@@ -634,7 +634,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         mod = MODELS.load(model)(root=model_root, mode="r", logger=logger)
         logger.info("Reading model to clip")
         mod.read()
-        mod.set_root(model_destination, mode="w")
+        mod.root.set(model_destination, mode="w")
         logger.info("Clipping grid")
         mod.clip_grid(region)
         logger.info("Clipping forcing")

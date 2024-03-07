@@ -13,7 +13,7 @@ from xugrid.ugrid import conventions
 
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.workflows.basin_mask import parse_region
+from hydromt.models.components.region import _parse_region
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def create_mesh2d(
     mesh2d : xu.UgridDataset
         Generated mesh2d.
     """  # noqa: E501
-    kind, region = parse_region(region, logger=logger)
+    kind, region = _parse_region(region, logger=logger)
     if kind != "mesh":
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")

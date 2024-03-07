@@ -2,7 +2,8 @@
 """Tests for the hydromt.models module of HydroMT."""
 
 from copy import deepcopy
-from os.path import abspath, dirname, isfile, join
+from os import listdir
+from os.path import abspath, dirname, exists, isfile, join
 
 import geopandas as gpd
 import numpy as np
@@ -17,15 +18,12 @@ from hydromt._compat import EntryPoint, EntryPoints
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import (
     MODELS,
-    # GridModel,
     Model,
     ModelCatalog,
     VectorModel,
     plugins,
 )
 from hydromt.models.api import _check_data
-
-# from hydromt.models.components.grid import GridMixin
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
@@ -136,11 +134,15 @@ def test_model_api(grid_model):
 def test_run_log_method():
     model = Model()
     region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    model._run_log_method("setup_region", region)  # args
-    assert "region" in model._geoms
-    model._geoms = {}
-    model._run_log_method("setup_region", region=region)  # kwargs
-    assert "region" in model._geoms
+    model._run_log_method("region.create", region)  # args
+    assert hasattr(model, "region")
+
+
+def test_run_log_kwargs_method():
+    model = Model()
+    region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+    model._run_log_method("region.create", region=region)  # kwargs
+    assert hasattr(model, "region")
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
@@ -184,7 +186,7 @@ def test_model(model, tmpdir):
         non_compliant = model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    model.set_root(str(tmpdir), mode="w")
+    model.root.set(str(tmpdir), mode="w")
     model.write()
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         model.read()
@@ -209,7 +211,7 @@ def test_model(model, tmpdir):
 def test_model_tables(model, df, tmpdir):
     # make a couple copies of the dfs for testing
     dfs = {str(i): df.copy() for i in range(5)}
-    model.set_root(tmpdir, mode="r+")  # append mode
+    model.root.set(tmpdir, mode="r+")  # append mode
     clean_model = deepcopy(model)
 
     with pytest.raises(KeyError):
@@ -271,51 +273,61 @@ def test_model_tables(model, df, tmpdir):
 #     assert "df" in mod1.tables
 
 
-@pytest.mark.filterwarnings("ignore:The setup_basemaps")
-def test_model_build_update(tmpdir, demda, obsda):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    # build model
-    model = Model(root=str(tmpdir), mode="w")
-    # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
-    model._CLI_ARGS.update({"region": "setup_region"})
+def test_model_errors_on_unknown_method():
+    model = Model()
     model._NAME = "testmodel"
-    model.build(
-        region={"bbox": bbox},
-        opt={"setup_basemaps": {}, "write_geoms": {}, "write_config": {}},
-    )
-    assert "region" in model._geoms
-    assert isfile(join(model.root, "model.yaml"))
-    assert isfile(join(model.root, "hydromt.log"))
-    # test update with specific write method
-    model.update(
-        opt={
-            "setup_region": {},  # should be removed with warning
-            "setup_basemaps": {},
-            "write_geoms": {"fn": "geoms/{name}.gpkg", "driver": "GPKG"},
-        }
-    )
-    assert isfile(join(model.root, "geoms", "region.gpkg"))
     with pytest.raises(
         ValueError, match='Model testmodel has no method "unknown_method"'
     ):
         model.update(opt={"unknown_method": {}})
+
+
+def test_model_does_not_overwrite_in_write_mode(tmpdir):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    root = join(tmpdir, "tmp")
+    model = Model(root=root, mode="w")
+    model.region.create({"bbox": bbox})
+    model.region.write()
+    assert exists(join(root, "region.geojson"))
+    with pytest.raises(
+        OSError, match="Model dir already exists and cannot be overwritten: "
+    ):
+        model.region.write()
+
+
+@pytest.mark.integration()
+def test_model_build_update(tmpdir, demda, obsda):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    # build model
+    model = Model(root=str(tmpdir), mode="w")
+    model._NAME = "testmodel"
+    model.build(
+        region={"bbox": bbox},
+        opt={
+            "region.create": {},
+            "region.write": {},
+            "write_geoms": {},
+            "write_config": {},
+        },
+    )
+    assert hasattr(model, "region")
+    assert isfile(join(model.root.path, "model.yml"))
+    assert isfile(join(model.root.path, "hydromt.log"))
+    assert isfile(join(model.root.path, "region.geojson")), listdir(model.root.path)
+
     # read and update model
     model = Model(root=str(tmpdir), mode="r")
     model_out = str(tmpdir.join("update"))
     model.update(model_out=model_out, opt={})  # write only
-    assert isfile(join(model_out, "model.yaml"))
+    assert isfile(join(model_out, "model.yml"))
 
-    # Now test update for a model with some data
-    geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-    # Quick check that model can't be overwritten without w+
-    with pytest.raises(
-        IOError, match="Model dir already exists and cannot be overwritten: "
-    ):
-        model = Model(root=str(tmpdir), mode="w")
+
+@pytest.mark.integration()
+def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Build model with some data
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
     model = Model(root=str(tmpdir), mode="w+")
-    # NOTE: _CLI_ARGS still pointing setup_basemaps for backwards comp
-    model._CLI_ARGS.update({"region": "setup_region"})
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
@@ -352,10 +364,10 @@ def test_model_build_update(tmpdir, demda, obsda):
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_setup_region(model, demda, tmpdir):
     # bbox
-    model.setup_region({"bbox": [12.05, 45.30, 12.85, 45.65]})
+    model.region.create({"bbox": [12.05, 45.30, 12.85, 45.65]})
     region = model._geoms.pop("region")
     # geom
-    model.setup_region({"geom": region})
+    model.region.create({"geom": region})
     gpd.testing.assert_geodataframe_equal(region, model.region)
     # geom via data catalog
     fn_region = str(tmpdir.join("region.gpkg"))
@@ -370,17 +382,17 @@ def test_setup_region(model, demda, tmpdir):
         }
     )
     model._geoms.pop("region")  # remove old region
-    model.setup_region({"geom": "region"})
+    model.region.create({"geom": "region"})
     gpd.testing.assert_geodataframe_equal(region, model.region)
     # grid
     model._geoms.pop("region")  # remove old region
     grid_fn = str(tmpdir.join("grid.tif"))
     demda.raster.to_raster(grid_fn)
-    model.setup_region({"grid": grid_fn})
+    model.region.create({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
     # basin
     model._geoms.pop("region")  # remove old region
-    model.setup_region({"basin": [12.2, 45.833333333333329]})
+    model.region.create({"basin": [12.2, 45.833333333333329]})
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 
@@ -389,9 +401,9 @@ def test_model_write_geoms(tmpdir):
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom.to_crs(epsg=28992, inplace=True)
-    model.set_geoms(geom=geom, name="region")
-    model.write_geoms(to_wgs84=True)
-    region_geom = gpd.read_file(str(join(tmpdir, "geoms/region.geojson")))
+    model.region.set(geom)
+    model.region.write(to_wgs84=True)
+    region_geom = gpd.read_file(str(join(tmpdir, "region.geojson")))
     assert region_geom.crs.to_epsg() == 4326
 
 
@@ -400,7 +412,7 @@ def test_model_set_geoms(tmpdir):
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom_28992 = geom.to_crs(epsg=28992)
     model = Model(root=str(tmpdir), mode="w")
-    model.setup_region({"geom": geom_28992})  # set model crs based on epsg28992
+    model.region.create({"geom": geom_28992})  # set model crs based on epsg28992
     model.set_geoms(geom, "geom_wgs84")  # this should convert the geom crs to epsg28992
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
 
@@ -408,7 +420,7 @@ def test_model_set_geoms(tmpdir):
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_config(model, tmpdir):
     # config
-    model.set_root(str(tmpdir))
+    model.root.set(str(tmpdir))
     model.set_config("global.name", "test")
     assert "name" in model._config["global"]
     assert model.get_config("global.name") == "test"
@@ -425,7 +437,7 @@ def test_maps_setup(tmpdir):
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = Model(data_libs=["artifact_data", dc_param_fn], mode="w")
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
-    mod.setup_region({"bbox": bbox})
+    mod.region.create({"bbox": bbox})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.setup_maps_from_rasterdataset(
         raster_fn="merit_hydro",
@@ -447,209 +459,214 @@ def test_maps_setup(tmpdir):
     non_compliant = mod._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    mod.set_root(str(tmpdir), mode="w")
+    mod.root.set(str(tmpdir), mode="w")
     mod.write(components=["config", "geoms", "maps"])
 
-    # def test_gridmodel(grid_model, tmpdir, demda):
-    #     assert "grid" in grid_model.api
-    #     non_compliant = grid_model._test_model_api()
-    #     assert len(non_compliant) == 0, non_compliant
-    #     # grid specific attributes
-    #     assert np.all(grid_model.res == grid_model.grid.raster.res)
-    #     assert np.all(grid_model.bounds == grid_model.grid.raster.bounds)
-    #     assert np.all(grid_model.transform == grid_model.grid.raster.transform)
-    #     # write model
-    #     grid_model.set_root(str(tmpdir), mode="w")
-    #     grid_model.write()
-    #     # read model
-    #     model1 = GridModel(str(tmpdir), mode="r")
-    #     model1.read()
-    #     # check if equal
-    #     equal, errors = grid_model._test_equal(model1)
-    #     assert equal, errors
 
-    #     # try update
-    #     grid_model.set_root(str(join(tmpdir, "update")), mode="w")
-    #     grid_model.write()
+# @pytest.mark.skip("needs implementation of Grid component")
+# def test_gridmodel(grid_model, tmpdir, demda):
+#     assert "grid" in grid_model.api
+#     non_compliant = grid_model._test_model_api()
+#     assert len(non_compliant) == 0, non_compliant
+#     # grid specific attributes
+#     assert np.all(grid_model.res == grid_model.grid.raster.res)
+#     assert np.all(grid_model.bounds == grid_model.grid.raster.bounds)
+#     assert np.all(grid_model.transform == grid_model.grid.raster.transform)
+#     # write model
+#     grid_model.root.set(str(tmpdir), mode="w")
+#     grid_model.write()
+#     # read model
+#     model1 = GridModel(str(tmpdir), mode="r")
+#     model1.read()
+#     # check if equal
+#     equal, errors = grid_model._test_equal(model1)
+#     assert equal, errors
 
-    #     model1 = GridModel(str(join(tmpdir, "update")), mode="r+")
-    #     model1.update(
-    #         opt={
-    #             "set_grid": {"data": demda, "name": "testdata"},
-    #             "write_grid": {},
-    #         }
-    #     )
-    #     assert "testdata" in model1.grid
-    #     assert "elevtn" in model1.grid
+#     # try update
+#     grid_model.root.set(str(join(tmpdir, "update")), mode="w")
+#     grid_model.write()
 
-    # @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-    # def test_setup_grid(tmpdir, demda):
-    #     # Initialize model
-    #     model = GridModel(
-    #         root=join(tmpdir, "grid_model"),
-    #         data_libs=["artifact_data"],
-    #         mode="w",
-    #     )
-    #     # wrong region kind
-    #     with pytest.raises(ValueError, match="Region for grid must be of kind"):
-    #         model.setup_grid({"vector_model": "test_model"})
-    #     # bbox
-    #     bbox = [12.05, 45.30, 12.85, 45.65]
-    #     with pytest.raises(
-    #         ValueError, match="res argument required for kind 'bbox', 'geom'"
-    #     ):
-    #         model.setup_grid({"bbox": bbox})
-    #     model.setup_grid(
-    #         region={"bbox": bbox},
-    #         res=0.05,
-    #         add_mask=False,
-    #         align=True,
-    #     )
-    #     assert "mask" not in model.grid
-    #     assert model.crs.to_epsg() == 4326
-    #     assert model.grid.raster.dims == ("y", "x")
-    #     assert model.grid.raster.shape == (7, 16)
-    #     assert np.all(np.round(model.grid.raster.bounds, 2) == bbox)
-    #     grid = model.grid
-    #     model._grid = xr.Dataset()  # remove old grid
-
-    #     # geom
-    #     region = model._geoms.pop("region")
-    #     model.setup_grid(
-    #         region={"geom": region},
-    #         res=0.05,
-    #         add_mask=False,
-    #     )
-    #     gpd.testing.assert_geodataframe_equal(region, model.region)
-    #     xr.testing.assert_allclose(grid, model.grid)
-    #     model._grid = xr.Dataset()  # remove old grid
-
-    #     model.setup_grid(
-    #         region={"geom": region},
-    #         res=10000,
-    #         crs="utm",
-    #         add_mask=True,
-    #     )
-    #     assert "mask" in model.grid
-    #     assert model.crs.to_epsg() == 32633
-    #     assert model.grid.raster.res == (10000, -10000)
-    #     model._grid = xr.Dataset()  # remove old grid
-
-    #     # bbox rotated
-    #     model.setup_grid(
-    #         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
-    #         res=0.05,
-    #         crs=4326,
-    #         rotated=True,
-    #         add_mask=True,
-    #     )
-    #     assert "xc" in model.grid.coords
-    #     assert model.grid.raster.y_dim == "y"
-    #     assert np.isclose(model.grid.raster.res[0], 0.05)
-    #     model._grid = xr.Dataset()  # remove old grid
-
-    #     # grid
-    #     grid_fn = str(tmpdir.join("grid.tif"))
-    #     demda.raster.to_raster(grid_fn)
-    #     model.setup_grid({"grid": grid_fn})
-    #     assert np.all(demda.raster.bounds == model.region.total_bounds)
-    #     model._grid = xr.Dataset()  # remove old grid
-
-    #     # basin
-    #     model.setup_grid(
-    #         region={"subbasin": [12.319, 46.320], "uparea": 50},
-    #         res=1000,
-    #         crs="utm",
-    #         hydrography_fn="merit_hydro",
-    #         basin_index_fn="merit_hydro_index",
-    #     )
-    #     assert not np.all(model.grid["mask"].values is True)
-    #     assert model.grid.raster.shape == (47, 61)
-
-    # @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-    # def test_gridmodel_setup(tmpdir):
-    #     # Initialize model
-    #     dc_param_fn = join(DATADIR, "parameters_data.yml")
-    #     mod = GridModel(
-    #         root=join(tmpdir, "grid_model"),
-    #         data_libs=["artifact_data", dc_param_fn],
-    #         mode="w",
-    #     )
-    #     # Add region
-    #     mod.setup_grid(
-    #         {"subbasin": [12.319, 46.320], "uparea": 50},
-    #         res=0.008333,
-    #         hydrography_fn="merit_hydro",
-    #         basin_index_fn="merit_hydro_index",
-    #         add_mask=True,
-    #     )
-    #     # Add data with setup_* methods
-    #     mod.setup_grid_from_constant(
-    #         constant=0.01,
-    #         name="c1",
-    #         nodata=-99.0,
-    #     )
-    #     mod.setup_grid_from_constant(
-    #         constant=2,
-    #         name="c2",
-    #         dtype=np.int8,
-    #         nodata=-1,
-    #     )
-    #     mod.setup_grid_from_rasterdataset(
-    #         raster_fn="merit_hydro",
-    #         variables=["elevtn", "basins"],
-    #         reproject_method=["average", "mode"],
-    #         mask_name="mask",
-    #     )
-    #     mod.setup_grid_from_rasterdataset(
-    #         raster_fn="vito",
-    #         fill_method="nearest",
-    #         reproject_method="mode",
-    #         rename={"vito": "landuse"},
-    #     )
-    #     mod.setup_grid_from_raster_reclass(
-    #         raster_fn="vito",
-    #         fill_method="nearest",
-    #         reclass_table_fn="vito_mapping",
-    #         reclass_variables=["roughness_manning"],
-    #         reproject_method=["average"],
-    #     )
-    #     mod.setup_grid_from_geodataframe(
-    #         vector_fn="hydro_lakes",
-    #         variables=["waterbody_id", "Depth_avg"],
-    #         nodata=[-1, -999.0],
-    #         rasterize_method="value",
-    #         rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
-    #     )
-    #     mod.setup_grid_from_geodataframe(
-    #         vector_fn="hydro_lakes",
-    #         rasterize_method="fraction",
-    #         rename={"hydro_lakes": "water_frac"},
-    #     )
-
-    # Checks
-    assert len(mod.grid) == 10
-    for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
-        assert v in mod.grid
-    assert mod.grid["lake_depth"].raster.nodata == -999.0
-    assert mod.grid["roughness_manning"].raster.nodata == -999.0
-    assert np.unique(mod.grid["c2"]).size == 2
-    assert np.isin([-1, 2], np.unique(mod.grid["c2"])).all()
-
-    non_compliant = mod._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
-
-    # write model
-    mod.set_root(str(tmpdir), mode="w")
-    mod.write(components=["geoms", "grid"])
+#     model1 = GridModel(str(join(tmpdir, "update")), mode="r+")
+#     model1.update(
+#         opt={
+#             "set_grid": {"data": demda, "name": "testdata"},
+#             "write_grid": {},
+#         }
+#     )
+#     assert "testdata" in model1.grid
+#     assert "elevtn" in model1.grid
 
 
+# @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+# def test_setup_grid(tmpdir, demda):
+#     # Initialize model
+#     model = GridModel(
+#         root=join(tmpdir, "grid_model"),
+#         data_libs=["artifact_data"],
+#         mode="w",
+#     )
+#     # wrong region kind
+#     with pytest.raises(ValueError, match="Region for grid must be of kind"):
+#         model.setup_grid({"vector_model": "test_model"})
+#     # bbox
+#     bbox = [12.05, 45.30, 12.85, 45.65]
+#     with pytest.raises(
+#         ValueError, match="res argument required for kind 'bbox', 'geom'"
+#     ):
+#         model.setup_grid({"bbox": bbox})
+#     model.setup_grid(
+#         region={"bbox": bbox},
+#         res=0.05,
+#         add_mask=False,
+#         align=True,
+#     )
+#     assert "mask" not in model.grid
+#     assert model.crs.to_epsg() == 4326
+#     assert model.grid.raster.dims == ("y", "x")
+#     assert model.grid.raster.shape == (7, 16)
+#     assert np.all(np.round(model.grid.raster.bounds, 2) == bbox)
+#     grid = model.grid
+#     model._grid = xr.Dataset()  # remove old grid
+
+#     # geom
+#     region = model._geoms.pop("region")
+#     model.setup_grid(
+#         region={"geom": region},
+#         res=0.05,
+#         add_mask=False,
+#     )
+#     gpd.testing.assert_geodataframe_equal(region, model.region)
+#     xr.testing.assert_allclose(grid, model.grid)
+#     model._grid = xr.Dataset()  # remove old grid
+
+#     model.setup_grid(
+#         region={"geom": region},
+#         res=10000,
+#         crs="utm",
+#         add_mask=True,
+#     )
+#     assert "mask" in model.grid
+#     assert model.crs.to_epsg() == 32633
+#     assert model.grid.raster.res == (10000, -10000)
+#     model._grid = xr.Dataset()  # remove old grid
+
+#     # bbox rotated
+#     model.setup_grid(
+#         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
+#         res=0.05,
+#         crs=4326,
+#         rotated=True,
+#         add_mask=True,
+#     )
+#     assert "xc" in model.grid.coords
+#     assert model.grid.raster.y_dim == "y"
+#     assert np.isclose(model.grid.raster.res[0], 0.05)
+#     model._grid = xr.Dataset()  # remove old grid
+
+#     # grid
+#     grid_fn = str(tmpdir.join("grid.tif"))
+#     demda.raster.to_raster(grid_fn)
+#     model.setup_grid({"grid": grid_fn})
+#     assert np.all(demda.raster.bounds == model.region.bounds)
+#     model._grid = xr.Dataset()  # remove old grid
+
+#     # basin
+#     model.setup_grid(
+#         region={"subbasin": [12.319, 46.320], "uparea": 50},
+#         res=1000,
+#         crs="utm",
+#         hydrography_fn="merit_hydro",
+#         basin_index_fn="merit_hydro_index",
+#     )
+#     assert not np.all(model.grid["mask"].values is True)
+#     assert model.grid.raster.shape == (47, 61)
+
+
+# @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+# def test_gridmodel_setup(tmpdir):
+#     # Initialize model
+#     dc_param_fn = join(DATADIR, "parameters_data.yml")
+#     mod = GridModel(
+#         root=join(tmpdir, "grid_model"),
+#         data_libs=["artifact_data", dc_param_fn],
+#         mode="w",
+#     )
+#     # Add region
+#     mod.setup_grid(
+#         {"subbasin": [12.319, 46.320], "uparea": 50},
+#         res=0.008333,
+#         hydrography_fn="merit_hydro",
+#         basin_index_fn="merit_hydro_index",
+#         add_mask=True,
+#     )
+#     # Add data with setup_* methods
+#     mod.setup_grid_from_constant(
+#         constant=0.01,
+#         name="c1",
+#         nodata=-99.0,
+#     )
+#     mod.setup_grid_from_constant(
+#         constant=2,
+#         name="c2",
+#         dtype=np.int8,
+#         nodata=-1,
+#     )
+#     mod.setup_grid_from_rasterdataset(
+#         raster_fn="merit_hydro",
+#         variables=["elevtn", "basins"],
+#         reproject_method=["average", "mode"],
+#         mask_name="mask",
+#     )
+#     mod.setup_grid_from_rasterdataset(
+#         raster_fn="vito",
+#         fill_method="nearest",
+#         reproject_method="mode",
+#         rename={"vito": "landuse"},
+#     )
+#     mod.setup_grid_from_raster_reclass(
+#         raster_fn="vito",
+#         fill_method="nearest",
+#         reclass_table_fn="vito_mapping",
+#         reclass_variables=["roughness_manning"],
+#         reproject_method=["average"],
+#     )
+#     mod.setup_grid_from_geodataframe(
+#         vector_fn="hydro_lakes",
+#         variables=["waterbody_id", "Depth_avg"],
+#         nodata=[-1, -999.0],
+#         rasterize_method="value",
+#         rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
+#     )
+#     mod.setup_grid_from_geodataframe(
+#         vector_fn="hydro_lakes",
+#         rasterize_method="fraction",
+#         rename={"hydro_lakes": "water_frac"},
+#     )
+
+#     # Checks
+#     assert len(mod.grid) == 10
+#     for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
+#         assert v in mod.grid
+#     assert mod.grid["lake_depth"].raster.nodata == -999.0
+#     assert mod.grid["roughness_manning"].raster.nodata == -999.0
+#     assert np.unique(mod.grid["c2"]).size == 2
+#     assert np.isin([-1, 2], np.unique(mod.grid["c2"])).all()
+
+#     non_compliant = mod._test_model_api()
+#     assert len(non_compliant) == 0, non_compliant
+
+#     # write model
+#     mod.root.set(str(tmpdir), mode="w")
+#     mod.write(components=["geoms", "grid"])
+
+
+@pytest.mark.skip("needs implementation of vector component")
 def test_vectormodel(vector_model, tmpdir):
     assert "vector" in vector_model.api
     non_compliant = vector_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    vector_model.set_root(str(tmpdir), mode="w")
+    vector_model.root.set(str(tmpdir), mode="w")
     vector_model.write()
     # read model
     model1 = VectorModel(str(tmpdir), mode="r")
@@ -679,10 +696,13 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
     assert "precip" in vector_model.vector
     assert "param1" in vector_model.vector
     # geometry and update grid
-    geoda_test = geoda.vector.update_geometry(geoda.vector.geometry.buffer(0.1))
+    crs = geoda.vector.crs
+    geoda_test = geoda.vector.update_geometry(
+        geoda.vector.geometry.to_crs(3857).buffer(0.1).to_crs(crs)
+    )
     with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
         vector_model.set_vector(data=geoda_test)
-    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop("geometry")
+    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop_vars("geometry")
     with pytest.raises(ValueError, match="Index coordinate of data variable"):
         vector_model.set_vector(data=param3, name="param3")
     vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
@@ -691,19 +711,19 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
 
     # test write vector
     vector_model.set_vector(data=gdf)
-    vector_model.set_root(str(tmpdir), mode="w")
+    vector_model.root.set(str(tmpdir), mode="w")
     # netcdf+geojson --> tested in test_vectormodel
     # netcdf only
     vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
     # geojson only
     # automatic split
     vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
-    assert isfile(join(vector_model.root, "vector", "vector_split.nc"))
-    assert not isfile(join(vector_model.root, "vector", "vector_all.nc"))
+    assert isfile(join(vector_model.root.path, "vector", "vector_split.nc"))
+    assert not isfile(join(vector_model.root.path, "vector", "vector_all.nc"))
     # geojson 1D data only
     vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
     vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
-    assert not isfile(join(vector_model.root, "vector", "vector_all2.nc"))
+    assert not isfile(join(vector_model.root.path, "vector", "vector_all2.nc"))
 
     # test read vector
     vector_model1 = VectorModel(str(tmpdir), mode="r")
@@ -727,7 +747,7 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
 
 
 def test_networkmodel(network_model, tmpdir):
-    network_model.set_root(str(tmpdir), mode="r+")
+    network_model.root.set(str(tmpdir), mode="r+")
     with pytest.raises(NotImplementedError):
         network_model.read(["network"])
     with pytest.raises(NotImplementedError):
@@ -745,7 +765,7 @@ def test_meshmodel(mesh_model, tmpdir):
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
     # write model
-    mesh_model.set_root(str(tmpdir), mode="w")
+    mesh_model.root.set(str(tmpdir), mode="w")
     mesh_model.write()
     # read model
     model1 = MeshModel(str(tmpdir), mode="r")

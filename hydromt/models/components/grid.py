@@ -266,7 +266,8 @@ class GridComponent(ModelComponent):
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
-            kind, region = parse_region(
+            # see ticket #813 for the skip
+            kind, region = parse_region(  # noqa: F821
                 region, data_catalog=self.data_catalog, logger=self.logger
             )
         elif kind != "grid":

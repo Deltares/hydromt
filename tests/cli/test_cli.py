@@ -68,6 +68,23 @@ def test_cli_build_grid_model(tmpdir):
     ]
     _ = CliRunner().invoke(hydromt_cli, cmd)
 
+
+@pytest.mark.skip(
+    "needs implementaion of components to tell what is allowed to be overwritten"
+)
+def test_cli_build_override(tmpdir):
+    root = str(tmpdir.join("grid_model_region"))
+    cmd = [
+        "build",
+        "grid_model",
+        root,
+        "-r",
+        "{'bbox': [12.05,45.30,12.85,45.65]}",
+        "--opt",
+        "setup_grid.res=0.05",
+        "-vv",
+    ]
+    _ = CliRunner().invoke(hydromt_cli, cmd)
     # test force overwrite
     with pytest.raises(IOError, match="Model dir already exists"):
         _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)

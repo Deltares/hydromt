@@ -12,7 +12,7 @@ from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -20,19 +20,17 @@ import pandas as pd
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
-from shapely.geometry import box
 
-from hydromt import __version__, workflows
-from hydromt._compat import HAS_XUGRID, Distribution
+from hydromt import __version__
+from hydromt._compat import Distribution
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
-from hydromt._utils import _classproperty, log
+from hydromt._utils import _classproperty
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
-
-if HAS_XUGRID:
-    import xugrid as xu
+from hydromt.models.components import ModelRegionComponent
+from hydromt.models.root import ModelRoot
 
 __all__ = ["Model"]
 
@@ -44,15 +42,14 @@ class Model(object, metaclass=ABCMeta):
     """General and basic API for models in HydroMT."""
 
     _DATADIR = ""  # path to the model data folder
-    _NAME = "modelname"
-    _CONF = "model.yaml"
+    _NAME: str = "modelname"
+    _CONF: StrPath = "model.yml"
     _CF = dict()  # configreader kwargs
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
     # tell hydroMT which methods should receive the res and region arguments
-    # TODO: change it back to setup_region and no res --> deprecation
-    _CLI_ARGS = {"region": "setup_basemaps", "res": "setup_basemaps"}
+    _CLI_ARGS = {"region": "region.create"}
     _TMP_DATA_DIR = None
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
@@ -65,7 +62,7 @@ class Model(object, metaclass=ABCMeta):
         "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
-        "region": gpd.GeoDataFrame,
+        "region": ModelRegionComponent,
         "results": XArrayDict,
         "states": XArrayDict,
     }
@@ -73,9 +70,9 @@ class Model(object, metaclass=ABCMeta):
     def __init__(
         self,
         root: Optional[str] = None,
-        mode: Optional[str] = "w",
+        mode: str = "w",
         config_fn: Optional[str] = None,
-        data_libs: Union[List, str] = None,
+        data_libs: Optional[Union[List, str]] = None,
         logger=logger,
         **artifact_keys,
     ):
@@ -120,9 +117,9 @@ class Model(object, metaclass=ABCMeta):
 
         # placeholders
         # metadata maps that can be at different resolutions
-        self._config: Optional[Dict[str:Literal]] = None  # nested dictionary
+        self._config: Optional[Dict[str, Any]] = None  # nested dictionary
         self._maps: Optional[XArrayDict] = None
-        self._tables: Dict[str, pd.DataFrame] = None
+        self._tables: Optional[Dict[str, pd.DataFrame]] = None
 
         self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
         self._forcing: Optional[XArrayDict] = None
@@ -133,14 +130,17 @@ class Model(object, metaclass=ABCMeta):
         self._staticgeoms = None
 
         # file system
-        self._root = ""
-        self._read = True
-        self._write = False
+        if root is None:
+            self.root: ModelRoot = ModelRoot(".", mode=mode)
+        else:
+            self.root: ModelRoot = ModelRoot(root, mode=mode)
+
+        self.region: ModelRegionComponent = ModelRegionComponent(self)
+
         self._defered_file_closes = []
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
-        self.set_root(root, mode)  # also creates hydromt.log file
         self.logger.info(
             f"Initializing {self._NAME} model from {dist_name} (v{version})."
         )
@@ -162,14 +162,29 @@ class Model(object, metaclass=ABCMeta):
         """Check all opt keys and raise sensible error messages if unknown."""
         for method in opt.keys():
             m = method.strip("0123456789")
-            if not callable(getattr(self, m, None)):
+            meth = self._get_sub_method(m)
+            if not callable(meth):
                 raise ValueError(f'Model {self._NAME} has no method "{method}"')
         return opt
+
+    def _get_sub_method(self, method_name: str) -> Optional[Callable]:
+        # temporary code until the component logic is added.
+        # now we need this to be able to call region.create
+        obj = self
+        for subojb in method_name.split("."):
+            try:
+                obj = getattr(obj, subojb)
+            except AttributeError:
+                return None
+        func = cast(Callable, obj)
+        return func
 
     def _run_log_method(self, method, *args, **kwargs):
         """Log method parameters before running a method."""
         method = method.strip("0123456789")
-        func = getattr(self, method)
+        func = self._get_sub_method(method)
+        if not callable(func):
+            raise ValueError(f'Model {self._NAME} has no method "{method}"')
         signature = inspect.signature(func)
         # combine user and default options
         params = {}
@@ -302,22 +317,22 @@ class Model(object, metaclass=ABCMeta):
         opt = self._check_get_opt(opt)
 
         # read current model
-        if not self._write:
+        if not self.root.is_writing_mode():
             if model_out is None:
                 raise ValueError(
                     '"model_out" directory required when updating in "read-only" mode'
                 )
             self.read()
             if forceful_overwrite:
-                self.set_root(model_out, mode="w+")
+                self.root.set(model_out, mode="w+")
             else:
-                self.set_root(model_out, mode="w")
+                self.root.set(model_out, mode="w")
 
         # check if model has a region
-        if self.region is None:
+        if self.region.data is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
-        # remove setup_basemaps from options and throw warning
+        # remove CLI_ARGS method from options and throw warning
         method = self._CLI_ARGS["region"]
         if method in opt:
             opt.pop(method)  # remove from opt
@@ -326,7 +341,7 @@ class Model(object, metaclass=ABCMeta):
         # loop over other methods from config file
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write()
-            if method.startswith("write_"):
+            if "write" in method:
                 write = False
             kwargs = {} if opt[method] is None else opt[method]
             self._run_log_method(method, **kwargs)
@@ -337,185 +352,14 @@ class Model(object, metaclass=ABCMeta):
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
-    ## general setup methods
-
-    def setup_region(
-        self,
-        region: dict,
-        hydrography_fn: str = "merit_hydro",
-        basin_index_fn: str = "merit_hydro_index",
-    ) -> dict:
-        """Set the `region` of interest of the model.
-
-        Adds model layer:
-
-        * **region** geom: region boundary vector
-
-        Parameters
-        ----------
-        region : dict
-            Dictionary describing region of interest, e.g.:
-
-            * {'bbox': [xmin, ymin, xmax, ymax]}
-
-            * {'geom': 'path/to/polygon_geometry'}
-
-            * {'basin': [xmin, ymin, xmax, ymax]}
-
-            * {'subbasin': [x, y], '<variable>': threshold}
-
-            For a complete overview of all region options,
-            see :py:function:~hydromt.workflows.basin_mask.parse_region
-        hydrography_fn : str
-            Name of data source for hydrography data.
-            FIXME describe data requirements
-        basin_index_fn : str
-            Name of data source with basin (bounding box) geometries associated with
-            the 'basins' layer of `hydrography_fn`. Only required if the `region` is
-            based on a (sub)(inter)basins without a 'bounds' argument.
-
-        Returns
-        -------
-        region: dict
-            Parsed region dictionary
-
-        See Also
-        --------
-        hydromt.workflows.basin_mask.parse_region
-        """
-        kind, region = parse_region(
-            region, data_catalog=self.data_catalog, logger=self.logger
-        )
-        # NOTE: kind=outlet is deprecated!
-        if kind in ["basin", "subbasin", "interbasin", "outlet"]:
-            if kind == "outlet":
-                warnings.warn(
-                    "Using outlet as kind in setup_region is deprecated",
-                    DeprecationWarning,
-                    stacklevel=2,
-                )
-            # retrieve global hydrography data (lazy!)
-            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
-            if "bounds" not in region:
-                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
-            # get basin geometry
-            geom, xy = workflows.get_basin_geometry(
-                ds=ds_org,
-                kind=kind,
-                logger=self.logger,
-                **region,
-            )
-            region.update(xy=xy)
-        elif "bbox" in region:
-            bbox = region["bbox"]
-            geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        elif "geom" in region:
-            geom = region["geom"]
-            if geom.crs is None:
-                raise ValueError('Model region "geom" has no CRS')
-        elif "grid" in region:  # Grid specific - should be removed in the future
-            geom = region["grid"].raster.box
-        elif "model" in region:
-            geom = region["model"].region
-        else:
-            raise ValueError(f"model region argument not understood: {region}")
-
-        self.set_geoms(geom, name="region")
-
-        # This setup method returns region so that it can be wrapped for models which
-        # require more information, e.g. grid RasterDataArray or xy coordinates.
-        return region
-
-    # TODO remove placeholder to make make sure
-    # build with the current _CLI_ARGS does not raise an error
-    def setup_basemaps(self, *args, **kwargs):  # noqa: D102
-        warnings.warn(
-            "The setup_basemaps method is not implemented.", UserWarning, stacklevel=2
-        )
-
     ## file system
-
-    @property
-    def root(self):
-        """Path to model folder."""
-        if self._root is None:
-            raise ValueError("Root unknown, use set_root method")
-        return self._root
-
     def _assert_write_mode(self):
-        if not self._write:
+        if not self.root.is_writing_mode():
             raise IOError("Model opened in read-only mode")
 
     def _assert_read_mode(self):
-        if not self._read:
+        if not self.root.is_reading_mode():
             raise IOError("Model opened in write-only mode")
-
-    def set_root(self, root: Optional[str], mode: Optional[str] = "w"):
-        """Initialize the model root.
-
-        In read/append mode a check is done if the root exists.
-        In write mode the required model folder structure is created.
-
-        Parameters
-        ----------
-        root : str, optional
-            path to model root
-        mode : {"r", "r+", "w"}, optional
-            read/append/write mode for model files
-        """
-        ignore_ext = set([".log", ".yml"])
-        if mode not in ["r", "r+", "w", "w+"]:
-            raise ValueError(
-                f'mode "{mode}" unknown, select from "r", "r+", "w" or "w+"'
-            )
-        self._root = root if root is None else abspath(root)
-        self._read = mode.startswith("r")
-        self._write = mode != "r"
-        self._overwrite = mode == "w+"
-        if self._root is not None:
-            if self._write:
-                for name in self._FOLDERS:
-                    path = join(self._root, name)
-                    if not isdir(path):
-                        os.makedirs(path)
-                        continue
-                    # path already exists check files
-                    fns = glob.glob(join(path, "*.*"))
-                    exts = set([os.path.splitext(fn)[1] for fn in fns])
-                    exts -= ignore_ext
-                    if len(exts) != 0:
-                        if mode.endswith("+"):
-                            self.logger.warning(
-                                "Model dir already exists and "
-                                f"files might be overwritten: {path}."
-                            )
-                        else:
-                            msg = (
-                                "Model dir already exists and cannot be "
-                                + f"overwritten: {path}. Use 'mode=w+' to force "
-                                + "overwrite existing files."
-                            )
-                            self.logger.error(msg)
-                            raise IOError(msg)
-            # check directory
-            elif not isdir(self._root):
-                raise IOError(f'model root not found at "{self._root}"')
-            # remove old logging file handler and add new filehandler
-            # in root if it does not exist
-            has_log_file = False
-            log_level = 20  # default, but overwritten by the level of active loggers
-            for i, h in enumerate(self.logger.handlers):
-                log_level = h.level
-                if hasattr(h, "baseFilename"):
-                    if dirname(h.baseFilename) != self._root:
-                        # remove handler and close file
-                        self.logger.handlers.pop(i).close()
-                    else:
-                        has_log_file = True
-                    break
-            if not has_log_file:
-                new_path = join(self._root, "hydromt.log")
-                log.add_filehandler(self.logger, new_path, log_level)
 
     # I/O
     def read(
@@ -536,23 +380,27 @@ class Model(object, metaclass=ABCMeta):
                 "config",
                 "staticmaps",
                 "maps",
+                "region",
                 "tables",
                 "geoms",
                 "forcing",
                 "states",
                 "results",
             ]
-        self.logger.info(f"Reading model data from {self.root}")
+        self.logger.info(f"Reading model data from {self.root.path}")
         for component in components:
-            if not hasattr(self, f"read_{component}"):
+            if hasattr(self, f"read_{component}"):
+                getattr(self, f"read_{component}")()
+            elif hasattr(self, component) and hasattr(getattr(self, component), "read"):
+                getattr(self, component).read()
+            else:
                 raise AttributeError(
-                    f"{type(self).__name__} does not have read_{component}"
+                    f"{type(self).__name__} does not have read_{component} or a component of that name with a read attr"
                 )
-            getattr(self, f"read_{component}")()
 
     def write(
         self,
-        components: List = None,
+        components: Optional[List] = None,
     ) -> None:
         """Write the complete model schematization and configuration to model files.
 
@@ -569,17 +417,23 @@ class Model(object, metaclass=ABCMeta):
                 "maps",
                 "tables",
                 "geoms",
+                "region",
                 "forcing",
                 "states",
                 "config",
             ]
-        self.logger.info(f"Writing model data to {self.root}")
+        self.logger.info(f"Writing model data to {self.root.path}")
         for component in components:
-            if not hasattr(self, f"write_{component}"):
+            if hasattr(self, f"write_{component}"):
+                getattr(self, f"write_{component}")()
+            elif hasattr(self, component) and hasattr(
+                getattr(self, component), "write"
+            ):
+                getattr(self, component).write()
+            else:
                 raise AttributeError(
-                    f"{type(self).__name__} does not have write_{component}"
+                    f"{type(self).__name__} does not have write_{component} or a component of that name with a write attr"
                 )
-            getattr(self, f"write_{component}")()
 
     def write_data_catalog(
         self,
@@ -606,10 +460,10 @@ class Model(object, metaclass=ABCMeta):
         save_csv: bool, optional
             If True, save the data catalog also as an csv table. By default False.
         """
-        path = data_lib_fn if isabs(data_lib_fn) else join(self.root, data_lib_fn)
+        path = data_lib_fn if isabs(data_lib_fn) else join(self.root.path, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
         # read hydromt_data yml file and add to data catalog
-        if self._read and isfile(path) and append:
+        if self.root.is_reading_mode() and isfile(path) and append:
             cat.from_yml(path)
         # update data catalog with new used sources
         for name, source in self.data_catalog.iter_sources(used_only=used_only):
@@ -683,11 +537,11 @@ class Model(object, metaclass=ABCMeta):
         """
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
-            if not self._read:  # write-only mode > read default config
+            if not self.root.is_reading_mode():  # write-only mode > read default config
                 config_fn = join(self._DATADIR, self._NAME, self._CONF)
                 prefix = "Default"
             elif self.root is not None:  # append or write mode > read model config
-                config_fn = join(self.root, self._config_fn)
+                config_fn = join(self.root.path, self._config_fn)
                 prefix = "Model"
         cfdict = dict()
         if config_fn is not None:
@@ -695,13 +549,13 @@ class Model(object, metaclass=ABCMeta):
                 cfdict = self._configread(config_fn)
                 self.logger.debug(f"{prefix} config read from {config_fn}")
             elif (
-                self._root is not None
+                self.root is not None
                 and not isabs(config_fn)
-                and isfile(join(self._root, config_fn))
+                and isfile(join(self.root.path, config_fn))
             ):
-                cfdict = self._configread(join(self.root, config_fn))
+                cfdict = self._configread(join(self.root.path, config_fn))
                 self.logger.debug(
-                    f"{prefix} config read from {join(self.root,config_fn)}"
+                    f"{prefix} config read from {join(self.root.path,config_fn)}"
                 )
             elif isfile(abspath(config_fn)):
                 cfdict = self._configread(abspath(config_fn))
@@ -722,7 +576,7 @@ class Model(object, metaclass=ABCMeta):
         elif self._config_fn is None:
             self._config_fn = self._CONF
         if config_root is None:
-            config_root = self.root
+            config_root = self.root.path
         fn = join(config_root, self._config_fn)
         self.logger.info(f"Writing model config to {fn}")
         self._configwrite(fn)
@@ -787,7 +641,7 @@ class Model(object, metaclass=ABCMeta):
         if abs_path and isinstance(value, str):
             value = Path(value)
             if not value.is_absolute():
-                value = Path(abspath(join(self.root, value)))
+                value = Path(abspath(join(self.root.path, value)))
         return value
 
     @property
@@ -801,7 +655,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize the model tables."""
         if self._tables is None:
             self._tables = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_tables()
 
     def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
@@ -812,7 +666,7 @@ class Model(object, metaclass=ABCMeta):
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
             for name in self.tables:
-                fn_out = join(self.root, fn.format(name=name))
+                fn_out = join(self.root.path, fn.format(name=name))
                 os.makedirs(dirname(fn_out), exist_ok=True)
                 self.tables[name].to_csv(fn_out, **local_kwargs)
         else:
@@ -823,7 +677,7 @@ class Model(object, metaclass=ABCMeta):
         self._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self.logger.info("Reading model table files.")
-        fns = glob.glob(join(self.root, fn.format(name="*")))
+        fns = glob.glob(join(self.root.path, fn.format(name="*")))
         if len(fns) > 0:
             for fn in fns:
                 name = basename(fn).split(".")[0]
@@ -856,7 +710,7 @@ class Model(object, metaclass=ABCMeta):
             if name in self._tables:
                 if not self._write:
                     raise IOError(f"Cannot overwrite table {name} in read-only mode")
-                elif self._read:
+                elif self.root.is_reading_mode():
                     self.logger.warning(f"Overwriting table: {name}")
 
             self._tables[name] = df
@@ -884,7 +738,7 @@ class Model(object, metaclass=ABCMeta):
         )
         if self._staticmaps is None:
             self._staticmaps = xr.Dataset()
-            if self._read:
+            if self.root.is_reading_mode():
                 self.read_staticmaps()
         return self._staticmaps
 
@@ -1151,7 +1005,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize maps."""
         if self._maps is None:
             self._maps = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_maps()
 
     def set_maps(
@@ -1238,7 +1092,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize geoms."""
         if self._geoms is None:
             self._geoms = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_geoms()
 
     def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
@@ -1282,7 +1136,7 @@ class Model(object, metaclass=ABCMeta):
         """
         self._assert_read_mode()
         self._initialize_geoms(skip_read=True)
-        fns = glob.glob(join(self.root, fn))
+        fns = glob.glob(join(self.root.path, fn))
         for fn in fns:
             name = basename(fn).split(".")[0]
             self.logger.debug(f"Reading model file {name}.")
@@ -1317,7 +1171,7 @@ class Model(object, metaclass=ABCMeta):
                 )
                 continue
             self.logger.debug(f"Writing file {fn.format(name=name)}")
-            _fn = join(self.root, fn.format(name=name))
+            _fn = join(self.root.path, fn.format(name=name))
             if not isdir(dirname(_fn)):
                 os.makedirs(dirname(_fn))
             if to_wgs84 and (
@@ -1340,7 +1194,7 @@ class Model(object, metaclass=ABCMeta):
             DeprecationWarning,
             stacklevel=2,
         )
-        if self._geoms is None and self._read:
+        if self._geoms is None and self.root.is_reading_mode():
             self.read_staticgeoms()
         self._staticgeoms = self._geoms
         return self._staticgeoms
@@ -1399,7 +1253,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize forcing."""
         if self._forcing is None:
             self._forcing = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_forcing()
 
     def set_forcing(
@@ -1485,7 +1339,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize states."""
         if self._states is None:
             self._states = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_states()
 
     def set_states(
@@ -1565,7 +1419,7 @@ class Model(object, metaclass=ABCMeta):
         """Initialize results."""
         if self._results is None:
             self._results = dict()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_results()
 
     def set_results(
@@ -1708,7 +1562,7 @@ class Model(object, metaclass=ABCMeta):
                 )
                 continue
             self.logger.debug(f"Writing file {fn.format(name=name)}")
-            _fn = join(self.root, fn.format(name=name))
+            _fn = join(self.root.path, fn.format(name=name))
             if not isdir(dirname(_fn)):
                 os.makedirs(dirname(_fn))
             if gdal_compliant:
@@ -1772,7 +1626,7 @@ class Model(object, metaclass=ABCMeta):
             dict of xarray.Dataset
         """
         ncs = dict()
-        fns = glob.glob(join(self.root, fn))
+        fns = glob.glob(join(self.root.path, fn))
         if "chunks" not in kwargs:  # read lazy by default
             kwargs.update(chunks="auto")
         for fn in fns:
@@ -1885,29 +1739,7 @@ class Model(object, metaclass=ABCMeta):
         if len(self.staticmaps) > 0:
             return self.staticmaps.raster.bounds
         else:
-            return self.region.total_bounds
-
-    @property
-    def region(self) -> gpd.GeoDataFrame:
-        """Returns the geometry of the model area of interest."""
-        region = gpd.GeoDataFrame()
-        if "region" in self.geoms:
-            region = self.geoms["region"]
-        # TODO: For now stays here but move to grid in GridModel and delete
-        elif len(self.staticmaps) > 0:
-            warnings.warn(
-                'Defining "region" based on staticmaps will be deprecated. Either use'
-                " region from GridModel or define your own method.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            crs = self.staticmaps.raster.crs
-            if crs is None and hasattr(crs, "to_epsg"):
-                crs = crs.to_epsg()  # not all CRS have an EPSG code
-            region = gpd.GeoDataFrame(
-                geometry=[box(*self.staticmaps.raster.bounds)], crs=crs
-            )
-        return region
+            return self.region.bounds
 
     # test methods
     def test_model_api(self):
@@ -2039,205 +1871,3 @@ def _check_equal(a, b, name="") -> Dict[str, str]:
     except AssertionError as e:
         errors.update({name: e})
     return errors
-
-
-def parse_region(region, logger=logger, data_catalog=None):
-    """Check and return parsed region arguments.
-
-    Parameters
-    ----------
-    region : dict
-        Dictionary describing region of interest.
-
-        For an exact clip of the region:
-
-        * {'bbox': [xmin, ymin, xmax, ymax]}
-
-        * {'geom': /path/to/polygon_geometry}
-
-        For a region based of another models grid:
-
-        * {'<model_name>': root}
-
-        For a region based of the grid of a raster file:
-
-        * {'grid': /path/to/raster}
-
-        For a region based on a mesh grid of a mesh file:
-
-        * {'mesh': /path/to/mesh}
-
-        Entire basin can be defined based on an ID, one or multiple point location
-        (x, y), or a region of interest (bounding box or geometry) for which the
-        basin IDs are looked up. The basins withint the area of interest can be further
-        filtered to only include basins with their outlet within the area of interest
-        ('outlets': true) of stream threshold arguments (e.g.: 'uparea': 1000).
-
-        Common use-cases include:
-
-        * {'basin': ID}
-
-        * {'basin': [ID1, ID2, ..]}
-
-        * {'basin': [x, y]}
-
-        * {'basin': [[x1, x2, ..], [y1, y2, ..]]}
-
-        * {'basin': /path/to/point_geometry}
-
-        * {'basin': [xmin, ymin, xmax, ymax]}
-
-        * {'basin': [xmin, ymin, xmax, ymax], 'outlets': true}
-
-        * {'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-
-        Subbasins are defined by its outlet locations and include all area upstream
-        from these points. The outlet locations can be passed as xy coordinate pairs,
-        but also derived from the most downstream cell(s) within a area of interest
-        defined by a bounding box or geometry, optionally refined by stream threshold
-        arguments.
-
-        The method can be speed up by providing an additional ``bounds`` argument which
-        should contain all upstream cell. If cells upstream of the subbasin are not
-        within the provide bounds a warning will be raised. Common use-cases include:
-
-        * {'subbasin': [x, y], '<variable>': threshold}
-
-        * {
-            'subbasin': [[x1, x2, ..], [y1, y2, ..]],
-            '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
-            }
-
-        * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
-
-        * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-
-        * {'subbasin': /path/to/polygon_geometry, '<variable>': threshold}
-
-        Interbasins are similar to subbasins but are bounded by a bounding box or
-        geometry and do not include all upstream area. Common use-cases include:
-
-        * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-
-        * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
-
-        * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
-    logger:
-        The logger to use.
-
-    Returns
-    -------
-    kind : {'basin', 'subbasin', 'interbasin', 'geom', 'bbox', 'grid'}
-        region kind
-    kwargs : dict
-        parsed region json
-    """
-    from hydromt.models import MODELS
-
-    if data_catalog is None:
-        data_catalog = DataCatalog()
-    kwargs = region.copy()
-    # NOTE: the order is important to prioritize the arguments
-    options = {
-        "basin": ["basid", "geom", "bbox", "xy"],
-        "subbasin": ["geom", "bbox", "xy"],
-        "interbasin": ["geom", "bbox", "xy"],  # FIXME remove interbasin & xy combi?
-        "outlet": ["geom", "bbox"],  # deprecated!
-        "geom": ["geom"],
-        "bbox": ["bbox"],
-        "grid": ["RasterDataArray"],
-        "mesh": ["UgridDataArray"],
-    }
-    kind = next(iter(kwargs))  # first key of region
-    value0 = kwargs.pop(kind)
-    if kind in MODELS:
-        model_class = MODELS.load(kind)
-        kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
-        kind = "model"
-    elif kind == "grid":
-        kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
-    elif kind == "mesh":
-        if HAS_XUGRID:
-            if isinstance(value0, (str, Path)) and isfile(value0):
-                kwarg = dict(mesh=xu.open_dataset(value0))
-            elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
-                kwarg = dict(mesh=value0)
-            elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
-                kwarg = dict(
-                    mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
-                )
-            else:
-                raise ValueError(
-                    f"Unrecognised type {type(value0)}."
-                    "Should be a path, data catalog key or xugrid object."
-                )
-            kwargs.update(kwarg)
-        else:
-            raise ImportError("xugrid is required to read mesh files.")
-    elif kind not in options:
-        k_lst = '", "'.join(list(options.keys()) + list(MODELS))
-        raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
-    else:
-        kwarg = _parse_region_value(value0, data_catalog=data_catalog)
-        if len(kwarg) == 0 or next(iter(kwarg)) not in options[kind]:
-            v_lst = '", "'.join(list(options[kind]))
-            raise ValueError(
-                f'Region value "{value0}" for kind={kind} not understood, '
-                f'provide one of "{v_lst}"'
-            )
-        kwargs.update(kwarg)
-    kwargs_str = dict()
-    for k, v in kwargs.items():
-        if isinstance(v, gpd.GeoDataFrame):
-            v = f"GeoDataFrame {v.total_bounds} (crs = {v.crs})"
-        elif isinstance(v, xr.DataArray):
-            v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
-        kwargs_str.update({k: v})
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
-    return kind, kwargs
-
-
-def _parse_region_value(value, data_catalog):
-    kwarg = {}
-    if isinstance(value, np.ndarray):
-        value = value.tolist()  # array to list
-
-    if isinstance(value, list):
-        if np.all([isinstance(p0, int) and abs(p0) > 180 for p0 in value]):  # all int
-            kwarg = dict(basid=value)
-        elif len(value) == 4:  # 4 floats
-            kwarg = dict(bbox=value)
-        elif len(value) == 2:  # 2 floats
-            kwarg = dict(xy=value)
-    elif isinstance(value, tuple) and len(value) == 2:  # tuple of x and y coords
-        kwarg = dict(xy=value)
-    elif isinstance(value, int):  # single int
-        kwarg = dict(basid=value)
-    elif isinstance(value, (str, Path)) and isdir(value):
-        kwarg = dict(root=value)
-    elif isinstance(value, (str, Path)):
-        geom = data_catalog.get_geodataframe(value)
-        kwarg = dict(geom=geom)
-    elif isinstance(value, gpd.GeoDataFrame):  # geometry
-        kwarg = dict(geom=value)
-    else:
-        raise ValueError(f"Region value {value} not understood.")
-
-    if "geom" in kwarg and np.all(kwarg["geom"].geometry.type == "Point"):
-        xy = (
-            kwarg["geom"].geometry.x.values,
-            kwarg["geom"].geometry.y.values,
-        )
-        kwarg = dict(xy=xy)
-    return kwarg
-
-
-def _check_size(ds, logger=logger, threshold=12e3**2):
-    # warning for large domain
-    if (
-        np.multiply(*ds.raster.shape) > threshold
-    ):  # 12e3 ** 2 > 10x10 degree at 3 arcsec
-        logger.warning(
-            "Loading very large spatial domain to derive a subbasin. "
-            "Provide initial 'bounds' if this takes too long."
-        )

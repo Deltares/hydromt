@@ -98,7 +98,7 @@ or append (if you update the model data in place) mode.
 
 To update a single component of a Wflow model from Python, the model methods can also be called directly instead of using the update method.
 Note that this will however not log the used methods and arguments making your model harder to reproduce. To change the model root before writing
-the updated model use the :py:func:`~hydromt.Model.set_root` method (not shown in this example).
+the updated model use the :py:func:`~hydromt.models.ModelRoot.set` method (not shown in this example).
 
 .. code-block::  python
 

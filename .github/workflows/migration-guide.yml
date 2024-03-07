@@ -1,0 +1,47 @@
+
+name: Migration guide is updated
+
+on:
+  pull_request:
+    branches:
+      - v1
+    paths:
+      - tests/*
+      - hydromt/*
+
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docs/dev/migrating-to-v1.rst
+            docs/api.rst
+          sparse-checkout-cone-mode: false
+          path: head
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docs/dev/migrating-to-v1.rst
+            docs/api.rst
+          sparse-checkout-cone-mode: false
+          path: v1
+          ref: v1
+      - name: check migration guide is updated
+        run: |
+          if cmp head/docs/dev/migrating-to-v1.rst v1/docs/dev/migrating-to-v1.rst; then
+            echo "migraion guide is not updated"
+            exit 1
+          fi
+      - name: check api.rst is updated
+        run: |
+          if cmp head/docs/api.rst v1/docs/api.rst; then
+            echo "api.rst is not updated"
+            exit 1
+          fi

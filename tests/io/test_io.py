@@ -121,7 +121,8 @@ def test_open_geodataset(tmpdir, geodf):
     # create equivalent polygon file
     fn_gdf_poly = str(tmpdir.join("polygons.geojson"))
     geodf_poly = geodf.copy()
-    geodf_poly["geometry"] = geodf_poly.buffer(0.1)
+    crs = geodf.crs
+    geodf_poly["geometry"] = geodf_poly.to_crs(3857).buffer(0.1).to_crs(crs)
     geodf_poly.to_file(fn_gdf_poly, driver="GeoJSON")
     # create zeros timeseries
     ts = pd.DataFrame(
