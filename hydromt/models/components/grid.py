@@ -17,7 +17,7 @@ from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.models.api import Model
-from hydromt.models.components.model_component import ModelComponent
+from hydromt.models.components.base import ModelComponent
 from hydromt.models.components.region import _parse_region
 from hydromt.workflows.basin_mask import get_basin_geometry
 from hydromt.workflows.grid import (
@@ -29,7 +29,6 @@ from hydromt.workflows.grid import (
 )
 
 __all__ = ["GridComponent"]
-# logger = getLogger(__name__)
 
 
 class GridComponent(ModelComponent):

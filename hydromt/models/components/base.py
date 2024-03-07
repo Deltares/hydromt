@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class ModelComponent:
-    """Base Model component class."""
+    """Abstract base class for ModelComponent."""
 
     def __init__(self, model: "Model"):
         self._model_ref: ReferenceType["Model"] = ref(model)
