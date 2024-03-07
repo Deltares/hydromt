@@ -20,12 +20,13 @@ import os
 import shutil
 from distutils.dir_util import copy_tree
 
-import numpy as np
 import sphinx_autosummary_accessors
 from click.testing import CliRunner
 
 import hydromt
 from hydromt.cli.main import main as hydromt_cli
+
+from docs.parse_predefined_catalogs import write_predefined_catalogs_to_rst_panels
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
@@ -46,58 +47,6 @@ def remove_dir_content(path: str) -> None:
     if os.path.isdir(path):
         shutil.rmtree(path)
 
-
-def write_panel(f, name, content="", level=0, item="dropdown"):
-    pad = "".ljust(level * 3)
-    f.write(f"{pad}.. {item}:: {name}\n")
-    f.write("\n")
-    if content:
-        pad = "".ljust((level + 1) * 3)
-        for line in content.split("\n"):
-            line_clean = line.replace("*", "\\*")
-            f.write(f"{pad}{line_clean}\n")
-        f.write("\n")
-
-
-def write_nested_dropdown(name, data_cat, note="", categories=[]):
-    df = data_cat.to_dataframe().sort_index().drop_duplicates("path")
-    with open(f"_generated/{name}.rst", mode="w") as f:
-        write_panel(f, name, note, level=0)
-        write_panel(f, "", level=1, item="tab-set")
-        for category in categories:
-            if category == "other":
-                sources = df.index[~np.isin(df["category"], categories)]
-            else:
-                sources = df.index[df["category"] == category]
-            if len(sources) > 0:
-                write_panel(f, category, level=2, item="tab-item")
-            for source in sources:
-                items = data_cat[source].summary().items()
-                summary = "\n".join(
-                    [f":{k}: {clean_str(v)}" for k, v in items if k != "category"]
-                )
-                write_panel(f, source, summary, level=3)
-
-        write_panel(f, "all", level=2, item="tab-item")
-        for source in df.index.values:
-            items = data_cat[source].summary()
-            items = {k: clean_str(v) for (k, v) in items.items()}.items()
-            summary = "\n".join([f":{k}: {v}" for k, v in items])
-            write_panel(f, source, summary, level=3)
-
-
-def clean_str(s):
-    if not isinstance(s, str):
-        return s
-    clean = s.replace("*", "\\*")
-    clean = clean.replace("_", "\\_")
-    idx = clean.find("p:/")
-    if idx > -1:
-        clean = clean[idx:]
-
-    return clean
-
-
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
 # -- Project information -----------------------------------------------------
 
@@ -112,41 +61,16 @@ version = hydromt.__version__
 # # -- Copy notebooks to include in docs -------
 if os.path.isdir("_examples"):
     remove_dir_content("_examples")
-os.makedirs("_examples")
-copy_tree("../examples", "_examples")
+if not bool(os.getenv("SPHINX_SKIP_EXAMPLES", False)):
+    os.makedirs("_examples")
+    copy_tree("../examples", "_examples")
 
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
 
 # # -- Generate panels rst files from data catalogs to include in docs -------
-categories = [
-    "geography",
-    "hydrography",
-    "landuse",
-    "hydro",
-    "meteo",
-    "ocean",
-    "socio-economic",
-    "topography",
-    "climate",
-    "other",
-]
-data_cat = hydromt.DataCatalog()
-data_cat.set_predefined_catalogs(r"../data/predefined_catalogs.yml")
-predefined_catalogs = data_cat.predefined_catalogs
-for name in predefined_catalogs:
-    try:
-        data_cat.from_predefined_catalogs(name)
-    except OSError as e:
-        print(e)
-        continue
-    note = predefined_catalogs[name].get("notes", "")
-    write_nested_dropdown(name, data_cat, note=note, categories=categories)
-    data_cat._sources = {}  # reset
-with open("_generated/predefined_catalogs.rst", "w") as f:
-    f.writelines(
-        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
-    )
+write_predefined_catalogs_to_rst_panels()
+
 
 # -- Generate cli help docs ----------------------------------------------
 

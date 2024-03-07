@@ -334,9 +334,13 @@ class DataAdapter(object, metaclass=ABCMeta):
                     continue
                 key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
                 # remove unused fields
-                if key in ["year", "month"] and time_tuple is None:
+                if (
+                    key in ["year", "month"]
+                    and time_tuple is None
+                    and not path.endswith("*")
+                ):
                     path += "*"
-                elif key == "variable" and variables is None:
+                elif key == "variable" and variables is None and not path.endswith("*"):
                     path += "*"
                 # escape unknown fields
                 elif key is not None and key not in known_keys:

@@ -195,6 +195,12 @@ def test_versioned_catalog_entries(tmpdir):
     # test round trip to and from dict
     merged_catalog2 = DataCatalog().from_dict(merged_catalog.to_dict())
     assert merged_catalog2 == merged_catalog
+    # test updating source meta data from version meta data
+    source_2020_local = merged_catalog.get_source(
+        "esa_worldcover", version="2020", provider="local"
+    )
+    assert source_2020_local.meta["source_author"] == "Test Dummy"
+    assert source_2020_local.meta["source_license"] == "CC BY 4.0"
 
     # Make sure we can query for the version we want
     aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
@@ -588,12 +594,12 @@ def test_get_dataframe(df, tmpdir):
 
 def test_deprecation_warnings(artifact_data):
     with pytest.deprecated_call():
-        # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
-        DataCatalog(artifact_data="v0.0.6")
+        # should be DataCatalog(data_libs=['v0.0.8'])
+        DataCatalog(artifact_data="v0.0.8")
     with pytest.deprecated_call():
         cat = DataCatalog()
-        # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.6')
-        cat.from_artifacts("artifact_data", version="v0.0.6")
+        # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.8')
+        cat.from_artifacts("artifact_data", version="v0.0.8")
     with pytest.deprecated_call():
         fn = artifact_data["chelsa"].path
         # should be driver_kwargs=dict(chunks={'x': 100, 'y': 100})
