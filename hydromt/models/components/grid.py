@@ -1,6 +1,4 @@
 """Grid Component."""
-import weakref
-from logging import Logger, getLogger
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -14,15 +12,14 @@ from shapely.geometry import box
 
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
-from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.models.api import Model
 from hydromt.models.components.model_component import ModelComponent
-from hydromt.models.root import ModelRoot
-from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
+from hydromt.models.components.region import _parse_region
+from hydromt.workflows.basin_mask import get_basin_geometry
 from hydromt.workflows.grid import (
     grid_from_constant,
     grid_from_geodataframe,
@@ -32,7 +29,7 @@ from hydromt.workflows.grid import (
 )
 
 __all__ = ["GridComponent"]
-logger = getLogger(__name__)
+# logger = getLogger(__name__)
 
 
 class GridComponent(ModelComponent):
@@ -45,32 +42,19 @@ class GridComponent(ModelComponent):
 
     def __init__(
         self,
-        root: ModelRoot,
-        data_catalog: DataCatalog,
         model: Model,
-        model_region=None,
-        logger: Logger = logger,
     ):
         """Initialize a GridComponent.
 
         Parameters
         ----------
-        root : ModelRoot
-            model root object containing path to model root
-        data_catalog : DataCatalog
-            data catalog object
-        model_region : _type_, optional
-            model region object, by default None
+        model: Model
+            HydroMT model instance
         logger : Logger, optional
             logger object, by default logger
         """
-        # self._model_ref = weakref.ref(model) TODO: discuss if this is necessary
-        self.logger = logger
-        self.root = root
-        self.data_catalog = data_catalog
-        self.model_region = model_region
         self._data = None
-        self._model_ref = weakref.ref(model)
+        super().__init__(model=model)
 
     def set(
         self,
@@ -150,10 +134,10 @@ class GridComponent(ModelComponent):
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
                 strategy=NoDataStrategy.IGNORE,
-                logger=logger,
+                logger=self.logger,
             )
         else:
-            if not self.root.is_writing_mode():
+            if not self.model_root.is_writing_mode():
                 raise IOError("Model opened in read-only mode")
             # write_nc requires dict - use dummy 'grid' key
             return write_nc(  # Can return DeferedFileClose object
@@ -181,15 +165,19 @@ class GridComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        if not self.root.is_reading_mode():
+        if not self.model_root.is_reading_mode():
             raise IOError("Model opened in write-only mode")
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
-        if self.root.is_reading_mode() and self.root.is_writing_mode():
+        if self.model_root.is_reading_mode() and self.model_root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
-            data_like, self.root, logger=logger, single_var_as_array=False, **kwargs
+            data_like,
+            self.model_root,
+            logger=self.logger,
+            single_var_as_array=False,
+            **kwargs,
         )
         for ds in loaded_nc_files.values():
             self.set(ds)
@@ -267,7 +255,7 @@ class GridComponent(ModelComponent):
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
             # see ticket #813 for the skip
-            kind, region = parse_region(  # noqa: F821
+            kind, region = _parse_region(  # noqa: F821
                 region, data_catalog=self.data_catalog, logger=self.logger
             )
         elif kind != "grid":
@@ -420,11 +408,6 @@ class GridComponent(ModelComponent):
         return grid
 
     @property
-    def model(self) -> Model:
-        """Access the Model instance through the weak reference."""
-        return self._model_ref()
-
-    @property
     def res(self) -> Optional[Tuple[float, float]]:
         """Returns the resolution of the model grid."""
         if len(self.data) > 0:
@@ -432,7 +415,7 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving resolution",
             strategy=NoDataStrategy.IGNORE,
-            logger=logger,
+            logger=self.logger,
         )
 
     @property
@@ -443,7 +426,7 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving transform",
             strategy=NoDataStrategy.IGNORE,
-            logger=logger,
+            logger=self.logger,
         )
 
     @property
@@ -451,7 +434,7 @@ class GridComponent(ModelComponent):
         """Returns coordinate reference system embedded in the model grid."""
         if self.data.raster.crs is not None:
             return CRS(self.data.raster.crs)
-        logger.warn("Grid data has no crs")
+        self.logger.warn("Grid data has no crs")
 
     @property
     def bounds(self) -> Optional[List[float]]:
@@ -461,7 +444,7 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving bounds",
             strategy=NoDataStrategy.IGNORE,
-            logger=logger,
+            logger=self.logger,
         )
 
     @property
@@ -475,7 +458,7 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving region",
             strategy=NoDataStrategy.IGNORE,
-            logger=logger,
+            logger=self.logger,
         )
 
     @property
@@ -489,7 +472,7 @@ class GridComponent(ModelComponent):
         """Initialize grid object."""
         if self._data is None:
             self._data = xr.Dataset()
-            if self.root.is_reading_mode() and not skip_read:
+            if self.model_root.is_reading_mode() and not skip_read:
                 self.read()
 
     def set_crs(self, crs: CRS) -> None:
