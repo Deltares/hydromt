@@ -4,42 +4,32 @@ import pytest
 import xarray as xr
 from pydantic import ValidationError
 
+from hydromt.data_adapter import RasterDatasetAdapter
 from hydromt.data_sources import RasterDataSource
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
-from hydromt.metadata_resolvers import MetaDataResolver
+
+
+@pytest.fixture()
+def mock_raster_ds_adapter():
+    class MockRasterDataSetAdapter(RasterDatasetAdapter):
+        def transform(self, ds: xr.Dataset, **kwargs):
+            return ds
+
+    return MockRasterDataSetAdapter()
 
 
 class TestRasterDataSource:
-    @pytest.fixture()
-    def example_source(
-        self,
-        mock_raster_ds_driver: RasterDatasetDriver,
-        mock_resolver: MetaDataResolver,
-        tmp_dir: Path,
-    ):
-        return RasterDataSource(
-            root=".",
-            name="example_rasterds",
-            driver=mock_raster_ds_driver,
-            metadata_resolver=mock_resolver,
-            uri=str(tmp_dir / "rasterds.zarr"),
-        )
-
-    def test_validators(self):
+    def test_validators(self, mock_raster_ds_adapter: RasterDatasetAdapter):
         with pytest.raises(ValidationError) as e_info:
             RasterDataSource(
-                root=".",
                 name="name",
                 uri="uri",
+                data_adapter=mock_raster_ds_adapter,
                 metadata_resolver="does not exist",
                 driver="does not exist",
             )
 
-        assert e_info.value.error_count() == 2
-        error_meta = next(
-            filter(lambda e: e["loc"] == ("metadata_resolver",), e_info.value.errors())
-        )
-        assert error_meta["type"] == "value_error"
+        assert e_info.value.error_count() == 1
         error_driver = next(
             filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
         )
@@ -48,13 +38,13 @@ class TestRasterDataSource:
     def test_model_validate(
         self,
         mock_raster_ds_driver: RasterDatasetDriver,
-        mock_resolver: MetaDataResolver,
+        mock_raster_ds_adapter: RasterDatasetAdapter,
     ):
         RasterDataSource.model_validate(
             {
                 "name": "zarrfile",
                 "driver": mock_raster_ds_driver,
-                "metadata_resolver": mock_resolver,
+                "data_adapter": mock_raster_ds_adapter,
                 "uri": "test_uri",
             }
         )
@@ -66,10 +56,23 @@ class TestRasterDataSource:
                     "name": "geojsonfile",
                     "data_type": "DifferentDataType",
                     "driver": mock_raster_ds_driver,
-                    "metadata_resolver": mock_resolver,
+                    "data_adapter": mock_raster_ds_adapter,
                     "uri": "test_uri",
                 }
             )
 
-    def test_read_data(self, example_source: RasterDataSource, rasterds: xr.Dataset):
-        assert rasterds == example_source.read_data()
+    def test_read_data(
+        self,
+        rasterds: xr.Dataset,
+        mock_raster_ds_driver: RasterDatasetDriver,
+        mock_raster_ds_adapter: RasterDatasetAdapter,
+        tmp_dir: Path,
+    ):
+        source = RasterDataSource(
+            _root=".",
+            name="example_rasterds",
+            driver=mock_raster_ds_driver,
+            data_adapter=mock_raster_ds_adapter,
+            uri=str(tmp_dir / "rasterds.zarr"),
+        )
+        assert rasterds == source.read_data()

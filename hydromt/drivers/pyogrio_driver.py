@@ -8,6 +8,7 @@ from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom
+from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import parse_geom_bbox_buffer
 
@@ -19,14 +20,15 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     def read(
         self,
-        uris: List[str],
+        uri: str,
         *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0,
         crs: Optional[CRS] = None,
+        variables: Optional[List[str]] = None,
         predicate: str = "intersects",
-        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
         logger: Logger = logger,
         **kwargs,
@@ -36,15 +38,26 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
+        uris = self.metadata_resolver.resolve(
+            uri,
+            bbox=bbox,
+            mask=mask,
+            buffer=buffer,
+            predicate=predicate,
+            variables=variables,
+            handle_nodata=handle_nodata,
+            **kwargs,
+        )
+        # TODO: put this check after the metadata resolver
         if len(uris) != 1:
             raise ValueError("Length of uris for Pyogrio Driver must be 1.")
-        uri = uris[0]
+        _uri = uris[0]
         if bbox is not None:  # buffer bbox
             bbox: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         if mask is not None:  # buffer mask
             mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
-        bbox_reader = bbox_from_file_and_filters(uri, bbox, mask, crs)
-        return read_dataframe(uri, bbox=bbox_reader)
+        bbox_reader = bbox_from_file_and_filters(_uri, bbox, mask, crs)
+        return read_dataframe(_uri, bbox=bbox_reader)
 
 
 def bbox_from_file_and_filters(

@@ -6,6 +6,7 @@ from typing import cast
 import geopandas as gpd
 import numpy as np
 import pytest
+from pydantic import ValidationError
 from pyogrio.errors import DataSourceError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
@@ -15,11 +16,12 @@ from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_sources.geodataframe import GeoDataSource
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
 
 
-class TestGeoDataFrameAdapter:
+class TestGeoDataFrameSource:
     @pytest.fixture()
     def artifact_data(self):
         datacatalog = DataCatalog()
@@ -32,32 +34,109 @@ class TestGeoDataFrameAdapter:
         geodf.to_file(uri, driver="GeoJSON")
         return uri
 
-    @pytest.fixture()
-    def example_source(self, example_geojson: str) -> GeoDataSource:
-        return GeoDataSource(
-            name="test",
-            uri=example_geojson,
-            metadata_resolver=ConventionResolver(),
-            driver=PyogrioDriver(),
+    def test_validators(self, mock_geodataframe_adapter: GeoDataFrameAdapter):
+        with pytest.raises(ValidationError) as e_info:
+            GeoDataSource(
+                _root=".",
+                name="name",
+                data_type="GeoDataFrame",
+                uri="uri",
+                data_adapter=mock_geodataframe_adapter,
+                driver="does not exist",
+            )
+
+        assert e_info.value.error_count() == 1
+        error_driver = next(
+            filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
         )
+        assert error_driver["type"] == "value_error"
+
+    def test_model_validate(
+        self,
+        mock_geodf_driver: GeoDataFrameDriver,
+        mock_geodataframe_adapter: GeoDataFrameAdapter,
+    ):
+        GeoDataSource.model_validate(
+            {
+                "name": "geojsonfile",
+                "data_type": "GeoDataFrame",
+                "driver": mock_geodf_driver,
+                "data_adapter": mock_geodataframe_adapter,
+                "uri": "test_uri",
+            }
+        )
+        with pytest.raises(
+            ValidationError, match="'data_type' must be 'GeoDataFrame'."
+        ):
+            GeoDataSource.model_validate(
+                {
+                    "name": "geojsonfile",
+                    "data_type": "DifferentDataType",
+                    "driver": mock_geodf_driver,
+                    "data_adapter": mock_geodataframe_adapter,
+                    "uri": "test_uri",
+                }
+            )
+
+    def test_get_data_query_params(
+        self,
+        geodf: gpd.GeoDataFrame,
+        mock_geodf_driver: GeoDataFrameDriver,
+        mock_geodataframe_adapter: GeoDataFrameAdapter,
+    ):
+        data_source = GeoDataSource(
+            _root=".",
+            name="geojsonfile",
+            data_type="GeoDataFrame",
+            driver=mock_geodf_driver,
+            data_adapter=mock_geodataframe_adapter,
+            uri="testuri",
+        )
+        gdf1 = data_source.get_data(bbox=list(geodf.total_bounds), buffer=1000)
+        assert isinstance(gdf1, gpd.GeoDataFrame)
+        assert np.all(gdf1 == geodf)
 
     @pytest.mark.integration()
-    def test_get_data(self, geodf: gpd.GeoDataFrame, example_source: GeoDataSource):
-        adapter = GeoDataFrameAdapter(source=example_source)
-        gdf = adapter.get_data(list(geodf.total_bounds))
+    def test_get_data(self, geodf: gpd.GeoDataFrame, example_geojson: str):
+        source = GeoDataSource(
+            name="test",
+            uri=example_geojson,
+            data_adapter=GeoDataFrameAdapter(),
+            driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
+        )
+        gdf = source.get_data(list(geodf.total_bounds))
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert np.all(gdf == geodf)
 
-        example_source.rename = {"test": "test1"}
-
-        gdf = adapter.get_data(
+    @pytest.mark.integration()
+    def test_get_data_rename(self, geodf: gpd.GeoDataFrame, example_geojson: str):
+        source = GeoDataSource(
+            name="test",
+            uri=example_geojson,
+            data_adapter=GeoDataFrameAdapter(
+                harmonization_settings={"rename": {"city": "ciudad"}}
+            ),
+            driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
+        )
+        gdf = source.get_data(
             bbox=list(geodf.total_bounds),
             buffer=1000,
         )
-        example_source.uri = "no_file.geojson"
-        adapter = GeoDataFrameAdapter(source=example_source)
+
+        assert isinstance(gdf, gpd.GeoDataFrame)
+        assert "ciudad" in gdf.columns
+        assert "city" not in gdf.columns
+
+    @pytest.mark.integration()
+    def test_get_data_not_found(self):
+        source = GeoDataSource(
+            name="test",
+            uri="no_file.geojson",
+            data_adapter=GeoDataFrameAdapter(),
+            driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
+        )
         with pytest.raises(DataSourceError):
-            adapter.get_data()
+            source.get_data()
 
     @pytest.mark.skip("Missing driver: 'raster'")
     def test_geodataframe_unit_attrs(self, artifact_data: DataCatalog):

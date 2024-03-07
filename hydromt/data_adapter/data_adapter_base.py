@@ -1,10 +1,12 @@
-"""Base class for data adapters."""
-from pydantic import BaseModel
+"""BaseModel for DataAdapter."""
+from pydantic import BaseModel, Field
 
-from hydromt.data_sources.data_source import DataSource
+from hydromt.data_adapter.harmonization_settings import HarmonizationSettings
 
 
 class DataAdapterBase(BaseModel):
-    """Base class for data adapters."""
+    """BaseModel for DataAdapter."""
 
-    source: DataSource
+    harmonization_settings: HarmonizationSettings = Field(
+        default_factory=HarmonizationSettings
+    )

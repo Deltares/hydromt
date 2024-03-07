@@ -6,14 +6,14 @@ from typing import Any, Callable, ClassVar, Dict, Optional, Union
 from pydantic import (
     BaseModel,
     Field,
-    field_validator,
+    PrivateAttr,
     model_validator,
 )
 
 from hydromt._typing import DataType
 from hydromt.data_adapter.caching import _uri_validator
-from hydromt.metadata_resolvers import MetaDataResolver
-from hydromt.metadata_resolvers.resolver_plugin import RESOLVERS
+from hydromt.data_adapter.harmonization_settings import HarmonizationSettings
+from hydromt.drivers import BaseDriver
 
 
 class DataSource(BaseModel):
@@ -55,18 +55,6 @@ class DataSource(BaseModel):
 
         raise ValueError("DataSource needs 'data_type'")
 
-    @field_validator("metadata_resolver", mode="before")
-    @classmethod
-    def _validate_metadata_resolver(cls, v: Any):
-        if isinstance(v, str):
-            if v not in RESOLVERS:
-                raise ValueError(f"unknown MetaDataResolver: '{v}'.")
-            return RESOLVERS.get(v)()
-        elif hasattr(v, "resolve"):  # MetaDataResolver duck-typing
-            return v
-        else:
-            raise ValueError("metadata_resolver should be string or MetaDataResolver.")
-
     @model_validator(mode="before")
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:
@@ -81,26 +69,21 @@ class DataSource(BaseModel):
     @model_validator(mode="after")
     def _validate_uri(self) -> str:
         if not _uri_validator(self.uri):
-            self.uri = _abs_path(self.root, self.uri)
+            self.uri = _abs_path(self._root, self.uri)
         return self
+
+    _root: Optional[str] = PrivateAttr(default=None)
 
     name: str
     uri: str
     data_type: ClassVar[DataType]
-    driver: Any
-    metadata_resolver: MetaDataResolver
-    root: Optional[str] = Field(default=None)
-    attrs: Dict[str, Any] = Field(default_factory=dict)
+    driver: BaseDriver
+    harmonization: HarmonizationSettings = Field(default_factory=HarmonizationSettings)
+    # data_adapter: Any
     version: Optional[str] = Field(default=None)
     provider: Optional[str] = Field(default=None)
     driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
     resolver_kwargs: Dict[str, Any] = Field(default_factory=dict)
-    unit_add: Dict[str, Any] = Field(default_factory=dict)
-    unit_mult: Dict[str, Any] = Field(default_factory=dict)
-    rename: Dict[str, str] = Field(default_factory=dict)
-    nodata: Union[float, int, Dict[str, Union[float, int]]] = Field(default=None)
-    extent: Dict[str, Any] = Field(default_factory=dict)  # ?
-    meta: Dict[str, Any] = Field(default_factory=dict)
     crs: Optional[int] = Field(default=None)
 
 

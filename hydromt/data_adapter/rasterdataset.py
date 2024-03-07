@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime
 from logging import Logger, getLogger
-from os.path import basename, join, splitext
+from os.path import join
 from typing import Dict, Optional, Tuple, Union, cast
 
 import numpy as np
@@ -13,17 +12,12 @@ import pyproj
 import rasterio
 import xarray as xr
 from pydantic import PrivateAttr
-from pyproj.exceptions import CRSError
-from pystac import Asset as StacAsset
-from pystac import Catalog as StacCatalog
-from pystac import Item as StacItem
-from pystac import MediaType
+from pyproj import CRS
 from rasterio.errors import RasterioIOError
 
 from hydromt._typing import (
     Bbox,
     Data,
-    ErrorHandleMethod,
     Geom,
     GeomBuffer,
     NoDataException,
@@ -37,7 +31,6 @@ from hydromt._typing import (
 )
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import has_no_data
-from hydromt.data_sources import RasterDataSource
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
 
@@ -49,7 +42,6 @@ __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 class RasterDatasetAdapter(DataAdapterBase):
     """Implementation for the RasterDatasetAdapter."""
 
-    source: RasterDataSource
     _used: bool = PrivateAttr(False)
 
     def to_file(
@@ -148,10 +140,12 @@ class RasterDatasetAdapter(DataAdapterBase):
 
         return fn_out, driver, read_kwargs
 
-    def get_data(
+    def transform(
         self,
+        ds: xr.Dataset,
+        *,
         bbox: Optional[Bbox] = None,
-        geom: Optional[Geom] = None,
+        mask: Optional[Geom] = None,
         buffer: GeomBuffer = 0,
         zoom_level: Optional[int] = None,
         align: Optional[bool] = None,
@@ -169,13 +163,6 @@ class RasterDatasetAdapter(DataAdapterBase):
         """
         try:
             self._used = True  # mark used
-            ds = self._read_data(
-                geom,
-                bbox,
-                cache_root,
-                zoom_level=zoom_level,
-                logger=logger,
-            )
             if has_no_data(ds):
                 raise NoDataException()
             # rename variables and parse data and attrs
@@ -188,7 +175,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             ds = RasterDatasetAdapter._slice_data(
                 ds,
                 variables,
-                geom,
+                mask,
                 bbox,
                 buffer,
                 align,
@@ -205,33 +192,13 @@ class RasterDatasetAdapter(DataAdapterBase):
             return self._single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
             _exec_nodata_strat(
-                f"No data was read from source: {self.source.name}",
+                "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,
             )
 
-    def _read_data(
-        self,
-        geom: Optional[Geom],
-        bbox: Optional[Bbox],
-        cache_root: Optional[StrPath],
-        zoom_level: Optional[int] = None,
-        logger: Logger = logger,
-    ):
-        logger.info(
-            f"Reading {self.source.name} {self.source.driver} data from {self.source.uri}"
-        )
-        ds: xr.Dataset = self.source.read_data(
-            mask=geom, bbox=bbox, zoom_level=zoom_level, **self.source.driver_kwargs
-        )
-
-        if has_no_data(ds):
-            return None
-        else:
-            return ds
-
     def _rename_vars(self, ds: Data) -> Data:
-        rm = {k: v for k, v in self.source.rename.items() if k in ds}
+        rm = {k: v for k, v in self.harmonization_settings.rename.items() if k in ds}
         ds = ds.rename(rm)
         return ds
 
@@ -250,20 +217,15 @@ class RasterDatasetAdapter(DataAdapterBase):
             )
         return ds
 
-    def _set_crs(self, ds: Data, logger: Logger = logger) -> Data:
+    def _set_crs(self, ds: Data, crs: Optional[CRS], logger: Logger = logger) -> Data:
         # set crs
-        if ds.raster.crs is None and self.source.crs is not None:
-            ds.raster.set_crs(self.source.crs)
+        if ds.raster.crs is None and crs is not None:
+            ds.raster.set_crs(crs)
         elif ds.raster.crs is None:
-            raise ValueError(
-                f"RasterDataset {self.source.name}: CRS not defined in data catalog or data."
-            )
-        elif (
-            self.source.crs is not None
-            and ds.raster.crs != pyproj.CRS.from_user_input(self.source.crs)
-        ):
+            raise ValueError("RasterDataset: CRS not defined in data catalog or data.")
+        elif crs is not None and ds.raster.crs != pyproj.CRS.from_user_input(crs):
             logger.warning(
-                f"RasterDataset {self.source.name}: CRS from data catalog does not match CRS "
+                "RasterDataset: CRS from data catalog does not match CRS "
                 " of data. The original CRS will be used. Please check your catalog."
             )
         return ds
@@ -340,7 +302,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             return ds
 
     def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
-        dt = self.source.unit_add.get("time", 0)
+        dt = self.harmonization_settings.unit_add.get("time", 0)
         if (
             dt != 0
             and "time" in ds.dims
@@ -413,15 +375,15 @@ class RasterDatasetAdapter(DataAdapterBase):
             return ds
 
     def _apply_unit_conversions(self, ds: Data, logger=logger):
-        unit_names = list(self.source.unit_mult.keys()) + list(
-            self.source.unit_add.keys()
+        unit_names = list(self.harmonization_settings.unit_mult.keys()) + list(
+            self.harmonization_settings.unit_add.keys()
         )
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
             logger.debug(f"Convert units for {len(unit_names)} variables.")
         for name in list(set(unit_names)):  # unique
-            m = self.source.unit_mult.get(name, 1)
-            a = self.source.unit_add.get(name, 0)
+            m = self.harmonization_settings.unit_mult.get(name, 1)
+            a = self.harmonization_settings.unit_add.get(name, 0)
             da = ds[name]
             attrs = da.attrs.copy()
             nodata_isnan = da.raster.nodata is None or np.isnan(da.raster.nodata)
@@ -436,11 +398,13 @@ class RasterDatasetAdapter(DataAdapterBase):
 
     def _set_nodata(self, ds):
         # set nodata value
-        if self.source.nodata is not None:
-            if not isinstance(self.source.nodata, dict):
-                nodata = {k: self.source.nodata for k in ds.data_vars.keys()}
+        if self.harmonization_settings.nodata is not None:
+            if not isinstance(self.harmonization_settings.nodata, dict):
+                nodata = {
+                    k: self.harmonization_settings.nodata for k in ds.data_vars.keys()
+                }
             else:
-                nodata = self.source.nodata
+                nodata = self.harmonization_settings.nodata
             for k in ds.data_vars:
                 mv = nodata.get(k, None)
                 if mv is not None and ds[k].raster.nodata is None:
@@ -449,10 +413,10 @@ class RasterDatasetAdapter(DataAdapterBase):
 
     def _set_metadata(self, ds):
         # unit attributes
-        for k in self.source.attrs:
-            ds[k].attrs.update(self.source.attrs[k])
+        for k in self.harmonization_settings.attrs:
+            ds[k].attrs.update(self.harmonization_settings.attrs[k])
         # set meta data
-        ds.attrs.update(self.source.meta)
+        ds.attrs.update(self.harmonization_settings.meta)
         return ds
 
     # TODO: uses rasterio and is specific to driver. Should be moved to driver
@@ -588,7 +552,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         else:
             return ds
 
-    def get_bbox(self, detect=True) -> TotalBounds:
+    def get_bbox(self, crs: Optional[CRS], detect=True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -608,8 +572,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        bbox = self.source.extent.get("bbox", None)
-        crs = cast(int, self.source.crs)
+        bbox = self.harmonization_settings.extent.get("bbox", None)
+        crs = cast(int, crs)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 
@@ -638,7 +602,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        time_range = self.source.extent.get("time_range", None)
+        time_range = self.harmonization_settings.extent.get("time_range", None)
         if time_range is None and detect:
             time_range = self.detect_time_range()
 
@@ -671,7 +635,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        if ds is None:
+        if ds is None:  # TODO: If we keep this optional, should move to DataSource.
             ds = self.get_data()
         crs = ds.raster.crs.to_epsg()
         bounds = ds.raster.bounds
@@ -700,88 +664,9 @@ class RasterDatasetAdapter(DataAdapterBase):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        if ds is None:
+        if ds is None:  # TODO: If we want to keep this optional, should move to Source.
             ds = self.get_data()
         return (
             ds[ds.raster.time_dim].min().values,
             ds[ds.raster.time_dim].max().values,
         )
-
-    def to_stac_catalog(
-        self,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
-    ) -> Optional[StacCatalog]:
-        """
-        Convert a rasterdataset into a STAC Catalog representation.
-
-        The collection will contain an asset for each of the associated files.
-
-
-        Parameters
-        ----------
-        - on_error (str, optional): The error handling strategy.
-          Options are: "raise" to raise an error on failure, "skip" to skip the
-          dataset on failure, and "coerce" (default) to set default values on failure.
-
-        Returns
-        -------
-        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
-          if the dataset was skipped.
-        """
-        try:
-            bbox, crs = self.get_bbox(detect=True)
-            bbox = list(bbox)
-            start_dt, end_dt = self.get_time_range(detect=True)
-            start_dt = pd.to_datetime(start_dt)
-            end_dt = pd.to_datetime(end_dt)
-            props = {**self.source.meta, "crs": crs}
-            ext = splitext(self.source.uri)[-1]
-            if ext == ".nc" or ext == ".vrt":
-                media_type = MediaType.HDF5
-            elif ext == ".tiff":
-                media_type = MediaType.TIFF
-            elif ext == ".cog":
-                media_type = MediaType.COG
-            elif ext == ".png":
-                media_type = MediaType.PNG
-            else:
-                raise RuntimeError(
-                    f"Unknown extention: {ext} cannot determine media type"
-                )
-        except (IndexError, KeyError, CRSError) as e:
-            if on_error == ErrorHandleMethod.SKIP:
-                logger.warning(
-                    "Skipping {name} during stac conversion because"
-                    "because detecting spacial extent failed."
-                )
-                return
-            elif on_error == ErrorHandleMethod.COERCE:
-                bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.source.meta
-                start_dt = datetime(1, 1, 1)
-                end_dt = datetime(1, 1, 1)
-                media_type = MediaType.JSON
-            else:
-                raise e
-
-        else:
-            # else makes type checkers a bit happier
-            stac_catalog = StacCatalog(
-                self.source.name,
-                description=self.source.name,
-            )
-            stac_item = StacItem(
-                self.source.name,
-                geometry=None,
-                bbox=list(bbox),
-                properties=props,
-                datetime=None,
-                start_datetime=start_dt,
-                end_datetime=end_dt,
-            )
-            stac_asset = StacAsset(str(self.source.uri), media_type=media_type)
-            base_name = basename(self.source.uri)
-            stac_item.add_asset(base_name, stac_asset)
-
-            stac_catalog.add_item(stac_item)
-            return stac_catalog
