@@ -147,6 +147,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: GeomBuffer = 0,
+        crs: Optional[CRS] = None,
         zoom_level: Optional[int] = None,
         align: Optional[bool] = None,
         variables: Optional[Variables] = None,
@@ -168,7 +169,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             # rename variables and parse data and attrs
             ds = self._rename_vars(ds)
             ds = self._validate_spatial_dims(ds)
-            ds = self._set_crs(ds, logger)
+            ds = self._set_crs(ds, crs, logger)
             ds = self._set_nodata(ds)
             ds = self._shift_time(ds, logger)
             # slice data
