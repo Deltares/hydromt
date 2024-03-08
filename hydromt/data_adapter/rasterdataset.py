@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from logging import Logger, getLogger
 from os.path import join
-from typing import Dict, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -539,7 +539,7 @@ class RasterDatasetAdapter(DataAdapterBase):
 
     @staticmethod
     def _single_var_as_array(
-        ds: Data, single_var_as_array: bool, variable_name: Optional[str] = None
+        ds: Data, single_var_as_array: bool, variable_name: Optional[List[str]] = None
     ) -> Data:
         # return data array if single variable dataset
         dvars = list(ds.data_vars.keys())
