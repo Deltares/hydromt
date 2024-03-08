@@ -1,11 +1,8 @@
 """Implementations for all of the necessary IO reading for HydroMT."""
-import abc
-import codecs
 import glob
 import io as pyio
 import logging
 from ast import literal_eval
-from configparser import ConfigParser
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
@@ -21,11 +18,10 @@ import yaml
 from pyogrio import read_dataframe
 from shapely.geometry import Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
-from tomli import load as load_toml
 
 from hydromt import gis
 from hydromt.gis import merge, raster, vector
-from hydromt.io.path import parse_abspath
+from hydromt.io.path import make_config_paths_abs
 
 logger = logging.getLogger(__name__)
 
@@ -646,7 +642,7 @@ def open_vector(
             )
             gdf = read_dataframe(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
         else:
-            gdf = gpd.read_file(str(fn), bbox=bbox, mode=mode, **kwargs)
+            gdf = gpd.read_file(str(fn), bbox=bbox, mask=geom, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
@@ -681,7 +677,7 @@ def open_vector_from_table(
     crs=None,
     **kwargs,
 ):
-    """Read point geometry files from csv, parquet, xy or excel table files.
+    r"""Read point geometry files from csv, parquet, xy or excel table files.
 
     Parameters
     ----------
@@ -690,7 +686,7 @@ def open_vector_from_table(
         If 'parquet' use :py:meth:`pandas.read_parquet` to read the data;
         If 'xls' or 'xlsx' use :py:meth:`pandas.read_excel` with `engine=openpyxl`
         If 'xy' use :py:meth:`pandas.read_csv` with `index_col=False`, `header=None`,
-        `delim_whitespace=True`.
+        `sep='\s+'`.
     x_dim, y_dim: str
         Name of x, y column. By default the x-column header should be one of
         ['x', 'longitude', 'lon', 'long'], and y-column header one of
@@ -721,7 +717,7 @@ def open_vector_from_table(
     elif driver == "xy":
         x_dim = x_dim if x_dim is not None else "x"
         y_dim = y_dim if y_dim is not None else "y"
-        kwargs.update(index_col=False, header=None, delim_whitespace=True)
+        kwargs.update(index_col=False, header=None, sep=r"\s+")
         df = pd.read_csv(fn, **kwargs).rename(columns={0: x_dim, 1: y_dim})
     else:
         raise IOError(f"Driver {driver} unknown.")
@@ -744,54 +740,6 @@ def open_vector_from_table(
     points = gpd.points_from_xy(df[x_dim], df[y_dim])
     gdf = gpd.GeoDataFrame(df.drop(columns=[x_dim, y_dim]), geometry=points, crs=crs)
     return gdf
-
-
-def read_ini_config(
-    config_fn: Union[Path, str],
-    encoding: str = "utf-8",
-    cf: ConfigParser = None,
-    skip_eval: bool = False,
-    skip_eval_sections: Optional[list] = None,
-    noheader: bool = False,
-) -> dict:
-    """Read configuration ini file and parse to (nested) dictionary.
-
-    Parameters
-    ----------
-    config_fn : Union[Path, str]
-        Path to configuration file
-    encoding : str, optional
-        File encoding, by default "utf-8"
-    cf : ConfigParser, optional
-        Alternative configuration parser, by default None
-    skip_eval : bool, optional
-        If True, do not evaluate string values, by default False
-    skip_eval_sections : list, optional
-        These sections are not evaluated for string values
-        if skip_eval=True, by default []
-    noheader : bool, optional
-        Set true for a single-level configuration file with no headers, by default False
-
-    Returns
-    -------
-    cfdict : dict
-        Configuration dictionary.
-    """
-    skip_eval_sections = skip_eval_sections or []
-    if cf is None:
-        cf = ConfigParser(allow_no_value=True, inline_comment_prefixes=[";", "#"])
-    elif isinstance(cf, abc.ABCMeta):  # not yet instantiated
-        cf = cf()
-    cf.optionxform = str  # preserve capital letter
-    with codecs.open(config_fn, "r", encoding=encoding) as fp:
-        cf.read_file(fp)
-        cfdict = cf._sections
-    # parse values
-    cfdict = parse_values(cfdict, skip_eval, skip_eval_sections)
-    # add dummy header
-    if noheader and "dummy" in cfdict:
-        cfdict = cfdict["dummy"]
-    return cfdict
 
 
 def configread(
@@ -832,17 +780,13 @@ def configread(
     if ext in [".yaml", ".yml"]:
         with open(config_fn, "rb") as f:
             cfdict = yaml.safe_load(f)
-        cfdict = _process_config_in(cfdict)
-    elif ext == ".toml":  # user defined
-        with open(config_fn, "rb") as f:
-            cfdict = load_toml(f)
-        cfdict = _process_config_in(cfdict)
     else:
-        cfdict = read_ini_config(config_fn, **kwargs)
+        raise ValueError(f"Unknown extention: {ext} Hydromt only supports yaml")
+
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_fn))
-        cfdict = parse_abspath(cfdict, root, skip_abspath_sections)
+        cfdict = make_config_paths_abs(cfdict, root, skip_abspath_sections)
 
     # update defaults
     if defaults:
@@ -876,7 +820,7 @@ def parse_values(
     skip_eval_sections = skip_eval_sections or []
     # loop through two-level dict: section, key-value pairs
     for section in cfdict:
-        # evaluate ini items to parse to python default objects:
+        # evaluate yaml items to parse to python default objects:
         if skip_eval or section in skip_eval_sections:
             cfdict[section].update(
                 {key: str(var) for key, var in cfdict[section].items()}
@@ -892,17 +836,3 @@ def parse_values(
                 value = None
             cfdict[section].update({key: value})
     return cfdict
-
-
-def _process_config_in(d):
-    ret = {}
-    if isinstance(d, dict):
-        for k, v in d.items():
-            if v == "NONE":
-                ret[k] = None
-            else:
-                ret[k] = _process_config_in(v)
-    else:
-        ret = d
-
-    return ret

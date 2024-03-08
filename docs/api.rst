@@ -6,6 +6,36 @@
 API reference
 #############
 
+======================
+Command Line Interface
+======================
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   api_cli/hydromt_cli.rst
+   api_cli/hydromt_build.rst
+   api_cli/hydromt_update.rst
+   api_cli/hydromt_clip.rst
+   api_cli/hydromt_export.rst
+   api_cli/hydromt_check.rst
+
+
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt <api_cli/hydromt_cli.rst>`_           | Main command line interface of HydroMT.                |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt build <api_cli/hydromt_build.rst>`_   | Build a model.                                         |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt update <api_cli/hydromt_update.rst>`_ | Update an existing model.                              |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt clip <api_cli/hydromt_clip.rst>`_     | Clip/Extract a submodel from an existing model.        |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt export <api_cli/hydromt_export.rst>`_ | Export data extract from a data catalog.               |
++------------------------------------------------+--------------------------------------------------------+
+| `hydromt check <api_cli/hydromt_check.rst>`_   | Check if data catalog or configuration file are valid. |
++------------------------------------------------+--------------------------------------------------------+
+
 ====
 Data
 ====
@@ -60,10 +90,23 @@ Get data
    data_catalog.DataCatalog.get_geodataset
    data_catalog.DataCatalog.get_geodataframe
    data_catalog.DataCatalog.get_dataframe
+   data_catalog.DataCatalog.get_dataset
 
+DataAdapter
+===========
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_adapter.DataAdapter
+   data_adapter.DataAdapter.summary
+   data_adapter.DataAdapter.to_dict
 
 RasterDataset
-=============
+-------------
 
 .. autosummary::
    :toctree: _generated
@@ -77,9 +120,10 @@ RasterDataset
    data_adapter.RasterDatasetAdapter.get_time_range
    data_adapter.RasterDatasetAdapter.detect_bbox
    data_adapter.RasterDatasetAdapter.detect_time_range
+   data_adapter.RasterDatasetAdapter.to_stac_catalog
 
 GeoDataset
-==========
+----------
 
 .. autosummary::
    :toctree: _generated
@@ -93,9 +137,10 @@ GeoDataset
    data_adapter.GeoDatasetAdapter.get_time_range
    data_adapter.GeoDatasetAdapter.detect_bbox
    data_adapter.GeoDatasetAdapter.detect_time_range
+   data_adapter.GeoDatasetAdapter.to_stac_catalog
 
 GeoDataFrame
-============
+------------
 
 .. autosummary::
    :toctree: _generated
@@ -107,9 +152,10 @@ GeoDataFrame
    data_adapter.GeoDataFrameAdapter.to_file
    data_adapter.GeoDataFrameAdapter.get_bbox
    data_adapter.GeoDataFrameAdapter.detect_bbox
+   data_adapter.GeoDataFrameAdapter.to_stac_catalog
 
 DataFrame
-=========
+---------
 
 .. autosummary::
    :toctree: _generated
@@ -119,6 +165,20 @@ DataFrame
    data_adapter.DataFrameAdapter.get_data
    data_adapter.DataFrameAdapter.to_dict
    data_adapter.DataFrameAdapter.to_file
+   data_adapter.DataFrameAdapter.to_stac_catalog
+
+Dataset
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_adapter.DatasetAdapter
+   data_adapter.DatasetAdapter.summary
+   data_adapter.DatasetAdapter.get_data
+   data_adapter.DatasetAdapter.to_dict
+   data_adapter.DatasetAdapter.to_file
+   data_adapter.DatasetAdapter.to_stac_catalog
 
 
 ======
@@ -156,7 +216,6 @@ High level methods
    Model.write
    Model.build
    Model.update
-   Model.set_root
    Model.write_data_catalog
 
 Model attributes
@@ -166,12 +225,12 @@ Model attributes
    :toctree: _generated
 
    Model.crs
-   Model.region
    Model.root
+   Model.region
    Model.api
 
-Model components and attributes
--------------------------------
+Model default components
+------------------------
 
 .. autosummary::
    :toctree: _generated
@@ -213,9 +272,6 @@ General methods
    Model.set_results
    Model.read_results
 
-   Model.read_nc
-   Model.write_nc
-
 .. _setup_methods:
 
 Setup methods
@@ -225,10 +281,97 @@ Setup methods
    :toctree: _generated
 
    Model.setup_config
-   Model.setup_region
    Model.setup_maps_from_rasterdataset
    Model.setup_maps_from_raster_reclass
 
+ModelRoot
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRoot
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRoot.mode
+   ModelRoot.is_writing_mode
+   ModelRoot.is_reading_mode
+   ModelRoot.is_override_mode
+
+Methods
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRoot.set
+
+ModelComponent
+==============
+
+Note that the base ModelComponent attributes and methods are available to all model
+components.
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelComponent
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelComponent.model
+   ModelComponent.data_catalog
+   ModelComponent.logger
+   ModelComponent.model_root
+
+ModelRegionComponent
+====================
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRegionComponent
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRegionComponent.data
+   ModelRegionComponent.model
+   ModelRegionComponent.crs
+   ModelRegionComponent.bounds
+   ModelRegionComponent.data_catalog
+   ModelRegionComponent.logger
+   ModelRegionComponent.model_root
+
+General Methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRegionComponent.set
+   ModelRegionComponent.read
+   ModelRegionComponent.write
+
+Data Methods
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRegionComponent.create
 
 .. _grid_model_api:
 
@@ -380,6 +523,8 @@ Setup methods
 Workflows
 =========
 
+.. _workflows_grid_api:
+
 Grid
 ====
 
@@ -391,6 +536,8 @@ Grid
    workflows.grid.grid_from_raster_reclass
    workflows.grid.grid_from_geodataframe
 
+.. _workflows_mesh_api:
+
 Mesh
 ====
 
@@ -401,6 +548,7 @@ Mesh
    workflows.mesh.mesh2d_from_rasterdataset
    workflows.mesh.mesh2d_from_raster_reclass
 
+.. _workflows_basin_api:
 
 Basin mask
 ==========
@@ -409,7 +557,8 @@ Basin mask
    :toctree: _generated
 
    workflows.basin_mask.get_basin_geometry
-   workflows.basin_mask.parse_region
+
+.. _workflows_rivers_api:
 
 River bathymetry
 ================
@@ -420,6 +569,7 @@ River bathymetry
    workflows.rivers.river_width
    workflows.rivers.river_depth
 
+.. _workflows_forcing_api:
 
 Forcing
 =======
@@ -479,6 +629,7 @@ Reading methods
 .. autosummary::
    :toctree: _generated
 
+   io.configread
    io.open_raster
    io.open_mfraster
    io.open_raster_from_tindex
@@ -486,18 +637,19 @@ Reading methods
    io.open_vector_from_table
    io.open_geodataset
    io.open_timeseries_from_table
+   io.open_mfcsv
 
-Raster writing methods
-======================
+Writing methods
+===============
 
 .. autosummary::
-   :template: autosummary/accessor_method.rst
    :toctree: _generated
 
-   DataArray.raster.to_xyz_tiles
-   DataArray.raster.to_slippy_tiles
-   DataArray.raster.to_raster
-   Dataset.raster.to_mapstack
+   io.configwrite
+   io.netcdf_writer
+   io.write_xy
+   io.zarr_writer
+
 
 .. _raster_api:
 
@@ -646,6 +798,18 @@ Low level methods
    gis_utils.axes_attrs
    gis_utils.meridian_offset
 
+Writing methods
+===============
+
+.. autosummary::
+   :template: autosummary/accessor_method.rst
+   :toctree: _generated
+
+   DataArray.raster.to_xyz_tiles
+   DataArray.raster.to_slippy_tiles
+   DataArray.raster.to_raster
+   Dataset.raster.to_mapstack
+
 .. _geodataset_api:
 
 ==================
@@ -756,6 +920,8 @@ Reproject
    DataArray.vector.to_crs
    Dataset.vector.to_crs
 
+.. _flw_api:
+
 ======================
 Flow direction methods
 ======================
@@ -766,33 +932,34 @@ visit the `pyflwdir docs. <https://deltares.github.io/pyflwdir/latest/>`_
 .. autosummary::
    :toctree: _generated
 
-   flw.flwdir_from_da
-   flw.d8_from_dem
-   flw.reproject_hydrography_like
-   flw.upscale_flwdir
-   flw.stream_map
-   flw.basin_map
-   flw.gauge_map
-   flw.outlet_map
-   flw.clip_basins
-   flw.dem_adjust
+   gis.flw.flwdir_from_da
+   gis.flw.d8_from_dem
+   gis.flw.reproject_hydrography_like
+   gis.flw.upscale_flwdir
+   gis.flw.stream_map
+   gis.flw.basin_map
+   gis.flw.gauge_map
+   gis.flw.outlet_map
+   gis.flw.clip_basins
+   gis.flw.dem_adjust
 
+.. _gis_utils_api:
 
 ===================
 General GIS methods
 ===================
 
 Raster
-=========
+======
 
 .. autosummary::
    :toctree: _generated
 
-   gis_utils.create_vrt
-   gis_utils.spread2d
-   gis_utils.reggrid_area
-   gis_utils.cellarea
-   gis_utils.cellres
+   gis.utils.create_vrt
+   gis.utils.spread2d
+   gis.utils.reggrid_area
+   gis.utils.cellarea
+   gis.utils.cellres
 
 CRS and transform
 =================
@@ -800,9 +967,13 @@ CRS and transform
 .. autosummary::
    :toctree: _generated
 
-   gis_utils.parse_crs
-   gis_utils.utm_crs
-   gis_utils.affine_to_coords
+   gis.utils.parse_crs
+   gis.utils.utm_crs
+   gis.utils.affine_to_coords
+   gis.utils.affine_to_meshgrid
+   gis.utils.bbox_from_file_and_filters
+   gis.utils.parse_geom_bbox_buffer
+   gis.utils.to_geographic_bbox
 
 Vector
 ======
@@ -810,9 +981,9 @@ Vector
 .. autosummary::
    :toctree: _generated
 
-   gis_utils.filter_gdf
-   gis_utils.nearest
-   gis_utils.nearest_merge
+   gis.utils.filter_gdf
+   gis.utils.nearest
+   gis.utils.nearest_merge
 
 
 .. _statistics:
@@ -860,25 +1031,3 @@ Design Events
    :toctree: _generated
 
    stats.design_events.get_peak_hydrographs
-
-
-=========
-Utilities
-=========
-
-Configuration files
-===================
-
-.. autosummary::
-   :toctree: _generated
-
-   config.configread
-   config.configwrite
-
-Logging
-=======
-
-.. autosummary::
-   :toctree: _generated
-
-   log.setuplog

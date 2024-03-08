@@ -15,7 +15,7 @@ from shapely.geometry import box
 
 from hydromt import workflows
 from hydromt.gis import raster, utils
-from hydromt.models.api import Model, parse_region
+from hydromt.models.api import Model
 
 __all__ = ["GridModel"]
 logger = logging.getLogger(__name__)
@@ -326,7 +326,7 @@ class GridMixin(object):
         """Initialize grid object."""
         if self._grid is None:
             self._grid = xr.Dataset()
-            if self._read and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read_grid()
 
     def set_grid(
@@ -369,9 +369,8 @@ class GridMixin(object):
             self._grid = data
         else:
             for dvar in data.data_vars:
-                if dvar in self._grid:
-                    if self._read:
-                        self.logger.warning(f"Replacing grid map: {dvar}")
+                if dvar in self._grid and self.root.is_reading_mode():
+                    self.logger.warning(f"Replacing grid map: {dvar}")
                 self._grid[dvar] = data[dvar]
 
     def read_grid(self, fn: str = "grid/grid.nc", **kwargs) -> None:
@@ -390,7 +389,7 @@ class GridMixin(object):
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
-        if self._read and self._write:
+        if self.root.is_reading_mode() and self.root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = self.read_nc(fn, single_var_as_array=False, **kwargs)
         for ds in loaded_nc_files.values():
@@ -536,7 +535,8 @@ class GridModel(GridMixin, Model):
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
-            kind, region = parse_region(
+            # see ticket #813 for the skip
+            kind, region = parse_region(  # noqa: F821
                 region, data_catalog=self.data_catalog, logger=self.logger
             )
         elif kind != "grid":
@@ -761,19 +761,6 @@ class GridModel(GridMixin, Model):
         """Returns the bounding box of the model grid."""
         if len(self.grid) > 0:
             return self.grid.raster.bounds
-
-    @property
-    def region(self) -> gpd.GeoDataFrame:
-        """Returns the geometry of the model area of interest."""
-        region = gpd.GeoDataFrame()
-        if "region" in self.geoms:
-            region = self.geoms["region"]
-        elif len(self.grid) > 0:
-            crs = self.crs
-            if crs is not None and hasattr(crs, "to_epsg"):
-                crs = crs.to_epsg()  # not all CRS have an EPSG code
-            region = gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
-        return region
 
     def set_crs(self, crs: CRS) -> None:
         """Set coordinate reference system of the model grid."""

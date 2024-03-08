@@ -32,11 +32,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: generate envs
-        run: |
-          pip install tomli
-          python make_env.py -p "3.11" -o full-environment.yml full
-
       - name: Build and test
         uses: docker/build-push-action@v4
         with:
@@ -44,6 +39,8 @@ jobs:
           target: full
           tags: hydromt
           load: true
+          build-args: |
+            PIXIENV=full-py311
 
 
       - name: Run Tests

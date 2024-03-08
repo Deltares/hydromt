@@ -107,9 +107,6 @@ venv.bak/
 .spyderproject
 .spyproject
 
-# VScode
-.vscode
-
 # PyCharm
 .idea
 
@@ -130,5 +127,4 @@ dask-worker-space/
 .envrc
 pyrightconfig.json
 
-pixi.lock
 .pixi
