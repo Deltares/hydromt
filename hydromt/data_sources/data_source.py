@@ -6,7 +6,6 @@ from typing import Any, Callable, ClassVar, Dict, Optional, Union
 from pydantic import (
     BaseModel,
     Field,
-    PrivateAttr,
     model_validator,
 )
 
@@ -69,11 +68,10 @@ class DataSource(BaseModel):
     @model_validator(mode="after")
     def _validate_uri(self) -> str:
         if not _uri_validator(self.uri):
-            self.uri = _abs_path(self._root, self.uri)
+            self.uri = _abs_path(self.root, self.uri)
         return self
 
-    _root: Optional[str] = PrivateAttr(default=None)
-
+    root: Optional[str] = Field(default=None)
     name: str
     uri: str
     data_type: ClassVar[DataType]

@@ -37,7 +37,7 @@ class TestGeoDataFrameSource:
     def test_validators(self, mock_geodataframe_adapter: GeoDataFrameAdapter):
         with pytest.raises(ValidationError) as e_info:
             GeoDataSource(
-                _root=".",
+                root=".",
                 name="name",
                 data_type="GeoDataFrame",
                 uri="uri",
@@ -85,7 +85,7 @@ class TestGeoDataFrameSource:
         mock_geodataframe_adapter: GeoDataFrameAdapter,
     ):
         data_source = GeoDataSource(
-            _root=".",
+            root=".",
             name="geojsonfile",
             data_type="GeoDataFrame",
             driver=mock_geodf_driver,

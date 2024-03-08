@@ -28,7 +28,6 @@ from hydromt.data_catalog import (
 from hydromt.data_sources import GeoDataSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis.utils import to_geographic_bbox
-from hydromt.metadata_resolvers import MetaDataResolver
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -86,12 +85,15 @@ def test_from_yml_no_root(tmpdir):
     assert cat.root == Path(tmpdir)
 
 
-def test_parser(mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):
+def test_parser(
+    mock_geodf_driver: GeoDataFrameDriver,
+    mock_geodataframe_adapter: GeoDataFrameAdapter,
+):
     # valid abs root on windows and linux!
     root = "c:/root" if os.name == "nt" else "/c/root"
     # simple; abs path
     source = {
-        "metadata_resolver": mock_resolver,
+        "data_adapter": mock_geodataframe_adapter,
         "driver": mock_geodf_driver,
         "data_type": "GeoDataFrame",
         "uri": f"{root}/to/data.gpkg",
@@ -106,7 +108,7 @@ def test_parser(mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataRe
     # assert datasource.uri == abspath(source["uri"])
     # rel path
     source = {
-        "metadata_resolver": mock_resolver,
+        "data_adapter": mock_geodataframe_adapter,
         "driver": mock_geodf_driver,
         "data_type": "GeoDataFrame",
         "uri": "path/to/data.gpkg",
@@ -119,7 +121,7 @@ def test_parser(mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataRe
     # alias
     dd = {
         "test": {
-            "metadata_resolver": mock_resolver,
+            "data_adapter": mock_geodataframe_adapter,
             "driver": mock_geodf_driver,
             "data_type": "GeoDataFrame",
             "uri": "path/to/data.gpkg",
@@ -139,7 +141,7 @@ def test_parser(mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataRe
     # placeholder
     dd = {
         "test_{p1}_{p2}": {
-            "metadata_resolver": mock_resolver,
+            "data_adapter": mock_geodataframe_adapter,
             "driver": mock_geodf_driver,
             "data_type": "GeoDataFrame",
             "uri": "data_{p2}.gpkg",
@@ -155,7 +157,7 @@ def test_parser(mock_geodf_driver: GeoDataFrameDriver, mock_resolver: MetaDataRe
     # variants
     dd = {
         "test": {
-            "metadata_resolver": mock_resolver,
+            "data_adapter": mock_geodataframe_adapter,
             "driver": mock_geodf_driver,
             "data_type": "GeoDataFrame",
             "variants": [

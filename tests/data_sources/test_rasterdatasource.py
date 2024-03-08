@@ -69,7 +69,7 @@ class TestRasterDataSource:
         tmp_dir: Path,
     ):
         source = RasterDataSource(
-            _root=".",
+            root=".",
             name="example_rasterds",
             driver=mock_raster_ds_driver,
             data_adapter=mock_raster_ds_adapter,
