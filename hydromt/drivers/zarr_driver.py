@@ -51,7 +51,6 @@ class ZarrDriver(RasterDatasetDriver):
             preprocess: Callable = PREPROCESSORS.get(preprocess)
 
         opn: Callable = partial(xr.open_zarr, **kwargs)
-        uris = self.metadata_resolver.resolve()
 
         return xr.merge(
             [preprocess(opn(_uri)) if preprocess else opn(_uri) for _uri in uris]

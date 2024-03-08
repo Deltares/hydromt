@@ -6,6 +6,7 @@ import pytest
 import zarr
 
 from hydromt.drivers.zarr_driver import ZarrDriver
+from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
 
 
 class TestZarrDriver:
@@ -38,4 +39,9 @@ class TestZarrDriver:
         return (root, tmp_path)
 
     def test_zarr_read(self, example_zarr_file: zarr.Array):
-        assert ZarrDriver().read([example_zarr_file[1]]) == example_zarr_file[0]
+        assert (
+            ZarrDriver(metadata_resolver=ConventionResolver()).read(
+                str(example_zarr_file[1])
+            )
+            == example_zarr_file[0]
+        )

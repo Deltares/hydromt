@@ -9,6 +9,7 @@ from shapely import box
 
 from hydromt._typing import Bbox
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
+from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
 
 
 class TestPyogrioDriver:
@@ -36,6 +37,10 @@ class TestPyogrioDriver:
         geodf.to_file(uri, driver="FlatGeobuf")
         return uri
 
+    @pytest.fixture(scope="class")
+    def driver(self):
+        return PyogrioDriver(metadata_resolver=ConventionResolver())
+
     # lazy-fixtures not maintained:
     # https://github.com/TvoroG/pytest-lazy-fixture/issues/65#issuecomment-1914527162
     fixture_uris = pytest.mark.parametrize(
@@ -52,35 +57,37 @@ class TestPyogrioDriver:
     @pytest.mark.usefixtures("_raise_gdal_warnings")
     @fixture_uris
     def test_read(
-        self, uri: str, request: pytest.FixtureRequest, geodf: gpd.GeoDataFrame
+        self,
+        uri: str,
+        request: pytest.FixtureRequest,
+        geodf: gpd.GeoDataFrame,
+        driver: PyogrioDriver,
     ):
         uri = request.getfixturevalue(uri)
-        driver = PyogrioDriver()
-        gdf: gpd.GeoDataFrame = driver.read([uri]).sort_values("id")
+        gdf: gpd.GeoDataFrame = driver.read(uri).sort_values("id")
         assert np.all(gdf.reset_index(drop=True) == geodf)  # fgb scrambles order
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
-    def test_read_nodata(self):
-        driver = PyogrioDriver()
+    def test_read_nodata(self, driver: PyogrioDriver):
         with pytest.raises(DataSourceError):
-            driver.read(["no_data.geojson"])
+            driver.read("no_data.geojson")
 
-    def test_read_multiple_uris(self):
-        driver = PyogrioDriver()
+    def test_read_multiple_uris(self, driver: PyogrioDriver):
         with pytest.raises(ValueError, match="must be 1"):
-            driver.read(["uri1", "uri2"])
+            driver.read("uri_{variable}", variables=["more", "than", "one"])
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
     @fixture_uris
-    def test_read_with_filters(self, uri: str, request: pytest.FixtureRequest):
+    def test_read_with_filters(
+        self, uri: str, request: pytest.FixtureRequest, driver: PyogrioDriver
+    ):
         uri = request.getfixturevalue(uri)
-        driver = PyogrioDriver()
         bbox: Bbox = (-60, -34.5600, -55, -30)
         gdf: gpd.GeoDataFrame = driver.read(
-            [uri], bbox=(-60, -34.5600, -55, -30), buffer=10000
+            uri, bbox=(-60, -34.5600, -55, -30), buffer=10000
         )
         assert gdf.shape == (1, 4)
-        gdf = driver.read([uri], mask=gpd.GeoSeries(box(*bbox)), buffer=10000)
+        gdf = driver.read(uri, mask=gpd.GeoSeries(box(*bbox)), buffer=10000)
         assert gdf.shape == (1, 4)
         with pytest.raises(ValueError, match="Both 'bbox' and 'mask' are provided."):
-            driver.read([uri], bbox=bbox, mask=gpd.GeoSeries(box(*bbox)), buffer=10000)
+            driver.read(uri, bbox=bbox, mask=gpd.GeoSeries(box(*bbox)), buffer=10000)
