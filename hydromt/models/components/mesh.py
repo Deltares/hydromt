@@ -78,7 +78,7 @@ class MeshComponent(ModelComponent):
         )
 
         if crs:  # Restore crs
-            for grid in self._data.ugrid.grids:
+            for grid in self.data.ugrid.grids:
                 grid.set_crs(crs)
 
         # update related geoms if necessary: region TODO: Check if is still needed
@@ -128,7 +128,7 @@ class MeshComponent(ModelComponent):
         ds_out.to_netcdf(_fn, **kwargs)
 
     def read(
-        self, fn: str = "mesh/mesh.nc", crs: Union[CRS, int] = None, **kwargs
+        self, fn: str = "mesh/mesh.nc", crs: Optional[Union[CRS, int]] = None, **kwargs
     ) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
@@ -232,7 +232,7 @@ class MeshComponent(ModelComponent):
         return mesh2d
 
     @property
-    def data(self) -> xu.UgridDataArray | xu.UgridDataset:
+    def data(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
         """
         Model static mesh data. It returns a xugrid.UgridDataset.
 
@@ -558,7 +558,7 @@ class MeshComponent(ModelComponent):
         return list(uds_sample.data_vars.keys())
 
     def _add_mesh(
-        self, data: xu.UgridDataset, grid_name: str, overwrite_grid: bool
+        self, data: xu.UgridDataset, grid_name: str, overwrite_grid: Optional[bool]
     ) -> Optional[CRS]:
         if self.data is None:  # NOTE: mesh is initialized with None
             # Check on crs
@@ -597,7 +597,7 @@ class MeshComponent(ModelComponent):
                             if g != grid_name
                         ]
                         # Re-define _data
-                        grids = xr.merge(grids)
+                        grids = xr.merge(objects=grids)
                         self._data = xu.UgridDataset(grids)
             # Check again mesh_names, could have changed if overwrite_grid=True
             if grid_name in self.mesh_names:
@@ -622,7 +622,7 @@ class MeshComponent(ModelComponent):
 
 
 def _check_UGrid(
-    data: Union[xu.UgridDataArray, xu.UgridDataset], name: str
+    data: Union[xu.UgridDataArray, xu.UgridDataset], name: Optional[str]
 ) -> xu.UgridDataset:
     if not isinstance(data, (xu.UgridDataArray, xu.UgridDataset)):
         raise ValueError(
