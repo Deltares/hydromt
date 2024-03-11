@@ -42,15 +42,15 @@ class DataSource(BaseModel):
 
     def summary(self) -> Dict[str, Any]:
         """Return a summary of the DataSource."""
-        sum: Dict[str, Any] = self.model_dump(include={"uri"})
-        sum.update(
+        summ: Dict[str, Any] = self.model_dump(include={"uri"})
+        summ.update(
             {
                 "data_type": self.__class__.data_type,
                 "driver": self.driver.__repr_name__(),
                 **self.data_adapter.harmonization_settings.meta,
             }
         )
-        return sum
+        return summ
 
     # TODO: def to_file(self, **query_params) https://github.com/Deltares/hydromt/issues/840
 

@@ -57,8 +57,8 @@ class TestDataSource:
                 "uri": "test_uri",
             }
         )
-        sum: Dict[str, Any] = submodel.summary()
-        assert sum["data_type"] == "GeoDataFrame"
-        assert sum["uri"] == f"{root}test_uri"
-        assert sum["driver"] == "MockGeoDataFrameDriver"
-        assert sum["custom_meta"] == "test"
+        summ: Dict[str, Any] = submodel.summary()
+        assert summ["data_type"] == "GeoDataFrame"
+        assert summ["uri"] == f"{root}test_uri"
+        assert summ["driver"] == "MockGeoDataFrameDriver"
+        assert summ["custom_meta"] == "test"
