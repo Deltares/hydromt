@@ -11,7 +11,7 @@ import numpy as np
 import xarray as xr
 import yaml
 
-from hydromt._typing.type_def import DeferedFileClose, XArrayDict
+from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
 from hydromt.io.path import make_config_paths_relative
 
 logger = logging.getLogger(__name__)
@@ -144,7 +144,7 @@ def write_nc(
     fn: str,
     root,
     logger: Logger,
-    temp_data_dir=None,
+    temp_data_dir: StrPath = None,
     gdal_compliant: bool = False,
     rename_dims: bool = False,
     force_sn: bool = False,
@@ -167,6 +167,9 @@ def write_nc(
         Dictionary of xarray.Dataset and/or xarray.DataArray to write
     fn: str
         filename relative to model root and should contain a {name} placeholder
+    temp_data_dir: StrPath, optional
+            Temporary directory to write grid to. If not given a TemporaryDirectory
+            is generated.
     gdal_compliant: bool, optional
         If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
         format using :py:meth:`~hydromt.raster.gdal_compliant`
