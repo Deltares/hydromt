@@ -95,12 +95,22 @@ Get data
 DataSource
 ==========
 
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.data_source.DataSource
+   data_source.data_source.DataSource.summary
+
 RasterDataset
 -------------
 
 .. autosummary::
    :toctree: _generated
 
+   data_source.rasterdataset.RasterDatasetSource
    data_source.rasterdataset.RasterDatasetSource.get_data
    data_source.rasterdataset.RasterDatasetSource.to_stac_catalog
    data_source.rasterdataset.RasterDatasetSource.get_bbox
@@ -140,7 +150,6 @@ RasterDataset
 
    data_adapter.RasterDatasetAdapter
    data_adapter.RasterDatasetAdapter.transform
-   data_adapter.RasterDatasetAdapter.summary
    data_adapter.RasterDatasetAdapter.to_dict
    data_adapter.RasterDatasetAdapter.to_file
    data_adapter.RasterDatasetAdapter.to_stac_catalog
@@ -169,7 +178,6 @@ GeoDataFrame
    :toctree: _generated
 
    data_adapter.GeoDataFrameAdapter
-   data_adapter.GeoDataFrameAdapter.summary
    data_adapter.GeoDataFrameAdapter.get_data
    data_adapter.GeoDataFrameAdapter.to_dict
    data_adapter.GeoDataFrameAdapter.to_file
