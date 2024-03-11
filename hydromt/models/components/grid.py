@@ -139,7 +139,7 @@ class GridComponent(ModelComponent):
             if not self.model_root.is_writing_mode():
                 raise IOError("Model opened in read-only mode")
             # write_nc requires dict - use dummy 'grid' key
-            return write_nc(  # Can return DeferedFileClose object
+            write_nc(  # Can return DeferedFileClose object
                 {"grid": self._data},
                 fn,
                 gdal_compliant=gdal_compliant,
