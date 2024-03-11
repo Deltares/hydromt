@@ -153,3 +153,65 @@ removed and their new equivalent is provided below:
 +--------------------------+---------------------------+
 | model.set_region(...)    | model.region.set(...)     |
 +--------------------------+---------------------------+
+
+DataAdapter
+-----------
+
+The previous version of the `DataAdapter` and it's subclasses had a lot of
+responsabilities:
+- Validate the input from the `DataCatalog` entry.
+- Find the right paths to the data based on a naming convention.
+- Deserialize/read many different file formats into python objects.
+- Merge these different python objects into one that represent that data source in the
+model region.
+- Homogenize the data based on the data catalog entry and HydroMT conventions.
+
+In v1, this class has been split into three extentable components:
+
+DataSource
+^^^^^^^^^^
+
+The `DataSource` is the python representation of a parsed entry in the `DataCatalog`.
+The `DataSource` is responsable for validating the `DataCatalog` entry. It also carries
+the soon-to-be introduced `DataAdapter` and `DataDriver` and serves as an entrypoint to
+the data.
+Per HydroMT data type (e.g. `RasterDataset`, `GeoDataFrame`), HydroMT has one
+`DataSource`, e.g. `RasterDatasetDataSource`, `GeoDataFrameDataSource`.
+
+MetaDataResolver
+^^^^^^^^^^^^^^^^
+
+The `MetaDataResolver` takes a single `uri` and the query parameters from the model,
+such as the region, or the timerange, and returns multiple absolute paths, or `uri`s,
+that can be read into a single python representation (e.g. `xarray.Dataset`). This
+functionality was previously covered in the `resolve_paths` function. However, there
+are more ways than to resolve a single uri, so the `MetaDataResolver` makes this
+behaviour extendable. The `MetaDataResolver` is injected into the `Driver` objects.
+
+Driver
+^^^^^^
+
+The `Driver` class is responsable for deserializing/reading a set of file types, like
+a geojson or zarr file, into their python in-memory representations:
+`geopandas.DataFrame` or `xarray.Dataset` respectively. To find the relevant files based
+on a single `uri` in the `DataCatalog`, a `MetaDataResolver` is used.
+The driver has a `read` method. This method accepts a `uri`, a
+unique identifier for a single datasource. It also accepts different query parameters,
+such a the region, timerange or zoom level of the query from the model.
+This `read` method returns the python representation of the DataSource.
+Because the merging of different files from different `DataSource`s can be
+non-trivial, the driver is responsable to merge the different python objects coming
+from the driver to a single representation. This is then returned from the `read`
+method.
+Because the query parameters vary per HydroMT data type, the is a different driver
+interface per type, e.g. `RasterDatasetDriver`, `GeoDataFrameDriver`.
+
+DataAdapter
+^^^^^^^^^^^
+
+The `DataAdapter` now has its previous responsabilities reduced to just homogenizing
+the data coming from the `Driver`. This means slicing the data to the right region,
+renaming variables, changing units, regridding and more. The `DataAdapter` has a
+`transform` method that takes a HydroMT data type and returns this same type. This
+method also accepts query parameters based on the data type, so there is a single
+`DataAdapter` per HydroMT data type.
