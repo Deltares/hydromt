@@ -1,12 +1,11 @@
+import logging
 from unittest.mock import create_autospec, patch
 
 import pytest
 import xarray as xr
 import xugrid as xu
 
-from hydromt.data_catalog import DataCatalog
 from hydromt.models.components.mesh import MeshComponent, _check_UGrid
-from hydromt.models.root import ModelRoot
 
 
 def test_check_UGrid():
@@ -31,25 +30,41 @@ def test_check_UGrid():
     assert "new_dataset" in dataset.data_vars.keys()
 
 
-def test_add_mesh(tmp_dir):
-    mesh_component = MeshComponent(
-        root=ModelRoot(tmp_dir), data_catalog=DataCatalog(), model_region=None
-    )
+@patch.object(MeshComponent, "_grid_is_equal")
+def test_add_mesh(mock_grid_is_equal, mock_model, caplog):
+    mesh_component = MeshComponent(mock_model)
     data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(ValueError, match="Data should have CRS."):
         mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
+    data.grid.crs = 28992
     mesh_component._data = data
-
+    data4326 = xu.data.elevation_nl().to_dataset()
+    data4326.grid.crs = 4326
     with pytest.raises(
         ValueError, match="Data and self.data should have the same CRS."
     ):
-        mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
-
-
-def test_set_raises_errors(tmp_dir):
-    mesh_component = MeshComponent(
-        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
+        mesh_component._add_mesh(data=data4326, grid_name="", overwrite_grid=False)
+    grid_name = "mesh2d"
+    mock_grid_is_equal.return_value = False
+    with pytest.raises(
+        ValueError,
+        match=f"Grid {grid_name} already exists in mesh"
+        " and has a different topology. "
+        "Use overwrite_grid=True to overwrite the grid"
+        " topology and related data.",
+    ):
+        mesh_component._add_mesh(data=data, grid_name=grid_name, overwrite_grid=False)
+    caplog.set_level(logging.WARNING)
+    mesh_component._data = data
+    mesh_component._add_mesh(data=data, grid_name="mesh2d", overwrite_grid=True)
+    assert (
+        f"Overwriting grid {grid_name} and the corresponding data variables in mesh."
+        in caplog.text
     )
+
+
+def test_set_raises_errors(mock_model):
+    mesh_component = MeshComponent(mock_model)
     with pytest.raises(
         ValueError,
         match=(

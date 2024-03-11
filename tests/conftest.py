@@ -1,7 +1,9 @@
+import logging
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Generator
+from unittest.mock import create_autospec
 
 import geopandas as gpd
 import numpy as np
@@ -20,7 +22,9 @@ from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
 from hydromt.models.api import Model
 from hydromt.models.components.network import NetworkModel
+from hydromt.models.components.region import ModelRegionComponent
 from hydromt.models.components.vector import VectorModel
+from hydromt.models.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
@@ -363,3 +367,15 @@ def artifact_data():
     datacatalog = DataCatalog()
     datacatalog.from_predefined_catalogs("artifact_data")
     return datacatalog
+
+
+@pytest.fixture()
+def mock_model(tmpdir):
+    logger = logging.getLogger(__name__)
+    logger.propagate = True
+    model = create_autospec(Model)
+    model.root = ModelRoot(path=tmpdir)
+    model.data_catalog = DataCatalog()
+    model.region = ModelRegionComponent(model=model)
+    model.logger = logger
+    return model

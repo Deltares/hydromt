@@ -38,7 +38,7 @@ class MeshComponent(ModelComponent):
         data: xu.UgridDataArray | xu.UgridDataset,
         name: Optional[str] = None,
         grid_name: Optional[str] = None,
-        overwrite_grid: Optional[bool] = False,
+        overwrite_grid: bool = False,
     ) -> None:
         """Add data to mesh.
 
@@ -558,9 +558,9 @@ class MeshComponent(ModelComponent):
         return list(uds_sample.data_vars.keys())
 
     def _add_mesh(
-        self, data: xu.UgridDataset, grid_name: str, overwrite_grid: Optional[bool]
+        self, data: xu.UgridDataset, grid_name: str, overwrite_grid: bool
     ) -> Optional[CRS]:
-        if self.data is None:  # NOTE: mesh is initialized with None
+        if self._data is None:  # NOTE: mesh is initialized with None
             # Check on crs
             if not data.ugrid.grid.crs:
                 raise ValueError("Data should have CRS.")
@@ -618,7 +618,7 @@ class MeshComponent(ModelComponent):
             return crs
 
     def _grid_is_equal(self, grid_name: str, data: xu.UgridDataset) -> bool:
-        return self.mesh_names[grid_name].to_dataset().equals(data.grid.to_dataset())
+        return self.mesh_grids[grid_name].to_dataset().equals(data.grid.to_dataset())
 
 
 def _check_UGrid(
