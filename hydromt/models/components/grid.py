@@ -103,7 +103,7 @@ class GridComponent(ModelComponent):
     def write(
         self,
         fn: str = "grid/grid.nc",
-        temp_data_dir: StrPath = None,
+        temp_data_dir: Optional[StrPath] = None,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
@@ -758,7 +758,7 @@ class GridComponent(ModelComponent):
                 f"No shapes of {vector_fn} found within region,"
                 " skipping setup_grid_from_vector."
             )
-            return
+            return None
         # Data resampling
         if vector_fn in rename.keys():
             # In case of choosing a new name with area or fraction method pass
