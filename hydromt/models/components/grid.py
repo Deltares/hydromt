@@ -11,7 +11,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
-from hydromt._typing.type_def import DeferedFileClose
+from hydromt._typing.type_def import DeferedFileClose, StrPath
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
@@ -59,7 +59,6 @@ class GridComponent(ModelComponent):
         self,
         data: Union[xr.DataArray, xr.Dataset, np.ndarray],
         name: Optional[str] = None,
-        read: bool = True,
     ):
         """Add data to grid.
 
@@ -104,6 +103,7 @@ class GridComponent(ModelComponent):
     def write(
         self,
         fn: str = "grid/grid.nc",
+        temp_data_dir: StrPath = None,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
@@ -117,8 +117,9 @@ class GridComponent(ModelComponent):
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
-        **kwargs : dict
-            Additional keyword arguments to be passed to the `write_nc` method.
+        temp_data_dir: StrPath, optional
+            Temporary directory to write grid to. If not given a TemporaryDirectory
+            is generated.
         gdal_compliant : bool, optional
             If True, write grid data in a way that is compatible with GDAL,
             by default False
@@ -128,6 +129,8 @@ class GridComponent(ModelComponent):
         force_sn: bool, optional
             If True and gdal_compliant, forces the dataset to have
             South -> North orientation.
+        **kwargs : dict
+            Additional keyword arguments to be passed to the `write_nc` method.
         """
         if len(self.data) == 0:
             _exec_nodata_strat(
@@ -140,17 +143,20 @@ class GridComponent(ModelComponent):
                 raise IOError("Model opened in read-only mode")
             # write_nc requires dict - use dummy 'grid' key
             write_nc(  # Can return DeferedFileClose object
-                {"grid": self._data},
+                {"grid": self.data},
                 fn,
+                temp_data_dir=temp_data_dir,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
                 force_sn=force_sn,
                 **kwargs,
             )
+        return None
 
     def read(
         self,
         fn: str = "grid/grid.nc",
+        mask_and_scale: bool = False,
         **kwargs,
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
@@ -161,6 +167,11 @@ class GridComponent(ModelComponent):
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
+        mask_and_scale : bool, optional
+            If True, replace array values equal to _FillValue with NA and scale values
+            according to the formula original_values * scale_factor + add_offset, where
+            _FillValue, scale_factor and add_offset are taken from variable attributes
+        (if they exist).
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
@@ -172,10 +183,11 @@ class GridComponent(ModelComponent):
         if self.model_root.is_reading_mode() and self.model_root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
-            data_like,
+            fn,
             self.model_root,
             logger=self.logger,
             single_var_as_array=False,
+            mask_and_scale=mask_and_scale,
             **kwargs,
         )
         for ds in loaded_nc_files.values():
@@ -416,6 +428,7 @@ class GridComponent(ModelComponent):
             strategy=NoDataStrategy.IGNORE,
             logger=self.logger,
         )
+        return None
 
     @property
     def transform(self) -> Optional[Affine]:
@@ -427,6 +440,7 @@ class GridComponent(ModelComponent):
             strategy=NoDataStrategy.IGNORE,
             logger=self.logger,
         )
+        return None
 
     @property
     def crs(self) -> Optional[CRS]:
@@ -434,6 +448,7 @@ class GridComponent(ModelComponent):
         if self.data.raster.crs is not None:
             return CRS(self.data.raster.crs)
         self.logger.warn("Grid data has no crs")
+        return None
 
     @property
     def bounds(self) -> Optional[List[float]]:
@@ -445,6 +460,7 @@ class GridComponent(ModelComponent):
             strategy=NoDataStrategy.IGNORE,
             logger=self.logger,
         )
+        return None
 
     @property
     def region(self) -> Optional[gpd.GeoDataFrame]:
@@ -459,6 +475,7 @@ class GridComponent(ModelComponent):
             strategy=NoDataStrategy.IGNORE,
             logger=self.logger,
         )
+        return None
 
     @property
     def data(self) -> xr.Dataset:

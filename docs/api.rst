@@ -641,6 +641,7 @@ Reading methods
    io.open_geodataset
    io.open_timeseries_from_table
    io.open_mfcsv
+   io.read_nc
 
 Writing methods
 ===============
@@ -652,6 +653,7 @@ Writing methods
    io.netcdf_writer
    io.write_xy
    io.zarr_writer
+   io.write_nc
 
 
 .. _raster_api:

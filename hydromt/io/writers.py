@@ -207,3 +207,4 @@ def write_nc(
                 tmp_fn=tmp_fn,
                 close_attempts=1,
             )
+    return None

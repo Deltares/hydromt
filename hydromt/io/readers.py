@@ -841,20 +841,6 @@ def parse_values(
     return cfdict
 
 
-def _process_config_in(d):
-    ret = {}
-    if isinstance(d, dict):
-        for k, v in d.items():
-            if v == "NONE":
-                ret[k] = None
-            else:
-                ret[k] = _process_config_in(v)
-    else:
-        ret = d
-
-    return ret
-
-
 def read_nc(
     fn: StrPath,
     root,
