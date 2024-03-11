@@ -15,7 +15,7 @@ from pystac import Item as StacItem
 from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.data_sources.geodataframe import GeoDataSource
+from hydromt.data_source.geodataframe import GeoDataFrameSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
@@ -36,7 +36,7 @@ class TestGeoDataFrameSource:
 
     def test_validators(self, mock_geodataframe_adapter: GeoDataFrameAdapter):
         with pytest.raises(ValidationError) as e_info:
-            GeoDataSource(
+            GeoDataFrameSource(
                 root=".",
                 name="name",
                 data_type="GeoDataFrame",
@@ -56,7 +56,7 @@ class TestGeoDataFrameSource:
         mock_geodf_driver: GeoDataFrameDriver,
         mock_geodataframe_adapter: GeoDataFrameAdapter,
     ):
-        GeoDataSource.model_validate(
+        GeoDataFrameSource.model_validate(
             {
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",
@@ -68,7 +68,7 @@ class TestGeoDataFrameSource:
         with pytest.raises(
             ValidationError, match="'data_type' must be 'GeoDataFrame'."
         ):
-            GeoDataSource.model_validate(
+            GeoDataFrameSource.model_validate(
                 {
                     "name": "geojsonfile",
                     "data_type": "DifferentDataType",
@@ -84,7 +84,7 @@ class TestGeoDataFrameSource:
         mock_geodf_driver: GeoDataFrameDriver,
         mock_geodataframe_adapter: GeoDataFrameAdapter,
     ):
-        data_source = GeoDataSource(
+        data_source = GeoDataFrameSource(
             root=".",
             name="geojsonfile",
             data_type="GeoDataFrame",
@@ -98,7 +98,7 @@ class TestGeoDataFrameSource:
 
     @pytest.mark.integration()
     def test_get_data(self, geodf: gpd.GeoDataFrame, example_geojson: str):
-        source = GeoDataSource(
+        source = GeoDataFrameSource(
             name="test",
             uri=example_geojson,
             data_adapter=GeoDataFrameAdapter(),
@@ -110,7 +110,7 @@ class TestGeoDataFrameSource:
 
     @pytest.mark.integration()
     def test_get_data_rename(self, geodf: gpd.GeoDataFrame, example_geojson: str):
-        source = GeoDataSource(
+        source = GeoDataFrameSource(
             name="test",
             uri=example_geojson,
             data_adapter=GeoDataFrameAdapter(
@@ -129,7 +129,7 @@ class TestGeoDataFrameSource:
 
     @pytest.mark.integration()
     def test_get_data_not_found(self):
-        source = GeoDataSource(
+        source = GeoDataFrameSource(
             name="test",
             uri="no_file.geojson",
             data_adapter=GeoDataFrameAdapter(),

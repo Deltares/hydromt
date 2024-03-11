@@ -41,7 +41,7 @@ def driver_from_str(driver_str: str, **driver_kwargs) -> GeoDataFrameDriver:
     return _KNOWN_DRIVERS[driver_str](**driver_kwargs)
 
 
-class GeoDataSource(DataSource):
+class GeoDataFrameSource(DataSource):
     """
     DataSource for GeoDataFrames.
 

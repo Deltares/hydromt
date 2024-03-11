@@ -1,7 +1,7 @@
 import pytest
 
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.data_sources import DataSource, GeoDataSource
+from hydromt.data_source import DataSource, GeoDataFrameSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 
 
@@ -20,7 +20,7 @@ class TestDataSource:
                 "uri": "test_uri",
             }
         )
-        assert isinstance(submodel, GeoDataSource)
+        assert isinstance(submodel, GeoDataFrameSource)
         with pytest.raises(ValueError, match="Unknown 'data_type'"):
             DataSource.model_validate(
                 {

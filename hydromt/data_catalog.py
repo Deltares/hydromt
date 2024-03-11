@@ -46,7 +46,7 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
-from hydromt.data_sources import DataSource
+from hydromt.data_source import DataSource
 
 logger = logging.getLogger(__name__)
 

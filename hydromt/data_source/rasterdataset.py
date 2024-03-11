@@ -20,7 +20,7 @@ from hydromt._typing import (
     TimeRange,
 )
 from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
-from hydromt.data_sources.data_source import DataSource
+from hydromt.data_source.data_source import DataSource
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.drivers.zarr_driver import ZarrDriver
 
@@ -38,7 +38,7 @@ def driver_from_str(driver_str: str, **kwargs) -> RasterDatasetDriver:
     return _KNOWN_DRIVERS[driver_str](**kwargs)
 
 
-class RasterDataSource(DataSource):
+class RasterDatasetSource(DataSource):
     """DataSource class for the RasterDataset type."""
 
     data_type: ClassVar[Literal["RasterDataset"]] = "RasterDataset"

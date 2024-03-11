@@ -25,7 +25,7 @@ from hydromt.data_catalog import (
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
-from hydromt.data_sources import GeoDataSource
+from hydromt.data_source import GeoDataFrameSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis.utils import to_geographic_bbox
 
@@ -99,7 +99,7 @@ def test_parser(
         "uri": f"{root}/to/data.gpkg",
     }
     datasource = _parse_data_source_dict("test", source, root=root)
-    assert isinstance(datasource, GeoDataSource)
+    assert isinstance(datasource, GeoDataFrameSource)
     assert datasource.uri == abspath(source["uri"])
     # TODO: do we want to allow Path objects?
     # # test with Path object

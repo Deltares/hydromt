@@ -5,7 +5,7 @@ import xarray as xr
 from pydantic import ValidationError
 
 from hydromt.data_adapter import RasterDatasetAdapter
-from hydromt.data_sources import RasterDataSource
+from hydromt.data_source import RasterDatasetSource
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 
@@ -21,7 +21,7 @@ def mock_raster_ds_adapter():
 class TestRasterDataSource:
     def test_validators(self, mock_raster_ds_adapter: RasterDatasetAdapter):
         with pytest.raises(ValidationError) as e_info:
-            RasterDataSource(
+            RasterDatasetSource(
                 name="name",
                 uri="uri",
                 data_adapter=mock_raster_ds_adapter,
@@ -40,7 +40,7 @@ class TestRasterDataSource:
         mock_raster_ds_driver: RasterDatasetDriver,
         mock_raster_ds_adapter: RasterDatasetAdapter,
     ):
-        RasterDataSource.model_validate(
+        RasterDatasetSource.model_validate(
             {
                 "name": "zarrfile",
                 "driver": mock_raster_ds_driver,
@@ -51,7 +51,7 @@ class TestRasterDataSource:
         with pytest.raises(
             ValidationError, match="'data_type' must be 'RasterDataset'."
         ):
-            RasterDataSource.model_validate(
+            RasterDatasetSource.model_validate(
                 {
                     "name": "geojsonfile",
                     "data_type": "DifferentDataType",
@@ -68,7 +68,7 @@ class TestRasterDataSource:
         mock_raster_ds_adapter: RasterDatasetAdapter,
         tmp_dir: Path,
     ):
-        source = RasterDataSource(
+        source = RasterDatasetSource(
             root=".",
             name="example_rasterds",
             driver=mock_raster_ds_driver,

@@ -176,7 +176,7 @@ The `DataSource` is responsable for validating the `DataCatalog` entry. It also 
 the soon-to-be introduced `DataAdapter` and `DataDriver` and serves as an entrypoint to
 the data.
 Per HydroMT data type (e.g. `RasterDataset`, `GeoDataFrame`), HydroMT has one
-`DataSource`, e.g. `RasterDatasetDataSource`, `GeoDataFrameDataSource`.
+`DataSource`, e.g. `RasterDatasetSource`, `GeoDataFrameSource`.
 
 MetaDataResolver
 ^^^^^^^^^^^^^^^^
