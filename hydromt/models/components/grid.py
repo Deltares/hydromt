@@ -150,7 +150,7 @@ class GridComponent(ModelComponent):
 
     def read(
         self,
-        data_like: str = "grid/grid.nc",
+        fn: str = "grid/grid.nc",
         **kwargs,
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
