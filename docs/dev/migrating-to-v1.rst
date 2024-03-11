@@ -174,12 +174,12 @@ a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
 methods have been changed to `add_data_from_*`. The functionality of the GridComponent
 has not been changed compared to the GridModel.
 
-+------------------------------+-------------------------------------+
-| v0.x                         | v1                                  |
-+==============================+=====================================+
-| model.set_grid(...)          | grid_component.set(...)             |
-| model.read_grid(...)         | grid_component.read(...)            |
-| model.write_grid(...)        | grid_component.write(...)           |
-| model.setup_grid(...)        | grid_component.create(...)          |
-| model.setup_grid_from_*(...) | grid_component.add_data_from_*(...) |
-+------------------------------+-------------------------------------+
++------------------------------+-------------------------------------------+
+| v0.x                         | v1                                        |
++==============================+===========================================+
+| model.set_grid(...)          | model.grid_component.set(...)             |
+| model.read_grid(...)         | model.grid_component.read(...)            |
+| model.write_grid(...)        | model.grid_component.write(...)           |
+| model.setup_grid(...)        | model.grid_component.create(...)          |
+| model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
++------------------------------+-------------------------------------------+
