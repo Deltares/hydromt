@@ -34,9 +34,9 @@ __all__ = ["GridComponent"]
 class GridComponent(ModelComponent):
     """ModelComponent class for grid components.
 
-    This class is used for setting, creating, writing, and reading grids for a
-    HydroMT model. The grid data in the data property of this class is of the
-    hydromt.gis.raster.RasterDataset type.
+    This class is used for setting, creating, writing, and reading regular grid data for a
+    HydroMT model. The grid component data stored in the ``data`` property of this class is of the
+    hydromt.gis.raster.RasterDataset type which is an extension of xarray.Dataset for regular grid.
     """
 
     def __init__(
