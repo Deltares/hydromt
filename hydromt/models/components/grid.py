@@ -487,7 +487,7 @@ class GridComponent(ModelComponent):
         nodata: Optional[Union[int, float]] = None,
         mask_name: Optional[str] = "mask",
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Adds a grid based on a constant value.
+        """HYDROMT CORE METHOD: Adds data to grid component based on a constant value.
 
         Parametersfr
         ----------
