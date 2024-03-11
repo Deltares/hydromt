@@ -1,10 +1,11 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
+
 import logging
 from typing import Dict, Iterator, List
 
 from hydromt import __version__, _compat
 from hydromt._compat import Distribution, EntryPoint, EntryPoints, entry_points
-from hydromt.models.api import Model
+from hydromt.models.model import Model
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +106,6 @@ def load(ep, logger=logger) -> Model:
 
 
 class ModelCatalog:
-
     """The model catalogue provides access to plugins and their Model classes."""
 
     def __init__(self):

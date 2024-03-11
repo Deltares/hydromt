@@ -18,9 +18,9 @@ from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
-from hydromt.models.api import Model
 from hydromt.models.components.network import NetworkModel
 from hydromt.models.components.vector import VectorModel
+from hydromt.models.model import Model
 
 dask_config.set(scheduler="single-threaded")
 

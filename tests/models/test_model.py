@@ -23,7 +23,7 @@ from hydromt.models import (
     VectorModel,
     plugins,
 )
-from hydromt.models.api import _check_data
+from hydromt.models.model import _check_data
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 

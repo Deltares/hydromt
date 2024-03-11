@@ -9,9 +9,9 @@ import pytest
 import xarray as xr
 
 from hydromt.data_catalog import DataCatalog
-from hydromt.models.api import Model
 from hydromt.models.components import ModelRegionComponent
 from hydromt.models.components.grid import GridComponent
+from hydromt.models.model import Model
 from hydromt.models.root import ModelRoot
 
 logger = logging.getLogger(__name__)

@@ -1,4 +1,5 @@
 """Grid Component."""
+
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -16,9 +17,9 @@ from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
-from hydromt.models.api import Model
 from hydromt.models.components.base import ModelComponent
 from hydromt.models.components.region import _parse_region
+from hydromt.models.model import Model
 from hydromt.workflows.basin_mask import get_basin_geometry
 from hydromt.workflows.grid import (
     grid_from_constant,

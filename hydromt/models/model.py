@@ -12,7 +12,7 @@ from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -30,16 +30,21 @@ from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
 from hydromt.models.components import ModelRegionComponent
+from hydromt.models.components.base import ModelComponent
 from hydromt.models.root import ModelRoot
 
 __all__ = ["Model"]
 
 logger = logging.getLogger(__name__)
+T = TypeVar("T", bound=ModelComponent)
 
 
 class Model(object, metaclass=ABCMeta):
+    """
+    General and basic API for models in HydroMT.
 
-    """General and basic API for models in HydroMT."""
+    Inherit from this class to pre-define mandatory components in the model.
+    """
 
     _DATADIR = ""  # path to the model data folder
     _NAME: str = "modelname"
