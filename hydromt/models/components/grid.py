@@ -603,7 +603,7 @@ class GridComponent(ModelComponent):
         rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid component by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
