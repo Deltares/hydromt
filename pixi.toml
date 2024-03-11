@@ -220,14 +220,14 @@ notebook = "*"
 
 [environments]
 default = { features = [
-  "py311",
+  "py39",
   "io",
   "extra",
   "dev",
   "test",
   "doc",
   "examples",
-], solve-group = "py311" }
+], solve-group = "py39" }
 full-py311 = { features = [
   "py311",
   "io",
