@@ -15,10 +15,10 @@ from shapely.geometry import box
 
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
-from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
+from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
+from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
 from hydromt.gis import raster, utils, vector
-from hydromt.metadata_resolvers import MetaDataResolver
+from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.models import MODELS
 from hydromt.models.api import Model
 from hydromt.models.components.grid import GridModel

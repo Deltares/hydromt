@@ -8,7 +8,7 @@ from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom
 from hydromt._typing.error import NoDataStrategy
-from hydromt.drivers import BaseDriver
+from hydromt.driver import BaseDriver
 
 logger: Logger = getLogger(__name__)
 

@@ -1,4 +1,4 @@
-from hydromt.metadata_resolvers.convention_resolver import ConventionResolver
+from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 
 class TestConventionResolver:

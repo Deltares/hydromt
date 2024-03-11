@@ -3,8 +3,8 @@ from typing import Any
 
 from pydantic import BaseModel, field_validator
 
-from hydromt.metadata_resolvers import MetaDataResolver
-from hydromt.metadata_resolvers.resolver_plugin import RESOLVERS
+from hydromt.metadata_resolver import MetaDataResolver
+from hydromt.metadata_resolver.resolver_plugin import RESOLVERS
 
 
 class BaseDriver(BaseModel):

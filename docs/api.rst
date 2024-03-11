@@ -129,6 +129,70 @@ GeoDataFrame
    data_source.geodataframe.GeoDataFrameSource.get_bbox
    data_source.geodataframe.GeoDataFrameSource.detect_bbox
 
+MetaDataResolver
+================
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   metadata_resolver.metadata_resolver.MetaDataResolver
+   metadata_resolver.metadata_resolver.MetaDataResolver.resolve
+
+ConventionResolver
+------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   metadata_resolver.convention_resolver.ConventionResolver
+   metadata_resolver.convention_resolver.ConventionResolver.resolve
+
+Driver
+======
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   driver.base_driver.BaseDriver
+
+RasterDataset
+-------------
+
+.. autosummary::
+   :toctree: _generated
+   driver.rasterdataset_driver.RasterDatasetDriver
+   driver.rasterdataset_driver.RasterDatasetDriver.read
+
+ZarrDriver
+^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+   driver.zarr_driver.ZarrDriver
+   driver.zarr_driver.ZarrDriver.read
+
+PyogrioDriver
+^^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+   driver.pyogrio_driver.PyogrioDriver
+   driver.pyogrio_driver.PyogrioDriver.read
+
+GeoDataFrame
+------------
+
+.. autosummary::
+   :toctree: _generated
+   driver.geodataframe_driver.GeoDataFrameDriver
+   driver.geodataframe_driver.GeoDataFrameDriver.read
+
 DataAdapter
 ===========
 
@@ -150,8 +214,6 @@ RasterDataset
 
    data_adapter.RasterDatasetAdapter
    data_adapter.RasterDatasetAdapter.transform
-   data_adapter.RasterDatasetAdapter.to_dict
-   data_adapter.RasterDatasetAdapter.to_file
    data_adapter.RasterDatasetAdapter.to_stac_catalog
 
 GeoDataset
@@ -179,8 +241,6 @@ GeoDataFrame
 
    data_adapter.GeoDataFrameAdapter
    data_adapter.GeoDataFrameAdapter.get_data
-   data_adapter.GeoDataFrameAdapter.to_dict
-   data_adapter.GeoDataFrameAdapter.to_file
    data_adapter.GeoDataFrameAdapter.to_stac_catalog
 
 DataFrame

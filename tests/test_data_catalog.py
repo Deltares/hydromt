@@ -26,7 +26,7 @@ from hydromt.data_catalog import (
     _parse_data_source_dict,
 )
 from hydromt.data_source import GeoDataFrameSource
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis.utils import to_geographic_bbox
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")

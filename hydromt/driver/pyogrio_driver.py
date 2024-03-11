@@ -9,7 +9,7 @@ from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom
 from hydromt._typing.error import NoDataStrategy
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)

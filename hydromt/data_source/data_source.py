@@ -13,7 +13,7 @@ from hydromt._typing import DataType
 from hydromt.data_adapter.caching import _uri_validator
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.harmonization_settings import HarmonizationSettings
-from hydromt.drivers import BaseDriver
+from hydromt.driver import BaseDriver
 
 
 class DataSource(BaseModel):
@@ -51,6 +51,8 @@ class DataSource(BaseModel):
             }
         )
         return sum
+
+    # TODO: def to_file(self, **query_params) https://github.com/Deltares/hydromt/issues/840
 
     @model_validator(mode="wrap")
     @classmethod
