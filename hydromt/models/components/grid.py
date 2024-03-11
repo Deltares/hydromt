@@ -489,7 +489,7 @@ class GridComponent(ModelComponent):
     ) -> List[str]:
         """HYDROMT CORE METHOD: Adds data to grid component based on a constant value.
 
-        Parametersfr
+        Parameters
         ----------
         constant: int, float
             Constant value to fill grid with.
