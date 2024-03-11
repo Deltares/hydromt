@@ -9,10 +9,22 @@ import shutil
 import typing
 import warnings
 from abc import ABCMeta
+from collections import OrderedDict
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import geopandas as gpd
 import numpy as np
@@ -135,12 +147,10 @@ class Model(object, metaclass=ABCMeta):
         self._staticgeoms = None
 
         # file system
-        if root is None:
-            self.root: ModelRoot = ModelRoot(".", mode=mode)
-        else:
-            self.root: ModelRoot = ModelRoot(root, mode=mode)
+        self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
 
-        self.region: ModelRegionComponent = ModelRegionComponent(self)
+        self._components: OrderedDict[str, ModelComponent] = OrderedDict()
+        self.add_component("region", ModelRegionComponent(self))
 
         self._defered_file_closes = []
 
@@ -149,6 +159,25 @@ class Model(object, metaclass=ABCMeta):
         self.logger.info(
             f"Initializing {self._NAME} model from {dist_name} (v{version})."
         )
+
+    def add_component(self, name: str, component: ModelComponent) -> None:
+        """Add a component to the model. Will raise an error if the component already exists."""
+        if name in self._components:
+            raise ValueError(f"Component {name} already exists in the model.")
+        self._components[name] = component
+
+    def get_component(self, name: str, _: Type[T]) -> T:
+        """Get a component from the model. Will raise an error if the component does not exist."""
+        return cast(T, self._components[name])
+
+    def __getattr__(self, name: str) -> ModelComponent:
+        """Get a component from the model. Will raise an error if the component does not exist."""
+        return self._components[name]
+
+    @property
+    def region(self) -> ModelRegionComponent:
+        """Return the model region component."""
+        return self.get_component("region", ModelRegionComponent)
 
     @_classproperty
     def api(cls) -> Dict:
@@ -263,8 +292,6 @@ class Model(object, metaclass=ABCMeta):
         # then loop over other methods
         for method in opt:
             # if any write_* functions are present in opt, skip the final self.write()
-            if method.startswith("write_"):
-                write = False
             kwargs = {} if opt[method] is None else opt[method]
             self._run_log_method(method, **kwargs)
 
@@ -276,7 +303,7 @@ class Model(object, metaclass=ABCMeta):
         self,
         model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
-        opt: Optional[Dict] = None,
+        opt: Optional[list[dict[str, Any]]] = None,
         forceful_overwrite: bool = False,
     ):
         r"""Single method to update a model based the settings in `opt`.
@@ -318,7 +345,6 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        opt = opt or {}
         opt = self._check_get_opt(opt)
 
         # read current model
@@ -328,32 +354,20 @@ class Model(object, metaclass=ABCMeta):
                     '"model_out" directory required when updating in "read-only" mode'
                 )
             self.read()
-            if forceful_overwrite:
-                self.root.set(model_out, mode="w+")
-            else:
-                self.root.set(model_out, mode="w")
+            mode = "w+" if forceful_overwrite else "w"
+            self.root.set(model_out, mode=mode)
 
         # check if model has a region
         if self.region.data is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
-        # remove CLI_ARGS method from options and throw warning
-        method = self._CLI_ARGS["region"]
-        if method in opt:
-            opt.pop(method)  # remove from opt
-            self.logger.warning(f'"{method}" can only be called when building a model.')
-
         # loop over other methods from config file
-        for method in opt:
-            # if any write_* functions are present in opt, skip the final self.write()
-            if "write" in method:
-                write = False
-            kwargs = {} if opt[method] is None else opt[method]
-            self._run_log_method(method, **kwargs)
-
-        # write
-        if write:
-            self.write()
+        for entry in opt:
+            method_name = entry["step"]
+            component_name = entry["on"]
+            # Call the function `method_name` on the right component.
+            # The arguments come from `with` in the options.
+            getattr(self._components[component_name], method_name)(**entry["with"])
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
@@ -367,78 +381,11 @@ class Model(object, metaclass=ABCMeta):
             raise IOError("Model opened in write-only mode")
 
     # I/O
-    def read(
-        self,
-        components: List = None,
-    ) -> None:
-        """Read the complete model schematization and configuration from model files.
-
-        Parameters
-        ----------
-        components : List, optional
-            List of model components to read, each should have an associated
-            read_<component> method. By default ['config', 'maps', 'staticmaps',
-            'geoms', 'forcing', 'states', 'results']
-        """
-        if components is None:
-            components = [
-                "config",
-                "staticmaps",
-                "maps",
-                "region",
-                "tables",
-                "geoms",
-                "forcing",
-                "states",
-                "results",
-            ]
+    def read(self) -> None:
+        """Read the complete model schematization and configuration from model files."""
         self.logger.info(f"Reading model data from {self.root.path}")
-        for component in components:
-            if hasattr(self, f"read_{component}"):
-                getattr(self, f"read_{component}")()
-            elif hasattr(self, component) and hasattr(getattr(self, component), "read"):
-                getattr(self, component).read()
-            else:
-                raise AttributeError(
-                    f"{type(self).__name__} does not have read_{component} or a component of that name with a read attr"
-                )
-
-    def write(
-        self,
-        components: Optional[List] = None,
-    ) -> None:
-        """Write the complete model schematization and configuration to model files.
-
-        Parameters
-        ----------
-        components : List, optional
-            List of model components to write, each should have an
-            associated write_<component> method. By default ['config', 'maps',
-            'staticmaps', 'geoms', 'forcing', 'states']
-        """
-        if components is None:
-            components = [
-                "staticmaps",
-                "maps",
-                "tables",
-                "geoms",
-                "region",
-                "forcing",
-                "states",
-                "config",
-            ]
-        self.logger.info(f"Writing model data to {self.root.path}")
-        for component in components:
-            if hasattr(self, f"write_{component}"):
-                getattr(self, f"write_{component}")()
-            elif hasattr(self, component) and hasattr(
-                getattr(self, component), "write"
-            ):
-                getattr(self, component).write()
-            else:
-                raise AttributeError(
-                    f"{type(self).__name__} does not have write_{component} or a component of that name with a write attr"
-                )
+        for c in self._components.values():
+            c.read()
 
     def write_data_catalog(
         self,

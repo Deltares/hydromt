@@ -1,5 +1,6 @@
 """Provides the base class for model components."""
 
+from abc import ABC, abstractmethod
 from logging import Logger
 from typing import TYPE_CHECKING, cast
 from weakref import ReferenceType, ref
@@ -11,9 +12,10 @@ if TYPE_CHECKING:
     from hydromt.models import Model
 
 
-class ModelComponent:
+class ModelComponent(ABC):
     """Abstract base class for ModelComponent."""
 
+    # TODO: Add config information, like file name.
     def __init__(self, model: "Model"):
         self._model_ref: ReferenceType["Model"] = ref(model)
 
@@ -36,3 +38,8 @@ class ModelComponent:
     def model_root(self) -> ModelRoot:
         """Return the root of the model this component is associated with."""
         return self.model.root
+
+    @abstractmethod
+    def read(self):
+        """Read the file into the component."""
+        ...
