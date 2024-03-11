@@ -1,3 +1,4 @@
+from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -34,6 +35,11 @@ DATADIR = join(dirname(abspath(__file__)), "data")
 def tmp_dir() -> Generator[Path, None, None]:
     with TemporaryDirectory() as tempdirname:
         yield Path(tempdirname)
+
+
+@pytest.fixture(scope="session")
+def root() -> str:
+    return abspath(sep)
 
 
 @pytest.fixture()

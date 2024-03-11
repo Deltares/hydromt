@@ -37,6 +37,7 @@ class TestDataSource:
     def test_summary(
         self,
         mock_geodf_driver: GeoDataFrameDriver,
+        root: str,
     ):
         class MockGeoDataFrameAdapter(GeoDataFrameAdapter):
             def transform(self, ds, **kwargs):
@@ -48,7 +49,7 @@ class TestDataSource:
 
         submodel: DataSource = DataSource.model_validate(
             {
-                "root": "/",
+                "root": root,
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",
                 "driver": mock_geodf_driver,
@@ -58,6 +59,6 @@ class TestDataSource:
         )
         sum: Dict[str, Any] = submodel.summary()
         assert sum["data_type"] == "GeoDataFrame"
-        assert sum["uri"] == "/test_uri"
+        assert sum["uri"] == f"{root}test_uri"
         assert sum["driver"] == "MockGeoDataFrameDriver"
         assert sum["custom_meta"] == "test"

@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class HarmonizationSettings(BaseModel):
     """Settings used to harmonize data."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, protected_namespaces=())
 
     unit_add: Dict[str, Any] = Field(default_factory=dict)
     unit_mult: Dict[str, Any] = Field(default_factory=dict)
