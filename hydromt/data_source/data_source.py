@@ -11,6 +11,7 @@ from pydantic import (
 
 from hydromt._typing import DataType
 from hydromt.data_adapter.caching import _uri_validator
+from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.harmonization_settings import HarmonizationSettings
 from hydromt.drivers import BaseDriver
 
@@ -25,6 +26,31 @@ class DataSource(BaseModel):
     the driver that the data should be read with, and is responsible for initializing
     this driver.
     """
+
+    name: str
+    uri: str
+    data_adapter: DataAdapterBase
+    driver: BaseDriver
+    data_type: ClassVar[DataType]
+    root: Optional[str] = Field(default=None)
+    harmonization: HarmonizationSettings = Field(default_factory=HarmonizationSettings)
+    version: Optional[str] = Field(default=None)
+    provider: Optional[str] = Field(default=None)
+    driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
+    resolver_kwargs: Dict[str, Any] = Field(default_factory=dict)
+    crs: Optional[int] = Field(default=None)
+
+    def summary(self) -> Dict[str, Any]:
+        """Return a summary of the DataSource."""
+        sum: Dict[str, Any] = self.model_dump(include={"uri"})
+        sum.update(
+            {
+                "data_type": self.__class__.data_type,
+                "driver": self.driver.__repr_name__(),
+                **self.data_adapter.harmonization_settings.meta,
+            }
+        )
+        return sum
 
     @model_validator(mode="wrap")
     @classmethod
@@ -70,19 +96,6 @@ class DataSource(BaseModel):
         if not _uri_validator(self.uri):
             self.uri = _abs_path(self.root, self.uri)
         return self
-
-    root: Optional[str] = Field(default=None)
-    name: str
-    uri: str
-    data_type: ClassVar[DataType]
-    driver: BaseDriver
-    harmonization: HarmonizationSettings = Field(default_factory=HarmonizationSettings)
-    # data_adapter: Any
-    version: Optional[str] = Field(default=None)
-    provider: Optional[str] = Field(default=None)
-    driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
-    resolver_kwargs: Dict[str, Any] = Field(default_factory=dict)
-    crs: Optional[int] = Field(default=None)
 
 
 def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
