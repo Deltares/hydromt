@@ -591,6 +591,8 @@ class XRasterBase(XGeoBase):
                 )
             ):
                 dy = -1 * dy
+        if isinstance(dx, dask.array.Array):
+            dx, dy = dx.compute(), dy.compute()
         self._res = dx, dy
         return dx, dy
 
@@ -649,6 +651,8 @@ class XRasterBase(XGeoBase):
                 b = c * math.cos(beta - alpha)
                 x0 = xs[0, 0] - np.sign(dy) * a
                 y0 = ys[0, 0] - np.sign(dy) * b
+        if isinstance(x0, dask.array.Array):  # compute if lazy
+            x0, y0 = x0.compute(), y0.compute()
         self._origin = x0, y0
         return x0, y0
 
@@ -1244,10 +1248,10 @@ class XRasterBase(XGeoBase):
                 xs, ys = zip(*gdf_bbox.dissolve().boundary[0].coords[:])
         cs, rs = ~self.transform * (np.array(xs), np.array(ys))
         # use round to get integer slices
-        c0 = max(int(round(cs.min() - buffer)), 0)
-        r0 = max(int(round(rs.min() - buffer)), 0)
-        c1 = int(round(cs.max() + buffer))
-        r1 = int(round(rs.max() + buffer))
+        c0 = max(int(np.round(cs.min() - buffer)), 0)
+        r0 = max(int(np.round(rs.min() - buffer)), 0)
+        c1 = int(np.round(cs.max() + buffer))
+        r1 = int(np.round(rs.max() + buffer))
         return self.clip(slice(c0, c1), slice(r0, r1))
 
     def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
@@ -2286,9 +2290,9 @@ class RasterDataArray(XRasterBase):
         kwargs.update(dict(method=method, extrapolate=extrapolate))
         if dim0:
             interp_data = np.empty(self._obj.shape, dtype=self._obj.dtype)
-            for i, (_, sub_xds) in enumerate(self._obj.groupby(dim0)):
+            for i, (_, sub_xds) in enumerate(self._obj.groupby(dim0, squeeze=False)):
                 interp_data[i, ...] = self._interpolate_na(
-                    sub_xds.load().data, **kwargs
+                    sub_xds.load().data.squeeze(), **kwargs
                 )
         else:
             interp_data = self._interpolate_na(self._obj.load().data, **kwargs)

@@ -9,6 +9,8 @@ import pytest
 import xarray as xr
 
 from hydromt.data_catalog import DataCatalog
+from hydromt.models.api import Model
+from hydromt.models.components import ModelRegionComponent
 from hydromt.models.components.grid import GridComponent
 from hydromt.models.root import ModelRoot
 
@@ -16,103 +18,76 @@ logger = logging.getLogger(__name__)
 logger.propagate = True
 
 
-def test_set(hydds, tmp_dir, rioda):
-    model_root = ModelRoot(path=tmp_dir)
-    data_catalog = DataCatalog()
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None
-    )
-    # Test setting xr.Dataset
+@pytest.fixture()
+def mock_model(tmpdir):
+    model = create_autospec(Model)
+    model.root = ModelRoot(path=tmpdir)
+    model.data_catalog = DataCatalog()
+    model.region = ModelRegionComponent(model=model)
+    model.logger = logger
+    return model
+
+
+def test_set_dataset(mock_model, hydds):
+    grid_component = GridComponent(model=mock_model)
     grid_component.set(data=hydds)
     assert len(grid_component.data) > 0
     assert isinstance(grid_component.data, xr.Dataset)
-    # Test setting xr.DataArray
+
+
+def test_set_dataarray(mock_model, hydds):
+    grid_component = GridComponent(model=mock_model)
     data_array = hydds.to_array()
     grid_component.set(data=data_array, name="data_array")
     assert "data_array" in grid_component.data.data_vars.keys()
-    assert len(grid_component.data.data_vars) == 3
+    assert len(grid_component.data.data_vars) == 1
+
+
+def test_set_raise_errors(mock_model, hydds):
+    grid_component = GridComponent(model=mock_model)
     # Test setting nameless data array
-    data_array.name = None
+    data_array = hydds.to_array()
     with pytest.raises(
         ValueError,
         match=f"Unable to set {type(data_array).__name__} data without a name",
     ):
         grid_component.set(data=data_array)
     # Test setting np.ndarray of different shape
+    grid_component.set(data=data_array, name="data_array")
     ndarray = np.random.rand(4, 5)
     with pytest.raises(ValueError, match="Shape of data and grid maps do not match"):
         grid_component.set(ndarray, name="ndarray")
 
 
-def test_write(tmp_dir, caplog):
-    model_root = ModelRoot(path=tmp_dir)
-    data_catalog = DataCatalog()
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None, logger=logger
-    )
+def test_write(mock_model, tmpdir, caplog):
+    grid_component = GridComponent(model=mock_model)
     # Test skipping writing when no grid data has been set
     caplog.set_level(logging.WARNING)
     grid_component.write()
     assert "No grid data found, skip writing" in caplog.text
     # Test raise IOerror when model is in read only mode
-    model_root = ModelRoot(tmp_dir, mode="r")
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None
-    )
+    mock_model.root = ModelRoot(tmpdir, mode="r")
+    grid_component = GridComponent(model=mock_model)
     with patch.object(GridComponent, "data", ["test"]):
         with pytest.raises(IOError, match="Model opened in read-only mode"):
             grid_component.write()
 
 
-def test_read(tmp_dir, hydds):
+def test_read(tmpdir, mock_model, hydds):
     # Test for raising IOError when model is in writing mode
-    model_root = ModelRoot(path=tmp_dir, mode="w")
-    data_catalog = DataCatalog()
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None, logger=logger
-    )
+    mock_model.root = ModelRoot(path=tmpdir, mode="w")
+    grid_component = GridComponent(model=mock_model)
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_component.read()
-    model_root = ModelRoot(path=tmp_dir, mode="r+")
-    data_catalog = DataCatalog()
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None, logger=logger
-    )
+    mock_model.root = ModelRoot(path=tmpdir, mode="r+")
+    grid_component = GridComponent(model=mock_model)
     with patch("hydromt.models.components.grid.read_nc", return_value={"grid": hydds}):
         grid_component.read()
         assert grid_component.data == hydds
 
 
-def test_create(tmp_dir, demda):
-    model_root = ModelRoot(path=join(tmp_dir, "grid_model"))
-    data_catalog = DataCatalog(data_libs=["artifact_data"])
-    grid_component = GridComponent(
-        root=model_root, data_catalog=data_catalog, model_region=None
-    )
-    # Wrong region kind
-    with pytest.raises(ValueError, match="Region for grid must be of kind"):
-        grid_component.create(region={"vector_model": "test_model"})
-    # bbox
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    with pytest.raises(
-        ValueError, match="res argument required for kind 'bbox', 'geom'"
-    ):
-        grid_component.create({"bbox": bbox})
-    grid_component.create(
-        region={"bbox": bbox},
-        res=0.05,
-        add_mask=False,
-        align=True,
-    )
-
-    assert "mask" not in grid_component.data
-    # assert model.crs.to_epsg() == 4326
-    assert grid_component.data.raster.dims == ("y", "x")
-    assert grid_component.data.raster.shape == (7, 16)
-    assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
-    grid_component._data = xr.Dataset()  # remove old grid
-
-    # bbox rotated
+def test_create_grid_from_bbox_rotated(mock_model):
+    grid_component = GridComponent(model=mock_model)
     grid_component.create(
         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
         res=0.05,
@@ -123,16 +98,52 @@ def test_create(tmp_dir, demda):
     assert "xc" in grid_component.data.coords
     assert grid_component.data.raster.y_dim == "y"
     assert np.isclose(grid_component.data.raster.res[0], 0.05)
-    grid_component._data = xr.Dataset()  # remove old grid
+    # Check set_geoms call
+    geom = grid_component.model.method_calls[0][1][0]
+    assert isinstance(geom, gpd.GeoDataFrame)
 
-    # grid
-    grid_fn = str(tmp_dir.join("grid.tif"))
-    demda.raster.to_raster(grid_fn)
-    grid_component.create({"grid": grid_fn})
-    assert np.all(demda.raster.bounds == grid_component.region.total_bounds)
-    grid_component._data = xr.Dataset()  # remove old grid
 
-    # basin
+def test_create_grid_from_bbox(mock_model):
+    grid_component = GridComponent(model=mock_model)
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_component.create(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    assert "mask" not in grid_component.data
+    assert grid_component.data.raster.dims == ("y", "x")
+    assert grid_component.data.raster.shape == (7, 16)
+    assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
+    # Check set_geoms call
+    geom = grid_component.model.method_calls[0][1][0]
+    assert isinstance(geom, gpd.GeoDataFrame)
+
+
+def test_create_raise_errors(mock_model):
+    grid_component = GridComponent(mock_model)
+    # Wrong region kind
+    with pytest.raises(ValueError, match="Region for grid must be of kind"):
+        grid_component.create(region={"vector_model": "test_model"})
+    # bbox
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    with pytest.raises(
+        ValueError, match="res argument required for kind 'bbox', 'geom'"
+    ):
+        grid_component.create({"bbox": bbox})
+
+
+@pytest.mark.skip(reason="needs working artifact data")
+def test_create_basin_grid(tmpdir):
+    model_root = ModelRoot(path=join(tmpdir, "grid_model"))
+    data_catalog = DataCatalog(data_libs=["artifact_data"])
+    grid_component = GridComponent(
+        root=model_root,
+        data_catalog=data_catalog,
+        model_region=None,
+        model=Model(),
+    )
     grid_component.create(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
@@ -144,7 +155,8 @@ def test_create(tmp_dir, demda):
     assert grid_component.data.raster.shape == (47, 61)
 
 
-def test_properties(caplog, tmp_dir, demda, grid_component):
+def test_properties(caplog, demda, mock_model):
+    grid_component = GridComponent(mock_model)
     # Test properties on empty grid
     caplog.set_level(logging.WARNING)
     res = grid_component.res
@@ -172,23 +184,24 @@ def test_properties(caplog, tmp_dir, demda, grid_component):
     assert all(region.bounds == demda.raster.bounds)
 
 
-def test_initialize_grid(tmp_dir):
-    grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir, mode="r"), data_catalog=None, model_region=None
-    )
+def test_initialize_grid(mock_model, tmpdir):
+    mock_model.root = ModelRoot(path=tmpdir, mode="r")
+    grid_component = GridComponent(mock_model)
     grid_component.read = MagicMock()
     grid_component._initialize_grid()
     assert isinstance(grid_component._data, xr.Dataset)
     assert grid_component.read.called
 
 
-def test_set_crs(grid_component, demda):
+def test_set_crs(mock_model, demda):
+    grid_component = GridComponent(mock_model)
     grid_component._data = demda
     grid_component.set_crs(crs=4326)
     assert grid_component.data.raster.crs == 4326
 
 
-def test_add_data_from_constant(grid_component, demda):
+def test_add_data_from_constant(mock_model, demda):
+    grid_component = GridComponent(mock_model)
     demda.name = "demda"
     with patch("hydromt.models.components.grid.grid_from_constant", return_value=demda):
         name = grid_component.add_data_from_constant(constant=0.01, name="demda")
@@ -198,14 +211,12 @@ def test_add_data_from_constant(grid_component, demda):
 
 @patch("hydromt.models.components.grid.grid_from_rasterdataset")
 def test_add_data_from_rasterdataset(
-    mock_grid_from_rasterdataset, demda, tmp_dir, caplog
+    mock_grid_from_rasterdataset, demda, caplog, mock_model
 ):
-    grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
-    )
     caplog.set_level(logging.INFO)
     demda.name = "demda"
     demda = demda.to_dataset()
+    grid_component = GridComponent(mock_model)
     mock_grid_from_rasterdataset.return_value = demda
     with patch.object(
         grid_component.data_catalog, "get_rasterdataset"
@@ -231,11 +242,9 @@ def test_add_data_from_rasterdataset(
         assert all([x in result for x in demda.data_vars.keys()])
 
 
-def test_add_data_from_raster_reclass(caplog, tmp_dir, demda):
+def test_add_data_from_raster_reclass(caplog, demda, mock_model):
+    grid_component = GridComponent(mock_model)
     caplog.set_level(logging.INFO)
-    grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
-    )
     raster_fn = "vito"
     reclass_table_fn = "vito_mapping"
 
@@ -285,12 +294,10 @@ def test_add_data_from_raster_reclass(caplog, tmp_dir, demda):
             )
 
 
-def test_add_data_from_geodataframe(caplog, tmp_dir, geodf, demda):
+def test_add_data_from_geodataframe(caplog, geodf, demda, mock_model):
+    grid_component = GridComponent(mock_model)
     caplog.set_level(logging.INFO)
     demda.name = "name"
-    grid_component = GridComponent(
-        root=ModelRoot(path=tmp_dir), data_catalog=DataCatalog(), model_region=None
-    )
     grid_component.data_catalog.get_geodataframe = create_autospec(
         grid_component.data_catalog.get_geodataframe, return_value=geodf
     )

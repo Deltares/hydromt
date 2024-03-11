@@ -26,7 +26,7 @@ rapidly becoming available at increasingly high resolutions, might be challengin
 Furthermore, analyzing model schematization and results from different models,
 which often use model-specific peculiar data formats, can be time consuming.
 This package aims to make the model building process **fast**, **modular** and **reproducible**
-by configuring the model building process from a single *ini* configuration file
+by configuring the model building process from a single *yaml* configuration file
 and **model- and data-agnostic** through a common model and data interface.
 
 

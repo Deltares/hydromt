@@ -595,16 +595,23 @@ class RasterDatasetAdapter(DataAdapter):
 
         # clip with bbox
         if bbox is not None:
+            # check if bbox is fully covered
             bbox_str = ", ".join([f"{c:.3f}" for c in bbox])
+
+            def _lt_or_close(a: float, b: float) -> bool:
+                return np.isclose(a, b) or a < b
+
+            w, s, e, n = ds.raster.bounds
+
+            if not any(
+                map(_lt_or_close, (w, s, bbox[2], bbox[3]), (bbox[0], bbox[1], e, n))
+            ):
+                logger.warning(
+                    f"Dataset [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
+                )
+
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
-            # if np.any(np.array(ds.raster.shape) < 2):
-            # check if bbox is fully covered
-            w, s, e, n = ds.raster.bounds
-            if not (w <= bbox[0] and s <= bbox[1] and e >= bbox[2] and n >= bbox[3]):
-                logger.warning(
-                    f"Dataset does [{w}, {s}, {e}, {n}] does not fully cover bbox [{bbox_str}]"
-                )
 
         if has_no_data(ds):
             return None

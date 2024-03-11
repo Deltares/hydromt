@@ -70,10 +70,6 @@ arg_root = click.argument(
     "MODEL_ROOT",
     type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
 )
-arg_baseroot = click.argument(
-    "BASEMODEL_ROOT",
-    type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
-)
 
 region_opt = click.option(
     "-r",
@@ -137,13 +133,13 @@ cache_opt = click.option(
 
 
 @click.group()
-@click.version_option(__version__, message="hydroMT version: %(version)s")
+@click.version_option(__version__, message="HydroMT version: %(version)s")
 @click.option(
     "--models",
     default=False,
     is_flag=True,
     is_eager=True,
-    help="Print availabe model plugins and exit.",
+    help="Print available model plugins and exit.",
     callback=print_models,
 )
 @click.pass_context
@@ -191,10 +187,9 @@ def build(
 
     To build a wflow model for a subbasin using a point coordinates snapped to cells
     with upstream area >= 50 km2
-    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.ini  -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
-
+    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
     To build a sfincs model based on a bbox
-    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.ini  -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
+    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml  -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -257,7 +252,7 @@ def build(
     "-c",
     "--components",
     multiple=True,
-    help="Model methods from ini file to run",
+    help="Model methods from configuration file to run",
 )
 @opt_cli
 @data_opt
@@ -293,9 +288,9 @@ def update(
     Update (overwrite!) landuse-landcover based maps in a Wflow model:
     hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
 
-    Update Wflow model components outlined in an .ini configuration file and
+    Update Wflow model components outlined in an .yml configuration file and
     write the model to a directory:
-    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.ini  -d /path/to/data_catalog.yml -v
+    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     # logger
     mode = "r+" if model_root == model_out else "r"
@@ -367,7 +362,7 @@ def check(
     """
     Verify that provided data catalog and config files are in the correct format.
 
-    Additionnaly region bbox and geom can also be validated.
+    Additionally region bbox and geom can also be validated.
 
     Example usage:
     --------------
@@ -440,10 +435,12 @@ def check(
     "-s",
     "--source",
     multiple=True,
+    help="Name of the data source to export.",
 )
 @click.option(
     "-t",
     "--time-tuple",
+    help="Time tuple as a list of two strings, e.g. ['2010-01-01', '2022-12-31']",
 )
 @region_opt
 @export_dest_path
@@ -608,7 +605,8 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
 
     If the existing model contains forcing, they will also be clipped to the new model.
 
-    For options to build wflow models see:
+    Example usage:
+    --------------
 
     Example usage to clip a wflow model for a subbasin derived from point coordinates
     snapped to cells with upstream area >= 50 km2
@@ -620,7 +618,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     Example usage basins whose outlets are inside a geometry
     hydromt clip wflow /path/to/model_root /path/to/model_destination "{'outlet': 'geometry.geojson'}"
 
-    All available option in the clip_staticmaps function help.
+    All available option in the clip_grid function help.
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -636,8 +634,8 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         mod = MODELS.load(model)(root=model_root, mode="r", logger=logger)
         logger.info("Reading model to clip")
         mod.read()
-        mod.set_root(model_destination, mode="w")
-        logger.info("Clipping staticmaps")
+        mod.root.set(model_destination, mode="w")
+        logger.info("Clipping grid")
         mod.clip_grid(region)
         logger.info("Clipping forcing")
         mod.clip_forcing()

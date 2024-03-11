@@ -7,7 +7,6 @@ from ast import literal_eval
 from os.path import isfile
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
-from warnings import warn
 
 import click
 import yaml
@@ -19,9 +18,8 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["parse_json", "parse_config", "parse_opt"]
 
+
 ### CLI callback methods ###
-
-
 def parse_opt(ctx, param, value):
     """Parse extra cli options.
 
@@ -85,20 +83,12 @@ def parse_json(ctx, param, value: str) -> Dict[str, Any]:
 
 
 ### general parsing methods ##
-
-
 def parse_config(
     path: Optional[Union[Path, str]] = None, opt_cli: Optional[Dict] = None
 ) -> Dict:
-    """Parse config from ini `path` and combine with command line options `opt_cli`."""
+    """Parse config from `path` and combine with command line options `opt_cli`."""
     opt = {}
     if path is not None and isfile(path):
-        if str(path).endswith(".ini"):
-            warn(
-                "Support for .ini configuration files will be deprecated",
-                PendingDeprecationWarning,
-                stacklevel=2,
-            )
         opt = configread(path, abs_path=True, skip_abspath_sections=["setup_config"])
     elif path is not None:
         raise IOError(f"Config not found at {path}")
@@ -117,7 +107,7 @@ def parse_config(
     return opt
 
 
-def parse_export_config_yaml(ctx, param, value) -> Dict:
+def parse_export_config_yaml(ctx, param, value) -> Dict[str, Any]:
     if value:
         with open(value, "r") as stream:
             yml = yaml.load(stream, Loader=yaml.FullLoader)

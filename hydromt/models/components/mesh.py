@@ -1,6 +1,6 @@
 """Mesh component."""
 import os
-from logging import Logger, getLogger
+from logging import getLogger
 from os.path import dirname, isdir, join
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -12,11 +12,10 @@ import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.models.components.model_component import ModelComponent
-from hydromt.models.model_utils import read_nc
-from hydromt.models.root import ModelRoot
+from hydromt.io.readers import read_nc
+from hydromt.models.api import Model
+from hydromt.models.components.base import ModelComponent
 from hydromt.workflows.mesh import (
     create_mesh2d,
     mesh2d_from_raster_reclass,
@@ -30,19 +29,8 @@ logger = getLogger(__name__)
 class MeshComponent(ModelComponent):
     """ModelComponent class for mesh components."""
 
-    def __init__(
-        self,
-        root: ModelRoot,
-        data_catalog: DataCatalog,
-        model_region=None,
-        logger: Logger = logger,
-    ):
-        super().__init__(
-            root=root,
-            data_catalog=data_catalog,
-            model_region=model_region,
-            logger=logger,
-        )
+    def __init__(self, model: Model):
+        super().__init__(model=model)
         self._data = None
 
     def set(
@@ -124,10 +112,10 @@ class MeshComponent(ModelComponent):
         if self.data is None:
             self.logger.debug("No mesh data found, skip writing.")
             return
-        if not self.root.is_writing_mode():
+        if not self.model_root.is_writing_mode():
             raise IOError("Model opened in read-only mode")
         # filename
-        _fn = join(self.root.path, fn)
+        _fn = join(self.model_root.path, fn)
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
         self.logger.debug(f"Writing file {fn}")
@@ -157,9 +145,9 @@ class MeshComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self.root.is_reading_mode()
+        self.model_root.is_reading_mode()
         ds = xr.merge(
-            read_nc(fn, root=self.root, logger=self.logger, **kwargs).values()
+            read_nc(fn, root=self.model_root, logger=self.logger, **kwargs).values()
         )
         uds = xu.UgridDataset(ds)
         if ds.rio.crs is not None:  # parse crs
@@ -181,7 +169,7 @@ class MeshComponent(ModelComponent):
         self,
         region: dict,
         res: Optional[float] = None,
-        crs: int = None,
+        crs: Optional[int] = None,
         grid_name: str = "mesh2d",
     ) -> xu.UgridDataset:
         """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
@@ -253,12 +241,12 @@ class MeshComponent(ModelComponent):
         method.
         """
         # XU grid data type Xarray dataset with xu sampling.
-        if self._data is None and self.root.is_reading_mode():
+        if self._data is None and self.model_root.is_reading_mode():
             self.read()
         return self._data
 
     @property
-    def crs(self) -> CRS:
+    def crs(self) -> Optional[CRS]:
         """Returns model mesh crs."""
         if self.data is not None:
             grid_crs = self.data.ugrid.crs
@@ -278,10 +266,11 @@ class MeshComponent(ModelComponent):
             return None
 
     @property
-    def bounds(self) -> Dict:
+    def bounds(self) -> Optional[Dict]:
         """Returns model mesh bounds."""
         if self.data is not None:
             return self.data.ugrid.bounds
+        return None
 
     @property
     def region(self) -> gpd.GeoDataFrame:
@@ -576,6 +565,7 @@ class MeshComponent(ModelComponent):
             if not data.ugrid.grid.crs:
                 raise ValueError("Data should have CRS.")
             self._data = data
+            return None
         else:
             # Check on crs
             if not data.ugrid.grid.crs == self.crs:

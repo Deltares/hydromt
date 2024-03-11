@@ -1,5 +1,4 @@
 """Grid Component."""
-from logging import Logger, getLogger
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -12,17 +11,15 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
-from hydromt._typing.type_def import DeferedFileClose
-from hydromt.data_catalog import DataCatalog
+from hydromt._typing.type_def import DeferedFileClose, StrPath
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
-from hydromt.models.components.model_component import ModelComponent
-from hydromt.models.model_utils import (
-    read_nc,
-    write_nc,
-)
-from hydromt.models.root import ModelRoot
-from hydromt.workflows.basin_mask import get_basin_geometry, parse_region
+from hydromt.io.readers import read_nc
+from hydromt.io.writers import write_nc
+from hydromt.models.api import Model
+from hydromt.models.components.base import ModelComponent
+from hydromt.models.components.region import _parse_region
+from hydromt.workflows.basin_mask import get_basin_geometry
 from hydromt.workflows.grid import (
     grid_from_constant,
     grid_from_geodataframe,
@@ -31,49 +28,37 @@ from hydromt.workflows.grid import (
     rotated_grid,
 )
 
-logger = getLogger(__name__)
+__all__ = ["GridComponent"]
 
 
 class GridComponent(ModelComponent):
     """ModelComponent class for grid components.
 
-    This class is used for setting, creating, writing, and reading grids for a
-    HydroMT model. The grid data in the data property of this class is of the
-    hydromt.gis.raster.RasterDataset type.
+    This class is used for setting, creating, writing, and reading regular grid data for a
+    HydroMT model. The grid component data stored in the ``data`` property of this class is of the
+    hydromt.gis.raster.RasterDataset type which is an extension of xarray.Dataset for regular grid.
     """
 
     def __init__(
         self,
-        root: ModelRoot,
-        data_catalog: DataCatalog,
-        model_region=None,
-        logger: Logger = logger,
+        model: Model,
     ):
         """Initialize a GridComponent.
 
         Parameters
         ----------
-        root : ModelRoot
-            model root object containing path to model root
-        data_catalog : DataCatalog
-            data catalog object
-        model_region : _type_, optional
-            model region object, by default None
+        model: Model
+            HydroMT model instance
         logger : Logger, optional
             logger object, by default logger
         """
-        # self._model_ref = weakref.ref(model) TODO: discuss if this is necessary
-        self.logger = logger
-        self.root = root
-        self.data_catalog = data_catalog
-        self.model_region = model_region
         self._data = None
+        super().__init__(model=model)
 
     def set(
         self,
         data: Union[xr.DataArray, xr.Dataset, np.ndarray],
         name: Optional[str] = None,
-        read: bool = True,
     ):
         """Add data to grid.
 
@@ -111,18 +96,19 @@ class GridComponent(ModelComponent):
         else:
             for dvar in data.data_vars:
                 if dvar in self._data:
-                    if read:
+                    if self.model_root.is_reading_mode():
                         self.logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
     def write(
         self,
         fn: str = "grid/grid.nc",
+        temp_data_dir: Optional[StrPath] = None,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
         **kwargs,
-    ) -> DeferedFileClose | None:
+    ) -> Optional[DeferedFileClose]:
         """Write model grid data to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
@@ -131,8 +117,9 @@ class GridComponent(ModelComponent):
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
-        **kwargs : dict
-            Additional keyword arguments to be passed to the `write_nc` method.
+        temp_data_dir: StrPath, optional
+            Temporary directory to write grid to. If not given a TemporaryDirectory
+            is generated.
         gdal_compliant : bool, optional
             If True, write grid data in a way that is compatible with GDAL,
             by default False
@@ -142,29 +129,34 @@ class GridComponent(ModelComponent):
         force_sn: bool, optional
             If True and gdal_compliant, forces the dataset to have
             South -> North orientation.
+        **kwargs : dict
+            Additional keyword arguments to be passed to the `write_nc` method.
         """
         if len(self.data) == 0:
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
                 strategy=NoDataStrategy.IGNORE,
-                logger=logger,
+                logger=self.logger,
             )
         else:
-            if not self.root.is_writing_mode():
+            if not self.model_root.is_writing_mode():
                 raise IOError("Model opened in read-only mode")
             # write_nc requires dict - use dummy 'grid' key
-            return write_nc(  # Can return DeferedFileClose object
-                {"grid": self._data},
+            write_nc(  # Can return DeferedFileClose object
+                {"grid": self.data},
                 fn,
+                temp_data_dir=temp_data_dir,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
                 force_sn=force_sn,
                 **kwargs,
             )
+        return None
 
     def read(
         self,
         fn: str = "grid/grid.nc",
+        mask_and_scale: bool = False,
         **kwargs,
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
@@ -175,18 +167,28 @@ class GridComponent(ModelComponent):
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
+        mask_and_scale : bool, optional
+            If True, replace array values equal to _FillValue with NA and scale values
+            according to the formula original_values * scale_factor + add_offset, where
+            _FillValue, scale_factor and add_offset are taken from variable attributes
+        (if they exist).
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        if not self.root.is_reading_mode():
+        if not self.model_root.is_reading_mode():
             raise IOError("Model opened in write-only mode")
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
-        if self.root.is_reading_mode() and self.root.is_writing_mode():
+        if self.model_root.is_reading_mode() and self.model_root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
-            fn, self.root, logger=logger, single_var_as_array=False, **kwargs
+            fn,
+            self.model_root,
+            logger=self.logger,
+            single_var_as_array=False,
+            mask_and_scale=mask_and_scale,
+            **kwargs,
         )
         for ds in loaded_nc_files.values():
             self.set(ds)
@@ -263,7 +265,8 @@ class GridComponent(ModelComponent):
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
-            kind, region = parse_region(
+            # see ticket #813 for the skip
+            kind, region = _parse_region(  # noqa: F821
                 region, data_catalog=self.data_catalog, logger=self.logger
             )
         elif kind != "grid":
@@ -410,53 +413,57 @@ class GridComponent(ModelComponent):
             grid = grid.drop_vars("mask")
 
         # Add region and grid to model
-        self.set_geoms(geom, "region")
+        self.model.set_geoms(geom, "region")
         self.set(grid)
 
         return grid
 
     @property
-    def res(self) -> Tuple[float, float] | None:
+    def res(self) -> Optional[Tuple[float, float]]:
         """Returns the resolution of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.res
         _exec_nodata_strat(
             msg="No grid data found for deriving resolution",
             strategy=NoDataStrategy.IGNORE,
-            logger=logger,
+            logger=self.logger,
         )
+        return None
 
     @property
-    def transform(self) -> Affine | None:
+    def transform(self) -> Optional[Affine]:
         """Returns spatial transform of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.transform
         _exec_nodata_strat(
             msg="No grid data found for deriving transform",
             strategy=NoDataStrategy.IGNORE,
-            logger=logger,
+            logger=self.logger,
         )
+        return None
 
     @property
-    def crs(self) -> CRS | None:
+    def crs(self) -> Optional[CRS]:
         """Returns coordinate reference system embedded in the model grid."""
         if self.data.raster.crs is not None:
             return CRS(self.data.raster.crs)
-        logger.warn("Grid data has no crs")
+        self.logger.warn("Grid data has no crs")
+        return None
 
     @property
-    def bounds(self) -> List[float] | None:
+    def bounds(self) -> Optional[List[float]]:
         """Returns the bounding box of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.bounds
         _exec_nodata_strat(
             msg="No grid data found for deriving bounds",
             strategy=NoDataStrategy.IGNORE,
-            logger=logger,
+            logger=self.logger,
         )
+        return None
 
     @property
-    def region(self) -> gpd.GeoDataFrame | None:
+    def region(self) -> Optional[gpd.GeoDataFrame]:
         """Returns the geometry of the model area of interest."""
         if len(self.data) > 0:
             crs = self.crs
@@ -466,8 +473,9 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving region",
             strategy=NoDataStrategy.IGNORE,
-            logger=logger,
+            logger=self.logger,
         )
+        return None
 
     @property
     def data(self) -> xr.Dataset:
@@ -480,7 +488,7 @@ class GridComponent(ModelComponent):
         """Initialize grid object."""
         if self._data is None:
             self._data = xr.Dataset()
-            if self.root.is_reading_mode() and not skip_read:
+            if self.model_root.is_reading_mode() and not skip_read:
                 self.read()
 
     def set_crs(self, crs: CRS) -> None:
@@ -496,9 +504,9 @@ class GridComponent(ModelComponent):
         nodata: Optional[Union[int, float]] = None,
         mask_name: Optional[str] = "mask",
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Adds a grid based on a constant value.
+        """HYDROMT CORE METHOD: Adds data to grid component based on a constant value.
 
-        Parametersfr
+        Parameters
         ----------
         constant: int, float
             Constant value to fill grid with.
@@ -539,7 +547,7 @@ class GridComponent(ModelComponent):
         mask_name: Optional[str] = "mask",
         rename: Optional[Dict] = None,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid component.
 
         If raster is a dataset, all variables will be added unless ``variables`` list
         is specified.
@@ -612,7 +620,7 @@ class GridComponent(ModelComponent):
         rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to grid object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid component by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
 
         Adds model layers:
 
@@ -698,7 +706,7 @@ class GridComponent(ModelComponent):
         rename: Optional[Dict] = None,
         all_touched: Optional[bool] = True,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid component by rasterizing the data from ``vector_fn``.
 
         Several type of rasterization are possible:
             * "fraction": the fraction of the grid cell covered by the vector
@@ -750,7 +758,7 @@ class GridComponent(ModelComponent):
                 f"No shapes of {vector_fn} found within region,"
                 " skipping setup_grid_from_vector."
             )
-            return
+            return None
         # Data resampling
         if vector_fn in rename.keys():
             # In case of choosing a new name with area or fraction method pass
