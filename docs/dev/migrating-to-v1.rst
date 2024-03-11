@@ -161,7 +161,7 @@ GridComponent
 
 In v1 the `GridModel` will no longer exist, instead of it we created a `GridComponent`,
 which is an implementation of the `ModelComponent` class. The idea is that this gives
-us more flexibility with adding components to the model class, for instance multiple
+users more flexibility with adding components to their model class, for instance multiple
 grids. In addition, the `ModelComponent`s improve maintainability of the code and
 terminology of the components and their methods.
 
