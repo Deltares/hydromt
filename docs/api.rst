@@ -92,6 +92,33 @@ Get data
    data_catalog.DataCatalog.get_dataframe
    data_catalog.DataCatalog.get_dataset
 
+DataSource
+==========
+
+RasterDataset
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.rasterdataset.RasterDatasetSource.get_data
+   data_source.rasterdataset.RasterDatasetSource.to_stac_catalog
+   data_source.rasterdataset.RasterDatasetSource.get_bbox
+   data_source.rasterdataset.RasterDatasetSource.get_time_range
+   data_source.rasterdataset.RasterDatasetSource.detect_bbox
+   data_source.rasterdataset.RasterDatasetSource.detect_time_range
+
+GeoDataFrame
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.geodataframe.GeoDataFrameSource.get_data
+   data_source.geodataframe.GeoDataFrameSource.to_stac_catalog
+   data_source.geodataframe.GeoDataFrameSource.get_bbox
+   data_source.geodataframe.GeoDataFrameSource.detect_bbox
+
 DataAdapter
 ===========
 
@@ -112,14 +139,10 @@ RasterDataset
    :toctree: _generated
 
    data_adapter.RasterDatasetAdapter
+   data_adapter.RasterDatasetAdapter.transform
    data_adapter.RasterDatasetAdapter.summary
-   data_adapter.RasterDatasetAdapter.get_data
    data_adapter.RasterDatasetAdapter.to_dict
    data_adapter.RasterDatasetAdapter.to_file
-   data_adapter.RasterDatasetAdapter.get_bbox
-   data_adapter.RasterDatasetAdapter.get_time_range
-   data_adapter.RasterDatasetAdapter.detect_bbox
-   data_adapter.RasterDatasetAdapter.detect_time_range
    data_adapter.RasterDatasetAdapter.to_stac_catalog
 
 GeoDataset
@@ -150,8 +173,6 @@ GeoDataFrame
    data_adapter.GeoDataFrameAdapter.get_data
    data_adapter.GeoDataFrameAdapter.to_dict
    data_adapter.GeoDataFrameAdapter.to_file
-   data_adapter.GeoDataFrameAdapter.get_bbox
-   data_adapter.GeoDataFrameAdapter.detect_bbox
    data_adapter.GeoDataFrameAdapter.to_stac_catalog
 
 DataFrame

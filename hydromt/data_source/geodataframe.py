@@ -7,18 +7,14 @@ from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import geopandas as gpd
 from pydantic import ValidationInfo, field_validator
+from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt._typing import (
-    Bbox,
-    ErrorHandleMethod,
-    Geom,
-    NoDataStrategy,
-)
+from hydromt._typing import Bbox, ErrorHandleMethod, Geom, NoDataStrategy, TotalBounds
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
@@ -64,7 +60,7 @@ class GeoDataFrameSource(DataSource):
         else:
             raise ValueError(f"unknown driver type: {str(v)}")
 
-    def get_data(
+    def read_data(
         self,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
@@ -74,7 +70,7 @@ class GeoDataFrameSource(DataSource):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ) -> gpd.GeoDataFrame:
-        """Use initialize driver to read data."""
+        """Use the driver and data adapter to read and harmonize the data."""
         gdf: gpd.GeoDataFrame = self.driver.read(
             self.uri,
             bbox=bbox,
@@ -98,6 +94,66 @@ class GeoDataFrameSource(DataSource):
             handle_nodata=handle_nodata,
             logger=logger,
         )
+
+    def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
+        """Return the bounding box and espg code of the dataset.
+
+        if the bounding box is not set and detect is True,
+        :py:meth:`hydromt.GeoDataframeAdapter.detect_bbox` will be used to detect it.
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the bounding box if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        bbox = self.data_adapter.harmonization_settings.extent.get("bbox", None)
+        if bbox is None and detect:
+            bbox, crs = self.detect_bbox()
+
+        return bbox, crs
+
+    def detect_bbox(
+        self,
+        gdf: Optional[gpd.GeoDataFrame] = None,
+    ) -> TotalBounds:
+        """Detect the bounding box and crs of the dataset.
+
+        If no dataset is provided, it will be fetched acodring to the settings in the
+        adapter. also see :py:meth:`hydromt.GeoDataframeAdapter.get_data`. the
+        coordinates are in the CRS of the dataset itself, which is also returned
+        alongside the coordinates.
+
+
+        Parameters
+        ----------
+        ds: xr.Dataset, xr.DataArray, Optional
+            the dataset to detect the bounding box of.
+            If none is provided, :py:meth:`hydromt.GeoDataframeAdapter.get_data`
+            will be used to fetch the it before detecting.
+
+        Returns
+        -------
+        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
+            the bounding box coordinates of the data. coordinates are returned as
+            [xmin,ymin,xmax,ymax]
+        crs: int
+            The ESPG code of the CRS of the coordinates returned in bbox
+        """
+        if gdf is None:
+            gdf = self.read_data()
+
+        crs = gdf.geometry.crs.to_epsg()
+        bounds = gdf.geometry.total_bounds
+        return bounds, crs
 
     def to_stac_catalog(
         self,

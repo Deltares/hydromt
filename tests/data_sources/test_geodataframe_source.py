@@ -92,7 +92,7 @@ class TestGeoDataFrameSource:
             data_adapter=mock_geodataframe_adapter,
             uri="testuri",
         )
-        gdf1 = data_source.get_data(bbox=list(geodf.total_bounds), buffer=1000)
+        gdf1 = data_source.read_data(bbox=list(geodf.total_bounds), buffer=1000)
         assert isinstance(gdf1, gpd.GeoDataFrame)
         assert np.all(gdf1 == geodf)
 
@@ -104,7 +104,7 @@ class TestGeoDataFrameSource:
             data_adapter=GeoDataFrameAdapter(),
             driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
         )
-        gdf = source.get_data(list(geodf.total_bounds))
+        gdf = source.read_data(list(geodf.total_bounds))
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert np.all(gdf == geodf)
 
@@ -118,7 +118,7 @@ class TestGeoDataFrameSource:
             ),
             driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
         )
-        gdf = source.get_data(
+        gdf = source.read_data(
             bbox=list(geodf.total_bounds),
             buffer=1000,
         )
@@ -136,7 +136,7 @@ class TestGeoDataFrameSource:
             driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
         )
         with pytest.raises(DataSourceError):
-            source.get_data()
+            source.read_data()
 
     @pytest.mark.skip("Missing driver: 'raster'")
     def test_geodataframe_unit_attrs(self, artifact_data: DataCatalog):
