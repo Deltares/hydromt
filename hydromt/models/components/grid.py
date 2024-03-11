@@ -197,7 +197,7 @@ class GridComponent(ModelComponent):
         self,
         region: dict,
         res: Optional[float] = None,
-        crs: int = None,
+        crs: Optional[int] = None,
         rotated: bool = False,
         hydrography_fn: Optional[str] = None,
         basin_index_fn: Optional[str] = None,
