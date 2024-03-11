@@ -530,7 +530,7 @@ class GridComponent(ModelComponent):
         mask_name: Optional[str] = "mask",
         rename: Optional[Dict] = None,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to grid component.
 
         If raster is a dataset, all variables will be added unless ``variables`` list
         is specified.
