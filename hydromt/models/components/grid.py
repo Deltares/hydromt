@@ -689,7 +689,7 @@ class GridComponent(ModelComponent):
         rename: Optional[Dict] = None,
         all_touched: Optional[bool] = True,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to grid object by rasterizing the data from ``vector_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to grid component by rasterizing the data from ``vector_fn``.
 
         Several type of rasterization are possible:
             * "fraction": the fraction of the grid cell covered by the vector
