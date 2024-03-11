@@ -97,7 +97,7 @@ class GridComponent(ModelComponent):
         else:
             for dvar in data.data_vars:
                 if dvar in self._data:
-                    if read:
+                    if self.model_root.is_reading_mode():
                         self.logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
