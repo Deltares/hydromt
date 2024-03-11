@@ -18,7 +18,7 @@ def mock_raster_ds_adapter():
     return MockRasterDataSetAdapter()
 
 
-class TestRasterDataSource:
+class TestRasterDatasetSource:
     def test_validators(self, mock_raster_ds_adapter: RasterDatasetAdapter):
         with pytest.raises(ValidationError) as e_info:
             RasterDatasetSource(
