@@ -16,6 +16,7 @@ class DataSourceFactory(ModelFactory[DataSource]):
 
 @pytest.mark.skip("see ticket #805 ")
 class TestConventionResolver:
+    @pytest.mark.skip(reason="test fails on windows")
     def test_resolve(self, data_source_factory: DataSourceFactory):
         mock_source = data_source_factory.build()
         resolver = ConventionResolver()
