@@ -11,7 +11,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
-from hydromt._typing.type_def import DeferedFileClose, StrPath
+from hydromt._typing.type_def import DeferedFileClose
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
