@@ -23,6 +23,8 @@ from hydromt.models import (
     VectorModel,
     plugins,
 )
+from hydromt.models.components.grid import GridComponent
+from hydromt.models.components.region import ModelRegionComponent
 from hydromt.models.model import _check_data
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
@@ -872,3 +874,14 @@ def test_meshmodel_setup(griduda, world):
     )
     assert "roughness_manning" in mod1.mesh.data_vars
     assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
+
+
+def test_initialize_model():
+    m = Model()
+    assert isinstance(m.region, ModelRegionComponent)
+
+
+def test_initialize_model_with_grid_component():
+    m = Model(components={"grid": {"type": "GridComponent"}})
+    assert isinstance(m.grid, GridComponent)
+    assert isinstance(m.region, ModelRegionComponent)

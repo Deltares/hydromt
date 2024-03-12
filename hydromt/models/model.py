@@ -29,6 +29,7 @@ from typing import (
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pydantic.utils
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
@@ -86,6 +87,7 @@ class Model(object, metaclass=ABCMeta):
 
     def __init__(
         self,
+        components: dict[str, dict[str, Any]] = None,
         root: Optional[str] = None,
         mode: str = "w",
         config_fn: Optional[str] = None,
@@ -111,6 +113,12 @@ class Model(object, metaclass=ABCMeta):
         logger:
             The logger to be used.
         """
+        # Recursively update the options with any defaults that are missing in the configuration.
+        components = components or {}
+        components = pydantic.utils.deep_update(
+            {"region": {"type": "ModelRegionComponent"}}, components
+        )
+
         data_libs = data_libs or []
         from . import MODELS  # avoid circular import
 
@@ -150,7 +158,7 @@ class Model(object, metaclass=ABCMeta):
         self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
 
         self._components: OrderedDict[str, ModelComponent] = OrderedDict()
-        self.add_component("region", ModelRegionComponent(self))
+        self._add_components(components)
 
         self._defered_file_closes = []
 
@@ -159,6 +167,12 @@ class Model(object, metaclass=ABCMeta):
         self.logger.info(
             f"Initializing {self._NAME} model from {dist_name} (v{version})."
         )
+
+    def _add_components(self, components: dict[str, dict[str, Any]]) -> None:
+        """Add all components that are specified in the config file."""
+        for name, options in components.items():
+            type_name = options.pop("type")
+            self.add_component(name, globals()[type_name](self, **options))
 
     def add_component(self, name: str, component: ModelComponent) -> None:
         """Add a component to the model. Will raise an error if the component already exists."""
