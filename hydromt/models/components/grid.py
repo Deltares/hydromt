@@ -101,7 +101,6 @@ class GridComponent(ModelComponent):
     def write(
         self,
         fn: str = "grid/grid.nc",
-        temp_data_dir: Optional[StrPath] = None,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
