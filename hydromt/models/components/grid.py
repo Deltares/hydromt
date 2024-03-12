@@ -49,8 +49,6 @@ class GridComponent(ModelComponent):
         ----------
         model: Model
             HydroMT model instance
-        logger : Logger, optional
-            logger object, by default logger
         """
         self._data = None
         super().__init__(model=model)
