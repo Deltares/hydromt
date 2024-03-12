@@ -31,7 +31,7 @@ def test_check_UGrid():
 
 
 @patch.object(MeshComponent, "_grid_is_equal")
-def test_add_mesh(mock_grid_is_equal, mock_model, caplog):
+def test_add_mesh_errors(mock_grid_is_equal, mock_model):
     mesh_component = MeshComponent(mock_model)
     data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(ValueError, match="Data should have CRS."):
@@ -54,72 +54,65 @@ def test_add_mesh(mock_grid_is_equal, mock_model, caplog):
         " topology and related data.",
     ):
         mesh_component._add_mesh(data=data, grid_name=grid_name, overwrite_grid=False)
+
+
+@patch.object(MeshComponent, "_grid_is_equal")
+def test_add_mesh_logging(mock_grid_is_equal, mock_model, caplog):
+    mesh_component = MeshComponent(mock_model)
+    data = xu.data.elevation_nl().to_dataset()
+    mock_grid_is_equal.return_value = False
     caplog.set_level(logging.WARNING)
     mesh_component._data = data
-    mesh_component._add_mesh(data=data, grid_name="mesh2d", overwrite_grid=True)
+    grid_name = "mesh2d"
+    mesh_component._add_mesh(data=data, grid_name=grid_name, overwrite_grid=True)
     assert (
         f"Overwriting grid {grid_name} and the corresponding data variables in mesh."
         in caplog.text
     )
+    mock_grid_is_equal.return_value = True
+    mesh_component._data = data
+    mesh_component._add_mesh(data=data, grid_name="mesh2d", overwrite_grid=False)
+    assert "Replacing mesh parameter: elevation" in caplog.text
 
 
-def test_set_raises_errors(mock_model):
+def test_add_mesh(mock_model):
     mesh_component = MeshComponent(mock_model)
-    with pytest.raises(
-        ValueError,
-        match=(
-            "New mesh data in set_mesh should be of"
-            " type xu.UgridDataArray or xu.UgridDataset"
-        ),
-    ):
-        mesh_component.set(xr.Dataset())
+    data = xu.data.elevation_nl().to_dataset()
+    data.grid.crs = 28992
+    mesh_component._data = data
+    crs = mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
+    assert crs == 28992
+    assert data.grid.name in mesh_component.mesh_names
 
-    data_no_name = create_autospec(xu.UgridDataArray)
-    data_no_name.name = None
-    with pytest.raises(
-        ValueError,
-        match=f"Cannot set mesh from {str(type(data_no_name).__name__)} without a name.",
-    ):
-        mesh_component.set(data_no_name)
+
+@patch("hydromt.models.components.mesh._check_UGrid")
+def test_set_raises_errors(mock_check_Ugrid, mock_model):
+    mesh_component = MeshComponent(mock_model)
     data = create_autospec(xu.UgridDataset)
     data.name = "fakedata"
     data.ugrid.grids = [1, 2]
+    mock_check_Ugrid.return_value = data
     with pytest.raises(
         ValueError,
         match="set_mesh methods only supports adding data to one grid at a time.",
     ):
-        mesh_component.set(data)
-
-    data = create_autospec(xu.UgridDataset)
-    data.ugrid.grid.crs = None
-    with patch("hydromt.models.components.mesh.MeshComponent.data", None):
-        with pytest.raises(ValueError, match="Data should have CRS."):
-            mesh_component.set(data)
-
-    with patch("hydromt.models.components.mesh.MeshComponent.data", data):
-        with patch("hydromt.models.components.mesh.MeshComponent.crs", 4326):
-            with pytest.raises(
-                ValueError, match="Data and self.data should have the same CRS."
-            ):
-                mesh_component.set(data)
-            data.ugrid.grid.crs = 4326
-            data.ugrid.grid.name = "fake_grid"
-            with patch(
-                "hydromt.models.components.mesh.MeshComponent.mesh_names",
-                data.ugrid.grid.name,
-            ):
-                with pytest.raises(
-                    ValueError,
-                    match=f"Grid {data.ugrid.grid.name} already exists in mesh"
-                    " and has a different topology. "
-                    "Use overwrite_grid=True to overwrite the grid"
-                    " topology and related data.",
-                ):
-                    mesh_component.set(data)
+        mesh_component.set(data=data)
 
 
-def test_create():
-    pass
+def test_create(mock_model):
+    mesh_component = MeshComponent(mock_model)
+    region = {"bbox": [-1, -1, 1, 1]}
+    res = 20
+    crs = 28992
+    test_data = xu.data.elevation_nl().to_dataset()
+    test_data.grid.crs = crs
+    with patch("hydromt.models.components.mesh.create_mesh2d") as mock_create_mesh2d:
+        mock_create_mesh2d.return_value = test_data
+        mesh_component.create(region=region, res=res, crs=crs)
+        mock_create_mesh2d.assert_called_once_with(
+            region=region, res=res, crs=crs, logger=mesh_component.logger
+        )
+        assert mesh_component.data == test_data
 
 
 def test_write():

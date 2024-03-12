@@ -35,7 +35,7 @@ class MeshComponent(ModelComponent):
 
     def set(
         self,
-        data: xu.UgridDataArray | xu.UgridDataset,
+        data: Union[xu.UgridDataArray, xu.UgridDataset],
         name: Optional[str] = None,
         grid_name: Optional[str] = None,
         overwrite_grid: bool = False,
@@ -72,7 +72,7 @@ class MeshComponent(ModelComponent):
         elif grid_name != data.ugrid.grid.name:
             data = rename_mesh(data, name=grid_name)
 
-        new_grid = grid_name not in self.mesh_names
+        # new_grid = grid_name not in self.mesh_names
         crs = self._add_mesh(
             data=data, grid_name=grid_name, overwrite_grid=overwrite_grid
         )
@@ -81,12 +81,12 @@ class MeshComponent(ModelComponent):
             for grid in self.data.ugrid.grids:
                 grid.set_crs(crs)
 
-        # update related geoms if necessary: region TODO: Check if is still needed
-        if overwrite_grid or new_grid:
-            # add / updates region
-            if "region" in self.geoms:
-                self._geoms.pop("region", None)
-            _ = self.region  # ??
+        # # update related geoms if necessary: region TODO: Check if is still needed
+        # if overwrite_grid or new_grid:
+        #     # add / updates region
+        #     if "region" in self.geoms:
+        #         self._geoms.pop("region", None)
+        #     _ = self.region
 
     def write(
         self,
@@ -380,7 +380,7 @@ class MeshComponent(ModelComponent):
         grid_name: Optional[str] = "mesh2d",
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
-        resampling_method: Optional[Union[str, List]] = "centroid",
+        resampling_method: Optional[str] = "centroid",
         rename: Optional[Dict] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to 2D ``grid_name`` in mesh object.
@@ -637,3 +637,4 @@ def _check_UGrid(
                 f"Cannot set mesh from {str(type(data).__name__)} without a name."
             )
         return data.to_dataset()
+    return data
