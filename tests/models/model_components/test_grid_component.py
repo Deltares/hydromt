@@ -10,11 +10,22 @@ import xarray as xr
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.models.api import Model
+from hydromt.models.components import ModelRegionComponent
 from hydromt.models.components.grid import GridComponent
 from hydromt.models.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 logger.propagate = True
+
+
+@pytest.fixture()
+def mock_model(tmpdir):
+    model = create_autospec(Model)
+    model.root = ModelRoot(path=tmpdir)
+    model.data_catalog = DataCatalog()
+    model.region = ModelRegionComponent(model=model)
+    model.logger = logger
+    return model
 
 
 def test_set_dataset(mock_model, hydds):

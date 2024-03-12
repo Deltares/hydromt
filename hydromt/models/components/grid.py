@@ -11,7 +11,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
-from hydromt._typing.type_def import DeferedFileClose, StrPath
+from hydromt._typing.type_def import DeferedFileClose
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
@@ -49,8 +49,6 @@ class GridComponent(ModelComponent):
         ----------
         model: Model
             HydroMT model instance
-        logger : Logger, optional
-            logger object, by default logger
         """
         self._data = None
         super().__init__(model=model)
@@ -103,7 +101,6 @@ class GridComponent(ModelComponent):
     def write(
         self,
         fn: str = "grid/grid.nc",
-        temp_data_dir: Optional[StrPath] = None,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
@@ -117,9 +114,6 @@ class GridComponent(ModelComponent):
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
-        temp_data_dir: StrPath, optional
-            Temporary directory to write grid to. If not given a TemporaryDirectory
-            is generated.
         gdal_compliant : bool, optional
             If True, write grid data in a way that is compatible with GDAL,
             by default False
@@ -145,7 +139,7 @@ class GridComponent(ModelComponent):
             write_nc(  # Can return DeferedFileClose object
                 {"grid": self.data},
                 fn,
-                temp_data_dir=temp_data_dir,
+                temp_data_dir=self.model._TMP_DATA_DIR,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
                 force_sn=force_sn,
@@ -197,7 +191,7 @@ class GridComponent(ModelComponent):
         self,
         region: dict,
         res: Optional[float] = None,
-        crs: int = None,
+        crs: Optional[int] = None,
         rotated: bool = False,
         hydrography_fn: Optional[str] = None,
         basin_index_fn: Optional[str] = None,
