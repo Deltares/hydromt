@@ -1,4 +1,6 @@
 import logging
+import os
+from os.path import dirname, isdir, isfile, join
 from unittest.mock import create_autospec, patch
 
 import pytest
@@ -6,6 +8,7 @@ import xarray as xr
 import xugrid as xu
 
 from hydromt.models.components.mesh import MeshComponent, _check_UGrid
+from hydromt.models.root import ModelRoot
 
 
 def test_check_UGrid():
@@ -115,12 +118,46 @@ def test_create(mock_model):
         assert mesh_component.data == test_data
 
 
-def test_write():
-    pass
+def test_write(mock_model, caplog, tmpdir):
+    mesh_component = MeshComponent(mock_model)
+    caplog.set_level(logging.DEBUG)
+    mesh_component.write()
+    assert "No mesh data found, skip writing." in caplog.text
+    mock_model.root = ModelRoot(path=tmpdir, mode="r")
+    mesh_component._data = xu.data.elevation_nl().to_dataset()
+    with pytest.raises(IOError, match="Model opened in read-only mode"):
+        mesh_component.write()
+
+    mock_model.root = ModelRoot(path=tmpdir, mode="w")
+    fn = "mesh/fake_mesh.nc"
+    mesh_component._data.grid.crs = 28992
+    mesh_component.write(fn=fn)
+    file_dir = join(mesh_component.model_root.path, dirname(fn))
+    file_path = join(tmpdir, fn)
+    assert isdir(file_dir)
+    assert f"Writing file {fn}" in caplog.text
+    assert isfile(file_path)
+    ds = xr.open_dataset(file_path)
+    assert "elevation" in ds.data_vars
+    assert "28992" in ds.spatial_ref.crs_wkt
 
 
-def test_read():
-    pass
+def test_read(mock_model, caplog, tmpdir):
+    mesh_component = MeshComponent(mock_model)
+    mesh_component.root = ModelRoot(tmpdir, mode="w")
+    with pytest.raises(IOError, match="Model not opend in read mode"):
+        mesh_component.read()
+    fn = "test/test_mesh.nc"
+    file_dir = join(mesh_component.model_root.path, dirname(fn))
+    os.makedirs(file_dir)
+    data = xu.data.elevation_nl().to_dataset()
+    data.to_netcdf(join(mesh_component.model_root.path, fn))
+    mock_model.root = ModelRoot(tmpdir, mode="r+")
+    with pytest.raises(
+        ValueError, match="no crs is found in the file nor passed to the reader."
+    ):
+        mesh_component.read(fn=fn)
+    # TODO add test for reading data with crs
 
 
 def test_properties():

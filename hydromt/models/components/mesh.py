@@ -145,9 +145,12 @@ class MeshComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self.model_root.is_reading_mode()
+        if not self.model_root.is_reading_mode():
+            raise IOError("Model not opend in read mode")
         ds = xr.merge(
-            read_nc(fn, root=self.model_root, logger=self.logger, **kwargs).values()
+            read_nc(
+                fn, root=self.model_root.path, logger=self.logger, **kwargs
+            ).values()
         )
         uds = xu.UgridDataset(ds)
         if ds.rio.crs is not None:  # parse crs
