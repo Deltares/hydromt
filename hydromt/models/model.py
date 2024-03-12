@@ -2,7 +2,6 @@
 """General and basic API for models in HydroMT."""
 
 import glob
-import inspect
 import logging
 import os
 import shutil
@@ -15,7 +14,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import (
     Any,
-    Callable,
     Dict,
     List,
     Optional,
@@ -29,7 +27,7 @@ from typing import (
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pydantic.utils
+import pydantic.v1.utils
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
@@ -38,6 +36,7 @@ from hydromt import __version__
 from hydromt._compat import Distribution
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
+from hydromt._utils.rgetattr import rgetattr
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
@@ -66,8 +65,6 @@ class Model(object, metaclass=ABCMeta):
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
-    # tell hydroMT which methods should receive the res and region arguments
-    _CLI_ARGS = {"region": "region.create"}
     _TMP_DATA_DIR = None
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
@@ -87,7 +84,7 @@ class Model(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        components: dict[str, dict[str, Any]] = None,
+        components: Optional[dict[str, dict[str, Any]]] = None,
         root: Optional[str] = None,
         mode: str = "w",
         config_fn: Optional[str] = None,
@@ -115,7 +112,7 @@ class Model(object, metaclass=ABCMeta):
         """
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
-        components = pydantic.utils.deep_update(
+        components = pydantic.v1.utils.deep_update(
             {"region": {"type": "ModelRegionComponent"}}, components
         )
 
@@ -206,58 +203,15 @@ class Model(object, metaclass=ABCMeta):
                 _api.update(getattr(base_cls, "_API", {}))
         return _api
 
-    def _check_get_opt(self, opt):
-        """Check all opt keys and raise sensible error messages if unknown."""
-        for method in opt.keys():
-            m = method.strip("0123456789")
-            meth = self._get_sub_method(m)
-            if not callable(meth):
-                raise ValueError(f'Model {self._NAME} has no method "{method}"')
-        return opt
-
-    def _get_sub_method(self, method_name: str) -> Optional[Callable]:
-        # temporary code until the component logic is added.
-        # now we need this to be able to call region.create
-        obj = self
-        for subojb in method_name.split("."):
-            try:
-                obj = getattr(obj, subojb)
-            except AttributeError:
-                return None
-        func = cast(Callable, obj)
-        return func
-
-    def _run_log_method(self, method, *args, **kwargs):
-        """Log method parameters before running a method."""
-        method = method.strip("0123456789")
-        func = self._get_sub_method(method)
-        if not callable(func):
-            raise ValueError(f'Model {self._NAME} has no method "{method}"')
-        signature = inspect.signature(func)
-        # combine user and default options
-        params = {}
-        for i, (k, v) in enumerate(signature.parameters.items()):
-            if k in ["args", "kwargs"]:
-                if k == "args":
-                    params[k] = args[i:]
-                else:
-                    params.update(**kwargs)
-            else:
-                v = kwargs.get(k, v.default)
-                if len(args) > i:
-                    v = args[i]
-                params[k] = v
-        # log options
-        for k, v in params.items():
-            if v is not inspect._empty:
-                self.logger.info(f"{method}.{k}: {v}")
-        return func(*args, **kwargs)
+    def _validate_steps(self, steps: OrderedDict[str, Any]) -> OrderedDict[str, Any]:
+        # TODO: Validate all steps
+        return steps
 
     def build(
         self,
         region: Optional[dict] = None,
         write: Optional[bool] = True,
-        opt: Optional[dict] = None,
+        steps: Optional[OrderedDict[str, Any]] = None,
     ):
         r"""Single method to build a model from scratch based on settings in `opt`.
 
@@ -294,30 +248,38 @@ class Model(object, metaclass=ABCMeta):
                 }
 
         """
-        opt = opt or {}
-        opt = self._check_get_opt(opt)
+        steps = steps or OrderedDict()
+        steps = self._validate_steps(steps)
 
-        # merge cli region and res arguments with opt
-        if region is not None:
-            if self._CLI_ARGS["region"] not in opt:
-                opt = {self._CLI_ARGS["region"]: {}, **opt}
-            opt[self._CLI_ARGS["region"]].update(region=region)
+        # opt gets preference over defaults.
+        # But put region.create at the start of the list.
+        pydantic.v1.utils.deep_update(steps, {"region.create": region})
+        steps.move_to_end("region.create", last=False)
 
-        # then loop over other methods
-        for method in opt:
-            # if any write_* functions are present in opt, skip the final self.write()
-            kwargs = {} if opt[method] is None else opt[method]
-            self._run_log_method(method, **kwargs)
+        for step in steps:
+            self.logger.info(f"build: {step}")
+            kwargs = steps[step] or {}
+            # Call the methods.
+            rgetattr(self, step)(kwargs)
 
-        # write
-        if write:
+        # If there are any write options included in the steps,
+        # we don't need to write the whole model.
+        if write and not self._options_contain_write(steps):
             self.write()
+
+    def _options_contain_write(self, steps: OrderedDict[str, Any]) -> bool:
+        return any([step.split(".")[-1] == "write" for step in steps])
+
+    def write(self):
+        """Write all components of the model to disk with defaults."""
+        for c in self._components.values():
+            c.write()
 
     def update(
         self,
         model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
-        opt: Optional[list[dict[str, Any]]] = None,
+        steps: Optional[OrderedDict[str, Any]] = None,
         forceful_overwrite: bool = False,
     ):
         r"""Single method to update a model based the settings in `opt`.
@@ -359,7 +321,8 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        opt = self._check_get_opt(opt)
+        steps = steps or OrderedDict()
+        steps = self._validate_steps(steps)
 
         # read current model
         if not self.root.is_writing_mode():
@@ -375,13 +338,19 @@ class Model(object, metaclass=ABCMeta):
         if self.region.data is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
+        # TODO: pop the region method from the steps, and give a warning.
+
         # loop over other methods from config file
-        for entry in opt:
-            method_name = entry["step"]
-            component_name = entry["on"]
-            # Call the function `method_name` on the right component.
-            # The arguments come from `with` in the options.
-            getattr(self._components[component_name], method_name)(**entry["with"])
+        for step in steps:
+            self.logger.info(f"update: {step}")
+            kwargs = steps[step] or {}
+            # Call the methods.
+            rgetattr(self, step)(kwargs)
+
+        # If there are any write options included in the steps,
+        # we don't need to write the whole model.
+        if write and not self._options_contain_write(steps):
+            self.write()
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
 

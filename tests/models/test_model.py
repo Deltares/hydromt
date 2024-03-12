@@ -281,7 +281,7 @@ def test_model_errors_on_unknown_method():
     with pytest.raises(
         ValueError, match='Model testmodel has no method "unknown_method"'
     ):
-        model.update(opt={"unknown_method": {}})
+        model.update(steps={"unknown_method": {}})
 
 
 def test_model_does_not_overwrite_in_write_mode(tmpdir):
@@ -305,7 +305,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
-        opt={
+        steps={
             "region.create": {},
             "region.write": {},
             "write_geoms": {},
@@ -320,7 +320,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     # read and update model
     model = Model(root=str(tmpdir), mode="r")
     model_out = str(tmpdir.join("update"))
-    model.update(model_out=model_out, opt={})  # write only
+    model.update(model_out=model_out, steps={})  # write only
     assert isfile(join(model_out, "model.yml"))
 
 
@@ -333,7 +333,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
-        opt={
+        steps={
             "setup_config": {"input": {"dem": "elevtn", "prec": "precip"}},
             "set_geoms": {"geom": geom, "name": "geom1"},
             "set_maps": {"data": demda, "name": "elevtn"},
@@ -343,7 +343,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Now update the model
     model = Model(root=str(tmpdir), mode="r+")
     model.update(
-        opt={
+        steps={
             "setup_config": {"input.dem2": "elevtn2", "input.temp": "temp"},
             "set_geoms": {"geom": geom, "name": "geom2"},
             "set_maps": {"data": demda, "name": "elevtn2"},

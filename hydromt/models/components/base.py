@@ -15,7 +15,6 @@ if TYPE_CHECKING:
 class ModelComponent(ABC):
     """Abstract base class for ModelComponent."""
 
-    # TODO: Add config information, like file name.
     def __init__(self, model: "Model"):
         self._model_ref: ReferenceType["Model"] = ref(model)
 
@@ -41,5 +40,10 @@ class ModelComponent(ABC):
 
     @abstractmethod
     def read(self):
-        """Read the file into the component."""
+        """Read the file(s) into the component."""
+        ...
+
+    @abstractmethod
+    def write(self):
+        """Write the component to file(s)."""
         ...
