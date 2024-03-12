@@ -175,6 +175,8 @@ class Model(object, metaclass=ABCMeta):
         """Add a component to the model. Will raise an error if the component already exists."""
         if name in self._components:
             raise ValueError(f"Component {name} already exists in the model.")
+        if not name.isidentifier():
+            raise ValueError(f"Component name {name} is not a valid identifier.")
         self._components[name] = component
 
     def get_component(self, name: str, _: Type[T]) -> T:
@@ -354,15 +356,6 @@ class Model(object, metaclass=ABCMeta):
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
-    ## file system
-    def _assert_write_mode(self):
-        if not self.root.is_writing_mode():
-            raise IOError("Model opened in read-only mode")
-
-    def _assert_read_mode(self):
-        if not self.root.is_reading_mode():
-            raise IOError("Model opened in write-only mode")
-
     # I/O
     def read(self) -> None:
         """Read the complete model schematization and configuration from model files."""
@@ -405,7 +398,6 @@ class Model(object, metaclass=ABCMeta):
             cat.add_source(name, source)
         # write data catalog
         if cat.sources:
-            self._assert_write_mode()
             if save_csv:
                 csv_path = os.path.splitext(path)[0] + ".csv"
                 cat.to_dataframe().reset_index().to_csv(
@@ -505,7 +497,6 @@ class Model(object, metaclass=ABCMeta):
         self, config_name: Optional[str] = None, config_root: Optional[str] = None
     ):
         """Write config to <root/config_fn>."""
-        self._assert_write_mode()
         if config_name is not None:
             self._config_fn = config_name
         elif self._config_fn is None:
@@ -596,7 +587,6 @@ class Model(object, metaclass=ABCMeta):
     def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Write tables at <root>/tables."""
         if self.tables:
-            self._assert_write_mode()
             self.logger.info("Writing table files.")
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
@@ -609,7 +599,6 @@ class Model(object, metaclass=ABCMeta):
 
     def read_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Read table files at <root>/tables and parse to dict of dataframes."""
-        self._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self.logger.info("Reading model table files.")
         fns = glob.glob(join(self.root.path, fn.format(name="*")))
@@ -744,7 +733,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `read_nc` function.
         """
-        self._assert_read_mode()
         for ds in self.read_nc(fn, **kwargs).values():
             self.set_staticmaps(ds)
 
@@ -767,7 +755,6 @@ class Model(object, metaclass=ABCMeta):
         if len(self.staticmaps) == 0:
             self.logger.debug("No staticmaps data found, skip writing.")
         else:
-            self._assert_write_mode()
             # write_nc requires dict - use dummy 'staticmaps' key
             nc_dict = {"staticmaps": self.staticmaps}
             self.write_nc(nc_dict, fn, **kwargs)
@@ -985,7 +972,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `read_nc` function.
         """
-        self._assert_read_mode()
         self._initialize_maps(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -1008,7 +994,6 @@ class Model(object, metaclass=ABCMeta):
         if len(self.maps) == 0:
             self.logger.debug("No maps data found, skip writing.")
         else:
-            self._assert_write_mode()
             self.write_nc(self.maps, fn, **kwargs)
 
     # model geometry files
@@ -1069,7 +1054,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
         """
-        self._assert_read_mode()
         self._initialize_geoms(skip_read=True)
         fns = glob.glob(join(self.root.path, fn))
         for fn in fns:
@@ -1098,7 +1082,6 @@ class Model(object, metaclass=ABCMeta):
         if len(self.geoms) == 0:
             self.logger.debug("No geoms data found, skip writing.")
             return
-        self._assert_write_mode()
         for name, gdf in self.geoms.items():
             if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
                 self.logger.warning(
@@ -1236,7 +1219,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode()
         self._initialize_forcing(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -1259,7 +1241,6 @@ class Model(object, metaclass=ABCMeta):
         if len(self.forcing) == 0:
             self.logger.debug("No forcing data found, skip writing.")
         else:
-            self._assert_write_mode()
             self.write_nc(self.forcing, fn, **kwargs)
 
     # model state files
@@ -1315,7 +1296,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode()
         self._initialize_states(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -1338,7 +1318,6 @@ class Model(object, metaclass=ABCMeta):
         if len(self.states) == 0:
             self.logger.debug("No states data found, skip writing.")
         else:
-            self._assert_write_mode()
             self.write_nc(self.states, fn, **kwargs)
 
     # model results files; NOTE we don't have a write_results method
@@ -1399,7 +1378,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode()
         self._initialize_results(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():

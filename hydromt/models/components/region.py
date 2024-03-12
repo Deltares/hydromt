@@ -214,7 +214,7 @@ class ModelRegionComponent(ModelComponent):
         **read_kwargs,
     ):
         """Read the model region from a file on disk."""
-        self.model._assert_read_mode()
+        super().read()
         # cannot read geom files for purely in memory models
         self.logger.debug(f"Reading model file {rel_path}.")
         self._data = cast(
@@ -230,8 +230,8 @@ class ModelRegionComponent(ModelComponent):
         **write_kwargs,
     ):
         """Write the model region to a file."""
+        super().write()
         write_path = join(self.model_root.path, rel_path)
-        self.model._assert_write_mode()
 
         if exists(write_path) and not self.model_root.is_override_mode():
             raise OSError(

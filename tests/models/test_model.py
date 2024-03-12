@@ -4,12 +4,14 @@
 from copy import deepcopy
 from os import listdir
 from os.path import abspath, dirname, exists, isfile, join
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pytest_mock import MockerFixture
 from shapely.geometry import box
 
 import hydromt._compat
@@ -23,6 +25,7 @@ from hydromt.models import (
     VectorModel,
     plugins,
 )
+from hydromt.models.components.base import ModelComponent
 from hydromt.models.components.grid import GridComponent
 from hydromt.models.components.region import ModelRegionComponent
 from hydromt.models.model import _check_data
@@ -876,6 +879,9 @@ def test_meshmodel_setup(griduda, world):
     assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
 
 
+# NEW TESTS FOR REFACTOR MODEL COMPONENTS
+
+
 def test_initialize_model():
     m = Model()
     assert isinstance(m.region, ModelRegionComponent)
@@ -885,3 +891,48 @@ def test_initialize_model_with_grid_component():
     m = Model(components={"grid": {"type": "GridComponent"}})
     assert isinstance(m.grid, GridComponent)
     assert isinstance(m.region, ModelRegionComponent)
+
+
+def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
+    m = Model(root=str(tmpdir))
+    grid = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("grid", grid)
+    m.write()
+    grid.write.assert_called_once()
+
+
+def test_getattr_component(mocker: MockerFixture):
+    m = Model()
+    foo = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("foo", foo)
+    assert m.foo == foo
+
+
+def test_add_component_wrong_name(mocker: MockerFixture):
+    m = Model()
+    foo = mocker.Mock(spec_set=ModelComponent)
+    with pytest.raises(
+        ValueError, match="Component name foo foo is not a valid identifier."
+    ):
+        m.add_component("foo foo", foo)
+
+
+def test_get_component_non_existent():
+    m = Model()
+    with pytest.raises(KeyError):
+        m.get_component("foo", ModelComponent)
+
+
+def test_read_calls_components(mocker: MockerFixture):
+    m = Model(mode="r")
+    mocker.patch.object(m.region, "read")
+    foo = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("foo", foo)
+    m.read()
+    foo.read.assert_called_once()
+
+
+def test_read_in_write_mode():
+    m = Model(mode="w")
+    with pytest.raises(IOError, match="Model opened in write-only mode"):
+        m.read()

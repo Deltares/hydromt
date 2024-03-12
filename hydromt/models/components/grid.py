@@ -127,6 +127,7 @@ class GridComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `write_nc` method.
         """
+        super().write()
         if len(self.data) == 0:
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
@@ -134,8 +135,6 @@ class GridComponent(ModelComponent):
                 logger=self.logger,
             )
         else:
-            if not self.model_root.is_writing_mode():
-                raise IOError("Model opened in read-only mode")
             # write_nc requires dict - use dummy 'grid' key
             write_nc(  # Can return DeferedFileClose object
                 {"grid": self.data},
@@ -170,8 +169,7 @@ class GridComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        if not self.model_root.is_reading_mode():
-            raise IOError("Model opened in write-only mode")
+        super().read()
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
