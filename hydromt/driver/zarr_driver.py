@@ -46,12 +46,15 @@ class ZarrDriver(RasterDatasetDriver):
             handle_nodata=handle_nodata,
             **kwargs,
         )
-        preprocess: str = kwargs.get("preprocess")
-        if preprocess:
-            preprocess: Callable = PREPROCESSORS.get(preprocess)
+        preprocessor: Optional[Callable] = None
+        preprocessor_name: Optional[str] = kwargs.get("preprocess")
+        if preprocessor_name:
+            preprocessor = PREPROCESSORS.get(preprocessor_name)
+            if not preprocessor:
+                raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
         opn: Callable = partial(xr.open_zarr, **kwargs)
 
         return xr.merge(
-            [preprocess(opn(_uri)) if preprocess else opn(_uri) for _uri in uris]
+            [preprocessor(opn(_uri)) if preprocessor else opn(_uri) for _uri in uris]
         )
