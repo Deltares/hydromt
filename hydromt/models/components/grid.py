@@ -114,9 +114,6 @@ class GridComponent(ModelComponent):
         ----------
         fn : str, optional
             filename relative to model root, by default 'grid/grid.nc'
-        temp_data_dir: StrPath, optional
-            Temporary directory to write grid to. If not given a TemporaryDirectory
-            is generated.
         gdal_compliant : bool, optional
             If True, write grid data in a way that is compatible with GDAL,
             by default False
@@ -142,7 +139,7 @@ class GridComponent(ModelComponent):
             write_nc(  # Can return DeferedFileClose object
                 {"grid": self.data},
                 fn,
-                temp_data_dir=temp_data_dir,
+                temp_data_dir=self.model._TMP_DATA_DIR,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
                 force_sn=force_sn,
