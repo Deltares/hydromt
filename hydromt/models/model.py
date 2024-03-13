@@ -61,7 +61,6 @@ class Model(object, metaclass=ABCMeta):
     _DATADIR = ""  # path to the model data folder
     _NAME: str = "modelname"
     _CONF: StrPath = "model.yml"
-    _CF = dict()  # configreader kwargs
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
@@ -205,10 +204,6 @@ class Model(object, metaclass=ABCMeta):
                 _api.update(getattr(base_cls, "_API", {}))
         return _api
 
-    def _validate_steps(self, steps: OrderedDict[str, Any]) -> OrderedDict[str, Any]:
-        # TODO: Validate all steps
-        return steps
-
     def build(
         self,
         *,
@@ -272,16 +267,9 @@ class Model(object, metaclass=ABCMeta):
         if write and not self._options_contain_write(steps):
             self.write()
 
-    def _options_contain_write(self, steps: OrderedDict[str, Any]) -> bool:
-        return any([step.split(".")[-1] == "write" for step in steps])
-
-    def write(self):
-        """Write all components of the model to disk with defaults."""
-        for c in self._components.values():
-            c.write()
-
     def update(
         self,
+        *,
         model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
         steps: Optional[OrderedDict[str, Any]] = None,
@@ -329,11 +317,17 @@ class Model(object, metaclass=ABCMeta):
         steps = steps or OrderedDict()
         steps = self._validate_steps(steps)
 
+        # check if region.create is in the steps, and remove it.
+        if steps.pop("region.create", None) is not None:
+            self.logger.warning(
+                "region.create can only be called when building a model."
+            )
+
         # read current model
         if not self.root.is_writing_mode():
             if model_out is None:
                 raise ValueError(
-                    '"model_out" directory required when updating in "read-only" mode'
+                    '"model_out" directory required when updating in "read-only" mode.'
                 )
             self.read()
             mode = "w+" if forceful_overwrite else "w"
@@ -343,9 +337,7 @@ class Model(object, metaclass=ABCMeta):
         if self.region.data is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
-        # TODO: pop the region method from the steps, and give a warning.
-
-        # loop over other methods from config file
+        # loop over methods from config file
         for step in steps:
             self.logger.info(f"update: {step}")
             kwargs = steps[step] or {}
@@ -359,12 +351,24 @@ class Model(object, metaclass=ABCMeta):
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
+    def write(self):
+        """Write all components of the model to disk with defaults."""
+        for c in self._components.values():
+            c.write()
+
     # I/O
     def read(self) -> None:
         """Read the complete model schematization and configuration from model files."""
         self.logger.info(f"Reading model data from {self.root.path}")
         for c in self._components.values():
             c.read()
+
+    def _options_contain_write(self, steps: OrderedDict[str, Any]) -> bool:
+        return any([step.split(".")[-1] == "write" for step in steps])
+
+    def _validate_steps(self, steps: OrderedDict[str, Any]) -> OrderedDict[str, Any]:
+        # TODO: Validate all steps
+        return steps
 
     def write_data_catalog(
         self,

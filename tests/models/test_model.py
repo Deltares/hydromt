@@ -972,3 +972,80 @@ def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
     region.create.assert_called_once_with(region=region_dict)
     region.write.assert_not_called()  # Only foo will be written, so no total write
     foo.write.assert_called_once()  # foo was written, because it was specified in steps
+
+
+def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
+    region_patch = mocker.patch(
+        "hydromt.models.model.ModelRegionComponent",
+        spec_set=ModelRegionComponent,
+    )
+    region = region_patch.return_value
+    m = Model(root=str(tmpdir))
+    assert m.region is region
+
+    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+    m.build(write=False, region=region_dict)
+
+    region.create.assert_called_once()
+    region.write.assert_not_called()
+
+
+def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
+    region_patch = mocker.patch(
+        "hydromt.models.model.ModelRegionComponent",
+        spec_set=ModelRegionComponent,
+    )
+    region = region_patch.return_value
+    m = Model(root=str(tmpdir))
+    assert m.region is region
+
+    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+
+    with pytest.raises(KeyError):
+        m.build(region=region_dict, steps=OrderedDict({"foo": {}}))
+
+
+def test_add_component_duplicate_throws(mocker: MockerFixture):
+    m = Model()
+    foo = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("foo", foo)
+    foo2 = mocker.Mock(spec_set=ModelComponent)
+
+    with pytest.raises(ValueError, match="Component foo already exists in the model."):
+        m.add_component("foo", foo2)
+
+
+def test_update_empty_model_with_region_none_throws(tmpdir: Path):
+    m = Model(root=str(tmpdir))
+    with pytest.raises(
+        ValueError, match="Model region not found, setup model using `build` first."
+    ):
+        m.update()
+
+
+def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
+    m = Model(root=str(tmpdir), mode="r")
+    with pytest.raises(
+        ValueError,
+        match='"model_out" directory required when updating in "read-only" mode.',
+    ):
+        m.update(model_out=None)
+
+
+def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
+    tmpdir: Path, mocker: MockerFixture
+):
+    region_patch = mocker.patch(
+        "hydromt.models.model.ModelRegionComponent", spec_set=ModelRegionComponent
+    )
+    region = region_patch.return_value
+    m = Model(root=str(tmpdir), mode="r")
+    assert region is m.region
+
+    m.update(model_out=str(tmpdir / "out"))
+
+    assert m.root.is_writing_mode()
+    assert not m.root.is_override_mode()
+    region.read.assert_called_once()
+    region.create.assert_not_called()
+    region.write.assert_called_once()
