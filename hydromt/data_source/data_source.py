@@ -59,8 +59,15 @@ class DataSource(BaseModel):
     def _init_subclass_data_type(cls, data: Any, handler: Callable):
         """Initialize the subclass based on the 'data_type' class variable.
 
-        this does not yet support submodels of submodels. If we need more hierarchy, check:
-        https://github.com/pydantic/pydantic/discussions/7008#discussioncomment-7966076.
+        All DataSources should be parsed based on their `data_type` class variable;
+        e.g. a dict with `data_type` = `RasterDataset` should be parsed as a
+        `RasterDatasetSource`. This class searches all subclasses until the correct
+        `DataSource` is found and initialized that one.
+        This allow an API as: `DataSource.model_validate(raster_ds_dict)` or
+        `DataSource(raster_ds_dict)`, but also `RasterDatasetSource(raster_ds_dict)`.
+
+        Inspired by: https://github.com/pydantic/pydantic/discussions/7008#discussioncomment
+        This validator does not yet support submodels of submodels.
         """
         if not isinstance(data, dict):
             # Other objects should already be the correct subclass.
