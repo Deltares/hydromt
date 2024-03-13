@@ -44,6 +44,7 @@ from hydromt.io.writers import configwrite
 from hydromt.models.components import ModelRegionComponent
 from hydromt.models.components.base import ModelComponent
 from hydromt.models.root import ModelRoot
+from hydromt.plugins import PLUGINS
 
 __all__ = ["Model"]
 
@@ -168,7 +169,10 @@ class Model(object, metaclass=ABCMeta):
         """Add all components that are specified in the config file."""
         for name, options in components.items():
             type_name = options.pop("type")
-            self.add_component(name, globals()[type_name](self, **options))
+
+            self.add_component(
+                name, PLUGINS.component_plugins[type_name](self, **options)
+            )
 
     def add_component(self, name: str, component: ModelComponent) -> None:
         """Add a component to the model. Will raise an error if the component already exists."""
