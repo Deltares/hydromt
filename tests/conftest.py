@@ -35,7 +35,7 @@ def tmp_dir() -> Generator[Path, None, None]:
 
 @pytest.fixture()
 def test_model(tmpdir) -> Model:
-    return Model(tmpdir)
+    return Model(root=tmpdir)
 
 
 @pytest.fixture()
