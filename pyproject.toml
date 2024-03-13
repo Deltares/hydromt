@@ -108,6 +108,9 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
+[tool.setuptools.dynamic]
+description = {file = "hydromt/__init__.py"}
+
 [tool.ruff]
 line-length = 88
 target-version = "py39"
