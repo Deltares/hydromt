@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from logging import Logger, getLogger
 from os.path import join
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -404,16 +404,17 @@ class RasterDatasetAdapter(DataAdapterBase):
         return ds
 
     def _set_nodata(self, ds):
+        """Parse and apply nodata values from the data catalog."""
         # set nodata value
         if self.harmonization_settings.nodata is not None:
             if not isinstance(self.harmonization_settings.nodata, dict):
-                nodata = {
+                no_data_values: Dict[str, Any] = {
                     k: self.harmonization_settings.nodata for k in ds.data_vars.keys()
                 }
             else:
-                nodata = self.harmonization_settings.nodata
+                no_data_values: Dict[str, Any] = self.harmonization_settings.nodata
             for k in ds.data_vars:
-                mv = nodata.get(k, None)
+                mv = no_data_values.get(k, None)
                 if mv is not None and ds[k].raster.nodata is None:
                     ds[k].raster.set_nodata(mv)
         return ds

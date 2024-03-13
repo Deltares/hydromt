@@ -1,6 +1,6 @@
 """The GeoDataFrame adapter performs transformations on GeoDataFrames."""
 from logging import Logger, getLogger
-from typing import List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -142,15 +142,19 @@ class GeoDataFrameAdapter(DataAdapterBase):
         return gdf
 
     def _set_nodata(self, gdf: gpd.GeoDataFrame):
-        # parse nodata values
-        cols = gdf.select_dtypes([np.number]).columns
-        if nodata := self.harmonization_settings.nodata is not None and len(cols) > 0:
-            if not isinstance(nodata, dict):
-                nodata = {c: nodata for c in cols}
+        """Parse and apply nodata values from the data catalog."""
+        cols: Iterable[str] = gdf.select_dtypes([np.number]).columns
+        no_data_value: Union[Dict[str, Any], str, None]
+        if (
+            no_data_value := self.harmonization_settings.nodata is not None
+            and len(cols) > 0
+        ):
+            if not isinstance(no_data_value, dict):
+                no_data_dict: Dict[str, Any] = {c: no_data_value for c in cols}
             else:
-                nodata = nodata
+                no_data_dict: Dict[str, Any] = no_data_value
             for c in cols:
-                mv = nodata.get(c, None)
+                mv = no_data_dict.get(c, None)
                 if mv is not None:
                     is_nodata = np.isin(gdf[c], np.atleast_1d(mv))
                     gdf[c] = np.where(is_nodata, np.nan, gdf[c])
