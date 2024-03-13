@@ -5,7 +5,8 @@ import shutil
 from ast import literal_eval
 from os.path import basename, dirname, isdir, isfile, join
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
+from urllib.parse import urlparse
 
 import geopandas as gpd
 import numpy as np
@@ -13,19 +14,27 @@ import requests
 from affine import Affine
 from pyproj import CRS
 
-from hydromt._validators.uri_test import is_uri
-
 logger = logging.getLogger(__name__)
 
 
 HYDROMT_DATADIR = join(Path.home(), ".hydromt_data")
 
 
+# TODO: move this to an appropriate module (has nothing to do with caching)
+def _uri_validator(uri: Union[str, Path]) -> bool:
+    """Check if uri is valid."""
+    try:
+        result = urlparse(str(uri))
+        return all([result.scheme, result.netloc])
+    except (ValueError, AttributeError):
+        return False
+
+
 def _copyfile(src, dst, chunk_size=1024):
     """Copy src file to dst. This method supports both online and local files."""
     if not isdir(dirname(dst)):
         os.makedirs(dirname(dst))
-    if is_uri(str(src)):
+    if _uri_validator(str(src)):
         with requests.get(src, stream=True) as r:
             if r.status_code != 200:
                 raise ConnectionError(

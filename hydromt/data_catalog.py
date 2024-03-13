@@ -37,7 +37,6 @@ from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import partition_dictionaries
-from hydromt._validators.uri_test import is_uri
 from hydromt.data_adapter import (
     DataAdapter,
     DataFrameAdapter,
@@ -46,7 +45,7 @@ from hydromt.data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile
+from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
 from hydromt.data_source import DataSource
 
 logger = logging.getLogger(__name__)
@@ -1763,7 +1762,7 @@ def _parse_data_source_dict(
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
-    if is_uri(str(uri_or_path)):
+    if _uri_validator(str(uri_or_path)):
         with requests.get(uri_or_path, stream=True) as r:
             if r.status_code != 200:
                 raise IOError(f"URL {r.content}: {uri_or_path}")

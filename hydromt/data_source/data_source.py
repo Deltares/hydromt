@@ -10,7 +10,7 @@ from pydantic import (
 )
 
 from hydromt._typing import DataType
-from hydromt._validators.uri_test import is_uri
+from hydromt.data_adapter.caching import _uri_validator
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.harmonization_settings import HarmonizationSettings
 from hydromt.driver import BaseDriver
@@ -102,7 +102,7 @@ class DataSource(BaseModel):
 
     @model_validator(mode="after")
     def _validate_uri(self) -> str:
-        if not is_uri(self.uri):
+        if not _uri_validator(self.uri):
             self.uri = _abs_path(self.root, self.uri)
         return self
 
