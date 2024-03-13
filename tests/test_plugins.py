@@ -1,3 +1,4 @@
+from hydromt.models.components.base import ModelComponent
 from hydromt.models.components.grid import GridComponent
 from hydromt.models.components.region import ModelRegionComponent
 from hydromt.plugins import PLUGINS
@@ -8,8 +9,8 @@ def test_core_component_plugins():
     assert components == {
         "ModelRegionComponent": ModelRegionComponent,
         "GridComponent": GridComponent,
+        "ModelComponent": ModelComponent,
     }
-    assert "ModelComponent" not in components
 
 
 # def test_plugins(mocker):

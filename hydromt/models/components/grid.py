@@ -1,7 +1,7 @@
 """Grid Component."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -19,7 +19,6 @@ from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.models.components.base import ModelComponent
 from hydromt.models.components.region import _parse_region
-from hydromt.models.model import Model
 from hydromt.workflows.basin_mask import get_basin_geometry
 from hydromt.workflows.grid import (
     grid_from_constant,
@@ -28,6 +27,9 @@ from hydromt.workflows.grid import (
     grid_from_rasterdataset,
     rotated_grid,
 )
+
+if TYPE_CHECKING:
+    from hydromt.models.model import Model
 
 __all__ = ["GridComponent"]
 
@@ -42,7 +44,7 @@ class GridComponent(ModelComponent):
 
     def __init__(
         self,
-        model: Model,
+        model: "Model",
     ):
         """Initialize a GridComponent.
 
