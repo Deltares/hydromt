@@ -186,7 +186,9 @@ such as the region, or the timerange, and returns multiple absolute paths, or `u
 that can be read into a single python representation (e.g. `xarray.Dataset`). This
 functionality was previously covered in the `resolve_paths` function. However, there
 are more ways than to resolve a single uri, so the `MetaDataResolver` makes this
-behaviour extendable. The `MetaDataResolver` is injected into the `Driver` objects.
+behaviour extendable. Plugins or other code can subclass the Abstract `MetaDataResolver`
+class to implement their own conventions for data discovery.
+The `MetaDataResolver` is injected into the `Driver` objects and can be used there.
 
 Driver
 ^^^^^^
