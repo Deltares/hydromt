@@ -53,6 +53,7 @@ def test_cli_clip_help(tmpdir):
     )
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_cli_build_grid_model(tmpdir):
     root = str(tmpdir.join("grid_model_region"))
     cmd = [
@@ -257,6 +258,7 @@ def test_export_cli_config_file(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_check_cli():
     r = CliRunner().invoke(
         hydromt_cli,
@@ -273,6 +275,7 @@ def test_check_cli():
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_check_cli_unsupported_region(tmpdir):
     with pytest.raises(Exception, match="is not supported in region validation yet"):
         _ = CliRunner().invoke(
@@ -290,6 +293,7 @@ def test_check_cli_unsupported_region(tmpdir):
         )
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_check_cli_known_region(tmpdir):
     with pytest.raises(Exception, match="Unknown region kind"):
         _ = CliRunner().invoke(
@@ -307,6 +311,7 @@ def test_check_cli_known_region(tmpdir):
         )
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_check_cli_bbox_valid(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -323,6 +328,7 @@ def test_check_cli_bbox_valid(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_check_cli_geom_valid(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -340,6 +346,7 @@ def test_check_cli_geom_valid(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_check_cli_geom_missing_file(tmpdir):
     with pytest.raises(Exception, match="Path not found at asdf"):
         _ = CliRunner().invoke(

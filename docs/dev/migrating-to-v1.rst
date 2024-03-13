@@ -154,6 +154,37 @@ removed and their new equivalent is provided below:
 | model.set_region(...)    | model.region.set(...)     |
 +--------------------------+---------------------------+
 
+GridComponent
+^^^^^^^^^^^^^
+
+**Rationale**
+
+In v1 the `GridModel` will no longer exist, instead of it we created a `GridComponent`,
+which is an implementation of the `ModelComponent` class. The idea is that this gives
+users more flexibility with adding components to their model class, for instance multiple
+grids. In addition, the `ModelComponent`s improve maintainability of the code and
+terminology of the components and their methods.
+
+**Changes
+
+The `GridMixin` and `GridModel` have been restructured into one `GridComponent` with only
+a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
+`read_grid`, and `setup_grid` have been changed to the more genericly named `set`,
+`write`, `read`, and `create` methods respectively. Also, the `setup_grid_from_*`
+methods have been changed to `add_data_from_*`. The functionality of the GridComponent
+has not been changed compared to the GridModel.
+
++------------------------------+-------------------------------------------+
+| v0.x                         | v1                                        |
++==============================+===========================================+
+| model.set_grid(...)          | model.grid_component.set(...)             |
+| model.read_grid(...)         | model.grid_component.read(...)            |
+| model.write_grid(...)        | model.grid_component.write(...)           |
+| model.setup_grid(...)        | model.grid_component.create(...)          |
+| model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
++------------------------------+-------------------------------------------+
+
+
 DataAdapter
 -----------
 

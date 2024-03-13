@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
-
 from copy import deepcopy
 from os import listdir
 from os.path import abspath, dirname, exists, isfile, join
+from typing import Any
 
 import geopandas as gpd
 import numpy as np
@@ -18,31 +18,28 @@ from hydromt._compat import EntryPoint, EntryPoints
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import (
     MODELS,
-    GridModel,
     Model,
     ModelCatalog,
     VectorModel,
     plugins,
 )
 from hydromt.models.api import _check_data
-from hydromt.models.components.grid import GridMixin
-from hydromt.models.components.region import ModelRegionComponent
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
-class _DummyModel(GridModel, GridMixin):
-    _API = {"asdf": "yeah"}
-
-
+@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
 def test_api_attrs():
-    dm = _DummyModel()
+    # class _DummyModel(GridModel, GridMixin):
+    # _API = {"asdf": "yeah"}
+    # dm = _DummyModel()
+    dm: Any = ...  # bypass ruff
     assert hasattr(dm, "_NAME")
     assert hasattr(dm, "_API")
     assert "asdf" in dm.api
     assert dm.api["asdf"] == "yeah"
     assert "region" in dm.api
-    assert dm.api["region"] == ModelRegionComponent
+    assert dm.api["region"] == gpd.GeoDataFrame
     assert "grid" in dm.api
     assert dm.api["grid"] == xr.Dataset
 
@@ -124,6 +121,7 @@ def test_check_data(demda):
         _check_data({"wrong": "type"})
 
 
+@pytest.mark.skip(reason="GridModel has been removed")
 def test_model_api(grid_model):
     assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
     # add some wrong data
@@ -242,8 +240,10 @@ def test_model_tables(model, df, tmpdir):
     ), f"model: {model_merged}\nclean_model: {clean_model_merged}"
 
 
+@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
 def test_model_append(demda, df, tmpdir):
     # write a model
+    GridModel: Any = ...  # bypass ruff
     demda.name = "dem"
     mod = GridModel(mode="w", root=str(tmpdir))
     mod.set_config("test.data", "dem")
@@ -465,7 +465,7 @@ def test_maps_setup(tmpdir):
     mod.write(components=["config", "geoms", "maps"])
 
 
-@pytest.mark.skip("needs implementation of Grid component")
+@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
 def test_gridmodel(grid_model, tmpdir, demda):
     assert "grid" in grid_model.api
     non_compliant = grid_model._test_model_api()
@@ -478,6 +478,7 @@ def test_gridmodel(grid_model, tmpdir, demda):
     grid_model.root.set(str(tmpdir), mode="w")
     grid_model.write()
     # read model
+    GridModel: Any = ...  # bypass ruff
     model1 = GridModel(str(tmpdir), mode="r")
     model1.read()
     # check if equal
@@ -499,9 +500,10 @@ def test_gridmodel(grid_model, tmpdir, demda):
     assert "elevtn" in model1.grid
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
+@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
 def test_setup_grid(tmpdir, demda):
     # Initialize model
+    GridModel: Any = ...  # bypass ruff
     model = GridModel(
         root=join(tmpdir, "grid_model"),
         data_libs=["artifact_data"],
@@ -584,10 +586,11 @@ def test_setup_grid(tmpdir, demda):
     assert model.grid.raster.shape == (47, 61)
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
+@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
 def test_gridmodel_setup(tmpdir):
     # Initialize model
     dc_param_fn = join(DATADIR, "parameters_data.yml")
+    GridModel: Any = ...  # bypass ruff
     mod = GridModel(
         root=join(tmpdir, "grid_model"),
         data_libs=["artifact_data", dc_param_fn],

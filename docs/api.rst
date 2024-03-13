@@ -462,15 +462,14 @@ Data Methods
 
    ModelRegionComponent.create
 
-.. _grid_model_api:
 
-GridModel
+GridComponent
 =========
 
 .. autosummary::
    :toctree: _generated
 
-   GridModel
+   GridComponent
 
 
 Components and attributes
@@ -479,9 +478,16 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   GridModel.grid
-   GridModel.crs
-   GridModel.region
+   GridComponent.model
+   GridComponent.data_catalog
+   GridComponent.logger
+   GridComponent.model_root
+   GridComponent.res
+   GridComponent.transform
+   GridComponent.crs
+   GridComponent.bounds
+   GridComponent.region
+   GridComponent.data
 
 
 General methods
@@ -490,9 +496,10 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   GridModel.set_grid
-   GridModel.read_grid
-   GridModel.write_grid
+   GridComponent.set
+   GridComponent.write
+   GridComponent.read
+
 
 Setup methods
 -------------
@@ -500,15 +507,11 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   GridModel.setup_config
-   GridModel.setup_region
-   GridModel.setup_maps_from_rasterdataset
-   GridModel.setup_maps_from_raster_reclass
-   GridModel.setup_grid
-   GridModel.setup_grid_from_constant
-   GridModel.setup_grid_from_rasterdataset
-   GridModel.setup_grid_from_raster_reclass
-   GridModel.setup_grid_from_geodataframe
+   GridComponent.create
+   GridComponent.add_data_from_constant
+   GridComponent.add_data_from_rasterdataset
+   GridComponent.add_data_from_raster_reclass
+   GridComponent.add_data_from_geodataframe
 
 
 .. _vector_model_api:
@@ -727,6 +730,7 @@ Reading methods
    io.open_geodataset
    io.open_timeseries_from_table
    io.open_mfcsv
+   io.read_nc
 
 Writing methods
 ===============
@@ -738,6 +742,7 @@ Writing methods
    io.netcdf_writer
    io.write_xy
    io.zarr_writer
+   io.write_nc
 
 
 .. _raster_api:
