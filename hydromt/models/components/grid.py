@@ -442,7 +442,7 @@ class GridComponent(ModelComponent):
         """Returns coordinate reference system embedded in the model grid."""
         if self.data.raster.crs is not None:
             return CRS(self.data.raster.crs)
-        self.logger.warn("Grid data has no crs")
+        self.logger.warning("Grid data has no crs")
         return None
 
     @property
