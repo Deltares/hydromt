@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """Defines the CLI-API."""
+
 import inspect
 import logging
 import typing
 from typing import Dict, List, Union
 
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import MODELS
 
 logger = logging.getLogger(__name__)
 

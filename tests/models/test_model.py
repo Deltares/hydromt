@@ -20,7 +20,6 @@ import hydromt.models.plugins
 from hydromt._compat import EntryPoint, EntryPoints
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import (
-    MODELS,
     Model,
     ModelCatalog,
     VectorModel,

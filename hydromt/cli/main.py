@@ -22,7 +22,7 @@ from hydromt._validators.model_config import HydromtModelSetup
 from hydromt._validators.region import validate_region
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import MODELS
+from hydromt.plugins import PLUGINS
 
 BUILDING_EXE = False
 if BUILDING_EXE:
@@ -51,7 +51,7 @@ def print_models(ctx, param, value):
     """
     if not value:
         return {}
-    click.echo(f"{MODELS}")
+    click.echo(f"{PLUGINS}")
     ctx.exit()
 
 

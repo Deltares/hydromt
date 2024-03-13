@@ -17,7 +17,6 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
-from hydromt.models import MODELS
 from hydromt.models.components.vector import VectorModel
 from hydromt.models.model import Model
 
@@ -318,16 +317,16 @@ def vector_model(ts, geodf):
     return mod
 
 
-@pytest.fixture()
-def mesh_model(griduda):
-    mod = MODELS.load("mesh_model")()
-    region = gpd.GeoDataFrame(
-        geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
-    )
-    mod.region.create({"geom": region})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_mesh(griduda, "elevtn")
-    return mod
+# @pytest.fixture()
+# def mesh_model(griduda):
+#     mod = MODELS.load("mesh_model")()
+#     region = gpd.GeoDataFrame(
+#         geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
+#     )
+#     mod.region.create({"geom": region})
+#     mod.setup_config(**{"header": {"setting": "value"}})
+#     mod.set_mesh(griduda, "elevtn")
+#     return mod
 
 
 @pytest.fixture()

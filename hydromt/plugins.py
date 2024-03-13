@@ -51,7 +51,7 @@ class Plugins:
     def model_plugins(self):
         """Load and provide access to all known model plugins."""
         if self._model_plugins is None:
-            self._model_plugins = _discover_plugins(group="hydromt.models.components")
+            self._model_plugins = _discover_plugins(group="hydromt.models")
 
         return self._model_plugins
 

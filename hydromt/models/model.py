@@ -117,20 +117,19 @@ class Model(object, metaclass=ABCMeta):
         )
 
         data_libs = data_libs or []
-        from . import MODELS  # avoid circular import
 
         self.logger = logger
         dist_name, version = "unknown", "NA"
-        if self._NAME in MODELS:
-            ep = MODELS[self._NAME]
-            dist: Optional[Distribution] = ep.dist
-            if dist:
-                dist_name = dist.name
-                version = dist.version
-            else:
-                # insert hydromt defaults
-                dist_name = "hydromt"
-                version = __version__
+        # if self._NAME in MODELS:
+        #     ep = MODELS[self._NAME]
+        #     dist: Optional[Distribution] = ep.dist
+        #     if dist:
+        #         dist_name = dist.name
+        #         version = dist.version
+        #     else:
+        #         # insert hydromt defaults
+        #         dist_name = "hydromt"
+        #         version = __version__
 
         # link to data
         self.data_catalog = DataCatalog(

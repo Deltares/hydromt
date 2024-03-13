@@ -112,6 +112,9 @@ hydromt = "hydromt.cli.main:main"
 [project.entry-points."hydromt.models.components"]
 core = "hydromt.models.components"
 
+[project.entry-points."hydromt.models"]
+core = "hydromt.models"
+
 [tool.ruff]
 line-length = 88
 target-version = "py39"
