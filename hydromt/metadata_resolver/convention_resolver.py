@@ -1,4 +1,5 @@
 """MetaDataResolver using HydroMT naming conventions."""
+
 from itertools import product
 from logging import Logger, getLogger
 from string import Formatter
@@ -66,10 +67,10 @@ class ConventionResolver(MetaDataResolver):
 
     def _get_variables(self, variables: List[str]) -> List[str]:
         variables: list[str] = np.atleast_1d(variables).tolist()
-        mv_inv: dict[str, str] = {
+        inverse_rename_mapping: dict[str, str] = {
             v: k for k, v in self.harmonization_settings.rename.items()
         }
-        vrs: dict[str] = [mv_inv.get(var, var) for var in variables]
+        vrs: dict[str] = [inverse_rename_mapping.get(var, var) for var in variables]
         return vrs
 
     def resolve(
