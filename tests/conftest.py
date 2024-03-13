@@ -18,7 +18,6 @@ from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
 from hydromt.models import MODELS
-from hydromt.models.components.network import NetworkModel
 from hydromt.models.components.vector import VectorModel
 from hydromt.models.model import Model
 
@@ -316,13 +315,6 @@ def vector_model(ts, geodf):
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     da.vector.set_crs(geodf.crs)
     mod.set_vector(da)
-    return mod
-
-
-@pytest.fixture()
-def network_model():
-    mod = NetworkModel()
-    # TODO set data and attributes of mod
     return mod
 
 

@@ -34,22 +34,6 @@ from hydromt.models.model import _check_data
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
-# class _DummyModel(GridModel, GridMixin):
-# _API = {"asdf": "yeah"}
-
-
-# def test_api_attrs():
-#     dm = _DummyModel()
-#     assert hasattr(dm, "_NAME")
-#     assert hasattr(dm, "_API")
-#     assert "asdf" in dm.api
-#     assert dm.api["asdf"] == "yeah"
-#     assert "region" in dm.api
-#     assert dm.api["region"] == gpd.GeoDataFrame
-#     assert "grid" in dm.api
-#     assert dm.api["grid"] == xr.Dataset
-
-
 def test_plugins(mocker):
     ep_lst = EntryPoints(
         [
@@ -137,6 +121,7 @@ def test_model_api(grid_model):
     assert non_compliant == ["geoms.wrong_geom", "forcing.test"]
 
 
+@pytest.mark.skip(reason="run_log_method has been removed")
 def test_run_log_method():
     model = Model()
     region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
@@ -144,6 +129,7 @@ def test_run_log_method():
     assert hasattr(model, "region")
 
 
+@pytest.mark.skip(reason="run_log_method has been removed")
 def test_run_log_kwargs_method():
     model = Model()
     region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
@@ -750,18 +736,6 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
     vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
     vector3 = vector_model1.vector
     assert "zs" not in vector3
-
-
-def test_networkmodel(network_model, tmpdir):
-    network_model.root.set(str(tmpdir), mode="r+")
-    with pytest.raises(NotImplementedError):
-        network_model.read(["network"])
-    with pytest.raises(NotImplementedError):
-        network_model.write(["network"])
-    with pytest.raises(NotImplementedError):
-        network_model.set_network()
-    with pytest.raises(NotImplementedError):
-        _ = network_model.network
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
