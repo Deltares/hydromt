@@ -109,6 +109,9 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
+[project.entry-points."hydromt.models.components"]
+core = "hydromt.models.components"
+
 [tool.ruff]
 line-length = 88
 target-version = "py39"
