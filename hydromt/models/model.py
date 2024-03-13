@@ -211,7 +211,8 @@ class Model(object, metaclass=ABCMeta):
 
     def build(
         self,
-        region: Optional[dict] = None,
+        *,
+        region: dict[str, Any],
         write: Optional[bool] = True,
         steps: Optional[OrderedDict[str, Any]] = None,
     ):
@@ -253,16 +254,18 @@ class Model(object, metaclass=ABCMeta):
         steps = steps or OrderedDict()
         steps = self._validate_steps(steps)
 
-        # opt gets preference over defaults.
+        # steps gets preference over defaults.
         # But put region.create at the start of the list.
-        pydantic.v1.utils.deep_update(steps, {"region.create": region})
+        steps = OrderedDict(
+            pydantic.v1.utils.deep_update(steps, {"region.create": {"region": region}})
+        )
         steps.move_to_end("region.create", last=False)
 
         for step in steps:
             self.logger.info(f"build: {step}")
             kwargs = steps[step] or {}
             # Call the methods.
-            rgetattr(self, step)(kwargs)
+            rgetattr(self, step)(**kwargs)
 
         # If there are any write options included in the steps,
         # we don't need to write the whole model.

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
+from collections import OrderedDict
 from copy import deepcopy
 from os import listdir
 from os.path import abspath, dirname, exists, isfile, join
@@ -936,3 +937,38 @@ def test_read_in_write_mode():
     m = Model(mode="w")
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         m.read()
+
+
+def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
+    region_patch = mocker.patch(
+        "hydromt.models.model.ModelRegionComponent",
+        spec_set=ModelRegionComponent,
+    )
+    region = region_patch.return_value
+    m = Model(root=str(tmpdir))
+    assert m.region is region
+    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+    m.build(region=region_dict)
+    region.create.assert_called_once_with(region=region_dict)
+    region.write.assert_called_once()
+
+
+def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
+    region_patch = mocker.patch(
+        "hydromt.models.model.ModelRegionComponent", spec_set=ModelRegionComponent
+    )
+    region = region_patch.return_value
+    grid_patch = mocker.patch(
+        "hydromt.models.model.ModelComponent", spec_set=ModelComponent
+    )
+    foo = grid_patch.return_value
+    m = Model(root=str(tmpdir))
+    m.add_component("foo", foo)
+    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+
+    # Specify to only write foo
+    m.build(region=region_dict, steps=OrderedDict({"foo.write": {}}))
+
+    region.create.assert_called_once_with(region=region_dict)
+    region.write.assert_not_called()  # Only foo will be written, so no total write
+    foo.write.assert_called_once()  # foo was written, because it was specified in steps
