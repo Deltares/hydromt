@@ -16,6 +16,7 @@ Changed
 Fixed
 -----
 - Bug in `raster.transform` with lazy coordinates. (#801)
+- Bug in `workflows.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
 
 
 v0.9.4 (2024-02-26)
