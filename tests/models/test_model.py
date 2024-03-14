@@ -6,6 +6,7 @@ from copy import deepcopy
 from os import listdir
 from os.path import abspath, dirname, exists, isfile, join
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import geopandas as gpd
 import numpy as np
@@ -27,6 +28,22 @@ from hydromt.models import Model
 from hydromt.models.model import _check_data
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
+
+
+def _patch_plugin_components(
+    mocker: MockerFixture, *component_classes: type
+) -> list[MagicMock]:
+    """Set up PLUGINS with mocked classes.
+
+    Returns a list of mocked instances of the classes.
+    These will be the components of the model.
+    """
+    type_mocks = {}
+    for c in component_classes:
+        class_type_mock = mocker.Mock(return_value=mocker.Mock(spec_set=c))
+        type_mocks[c.__name__] = class_type_mock
+    mocker.patch("hydromt.models.model.PLUGINS", component_plugins=type_mocks)
+    return [type_mocks[c.__name__].return_value for c in component_classes]
 
 
 @pytest.mark.skip(reason="needs translation to new entrypoint structure")
@@ -913,11 +930,7 @@ def test_read_in_write_mode():
 
 
 def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
-    region_patch = mocker.patch(
-        "hydromt.components.region.ModelRegionComponent",
-        spec_set=ModelRegionComponent,
-    )
-    region = region_patch.return_value
+    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
@@ -927,17 +940,12 @@ def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
 
 
 def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
-    region_patch = mocker.patch(
-        "hydromt.components.region.ModelRegionComponent", spec_set=ModelRegionComponent
-    )
-    region = region_patch.return_value
-    grid_patch = mocker.patch(
-        "hydromt.components.base.ModelComponent", spec_set=ModelComponent
-    )
-    foo = grid_patch.return_value
+    region, foo = _patch_plugin_components(mocker, ModelRegionComponent, ModelComponent)
     m = Model(root=str(tmpdir))
     m.add_component("foo", foo)
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+    assert m.region is region
+    assert m.foo is foo
 
     # Specify to only write foo
     m.build(region=region_dict, steps=OrderedDict({"foo.write": {}}))
@@ -948,11 +956,7 @@ def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
 
 
 def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
-    region_patch = mocker.patch(
-        "hydromt.models.model.ModelRegionComponent",
-        spec_set=ModelRegionComponent,
-    )
-    region = region_patch.return_value
+    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
 
@@ -964,11 +968,7 @@ def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path
 
 
 def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
-    region_patch = mocker.patch(
-        "hydromt.models.model.ModelRegionComponent",
-        spec_set=ModelRegionComponent,
-    )
-    region = region_patch.return_value
+    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
 
@@ -1008,10 +1008,7 @@ def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
 def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
     tmpdir: Path, mocker: MockerFixture
 ):
-    region_patch = mocker.patch(
-        "hydromt.models.model.ModelRegionComponent", spec_set=ModelRegionComponent
-    )
-    region = region_patch.return_value
+    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
     m = Model(root=str(tmpdir), mode="r")
     assert region is m.region
 
