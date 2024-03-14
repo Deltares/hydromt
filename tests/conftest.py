@@ -11,13 +11,12 @@ import pytest
 import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
-from shapely.geometry import box
 
+from hydromt.components.vector import VectorModel
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
-from hydromt.models.components.vector import VectorModel
 from hydromt.models.model import Model
 
 dask_config.set(scheduler="single-threaded")

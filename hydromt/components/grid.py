@@ -13,12 +13,12 @@ from shapely.geometry import box
 
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
+from hydromt.components.base import ModelComponent
+from hydromt.components.region import _parse_region
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
-from hydromt.models.components.base import ModelComponent
-from hydromt.models.components.region import _parse_region
 from hydromt.workflows.basin_mask import get_basin_geometry
 from hydromt.workflows.grid import (
     grid_from_constant,

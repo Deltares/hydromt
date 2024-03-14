@@ -17,8 +17,8 @@ from shapely import box
 
 from hydromt import _compat
 from hydromt._typing.type_def import StrPath
+from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.models.components.base import ModelComponent
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:

@@ -109,8 +109,8 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
-[project.entry-points."hydromt.models.components"]
-core = "hydromt.models.components"
+[project.entry-points."hydromt.components"]
+core = "hydromt.components"
 
 [project.entry-points."hydromt.models"]
 core = "hydromt.models"

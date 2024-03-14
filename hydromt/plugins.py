@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Dict, Type
 from importlib_metadata import entry_points
 
 if TYPE_CHECKING:
-    from hydromt.models.components import ModelComponent  # noqa
+    from hydromt.components import ModelComponent  # noqa
     from hydromt.models import Model  # noqa
 
 logger = logging.getLogger(__name__)
@@ -41,9 +41,7 @@ class Plugins:
     def component_plugins(self):
         """Load and provide access to all known component plugins."""
         if self._component_plugins is None:
-            self._component_plugins = _discover_plugins(
-                group="hydromt.models.components"
-            )
+            self._component_plugins = _discover_plugins(group="hydromt.components")
 
         return self._component_plugins
 

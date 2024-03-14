@@ -1,6 +1,6 @@
-from hydromt.models.components.base import ModelComponent
-from hydromt.models.components.grid import GridComponent
-from hydromt.models.components.region import ModelRegionComponent
+from hydromt.components.base import ModelComponent
+from hydromt.components.grid import GridComponent
+from hydromt.components.region import ModelRegionComponent
 from hydromt.plugins import PLUGINS
 
 

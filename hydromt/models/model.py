@@ -32,17 +32,15 @@ import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 
-from hydromt import __version__
-from hydromt._compat import Distribution
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
 from hydromt._utils.rgetattr import rgetattr
+from hydromt.components import ModelRegionComponent
+from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
-from hydromt.models.components import ModelRegionComponent
-from hydromt.models.components.base import ModelComponent
 from hydromt.models.root import ModelRoot
 from hydromt.plugins import PLUGINS
 

@@ -2,26 +2,30 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import TYPE_CHECKING, cast
-from weakref import ReferenceType, ref
+from weakref import ref
 
 from hydromt.data_catalog import DataCatalog
-from hydromt.models.root import ModelRoot
 
-if TYPE_CHECKING:
-    from hydromt.models import Model
+# if TYPE_CHECKING:
+#     from hydromt.models import Model
+#     from hydromt.models.root import ModelRoot
 
 
 class ModelComponent(ABC):
     """Abstract base class for ModelComponent."""
 
-    def __init__(self, model: "Model"):
-        self._model_ref: ReferenceType["Model"] = ref(model)
+    def __init__(self, model):
+        self._model_ref = ref(model)
 
     @property
-    def model(self) -> "Model":
+    def model(self):
         """Return the model object this component is associated with."""
-        return cast("Model", self._model_ref())
+        return self._model_ref()
+
+    # @property
+    # def model(self) -> "Model":
+    #     """Return the model object this component is associated with."""
+    #     return cast("Model", self._model_ref())
 
     @property
     def data_catalog(self) -> DataCatalog:
@@ -34,7 +38,7 @@ class ModelComponent(ABC):
         return self.model.logger
 
     @property
-    def model_root(self) -> ModelRoot:
+    def model_root(self):
         """Return the root of the model this component is associated with."""
         return self.model.root
 

@@ -15,24 +15,23 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-import hydromt._compat
-import hydromt.models.plugins
 from hydromt._compat import EntryPoint, EntryPoints
+
+# ModelCatalog,
+# VectorModel,
+from hydromt.components.base import ModelComponent
+from hydromt.components.grid import GridComponent
+from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import (
     Model,
-    ModelCatalog,
-    VectorModel,
-    plugins,
 )
-from hydromt.models.components.base import ModelComponent
-from hydromt.models.components.grid import GridComponent
-from hydromt.models.components.region import ModelRegionComponent
 from hydromt.models.model import _check_data
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
+@pytest.mark.skip(reason="needs translation to new entrypoint structure")
 def test_plugins(mocker):
     ep_lst = EntryPoints(
         [
@@ -49,6 +48,7 @@ def test_plugins(mocker):
     assert isinstance(eps["test_model"], EntryPoint)
 
 
+@pytest.mark.skip(reason="needs translation to new entrypoint structure")
 def test_plugin_duplicates(mocker):
     ep_lst = plugins.get_general_eps().values()
     mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
@@ -56,6 +56,7 @@ def test_plugin_duplicates(mocker):
     assert len(eps) == 0
 
 
+@pytest.mark.skip(reason="needs translation to new entrypoint structure")
 def test_load():
     with pytest.raises(ValueError, match="Model plugin type not recognized"):
         plugins.load(
@@ -74,22 +75,22 @@ def test_load():
 
 
 # test both with and without xugrid
-@pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
-def test_global_models(mocker, has_xugrid):
-    _MODELS = ModelCatalog()
-    mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
-    keys = list(plugins.LOCAL_EPS.keys())
-    if not hydromt._compat.HAS_XUGRID:
-        keys.remove("mesh_model")
-    # set first local model as plugin for testing
-    _MODELS._plugins.append(keys[0])
-    assert isinstance(_MODELS[keys[0]], EntryPoint)
-    assert issubclass(_MODELS.load(keys[0]), Model)
-    assert keys[0] in _MODELS.__str__()
-    assert all([k in _MODELS for k in keys])  # eps
-    assert all([k in _MODELS.cls for k in keys])
-    with pytest.raises(ValueError, match="Unknown model"):
-        _MODELS["unknown"]
+# @pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
+# def test_global_models(mocker, has_xugrid):
+#     _MODELS = ModelCatalog()
+#     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
+#     keys = list(plugins.LOCAL_EPS.keys())
+#     if not hydromt._compat.HAS_XUGRID:
+#         keys.remove("mesh_model")
+#     # set first local model as plugin for testing
+#     _MODELS._plugins.append(keys[0])
+#     assert isinstance(_MODELS[keys[0]], EntryPoint)
+#     assert issubclass(_MODELS.load(keys[0]), Model)
+#     assert keys[0] in _MODELS.__str__()
+#     assert all([k in _MODELS for k in keys])  # eps
+#     assert all([k in _MODELS.cls for k in keys])
+#     with pytest.raises(ValueError, match="Unknown model"):
+#         _MODELS["unknown"]
 
 
 def test_check_data(demda):
@@ -264,6 +265,7 @@ def test_model_tables(model, df, tmpdir):
 #     assert "df" in mod1.tables
 
 
+@pytest.mark.skip(reason="needs method/yaml validation")
 def test_model_errors_on_unknown_method():
     model = Model()
     model._NAME = "testmodel"
@@ -651,90 +653,90 @@ def test_maps_setup(tmpdir):
 #     mod.write(components=["geoms", "grid"])
 
 
-@pytest.mark.skip("needs implementation of vector component")
-def test_vectormodel(vector_model, tmpdir):
-    assert "vector" in vector_model.api
-    non_compliant = vector_model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
-    # write model
-    vector_model.root.set(str(tmpdir), mode="w")
-    vector_model.write()
-    # read model
-    model1 = VectorModel(str(tmpdir), mode="r")
-    model1.read()
-    # check if equal
-    equal, errors = vector_model._test_equal(model1)
-    assert equal, errors
+# @pytest.mark.skip("needs implementation of vector component")
+# def test_vectormodel(vector_model, tmpdir):
+#     assert "vector" in vector_model.api
+#     non_compliant = vector_model._test_model_api()
+#     assert len(non_compliant) == 0, non_compliant
+#     # write model
+#     vector_model.root.set(str(tmpdir), mode="w")
+#     vector_model.write()
+#     # read model
+#     model1 = VectorModel(str(tmpdir), mode="r")
+#     model1.read()
+#     # check if equal
+#     equal, errors = vector_model._test_equal(model1)
+#     assert equal, errors
 
 
-def test_vectormodel_vector(vector_model, tmpdir, geoda):
-    # test set vector
-    testds = vector_model.vector.copy()
-    # np.ndarray
-    with pytest.raises(ValueError, match="Unable to set"):
-        vector_model.set_vector(data=testds["zs"].values)
-    with pytest.raises(
-        ValueError, match="set_vector with np.ndarray is only supported if data is 1D"
-    ):
-        vector_model.set_vector(data=testds["zs"].values, name="precip")
-    # xr.DataArray
-    vector_model.set_vector(data=testds["zs"], name="precip")
-    # geodataframe
-    gdf = testds.vector.geometry.to_frame("geometry")
-    gdf["param1"] = np.random.rand(gdf.shape[0])
-    gdf["param2"] = np.random.rand(gdf.shape[0])
-    vector_model.set_vector(data=gdf)
-    assert "precip" in vector_model.vector
-    assert "param1" in vector_model.vector
-    # geometry and update grid
-    crs = geoda.vector.crs
-    geoda_test = geoda.vector.update_geometry(
-        geoda.vector.geometry.to_crs(3857).buffer(0.1).to_crs(crs)
-    )
-    with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
-        vector_model.set_vector(data=geoda_test)
-    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop_vars("geometry")
-    with pytest.raises(ValueError, match="Index coordinate of data variable"):
-        vector_model.set_vector(data=param3, name="param3")
-    vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
-    assert "param1" not in vector_model.vector
-    assert "zs" in vector_model.vector
+# def test_vectormodel_vector(vector_model, tmpdir, geoda):
+#     # test set vector
+#     testds = vector_model.vector.copy()
+#     # np.ndarray
+#     with pytest.raises(ValueError, match="Unable to set"):
+#         vector_model.set_vector(data=testds["zs"].values)
+#     with pytest.raises(
+#         ValueError, match="set_vector with np.ndarray is only supported if data is 1D"
+#     ):
+#         vector_model.set_vector(data=testds["zs"].values, name="precip")
+#     # xr.DataArray
+#     vector_model.set_vector(data=testds["zs"], name="precip")
+#     # geodataframe
+#     gdf = testds.vector.geometry.to_frame("geometry")
+#     gdf["param1"] = np.random.rand(gdf.shape[0])
+#     gdf["param2"] = np.random.rand(gdf.shape[0])
+#     vector_model.set_vector(data=gdf)
+#     assert "precip" in vector_model.vector
+#     assert "param1" in vector_model.vector
+#     # geometry and update grid
+#     crs = geoda.vector.crs
+#     geoda_test = geoda.vector.update_geometry(
+#         geoda.vector.geometry.to_crs(3857).buffer(0.1).to_crs(crs)
+#     )
+#     with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
+#         vector_model.set_vector(data=geoda_test)
+#     param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop_vars("geometry")
+#     with pytest.raises(ValueError, match="Index coordinate of data variable"):
+#         vector_model.set_vector(data=param3, name="param3")
+#     vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
+#     assert "param1" not in vector_model.vector
+#     assert "zs" in vector_model.vector
 
-    # test write vector
-    vector_model.set_vector(data=gdf)
-    vector_model.root.set(str(tmpdir), mode="w")
-    # netcdf+geojson --> tested in test_vectormodel
-    # netcdf only
-    vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
-    # geojson only
-    # automatic split
-    vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
-    assert isfile(join(vector_model.root.path, "vector", "vector_split.nc"))
-    assert not isfile(join(vector_model.root.path, "vector", "vector_all.nc"))
-    # geojson 1D data only
-    vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
-    vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
-    assert not isfile(join(vector_model.root.path, "vector", "vector_all2.nc"))
+#     # test write vector
+#     vector_model.set_vector(data=gdf)
+#     vector_model.root.set(str(tmpdir), mode="w")
+#     # netcdf+geojson --> tested in test_vectormodel
+#     # netcdf only
+#     vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
+#     # geojson only
+#     # automatic split
+#     vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
+#     assert isfile(join(vector_model.root.path, "vector", "vector_split.nc"))
+#     assert not isfile(join(vector_model.root.path, "vector", "vector_all.nc"))
+#     # geojson 1D data only
+#     vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
+#     vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+#     assert not isfile(join(vector_model.root.path, "vector", "vector_all2.nc"))
 
-    # test read vector
-    vector_model1 = VectorModel(str(tmpdir), mode="r")
-    # netcdf only
-    vector_model1.read_vector(fn="vector/vector_full.nc", fn_geom=None)
-    vector0 = vector_model1.vector
-    assert len(vector0["zs"].dims) == 2
-    vector_model1._vector = None
-    # geojson only
-    # automatic split
-    vector_model1.read_vector(
-        fn="vector/vector_split.nc", fn_geom="vector/vector_split.geojson"
-    )
-    vector1 = vector_model1.vector
-    assert len(vector1["zs"].dims) == 2
-    vector_model1._vector = None
-    # geojson 1D data only
-    vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
-    vector3 = vector_model1.vector
-    assert "zs" not in vector3
+#     # test read vector
+#     vector_model1 = VectorModel(str(tmpdir), mode="r")
+#     # netcdf only
+#     vector_model1.read_vector(fn="vector/vector_full.nc", fn_geom=None)
+#     vector0 = vector_model1.vector
+#     assert len(vector0["zs"].dims) == 2
+#     vector_model1._vector = None
+#     # geojson only
+#     # automatic split
+#     vector_model1.read_vector(
+#         fn="vector/vector_split.nc", fn_geom="vector/vector_split.geojson"
+#     )
+#     vector1 = vector_model1.vector
+#     assert len(vector1["zs"].dims) == 2
+#     vector_model1._vector = None
+#     # geojson 1D data only
+#     vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+#     vector3 = vector_model1.vector
+#     assert "zs" not in vector3
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")

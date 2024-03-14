@@ -8,9 +8,9 @@ import pandas as pd
 import pytest
 import xarray as xr
 
+from hydromt.components import ModelRegionComponent
+from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.models.components import ModelRegionComponent
-from hydromt.models.components.grid import GridComponent
 from hydromt.models.model import Model
 from hydromt.models.root import ModelRoot
 
@@ -81,7 +81,7 @@ def test_read(tmpdir, mock_model, hydds):
         grid_component.read()
     mock_model.root = ModelRoot(path=tmpdir, mode="r+")
     grid_component = GridComponent(model=mock_model)
-    with patch("hydromt.models.components.grid.read_nc", return_value={"grid": hydds}):
+    with patch("hydromt.components.grid.read_nc", return_value={"grid": hydds}):
         grid_component.read()
         assert grid_component.data == hydds
 
@@ -203,13 +203,13 @@ def test_set_crs(mock_model, demda):
 def test_add_data_from_constant(mock_model, demda):
     grid_component = GridComponent(mock_model)
     demda.name = "demda"
-    with patch("hydromt.models.components.grid.grid_from_constant", return_value=demda):
+    with patch("hydromt.components.grid.grid_from_constant", return_value=demda):
         name = grid_component.add_data_from_constant(constant=0.01, name="demda")
         assert name == ["demda"]
         assert grid_component.data == demda
 
 
-@patch("hydromt.models.components.grid.grid_from_rasterdataset")
+@patch("hydromt.components.grid.grid_from_rasterdataset")
 def test_add_data_from_rasterdataset(
     mock_grid_from_rasterdataset, demda, caplog, mock_model
 ):
@@ -257,7 +257,7 @@ def test_add_data_from_raster_reclass(caplog, demda, mock_model):
     )
 
     with patch(
-        "hydromt.models.components.grid.grid_from_raster_reclass"
+        "hydromt.components.grid.grid_from_raster_reclass"
     ) as mock_grid_from_raster_reclass:
         mock_grid_from_raster_reclass.return_value = demda.to_dataset()
 
@@ -302,7 +302,7 @@ def test_add_data_from_geodataframe(caplog, geodf, demda, mock_model):
         grid_component.data_catalog.get_geodataframe, return_value=geodf
     )
     with patch(
-        "hydromt.models.components.grid.grid_from_geodataframe"
+        "hydromt.components.grid.grid_from_geodataframe"
     ) as mock_grid_from_geodataframe:
         mock_grid_from_geodataframe.return_value = demda.to_dataset()
         vector_fn = "hydro_lakes"
