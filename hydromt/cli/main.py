@@ -24,15 +24,6 @@ from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
 
-BUILDING_EXE = False
-if BUILDING_EXE:
-    import sys
-
-    exepath = sys.prefix
-    import pyproj
-
-    pyproj_datadir = join(exepath, "proj-data")
-    pyproj.datadir.set_data_dir(pyproj_datadir)
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +42,7 @@ def print_models(ctx, param, value):
     """
     if not value:
         return {}
-    click.echo(f"{PLUGINS}")
+    click.echo(f"{PLUGINS.summary()}")
     ctx.exit()
 
 
