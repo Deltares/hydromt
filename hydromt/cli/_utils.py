@@ -59,7 +59,7 @@ def parse_opt(ctx, param, value):
     return out
 
 
-def parse_json(value: str) -> Dict[str, Any]:
+def parse_json(ctx, param, value: str) -> Dict[str, Any]:
     """Parse json from object or file.
 
     If the object passed is a path pointing to a file, load it's contents and parse it.
@@ -68,6 +68,10 @@ def parse_json(value: str) -> Dict[str, Any]:
     if isfile(value):
         with open(value, "r") as f:
             kwargs = json.load(f)
+
+    # Catch old keyword for resulution "-r"
+    elif type(literal_eval(value)) in (float, int):
+        raise DeprecatedError("'-r' is used for region, resolution is deprecated")
     else:
         if value.strip("{").startswith("'"):
             value = value.replace("'", '"')
@@ -101,3 +105,12 @@ def parse_config(
             for option, value in opt_cli[section].items():
                 opt[section].update({option: value})
     return opt
+
+
+def parse_export_config_yaml(ctx, param, value) -> Dict[str, Any]:
+    if value:
+        with open(value, "r") as stream:
+            yml = yaml.load(stream, Loader=yaml.FullLoader)
+        return yml
+    else:
+        return {}

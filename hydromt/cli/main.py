@@ -24,6 +24,15 @@ from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
 
+BUILDING_EXE = False
+if BUILDING_EXE:
+    import sys
+
+    exepath = sys.prefix
+    import pyproj
+
+    pyproj_datadir = join(exepath, "proj-data")
+    pyproj.datadir.set_data_dir(pyproj_datadir)
 
 logger = logging.getLogger(__name__)
 
@@ -202,7 +211,7 @@ def build(
     try:
         # initialize model and create folder structure
         mode = "w+" if fo else "w"
-        mod = MODELS.load(model)(
+        mod = PLUGINS.model_plugins[model](
             root=model_root,
             mode=mode,
             logger=logger,
@@ -302,7 +311,7 @@ def update(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
-        mod = MODELS.load(model)(
+        mod = PLUGINS.model_plugins[model](
             root=model_root,
             mode=mode,
             data_libs=data_libs,
@@ -393,7 +402,7 @@ def check(
                 all_exceptions.append(e)
 
         if config:
-            mod = MODELS.load(model)
+            mod = PLUGINS.model_plugins[model]
             logger.info(f"Validating for model {model} of type {type(mod).__name__}")
             try:
                 config_dict = _utils.parse_config(config)
@@ -622,7 +631,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     if model != "wflow":
         raise NotImplementedError("Clip function only implemented for wflow model.")
     try:
-        mod = MODELS.load(model)(root=model_root, mode="r", logger=logger)
+        mod = PLUGINS.model_plugins[model](root=model_root, mode="r", logger=logger)
         logger.info("Reading model to clip")
         mod.read()
         mod.root.set(model_destination, mode="w")

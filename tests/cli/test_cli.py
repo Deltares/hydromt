@@ -2,13 +2,11 @@
 
 from os.path import abspath, dirname, join
 
-import numpy as np
 import pytest
 from click.testing import CliRunner
 
 from hydromt import __version__
 from hydromt._typing import NoDataException
-from hydromt.cli import api as hydromt_api
 from hydromt.cli.main import main as hydromt_cli
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
@@ -365,25 +363,3 @@ def test_check_cli_geom_missing_file(tmpdir):
             ],
             catch_exceptions=False,
         )
-
-
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_api_datasets():
-    # datasets
-    assert "artifact_data" in hydromt_api.get_predifined_catalogs()
-    datasets = hydromt_api.get_datasets("artifact_data")
-    assert isinstance(datasets, dict)
-    assert isinstance(datasets["RasterDatasetSource"], list)
-
-
-@pytest.mark.skip(reason="needs translation to new entrypoint structure")
-def test_api_model_components():
-    # models
-    components = hydromt_api.get_model_components(
-        "vector_model", component_types=["write"]
-    )
-    name = "write_vector"
-    assert name in components
-    assert np.all([k.startswith("write") for k in components])
-    keys = ["doc", "required", "optional", "kwargs"]
-    assert np.all([k in components[name] for k in keys])
