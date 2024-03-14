@@ -10,9 +10,9 @@ import xarray as xr
 
 from hydromt.components import ModelRegionComponent
 from hydromt.components.grid import GridComponent
+from hydromt.components.root import ModelRootComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models.model import Model
-from hydromt.models.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 logger.propagate = True
@@ -21,7 +21,7 @@ logger.propagate = True
 @pytest.fixture()
 def mock_model(tmpdir):
     model = create_autospec(Model)
-    model.root = ModelRoot(path=tmpdir)
+    model.root = ModelRootComponent(path=tmpdir)
     model.data_catalog = DataCatalog()
     model.region = ModelRegionComponent(model=model)
     model.logger = logger
@@ -66,7 +66,7 @@ def test_write(mock_model, tmpdir, caplog):
     grid_component.write()
     assert "No grid data found, skip writing" in caplog.text
     # Test raise IOerror when model is in read only mode
-    mock_model.root = ModelRoot(tmpdir, mode="r")
+    mock_model.root = ModelRootComponent(tmpdir, mode="r")
     grid_component = GridComponent(model=mock_model)
     with patch.object(GridComponent, "data", ["test"]):
         with pytest.raises(IOError, match="Model opened in read-only mode"):
@@ -75,11 +75,11 @@ def test_write(mock_model, tmpdir, caplog):
 
 def test_read(tmpdir, mock_model, hydds):
     # Test for raising IOError when model is in writing mode
-    mock_model.root = ModelRoot(path=tmpdir, mode="w")
+    mock_model.root = ModelRootComponent(path=tmpdir, mode="w")
     grid_component = GridComponent(model=mock_model)
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_component.read()
-    mock_model.root = ModelRoot(path=tmpdir, mode="r+")
+    mock_model.root = ModelRootComponent(path=tmpdir, mode="r+")
     grid_component = GridComponent(model=mock_model)
     with patch("hydromt.components.grid.read_nc", return_value={"grid": hydds}):
         grid_component.read()
@@ -136,7 +136,7 @@ def test_create_raise_errors(mock_model):
 
 @pytest.mark.skip(reason="needs working artifact data")
 def test_create_basin_grid(tmpdir):
-    model_root = ModelRoot(path=join(tmpdir, "grid_model"))
+    model_root = ModelRootComponent(path=join(tmpdir, "grid_model"))
     data_catalog = DataCatalog(data_libs=["artifact_data"])
     grid_component = GridComponent(
         root=model_root,
@@ -185,7 +185,7 @@ def test_properties(caplog, demda, mock_model):
 
 
 def test_initialize_grid(mock_model, tmpdir):
-    mock_model.root = ModelRoot(path=tmpdir, mode="r")
+    mock_model.root = ModelRootComponent(path=tmpdir, mode="r")
     grid_component = GridComponent(mock_model)
     grid_component.read = MagicMock()
     grid_component._initialize_grid()

@@ -23,9 +23,7 @@ from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import (
-    Model,
-)
+from hydromt.models import Model
 from hydromt.models.model import _check_data
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
@@ -916,7 +914,7 @@ def test_read_in_write_mode():
 
 def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
     region_patch = mocker.patch(
-        "hydromt.models.model.ModelRegionComponent",
+        "hydromt.components.region.ModelRegionComponent",
         spec_set=ModelRegionComponent,
     )
     region = region_patch.return_value
@@ -930,11 +928,11 @@ def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
 
 def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
     region_patch = mocker.patch(
-        "hydromt.models.model.ModelRegionComponent", spec_set=ModelRegionComponent
+        "hydromt.components.region.ModelRegionComponent", spec_set=ModelRegionComponent
     )
     region = region_patch.return_value
     grid_patch = mocker.patch(
-        "hydromt.models.model.ModelComponent", spec_set=ModelComponent
+        "hydromt.components.base.ModelComponent", spec_set=ModelComponent
     )
     foo = grid_patch.return_value
     m = Model(root=str(tmpdir))

@@ -12,7 +12,7 @@ import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
 
-from hydromt.components.vector import VectorModel
+# from hydromt.components.vector import VectorModel
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import raster, utils, vector
@@ -300,20 +300,20 @@ def model(demda, world, obsda):
     return mod
 
 
-@pytest.fixture()
-def vector_model(ts, geodf):
-    mod = VectorModel()
-    mod.setup_config(**{"header": {"setting": "value"}})
-    da = xr.DataArray(
-        ts,
-        dims=["index", "time"],
-        coords={"index": ts.index, "time": ts.columns},
-        name="zs",
-    )
-    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
-    da.vector.set_crs(geodf.crs)
-    mod.set_vector(da)
-    return mod
+# @pytest.fixture()
+# def vector_model(ts, geodf):
+#     mod = VectorModel()
+#     mod.setup_config(**{"header": {"setting": "value"}})
+#     da = xr.DataArray(
+#         ts,
+#         dims=["index", "time"],
+#         coords={"index": ts.index, "time": ts.columns},
+#         name="zs",
+#     )
+#     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+#     da.vector.set_crs(geodf.crs)
+#     mod.set_vector(da)
+#     return mod
 
 
 # @pytest.fixture()

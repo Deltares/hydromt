@@ -37,11 +37,11 @@ from hydromt._utils import _classproperty
 from hydromt._utils.rgetattr import rgetattr
 from hydromt.components import ModelRegionComponent
 from hydromt.components.base import ModelComponent
+from hydromt.components.root import ModelRootComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
-from hydromt.models.root import ModelRoot
 from hydromt.plugins import PLUGINS
 
 __all__ = ["Model"]
@@ -149,7 +149,7 @@ class Model(object, metaclass=ABCMeta):
         self._staticgeoms = None
 
         # file system
-        self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
+        self.root: ModelRootComponent = ModelRootComponent(root or ".", mode=mode)
 
         self._components: OrderedDict[str, ModelComponent] = OrderedDict()
         self._add_components(components)
