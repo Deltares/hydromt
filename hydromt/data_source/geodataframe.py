@@ -45,6 +45,7 @@ class GeoDataFrameSource(DataSource):
         logger: Logger = logger,
     ) -> gpd.GeoDataFrame:
         """Use the driver and data adapter to read and harmonize the data."""
+        self._used = True
         gdf: gpd.GeoDataFrame = self.driver.read(
             self.uri,
             bbox=bbox,

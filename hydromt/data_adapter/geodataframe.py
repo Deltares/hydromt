@@ -1,11 +1,11 @@
 """The GeoDataFrame adapter performs transformations on GeoDataFrames."""
+
 from logging import Logger, getLogger
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
 import pyproj
-from pydantic import PrivateAttr
 from pyproj import CRS
 
 from hydromt._typing import (
@@ -22,8 +22,6 @@ logger: Logger = getLogger(__name__)
 class GeoDataFrameAdapter(DataAdapterBase):
     """The GeoDataFrameAdapter performs transformations on GeoDataFrames."""
 
-    _used: bool = PrivateAttr(False)
-
     def transform(
         self,
         gdf: gpd.GeoDataFrame,
@@ -38,8 +36,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
         logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
         """Read transform data to HydroMT standards."""
-        self._used = True  # mark used
-
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)
         gdf = self._set_crs(gdf, crs, logger=logger)

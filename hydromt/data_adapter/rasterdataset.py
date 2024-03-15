@@ -1,4 +1,5 @@
 """Implementation for the RasterDatasetAdapter."""
+
 from __future__ import annotations
 
 import os
@@ -11,7 +12,6 @@ import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
-from pydantic import PrivateAttr
 from pyproj import CRS
 from rasterio.errors import RasterioIOError
 
@@ -40,8 +40,6 @@ __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 
 class RasterDatasetAdapter(DataAdapterBase):
     """Implementation for the RasterDatasetAdapter."""
-
-    _used: bool = PrivateAttr(False)
 
     def to_file(
         self,
@@ -162,7 +160,6 @@ class RasterDatasetAdapter(DataAdapterBase):
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
         try:
-            self._used = True  # mark used
             if has_no_data(ds):
                 raise NoDataException()
             # rename variables and parse data and attrs

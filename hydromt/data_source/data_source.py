@@ -7,6 +7,7 @@ from typing import Any, Callable, ClassVar, Dict, Optional, Union
 from pydantic import (
     BaseModel,
     Field,
+    PrivateAttr,
     model_validator,
 )
 
@@ -27,6 +28,8 @@ class DataSource(BaseModel):
     the driver that the data should be read with, and is responsible for initializing
     this driver.
     """
+
+    _used: bool = PrivateAttr(False)
 
     name: str
     uri: str
