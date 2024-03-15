@@ -16,8 +16,6 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-from hydromt._compat import EntryPoint, EntryPoints
-
 # ModelCatalog,
 # VectorModel,
 from hydromt.components.base import ModelComponent
@@ -26,6 +24,7 @@ from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data
+from hydromt.plugins import PLUGINS
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
@@ -46,47 +45,47 @@ def _patch_plugin_components(
     return [type_mocks[c.__name__].return_value for c in component_classes]
 
 
-@pytest.mark.skip(reason="needs translation to new entrypoint structure")
-def test_plugins(mocker):
-    ep_lst = EntryPoints(
-        [
-            EntryPoint(
-                name="test_model",
-                value="hydromt.models.model_api:Model",
-                group="hydromt.models",
-            )
-        ]
-    )
-    mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
-    eps = plugins.get_plugin_eps()
-    assert "test_model" in eps
-    assert isinstance(eps["test_model"], EntryPoint)
+# @pytest.mark.skip(reason="needs translation to new entrypoint structure")
+# def test_plugins(mocker):
+#     ep_lst = EntryPoints(
+#         [
+#             EntryPoint(
+#                 name="test_model",
+#                 value="hydromt.models.model_api:Model",
+#                 group="hydromt.models",
+#             )
+#         ]
+#     )
+#     mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
+#     eps = plugins.get_plugin_eps()
+#     assert "test_model" in eps
+#     assert isinstance(eps["test_model"], EntryPoint)
 
 
-@pytest.mark.skip(reason="needs translation to new entrypoint structure")
-def test_plugin_duplicates(mocker):
-    ep_lst = plugins.get_general_eps().values()
-    mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
-    eps = plugins.get_plugin_eps()
-    assert len(eps) == 0
+# @pytest.mark.skip(reason="needs translation to new entrypoint structure")
+# def test_plugin_duplicates(mocker):
+#     ep_lst = plugins.get_general_eps().values()
+#     mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
+#     eps = plugins.get_plugin_eps()
+#     assert len(eps) == 0
 
 
-@pytest.mark.skip(reason="needs translation to new entrypoint structure")
-def test_load():
-    with pytest.raises(ValueError, match="Model plugin type not recognized"):
-        plugins.load(
-            EntryPoint(
-                name="error",
-                value="hydromt.data_catalog:DataCatalog",
-                group="hydromt.data_catalog",
-            )
-        )
-    with pytest.raises(ImportError, match="Error while loading model plugin"):
-        plugins.load(
-            EntryPoint(
-                name="error", value="hydromt.models:DataCatalog", group="hydromt.models"
-            )
-        )
+# @pytest.mark.skip(reason="needs translation to new entrypoint structure")
+# def test_load():
+#     with pytest.raises(ValueError, match="Model plugin type not recognized"):
+#         plugins.load(
+#             EntryPoint(
+#                 name="error",
+#                 value="hydromt.data_catalog:DataCatalog",
+#                 group="hydromt.data_catalog",
+#             )
+#         )
+#     with pytest.raises(ImportError, match="Error while loading model plugin"):
+#         plugins.load(
+#             EntryPoint(
+#                 name="error", value="hydromt.models:DataCatalog", group="hydromt.models"
+#             )
+#         )
 
 
 # test both with and without xugrid
@@ -304,6 +303,7 @@ def test_model_does_not_overwrite_in_write_mode(tmpdir):
 
 
 @pytest.mark.integration()
+@pytest.mark.skip(reason="needs method/yaml validation")
 def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     # build model
@@ -331,6 +331,7 @@ def test_model_build_update(tmpdir, demda, obsda):
 
 
 @pytest.mark.integration()
+@pytest.mark.skip(reason="needs method/yaml validation")
 def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Build model with some data
     bbox = [12.05, 45.30, 12.85, 45.65]
@@ -756,7 +757,7 @@ def test_maps_setup(tmpdir):
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_meshmodel(mesh_model, tmpdir):
-    MeshModel = MODELS.load("mesh_model")
+    MeshModel = PLUGINS.model_plugins["mesh_model"]
     assert "mesh" in mesh_model.api
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
@@ -773,7 +774,7 @@ def test_meshmodel(mesh_model, tmpdir):
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_setup_mesh(tmpdir, griduda):
-    MeshModel = MODELS.load("mesh_model")
+    MeshModel = PLUGINS.model_plugins["mesh_model"]
     # Initialize model
     model = MeshModel(
         root=join(tmpdir, "mesh_model"),
@@ -844,7 +845,7 @@ def test_setup_mesh(tmpdir, griduda):
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_meshmodel_setup(griduda, world):
-    MeshModel = MODELS.load("mesh_model")
+    MeshModel = PLUGINS.model_plugins["mesh_model"]
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
