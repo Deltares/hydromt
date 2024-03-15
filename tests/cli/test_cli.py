@@ -12,39 +12,41 @@ from hydromt.cli.main import main as hydromt_cli
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
-def test_cli_verison(tmpdir):
+def test_cli_verison():
     r = CliRunner().invoke(hydromt_cli, "--version")
     assert r.exit_code == 0
     assert r.output.split()[-1] == __version__
 
 
-@pytest.mark.skip(reason="needs translation to new entrypoint structure")
-def test_cli_models(tmpdir):
+def test_cli_models():
     r = CliRunner().invoke(hydromt_cli, "--models")
     assert r.exit_code == 0
-    assert r.output.startswith("model plugins")
+    assert "component plugins" in r.output
+    assert "model plugins" in r.output
+    assert "ModelRegionComponent" in r.output
+    assert "Model" in r.output
 
 
-def test_cli_help(tmpdir):
+def test_cli_help():
     r = CliRunner().invoke(hydromt_cli, "--help")
     assert r.exit_code == 0
     # NOTE: when called from CliRunner we get "Usage: main" instead of "Usage: hydromt"
     assert r.output.startswith("Usage: main [OPTIONS] COMMAND [ARGS]...")
 
 
-def test_cli_build_help(tmpdir):
+def test_cli_build_help():
     r = CliRunner().invoke(hydromt_cli, ["build", "--help"])
     assert r.exit_code == 0
     assert r.output.startswith("Usage: main build [OPTIONS] MODEL MODEL_ROOT")
 
 
-def test_cli_update_help(tmpdir):
+def test_cli_update_help():
     r = CliRunner().invoke(hydromt_cli, ["update", "--help"])
     assert r.exit_code == 0
     assert r.output.startswith("Usage: main update [OPTIONS] MODEL MODEL_ROOT")
 
 
-def test_cli_clip_help(tmpdir):
+def test_cli_clip_help():
     r = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
     assert r.exit_code == 0
     assert r.output.startswith(
@@ -259,14 +261,11 @@ def test_export_cli_config_file(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
 def test_check_cli():
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "check",
-            "-m",
-            "grid_model",
             "-d",
             "tests/data/test_sources.yml",
             "-i",
@@ -301,8 +300,6 @@ def test_check_cli_known_region(tmpdir):
             hydromt_cli,
             [
                 "check",
-                "-m",
-                "grid_model",
                 "-r",
                 "{'asdfasdfasdf': [-7.24, 62.09], 'uparea': 50}",
                 "-i",

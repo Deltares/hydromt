@@ -352,7 +352,7 @@ def update(
 @click.pass_context
 def check(
     ctx,
-    model,
+    model: Optional[str],
     config,
     data,
     region: Optional[Dict[Any, Any]],
@@ -402,13 +402,13 @@ def check(
                 all_exceptions.append(e)
 
         if config:
-            mod = PLUGINS.model_plugins[model]
-            logger.info(f"Validating for model {model} of type {type(mod).__name__}")
+            logger.info(f"Validating config at {config}")
             try:
                 config_dict = _utils.parse_config(config)
-                logger.info(f"Validating config at {config}")
+                if model:
+                    config_dict["global"]["model"] = model
 
-                HydromtModelSetup.from_dict(config_dict, model=mod)
+                HydromtModelSetup.from_dict(config_dict)
                 logger.info("Model config valid!")
 
             except (ValidationError, ValueError) as e:
