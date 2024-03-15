@@ -11,6 +11,10 @@ class FooComponent(ModelComponent):
     def create(self, a: int, b: str) -> None:
         pass
 
+    @hydromt_step
+    def with_defaults(self, a: int, b: str = "2") -> None:
+        pass
+
     def read(self) -> None:
         pass
 
@@ -75,3 +79,10 @@ def test_validate_steps_blacklisted_function():
         AttributeError, match="Method read is not allowed to be called on model."
     ):
         validate_steps(model, {"read": None})
+
+
+def test_validate_steps_correct_with_defaults():
+    model = Model()
+    model.add_component("foo", FooComponent(model))
+    validate_steps(model, {"foo.with_defaults": {"a": 1}})
+    validate_steps(model, {"foo.with_defaults": {"a": 1, "b": "3"}})

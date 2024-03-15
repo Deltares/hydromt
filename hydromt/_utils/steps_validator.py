@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 from .rgetattr import rgetattr
 
 
-def validate_steps(model: "Model", steps: OrderedDict[str, Any]) -> None:
+def validate_steps(model: "Model", steps: OrderedDict[str, dict[str, Any]]) -> None:
     for step, options in steps.items():
         attr = rgetattr(model, step, None)
         if attr is None:
