@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from logging import Logger
 from weakref import ref
 
+from hydromt import hydromt_step
 from hydromt.data_catalog import DataCatalog
 
 # if TYPE_CHECKING:
@@ -48,6 +49,7 @@ class ModelComponent(ABC):
         if not self.model_root.is_reading_mode():
             raise IOError("Model opened in write-only mode")
 
+    @hydromt_step
     @abstractmethod
     def write(self):
         """Write the component to file(s)."""

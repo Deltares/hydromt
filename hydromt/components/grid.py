@@ -11,6 +11,7 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.components.base import ModelComponent
@@ -53,7 +54,7 @@ class GridComponent(ModelComponent):
         model: Model
             HydroMT model instance
         """
-        self._data = None
+        self._data: Optional[xr.Dataset] = None
         super().__init__(model=model)
 
     def set(
@@ -101,6 +102,7 @@ class GridComponent(ModelComponent):
                         self.logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
+    @hydromt_step
     def write(
         self,
         fn: str = "grid/grid.nc",
@@ -188,6 +190,7 @@ class GridComponent(ModelComponent):
         for ds in loaded_nc_files.values():
             self.set(ds)
 
+    @hydromt_step
     def create(
         self,
         region: dict,
@@ -491,6 +494,7 @@ class GridComponent(ModelComponent):
         if len(self.data) > 0:
             self.data.raster.set_crs(crs)
 
+    @hydromt_step
     def add_data_from_constant(
         self,
         constant: Union[int, float],
@@ -533,6 +537,7 @@ class GridComponent(ModelComponent):
 
         return [name]
 
+    @hydromt_step
     def add_data_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
@@ -603,6 +608,7 @@ class GridComponent(ModelComponent):
 
         return list(ds_out.data_vars.keys())
 
+    @hydromt_step
     def add_data_from_raster_reclass(
         self,
         raster_fn: Union[str, Path, xr.DataArray],
@@ -691,6 +697,7 @@ class GridComponent(ModelComponent):
 
         return list(ds_vars.data_vars.keys())
 
+    @hydromt_step
     def add_data_from_geodataframe(
         self,
         vector_fn: Union[str, Path, gpd.GeoDataFrame],

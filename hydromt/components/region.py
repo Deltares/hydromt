@@ -15,7 +15,7 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely import box
 
-from hydromt import _compat
+from hydromt import _compat, hydromt_step
 from hydromt._typing.type_def import StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
@@ -39,6 +39,7 @@ class ModelRegionComponent(ModelComponent):
         super().__init__(model)
         self._data: Optional[GeoDataFrame] = None
 
+    @hydromt_step
     def create(
         self,
         region: dict,
@@ -223,6 +224,7 @@ class ModelRegionComponent(ModelComponent):
         )
         self.kind = "geom"
 
+    @hydromt_step
     def write(
         self,
         rel_path: StrPath = Path(DEFAULT_REGION_FILE_PATH),

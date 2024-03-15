@@ -32,9 +32,11 @@ import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 
+from hydromt import hydromt_step
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
 from hydromt._utils.rgetattr import rgetattr
+from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import ModelRegionComponent
 from hydromt.components.base import ModelComponent
 from hydromt.components.root import ModelRootComponent
@@ -248,7 +250,7 @@ class Model(object, metaclass=ABCMeta):
 
         """
         steps = steps or OrderedDict()
-        steps = self._validate_steps(steps)
+        validate_steps(self, steps)
 
         # steps gets preference over defaults.
         # But put region.create at the start of the list.
@@ -316,7 +318,7 @@ class Model(object, metaclass=ABCMeta):
             to a temporary file in case the original file cannot be written to.
         """
         steps = steps or OrderedDict()
-        steps = self._validate_steps(steps)
+        validate_steps(self, steps)
 
         # check if region.create is in the steps, and remove it.
         if steps.pop("region.create", None) is not None:
@@ -352,12 +354,12 @@ class Model(object, metaclass=ABCMeta):
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
+    @hydromt_step
     def write(self):
         """Write all components of the model to disk with defaults."""
         for c in self._components.values():
             c.write()
 
-    # I/O
     def read(self) -> None:
         """Read the complete model schematization and configuration from model files."""
         self.logger.info(f"Reading model data from {self.root.path}")
@@ -366,10 +368,6 @@ class Model(object, metaclass=ABCMeta):
 
     def _options_contain_write(self, steps: OrderedDict[str, Any]) -> bool:
         return any([step.split(".")[-1] == "write" for step in steps])
-
-    def _validate_steps(self, steps: OrderedDict[str, Any]) -> OrderedDict[str, Any]:
-        # TODO: Validate all steps
-        return steps
 
     def write_data_catalog(
         self,
