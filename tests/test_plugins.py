@@ -1,7 +1,7 @@
 from typing import List
-from unittest.mock import MagicMock, create_autospec
 
 import pytest
+from importlib_metadata import EntryPoint, EntryPoints, entry_points
 from pytest_mock import MockerFixture
 
 from hydromt.components.base import ModelComponent
@@ -39,19 +39,21 @@ def test_summary():
 
 
 def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str]):
-    mock_single_entrypoint = MagicMock()
-    mock_multiple_entrypoints = MagicMock()
+    mock_single_entrypoint = mocker.create_autospec(EntryPoint, spec_set=True)
+    mock_multiple_entrypoints = mocker.create_autospec(EntryPoints, spec_set=True)
     mock_multiple_entrypoints.__iter__.return_value = [mock_single_entrypoint]
 
-    mock_module = MagicMock(__all__=component_names)
+    mock_module = mocker.MagicMock(__all__=component_names)
     mock_single_entrypoint.load.return_value = mock_module
     mocked_components = []
     for c in component_names:
-        mock_component = create_autospec(ModelComponent, spec_set=True, instance=True)
+        mock_component = mocker.create_autospec(
+            ModelComponent, spec_set=True, instance=True
+        )
         mock_module.__setattr__(c, mock_component)
         mocked_components.append(mock_component)
 
-    func = MagicMock()
+    func = mocker.create_autospec(entry_points, spec_set=True)
     func.return_value = mock_multiple_entrypoints
 
     return func, mocked_components
@@ -71,8 +73,8 @@ def test_discover_mock_plugin(mocker):
     mock_entrypoints, mocked_components = _patch_plugin_entry_point(
         mocker, ["TestModelComponent", "OtherTestModelComponent"]
     )
-    with mocker.patch("hydromt.plugins.entry_points", new=mock_entrypoints):
-        components = PLUGINS.component_plugins
+    mocker.patch("hydromt.plugins.entry_points", new=mock_entrypoints)
+    components = PLUGINS.component_plugins
     assert components == {
         "TestModelComponent": mocked_components[0],
         "OtherTestModelComponent": mocked_components[1],
