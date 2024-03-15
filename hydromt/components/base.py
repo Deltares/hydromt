@@ -3,20 +3,20 @@
 from abc import ABC, abstractmethod
 from logging import Logger
 from typing import TYPE_CHECKING, cast
-from weakref import ref
+from weakref import ReferenceType, ref
 
-from hydromt import hydromt_step
 from hydromt.data_catalog import DataCatalog
 
 if TYPE_CHECKING:
+    from hydromt.components.root import ModelRootComponent
     from hydromt.models import Model
 
 
 class ModelComponent(ABC):
     """Abstract base class for ModelComponent."""
 
-    def __init__(self, model):
-        self._model_ref = ref(model)
+    def __init__(self, model: "Model"):
+        self._model_ref: ReferenceType["Model"] = ref(model)
 
     @property
     def model(self) -> "Model":
@@ -34,7 +34,7 @@ class ModelComponent(ABC):
         return self.model.logger
 
     @property
-    def model_root(self):
+    def model_root(self) -> "ModelRootComponent":
         """Return the root of the model this component is associated with."""
         return self.model.root
 
@@ -44,7 +44,6 @@ class ModelComponent(ABC):
         if not self.model_root.is_reading_mode():
             raise IOError("Model opened in write-only mode")
 
-    @hydromt_step
     @abstractmethod
     def write(self):
         """Write the component to file(s)."""

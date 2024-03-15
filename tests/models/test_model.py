@@ -45,49 +45,6 @@ def _patch_plugin_components(
     return [type_mocks[c.__name__].return_value for c in component_classes]
 
 
-# @pytest.mark.skip(reason="needs translation to new entrypoint structure")
-# def test_plugins(mocker):
-#     ep_lst = EntryPoints(
-#         [
-#             EntryPoint(
-#                 name="test_model",
-#                 value="hydromt.models.model_api:Model",
-#                 group="hydromt.models",
-#             )
-#         ]
-#     )
-#     mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
-#     eps = plugins.get_plugin_eps()
-#     assert "test_model" in eps
-#     assert isinstance(eps["test_model"], EntryPoint)
-
-
-# @pytest.mark.skip(reason="needs translation to new entrypoint structure")
-# def test_plugin_duplicates(mocker):
-#     ep_lst = plugins.get_general_eps().values()
-#     mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
-#     eps = plugins.get_plugin_eps()
-#     assert len(eps) == 0
-
-
-# @pytest.mark.skip(reason="needs translation to new entrypoint structure")
-# def test_load():
-#     with pytest.raises(ValueError, match="Model plugin type not recognized"):
-#         plugins.load(
-#             EntryPoint(
-#                 name="error",
-#                 value="hydromt.data_catalog:DataCatalog",
-#                 group="hydromt.data_catalog",
-#             )
-#         )
-#     with pytest.raises(ImportError, match="Error while loading model plugin"):
-#         plugins.load(
-#             EntryPoint(
-#                 name="error", value="hydromt.models:DataCatalog", group="hydromt.models"
-#             )
-#         )
-
-
 # test both with and without xugrid
 # @pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
 # def test_global_models(mocker, has_xugrid):
