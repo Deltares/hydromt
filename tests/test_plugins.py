@@ -2,6 +2,7 @@ from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.components.root import ModelRootComponent
+from hydromt.models.model import Model
 from hydromt.plugins import PLUGINS
 
 
@@ -13,6 +14,11 @@ def test_core_component_plugins():
         "ModelComponent": ModelComponent,
         "ModelRootComponent": ModelRootComponent,
     }
+
+
+def test_core_model_plugins():
+    models = PLUGINS.model_plugins
+    assert models == {"Model": Model}
 
 
 # def test_plugins(mocker):

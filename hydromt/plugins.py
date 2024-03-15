@@ -1,7 +1,7 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
 
 import logging
-from typing import TYPE_CHECKING, Dict, Type
+from typing import TYPE_CHECKING, Dict, Optional, Type
 
 from importlib_metadata import entry_points
 
@@ -34,11 +34,11 @@ class Plugins:
 
     def __init__(self):
         """Initiate the catalog object."""
-        self._component_plugins = None
-        self._model_plugins = None
+        self._component_plugins: Optional[dict[str, type["ModelComponent"]]] = None
+        self._model_plugins: Optional[dict[str, type["Model"]]] = None
 
     @property
-    def component_plugins(self):
+    def component_plugins(self) -> dict[str, type["ModelComponent"]]:
         """Load and provide access to all known component plugins."""
         if self._component_plugins is None:
             self._component_plugins = _discover_plugins(group="hydromt.components")
@@ -46,14 +46,14 @@ class Plugins:
         return self._component_plugins
 
     @property
-    def model_plugins(self):
+    def model_plugins(self) -> dict[str, type["Model"]]:
         """Load and provide access to all known model plugins."""
         if self._model_plugins is None:
             self._model_plugins = _discover_plugins(group="hydromt.models")
 
         return self._model_plugins
 
-    def summary(self):
+    def summary(self) -> str:
         """Generate string representation containing the registered entrypoints."""
         component_plugins = ", ".join(self.component_plugins)
         model_plugins = ", ".join(self.model_plugins)
