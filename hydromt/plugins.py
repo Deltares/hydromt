@@ -1,6 +1,5 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
 
-import logging
 from typing import TYPE_CHECKING, Dict, Optional, Type
 
 from importlib_metadata import entry_points
@@ -8,8 +7,6 @@ from importlib_metadata import entry_points
 if TYPE_CHECKING:
     from hydromt.components import ModelComponent  # noqa
     from hydromt.models import Model  # noqa
-
-logger = logging.getLogger(__name__)
 
 __all__ = ["PLUGINS"]
 

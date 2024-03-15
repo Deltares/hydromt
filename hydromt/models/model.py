@@ -46,7 +46,7 @@ from hydromt.plugins import PLUGINS
 
 __all__ = ["Model"]
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=ModelComponent)
 
 
@@ -87,7 +87,7 @@ class Model(object, metaclass=ABCMeta):
         mode: str = "w",
         config_fn: Optional[str] = None,
         data_libs: Optional[Union[List, str]] = None,
-        logger=logger,
+        logger=_logger,
         **artifact_keys,
     ):
         r"""Initialize a model.
@@ -1493,7 +1493,7 @@ class Model(object, metaclass=ABCMeta):
             try:
                 ds.to_netcdf(_fn, **kwargs)
             except PermissionError:
-                logger.warning(f"Could not write to file {_fn}, defering write")
+                _logger.warning(f"Could not write to file {_fn}, defering write")
                 if self._TMP_DATA_DIR is None:
                     self._TMP_DATA_DIR = TemporaryDirectory()
 
