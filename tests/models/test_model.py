@@ -899,6 +899,7 @@ def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
 
 def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
     region, foo = _patch_plugin_components(mocker, ModelRegionComponent, ModelComponent)
+    foo.write.__ishydromtstep__ = True
     m = Model(root=str(tmpdir))
     m.add_component("foo", foo)
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
