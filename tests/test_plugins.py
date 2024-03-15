@@ -39,6 +39,10 @@ def test_summary():
 
 
 def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str]):
+    ### SETUP
+    PLUGINS._component_plugins = None
+    PLUGINS._model_plugins = None
+
     mock_single_entrypoint = mocker.create_autospec(EntryPoint, spec_set=True)
     mock_multiple_entrypoints = mocker.create_autospec(EntryPoints, spec_set=True)
     mock_multiple_entrypoints.__iter__.return_value = [mock_single_entrypoint]
@@ -59,7 +63,19 @@ def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str])
     return func, mocked_components
 
 
-def test_errors_on_duplicate_plugins(mocker):
+@pytest.fixture()
+def _reset_plugins():
+    PLUGINS._component_plugins = None
+    PLUGINS._model_plugins = None
+    yield
+    PLUGINS._component_plugins = None
+    PLUGINS._model_plugins = None
+
+
+@pytest.mark.usefixtures("_reset_plugins")
+def test_errors_on_duplicate_plugins(
+    mocker,
+):
     mocked_entrypoints, _ = _patch_plugin_entry_point(
         mocker, ["TestModelComponent", "TestModelComponent"]
     )
@@ -69,7 +85,9 @@ def test_errors_on_duplicate_plugins(mocker):
         _ = PLUGINS.component_plugins
 
 
+@pytest.mark.usefixtures("_reset_plugins")
 def test_discover_mock_plugin(mocker):
+    PLUGINS._component_plugins = None
     mock_entrypoints, mocked_components = _patch_plugin_entry_point(
         mocker, ["TestModelComponent", "OtherTestModelComponent"]
     )
