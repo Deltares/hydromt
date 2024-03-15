@@ -2,14 +2,14 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger
+from typing import TYPE_CHECKING, cast
 from weakref import ref
 
 from hydromt import hydromt_step
 from hydromt.data_catalog import DataCatalog
 
-# if TYPE_CHECKING:
-#     from hydromt.models import Model
-#     from hydromt.models.root import ModelRoot
+if TYPE_CHECKING:
+    from hydromt.models import Model
 
 
 class ModelComponent(ABC):
@@ -19,14 +19,9 @@ class ModelComponent(ABC):
         self._model_ref = ref(model)
 
     @property
-    def model(self):
+    def model(self) -> "Model":
         """Return the model object this component is associated with."""
-        return self._model_ref()
-
-    # @property
-    # def model(self) -> "Model":
-    #     """Return the model object this component is associated with."""
-    #     return cast("Model", self._model_ref())
+        return cast("Model", self._model_ref())
 
     @property
     def data_catalog(self) -> DataCatalog:
