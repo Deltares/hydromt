@@ -1,12 +1,13 @@
 """DataSource class for the RasterDataset type."""
+
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, Literal, Optional, cast
+from typing import ClassVar, Dict, Literal, Optional, cast
 
 import pandas as pd
 import xarray as xr
-from pydantic import ValidationInfo, field_validator
+from pydantic import Field
 from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
@@ -39,20 +40,7 @@ class RasterDatasetSource(DataSource):
 
     data_type: ClassVar[Literal["RasterDataset"]] = "RasterDataset"
     driver: RasterDatasetDriver
-    data_adapter: RasterDatasetAdapter
-
-    @field_validator("driver", mode="before")
-    @classmethod
-    def _check_geodataframe_drivers(cls, v: Any, info: ValidationInfo) -> str:
-        if isinstance(v, str):
-            if v not in _KNOWN_DRIVERS:
-                raise ValueError(f"unknown driver '{v}'")
-            return driver_from_str(v, **info.data.get("driver_kwargs"))
-        elif hasattr(v, "read"):  # driver duck-typing
-            return v
-        else:
-            raise ValueError(f"unknown driver type: {str(v)}")
-
+    data_adapter: RasterDatasetAdapter = Field(default_factory=RasterDatasetAdapter)
     zoom_levels: Optional[Dict[int, float]] = None
 
     def read_data(

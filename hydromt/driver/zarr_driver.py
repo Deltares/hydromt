@@ -1,4 +1,5 @@
 """RasterDatasetDriver for zarr data."""
+
 from functools import partial
 from logging import Logger
 from typing import Callable, List, Optional
@@ -14,6 +15,8 @@ from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
 
 class ZarrDriver(RasterDatasetDriver):
     """RasterDatasetDriver for zarr data."""
+
+    name = "zarr"
 
     def read(
         self,

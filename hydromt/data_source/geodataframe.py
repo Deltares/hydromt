@@ -3,10 +3,10 @@
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional
+from typing import ClassVar, List, Literal, Optional
 
 import geopandas as gpd
-from pydantic import ValidationInfo, field_validator
+from pydantic import Field
 from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
@@ -17,24 +17,10 @@ from pystac import MediaType
 from hydromt._typing import Bbox, ErrorHandleMethod, Geom, NoDataStrategy, TotalBounds
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
-from hydromt.driver.pyogrio_driver import PyogrioDriver
 
 from .data_source import DataSource
 
 logger: Logger = getLogger(__name__)
-
-# placeholder for proper plugin behaviour later on.
-_KNOWN_DRIVERS: Dict[str, GeoDataFrameDriver] = {"pyogrio": PyogrioDriver}
-
-
-def driver_from_str(driver_str: str, **driver_kwargs) -> GeoDataFrameDriver:
-    """Construct GeoDataFrame driver."""
-    if driver_str not in _KNOWN_DRIVERS.keys():
-        raise ValueError(
-            f"driver {driver_str} not in known GeoDataFrameDrivers: {_KNOWN_DRIVERS.keys()}"
-        )
-
-    return _KNOWN_DRIVERS[driver_str](**driver_kwargs)
 
 
 class GeoDataFrameSource(DataSource):
@@ -46,19 +32,7 @@ class GeoDataFrameSource(DataSource):
 
     data_type: ClassVar[Literal["GeoDataFrame"]] = "GeoDataFrame"
     driver: GeoDataFrameDriver
-    data_adapter: GeoDataFrameAdapter
-
-    @field_validator("driver", mode="before")
-    @classmethod
-    def _check_geodataframe_drivers(cls, v: Any, info: ValidationInfo) -> str:
-        if isinstance(v, str):
-            if v not in _KNOWN_DRIVERS:
-                raise ValueError(f"unknown driver '{v}'")
-            return driver_from_str(v, **info.data.get("driver_kwargs"))
-        elif hasattr(v, "read"):  # driver duck-typing
-            return v
-        else:
-            raise ValueError(f"unknown driver type: {str(v)}")
+    data_adapter: GeoDataFrameAdapter = Field(default_factory=GeoDataFrameAdapter)
 
     def read_data(
         self,

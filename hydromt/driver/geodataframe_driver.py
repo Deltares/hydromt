@@ -1,4 +1,5 @@
 """Driver for GeoDataFrames."""
+
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
 from typing import List, Optional
@@ -13,7 +14,7 @@ from hydromt.driver import BaseDriver
 logger: Logger = getLogger(__name__)
 
 
-class GeoDataFrameDriver(ABC, BaseDriver):
+class GeoDataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
 
     @abstractmethod

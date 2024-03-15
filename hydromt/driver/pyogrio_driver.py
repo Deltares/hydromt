@@ -1,4 +1,5 @@
 """Driver to read geodataframes using Pyogrio."""
+
 from logging import Logger, getLogger
 from typing import List, Optional
 
@@ -17,6 +18,8 @@ logger: Logger = getLogger(__name__)
 
 class PyogrioDriver(GeoDataFrameDriver):
     """Driver to read GeoDataFrames using the `pyogrio` package."""
+
+    name = "pyogrio"
 
     def read(
         self,

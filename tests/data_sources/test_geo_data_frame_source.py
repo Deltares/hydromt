@@ -49,7 +49,7 @@ class TestGeoDataFrameSource:
         error_driver = next(
             filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
         )
-        assert error_driver["type"] == "value_error"
+        assert error_driver["type"] == "model_type"
 
     def test_model_validate(
         self,
@@ -137,6 +137,24 @@ class TestGeoDataFrameSource:
         )
         with pytest.raises(DataSourceError):
             source.read_data()
+
+    def test_instantiate_directly(
+        self,
+    ):
+        GeoDataFrameSource(
+            name="test",
+            uri="points.geojson",
+            driver={"name": "pyogrio", "metadata_resolver": "convention"},
+            driver_kwargs={},
+            data_adapter={"harmonization_settings": {"unit_add": {"geoattr": 1.0}}},
+        )
+
+    def test_instantiate_directly_minimal_kwargs(self):
+        GeoDataFrameSource(
+            name="test",
+            uri="points.geojson",
+            driver={"name": "pyogrio"},
+        )
 
     @pytest.mark.skip("Missing driver: 'raster'")
     def test_geodataframe_unit_attrs(self, artifact_data: DataCatalog):

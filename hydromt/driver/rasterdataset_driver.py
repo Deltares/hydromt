@@ -1,4 +1,5 @@
 """Driver for RasterDatasets."""
+
 from abc import ABC, abstractmethod
 from logging import Logger
 from typing import List, Optional
@@ -12,7 +13,7 @@ from hydromt._typing.error import NoDataStrategy
 from .base_driver import BaseDriver
 
 
-class RasterDatasetDriver(ABC, BaseDriver):
+class RasterDatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
 
     @abstractmethod

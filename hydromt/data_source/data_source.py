@@ -1,4 +1,5 @@
 """Abstract DataSource class."""
+
 from os.path import abspath, join
 from pathlib import Path
 from typing import Any, Callable, ClassVar, Dict, Optional, Union
@@ -87,7 +88,7 @@ class DataSource(BaseModel):
             except StopIteration:
                 raise ValueError(f"Unknown 'data_type': '{data_type}'")
 
-        raise ValueError("DataSource needs 'data_type'")
+        raise ValueError(f"{cls.__name__} needs 'data_type'")
 
     @model_validator(mode="before")
     @classmethod

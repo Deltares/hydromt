@@ -33,7 +33,7 @@ class TestRasterDatasetSource:
         error_driver = next(
             filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
         )
-        assert error_driver["type"] == "value_error"
+        assert error_driver["type"] == "model_type"
 
     def test_model_validate(
         self,
@@ -60,6 +60,25 @@ class TestRasterDatasetSource:
                     "uri": "test_uri",
                 }
             )
+
+    def test_instantiate_directly(
+        self,
+    ):
+        RasterDatasetSource(
+            name="test",
+            uri="points.zarr",
+            zoom_levels={1: 10},
+            driver={"name": "zarr", "metadata_resolver": "convention"},
+            driver_kwargs={},
+            data_adapter={"harmonization_settings": {"unit_add": {"geoattr": 1.0}}},
+        )
+
+    def test_instantiate_directly_minimal_kwargs(self):
+        RasterDatasetSource(
+            name="test",
+            uri="points.zarr",
+            driver={"name": "zarr"},
+        )
 
     def test_read_data(
         self,
