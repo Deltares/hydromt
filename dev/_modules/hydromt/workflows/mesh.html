@@ -446,6 +446,7 @@ document.write(`
                   
   <h1>Source code for hydromt.workflows.mesh</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Implementation for mesh based workflows.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
@@ -713,7 +714,7 @@ document.write(`
     <span class="c1"># Get one variable name in ds to simplify to da</span>
     <span class="n">var</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">uda</span> <span class="o">=</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataArray</span><span class="o">.</span><span class="n">from_structured</span><span class="p">(</span>
-        <span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">x_dim</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">y_dim</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">})</span>
+        <span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">xcoords</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">ycoords</span><span class="o">.</span><span class="n">name</span>
     <span class="p">)</span>
     <span class="n">uda</span><span class="o">.</span><span class="n">ugrid</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 
