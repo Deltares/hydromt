@@ -335,7 +335,7 @@ class MeshComponent(ModelComponent):
 
     def get_mesh(
         self, grid_name: str, include_data: bool = False
-    ) -> Union[xu.UgridDataArray, xu.UgridDataset]:
+    ) -> Union[xu.Ugrid1d, xu.Ugrid2d, xu.UgridDataArray, xu.UgridDataset]:
         """
         Return a specific grid topology from mesh based on grid_name.
 
