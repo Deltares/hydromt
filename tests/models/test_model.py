@@ -90,8 +90,6 @@ def test_global_models(mocker, has_xugrid):
     _MODELS = ModelCatalog()
     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
     keys = list(plugins.LOCAL_EPS.keys())
-    if not hydromt._compat.HAS_XUGRID:
-        keys.remove("mesh_model")
     # set first local model as plugin for testing
     _MODELS._plugins.append(keys[0])
     assert isinstance(_MODELS[keys[0]], EntryPoint)
