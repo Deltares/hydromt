@@ -3,8 +3,8 @@
 global:
   model_type: Model
   components:
-    - grid:
-        type: GridComponent
+    grid:
+      type: GridComponent
 steps:
   # - config.create:
   #   header.settings: value

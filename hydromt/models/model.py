@@ -338,9 +338,10 @@ class Model(object, metaclass=ABCMeta):
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
     @hydromt_step
-    def write(self):
+    def write(self, components: Optional[list[str]] = None):
         """Write all components of the model to disk with defaults."""
-        for c in self._components.values():
+        components = components or list(self._components.keys())
+        for c in [self._components[name] for name in components]:
             c.write()
 
     def read(self) -> None:

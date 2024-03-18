@@ -408,7 +408,7 @@ def check(
                 if model:
                     config_dict["global"]["model"] = model
 
-                HydromtModelSetup.from_dict(config_dict)
+                HydromtModelSetup(**config_dict)
                 logger.info("Model config valid!")
 
             except (ValidationError, ValueError) as e:
