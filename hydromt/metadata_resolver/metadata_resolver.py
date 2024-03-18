@@ -1,13 +1,13 @@
 """Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
+
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import geopandas as gpd
 from pydantic import BaseModel, Field
 
 from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
-from hydromt.data_adapter.harmonization_settings import HarmonizationSettings
 
 logger: Logger = getLogger(__name__)
 
@@ -15,9 +15,9 @@ logger: Logger = getLogger(__name__)
 class MetaDataResolver(BaseModel, ABC):
     """Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
 
-    harmonization_settings: HarmonizationSettings = Field(
-        default_factory=HarmonizationSettings
-    )
+    unit_add: Dict[str, Any] = Field(default_factory=dict)
+    unit_mult: Dict[str, Any] = Field(default_factory=dict)
+    rename: Dict[str, str] = Field(default_factory=dict)
 
     @abstractmethod
     def resolve(

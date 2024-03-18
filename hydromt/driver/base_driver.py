@@ -27,6 +27,17 @@ class BaseDriver(BaseModel, ABC):
             if v not in RESOLVERS:
                 raise ValueError(f"unknown MetaDataResolver: '{v}'.")
             return RESOLVERS.get(v)()
+        elif isinstance(v, dict):
+            try:
+                name: str = v.pop("name")
+                if name not in RESOLVERS:
+                    raise ValueError(f"unknown MetaDataResolver: '{name}'.")
+                else:
+                    return RESOLVERS.get(name).model_validate(v)
+            except KeyError:
+                # return default when name is missing
+                return cls.model_fields.get("metadata_resolver").default_factory(**v)
+
         elif v is None:  # let default factory handle it
             return None
         elif hasattr(v, "resolve"):  # MetaDataResolver duck-typing

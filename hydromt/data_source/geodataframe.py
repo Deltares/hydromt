@@ -90,7 +90,7 @@ class GeoDataFrameSource(DataSource):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        bbox = self.data_adapter.harmonization_settings.extent.get("bbox", None)
+        bbox = self.extent.get("bbox", None)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 
@@ -155,9 +155,9 @@ class GeoDataFrameSource(DataSource):
           None if the dataset was skipped.
         """
         try:
-            bbox, crs = self.data_adapter.get_bbox(detect=True)  # Should move to driver
+            bbox, crs = self.get_bbox(detect=True)  # Should move to driver
             bbox = list(bbox)
-            props = {**self.harmonization.meta, "crs": crs}
+            props = {**self.data_adapter.meta, "crs": crs}
             ext = splitext(self.uri)[-1]
             if ext == ".gpkg":
                 media_type = MediaType.GEOPACKAGE
@@ -174,7 +174,7 @@ class GeoDataFrameSource(DataSource):
                 return
             elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.harmonization.meta
+                props = self.data_adapter.meta
                 media_type = MediaType.JSON
             else:
                 raise e

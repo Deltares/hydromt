@@ -57,9 +57,7 @@ class ConventionResolver(MetaDataResolver):
         keys: List[str],
         timerange: TimeRange,
     ) -> pd.PeriodIndex:
-        dt: pd.Timedelta = pd.to_timedelta(
-            self.harmonization_settings.unit_add.get("time", 0), unit="s"
-        )
+        dt: pd.Timedelta = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
         t_range: pd.DatetimeIndex = pd.to_datetime(list(timerange)) - dt
         freq: str = "m" if "month" in keys else "a"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
@@ -67,9 +65,7 @@ class ConventionResolver(MetaDataResolver):
 
     def _get_variables(self, variables: List[str]) -> List[str]:
         variables: list[str] = np.atleast_1d(variables).tolist()
-        inverse_rename_mapping: dict[str, str] = {
-            v: k for k, v in self.harmonization_settings.rename.items()
-        }
+        inverse_rename_mapping: dict[str, str] = {v: k for k, v in self.rename.items()}
         vrs: dict[str] = [inverse_rename_mapping.get(var, var) for var in variables]
         return vrs
 

@@ -104,7 +104,7 @@ class RasterDatasetSource(DataSource):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        bbox = self.data_adapter.harmonization_settings.extent.get("bbox", None)
+        bbox = self.extent.get("bbox", None)
         crs = cast(int, crs)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
@@ -134,9 +134,7 @@ class RasterDatasetSource(DataSource):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        time_range = self.data_adapter.harmonization_settings.extent.get(
-            "time_range", None
-        )
+        time_range = self.extent.get("time_range", None)
         if time_range is None and detect:
             time_range = self.detect_time_range()
 
@@ -232,7 +230,7 @@ class RasterDatasetSource(DataSource):
             start_dt, end_dt = self.get_time_range(detect=True)
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
-            props = {**self.harmonization.meta, "crs": crs}
+            props = {**self.data_adapter.meta, "crs": crs}
             ext = splitext(self.uri)[-1]
             if ext == ".nc" or ext == ".vrt":
                 media_type = MediaType.HDF5
@@ -255,7 +253,7 @@ class RasterDatasetSource(DataSource):
                 return
             elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.harmonization.meta
+                props = self.data_adapter.meta
                 start_dt = datetime(1, 1, 1)
                 end_dt = datetime(1, 1, 1)
                 media_type = MediaType.JSON

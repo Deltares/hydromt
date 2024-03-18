@@ -195,7 +195,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             )
 
     def _rename_vars(self, ds: Data) -> Data:
-        rm = {k: v for k, v in self.harmonization_settings.rename.items() if k in ds}
+        rm = {k: v for k, v in self.rename.items() if k in ds}
         ds = ds.rename(rm)
         return ds
 
@@ -299,7 +299,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             return ds
 
     def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
-        dt = self.harmonization_settings.unit_add.get("time", 0)
+        dt = self.unit_add.get("time", 0)
         if (
             dt != 0
             and "time" in ds.dims
@@ -379,15 +379,13 @@ class RasterDatasetAdapter(DataAdapterBase):
             return ds
 
     def _apply_unit_conversions(self, ds: Data, logger=logger):
-        unit_names = list(self.harmonization_settings.unit_mult.keys()) + list(
-            self.harmonization_settings.unit_add.keys()
-        )
+        unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
             logger.debug(f"Convert units for {len(unit_names)} variables.")
         for name in list(set(unit_names)):  # unique
-            m = self.harmonization_settings.unit_mult.get(name, 1)
-            a = self.harmonization_settings.unit_add.get(name, 0)
+            m = self.unit_mult.get(name, 1)
+            a = self.unit_add.get(name, 0)
             da = ds[name]
             attrs = da.attrs.copy()
             nodata_isnan = da.raster.nodata is None or np.isnan(da.raster.nodata)
@@ -403,13 +401,13 @@ class RasterDatasetAdapter(DataAdapterBase):
     def _set_nodata(self, ds):
         """Parse and apply nodata values from the data catalog."""
         # set nodata value
-        if self.harmonization_settings.nodata is not None:
-            if not isinstance(self.harmonization_settings.nodata, dict):
+        if self.nodata is not None:
+            if not isinstance(self.nodata, dict):
                 no_data_values: Dict[str, Any] = {
-                    k: self.harmonization_settings.nodata for k in ds.data_vars.keys()
+                    k: self.nodata for k in ds.data_vars.keys()
                 }
             else:
-                no_data_values: Dict[str, Any] = self.harmonization_settings.nodata
+                no_data_values: Dict[str, Any] = self.nodata
             for k in ds.data_vars:
                 mv = no_data_values.get(k, None)
                 if mv is not None and ds[k].raster.nodata is None:
@@ -418,10 +416,10 @@ class RasterDatasetAdapter(DataAdapterBase):
 
     def _set_metadata(self, ds):
         # unit attributes
-        for k in self.harmonization_settings.attrs:
-            ds[k].attrs.update(self.harmonization_settings.attrs[k])
+        for k in self.attrs:
+            ds[k].attrs.update(self.attrs[k])
         # set meta data
-        ds.attrs.update(self.harmonization_settings.meta)
+        ds.attrs.update(self.meta)
         return ds
 
     # TODO: uses rasterio and is specific to driver. Should be moved to driver

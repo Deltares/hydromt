@@ -1,12 +1,16 @@
 """BaseModel for DataAdapter."""
-from pydantic import BaseModel, Field
 
-from hydromt.data_adapter.harmonization_settings import HarmonizationSettings
+from typing import Any, Dict, Union
+
+from pydantic import BaseModel, Field
 
 
 class DataAdapterBase(BaseModel):
     """BaseModel for DataAdapter."""
 
-    harmonization_settings: HarmonizationSettings = Field(
-        default_factory=HarmonizationSettings
-    )
+    unit_add: Dict[str, Any] = Field(default_factory=dict)
+    unit_mult: Dict[str, Any] = Field(default_factory=dict)
+    rename: Dict[str, str] = Field(default_factory=dict)
+    attrs: Dict[str, Any] = Field(default_factory=dict)
+    meta: Dict[str, Any] = Field(default_factory=dict)
+    nodata: Union[float, int, Dict[str, Union[float, int]], None] = Field(default=None)

@@ -70,7 +70,7 @@ class TestRasterDatasetSource:
             zoom_levels={1: 10},
             driver={"name": "zarr", "metadata_resolver": "convention"},
             driver_kwargs={},
-            data_adapter={"harmonization_settings": {"unit_add": {"geoattr": 1.0}}},
+            data_adapter={"unit_add": {"geoattr": 1.0}},
         )
 
     def test_instantiate_directly_minimal_kwargs(self):

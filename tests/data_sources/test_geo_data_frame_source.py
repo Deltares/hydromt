@@ -113,9 +113,7 @@ class TestGeoDataFrameSource:
         source = GeoDataFrameSource(
             name="test",
             uri=example_geojson,
-            data_adapter=GeoDataFrameAdapter(
-                harmonization_settings={"rename": {"city": "ciudad"}}
-            ),
+            data_adapter=GeoDataFrameAdapter(rename={"city": "ciudad"}),
             driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
         )
         gdf = source.read_data(
@@ -146,7 +144,18 @@ class TestGeoDataFrameSource:
             uri="points.geojson",
             driver={"name": "pyogrio", "metadata_resolver": "convention"},
             driver_kwargs={},
-            data_adapter={"harmonization_settings": {"unit_add": {"geoattr": 1.0}}},
+            data_adapter={"unit_add": {"geoattr": 1.0}},
+        )
+
+    def test_instantiate_mixed_objects(self):
+        GeoDataFrameSource(
+            name="test",
+            uri="points.geojson",
+            driver=PyogrioDriver(
+                metadata_resolver={"name": "convention", "unit_add": {"geoattr": 1.0}}
+            ),
+            driver_kwargs={},
+            data_adapter={"unit_add": {"geoattr": 1.0}},
         )
 
     def test_instantiate_directly_minimal_kwargs(self):

@@ -59,7 +59,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
     def _rename_vars(self, gdf: gpd.GeoDataFrame):
         # rename and select columns
-        if rename := self.harmonization_settings.rename:
+        if rename := self.rename:
             rename = {k: v for k, v in rename.items() if k in gdf.columns}
             gdf = gdf.rename(columns=rename)
         return gdf
@@ -141,10 +141,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         """Parse and apply nodata values from the data catalog."""
         cols: Iterable[str] = gdf.select_dtypes([np.number]).columns
         no_data_value: Union[Dict[str, Any], str, None]
-        if (
-            no_data_value := self.harmonization_settings.nodata is not None
-            and len(cols) > 0
-        ):
+        if no_data_value := self.nodata is not None and len(cols) > 0:
             if not isinstance(no_data_value, dict):
                 no_data_dict: Dict[str, Any] = {c: no_data_value for c in cols}
             else:
@@ -158,25 +155,23 @@ class GeoDataFrameAdapter(DataAdapterBase):
 
     def _apply_unit_conversions(self, gdf: gpd.GeoDataFrame, logger: Logger = logger):
         # unit conversion
-        unit_names = list(self.harmonization_settings.unit_mult.keys()) + list(
-            self.harmonization_settings.unit_add.keys()
-        )
+        unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in gdf.columns]
         if len(unit_names) > 0:
             logger.debug(f"Convert units for {len(unit_names)} columns.")
         for name in list(set(unit_names)):  # unique
-            m = self.harmonization_settings.unit_mult.get(name, 1)
-            a = self.harmonization_settings.unit_add.get(name, 0)
+            m = self.unit_mult.get(name, 1)
+            a = self.unit_add.get(name, 0)
             gdf[name] = gdf[name] * m + a
         return gdf
 
     def _set_metadata(self, gdf: gpd.GeoDataFrame):
         # set meta data
-        gdf.attrs.update(self.harmonization_settings.meta)
+        gdf.attrs.update(self.meta)
 
         # set column attributes
-        for col in self.harmonization_settings.attrs:
+        for col in self.attrs:
             if col in gdf.columns:
-                gdf[col].attrs.update(**self.harmonization_settings.attrs[col])
+                gdf[col].attrs.update(**self.attrs[col])
 
         return gdf
