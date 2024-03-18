@@ -58,8 +58,6 @@ The following changes are required in your code:
 +--------------------------+--------------------------------------+
 | hydromt.gis_utils        | hydromt.gis.utils                    |
 +--------------------------+--------------------------------------+
-| hydromt.raster           | hydromt.gis.raster                   |
-+--------------------------+--------------------------------------+
 
 
 Data catalog
@@ -106,6 +104,33 @@ with their equivalent functions
 
 Model
 -----
+
+Moving from an inheretance to composition structure for the Model class
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Rationale**
+
+Prior to v1, the `Model` class was the only real place where developers could
+modify the behaviour of Core through either subclassing it, or using various
+`Mixin` classes. All parts of a model were implemented as class properties
+forcing every model to use the same terminology While this was enough for
+some users, it was too restrictive for others. For example, the SFINCS
+plugin uses multiple grids for its computation which was not possible in
+the setup pre-v1. There was also a lot of code duplication for the use of
+several parts of a model such as `maps`, `forcing` and `states`. To offer
+users more modularity and flexibility as well as improve mantainability we
+have decided to move the core to a component based archetecture rather than
+an inheritance based one.
+
+**Changes required**
+
+Now a `Model` is made up of seveal `Component` classes to which it can delegate work.
+While it should still be responsible for workloads that span multiple componontens
+it should delegate work to components whenever possible. For specific changes needed
+for appropriate components see their entry for the migration guide, but general
+changes will be described here.
+
+
 
 Making the model region it's own component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -183,3 +208,32 @@ has not been changed compared to the GridModel.
 | model.setup_grid(...)        | model.grid_component.create(...)          |
 | model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
+
+Plugins
+-------
+
+Previously the `Model` class was the only entrypoint for providing core with custom behaviour.
+Now, there are three:
+
+- `Model`: This class is mostly responsible for dispatching function calls and otherwise delegating work to components.
+- `ModelComponent`. This class provides more specialised functionalities to do with a single part of a model such as a mesh or grid.
+- `Driver`. TBC
+
+Each of these parts have entry points at their relevant submodules. For example, see how these are specified in the `pyproject.toml`
+
+```toml
+[project.entry-points."hydromt.components"]
+core = "hydromt.components"
+
+[project.entry-points."hydromt.models"]
+core = "hydromt.models"
+
+```
+To have v1 or core recognise there are a few new requiremetns:
+1. There must be a dedicated seperate submodule for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
+2. These submodules must have an `__init__.py` and this file must specify a `__all__` attribute.
+3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant catagory. This means these submodules should not re-export anything that is not a plugin.
+4. Though this cannot be enforced in Python, there is a base class for each of the plugin catagories in core, which your objects should inherit from, this makes sure that you implement all the relevant functionality.
+
+When you have specified the plugins you wish to make available to core in your `pyproject.toml`, all objects should be made available through a global static object called `PLUGINS`. This object has attributes
+for each of the corresponding plugin categories.
