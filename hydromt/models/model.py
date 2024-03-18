@@ -117,17 +117,6 @@ class Model(object, metaclass=ABCMeta):
         data_libs = data_libs or []
 
         self.logger = logger
-        dist_name, version = "unknown", "NA"
-        # if self._NAME in MODELS:
-        #     ep = MODELS[self._NAME]
-        #     dist: Optional[Distribution] = ep.dist
-        #     if dist:
-        #         dist_name = dist.name
-        #         version = dist.version
-        #     else:
-        #         # insert hydromt defaults
-        #         dist_name = "hydromt"
-        #         version = __version__
 
         # link to data
         self.data_catalog = DataCatalog(
@@ -155,9 +144,6 @@ class Model(object, metaclass=ABCMeta):
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
-        self.logger.info(
-            f"Initializing {self._NAME} model from {dist_name} (v{version})."
-        )
 
     def _add_components(self, components: dict[str, dict[str, Any]]) -> None:
         """Add all components that are specified in the config file."""
@@ -1390,7 +1376,6 @@ class Model(object, metaclass=ABCMeta):
             ncs.update({name: ds})
         return ncs
 
-    ## properties / methods below can be used directly in actual class
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
