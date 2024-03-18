@@ -275,15 +275,12 @@ def test_check_cli():
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_unsupported_region(tmpdir):
+def test_check_cli_unsupported_region():
     with pytest.raises(Exception, match="is not supported in region validation yet"):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
                 "check",
-                "-m",
-                "grid_model",
                 "-r",
                 "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
                 "-i",
@@ -293,8 +290,7 @@ def test_check_cli_unsupported_region(tmpdir):
         )
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_known_region(tmpdir):
+def test_check_cli_known_region():
     with pytest.raises(Exception, match="Unknown region kind"):
         _ = CliRunner().invoke(
             hydromt_cli,
@@ -309,14 +305,11 @@ def test_check_cli_known_region(tmpdir):
         )
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_bbox_valid(tmpdir):
+def test_check_cli_bbox_valid():
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "check",
-            "-m",
-            "grid_model",
             "-r",
             "{'bbox': [12.05,45.30,12.85,45.65]}",
             "-i",
@@ -326,14 +319,11 @@ def test_check_cli_bbox_valid(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_geom_valid(tmpdir):
+def test_check_cli_geom_valid():
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "check",
-            "-m",
-            "grid_model",
             "-r",
             "{'geom': 'tests/data/naturalearth_lowres.geojson'}",
             "-i",
@@ -344,15 +334,12 @@ def test_check_cli_geom_valid(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_geom_missing_file(tmpdir):
+def test_check_cli_geom_missing_file():
     with pytest.raises(Exception, match="Path not found at asdf"):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
                 "check",
-                "-m",
-                "grid_model",
                 "-r",
                 "{'geom': 'asdfasdf'}",
                 "-i",
