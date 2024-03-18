@@ -1,6 +1,5 @@
 import inspect
-from collections import OrderedDict
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Dict
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
@@ -8,7 +7,7 @@ if TYPE_CHECKING:
 from .rgetattr import rgetattr
 
 
-def validate_steps(model: "Model", steps: OrderedDict[str, dict[str, Any]]) -> None:
+def validate_steps(model: "Model", steps: Dict[str, dict[str, Any]]) -> None:
     for step, options in steps.items():
         attr = rgetattr(model, step, None)
         if attr is None:

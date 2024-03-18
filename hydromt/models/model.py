@@ -8,7 +8,6 @@ import shutil
 import typing
 import warnings
 from abc import ABCMeta
-from collections import OrderedDict
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -153,7 +152,7 @@ class Model(object, metaclass=ABCMeta):
         # file system
         self.root: ModelRootComponent = ModelRootComponent(root or ".", mode=mode)
 
-        self._components: OrderedDict[str, ModelComponent] = OrderedDict()
+        self._components: Dict[str, ModelComponent] = {}
         self._add_components(components)
 
         self._defered_file_closes = []
@@ -212,7 +211,7 @@ class Model(object, metaclass=ABCMeta):
         *,
         region: dict[str, Any],
         write: Optional[bool] = True,
-        steps: Optional[OrderedDict[str, Any]] = None,
+        steps: Optional[Dict[str, Any]] = None,
     ):
         r"""Single method to build a model from scratch based on settings in `opt`.
 
@@ -249,15 +248,17 @@ class Model(object, metaclass=ABCMeta):
                 }
 
         """
-        steps = steps or OrderedDict()
+        steps = steps or {}
         validate_steps(self, steps)
 
         # steps gets preference over defaults.
         # But put region.create at the start of the list.
-        steps = OrderedDict(
-            pydantic.v1.utils.deep_update(steps, {"region.create": {"region": region}})
+        steps = pydantic.v1.utils.deep_update(
+            steps, {"region.create": {"region": region}}
         )
-        steps.move_to_end("region.create", last=False)
+
+        tmp = steps.pop("region.create")
+        steps = {"region.create": tmp, **steps}
 
         for step in steps:
             self.logger.info(f"build: {step}")
@@ -275,7 +276,7 @@ class Model(object, metaclass=ABCMeta):
         *,
         model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
-        steps: Optional[OrderedDict[str, Any]] = None,
+        steps: Optional[Dict[str, Any]] = None,
         forceful_overwrite: bool = False,
     ):
         r"""Single method to update a model based the settings in `opt`.
@@ -317,7 +318,7 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        steps = steps or OrderedDict()
+        steps = steps or {}
         validate_steps(self, steps)
 
         # check if region.create is in the steps, and remove it.
@@ -366,7 +367,7 @@ class Model(object, metaclass=ABCMeta):
         for c in self._components.values():
             c.read()
 
-    def _options_contain_write(self, steps: OrderedDict[str, Any]) -> bool:
+    def _options_contain_write(self, steps: Dict[str, Any]) -> bool:
         return any([step.split(".")[-1] == "write" for step in steps])
 
     def write_data_catalog(

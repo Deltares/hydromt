@@ -208,16 +208,6 @@ def test_model_tables(model, df, tmpdir):
 #     assert "df" in mod1.tables
 
 
-@pytest.mark.skip(reason="needs method/yaml validation")
-def test_model_errors_on_unknown_method():
-    model = Model()
-    model._NAME = "testmodel"
-    with pytest.raises(
-        ValueError, match='Model testmodel has no method "unknown_method"'
-    ):
-        model.update(steps={"unknown_method": {}})
-
-
 def test_model_does_not_overwrite_in_write_mode(tmpdir):
     bbox = [12.05, 45.30, 12.85, 45.65]
     root = join(tmpdir, "tmp")
@@ -242,9 +232,7 @@ def test_model_build_update(tmpdir, demda, obsda):
         region={"bbox": bbox},
         steps={
             "region.create": {},
-            "region.write": {},
-            "write_geoms": {},
-            "write_config": {},
+            "region.write": {"components": {"geoms", "config"}},
         },
     )
     assert hasattr(model, "region")
