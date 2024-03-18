@@ -6,7 +6,6 @@ import logging
 import os
 import shutil
 import typing
-import warnings
 from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
@@ -145,9 +144,6 @@ class Model(object, metaclass=ABCMeta):
         self._forcing: Optional[XArrayDict] = None
         self._states: Optional[XArrayDict] = None
         self._results: Optional[XArrayDict] = None
-        # To be deprecated in future versions!
-        self._staticmaps = None
-        self._staticgeoms = None
 
         # file system
         self.root: ModelRootComponent = ModelRootComponent(root or ".", mode=mode)
@@ -653,119 +649,6 @@ class Model(object, metaclass=ABCMeta):
             [df.assign(table_origin=name) for name, df in self.tables.items()], axis=0
         )
 
-    # model static maps
-    @property
-    def staticmaps(self):
-        """Model static maps.
-
-        Returns xarray.Dataset,
-        ..NOTE: will be deprecated in future versions and replaced by `grid`.
-        """
-        warnings.warn(
-            "The staticmaps property of the Model class will be deprecated in future"
-            "versions. Use the grid property of the GridModel class instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if self._staticmaps is None:
-            self._staticmaps = xr.Dataset()
-            if self.root.is_reading_mode():
-                self.read_staticmaps()
-        return self._staticmaps
-
-    def set_staticmaps(
-        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
-    ):
-        """Add data to staticmaps.
-
-        All layers of staticmaps must have identical spatial coordinates.
-        This method will be deprecated in future versions. See
-        :py:meth:`~hydromt.models.GridModel.set_grid`.
-
-        Parameters
-        ----------
-        data: xarray.DataArray or xarray.Dataset
-            new map layer to add to staticmaps
-        name: str, optional
-            Name of new map layer, this is used to overwrite the name of a DataArray
-            or to select a variable from a Dataset.
-        """
-        warnings.warn(
-            "The set_staticmaps method will be deprecated in future versions, "
-            + "use set_grid instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if name is None:
-            if isinstance(data, xr.DataArray) and data.name is not None:
-                name = data.name
-            elif not isinstance(data, xr.Dataset):
-                raise ValueError("Setting a map requires a name")
-        elif name is not None and isinstance(data, xr.Dataset):
-            data_vars = list(data.data_vars)
-            if len(data_vars) == 1 and name not in data_vars:
-                data = data.rename_vars({data_vars[0]: name})
-            elif name not in data_vars:
-                raise ValueError("Name not found in DataSet")
-            else:
-                data = data[[name]]
-        if isinstance(data, xr.DataArray):
-            data.name = name
-            data = data.to_dataset()
-        if len(self.staticmaps) == 0:  # new data / trigger read
-            self._staticmaps = data
-        else:
-            if isinstance(data, np.ndarray):
-                if data.shape != self.shape:
-                    raise ValueError("Shape of data and staticmaps do not match")
-                data = xr.DataArray(dims=self.dims, data=data, name=name).to_dataset()
-            for dvar in data.data_vars.keys():
-                if dvar in self._staticmaps:
-                    self.logger.warning(f"Replacing staticmap: {dvar}")
-                self._staticmaps[dvar] = data[dvar]
-
-    def read_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
-        r"""Read static model maps at <root>/<fn> and add to staticmaps property.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
-
-        .. NOTE: this method is deprecated.
-        Use the grid property of the GridMixin instead.
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, by default "staticmaps/staticmaps.nc"
-        \**kwargs:
-            Additional keyword arguments that are passed to the
-            `read_nc` function.
-        """
-        for ds in self.read_nc(fn, **kwargs).values():
-            self.set_staticmaps(ds)
-
-    def write_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
-        r"""Write static model maps to netcdf file at <root>/<fn>.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
-
-        .. NOTE: this method is deprecated.
-        Use the grid property of the GridMixin instead.
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, by default 'staticmaps/staticmaps.nc'
-        \**kwargs:
-            Additional keyword arguments that are passed to the
-            `write_nc` function.
-        """
-        if len(self.staticmaps) == 0:
-            self.logger.debug("No staticmaps data found, skip writing.")
-        else:
-            # write_nc requires dict - use dummy 'staticmaps' key
-            nc_dict = {"staticmaps": self.staticmaps}
-            self.write_nc(nc_dict, fn, **kwargs)
-
     # map files setup methods
     def setup_maps_from_rasterdataset(
         self,
@@ -1105,66 +988,6 @@ class Model(object, metaclass=ABCMeta):
             ):
                 gdf = gdf.to_crs(4326)
             gdf.to_file(_fn, **kwargs)
-
-    @property
-    def staticgeoms(self):
-        """Access the geometryes.
-
-        This property will be deprecated in future versions,
-        use :py:meth:`~hydromt.Model.geom`.
-        """
-        warnings.warn(
-            "The staticgeoms method will be deprecated in future versions,"
-            " use geoms instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if self._geoms is None and self.root.is_reading_mode():
-            self.read_staticgeoms()
-        self._staticgeoms = self._geoms
-        return self._staticgeoms
-
-    def set_staticgeoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
-        """Set the geometries.
-
-        This method will be deprecated in future versions,
-        use :py:meth:`~hydromt.Model.set_geoms`.
-        """
-        warnings.warn(
-            "The set_staticgeoms method will be deprecated in future versions,"
-            " use set_geoms instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.set_geoms(geom, name)
-
-    def read_staticgeoms(self):
-        """Read gemoetries from disk.
-
-        This method will be deprecated in future versions
-        use :py:meth:`~hydromt.Model.read_geoms`.
-        """
-        warnings.warn(
-            'The read_staticgeoms" method will be deprecated in future versions," \
-            " use read_geoms instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.read_geoms(fn="staticgeoms/*.geojson")
-
-    def write_staticgeoms(self):
-        """Write the geometries to disk.
-
-        This method will be deprecated in future versions,
-        use :py:meth:`~hydromt.Model.write_geoms`.
-        """
-        warnings.warn(
-            'The "write_staticgeoms" method will be deprecated in future versions,"\
-             " use  "write_geoms" instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.write_geoms(fn="staticgeoms/{name}.geojson")
 
     # model forcing files
     @property
@@ -1571,107 +1394,9 @@ class Model(object, metaclass=ABCMeta):
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.crs
-        else:
-            return self.region.crs
-
-    def set_crs(self, crs) -> None:
-        """Set the coordinate reference system."""
-        warnings.warn(
-            '"set_crs" is deprecated. Please set the crs of all model'
-            " components instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.set_crs(crs)
-
-    @property
-    def dims(self) -> Tuple:
-        """Returns spatial dimension names of staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.dims
-
-    @property
-    def coords(self) -> Dict:
-        """Returns the coordinates of model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.coords
-
-    @property
-    def res(self) -> Tuple:
-        """Returns the resolution of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.res
-
-    @property
-    def transform(self):
-        """Returns the geospatial transform of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.transform
-
-    @property
-    def width(self):
-        """Returns the width of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.width
-
-    @property
-    def height(self):
-        """Returns the height of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.height
-
-    @property
-    def shape(self) -> Tuple:
-        """Returns the shape of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.shape
-
-    @property
-    def bounds(self) -> Tuple:
-        """Returns the bounding box of the model region.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.bounds
-        else:
-            return self.region.bounds
+        return self.region.crs
 
     # test methods
-    def test_model_api(self):
-        """Test compliance with HydroMT Model API."""
-        warnings.warn(
-            '"test_model_api" is now part of the internal API, use "_test_model_api"'
-            " instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._test_model_api()
-
     def _test_model_api(self) -> List:
         """Test compliance with HydroMT Model API.
 
