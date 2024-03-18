@@ -16,8 +16,6 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-# ModelCatalog,
-# VectorModel,
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
@@ -80,32 +78,6 @@ def test_check_data(demda):
         _check_data(demds, split_dataset=False)
     with pytest.raises(ValueError, match='Data type "dict" not recognized'):
         _check_data({"wrong": "type"})
-
-
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_model_api(grid_model):
-    assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
-    # add some wrong data
-    grid_model.geoms.update({"wrong_geom": xr.Dataset()})
-    grid_model.forcing.update({"test": gpd.GeoDataFrame()})
-    non_compliant = grid_model._test_model_api()
-    assert non_compliant == ["geoms.wrong_geom", "forcing.test"]
-
-
-@pytest.mark.skip(reason="run_log_method has been removed")
-def test_run_log_method():
-    model = Model()
-    region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    model._run_log_method("region.create", region)  # args
-    assert hasattr(model, "region")
-
-
-@pytest.mark.skip(reason="run_log_method has been removed")
-def test_run_log_kwargs_method():
-    model = Model()
-    region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    model._run_log_method("region.create", region=region)  # kwargs
-    assert hasattr(model, "region")
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
