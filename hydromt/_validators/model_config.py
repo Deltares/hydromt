@@ -40,14 +40,6 @@ class HydromtComponentConfig(BaseModel):
         return v
 
 
-def _is_hydromt_step_function(attr: Any, function_name: str) -> bool:
-    return (
-        inspect.isfunction(attr)
-        and attr.__name__ == function_name
-        and hasattr(attr, "__ishydromtstep__")
-    )
-
-
 class HydromtModelStep(BaseModel):
     fn: Callable
     args: dict[str, Any] = Field(default_factory=dict)
@@ -61,7 +53,10 @@ class HydromtModelStep(BaseModel):
     @model_validator(mode="after")
     def validate_model(self):
         sig = inspect.signature(self.fn)
-        _ = sig.bind_partial(**self.args)
+        if sig.parameters.get("self", None) is not None:
+            _ = sig.bind(**{"self": None, **self.args})
+        else:
+            _ = sig.bind(**self.args)
 
 
 class HydromtGlobalConfig(BaseModel):
@@ -121,7 +116,9 @@ class HydromtModelSetup(BaseModel):
 
         members = inspect.getmembers(
             function_owner,
-            predicate=lambda v: _is_hydromt_step_function(v, split_name[-1]),
+            predicate=lambda v: HydromtModelSetup._is_hydromt_step_function(
+                v, split_name[-1]
+            ),
         )
         if len(members) == 0:
             raise ValueError(
@@ -129,3 +126,11 @@ class HydromtModelSetup(BaseModel):
             )
 
         return HydromtModelStep(fn=members[0][1], args=options)
+
+    @staticmethod
+    def _is_hydromt_step_function(attr: Any, function_name: str) -> bool:
+        return (
+            inspect.isfunction(attr)
+            and attr.__name__ == function_name
+            and hasattr(attr, "__ishydromtstep__")
+        )
