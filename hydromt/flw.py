@@ -93,6 +93,7 @@ def d8_from_dem(
     max_depth: float = -1.0,
     outlets: str = "edge",
     idxs_pit: Optional[np.ndarray] = None,
+    rivdph: float = 5,
     **kwargs,
 ) -> xr.DataArray:
     """Derive D8 flow directions grid from an elevation grid.
@@ -108,8 +109,10 @@ def d8_from_dem(
     da_elv: 2D xarray.DataArray
         elevation raster
     gdf_stream: geopandas.GeoDataArray, optional
-        stream vector layer with 'uparea' [km2] column which is used to burn
-        the river in the elevation data.
+        stream vector layer
+        If the layer has a 'rivdph' [m] column, this is used to burn in (i.e. subtract from) the DEM.
+        Otherwise if it has an 'uparea' [km2] column this is used to create a synthetic elevation grid for river cells.
+        If both are not present a fixed depth (rivdph) is used.
     max_depth: float, optional
         Maximum pour point depth. Depressions with a larger pour point
         depth are set as pit. A negative value (default) equals an infinitely
@@ -117,6 +120,8 @@ def d8_from_dem(
     outlets: {'edge', 'min'}
         Position for basin outlet(s) at the all valid elevation edge cell ('edge')
         or only the minimum elevation edge cell ('min')
+    rivdph: float
+        fixed depth value used to burn in the dem
     idxs_pit: 1D array of int
         Linear indices of outlet cells.
     **kwargs:
@@ -138,15 +143,26 @@ def d8_from_dem(
     assert nodata is not None
     assert ~np.isnan(nodata)
     # burn in river if
-    if gdf_stream is not None and "uparea" in gdf_stream.columns:
-        gdf_stream = gdf_stream.sort_values(by="uparea")
-        dst_rivupa = da_elv.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
-        # make sure the rivers have a slope and are below all other elevation cells.
-        # river elevation = min(elv) - log10(uparea[m2]) from rasterized river uparea.
-        elvmin = da_elv.where(da_elv != nodata).min()
-        elvriv = elvmin - np.log10(np.maximum(1.0, dst_rivupa * 1e3))
-        # synthetic elevation with river burned in
-        da_elv = elvriv.where(np.logical_and(da_elv != nodata, dst_rivupa > 0), da_elv)
+    nodata_mask = da_elv == nodata
+    if isinstance(gdf_stream, gpd.GeoDataFrame):
+        if "uparea" not in gdf_stream.columns and "rivdph" not in gdf_stream.columns:
+            gdf_stream = gdf_stream.assign(rivdph=rivdph)  # fixed depth
+        if "rivdph" in gdf_stream.columns:
+            da_elv = da_elv - np.maximum(
+                0, da_elv.raster.rasterize(gdf_stream, col_name="rivdph", nodata=0)
+            )
+            da_elv = da_elv.where(~nodata_mask, nodata)
+        elif "uparea" in gdf_stream.columns:
+            gdf_stream = gdf_stream.sort_values(by="uparea")
+            dst_rivupa = da_elv.raster.rasterize(
+                gdf_stream, col_name="uparea", nodata=0
+            )
+            # make sure the rivers have a slope and are below all other elevation cells.
+            # river elevation = min(elv) - log10(uparea[m2]) from rasterized river uparea.
+            elvmin = da_elv.where(~nodata_mask).min()
+            elvriv = elvmin - np.log10(np.maximum(1.0, dst_rivupa * 1e3))
+            # synthetic elevation with river burned in
+            da_elv = elvriv.where(np.logical_and(nodata_mask, dst_rivupa > 0), da_elv)
         da_elv.raster.set_nodata(nodata)
         da_elv.raster.set_crs(crs)
     # derive new flow directions from (synthetic) elevation
