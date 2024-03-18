@@ -115,11 +115,6 @@ def test_write_data_catalog(tmpdir):
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_model(model, tmpdir):
-    # Staticmaps -> moved from _test_model_api as it is deprecated
-    model._API.update({"staticmaps": xr.Dataset})
-    with pytest.deprecated_call():
-        non_compliant = model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
     # write model
     model.root.set(str(tmpdir), mode="w")
     model.write()
@@ -136,10 +131,6 @@ def test_model(model, tmpdir):
     with pytest.deprecated_call():
         equal, errors = model._test_equal(model1)
     assert equal, errors
-    # read region from staticmaps
-    model._geoms.pop("region")
-    with pytest.deprecated_call():
-        assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")

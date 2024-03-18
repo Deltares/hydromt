@@ -130,6 +130,10 @@ it should delegate work to components whenever possible. For specific changes ne
 for appropriate components see their entry for the migration guide, but general
 changes will be described here.
 
+Implementing Model Components
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
 
 
 Making the model region it's own component

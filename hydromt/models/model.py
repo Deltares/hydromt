@@ -1397,26 +1397,6 @@ class Model(object, metaclass=ABCMeta):
         return self.region.crs
 
     # test methods
-    def _test_model_api(self) -> List:
-        """Test compliance with HydroMT Model API.
-
-        Returns
-        -------
-        non_compliant: list
-            List of model components that are non-compliant with the model API
-            structure.
-        """
-        non_compliant = []
-        for component, dtype in self.api.items():
-            obj = getattr(self, component, None)
-            try:
-                assert obj is not None, component
-                _assert_isinstance(obj, dtype, component)
-            except AssertionError as err:
-                non_compliant.append(str(err))
-
-        return non_compliant
-
     def _test_equal(self, other, skip_component=None) -> Tuple[bool, Dict]:
         """Test if two models including their data components are equal.
 
