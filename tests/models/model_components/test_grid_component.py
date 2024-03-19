@@ -11,8 +11,8 @@ import xarray as xr
 from hydromt.components import ModelRegionComponent
 from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.models._root import ModelRoot
 from hydromt.models.model import Model
+from hydromt.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 logger.propagate = True

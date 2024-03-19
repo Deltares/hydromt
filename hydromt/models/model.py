@@ -41,8 +41,8 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
-from hydromt.models._root import ModelRoot
 from hydromt.plugins import PLUGINS
+from hydromt.root import ModelRoot
 
 __all__ = ["Model"]
 
