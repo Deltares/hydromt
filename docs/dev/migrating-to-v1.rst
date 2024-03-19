@@ -124,15 +124,62 @@ an inheritance based one.
 
 **Changes required**
 
+Here we will describe the specific changes needed to use a `Model` object.
+The changes necessary to have core recognise your plugins are described below.
 Now a `Model` is made up of seveal `Component` classes to which it can delegate work.
 While it should still be responsible for workloads that span multiple componontens
 it should delegate work to components whenever possible. For specific changes needed
-for appropriate components see their entry for the migration guide, but general
+for appropriate components see their entry in this migration guide, but general
 changes will be described here.
 
 Implementing Model Components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Components are objects that the `Model` class can delegate work to. Typically they are associated with one object such as a grid,
+forcing or tables. To be able to work within a `Model` class properly a component must implement the following methods:
+
+- `read`: reading the component and it's data from disk.
+- `write`: write the component in it's current state to disk in the provided root.
+
+Additionally it is highly recommended to also provide the following methods:
+
+- `set`: provide the ability to override the current data in the component.
+- `create`: the ability to construct the component and it's data from the provided arguments.
+
+It may additionally implement any necessary functionality. Any implemented funcitonality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
+
+```python
+    @hydromt_step
+    def write( self, ... ) -> None:
+      ...
+```
+
+This decorator can be imported from the root of core. When implementing a component, you should inheret from the core provided class called
+`ModelComponent`. When you do this, not only will it provide some additional validation that you have implemented the correct functions,
+but your components will also gain access to the following attributes:
+
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+| Attribute name | Description                                                                                       | example                                  |
++================+===================================================================================================+==========================================+
+| model          | A reference to the model containing the component which can be used to retrieve other components  | self.model.get_component(...)            |
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+| data_catalog   | A reference to the model's data catalog which can be used to retrieve data                        | self.data_catalog.get_rasterdataset(...) |
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+| logger         | A reference to the logger of the model                                                            | self.logger.info(....)                   |
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+| model_root     | A reference to the model root which can be used for permissions checking and determining IO paths | self.model_root.path                     |
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+
+As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it recieves. Note that this makes it impractical if not impossible to use components outside of the model they are assigned to.
+
+**Manipulating Components**
+
+components can be added to a `Model` object by using the `model.add_component` function. This function takes the name of the component, and the TYPE (not an instance) of the component as argument. You should be able to retrieve the relevant type by accessing the `PLUGINS` object in core. When these components
+are added, they are uninitialised (i.e. empty). You can poulate them by calling functions such as `create` or `read` from the yaml interface or any other means through the interactive Python API.
+
+Once a component has been added, any component (or other object or scope that has access to the model class) can retrieve necessary components by using the
+`model.get_component` function which takes the name of the desired component and the TYPE of the component you wish to retrieve. At this point you can do
+with it as you please.
 
 
 
@@ -194,7 +241,7 @@ users more flexibility with adding components to their model class, for instance
 grids. In addition, the `ModelComponent`s improve maintainability of the code and
 terminology of the components and their methods.
 
-**Changes
+**Changes**
 
 The `GridMixin` and `GridModel` have been restructured into one `GridComponent` with only
 a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
@@ -231,9 +278,9 @@ core = "hydromt.components"
 
 [project.entry-points."hydromt.models"]
 core = "hydromt.models"
-
 ```
-To have v1 or core recognise there are a few new requiremetns:
+
+To have post v1 core recognise there are a few new requirements:
 1. There must be a dedicated seperate submodule for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
 2. These submodules must have an `__init__.py` and this file must specify a `__all__` attribute.
 3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant catagory. This means these submodules should not re-export anything that is not a plugin.
