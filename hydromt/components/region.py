@@ -137,18 +137,18 @@ class ModelRegionComponent(ModelComponent):
             parsed region json
         """
         kind, region = _parse_region(
-            region, data_catalog=self.data_catalog, logger=self.logger
+            region, data_catalog=self._data_catalog, logger=self._logger
         )
         if kind in ["basin", "subbasin", "interbasin"]:
             # retrieve global hydrography data (lazy!)
-            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
+            ds_org = self._data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
+                region.update(basin_index=self._data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = get_basin_geometry(
                 ds=ds_org,
                 kind=kind,
-                logger=self.logger,
+                logger=self._logger,
                 **region,
             )
             region.update(xy=xy)
@@ -176,7 +176,7 @@ class ModelRegionComponent(ModelComponent):
         # if nothing is provided, record that the region was set by the user
         self.kind = kind
         if self._data is not None:
-            self.logger.info("Updating region geometry.")
+            self._logger.info("Updating region geometry.")
 
         if isinstance(data, GeoSeries):
             self._data = GeoDataFrame(data)
@@ -196,7 +196,7 @@ class ModelRegionComponent(ModelComponent):
     @property
     def data(self) -> Optional[GeoDataFrame]:
         """Provide access to the underlying GeoDataFrame data of the model region."""
-        if self._data is None and self.model_root.is_reading_mode():
+        if self._data is None and self._model_root.is_reading_mode():
             self.read()
 
         return self._data
@@ -217,10 +217,10 @@ class ModelRegionComponent(ModelComponent):
         """Read the model region from a file on disk."""
         super().read()
         # cannot read geom files for purely in memory models
-        self.logger.debug(f"Reading model file {rel_path}.")
+        self._logger.debug(f"Reading model file {rel_path}.")
         self._data = cast(
             GeoDataFrame,
-            gpd.read_file(join(self.model_root.path, rel_path), **read_kwargs),
+            gpd.read_file(join(self._model_root.path, rel_path), **read_kwargs),
         )
         self.kind = "geom"
 
@@ -233,9 +233,9 @@ class ModelRegionComponent(ModelComponent):
     ):
         """Write the model region to a file."""
         super().write()
-        write_path = join(self.model_root.path, rel_path)
+        write_path = join(self._model_root.path, rel_path)
 
-        if exists(write_path) and not self.model_root.is_override_mode():
+        if exists(write_path) and not self._model_root.is_override_mode():
             raise OSError(
                 f"Model dir already exists and cannot be overwritten: {write_path}"
             )
@@ -244,9 +244,9 @@ class ModelRegionComponent(ModelComponent):
             makedirs(base_name, exist_ok=True)
 
         if self.data is None:
-            self.logger.info("No region data found. skipping writing...")
+            self._logger.info("No region data found. skipping writing...")
         else:
-            self.logger.info(f"writing region data to {write_path}")
+            self._logger.info(f"writing region data to {write_path}")
             gdf = self.data.copy()
 
             if to_wgs84 and (

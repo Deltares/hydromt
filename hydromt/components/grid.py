@@ -98,8 +98,8 @@ class GridComponent(ModelComponent):
         else:
             for dvar in data.data_vars:
                 if dvar in self._data:
-                    if self.model_root.is_reading_mode():
-                        self.logger.warning(f"Replacing grid map: {dvar}")
+                    if self._model_root.is_reading_mode():
+                        self._logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
     @hydromt_step
@@ -136,14 +136,14 @@ class GridComponent(ModelComponent):
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
                 strategy=NoDataStrategy.IGNORE,
-                logger=self.logger,
+                logger=self._logger,
             )
         else:
             # write_nc requires dict - use dummy 'grid' key
             write_nc(  # Can return DeferedFileClose object
                 {"grid": self.data},
                 fn,
-                temp_data_dir=self.model._TMP_DATA_DIR,
+                temp_data_dir=self._model._TMP_DATA_DIR,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
                 force_sn=force_sn,
@@ -177,12 +177,12 @@ class GridComponent(ModelComponent):
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
-        if self.model_root.is_reading_mode() and self.model_root.is_writing_mode():
+        if self._model_root.is_reading_mode() and self._model_root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
             fn,
-            self.model_root,
-            logger=self.logger,
+            self._model_root,
+            logger=self._logger,
             single_var_as_array=False,
             mask_and_scale=mask_and_scale,
             **kwargs,
@@ -258,14 +258,14 @@ class GridComponent(ModelComponent):
         grid : xr.DataArray
             Generated grid mask.
         """
-        self.logger.info("Preparing 2D grid.")
+        self._logger.info("Preparing 2D grid.")
 
         kind = next(iter(region))  # first key of region
         if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
             # Do not parse_region for grid as we want to allow for more (file) formats
             # see ticket #813 for the skip
             kind, region = _parse_region(  # noqa: F821
-                region, data_catalog=self.data_catalog, logger=self.logger
+                region, data_catalog=self._data_catalog, logger=self._logger
             )
         elif kind != "grid":
             raise ValueError(
@@ -324,22 +324,22 @@ class GridComponent(ModelComponent):
 
         elif kind in ["basin", "subbasin", "interbasin"]:
             # retrieve global hydrography data (lazy!)
-            ds_hyd = self.data_catalog.get_rasterdataset(hydrography_fn)
+            ds_hyd = self._data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
+                region.update(basin_index=self._data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = get_basin_geometry(
                 ds=ds_hyd,
                 kind=kind,
-                logger=self.logger,
+                logger=self._logger,
                 **region,
             )
             # get ds_hyd again but clipped to geom, one variable is enough
-            da_hyd = self.data_catalog.get_rasterdataset(
+            da_hyd = self._data_catalog.get_rasterdataset(
                 hydrography_fn, geom=geom, variables=["flwdir"]
             )
             if not isinstance(res, (int, float)):
-                self.logger.info(
+                self._logger.info(
                     "res argument not defined, using resolution of "
                     f"hydrography_fn {da_hyd.raster.res}"
                 )
@@ -365,13 +365,13 @@ class GridComponent(ModelComponent):
             if isinstance(fn, (xr.DataArray, xr.Dataset)):
                 da_like = fn
             else:
-                da_like = self.data_catalog.get_rasterdataset(fn)
+                da_like = self._data_catalog.get_rasterdataset(fn)
             # Get xycoords, geom
             xcoords = da_like.raster.xcoords.values
             ycoords = da_like.raster.ycoords.values
             geom = da_like.raster.box
             if crs is not None or res is not None:
-                self.logger.warning(
+                self._logger.warning(
                     "For region kind 'grid', the gris crs/res are used and not"
                     f" user-defined crs {crs} or res {res}"
                 )
@@ -411,7 +411,7 @@ class GridComponent(ModelComponent):
             grid = grid.drop_vars("mask")
 
         # Add region and grid to model
-        self.model.set_geoms(geom, "region")
+        self._model.set_geoms(geom, "region")
         self.set(grid)
 
         return grid
@@ -424,7 +424,7 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving resolution",
             strategy=NoDataStrategy.IGNORE,
-            logger=self.logger,
+            logger=self._logger,
         )
         return None
 
@@ -436,7 +436,7 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving transform",
             strategy=NoDataStrategy.IGNORE,
-            logger=self.logger,
+            logger=self._logger,
         )
         return None
 
@@ -445,7 +445,7 @@ class GridComponent(ModelComponent):
         """Returns coordinate reference system embedded in the model grid."""
         if self.data.raster.crs is not None:
             return CRS(self.data.raster.crs)
-        self.logger.warning("Grid data has no crs")
+        self._logger.warning("Grid data has no crs")
         return None
 
     @property
@@ -456,7 +456,7 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving bounds",
             strategy=NoDataStrategy.IGNORE,
-            logger=self.logger,
+            logger=self._logger,
         )
         return None
 
@@ -471,7 +471,7 @@ class GridComponent(ModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving region",
             strategy=NoDataStrategy.IGNORE,
-            logger=self.logger,
+            logger=self._logger,
         )
         return None
 
@@ -486,7 +486,7 @@ class GridComponent(ModelComponent):
         """Initialize grid object."""
         if self._data is None:
             self._data = xr.Dataset()
-            if self.model_root.is_reading_mode() and not skip_read:
+            if self._model_root.is_reading_mode() and not skip_read:
                 self.read()
 
     def set_crs(self, crs: CRS) -> None:
@@ -584,9 +584,9 @@ class GridComponent(ModelComponent):
             Names of added model map layers
         """
         rename = rename or {}
-        self.logger.info(f"Preparing grid data from raster source {raster_fn}")
+        self._logger.info(f"Preparing grid data from raster source {raster_fn}")
         # Read raster data and select variables
-        ds = self.data_catalog.get_rasterdataset(
+        ds = self._data_catalog.get_rasterdataset(
             raster_fn,
             geom=self.region,
             buffer=2,
@@ -665,12 +665,12 @@ class GridComponent(ModelComponent):
             Names of added model grid layers
         """  # noqa: E501
         rename = rename or dict()
-        self.logger.info(
+        self._logger.info(
             f"Preparing grid data by reclassifying the data in {raster_fn} based "
             f"on {reclass_table_fn}"
         )
         # Read raster data and remapping table
-        da = self.data_catalog.get_rasterdataset(
+        da = self._data_catalog.get_rasterdataset(
             raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
         )
         if not isinstance(da, xr.DataArray):
@@ -678,7 +678,7 @@ class GridComponent(ModelComponent):
                 f"raster_fn {raster_fn} should be a single variable. "
                 "Please select one using the 'variable' argument"
             )
-        df_vars = self.data_catalog.get_dataframe(
+        df_vars = self._data_catalog.get_dataframe(
             reclass_table_fn, variables=reclass_variables
         )
         # Data resampling
@@ -751,12 +751,12 @@ class GridComponent(ModelComponent):
             Names of added model grid layers
         """  # noqa: E501
         rename = rename or dict()
-        self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
-        gdf = self.data_catalog.get_geodataframe(
+        self._logger.info(f"Preparing grid data from vector '{vector_fn}'.")
+        gdf = self._data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
         )
         if gdf.empty:
-            self.logger.warning(
+            self._logger.warning(
                 f"No shapes of {vector_fn} found within region,"
                 " skipping setup_grid_from_vector."
             )
