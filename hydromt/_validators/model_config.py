@@ -60,7 +60,6 @@ class HydromtModelStep(BaseModel):
 
 
 class HydromtGlobalConfig(BaseModel):
-    model_type: Type[Model]
     components: list[HydromtComponentConfig]
 
     model_config = ConfigDict(extra="forbid")
@@ -72,6 +71,14 @@ class HydromtGlobalConfig(BaseModel):
             return [{"name": name, **options} for name, options in v.items()]
         return v
 
+
+class HydromtModelSetup(BaseModel):
+    """A Pydantic model for the validation of model setup files."""
+
+    model_type: Type[Model]
+    steps: list[HydromtModelStep]
+    globals: HydromtGlobalConfig = Field(serialization_alias="global")
+
     @field_validator("model_type", mode="before")
     @classmethod
     def validate_model_type(cls, v):
@@ -79,27 +86,31 @@ class HydromtGlobalConfig(BaseModel):
             return PLUGINS.model_plugins[v]
         return v
 
-
-class HydromtModelSetup(BaseModel):
-    """A Pydantic model for the validation of model setup files."""
-
-    steps: list[HydromtModelStep]
-    globals: HydromtGlobalConfig = Field(serialization_alias="global")
-
     @model_validator(mode="before")
     @classmethod
     def validate_model(cls, v):
         if isinstance(v, dict):
             global_config = HydromtGlobalConfig(**v["global"])
             return {
+                "model_type": v["model_type"],
                 "globals": global_config,
-                "steps": [cls._create_step(global_config, step) for step in v["steps"]],
+                "steps": [
+                    cls._create_step(
+                        model_type=cls.validate_model_type(v["model_type"]),
+                        components=global_config.components,
+                        step=step,
+                    )
+                    for step in v["steps"]
+                ],
             }
         return v
 
     @staticmethod
     def _create_step(
-        globals: HydromtGlobalConfig, step: dict[str, dict[str, Any]]
+        *,
+        model_type: Type[Model],
+        components: list[HydromtComponentConfig],
+        step: dict[str, dict[str, Any]],
     ) -> HydromtModelStep:
         name, options = next(iter(step.items()))
         split_name = name.split(".")
@@ -108,11 +119,9 @@ class HydromtModelSetup(BaseModel):
                 f"Invalid step name {name}. Must be in the format <component>.<function> or <function> if the function is in the model itself."
             )
 
-        function_owner: Type = globals.model_type
+        function_owner: Type = model_type
         if len(split_name) == 2:
-            function_owner = next(
-                x.type for x in globals.components if x.name == split_name[0]
-            )
+            function_owner = next(x.type for x in components if x.name == split_name[0])
 
         members = inspect.getmembers(
             function_owner,

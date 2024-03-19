@@ -113,12 +113,12 @@ Moving from an inheritance to composition structure for the Model class
 Prior to v1, the `Model` class was the only real place where developers could
 modify the behavior of Core through either subclassing it, or using various
 `Mixin` classes. All parts of a model were implemented as class properties
-forcing every model to use the same terminology While this was enough for
+forcing every model to use the same terminology. While this was enough for
 some users, it was too restrictive for others. For example, the SFINCS
-plugin uses multiple grids for its computation which was not possible in
+plugin uses multiple grids for its computation, which was not possible in
 the setup pre-v1. There was also a lot of code duplication for the use of
 several parts of a model such as `maps`, `forcing` and `states`. To offer
-users more modularity and flexibility as well as improve maintainability we
+users more modularity and flexibility, as well as improve maintainability, we
 have decided to move the core to a component based architecture rather than
 an inheritance based one.
 
@@ -138,13 +138,13 @@ Implementing Model Components
 Components are objects that the `Model` class can delegate work to. Typically, they are associated with one object such as a grid,
 forcing or tables. To be able to work within a `Model` class properly a component must implement the following methods:
 
-- `read`: reading the component and it's data from disk.
+- `read`: reading the component and its data from disk.
 - `write`: write the component in its current state to disk in the provided root.
 
 Additionally, it is highly recommended to also provide the following methods:
 
 - `set`: provide the ability to override the current data in the component.
-- `create`: the ability to construct the component and it's data from the provided arguments.
+- `create`: the ability to construct the component and its data from the provided arguments.
 
 It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
@@ -170,7 +170,7 @@ but your components will also gain access to the following attributes:
 | model_root     | A reference to the model root which can be used for permissions checking and determining IO paths | self.model_root.path                     |
 +----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
 
-As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it recieves. Note that this makes it impractical if not impossible to use components outside the model they are assigned to.
+As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it receives. Note that this makes it impractical if not impossible to use components outside of the model they are assigned to.
 
 **Manipulating Components**
 
@@ -235,7 +235,7 @@ GridComponent
 
 **Rationale**
 
-In v1 the `GridModel` will no longer exist, instead of it we created a `GridComponent`,
+In v1 the `GridModel` will no longer exist. Instead we created a `GridComponent`,
 which is an implementation of the `ModelComponent` class. The idea is that this gives
 users more flexibility with adding components to their model class, for instance multiple
 grids. In addition, the `ModelComponent`s improve maintainability of the code and
@@ -245,7 +245,7 @@ terminology of the components and their methods.
 
 The `GridMixin` and `GridModel` have been restructured into one `GridComponent` with only
 a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
-`read_grid`, and `setup_grid` have been changed to the more genericly named `set`,
+`read_grid`, and `setup_grid` have been changed to the more generically named `set`,
 `write`, `read`, and `create` methods respectively. Also, the `setup_grid_from_*`
 methods have been changed to `add_data_from_*`. The functionality of the GridComponent
 has not been changed compared to the GridModel.
@@ -285,10 +285,9 @@ An example of a fictional Wflow YAML file would be:
 model_type: wflow
 global:
 	data_libs: deltares_data
-		components:
-			config:
-				filename: wflow_sbm_calibrated.toml
-
+	components:
+		config:
+			filename: wflow_sbm_calibrated.toml
 steps:
 	- grid.create:
 		shape: [10, 10]

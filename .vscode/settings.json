@@ -25,6 +25,7 @@
         "pixi",
         "pydantic",
         "pygeos",
+        "SFINCS",
         "zarr"
     ]
 }

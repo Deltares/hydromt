@@ -8,7 +8,6 @@ from hydromt._validators.model_config import (
 )
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.models.model import Model
 
 
 def test_validate_component_config_wrong_characters():
@@ -63,7 +62,6 @@ def test_validate_global_config_components():
             "grid": {"type": "GridComponent"},
             "subgrid": {"type": "GridComponent"},
         },  # type: ignore
-        model_type=Model,
     )
     assert globals.components[0].name == "grid"
     assert globals.components[0].type == GridComponent
@@ -73,16 +71,6 @@ def test_validate_global_config_components():
 
 def test_validate_global_config_components_wrong_input():
     with pytest.raises(TypeError, match="'str' object is not a mapping"):
-        HydromtGlobalConfig(components={"grid": "foo"}, model_type=Model)
+        HydromtGlobalConfig(components={"grid": "foo"})
     with pytest.raises(TypeError, match="'NoneType' object is not a mapping"):
-        HydromtGlobalConfig(components={"grid": None}, model_type=Model)
-
-
-def test_validate_global_config_model_type():
-    class Foo:
-        pass
-
-    with pytest.raises(ValidationError, match="Input should be a subclass of Model"):
-        HydromtGlobalConfig(components=[], model_type=Foo)
-    HydromtGlobalConfig(components=[], model_type=Model)
-    HydromtGlobalConfig(components=[], model_type="Model")
+        HydromtGlobalConfig(components={"grid": None})
