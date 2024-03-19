@@ -18,5 +18,13 @@
         ".ruff_cache": true,
         "**/__pycache__": true
     },
-    "files.insertFinalNewline": true
+    "files.insertFinalNewline": true,
+    "cSpell.words": [
+        "GDAL",
+        "hydromt",
+        "pixi",
+        "pydantic",
+        "pygeos",
+        "zarr"
+    ]
 }
