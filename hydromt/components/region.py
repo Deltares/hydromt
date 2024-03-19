@@ -286,10 +286,6 @@ def _parse_region(
     }
     kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
-    # if kind in MODELS:
-    #     model_class = MODELS.load(kind)
-    #     kwargs = dict(mod=model_class.__init__(root=value0, mode="r", logger=logger))
-    #     kind = "model"
 
     if kind == "grid":
         kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
