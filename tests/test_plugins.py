@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
-from hydromt.components.root import ModelRootComponent
+from hydromt.models._root import ModelRoot
 from hydromt.models.model import Model
 from hydromt.plugins import PLUGINS
 
@@ -18,7 +18,7 @@ def test_core_component_plugins():
         "ModelRegionComponent": ModelRegionComponent,
         "GridComponent": GridComponent,
         "ModelComponent": ModelComponent,
-        "ModelRootComponent": ModelRootComponent,
+        "ModelRoot": ModelRoot,
     }
 
 
@@ -34,7 +34,6 @@ def test_summary():
     assert "ModelRegionComponent" in summary
     assert "GridComponent" in summary
     assert "ModelComponent" in summary
-    assert "ModelRootComponent" in summary
     assert "Model" in summary
 
 

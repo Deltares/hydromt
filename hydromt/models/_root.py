@@ -14,7 +14,7 @@ from hydromt._utils.log import add_filehandler
 logger = getLogger(__name__)
 
 
-class ModelRootComponent:
+class ModelRoot:
     """A class to handle model roots in a cross platform manner."""
 
     def __init__(

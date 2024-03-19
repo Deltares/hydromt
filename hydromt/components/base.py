@@ -8,8 +8,8 @@ from weakref import ReferenceType, ref
 from hydromt.data_catalog import DataCatalog
 
 if TYPE_CHECKING:
-    from hydromt.components.root import ModelRootComponent
     from hydromt.models import Model
+    from hydromt.models._root import ModelRoot
 
 
 class ModelComponent(ABC):
@@ -34,7 +34,7 @@ class ModelComponent(ABC):
         return self.model.logger
 
     @property
-    def model_root(self) -> "ModelRootComponent":
+    def model_root(self) -> "ModelRoot":
         """Return the root of the model this component is associated with."""
         return self.model.root
 

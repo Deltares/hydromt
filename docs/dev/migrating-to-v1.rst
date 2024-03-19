@@ -75,19 +75,19 @@ data catalog has undergone some changes. Now since a catalog entry no longer uni
 identifies one source, (since it can refer to any of the variants mentioned above) it
 becomes insufficient to request a data source by string only. Since the dictionary
 interface in python makes it impossible to add additional arguments when requesting a
-data source, we created a more extensive API for this. In order to make sure users's
+data source, we created a more extensive API for this. In order to make sure users'
 code remains working consistently and have a clear upgrade path when adding new
 variants we have decided to remove the old dictionary like interface.
 
 **Changes required**
 
 Dictionary like features such as `catalog['source']`, `catalog['source'] = data`,
-`source in catalog` etc should be removed for v1. Equivalent interfaces have been
-provided for each operation so it should be fairly simple. Below is a small table
+`source in catalog` etc. should be removed for v1. Equivalent interfaces have been
+provided for each operation, so it should be fairly simple. Below is a small table
 with their equivalent functions
 
 
-.. table:: Dictionary translation guide for v1
+..table:: Dictionary translation guide for v1
    :widths: auto
 
 +--------------------------+--------------------------------------+
@@ -105,29 +105,29 @@ with their equivalent functions
 Model
 -----
 
-Moving from an inheretance to composition structure for the Model class
+Moving from an inheritance to composition structure for the Model class
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Rationale**
 
 Prior to v1, the `Model` class was the only real place where developers could
-modify the behaviour of Core through either subclassing it, or using various
+modify the behavior of Core through either subclassing it, or using various
 `Mixin` classes. All parts of a model were implemented as class properties
 forcing every model to use the same terminology While this was enough for
 some users, it was too restrictive for others. For example, the SFINCS
 plugin uses multiple grids for its computation which was not possible in
 the setup pre-v1. There was also a lot of code duplication for the use of
 several parts of a model such as `maps`, `forcing` and `states`. To offer
-users more modularity and flexibility as well as improve mantainability we
-have decided to move the core to a component based archetecture rather than
+users more modularity and flexibility as well as improve maintainability we
+have decided to move the core to a component based architecture rather than
 an inheritance based one.
 
 **Changes required**
 
 Here we will describe the specific changes needed to use a `Model` object.
-The changes necessary to have core recognise your plugins are described below.
-Now a `Model` is made up of seveal `Component` classes to which it can delegate work.
-While it should still be responsible for workloads that span multiple componontens
+The changes necessary to have core recognize your plugins are described below.
+Now a `Model` is made up of several `Component` classes to which it can delegate work.
+While it should still be responsible for workloads that span multiple components
 it should delegate work to components whenever possible. For specific changes needed
 for appropriate components see their entry in this migration guide, but general
 changes will be described here.
@@ -135,18 +135,18 @@ changes will be described here.
 Implementing Model Components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Components are objects that the `Model` class can delegate work to. Typically they are associated with one object such as a grid,
+Components are objects that the `Model` class can delegate work to. Typically, they are associated with one object such as a grid,
 forcing or tables. To be able to work within a `Model` class properly a component must implement the following methods:
 
 - `read`: reading the component and it's data from disk.
-- `write`: write the component in it's current state to disk in the provided root.
+- `write`: write the component in its current state to disk in the provided root.
 
-Additionally it is highly recommended to also provide the following methods:
+Additionally, it is highly recommended to also provide the following methods:
 
 - `set`: provide the ability to override the current data in the component.
 - `create`: the ability to construct the component and it's data from the provided arguments.
 
-It may additionally implement any necessary functionality. Any implemented funcitonality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
+It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
 ```python
 @hydromt_step
@@ -154,12 +154,12 @@ def write(self, ...) -> None:
 	pass
 ```
 
-This decorator can be imported from the root of core. When implementing a component, you should inheret from the core provided class called
+This decorator can be imported from the root of core. When implementing a component, you should inherit from the core provided class called
 `ModelComponent`. When you do this, not only will it provide some additional validation that you have implemented the correct functions,
 but your components will also gain access to the following attributes:
 
 +----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
-| Attribute name | Description                                                                                       | example                                  |
+| Attribute name | Description                                                                                       | Example                                  |
 +================+===================================================================================================+==========================================+
 | model          | A reference to the model containing the component which can be used to retrieve other components  | self.model.get_component(...)            |
 +----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
@@ -170,12 +170,12 @@ but your components will also gain access to the following attributes:
 | model_root     | A reference to the model root which can be used for permissions checking and determining IO paths | self.model_root.path                     |
 +----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
 
-As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it recieves. Note that this makes it impractical if not impossible to use components outside of the model they are assigned to.
+As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it recieves. Note that this makes it impractical if not impossible to use components outside the model they are assigned to.
 
 **Manipulating Components**
 
-components can be added to a `Model` object by using the `model.add_component` function. This function takes the name of the component, and the TYPE (not an instance) of the component as argument. You should be able to retrieve the relevant type by accessing the `PLUGINS` object in core. When these components
-are added, they are uninitialised (i.e. empty). You can poulate them by calling functions such as `create` or `read` from the yaml interface or any other means through the interactive Python API.
+Components can be added to a `Model` object by using the `model.add_component` function. This function takes the name of the component, and the TYPE (not an instance) of the component as argument. You should be able to retrieve the relevant type by accessing the `PLUGINS` object in core. When these components
+are added, they are uninitialized (i.e. empty). You can populate them by calling functions such as `create` or `read` from the yaml interface or any other means through the interactive Python API.
 
 Once a component has been added, any component (or other object or scope that has access to the model class) can retrieve necessary components by using the
 `model.get_component` function which takes the name of the desired component and the TYPE of the component you wish to retrieve. At this point you can do
@@ -183,7 +183,7 @@ with it as you please.
 
 
 
-Making the model region it's own component
+Making the model region its own component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Rationale**
@@ -267,19 +267,19 @@ has not been changed compared to the GridModel.
 Changes to the format of the yaml interface
 -------------------------------------------
 
-The first change to the yaml format is that now, at the root of the documents are three keys:
+The first change to the YAML format is that now, at the root of the documents are three keys:
 `model_type`, `global` and `steps`.
 - `model_type` details what kind of model is going to be used in the model. This used to be provided only through the CLI,
-but given that yaml files are very model specific we've decided to make this available thorugh the yaml file as well.
+but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
 - `global` is intended for any configuration for the model object itself, here you may override any default
 configuration for the components provided by your implementation
-- `steps` shouldcontain a list of function calles. In pre-v1 versions this used to be a dictionary but now it has become a list
-which removes the necessity for adding numbers to the end of funciton calls of the same name. You may prefix a component name
+- `steps` should contain a list of function calls. In pre-v1 versions this used to be a dictionary, but now it has become a list
+which removes the necessity for adding numbers to the end of function calls of the same name. You may prefix a component name
 for the step in a dotted manner to indicate the function should be called on that component instead of the model. In general any step
-listed here will correspond to a function on either the model or one of it's components. Any keys that are listed under a step will be
+listed here will correspond to a function on either the model or one of its components. Any keys that are listed under a step will be
 provided to the function call as arguments.
 
-An example of a fictional wflow yaml file would be:
+An example of a fictional Wflow YAML file would be:
 
 ```yaml
 model_type: wflow
@@ -310,11 +310,11 @@ steps:
 Plugins
 -------
 
-Previously the `Model` class was the only entrypoint for providing core with custom behaviour.
+Previously the `Model` class was the only entrypoint for providing core with custom behavior.
 Now, there are three:
 
 - `Model`: This class is mostly responsible for dispatching function calls and otherwise delegating work to components.
-- `ModelComponent`. This class provides more specialised functionalities to do with a single part of a model such as a mesh or grid.
+- `ModelComponent`. This class provides more specialized functionalities to do with a single part of a model such as a mesh or grid.
 - `Driver`. TBC
 
 Each of these parts have entry points at their relevant submodules. For example, see how these are specified in the `pyproject.toml`
@@ -327,11 +327,11 @@ core = "hydromt.components"
 core = "hydromt.models"
 ```
 
-To have post v1 core recognise there are a few new requirements:
-1. There must be a dedicated seperate submodule for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
+To have post v1 core recognize there are a few new requirements:
+1. There must be a dedicated separate submodule for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
 2. These submodules must have an `__init__.py` and this file must specify a `__all__` attribute.
-3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant catagory. This means these submodules should not re-export anything that is not a plugin.
-4. Though this cannot be enforced in Python, there is a base class for each of the plugin catagories in core, which your objects should inherit from, this makes sure that you implement all the relevant functionality.
+3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant category. This means these submodules should not re-export anything that is not a plugin.
+4. Though this cannot be enforced in Python, there is a base class for each of the plugin categories in core, which your objects should inherit from, this makes sure that you implement all the relevant functionality.
 
 When you have specified the plugins you wish to make available to core in your `pyproject.toml`, all objects should be made available through a global static object called `PLUGINS`. This object has attributes
 for each of the corresponding plugin categories.

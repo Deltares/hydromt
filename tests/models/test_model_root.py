@@ -4,7 +4,7 @@ from os.path import abspath, exists, join
 import pytest
 
 from hydromt._typing import ModelMode
-from hydromt.components.root import ModelRootComponent
+from hydromt.models._root import ModelRoot
 
 # we need to compensate for where the repo is located when
 # we run the tests
@@ -56,7 +56,7 @@ def test_errors_on_unknown_modes(mode):
 def test_root_creates_logs_and_dir(tmpdir, caplog):
     p = join(tmpdir, "one")
     assert not exists(p)
-    _ = ModelRootComponent(p)
+    _ = ModelRoot(p)
     assert exists(p)
     assert exists(join(p, "hydromt.log"))
 
@@ -65,7 +65,7 @@ def test_new_root_copies_old_file(tmpdir, caplog):
     first_path = join(tmpdir, "one")
     assert not exists(first_path)
 
-    r = ModelRootComponent(first_path, "w")
+    r = ModelRoot(first_path, "w")
     r.logger.warning("hey! this is a secret you should really remember")
     r._close_logs()
     assert exists(first_path)
@@ -92,7 +92,7 @@ def test_new_root_closes_old_log(tmpdir, caplog):
     first_path = join(tmpdir, "one")
     second_path = join(tmpdir, "two")
 
-    r = ModelRootComponent(first_path, "w")
+    r = ModelRoot(first_path, "w")
     assert any(
         [
             h
@@ -122,7 +122,7 @@ def test_new_root_closes_old_log(tmpdir, caplog):
 def test_root_overwrite_deletes_old_log(tmpdir, caplog):
     path = join(tmpdir, "one")
     assert not exists(path)
-    root = ModelRootComponent(path, "w")
+    root = ModelRoot(path, "w")
     root.logger.warning("hey!, this is a secret you should really remember")
     root._close_logs()
 
