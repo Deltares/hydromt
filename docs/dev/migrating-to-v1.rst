@@ -149,9 +149,9 @@ Additionally it is highly recommended to also provide the following methods:
 It may additionally implement any necessary functionality. Any implemented funcitonality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
 ```python
-    @hydromt_step
-    def write( self, ... ) -> None:
-      ...
+@hydromt_step
+def write(self, ...) -> None:
+	pass
 ```
 
 This decorator can be imported from the root of core. When implementing a component, you should inheret from the core provided class called
@@ -259,6 +259,49 @@ has not been changed compared to the GridModel.
 | model.setup_grid(...)        | model.grid_component.create(...)          |
 | model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
+
+Changes to the format of the yaml interface
+-------------------------------------------
+
+The first change to the yaml format is that now, at the root of the documents are three keys:
+`model_type`, `global` and `steps`.
+- `model_type` details what kind of model is going to be used in the model. This used to be provided only through the CLI,
+but given that yaml files are very model specific we've decided to make this available thorugh the yaml file as well.
+- `global` is intended for any configuration for the model object itself, here you may override any default
+configuration for the components provided by your implementation
+- `steps` shouldcontain a list of function calles. In pre-v1 versions this used to be a dictionary but now it has become a list
+which removes the necessity for adding numbers to the end of funciton calls of the same name. You may prefix a component name
+for the step in a dotted manner to indicate the function should be called on that component instead of the model. In general any step
+listed here will correspond to a function on either the model or one of it's components. Any keys that are listed under a step will be
+provided to the function call as arguments.
+
+An example of a fictional wflow yaml file would be:
+
+```yaml
+model_type: wflow
+global:
+	data_libs: deltares_data
+		components:
+			config:
+				filename: wflow_sbm_calibrated.toml
+
+steps:
+	- grid.create:
+		shape: [10, 10]
+		dtype: float32
+		fill: 0.0
+	- setup_reservoirs:
+		reservoirs_fn: hydro_reservoirs
+		min_area: 1.0
+	- write:
+		components:
+			- grid
+			- config
+	- geoms.write:
+		filename: geoms/*.gpkg
+		driver: GPKG
+```
+
 
 Plugins
 -------
