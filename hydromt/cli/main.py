@@ -406,7 +406,7 @@ def check(
             try:
                 config_dict = _utils.parse_config(config)
                 if model:
-                    config_dict["global"]["model"] = model
+                    config_dict["model_type"] = model
 
                 HydromtModelSetup(**config_dict)
                 logger.info("Model config valid!")
