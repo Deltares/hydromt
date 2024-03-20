@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from hydromt.components import ModelRegionComponent
+from hydromt.components import SpatialModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models.model import Model
@@ -23,14 +23,14 @@ def mock_model(tmpdir):
     model = create_autospec(Model)
     model.root = ModelRoot(path=tmpdir)
     model.data_catalog = DataCatalog()
-    model.region = ModelRegionComponent(model=model)
+    model.region = SpatialModelComponent(model=model)
     model.logger = logger
     return model
 
 
 def test_set_dataset(mock_model, hydds):
     grid_component = GridComponent(model=mock_model)
-    grid_component.set(data=hydds)
+    grid_component.set_grid(data=hydds)
     assert len(grid_component.data) > 0
     assert isinstance(grid_component.data, xr.Dataset)
 
@@ -38,7 +38,7 @@ def test_set_dataset(mock_model, hydds):
 def test_set_dataarray(mock_model, hydds):
     grid_component = GridComponent(model=mock_model)
     data_array = hydds.to_array()
-    grid_component.set(data=data_array, name="data_array")
+    grid_component.set_grid(data=data_array, name="data_array")
     assert "data_array" in grid_component.data.data_vars.keys()
     assert len(grid_component.data.data_vars) == 1
 
@@ -51,12 +51,12 @@ def test_set_raise_errors(mock_model, hydds):
         ValueError,
         match=f"Unable to set {type(data_array).__name__} data without a name",
     ):
-        grid_component.set(data=data_array)
+        grid_component.set_grid(data=data_array)
     # Test setting np.ndarray of different shape
-    grid_component.set(data=data_array, name="data_array")
+    grid_component.set_grid(data=data_array, name="data_array")
     ndarray = np.random.rand(4, 5)
     with pytest.raises(ValueError, match="Shape of data and grid maps do not match"):
-        grid_component.set(ndarray, name="ndarray")
+        grid_component.set_grid(ndarray, name="ndarray")
 
 
 def test_write(mock_model, tmpdir, caplog):
@@ -167,7 +167,7 @@ def test_properties(caplog, demda, mock_model):
     assert "Grid data has no crs" in caplog.text
     bounds = grid_component.bounds
     assert "No grid data found for deriving bounds" in caplog.text
-    region = grid_component.region
+    region = grid_component.region_data
     assert "No grid data found for deriving region" in caplog.text
     assert all(
         props is None for props in [res, transform, crs, bounds, region]
@@ -179,7 +179,7 @@ def test_properties(caplog, demda, mock_model):
     assert grid_component.crs == demda.raster.crs
     assert grid_component.bounds == demda.raster.bounds
 
-    region = grid_component.region
+    region = grid_component.region_data
     assert isinstance(region, gpd.GeoDataFrame)
     assert all(region.bounds == demda.raster.bounds)
 

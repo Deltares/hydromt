@@ -14,8 +14,7 @@ from shapely.geometry import box
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
-from hydromt.components.base import ModelComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis import raster
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
 __all__ = ["GridComponent"]
 
 
-class GridComponent(ModelComponent):
+class GridComponent(SpatialModelComponent):
     """ModelComponent class for grid components.
 
     This class is used for setting, creating, writing, and reading regular grid data for a
@@ -41,11 +40,7 @@ class GridComponent(ModelComponent):
     hydromt.gis.raster.RasterDataset type which is an extension of xarray.Dataset for regular grid.
     """
 
-    def __init__(
-        self,
-        model: "Model",
-        region: str = "region",
-    ):
+    def __init__(self, model: "Model"):
         """Initialize a GridComponent.
 
         Parameters
@@ -56,10 +51,9 @@ class GridComponent(ModelComponent):
             Name of the region component in the model, by default 'region'
         """
         super().__init__(model=model)
-        self._data: Optional[xr.Dataset] = None
-        self._region_name = region
+        self.__data: Optional[xr.Dataset] = None
 
-    def set(
+    def set_grid(
         self,
         data: Union[xr.DataArray, xr.Dataset, np.ndarray],
         name: Optional[str] = None,
@@ -85,9 +79,9 @@ class GridComponent(ModelComponent):
         if name is None and name_required:
             raise ValueError(f"Unable to set {type(data).__name__} data without a name")
         if isinstance(data, np.ndarray):
-            if data.shape != self._data.raster.shape:
+            if data.shape != self.__data.raster.shape:
                 raise ValueError("Shape of data and grid maps do not match")
-            data = xr.DataArray(dims=self._data.raster.dims, data=data, name=name)
+            data = xr.DataArray(dims=self.__data.raster.dims, data=data, name=name)
         elif isinstance(data, xr.DataArray):
             if name is not None:
                 data.name = name
@@ -95,14 +89,14 @@ class GridComponent(ModelComponent):
         elif not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
 
-        if len(self._data) == 0:  # empty grid
-            self._data = data
+        if len(self.__data) == 0:  # empty grid
+            self.__data = data
         else:
             for dvar in data.data_vars:
-                if dvar in self._data:
+                if dvar in self.__data:
                     if self._model_root.is_reading_mode():
                         self._logger.warning(f"Replacing grid map: {dvar}")
-                self._data[dvar] = data[dvar]
+                self.__data[dvar] = data[dvar]
 
     @hydromt_step
     def write(
@@ -190,7 +184,7 @@ class GridComponent(ModelComponent):
             **kwargs,
         )
         for ds in loaded_nc_files.values():
-            self.set(ds)
+            self.set_grid(ds)
 
     @hydromt_step
     def create(
@@ -262,31 +256,22 @@ class GridComponent(ModelComponent):
             Generated grid mask.
         """
         self._logger.info("Preparing 2D grid.")
-        region_component = self._model.get_component(
-            self._region_name, ModelRegionComponent
+        super().create(
+            region=region,
+            crs=crs,
+            hydrography_fn=hydrography_fn,
+            basin_index_fn=basin_index_fn,
         )
 
-        if region is not None:
-            region_component.create(
-                region=region,
-                crs=crs,
-                hydrography_fn=hydrography_fn,
-                basin_index_fn=basin_index_fn,
-            )
-
-        kind = region_component.kind
-        geom = region_component.data
-        assert geom is not None
-
         # Derive xcoords, ycoords and geom for the different kind options
-        if kind in ["bbox", "geom"]:
+        if self.kind in ["bbox", "geom"]:
             if not res:
                 raise ValueError("res argument required for region kind 'bbox', 'geom'")
 
             # Generate grid based on res for region bbox
             # TODO add warning on res value if crs is projected or not?
             if not rotated:
-                xmin, ymin, xmax, ymax = geom.total_bounds
+                xmin, ymin, xmax, ymax = self.geom.total_bounds
                 res = abs(res)
                 if align:
                     xmin = round(xmin / res) * res
@@ -308,7 +293,7 @@ class GridComponent(ModelComponent):
                     )
                 )
             else:  # rotated
-                geomu = geom.unary_union
+                geomu = self.geom.unary_union
                 x0, y0, mmax, nmax, rot = rotated_grid(
                     geomu, res, dec_origin=dec_origin, dec_rotation=dec_rotation
                 )
@@ -317,10 +302,10 @@ class GridComponent(ModelComponent):
                     * Affine.rotation(rot)
                     * Affine.scale(res, res)
                 )
-        elif kind in ["basin", "subbasin", "interbasin"]:
+        elif self.kind in ["basin", "subbasin", "interbasin"]:
             # get ds_hyd again but clipped to geom, one variable is enough
             da_hyd = self._data_catalog.get_rasterdataset(
-                hydrography_fn, geom=geom, variables=["flwdir"]
+                hydrography_fn, geom=self.geom, variables=["flwdir"]
             )
             if not res:
                 self._logger.info(
@@ -340,10 +325,10 @@ class GridComponent(ModelComponent):
             # Get xycoords, geom
             xcoords = da_hyd.raster.xcoords.values
             ycoords = da_hyd.raster.ycoords.values
-        elif kind == "grid":
+        elif self.kind == "grid":
             # Get xycoords
-            xcoords = region_component.data.raster.xcoords.values
-            ycoords = region_component.data.raster.ycoords.values
+            xcoords = self.region_data.raster.xcoords.values
+            ycoords = self.region_data.raster.ycoords.values
             if crs is not None or res is not None:
                 self._logger.warning(
                     "For region kind 'grid', the grid crs/res are used and not"
@@ -360,7 +345,7 @@ class GridComponent(ModelComponent):
                 dtype=np.uint8,
                 name="mask",
                 attrs={},
-                crs=geom.crs,
+                crs=self.crs,
                 lazy=False,
             )
         else:
@@ -371,19 +356,19 @@ class GridComponent(ModelComponent):
                 dtype=np.uint8,
                 name="mask",
                 attrs={},
-                crs=geom.crs,
+                crs=self.crs,
                 lazy=False,
             )
         # Create geometry_mask with geom
         if add_mask:
-            grid = grid.raster.geometry_mask(geom, all_touched=True)
+            grid = grid.raster.geometry_mask(self.geom, all_touched=True)
             grid.name = "mask"
         # Remove mask variable mask from grid if not add_mask
         else:
             grid = grid.to_dataset()
             grid = grid.drop_vars("mask")
 
-        self.set(grid)
+        self.set_grid(grid)
 
     @property
     def res(self) -> Optional[Tuple[float, float]]:
@@ -410,27 +395,7 @@ class GridComponent(ModelComponent):
         return None
 
     @property
-    def crs(self) -> Optional[CRS]:
-        """Returns coordinate reference system embedded in the model grid."""
-        if self.data.raster.crs is not None:
-            return CRS(self.data.raster.crs)
-        self._logger.warning("Grid data has no crs")
-        return None
-
-    @property
-    def bounds(self) -> Optional[List[float]]:
-        """Returns the bounding box of the model grid."""
-        if len(self.data) > 0:
-            return self.data.raster.bounds
-        _exec_nodata_strat(
-            msg="No grid data found for deriving bounds",
-            strategy=NoDataStrategy.IGNORE,
-            logger=self._logger,
-        )
-        return None
-
-    @property
-    def region(self) -> Optional[gpd.GeoDataFrame]:
+    def region_data(self) -> Optional[gpd.GeoDataFrame]:
         """Returns the geometry of the model area of interest."""
         if len(self.data) > 0:
             crs = self.crs
@@ -447,14 +412,14 @@ class GridComponent(ModelComponent):
     @property
     def data(self) -> xr.Dataset:
         """Model static gridded data as xarray.Dataset."""
-        if self._data is None:
+        if self.__data is None:
             self._initialize_grid()
-        return self._data
+        return self.__data
 
     def _initialize_grid(self, skip_read: bool = False) -> None:
         """Initialize grid object."""
-        if self._data is None:
-            self._data = xr.Dataset()
+        if self.__data is None:
+            self.__data = xr.Dataset()
             if self._model_root.is_reading_mode() and not skip_read:
                 self.read()
 
@@ -502,7 +467,7 @@ class GridComponent(ModelComponent):
             mask_name=mask_name,
         )
         # Add to grid
-        self.set(da)
+        self.set_grid(da)
 
         return [name]
 
@@ -557,7 +522,7 @@ class GridComponent(ModelComponent):
         # Read raster data and select variables
         ds = self._data_catalog.get_rasterdataset(
             raster_fn,
-            geom=self.region,
+            geom=self.region_data,
             buffer=2,
             variables=variables,
             single_var_as_array=False,
@@ -573,7 +538,7 @@ class GridComponent(ModelComponent):
             rename=rename,
         )
         # Add to grid
-        self.set(ds_out)
+        self.set_grid(ds_out)
 
         return list(ds_out.data_vars.keys())
 
@@ -640,7 +605,7 @@ class GridComponent(ModelComponent):
         )
         # Read raster data and remapping table
         da = self._data_catalog.get_rasterdataset(
-            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
+            raster_fn, geom=self.region_data, buffer=2, variables=variable, **kwargs
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
@@ -662,7 +627,7 @@ class GridComponent(ModelComponent):
             rename=rename,
         )
         # Add to maps
-        self.set(ds_vars)
+        self.set_grid(ds_vars)
 
         return list(ds_vars.data_vars.keys())
 
@@ -722,7 +687,7 @@ class GridComponent(ModelComponent):
         rename = rename or dict()
         self._logger.info(f"Preparing grid data from vector '{vector_fn}'.")
         gdf = self._data_catalog.get_geodataframe(
-            vector_fn, geom=self.region, dst_crs=self.crs
+            vector_fn, geom=self.region_data, dst_crs=self.crs
         )
         if gdf.empty:
             self._logger.warning(
@@ -736,7 +701,7 @@ class GridComponent(ModelComponent):
             # the name directly
             rename = rename[vector_fn]
         ds = grid_from_geodataframe(
-            grid_like=self._data,
+            grid_like=self.__data,
             gdf=gdf,
             variables=variables,
             nodata=nodata,
@@ -746,6 +711,6 @@ class GridComponent(ModelComponent):
             all_touched=all_touched,
         )
         # Add to grid
-        self.set(ds)
+        self.set_grid(ds)
 
         return list(ds.data_vars.keys())

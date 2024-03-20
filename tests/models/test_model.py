@@ -4,8 +4,9 @@
 from collections import OrderedDict
 from copy import deepcopy
 from os import listdir
-from os.path import abspath, dirname, exists, isfile, join
+from os.path import abspath, dirname, isfile, join
 from pathlib import Path
+from typing import Any, Union
 from unittest.mock import MagicMock
 
 import geopandas as gpd
@@ -13,12 +14,13 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from _pytest.compat import LEGACY_PATH
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data
@@ -62,7 +64,7 @@ def _patch_plugin_components(
 #         _MODELS["unknown"]
 
 
-def test_check_data(demda):
+def test_check_data(demda: xr.DataArray):
     data_dict = _check_data(demda.copy(), "elevtn")
     assert isinstance(data_dict["elevtn"], xr.DataArray)
     assert data_dict["elevtn"].name == "elevtn"
@@ -81,7 +83,7 @@ def test_check_data(demda):
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_write_data_catalog(tmpdir):
+def test_write_data_catalog(tmpdir: LEGACY_PATH):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
     sources = list(model.data_catalog.sources.keys())
     data_lib_fn = join(model.root, "hydromt_data.yml")
@@ -114,7 +116,7 @@ def test_write_data_catalog(tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_model(model, tmpdir):
+def test_model(model: Model, tmpdir: LEGACY_PATH):
     # write model
     model.root.set(str(tmpdir), mode="w")
     model.write()
@@ -134,7 +136,7 @@ def test_model(model, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_model_tables(model, df, tmpdir):
+def test_model_tables(model: Model, df: pd.DataFrame, tmpdir: LEGACY_PATH):
     # make a couple copies of the dfs for testing
     dfs = {str(i): df.copy() for i in range(5)}
     model.root.set(tmpdir, mode="r+")  # append mode
@@ -147,7 +149,7 @@ def test_model_tables(model, df, tmpdir):
         model.set_tables(d, name=i)
         assert df.equals(model.tables[i])
 
-    # now do the same but interating over the stables instead
+    # now do the same but iterating over the stables instead
     for i, d in model.tables.items():
         model.set_tables(d, name=i)
         assert df.equals(model.tables[i])
@@ -199,13 +201,17 @@ def test_model_tables(model, df, tmpdir):
 #     assert "df" in mod1.tables
 
 
-def test_model_does_not_overwrite_in_write_mode(tmpdir):
+def test_model_does_not_overwrite_in_write_mode(tmpdir: LEGACY_PATH):
     bbox = [12.05, 45.30, 12.85, 45.65]
     root = join(tmpdir, "tmp")
-    model = Model(root=root, mode="w")
-    model.region.create({"bbox": bbox})
+    model = Model(
+        root=root,
+        mode="w",
+        components={"region": {"type": SpatialModelComponent}},
+        region_component="region",
+    )
+    model.region.create(region={"bbox": bbox})
     model.region.write()
-    assert exists(join(root, "region.geojson"))
     with pytest.raises(
         OSError, match="Model dir already exists and cannot be overwritten: "
     ):
@@ -214,7 +220,9 @@ def test_model_does_not_overwrite_in_write_mode(tmpdir):
 
 @pytest.mark.integration()
 @pytest.mark.skip(reason="needs method/yaml validation")
-def test_model_build_update(tmpdir, demda, obsda):
+def test_model_build_update(
+    tmpdir: LEGACY_PATH, demda: xr.DataArray, obsda: xr.DataArray
+):
     bbox = [12.05, 45.30, 12.85, 45.65]
     # build model
     model = Model(root=str(tmpdir), mode="w")
@@ -240,7 +248,9 @@ def test_model_build_update(tmpdir, demda, obsda):
 
 @pytest.mark.integration()
 @pytest.mark.skip(reason="needs method/yaml validation")
-def test_model_build_update_with_data(tmpdir, demda, obsda):
+def test_model_build_update_with_data(
+    tmpdir: LEGACY_PATH, demda: xr.DataArray, obsda: xr.DataArray
+):
     # Build model with some data
     bbox = [12.05, 45.30, 12.85, 45.65]
     geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
@@ -279,7 +289,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_setup_region(model, demda, tmpdir):
+def test_setup_region(model: Model, demda: xr.DataArray, tmpdir: LEGACY_PATH):
     # bbox
     model.region.create({"bbox": [12.05, 45.30, 12.85, 45.65]})
     region = model._geoms.pop("region")
@@ -313,29 +323,39 @@ def test_setup_region(model, demda, tmpdir):
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 
-def test_model_write_geoms(tmpdir):
-    model = Model(root=str(tmpdir), mode="w")
+def test_model_write_geoms(tmpdir: LEGACY_PATH):
+    model = Model(
+        root=str(tmpdir),
+        mode="w",
+        region_component="region",
+        components={"region": {"type": SpatialModelComponent}},
+    )
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom.to_crs(epsg=28992, inplace=True)
-    model.region.set(geom)
+    model.region.set_region(geom)
     model.region.write(to_wgs84=True)
     region_geom = gpd.read_file(str(join(tmpdir, "region.geojson")))
     assert region_geom.crs.to_epsg() == 4326
 
 
-def test_model_set_geoms(tmpdir):
+def test_model_set_geoms(tmpdir: LEGACY_PATH):
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom_28992 = geom.to_crs(epsg=28992)
-    model = Model(root=str(tmpdir), mode="w")
-    model.region.create({"geom": geom_28992})  # set model crs based on epsg28992
+    model = Model(
+        root=str(tmpdir),
+        mode="w",
+        region_component="region",
+        components={"region": {"type": SpatialModelComponent}},
+    )
+    model.region.create(region={"geom": geom_28992})  # set model crs based on epsg28992
     model.set_geoms(geom, "geom_wgs84")  # this should convert the geom crs to epsg28992
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_config(model, tmpdir):
+def test_config(model: Model, tmpdir: LEGACY_PATH):
     # config
     model.root.set(str(tmpdir))
     model.set_config("global.name", "test")
@@ -350,7 +370,7 @@ def test_config(model, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_maps_setup(tmpdir):
+def test_maps_setup(tmpdir: LEGACY_PATH):
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = Model(data_libs=["artifact_data", dc_param_fn], mode="w")
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
@@ -664,7 +684,7 @@ def test_maps_setup(tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_meshmodel(mesh_model, tmpdir):
+def test_meshmodel(mesh_model, tmpdir: LEGACY_PATH):
     MeshModel = PLUGINS.model_plugins["mesh_model"]
     assert "mesh" in mesh_model.api
     non_compliant = mesh_model._test_model_api()
@@ -681,7 +701,7 @@ def test_meshmodel(mesh_model, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_setup_mesh(tmpdir, griduda):
+def test_setup_mesh(tmpdir: LEGACY_PATH, griduda: Any):
     MeshModel = PLUGINS.model_plugins["mesh_model"]
     # Initialize model
     model = MeshModel(
@@ -752,7 +772,9 @@ def test_setup_mesh(tmpdir, griduda):
 
 
 @pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_meshmodel_setup(griduda, world):
+def test_meshmodel_setup(
+    griduda: Any, world: Union[pd.DataFrame, gpd.GeoDataFrame, Any]
+):
     MeshModel = PLUGINS.model_plugins["mesh_model"]
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
@@ -783,18 +805,20 @@ def test_meshmodel_setup(griduda, world):
 
 
 def test_initialize_model():
-    m = Model()
-    assert isinstance(m.region, ModelRegionComponent)
+    m = Model(
+        region_component="foo", components={"foo": {"type": "SpatialModelComponent"}}
+    )
+    assert isinstance(m.region, SpatialModelComponent)
 
 
 def test_initialize_model_with_grid_component():
-    m = Model(components={"grid": {"type": "GridComponent"}})
+    m = Model(components={"grid": {"type": "GridComponent"}}, region_component="grid")
     assert isinstance(m.grid, GridComponent)
-    assert isinstance(m.region, ModelRegionComponent)
+    assert isinstance(m.region, SpatialModelComponent)
 
 
 def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
-    m = Model(root=str(tmpdir))
+    m = Model(root=str(tmpdir), components={}, region_component="")
     grid = mocker.Mock(spec_set=ModelComponent)
     m.add_component("grid", grid)
     m.write()
@@ -802,14 +826,14 @@ def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
 
 
 def test_getattr_component(mocker: MockerFixture):
-    m = Model()
+    m = Model(components={}, region_component="")
     foo = mocker.Mock(spec_set=ModelComponent)
     m.add_component("foo", foo)
     assert m.foo == foo
 
 
 def test_add_component_wrong_name(mocker: MockerFixture):
-    m = Model()
+    m = Model(components={}, region_component="")
     foo = mocker.Mock(spec_set=ModelComponent)
     with pytest.raises(
         ValueError, match="Component name foo foo is not a valid identifier."
@@ -818,47 +842,58 @@ def test_add_component_wrong_name(mocker: MockerFixture):
 
 
 def test_get_component_non_existent():
-    m = Model()
+    m = Model(components={}, region_component="")
     with pytest.raises(KeyError):
         m.get_component("foo", ModelComponent)
 
 
 def test_read_calls_components(mocker: MockerFixture):
-    m = Model(mode="r")
-    mocker.patch.object(m.region, "read")
-    foo = mocker.Mock(spec_set=ModelComponent)
-    m.add_component("foo", foo)
+    foo = _patch_plugin_components(mocker, SpatialModelComponent)[0]
+    m = Model(
+        mode="r",
+        components={"foo": {"type": "SpatialModelComponent"}},
+        region_component="foo",
+    )
     m.read()
     foo.read.assert_called_once()
 
 
-def test_read_in_write_mode():
-    m = Model(mode="w")
-    with pytest.raises(IOError, match="Model opened in write-only mode"):
-        m.read()
-
-
 def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
-    m = Model(root=str(tmpdir))
+    region = _patch_plugin_components(mocker, SpatialModelComponent)[0]
+    region.create.__ishydromtstep__ = True
+    region.write.__ishydromtstep__ = True
+    m = Model(
+        root=str(tmpdir),
+        components={"region": {"type": "SpatialModelComponent"}},
+        region_component="region",
+    )
     assert m.region is region
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    m.build(region=region_dict)
+    m.build(region=region_dict, steps=[{"region.create": {}}])
     region.create.assert_called_once_with(region=region_dict)
     region.write.assert_called_once()
 
 
 def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
-    region, foo = _patch_plugin_components(mocker, ModelRegionComponent, ModelComponent)
+    region, foo = _patch_plugin_components(
+        mocker, SpatialModelComponent, ModelComponent
+    )
     foo.write.__ishydromtstep__ = True
-    m = Model(root=str(tmpdir))
-    m.add_component("foo", foo)
+    region.create.__ishydromtstep__ = True
+    m = Model(
+        root=str(tmpdir),
+        components={
+            "region": {"type": "SpatialModelComponent"},
+            "foo": {"type": "ModelComponent"},
+        },
+        region_component="region",
+    )
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
     assert m.region is region
     assert m.foo is foo
 
     # Specify to only write foo
-    m.build(region=region_dict, steps=OrderedDict({"foo.write": {}}))
+    m.build(region=region_dict, steps=[{"region.create": {}}, {"foo.write": {}}])
 
     region.create.assert_called_once_with(region=region_dict)
     region.write.assert_not_called()  # Only foo will be written, so no total write
@@ -866,7 +901,7 @@ def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
 
 
 def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, SpatialModelComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
 
@@ -878,7 +913,7 @@ def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path
 
 
 def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, SpatialModelComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
 
@@ -918,7 +953,7 @@ def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
 def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
     tmpdir: Path, mocker: MockerFixture
 ):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, SpatialModelComponent)[0]
     m = Model(root=str(tmpdir), mode="r")
     assert region is m.region
 

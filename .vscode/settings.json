@@ -26,6 +26,7 @@
         "pydantic",
         "pygeos",
         "SFINCS",
+        "xugrid",
         "zarr"
     ]
 }

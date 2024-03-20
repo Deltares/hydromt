@@ -13,6 +13,7 @@ import xugrid as xu
 from dask import config as dask_config
 
 # from hydromt.components.vector import VectorModel
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import raster, utils, vector
@@ -32,7 +33,11 @@ def tmp_dir() -> Generator[Path, None, None]:
 
 @pytest.fixture()
 def test_model(tmpdir) -> Model:
-    return Model(root=tmpdir)
+    return Model(
+        root=tmpdir,
+        region_component="region",
+        components={"region": {"type": SpatialModelComponent}},
+    )
 
 
 @pytest.fixture()
@@ -287,7 +292,11 @@ def griduda():
 
 @pytest.fixture()
 def model(demda, world, obsda):
-    mod = Model(data_libs=["artifact_data"])
+    mod = Model(
+        data_libs=["artifact_data"],
+        components={"region": {"type": SpatialModelComponent}},
+        region_component="region",
+    )
     mod.region.create({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_geoms(world, "world")

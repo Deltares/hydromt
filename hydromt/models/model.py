@@ -25,7 +25,6 @@ from typing import (
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pydantic.v1.utils
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
@@ -35,7 +34,7 @@ from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
-from hydromt.components import ModelRegionComponent
+from hydromt.components import SpatialModelComponent
 from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -75,14 +74,16 @@ class Model(object, metaclass=ABCMeta):
         "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
-        "region": ModelRegionComponent,
+        "region": SpatialModelComponent,
         "results": XArrayDict,
         "states": XArrayDict,
     }
 
     def __init__(
         self,
-        components: Optional[dict[str, dict[str, Any]]] = None,
+        *,
+        region_component: str,
+        components: dict[str, dict[str, Any]],
         root: Optional[str] = None,
         mode: str = "w",
         config_fn: Optional[str] = None,
@@ -96,6 +97,11 @@ class Model(object, metaclass=ABCMeta):
         ----------
         root : str, optional
             Model root, by default None
+        components: dict
+            All the components that need to be initialized in the model.
+            Requires at least one component of type SpatialModelComponent.
+        region_component: str, optional
+            The name of the region component in the model that defines the main region to work on.
         mode : {'r','r+','w'}, optional
             read/append/write mode, by default "w"
         config_fn : str, optional
@@ -108,12 +114,6 @@ class Model(object, metaclass=ABCMeta):
         logger:
             The logger to be used.
         """
-        # Recursively update the options with any defaults that are missing in the configuration.
-        components = components or {}
-        components = pydantic.v1.utils.deep_update(
-            {"region": {"type": "ModelRegionComponent"}}, components
-        )
-
         data_libs = data_libs or []
 
         self.logger = logger
@@ -139,6 +139,7 @@ class Model(object, metaclass=ABCMeta):
 
         self._components: Dict[str, ModelComponent] = {}
         self._add_components(components)
+        self.__main_spatial_component = region_component
 
         self._defered_file_closes = []
 
@@ -150,9 +151,10 @@ class Model(object, metaclass=ABCMeta):
         for name, options in components.items():
             type_name = options.pop("type")
 
-            self.add_component(
-                name, PLUGINS.component_plugins[type_name](self, **options)
-            )
+            if isinstance(type_name, str):
+                type_name = PLUGINS.component_plugins[type_name]
+
+            self.add_component(name, type_name(self, **options))
 
     def add_component(self, name: str, component: ModelComponent) -> None:
         """Add a component to the model. Will raise an error if the component already exists."""
@@ -171,9 +173,9 @@ class Model(object, metaclass=ABCMeta):
         return self._components[name]
 
     @property
-    def region(self) -> ModelRegionComponent:
+    def region(self) -> SpatialModelComponent:
         """Return the model region component."""
-        return self.get_component("region", ModelRegionComponent)
+        return self.get_component(self.__main_spatial_component, SpatialModelComponent)
 
     @_classproperty
     def api(cls) -> Dict:
@@ -193,7 +195,7 @@ class Model(object, metaclass=ABCMeta):
         *,
         region: dict[str, Any],
         write: Optional[bool] = True,
-        steps: Optional[Dict[str, Any]] = None,
+        steps: Optional[list[dict[str, dict[str, Any]]]] = None,
     ):
         r"""Single method to build a model from scratch based on settings in `opt`.
 
@@ -228,23 +230,20 @@ class Model(object, metaclass=ABCMeta):
                         ...
                     }
                 }
-
         """
-        steps = steps or {}
+        steps = steps or []
+        create_function_name = f"{self.__main_spatial_component}.create"
+        spatial_component_index = next(
+            i
+            for i, step in enumerate(steps)
+            if next(iter(step)) == create_function_name
+        )
+        steps[spatial_component_index][create_function_name]["region"] = region
         validate_steps(self, steps)
 
-        # steps gets preference over defaults.
-        # But put region.create at the start of the list.
-        steps = pydantic.v1.utils.deep_update(
-            steps, {"region.create": {"region": region}}
-        )
-
-        tmp = steps.pop("region.create")
-        steps = {"region.create": tmp, **steps}
-
-        for step in steps:
+        for step_dict in steps:
+            step, kwargs = next(iter(step_dict.items()))
             self.logger.info(f"build: {step}")
-            kwargs = steps[step] or {}
             # Call the methods.
             rgetattr(self, step)(**kwargs)
 
@@ -258,7 +257,7 @@ class Model(object, metaclass=ABCMeta):
         *,
         model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
-        steps: Optional[Dict[str, Any]] = None,
+        steps: Optional[list[dict[str, dict[str, Any]]]] = None,
         forceful_overwrite: bool = False,
     ):
         r"""Single method to update a model based the settings in `opt`.
@@ -300,14 +299,10 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        steps = steps or {}
+        steps = steps or []
         validate_steps(self, steps)
 
-        # check if region.create is in the steps, and remove it.
-        if steps.pop("region.create", None) is not None:
-            self.logger.warning(
-                "region.create can only be called when building a model."
-            )
+        # TODO: Remove {region}.create?
 
         # read current model
         if not self.root.is_writing_mode():
@@ -320,13 +315,13 @@ class Model(object, metaclass=ABCMeta):
             self.root.set(model_out, mode=mode)
 
         # check if model has a region
-        if self.region.data is None:
+        if self.region.region_data is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
         # loop over methods from config file
-        for step in steps:
+        for step_dict in steps:
+            step, kwargs = next(iter(step_dict.items()))
             self.logger.info(f"update: {step}")
-            kwargs = steps[step] or {}
             # Call the methods.
             rgetattr(self, step)(kwargs)
 
@@ -350,8 +345,10 @@ class Model(object, metaclass=ABCMeta):
         for c in self._components.values():
             c.read()
 
-    def _options_contain_write(self, steps: Dict[str, Any]) -> bool:
-        return any([step.split(".")[-1] == "write" for step in steps])
+    def _options_contain_write(self, steps: list[dict[str, dict[str, Any]]]) -> bool:
+        return any(
+            [next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps]
+        )
 
     def write_data_catalog(
         self,

@@ -30,15 +30,15 @@ logger = getLogger(__name__)
 DEFAULT_REGION_FILE_PATH = "region.geojson"
 
 
-class ModelRegionComponent(ModelComponent):
-    """Define the model region."""
+class SpatialModelComponent(ModelComponent):
+    """Base class for spatial model components like GridComponent."""
 
     def __init__(
         self,
         model: "Model",
     ) -> None:
         super().__init__(model)
-        self._data: Optional[GeoDataFrame] = None
+        self.__data: Optional[GeoDataFrame] = None
 
     @hydromt_step
     def create(
@@ -175,48 +175,47 @@ class ModelRegionComponent(ModelComponent):
             crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
             geom = geom.to_crs(crs)
 
-        self.set(geom, kind)
+        self.set_region(geom, kind)
         # This setup method returns region so that it can be wrapped for models which
         # require more information, e.g. grid RasterDataArray or xy coordinates.
         return region
 
-    def set(self, data: GeoDataFrame, kind: str = "geom"):
+    def set_region(self, data: GeoDataFrame, kind: str = "geom"):
         """Set the model region based on provided GeoDataFrame."""
         # if nothing is provided, record that the region was set by the user
         self.kind = kind
-        if self._data is not None:
+        if self.__data is not None:
             self._logger.info("Updating region geometry.")
 
         if isinstance(data, GeoSeries):
-            self._data = GeoDataFrame(data)
+            self.__data = GeoDataFrame(data)
         elif isinstance(data, GeoDataFrame):
-            self._data = data
+            self.__data = data
         else:
             raise ValueError("Only GeoSeries or GeoDataFrame can be used as region.")
 
     @property
     def bounds(self):
         """Return the total bound sof the model region."""
-        if self.data is not None:
-            return self.data.total_bounds
+        if self.__data is not None:
+            return self.__data.total_bounds
         else:
             raise ValueError("Could not read or construct region to read bounds from")
 
     @property
-    def data(self) -> Optional[GeoDataFrame]:
+    def region_data(self) -> Optional[GeoDataFrame]:
         """Provide access to the underlying GeoDataFrame data of the model region."""
-        if self._data is None and self._model_root.is_reading_mode():
+        if self.__data is None and self._model_root.is_reading_mode():
             self.read()
 
-        return self._data
+        return self.__data
 
     @property
     def crs(self) -> CRS:
         """Provide access to the CRS of the model region."""
-        if self.data is not None:
-            return self.data.crs
-        else:
+        if self.__data is None:
             raise ValueError("Could not read or construct region to read crs from")
+        return self.__data.crs
 
     def read(
         self,
@@ -227,7 +226,7 @@ class ModelRegionComponent(ModelComponent):
         super().read()
         # cannot read geom files for purely in memory models
         self._logger.debug(f"Reading model file {rel_path}.")
-        self._data = cast(
+        self.__data = cast(
             GeoDataFrame,
             gpd.read_file(join(self._model_root.path, rel_path), **read_kwargs),
         )
@@ -252,11 +251,11 @@ class ModelRegionComponent(ModelComponent):
         if not exists(base_name):
             makedirs(base_name, exist_ok=True)
 
-        if self.data is None:
+        if self.__data is None:
             self._logger.info("No region data found. skipping writing...")
         else:
             self._logger.info(f"writing region data to {write_path}")
-            gdf = self.data.copy()
+            gdf = self.__data.copy()
 
             if to_wgs84 and (
                 write_kwargs.get("driver") == "GeoJSON"
@@ -267,11 +266,11 @@ class ModelRegionComponent(ModelComponent):
             gdf.to_file(write_path, **write_kwargs)
 
     def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, ModelRegionComponent):
+        if not isinstance(__value, SpatialModelComponent):
             return False
         else:
             try:
-                assert_geodataframe_equal(self.data, __value.data)
+                assert_geodataframe_equal(self.__data, __value.data)
                 return True
             except AssertionError:
                 return False
@@ -310,7 +309,7 @@ def _parse_region(
                 )
             else:
                 raise ValueError(
-                    f"Unrecognised type {type(value0)}."
+                    f"Unrecognized type {type(value0)}."
                     "Should be a path, data catalog key or xugrid object."
                 )
             kwargs.update(kwarg)

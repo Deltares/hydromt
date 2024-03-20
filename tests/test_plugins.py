@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.models.model import Model
 from hydromt.plugins import PLUGINS
 
@@ -14,7 +14,7 @@ from hydromt.plugins import PLUGINS
 def test_core_component_plugins():
     components = PLUGINS.component_plugins
     assert components == {
-        "ModelRegionComponent": ModelRegionComponent,
+        "ModelRegionComponent": SpatialModelComponent,
         "GridComponent": GridComponent,
         "ModelComponent": ModelComponent,
     }

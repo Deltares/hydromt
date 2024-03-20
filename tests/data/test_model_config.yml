@@ -2,6 +2,7 @@
 ---
 model_type: Model
 global:
+  region_component: grid
   components:
     grid:
       type: GridComponent

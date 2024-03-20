@@ -12,7 +12,7 @@ from pyproj import CRS
 from shapely.geometry import box
 from xugrid.ugrid import conventions
 
-from hydromt.components.region import _parse_region
+from hydromt.components.spatial import _parse_region
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
 
