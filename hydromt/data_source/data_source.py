@@ -100,18 +100,26 @@ class DataSource(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def _push_down_data_adapter_args(cls, data: Any):
+        """Copy unit_add, unit_mult and rename to metadata_adapter.
+
+        The metadata resolver should query the data with the right variables and
+        the correct time variables, and this needs these arguments when used in
+        conjunction with the DataAdapter. The DataSource is responsable to keep these
+        up-to-date.
+        """
         if isinstance(data, dict) or isinstance(data, BaseModel):
             try:
                 for da_arg in ["unit_add", "unit_mult", "rename"]:
                     value: Any = get_nested_var(["data_adapter", da_arg], data, {})
                     set_nested_var(["driver", "metadata_resolver", da_arg], data, value)
             except ValueError:
-                pass  # let pydantic handle it
+                pass  # let pydantic handle any errors
         return data
 
     @model_validator(mode="before")
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:
+        """Pydantic does not check class variables, so it is checked here."""
         if (
             isinstance(data, dict)
             and data.get("data_type")
@@ -122,6 +130,7 @@ class DataSource(BaseModel):
 
     @model_validator(mode="after")
     def _validate_uri(self) -> str:
+        """In case of a local path, add the root before it."""
         if not _uri_validator(self.uri):
             self.uri = _abs_path(self.root, self.uri)
         return self
