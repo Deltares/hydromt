@@ -193,7 +193,7 @@ class Model(object, metaclass=ABCMeta):
     def build(
         self,
         *,
-        region: dict[str, Any],
+        region: Optional[dict[str, Any]] = None,
         write: Optional[bool] = True,
         steps: Optional[list[dict[str, dict[str, Any]]]] = None,
     ):
@@ -232,13 +232,9 @@ class Model(object, metaclass=ABCMeta):
                 }
         """
         steps = steps or []
-        create_function_name = f"{self.__main_spatial_component}.create"
-        spatial_component_index = next(
-            i
-            for i, step in enumerate(steps)
-            if next(iter(step)) == create_function_name
-        )
-        steps[spatial_component_index][create_function_name]["region"] = region
+        if region is not None:
+            self._update_region(steps=steps, region=region)
+
         validate_steps(self, steps)
 
         for step_dict in steps:
@@ -349,6 +345,20 @@ class Model(object, metaclass=ABCMeta):
         return any(
             [next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps]
         )
+
+    def _update_region(
+        self,
+        *,
+        steps: list[dict[str, dict[str, Any]]],
+        region: dict[str, Any],
+    ):
+        create_function_name = f"{self.__main_spatial_component}.create"
+        spatial_component_index = next(
+            i
+            for i, step in enumerate(steps)
+            if next(iter(step)) == create_function_name
+        )
+        steps[spatial_component_index][create_function_name]["region"] = region
 
     def write_data_catalog(
         self,

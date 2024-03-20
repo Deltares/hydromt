@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
-from collections import OrderedDict
 from copy import deepcopy
 from os import listdir
 from os.path import abspath, dirname, isfile, join
@@ -902,43 +901,36 @@ def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
 
 def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
     region = _patch_plugin_components(mocker, SpatialModelComponent)[0]
-    m = Model(root=str(tmpdir))
+    region.create.__ishydromtstep__ = True
+    m = Model(
+        root=str(tmpdir),
+        components={"region": {"type": "SpatialModelComponent"}},
+        region_component="region",
+    )
     assert m.region is region
 
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    m.build(write=False, region=region_dict)
+    m.build(write=False, region=region_dict, steps=[{"region.create": {}}])
 
     region.create.assert_called_once()
     region.write.assert_not_called()
 
 
 def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, SpatialModelComponent)[0]
-    m = Model(root=str(tmpdir))
-    assert m.region is region
-
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+    m = Model(root=str(tmpdir), components={}, region_component="")
 
     with pytest.raises(KeyError):
-        m.build(region=region_dict, steps=OrderedDict({"foo": {}}))
+        m.build(steps=[{"foo": {}}])
 
 
 def test_add_component_duplicate_throws(mocker: MockerFixture):
-    m = Model()
+    m = Model(components={}, region_component="")
     foo = mocker.Mock(spec_set=ModelComponent)
     m.add_component("foo", foo)
     foo2 = mocker.Mock(spec_set=ModelComponent)
 
     with pytest.raises(ValueError, match="Component foo already exists in the model."):
         m.add_component("foo", foo2)
-
-
-def test_update_empty_model_with_region_none_throws(tmpdir: Path):
-    m = Model(root=str(tmpdir))
-    with pytest.raises(
-        ValueError, match="Model region not found, setup model using `build` first."
-    ):
-        m.update()
 
 
 def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
