@@ -19,6 +19,7 @@ from hydromt import _compat, hydromt_step
 from hydromt._typing.type_def import StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
+from hydromt.gis import utils as gis_utils
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:
@@ -42,10 +43,12 @@ class ModelRegionComponent(ModelComponent):
     @hydromt_step
     def create(
         self,
+        *,
         region: dict,
+        crs: Optional[int] = None,
         hydrography_fn: str = "merit_hydro",
         basin_index_fn: str = "merit_hydro_index",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Check and return parsed region arguments.
 
         Parameters
@@ -73,7 +76,7 @@ class ModelRegionComponent(ModelComponent):
 
             Entire basin can be defined based on an ID, one or multiple point location
             (x, y), or a region of interest (bounding box or geometry) for which the
-            basin IDs are looked up. The basins withint the area of interest can be further
+            basin IDs are looked up. The basins within the area of interest can be further
             filtered to only include basins with their outlet within the area of interest
             ('outlets': true) of stream threshold arguments (e.g.: 'uparea': 1000).
 
@@ -126,6 +129,8 @@ class ModelRegionComponent(ModelComponent):
             * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
 
             * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
+        crs: int, optional
+            EPSG code of the model or "utm" to let hydromt find the closest projected
         logger:
             The logger to use.
 
@@ -165,6 +170,10 @@ class ModelRegionComponent(ModelComponent):
             geom = region["model"].region
         else:
             raise ValueError(f"model region argument not understood: {region}")
+
+        if crs is not None:
+            crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+            geom = geom.to_crs(crs)
 
         self.set(geom, kind)
         # This setup method returns region so that it can be wrapped for models which
