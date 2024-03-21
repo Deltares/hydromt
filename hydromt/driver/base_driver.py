@@ -19,7 +19,7 @@ class BaseDriver(BaseModel, ABC):
     metadata_resolver: MetaDataResolver = Field(
         default_factory=RESOLVERS.get("convention")
     )
-    config: ConfigDict = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="allow")
 
     @field_validator("metadata_resolver", mode="before")
     @classmethod
