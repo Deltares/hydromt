@@ -19,20 +19,8 @@ from hydromt._typing import Bbox, ErrorHandleMethod, Geom, TimeRange, TotalBound
 from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
 from hydromt.data_source.data_source import DataSource
 from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
-from hydromt.driver.zarr_driver import ZarrDriver
 
-_KNOWN_DRIVERS: Dict[str, RasterDatasetDriver] = {"zarr": ZarrDriver}
 logger: Logger = getLogger(__name__)
-
-
-def driver_from_str(driver_str: str, **kwargs) -> RasterDatasetDriver:
-    """Construct RasterDatasetDriver."""
-    if driver_str not in _KNOWN_DRIVERS.keys():
-        raise ValueError(
-            f"driver {driver_str} not in known RasterDatasetDrivers: {_KNOWN_DRIVERS.keys()}"
-        )
-
-    return _KNOWN_DRIVERS[driver_str](**kwargs)
 
 
 class RasterDatasetSource(DataSource):

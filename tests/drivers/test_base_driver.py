@@ -1,6 +1,4 @@
 from hydromt.driver.base_driver import BaseDriver
-from hydromt.driver.pyogrio_driver import PyogrioDriver
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 
 class TestBaseDriver:
@@ -8,10 +6,12 @@ class TestBaseDriver:
         driver: BaseDriver = BaseDriver.model_validate(
             {"name": "pyogrio", "metadata_resolver": "convention"}
         )
-        assert type(driver) == PyogrioDriver
-        assert type(driver.metadata_resolver) == ConventionResolver
+
+        assert driver.__class__.__qualname__ == "PyogrioDriver"
+        assert driver.metadata_resolver.__class__.__qualname__ == "ConventionResolver"
 
     def test_init_dict_minimal_args(self):
         driver: BaseDriver = BaseDriver.model_validate({"name": "pyogrio"})
-        assert type(driver) == PyogrioDriver
-        assert type(driver.metadata_resolver) == ConventionResolver
+
+        assert driver.__class__.__qualname__ == "PyogrioDriver"
+        assert driver.metadata_resolver.__class__.__qualname__ == "ConventionResolver"

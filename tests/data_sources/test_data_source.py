@@ -9,7 +9,7 @@ from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
 
 
 class TestDataSource:
-    def test_polymorphism(
+    def test_polymorphism_model_validate(
         self,
         mock_geodf_driver: GeoDataFrameDriver,
         mock_geodataframe_adapter: GeoDataFrameAdapter,
@@ -24,6 +24,12 @@ class TestDataSource:
             }
         )
         assert isinstance(submodel, GeoDataFrameSource)
+
+    def test_polymorphism_unknown_data_type(
+        self,
+        mock_geodf_driver: GeoDataFrameDriver,
+        mock_geodataframe_adapter: GeoDataFrameAdapter,
+    ):
         with pytest.raises(ValueError, match="Unknown 'data_type'"):
             DataSource.model_validate(
                 {

@@ -43,7 +43,6 @@ class DataSource(BaseModel):
     root: Optional[str] = Field(default=None)
     version: Optional[str] = Field(default=None)
     provider: Optional[str] = Field(default=None)
-    resolver_kwargs: Dict[str, Any] = Field(default_factory=dict)
     crs: Optional[int] = Field(default=None)
     extent: Dict[str, Any] = Field(default_factory=dict)
 
