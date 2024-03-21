@@ -351,7 +351,7 @@ class MeshComponent(ModelComponent):
 
         Returns
         -------
-        uds: Union[xu.UgridDataArray, xu.UgridDataset]
+        uds: Union[xu.Ugrid1d, xu.Ugrid2d, xu.UgridDataArray, xu.UgridDataset]
             Grid topology with or without data variables.
         """
         if self.data is None:
