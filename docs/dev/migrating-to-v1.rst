@@ -144,7 +144,8 @@ forcing or tables. To be able to work within a `Model` class properly a componen
 Additionally, it is highly recommended to also provide the following methods:
 
 - `set`: provide the ability to override the current data in the component.
-- `create`: the ability to construct the component and its data from the provided arguments.
+- `create`: the ability to construct the schematization of the component (computation units like grid cells, mesh1d or network lines, vector units for lumped model etc.) from the provided arguments.
+- `add_data`: the ability to add model data and parameters to the component once the schematization is well defined (ie add landuse data to grid or mesh etc.).
 
 It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
@@ -174,14 +175,18 @@ As briefly mentioned in the table above, your component will be able to retrieve
 
 **Manipulating Components**
 
-Components can be added to a `Model` object by using the `model.add_component` function. This function takes the name of the component, and the TYPE (not an instance) of the component as argument. You should be able to retrieve the relevant type by accessing the `PLUGINS` object in core. When these components
+Components can be added to a `Model` object by using the `model.add_component` function. This function takes the name of the component, and the TYPE (not an instance) of the component as argument. When these components
 are added, they are uninitialized (i.e. empty). You can populate them by calling functions such as `create` or `read` from the yaml interface or any other means through the interactive Python API.
 
 Once a component has been added, any component (or other object or scope that has access to the model class) can retrieve necessary components by using the
 `model.get_component` function which takes the name of the desired component and the TYPE of the component you wish to retrieve. At this point you can do
 with it as you please.
 
-
+In the core of HydroMT, the available components are (list or maybe table):
+  - `GridComponent` for data on a regular grid
+  - etc.
+ 
+ A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
 Making the model region its own component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
