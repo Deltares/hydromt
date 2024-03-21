@@ -50,14 +50,18 @@ class Plugins:
 
         return self._model_plugins
 
-    def summary(self) -> str:
-        """Generate string representation containing the registered entrypoints."""
-        component_plugins = ", ".join(self.component_plugins)
-        model_plugins = ", ".join(self.model_plugins)
-        return (
-            f"component plugins:\n{component_plugins}"
-            f"model plugins:\n{model_plugins}"
-        )
+    def model_summary(self) -> str:
+        """Generate string representation containing the registered model entrypoints."""
+        model_plugins = "\n\t- ".join(self.model_plugins)
+        return f"model plugins:\n\t- {model_plugins}"
+
+    def component_summary(self) -> str:
+        """Generate string representation containing the registered component entrypoints."""
+        component_plugins = "\n\t- ".join(self.component_plugins)
+        return f"component plugins:\n\t- {component_plugins}"
+
+    def plugin_summary(self) -> str:
+        return "\n".join([self.model_summary(), self.component_summary()])
 
 
 PLUGINS = Plugins()

@@ -37,7 +37,7 @@ if BUILDING_EXE:
 logger = logging.getLogger(__name__)
 
 
-def print_models(ctx, param, value):
+def print_available_models(ctx, param, value):
     """Print the available models and exit.
 
     Parameters
@@ -51,7 +51,43 @@ def print_models(ctx, param, value):
     """
     if not value:
         return {}
-    click.echo(f"{PLUGINS.summary()}")
+    click.echo(f"{PLUGINS.model_summary()}")
+    ctx.exit()
+
+
+def print_available_components(ctx, param, value):
+    """Print the available components and exit.
+
+    Parameters
+    ----------
+    ctx : click.Context
+        The Click context object.
+    param : click.Parameter
+        The Click parameter object.
+    value : bool
+        The value of the parameter.
+    """
+    if not value:
+        return {}
+    click.echo(PLUGINS.component_summary())
+    ctx.exit()
+
+
+def print_available_plugins(ctx, param, value):
+    """Print the available plugins and exit.
+
+    Parameters
+    ----------
+    ctx : click.Context
+        The Click context object.
+    param : click.Parameter
+        The Click parameter object.
+    value : bool
+        The value of the parameter.
+    """
+    if not value:
+        return {}
+    click.echo(f"{PLUGINS.plugin_summary()}")
     ctx.exit()
 
 
@@ -140,7 +176,23 @@ cache_opt = click.option(
     is_flag=True,
     is_eager=True,
     help="Print available model plugins and exit.",
-    callback=print_models,
+    callback=print_available_models,
+)
+@click.option(
+    "--components",
+    default=False,
+    is_flag=True,
+    is_eager=True,
+    help="Print available component plugins and exit.",
+    callback=print_available_components,
+)
+@click.option(
+    "--plugins",
+    default=False,
+    is_flag=True,
+    is_eager=True,
+    help="Print available component plugins and exit.",
+    callback=print_available_plugins,
 )
 @click.pass_context
 def main(ctx, models):  # , quiet, verbose):
