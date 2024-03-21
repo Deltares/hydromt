@@ -15,12 +15,9 @@ from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.components.base import ModelComponent
-from hydromt.components.region import _parse_region
 from hydromt.gis import raster
-from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
-from hydromt.workflows.basin_mask import get_basin_geometry
 from hydromt.workflows.grid import (
     grid_from_constant,
     grid_from_geodataframe,
@@ -46,6 +43,7 @@ class GridComponent(ModelComponent):
     def __init__(
         self,
         model: "Model",
+        region: str = "region",
     ):
         """Initialize a GridComponent.
 
@@ -54,8 +52,9 @@ class GridComponent(ModelComponent):
         model: Model
             HydroMT model instance
         """
-        self._data: Optional[xr.Dataset] = None
         super().__init__(model=model)
+        self._region_component = region
+        self._data: Optional[xr.Dataset] = None
 
     def set(
         self,
@@ -194,7 +193,8 @@ class GridComponent(ModelComponent):
     @hydromt_step
     def create(
         self,
-        region: dict,
+        *,
+        region: Optional[dict] = None,
         res: Optional[float] = None,
         crs: Optional[int] = None,
         rotated: bool = False,
@@ -204,7 +204,7 @@ class GridComponent(ModelComponent):
         align: bool = True,
         dec_origin: int = 0,
         dec_rotation: int = 3,
-    ) -> xr.DataArray:
+    ) -> None:
         """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
         A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
@@ -261,33 +261,21 @@ class GridComponent(ModelComponent):
         """
         self._logger.info("Preparing 2D grid.")
 
-        kind = next(iter(region))  # first key of region
-        if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
-            # Do not parse_region for grid as we want to allow for more (file) formats
-            # see ticket #813 for the skip
-            kind, region = _parse_region(  # noqa: F821
-                region, data_catalog=self._data_catalog, logger=self._logger
+        # Pass region creation information to model.region.
+        if region is not None:
+            self._model.region.create(
+                region=region,
+                basin_index_fn=basin_index_fn,
+                hydrography_fn=hydrography_fn,
             )
-        elif kind != "grid":
-            raise ValueError(
-                f"Region for grid must be of kind [grid, bbox, geom, basin, subbasin,"
-                f" interbasin], kind {kind} not understood."
-            )
+
+        kind = self._model.region.kind
+        geom = self._model.region.data
 
         # Derive xcoords, ycoords and geom for the different kind options
         if kind in ["bbox", "geom"]:
-            if not isinstance(res, (int, float)):
+            if not res:
                 raise ValueError("res argument required for kind 'bbox', 'geom'")
-            if kind == "bbox":
-                bbox = region["bbox"]
-                geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            elif kind == "geom":
-                geom = region["geom"]
-                if geom.crs is None:
-                    raise ValueError('Model region "geom" has no CRS')
-            if crs is not None:
-                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
-                geom = geom.to_crs(crs)
             # Generate grid based on res for region bbox
             # TODO add warning on res value if crs is projected or not?
             if not rotated:
@@ -322,24 +310,12 @@ class GridComponent(ModelComponent):
                     * Affine.rotation(rot)
                     * Affine.scale(res, res)
                 )
-
         elif kind in ["basin", "subbasin", "interbasin"]:
-            # retrieve global hydrography data (lazy!)
-            ds_hyd = self._data_catalog.get_rasterdataset(hydrography_fn)
-            if "bounds" not in region:
-                region.update(basin_index=self._data_catalog.get_source(basin_index_fn))
-            # get basin geometry
-            geom, xy = get_basin_geometry(
-                ds=ds_hyd,
-                kind=kind,
-                logger=self._logger,
-                **region,
-            )
             # get ds_hyd again but clipped to geom, one variable is enough
             da_hyd = self._data_catalog.get_rasterdataset(
                 hydrography_fn, geom=geom, variables=["flwdir"]
             )
-            if not isinstance(res, (int, float)):
+            if not res:
                 self._logger.info(
                     "res argument not defined, using resolution of "
                     f"hydrography_fn {da_hyd.raster.res}"
@@ -357,26 +333,14 @@ class GridComponent(ModelComponent):
             # Get xycoords, geom
             xcoords = da_hyd.raster.xcoords.values
             ycoords = da_hyd.raster.ycoords.values
-            if geom.crs != da_hyd.raster.crs:
-                crs = da_hyd.raster.crs
-                geom = geom.to_crs(crs)
         elif kind == "grid":
-            # Support more formats for grid input (netcdf, zarr, io.open_raster)
-            fn = region[kind]
-            if isinstance(fn, (xr.DataArray, xr.Dataset)):
-                da_like = fn
-            else:
-                da_like = self._data_catalog.get_rasterdataset(fn)
-            # Get xycoords, geom
-            xcoords = da_like.raster.xcoords.values
-            ycoords = da_like.raster.ycoords.values
-            geom = da_like.raster.box
+            xcoords = geom.raster.xcoords.values
+            ycoords = geom.raster.ycoords.values
             if crs is not None or res is not None:
                 self._logger.warning(
-                    "For region kind 'grid', the gris crs/res are used and not"
+                    "For region kind 'grid', the grid crs/res are used and not"
                     f" user-defined crs {crs} or res {res}"
                 )
-            crs = da_like.raster.crs
 
         # Instantiate grid object
         # Generate grid using hydromt full method
@@ -411,11 +375,7 @@ class GridComponent(ModelComponent):
             grid = grid.to_dataset()
             grid = grid.drop_vars("mask")
 
-        # Add region and grid to model
-        self._model.set_geoms(geom, "region")
         self.set(grid)
-
-        return grid
 
     @property
     def res(self) -> Optional[Tuple[float, float]]:

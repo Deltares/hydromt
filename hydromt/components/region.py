@@ -19,6 +19,7 @@ from hydromt import _compat, hydromt_step
 from hydromt._typing.type_def import StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
+from hydromt.gis import utils as gis_utils
 from hydromt.plugins import PLUGINS
 from hydromt.workflows.basin_mask import get_basin_geometry
 
@@ -40,14 +41,17 @@ class ModelRegionComponent(ModelComponent):
     ) -> None:
         super().__init__(model)
         self._data: Optional[GeoDataFrame] = None
+        self._initialized = False
 
     @hydromt_step
     def create(
         self,
+        *,
         region: dict,
+        crs: Optional[int] = None,
         hydrography_fn: str = "merit_hydro",
         basin_index_fn: str = "merit_hydro_index",
-    ) -> Dict[str, Any]:
+    ) -> None:
         """Check and return parsed region arguments.
 
         Parameters
@@ -130,6 +134,8 @@ class ModelRegionComponent(ModelComponent):
             * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
         logger:
             The logger to use.
+        crs: int, optional
+            EPSG code of the model or "utm" to let hydromt find the closest projected
 
         Returns
         -------
@@ -138,6 +144,10 @@ class ModelRegionComponent(ModelComponent):
         kwargs : dict
             parsed region json
         """
+        if self.data is not None:
+            self._logger.warn("Model region already initialized. Skipping creation.")
+            return
+
         kind, region = _parse_region(
             region, data_catalog=self._data_catalog, logger=self._logger
         )
@@ -168,12 +178,13 @@ class ModelRegionComponent(ModelComponent):
         else:
             raise ValueError(f"model region argument not understood: {region}")
 
-        self.set(geom, kind)
-        # This setup method returns region so that it can be wrapped for models which
-        # require more information, e.g. grid RasterDataArray or xy coordinates.
-        return region
+        if crs is not None:
+            crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+            geom = geom.to_crs(crs)
 
-    def set(self, data: GeoDataFrame, kind: str = "geom"):
+        self.set(geom, kind)
+
+    def set(self, data: GeoDataFrame, kind: str = "geom") -> None:
         """Set the model region based on provided GeoDataFrame."""
         # if nothing is provided, record that the region was set by the user
         self.kind = kind
@@ -186,6 +197,8 @@ class ModelRegionComponent(ModelComponent):
             self._data = data
         else:
             raise ValueError("Only GeoSeries or GeoDataFrame can be used as region.")
+
+        self._initialized = True
 
     @property
     def bounds(self):
