@@ -71,7 +71,6 @@ class RasterDatasetSource(DataSource):
             predicate=predicate,
             timerange=timerange,
             zoom_level=zoom_level,
-            **self.driver_kwargs,
         )
         return self.data_adapter.transform(
             ds,

@@ -69,7 +69,6 @@ class TestRasterDatasetSource:
             uri="points.zarr",
             zoom_levels={1: 10},
             driver={"name": "zarr", "metadata_resolver": "convention"},
-            driver_kwargs={},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
 

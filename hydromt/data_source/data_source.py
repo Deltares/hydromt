@@ -43,7 +43,6 @@ class DataSource(BaseModel):
     root: Optional[str] = Field(default=None)
     version: Optional[str] = Field(default=None)
     provider: Optional[str] = Field(default=None)
-    driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
     resolver_kwargs: Dict[str, Any] = Field(default_factory=dict)
     crs: Optional[int] = Field(default=None)
     extent: Dict[str, Any] = Field(default_factory=dict)
@@ -158,6 +157,24 @@ def get_nested_var(
         return nested_object
 
 
+def set_nested_var(
+    nested_var_keys: List[str],
+    nested_object: Any,
+    value: Any,
+):
+    """Set nested variable during pydantic "before" validation."""
+    key: str = nested_var_keys.pop(0)
+    if len(nested_var_keys) > 0:
+        prop: Union[BaseModel, Dict, None] = _get_property(
+            nested_object, key, default={}
+        )
+        # Then set result of get on larger object
+        newprop = set_nested_var(nested_var_keys, prop, value)
+        return _set_pydantic_or_dict_property(nested_object, key, newprop)
+    else:
+        return _set_pydantic_or_dict_property(nested_object, key, value)
+
+
 def _get_property(obj: Any, key: str, default: T) -> Union[Dict, BaseModel, T]:
     if isinstance(obj, Dict):
         return obj.get(key, default)
@@ -182,21 +199,3 @@ def _set_pydantic_or_dict_property(
             f"Cannot set value '{value}' on object '{obj}' with key '{key}'."
         )
     return obj
-
-
-def set_nested_var(
-    nested_var_keys: List[str],
-    nested_object: Any,
-    value: Any,
-):
-    """Set nested variable during pydantic "before" validation."""
-    key: str = nested_var_keys.pop(0)
-    if len(nested_var_keys) > 0:
-        prop: Union[BaseModel, Dict, None] = _get_property(
-            nested_object, key, default={}
-        )
-        # Then set result of get on larger object
-        newprop = set_nested_var(nested_var_keys, prop, value)
-        return _set_pydantic_or_dict_property(nested_object, key, newprop)
-    else:
-        return _set_pydantic_or_dict_property(nested_object, key, value)

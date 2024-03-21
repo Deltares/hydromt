@@ -3,7 +3,7 @@
 from abc import ABC
 from typing import Any, Callable, ClassVar
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.metadata_resolver.resolver_plugin import RESOLVERS
@@ -15,10 +15,11 @@ class BaseDriver(BaseModel, ABC):
     Is used to implement common functionality.
     """
 
+    name: ClassVar[str]
     metadata_resolver: MetaDataResolver = Field(
         default_factory=RESOLVERS.get("convention")
     )
-    name: ClassVar[str]
+    config: ConfigDict = ConfigDict(extra="allow")
 
     @field_validator("metadata_resolver", mode="before")
     @classmethod
@@ -43,7 +44,9 @@ class BaseDriver(BaseModel, ABC):
         elif hasattr(v, "resolve"):  # MetaDataResolver duck-typing
             return v
         else:
-            raise ValueError("metadata_resolver should be string or MetaDataResolver.")
+            raise ValueError(
+                "metadata_resolver should be string, dict or MetaDataResolver."
+            )
 
     @model_validator(mode="wrap")
     @classmethod

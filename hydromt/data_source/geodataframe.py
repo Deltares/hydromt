@@ -56,7 +56,6 @@ class GeoDataFrameSource(DataSource):
             variables=variables,
             handle_nodata=handle_nodata,
             logger=logger,
-            **self.driver_kwargs,
         )
         return self.data_adapter.transform(
             gdf,
