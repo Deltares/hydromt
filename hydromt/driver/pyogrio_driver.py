@@ -51,7 +51,6 @@ class PyogrioDriver(GeoDataFrameDriver):
             handle_nodata=handle_nodata,
             **kwargs,
         )
-        # TODO: put this check after the metadata resolver
         if len(uris) != 1:
             raise ValueError("Length of uris for Pyogrio Driver must be 1.")
         _uri = uris[0]

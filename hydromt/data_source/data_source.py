@@ -1,5 +1,6 @@
 """Abstract DataSource class."""
 
+from abc import ABC
 from logging import Logger, getLogger
 from os.path import abspath, join
 from pathlib import Path
@@ -22,7 +23,7 @@ logger: Logger = getLogger(__name__)
 T = TypeVar("T")
 
 
-class DataSource(BaseModel):
+class DataSource(BaseModel, ABC):
     """
     A DataSource is a parsed section of a DataCatalog.
 
