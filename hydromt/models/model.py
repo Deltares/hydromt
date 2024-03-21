@@ -138,7 +138,7 @@ class Model(object, metaclass=ABCMeta):
         # file system
         self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
 
-        self._components: Dict[str, ModelComponent] = {}
+        self._components: dict[str, ModelComponent] = {}
         self._add_components(components)
 
         self._defered_file_closes = []
@@ -187,7 +187,7 @@ class Model(object, metaclass=ABCMeta):
         _api = cls._API.copy()
 
         # reversed is so that child attributes take priority
-        # this does mean that it becomes imporant in which order you
+        # this does mean that it becomes important in which order you
         # inherit from your base classes.
         for base_cls in reversed(cls.__mro__):
             if hasattr(base_cls, "_API"):
@@ -197,9 +197,8 @@ class Model(object, metaclass=ABCMeta):
     def build(
         self,
         *,
-        region: dict[str, Any],
         write: Optional[bool] = True,
-        steps: Optional[list[dict[str, dict[str, Any]]]] = None,
+        steps: list[dict[str, dict[str, Any]]],
     ):
         r"""Single method to build a model from scratch based on settings in `steps`.
 
@@ -215,9 +214,6 @@ class Model(object, metaclass=ABCMeta):
 
         Parameters
         ----------
-        region: dict
-            Description of model region. See :py:meth:`~hydromt.workflows.parse_region`
-            for all options.
         write: bool, optional
             Write complete model after executing all methods in opt, by default True.
         steps: Optional[list[dict[str, dict[str, Any]]]]
@@ -239,10 +235,7 @@ class Model(object, metaclass=ABCMeta):
                 ]
 
         """
-        steps = steps or []
         validate_steps(self, steps)
-        self._update_region_from_arguments(steps, region)
-        self._move_region_create_to_front(steps)
 
         for step_dict in steps:
             step, kwargs = next(iter(step_dict.items()))
@@ -315,9 +308,6 @@ class Model(object, metaclass=ABCMeta):
         steps = steps or []
         validate_steps(self, steps)
 
-        # check if region.create is in the steps, and remove it.
-        self._remove_region_create(steps)
-
         # read current model
         if not self.root.is_writing_mode():
             if model_out is None:
@@ -389,39 +379,6 @@ class Model(object, metaclass=ABCMeta):
         return any(
             next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps
         )
-
-    @staticmethod
-    def _update_region_from_arguments(
-        steps: list[dict[str, dict[str, Any]]], region: dict[str, Any]
-    ) -> None:
-        try:
-            region_step = next(
-                step_dict
-                for step_dict in enumerate(steps)
-                if next(iter(step_dict)) == "region.create"
-            )
-            region_step[1]["region"] = region
-        except StopIteration:
-            steps.insert(0, {"region.create": {"region": region}})
-
-    @staticmethod
-    def _move_region_create_to_front(steps: list[dict[str, dict[str, Any]]]) -> None:
-        region_create = next(
-            step_dict for step_dict in steps if "region.create" in step_dict
-        )
-        steps.remove(region_create)
-        steps.insert(0, region_create)
-
-    def _remove_region_create(self, steps: list[dict[str, dict[str, Any]]]) -> None:
-        try:
-            steps.remove(
-                next(step_dict for step_dict in steps if "region.create" in step_dict)
-            )
-            self.logger.warning(
-                "region.create can only be called when building a model."
-            )
-        except StopIteration:
-            pass
 
     @hydromt_step
     def write_data_catalog(

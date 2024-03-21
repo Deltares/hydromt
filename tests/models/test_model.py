@@ -163,7 +163,7 @@ def test_model_tables(model, df, tmpdir):
         model.set_tables(d, name=i)
         assert df.equals(model.tables[i])
 
-    # now do the same but interating over the stables instead
+    # now do the same but iterating over the stables instead
     for i, d in model.tables.items():
         model.set_tables(d, name=i)
         assert df.equals(model.tables[i])
@@ -861,11 +861,12 @@ def test_read_in_write_mode():
 
 def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
     region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region.create.__ishydromtstep__ = True
     m = Model(root=str(tmpdir))
     assert m.region is region
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    m.build(region=region_dict)
-    region.create.assert_called_once_with(region=region_dict)
+    m.build(steps=[{"region.create": {"region": region_dict}}])
+    region.create.assert_called_once()
     region.write.assert_called_once()
 
 
@@ -874,14 +875,11 @@ def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
     foo.write.__ishydromtstep__ = True
     m = Model(root=str(tmpdir))
     m.add_component("foo", foo)
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
     assert m.region is region
     assert m.foo is foo
 
-    # Specify to only write foo
-    m.build(region=region_dict, steps=[{"foo.write": {}}])
+    m.build(steps=[{"foo.write": {}}])
 
-    region.create.assert_called_once_with(region=region_dict)
     region.write.assert_not_called()  # Only foo will be written, so no total write
     foo.write.assert_called_once()  # foo was written, because it was specified in steps
 
@@ -891,10 +889,8 @@ def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path
     m = Model(root=str(tmpdir))
     assert m.region is region
 
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    m.build(write=False, region=region_dict)
+    m.build(write=False, steps=[])
 
-    region.create.assert_called_once()
     region.write.assert_not_called()
 
 
@@ -903,10 +899,8 @@ def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
     m = Model(root=str(tmpdir))
     assert m.region is region
 
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-
-    with pytest.raises(KeyError):
-        m.build(region=region_dict, steps=[{"foo": {}}])
+    with pytest.raises(KeyError, match="foo"):
+        m.build(steps=[{"foo": {}}])
 
 
 def test_add_component_duplicate_throws(mocker: MockerFixture):
