@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
-from collections import OrderedDict
 from copy import deepcopy
 from os import listdir
 from os.path import abspath, dirname, exists, isfile, join
@@ -858,7 +857,7 @@ def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
     assert m.foo is foo
 
     # Specify to only write foo
-    m.build(region=region_dict, steps=OrderedDict({"foo.write": {}}))
+    m.build(region=region_dict, steps=[{"foo.write": {}}])
 
     region.create.assert_called_once_with(region=region_dict)
     region.write.assert_not_called()  # Only foo will be written, so no total write
@@ -885,7 +884,7 @@ def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
 
     with pytest.raises(KeyError):
-        m.build(region=region_dict, steps=OrderedDict({"foo": {}}))
+        m.build(region=region_dict, steps=[{"foo": {}}])
 
 
 def test_add_component_duplicate_throws(mocker: MockerFixture):

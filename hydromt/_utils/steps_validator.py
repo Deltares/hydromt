@@ -1,5 +1,5 @@
 import inspect
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
@@ -7,12 +7,13 @@ if TYPE_CHECKING:
 from .rgetattr import rgetattr
 
 
-def validate_steps(model: "Model", steps: Dict[str, dict[str, Any]]) -> None:
-    for step, options in steps.items():
+def validate_steps(model: "Model", steps: list[dict[str, dict[str, Any]]]) -> None:
+    for step_dict in steps:
+        step, options = next(iter(step_dict.items()))
         attr = rgetattr(model, step, None)
         if attr is None:
             raise AttributeError(f"Method {step} not found in model.")
-        if not getattr(attr, "__ishydromtstep__", False) == True:
+        if not hasattr(attr, "__ishydromtstep__"):
             raise AttributeError(
                 f"Method {step} is not allowed to be called on model, since it is not a HydroMT step definition."
                 " Add @hydromt_step if that is your intention."

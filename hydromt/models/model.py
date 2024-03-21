@@ -149,10 +149,8 @@ class Model(object, metaclass=ABCMeta):
         """Add all components that are specified in the config file."""
         for name, options in components.items():
             type_name = options.pop("type")
-
-            self.add_component(
-                name, PLUGINS.component_plugins[type_name](self, **options)
-            )
+            component_type = PLUGINS.component_plugins[type_name]
+            self.add_component(name, component_type(self, **options))
 
     def add_component(self, name: str, component: ModelComponent) -> None:
         """Add a component to the model. Will raise an error if the component already exists."""
@@ -193,7 +191,7 @@ class Model(object, metaclass=ABCMeta):
         *,
         region: dict[str, Any],
         write: Optional[bool] = True,
-        steps: Optional[Dict[str, Any]] = None,
+        steps: Optional[list[dict[str, dict[str, Any]]]] = None,
     ):
         r"""Single method to build a model from scratch based on settings in `opt`.
 
@@ -230,21 +228,14 @@ class Model(object, metaclass=ABCMeta):
                 }
 
         """
-        steps = steps or {}
+        steps = steps or []
         validate_steps(self, steps)
+        self._update_region_from_arguments(steps, region)
+        self._move_region_create_to_front(steps)
 
-        # steps gets preference over defaults.
-        # But put region.create at the start of the list.
-        steps = pydantic.v1.utils.deep_update(
-            steps, {"region.create": {"region": region}}
-        )
-
-        tmp = steps.pop("region.create")
-        steps = {"region.create": tmp, **steps}
-
-        for step in steps:
+        for step_dict in steps:
+            step, kwargs = next(iter(step_dict.items()))
             self.logger.info(f"build: {step}")
-            kwargs = steps[step] or {}
             # Call the methods.
             rgetattr(self, step)(**kwargs)
 
@@ -258,7 +249,7 @@ class Model(object, metaclass=ABCMeta):
         *,
         model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
-        steps: Optional[Dict[str, Any]] = None,
+        steps: Optional[list[dict[str, dict[str, Any]]]] = None,
         forceful_overwrite: bool = False,
     ):
         r"""Single method to update a model based the settings in `opt`.
@@ -300,14 +291,11 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        steps = steps or {}
+        steps = steps or []
         validate_steps(self, steps)
 
         # check if region.create is in the steps, and remove it.
-        if steps.pop("region.create", None) is not None:
-            self.logger.warning(
-                "region.create can only be called when building a model."
-            )
+        self._remove_region_create(steps)
 
         # read current model
         if not self.root.is_writing_mode():
@@ -324,9 +312,9 @@ class Model(object, metaclass=ABCMeta):
             raise ValueError("Model region not found, setup model using `build` first.")
 
         # loop over methods from config file
-        for step in steps:
+        for step_dict in steps:
+            step, kwargs = next(iter(step_dict.items()))
             self.logger.info(f"update: {step}")
-            kwargs = steps[step] or {}
             # Call the methods.
             rgetattr(self, step)(kwargs)
 
@@ -350,8 +338,44 @@ class Model(object, metaclass=ABCMeta):
         for c in self._components.values():
             c.read()
 
-    def _options_contain_write(self, steps: Dict[str, Any]) -> bool:
-        return any([step.split(".")[-1] == "write" for step in steps])
+    @staticmethod
+    def _options_contain_write(steps: list[dict[str, dict[str, Any]]]) -> bool:
+        return any(
+            next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps
+        )
+
+    @staticmethod
+    def _update_region_from_arguments(
+        steps: list[dict[str, dict[str, Any]]], region: dict[str, Any]
+    ) -> None:
+        try:
+            region_step = next(
+                step_dict
+                for step_dict in enumerate(steps)
+                if next(iter(step_dict)) == "region.create"
+            )
+            region_step[1]["region"] = region
+        except StopIteration:
+            steps.insert(0, {"region.create": {"region": region}})
+
+    @staticmethod
+    def _move_region_create_to_front(steps: list[dict[str, dict[str, Any]]]) -> None:
+        region_create = next(
+            step_dict for step_dict in steps if "region.create" in step_dict
+        )
+        steps.remove(region_create)
+        steps.insert(0, region_create)
+
+    def _remove_region_create(self, steps: list[dict[str, dict[str, Any]]]) -> None:
+        try:
+            steps.remove(
+                next(step_dict for step_dict in steps if "region.create" in step_dict)
+            )
+            self.logger.warning(
+                "region.create can only be called when building a model."
+            )
+        except StopIteration:
+            pass
 
     def write_data_catalog(
         self,

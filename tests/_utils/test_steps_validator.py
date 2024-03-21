@@ -36,7 +36,7 @@ class FooModel(Model):
 
 
 def test_validate_steps_unknown_args_in_dict():
-    steps = {"foo.create": {"a": 1, "b": "2", "c": 3}}
+    steps = [{"foo.create": {"a": 1, "b": "2", "c": 3}}]
     model = Model()
     model.add_component("foo", FooComponent(model))
     with pytest.raises(TypeError, match="got an unexpected keyword argument 'c'"):
@@ -44,7 +44,7 @@ def test_validate_steps_unknown_args_in_dict():
 
 
 def test_validate_steps_not_all_args_in_dict():
-    steps = {"foo.create": {"a": 1}}
+    steps = [{"foo.create": {"a": 1}}]
     model = Model()
     model.add_component("foo", FooComponent(model))
     with pytest.raises(TypeError, match="missing a required argument: 'b'"):
@@ -52,7 +52,7 @@ def test_validate_steps_not_all_args_in_dict():
 
 
 def test_validate_steps_correct():
-    steps = {"foo.create": {"a": 1, "b": "2"}}
+    steps = [{"foo.create": {"a": 1, "b": "2"}}]
     model = Model()
     model.add_component("foo", FooComponent(model))
     validate_steps(model, steps)
@@ -60,7 +60,7 @@ def test_validate_steps_correct():
 
 def test_validate_steps_in_model_correct():
     model = FooModel()
-    validate_steps(model, {"foo": {"a": 1, "b": "2"}, "bar": None})
+    validate_steps(model, [{"foo": {"a": 1, "b": "2"}}, {"bar": None}])
 
 
 def test_validate_steps_disallowed_function():
@@ -69,7 +69,7 @@ def test_validate_steps_disallowed_function():
         AttributeError,
         match="Method baz is not allowed to be called on model, since it is not a HydroMT step definition. Add @hydromt_step if that is your intention.",
     ):
-        validate_steps(model, {"baz": None})
+        validate_steps(model, [{"baz": None}])
 
 
 def test_validate_steps_blacklisted_function():
@@ -78,11 +78,11 @@ def test_validate_steps_blacklisted_function():
     with pytest.raises(
         AttributeError, match="Method read is not allowed to be called on model."
     ):
-        validate_steps(model, {"read": None})
+        validate_steps(model, [{"read": None}])
 
 
 def test_validate_steps_correct_with_defaults():
     model = Model()
     model.add_component("foo", FooComponent(model))
-    validate_steps(model, {"foo.with_defaults": {"a": 1}})
-    validate_steps(model, {"foo.with_defaults": {"a": 1, "b": "3"}})
+    validate_steps(model, [{"foo.with_defaults": {"a": 1}}])
+    validate_steps(model, [{"foo.with_defaults": {"a": 1, "b": "3"}}])
