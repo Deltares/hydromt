@@ -334,13 +334,15 @@ def test_from_yml_with_archive(tmpdir):
 
 def test_from_predefined_catalogs():
     data_catalog = DataCatalog()
-    data_catalog.set_predefined_catalogs(
-        join(CATALOGDIR, "..", "predefined_catalogs.yml")
-    )
-    for name in data_catalog.predefined_catalogs:
-        data_catalog.from_predefined_catalogs(f"{name}=latest")
-        assert len(data_catalog._sources) > 0
+    cat_root = Path(__file__).parent.parent / "data" / "catalogs"
+    assert len(data_catalog._catalogs) == 0
+    predefined_catalogs = data_catalog.predefined_catalogs
+    assert len(predefined_catalogs) > 0
+    for name in predefined_catalogs:
         data_catalog._sources = {}  # reset
+        base_url = cat_root / name  # test with local catalog
+        data_catalog.from_predefined_catalogs(f"{name}=latest", base_url=base_url)
+        assert len(data_catalog._sources) > 0
     with pytest.raises(ValueError, match='Catalog with name "asdf" not found'):
         data_catalog.from_predefined_catalogs("asdf")
 

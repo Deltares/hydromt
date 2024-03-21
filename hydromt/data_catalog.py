@@ -35,10 +35,10 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt.nodata import NoDataException, NoDataStrategy, _exec_nodata_strat
+from hydromt.predefined_catalogs import _get_catalog_eps
 from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt.utils import partition_dictionaries
 
-from . import __version__
 from .data_adapter import (
     DataAdapter,
     DataFrameAdapter,
@@ -62,8 +62,7 @@ class DataCatalog(object):
 
     """Base class for the data catalog object."""
 
-    # root URL with data_catalog file
-    _url = r"https://raw.githubusercontent.com/Deltares/hydromt/main/data/predefined_catalogs.yml"
+    _version = "v0"  # version of the data catalog
     _cache_dir = HYDROMT_DATADIR
 
     def __init__(
@@ -254,7 +253,7 @@ class DataCatalog(object):
     def predefined_catalogs(self) -> Dict:
         """Return all predefined catalogs."""
         if not self._catalogs:
-            self.set_predefined_catalogs()
+            self._get_predefined_catalogs()
         return self._catalogs
 
     def get_source_bbox(
@@ -607,28 +606,11 @@ class DataCatalog(object):
         """Add data sources to library or update them."""
         self.update(**kwargs)
 
-    def set_predefined_catalogs(
-        self, urlpath: Optional[Union[Path, str]] = None
-    ) -> Dict:
+    def _get_predefined_catalogs(self) -> Dict:
         """Initialise the predefined catalogs."""
         # get predefined_catalogs
-        urlpath = self._url if urlpath is None else urlpath
-        cache_path = join(self._cache_dir, basename(urlpath))
-        try:
-            # download file locally; overwrite existing file
-            _copyfile(urlpath, cache_path)
-        except Exception:  # if offline
-            self.logger.warning(
-                "Downloading the predefined catalogs failed;"
-                "check your internet connection"
-            )
-            pass
-        if isfile(cache_path):
-            self._catalogs = _yml_from_uri_or_path(cache_path)
-        if self._catalogs is None:
-            raise ConnectionError(
-                "Predefined catalogs not found; check your internet connection."
-            )
+        self._catalogs = _get_catalog_eps(logger=self.logger)
+
         return self._catalogs
 
     def from_artifacts(
@@ -659,7 +641,7 @@ class DataCatalog(object):
         return self.from_predefined_catalogs(name, version)
 
     def from_predefined_catalogs(
-        self, name: str, version: str = "latest"
+        self, name: str, version: str = "latest", base_url: Optional[str] = None
     ) -> DataCatalog:
         """Add data sources from a predefined data catalog.
 
@@ -669,6 +651,11 @@ class DataCatalog(object):
             Catalog name.
         version : str, optional
             Catlog release version. By default it takes the latest known release.
+        base_url : str, optional
+            Base url to the catalog, by default None.
+            Assumes versions file is located at base_url/versions.yml.
+            Overrides the base url in the versions file.
+            For testing purposes only.
 
         Returns
         -------
@@ -681,38 +668,38 @@ class DataCatalog(object):
             raise ValueError(
                 f'Catalog with name "{name}" not found in predefined catalogs'
             )
-        urlpath = self.predefined_catalogs[name].get("urlpath")
-        versions_dict = self.predefined_catalogs[name].get("versions")
-        if version == "latest" or not isinstance(version, str):
-            # if a specific version is requested, we don't have to try others
-            versions = list(versions_dict.keys())
-            if len(versions) > 1:
-                version = versions[np.argmax([Version(v) for v in versions])]
-            else:
-                version = versions[0]
 
-        if version not in versions_dict:
+        # get catalog verions
+        if base_url is not None:
+            uri = join(base_url, "versions.yml")
+        else:
+            uri = self.predefined_catalogs[name]
+        cat_versions = _yml_from_uri_or_path(uri)
+        valid_versions = [
+            v for v in cat_versions["versions"] if v["name"].startswith(self._version)
+        ]
+        if len(valid_versions) == 0:
             raise RuntimeError(
-                f"Unknown version requested {version}. "
-                f"options are :{versions_dict.keys()}"
+                f"No compatible catalog version could be found for {name}."
             )
-        possible_catalg_versions = [(Version(k), v) for k, v in versions_dict.items()]
-        possible_catalg_versions_sorted = reversed(sorted(possible_catalg_versions))
+        if version == "latest":
+            vdict = valid_versions[
+                np.argmax([Version(v["name"]) for v in valid_versions])
+            ]
+        else:
+            known_versions = [v["name"] for v in valid_versions]
+            if version not in known_versions:
+                raise RuntimeError(
+                    f"Unknown version requested {version}. "
+                    f"options are :{known_versions}"
+                )
+            vdict = [v for v in valid_versions if v["name"] == version]
 
-        for _, identifier in possible_catalg_versions_sorted:
-            try:
-                urlpath = urlpath.format(version=identifier)
-                if urlpath.split(".")[-1] in ["gz", "zip"]:
-                    self.logger.info(f"Reading data catalog archive {name} {version}")
-                    self.from_archive(urlpath, name=name, version=version)
-                else:
-                    self.logger.info(f"Reading data catalog {name} {version}")
-                    self.from_yml(urlpath, catalog_name=name)
-                return self
-            except RuntimeError:
-                continue
-
-        raise RuntimeError("No compatible compatible catalog version could be found")
+        if base_url is None:
+            base_url = cat_versions.get("base_url")
+        urlpath = join(base_url, vdict["path"])
+        self.logger.info(f"Reading data catalog {name} {version}")
+        self.from_yml(urlpath, catalog_name=name)
 
     def from_archive(
         self,
@@ -866,15 +853,6 @@ class DataCatalog(object):
 
         # read meta data
         meta = yml.pop("meta", meta)
-        # check version required hydromt version
-        requested_version = meta.get("hydromt_version", None)
-        if requested_version is not None:
-            allow_dev = meta.get("allow_dev_version", True)
-            if not self._is_compatible(__version__, requested_version, allow_dev):
-                raise RuntimeError(
-                    f"Data catalog requires Hydromt Version {requested_version} which "
-                    f"is incompattible with current hydromt verison {__version__}."
-                )
         if catalog_name is None:
             catalog_name = cast(
                 str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))

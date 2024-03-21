@@ -1,0 +1,8 @@
+name: deltares_data
+base_url: https://github.com/Deltares/hydromt/blob/main/data/catalogs/deltares_data
+
+versions:
+    - name: v0.6.0
+      path: v0.6.0/data_catalog.yml
+    - name: v0.5.0
+      path: v0.5.0/data_catalog.yml
