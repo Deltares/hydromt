@@ -21,14 +21,20 @@ class ModelComponent(ABC):
     @abstractmethod
     def read(self):
         """Read the file(s) into the component."""
-        if not self._model_root.is_reading_mode():
-            raise IOError("Model opened in write-only mode")
+        ...
 
     @abstractmethod
     def write(self):
         """Write the component to file(s)."""
+        ...
+
+    def _assert_write_mode(self) -> None:
         if not self._model_root.is_writing_mode():
             raise IOError("Model opened in read-only mode")
+
+    def _assert_read_mode(self) -> None:
+        if not self._model_root.is_reading_mode():
+            raise IOError("Model opened in write-only mode")
 
     @property
     def _model(self) -> "Model":

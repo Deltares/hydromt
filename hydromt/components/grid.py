@@ -131,7 +131,7 @@ class GridComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `write_nc` method.
         """
-        super().write()
+        self._assert_write_mode()
         if len(self.data) == 0:
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
@@ -173,7 +173,7 @@ class GridComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        super().read()
+        self._assert_read_mode()
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
