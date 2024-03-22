@@ -145,6 +145,13 @@ class Model(object, metaclass=ABCMeta):
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
 
+        model_metadata = cast(
+            Dict[str, str], PLUGINS.model_metadata[self.__class__.__name__]
+        )
+        self.logger.info(
+            f"Initializing {self.__class__.__name__} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
+        )
+
     def _add_components(self, components: dict[str, dict[str, Any]]) -> None:
         """Add all components that are specified in the config file."""
         for name, options in components.items():
