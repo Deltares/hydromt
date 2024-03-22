@@ -1,6 +1,5 @@
 name: artifact_data
-base_url: https://github.com/Deltares/hydromt/blob/main/data/catalogs/artifact_data
 versions:
-- version: v0.1.0
-  hash: 6d21580487f6403732c54e36dfb6c1d6
-  path: v0.1.0/data_catalog.yml
+- version: v0.0.8
+  hash: f5b46d7539d143f6cebc41fde8aae9b3
+  path: v0.0.8/data_catalog.yml

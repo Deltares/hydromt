@@ -12,9 +12,12 @@ from hydromt._compat import entry_points
 logger = logging.getLogger(__name__)
 
 # core artifact data first
+GIT_ROOT = r"https://github.com/Deltares/hydromt/blob/main/data/catalogs"
 LOCAL_EPS = {
-    "artifact_data": r"https://github.com/Deltares/hydromt/blob/main/data/catalogs/artifact_data/versions.yml",
-    "deltares_data": r"https://github.com/Deltares/hydromt/blob/main/data/catalogs/deltares_data/versions.yml",
+    "artifact_data": f"{GIT_ROOT}/artifact_data/versions.yml",
+    "deltares_data": f"{GIT_ROOT}/deltares_data/versions.yml",
+    "aws_data": f"{GIT_ROOT}/aws_data/versions.yml",
+    "gcs_cmip6_data": f"{GIT_ROOT}/gcs_cmip6_data/versions.yml",
 }
 
 

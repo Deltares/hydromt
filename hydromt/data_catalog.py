@@ -641,7 +641,7 @@ class DataCatalog(object):
         return self.from_predefined_catalogs(name, version)
 
     def from_predefined_catalogs(
-        self, name: str, version: str = "latest", base_url: Optional[str] = None
+        self, name: str, version: str = "latest"
     ) -> DataCatalog:
         """Add data sources from a predefined data catalog.
 
@@ -651,11 +651,6 @@ class DataCatalog(object):
             Catalog name.
         version : str, optional
             Catlog release version. By default it takes the latest known release.
-        base_url : str, optional
-            Base url to the catalog, by default None.
-            Assumes versions file is located at base_url/versions.yml.
-            Overrides the base url in the versions file.
-            For testing purposes only.
 
         Returns
         -------
@@ -670,10 +665,8 @@ class DataCatalog(object):
             )
 
         # get catalog verions
-        if base_url is not None:
-            uri = join(base_url, "versions.yml")
-        else:
-            uri = self.predefined_catalogs[name]
+        uri = self.predefined_catalogs[name]
+
         cat_versions = _yml_from_uri_or_path(uri)
         valid_versions = [
             v
@@ -695,11 +688,9 @@ class DataCatalog(object):
                     f"Unknown version requested {version}. "
                     f"options are :{known_versions}"
                 )
-            vdict = [v for v in valid_versions if v["version"] == version]
+            vdict = [v for v in valid_versions if v["version"] == version][0]
 
-        if base_url is None:
-            base_url = cat_versions.get("base_url")
-        urlpath = join(base_url, vdict["path"])
+        urlpath = join(os.path.dirname(uri), vdict["path"])
         self.logger.info(f"Reading data catalog {name} {version}")
         self.from_yml(urlpath, catalog_name=name)
 

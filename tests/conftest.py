@@ -35,6 +35,28 @@ dask_config.set(scheduler="single-threaded")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
+@pytest.fixture(autouse=True)
+def _local_catalog_eps(monkeypatch) -> dict:
+    """Set entrypoints to local predefined catalogs."""
+    cat_root = Path(__file__).parent.parent / "data" / "catalogs"
+    eps = {f.parent.name: f for f in cat_root.glob("*/versions.yml")}
+    monkeypatch.setattr("hydromt.predefined_catalogs.LOCAL_EPS", eps)
+
+
+@pytest.fixture()
+def data_catalog(_local_catalog_eps) -> DataCatalog:
+    """DataCatalog instance that points to local predefined catalogs."""
+    return DataCatalog("artifact_data=v0.0.8")
+
+
+@pytest.fixture(scope="session")
+def latest_dd_version_uri():
+    cat_root = Path(__file__).parent.parent / "data" / "catalogs" / "deltares_data"
+    versions = [d.name for d in cat_root.iterdir() if d.is_dir()]
+    latest_version = sorted(versions)[-1]
+    return cat_root / latest_version / "data_catalog.yml"
+
+
 @pytest.fixture(scope="class")
 def tmp_dir() -> Path:
     with TemporaryDirectory() as tempdirname:
@@ -351,8 +373,8 @@ def mesh_model(griduda):
     return mod
 
 
-@pytest.fixture()
-def artifact_data():
-    datacatalog = DataCatalog()
-    datacatalog.from_predefined_catalogs("artifact_data")
-    return datacatalog
+# @pytest.fixture()
+# def artifact_data():
+#     datacatalog = DataCatalog()
+#     datacatalog.from_predefined_catalogs("artifact_data")
+#     return datacatalog

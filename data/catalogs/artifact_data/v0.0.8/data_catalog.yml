@@ -1,5 +1,5 @@
 meta:
-  version: v0.1.0
+  version: v0.0.8
   root: https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.8/data.tar.gz
 
 chelsa:

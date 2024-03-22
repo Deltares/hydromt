@@ -1,5 +1,4 @@
 name: gcs_cmip6_data
-base_url: https://github.com/Deltares/hydromt/blob/main/data/catalogs/gcs_cmip6_data
 versions:
 - version: v0.1.0
   hash: ec99378d21d4f2353d8036b466210344

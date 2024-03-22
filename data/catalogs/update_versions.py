@@ -21,7 +21,6 @@ def write_versions_file(root):
         ), f"Catalog {root.name} version {v['version']} does not match path {v['path']}"
     yml_dict = {
         "name": root.name,
-        "base_url": f"{BASE_URL}/{root.name}",
         "versions": versions,
     }
     with open(root / "versions.yml", "w") as f:

@@ -31,8 +31,8 @@ def test_get_versions(tmpdir):
 def test_get_versions_artifacts(cat_root):
     versions = _get_catalog_versions(cat_root / "artifact_data")
     assert len(versions) > 0
-    assert any(v["version"] == "v0.1.0" for v in versions)
-    version = [v for v in versions if v["version"] == "v0.1.0"][0]
+    assert any(v["version"] == "v0.0.8" for v in versions)
+    version = [v for v in versions if v["version"] == "v0.0.8"][0]
     assert all([key in version for key in ["version", "hash", "path"]])
 
 
