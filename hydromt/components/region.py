@@ -163,23 +163,40 @@ class ModelRegionComponent(ModelComponent):
                 **region,
             )
             region.update(xy=xy)
+            # get ds_hyd again but clipped to geom, one variable is enough
+            da_hyd = self._data_catalog.get_rasterdataset(
+                hydrography_fn, geom=geom, variables=["flwdir"]
+            )
+            assert da_hyd is not None
+            if geom.crs != da_hyd.raster.crs:
+                crs = da_hyd.raster.crs
+                geom = geom.to_crs(crs)
         elif "bbox" in region:
             bbox = region["bbox"]
+            # TODO: Use the crs from the parameters directly?
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+            if crs is not None:
+                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+                geom = geom.to_crs(crs)
         elif "geom" in region:
             geom = region["geom"]
+            # TODO: What if the crs is defined in the parameters? grid.py also used to raise an error.
             if geom.crs is None:
                 raise ValueError('Model region "geom" has no CRS')
+            if crs is not None:
+                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+                geom = geom.to_crs(crs)
         elif "grid" in region:  # Grid specific - should be removed in the future
             geom = region["grid"].raster.box
+            # TODO: Update crs with argument from function?
+            if crs is not None:
+                self._logger.warning(
+                    f"For region kind 'grid', the grid's crs is used and not user-defined crs {crs}"
+                )
         elif "model" in region:
             geom = region["model"].region
         else:
             raise ValueError(f"model region argument not understood: {region}")
-
-        if crs is not None:
-            crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
-            geom = geom.to_crs(crs)
 
         self.set(geom, kind)
 
