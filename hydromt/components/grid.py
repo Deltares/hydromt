@@ -15,6 +15,7 @@ from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.components.base import ModelComponent
+from hydromt.components.region import ModelRegionComponent
 from hydromt.gis import raster
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
@@ -262,15 +263,18 @@ class GridComponent(ModelComponent):
         self._logger.info("Preparing 2D grid.")
 
         # Pass region creation information to model.region.
+        region_component = self._model.get_component(
+            self._region_component, ModelRegionComponent
+        )
         if region is not None:
-            self._model.region.create(
+            region_component.create(
                 region=region,
                 basin_index_fn=basin_index_fn,
                 hydrography_fn=hydrography_fn,
             )
 
-        kind = self._model.region.kind
-        geom = self._model.region.data
+        kind = region_component.kind
+        geom = region_component.data
 
         # Derive xcoords, ycoords and geom for the different kind options
         if kind in ["bbox", "geom"]:
