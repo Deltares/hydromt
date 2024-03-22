@@ -338,7 +338,7 @@ core = "hydromt.models"
 ```
 
 To have post v1 core recognize there are a few new requirements:
-1. There must be a dedicated separate submodule for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
+1. There must be a dedicated separate submodule (i.e. a folder with a `__init__.py` file that you can import from) for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
 2. These submodules must have an `__init__.py` and this file must specify a `__all__` attribute.
 3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant category. This means these submodules should not re-export anything that is not a plugin.
 4. Though this cannot be enforced in Python, there is a base class for each of the plugin categories in core, which your objects should inherit from, this makes sure that you implement all the relevant functionality.
