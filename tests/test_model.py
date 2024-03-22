@@ -840,5 +840,7 @@ def test_meshmodel_setup(griduda, world):
         resampling_method=["mode", "centroid"],
         grid_name="mesh2d",
     )
+    ds_mesh2d = mod1.get_mesh("mesh2d", include_data=True)
+    assert "landuse" in ds_mesh2d
     assert "roughness_manning" in mod1.mesh.data_vars
     assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
