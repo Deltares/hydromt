@@ -1,49 +1,53 @@
 # -*- coding: utf-8 -*-
-"""HydroMT VectorModel class definition."""
+"""HydroMT VectorComponent class definition."""
 
 import logging
 import os
 from os.path import basename, dirname, isfile, join
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import geopandas as gpd
 import numpy as np
 import xarray as xr
 
+from hydromt.components.base import ModelComponent
 from hydromt.gis.vector import GeoDataset
-from hydromt.models.model import Model, _check_equal
+from hydromt.io.readers import read_nc
+from hydromt.io.writers import write_nc
+from hydromt.models.model import Model
 
-__all__ = ["VectorModel"]
 logger = logging.getLogger(__name__)
 
 
-class VectorMixin:
-    _API = {"vector": xr.Dataset}
+class VectorComponent(ModelComponent):
+    """Component to handle vector data in a model."""
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self._vector: xr.Dataset = None
+    def __init__(self, model: Model) -> None:
+        super().__init__(model)
+        self._vector: Optional[xr.Dataset] = None
 
     @property
-    def vector(self) -> xr.Dataset:
+    def data(self) -> xr.Dataset:
         """Model vector (polygon) data.
 
         Returns xr.Dataset with a polygon geometry coordinate.
         """
         if self._vector is None:
             self._initialize_vector()
+        assert self._vector is not None
         return self._vector
 
     def _initialize_vector(self, skip_read=False) -> None:
         """Initialize vector data."""
         if self._vector is None:
             self._vector = xr.Dataset()
-            if self.root.is_reading_mode() and not skip_read:
-                self.read_vector()
+            if self._root.is_reading_mode() and not skip_read:
+                self.read()
 
-    def set_vector(
+    def set(
         self,
         data: Union[xr.DataArray, xr.Dataset, np.ndarray, gpd.GeoDataFrame] = None,
+        *,
         name: Optional[str] = None,
         overwrite_geom: bool = False,
     ) -> None:
@@ -74,9 +78,9 @@ class VectorMixin:
             raise ValueError(f"Unable to set {type(data).__name__} data without a name")
 
         # check the type of data
-        if isinstance(data, np.ndarray) and "geometry" in self.vector:
-            index_dim = self.vector.vector.index_dim
-            index = self.vector[index_dim]
+        if isinstance(data, np.ndarray) and "geometry" in self.data:
+            index_dim = self.data.vector.index_dim
+            index = self.data[index_dim]
             if data.size != index.size:
                 if data.ndim == 1:
                     raise ValueError("Size of data and number of vector do not match")
@@ -97,12 +101,12 @@ class VectorMixin:
         # Add to vector
         # 1. self.vector does not have a geometry yet or overwrite_geom
         # then use data directly
-        if self.vector_geometry is None or overwrite_geom:
+        if self.geometry is None or overwrite_geom:
             if data.vector.geometry is None:
                 raise ValueError("Cannot instantiate vector without geometry in data")
             else:
                 if overwrite_geom:
-                    self.logger.warning("Overwriting vector object with data")
+                    self._logger.warning("Overwriting vector object with data")
                 self._vector = data
         # 2. self.vector has a geometry
         else:
@@ -110,29 +114,30 @@ class VectorMixin:
             if data.vector.geometry is not None:
                 if not np.all(
                     data.vector.geometry.geom_equals_exact(
-                        self.vector_geometry, tolerance=0.0001
+                        self.geometry, tolerance=0.0001
                     )
                 ):
                     raise ValueError("Geometry of data and vector do not match")
             # add data (with check on index)
             for dvar in data.data_vars:
-                if dvar in self._vector:
-                    self.logger.warning(f"Replacing vector variable: {dvar}")
+                if dvar in self.data:
+                    self._logger.warning(f"Replacing vector variable: {dvar}")
                 # check on index coordinate before merging
                 dims = data[dvar].dims
                 if np.array_equal(
-                    data[dims[0]].values, self._vector[self.index_dim].values
+                    data[dims[0]].values, self.data[self.index_dim].values
                 ):
-                    self._vector[dvar] = data[dvar]
+                    self.data[dvar] = data[dvar]
                 else:
                     raise ValueError(
                         f"Index coordinate of data variable {dvar} "
                         "does not match vector index coordinate"
                     )
 
-    def read_vector(
+    def read(
         self,
-        fn: str = "vector/vector.nc",
+        *,
+        fn: Optional[str] = "vector/vector.nc",
         fn_geom: str = "vector/vector.geojson",
         **kwargs,
     ) -> None:
@@ -162,20 +167,25 @@ class VectorMixin:
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode()
+        self._root._assert_read_mode()
         self._initialize_vector(skip_read=True)
         if fn is not None:
             # Disable lazy loading of data
             # to avoid issues with reading object dtype data
             if "chunks" not in kwargs:
                 kwargs["chunks"] = None
-            ds = xr.merge(self.read_nc(fn, **kwargs).values())
+            ds = xr.merge(
+                read_nc(
+                    fn, root=self._root.path, logger=self._logger, **kwargs
+                ).values()
+            )
             # check if ds is empty (default fn has a value)
             if len(ds.sizes) == 0:
                 fn = None
-        if fn_geom is not None and isfile(join(self.root.path, fn_geom)):
-            gdf = gpd.read_file(join(self.root.path, fn_geom))
+        if fn_geom is not None and isfile(join(self._root.path, fn_geom)):
+            gdf = gpd.read_file(join(self._root.path, fn_geom))
             # geom + netcdf data
+            # TODO: What if ds is None?
             if fn is not None:
                 ds = GeoDataset.from_gdf(gdf, data_vars=ds)
             # geom only
@@ -185,13 +195,14 @@ class VectorMixin:
         elif fn is not None:
             ds = GeoDataset.from_netcdf(ds)
         else:
-            self.logger.info("No vector data found, skip reading.")
+            self._logger.info("No vector data found, skip reading.")
             return
 
-        self.set_vector(ds)
+        self.set(data=ds)
 
-    def write_vector(
+    def write(
         self,
+        *,
         fn: str = "vector/vector.nc",
         fn_geom: str = "vector/vector.geojson",
         ogr_compliant: bool = False,
@@ -232,11 +243,11 @@ class VectorMixin:
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        ds = self.vector
+        ds = self.data
         if len(ds) == 0:
-            self.logger.debug("No vector data found, skip writing.")
+            self._logger.debug("No vector data found, skip writing.")
             return
-        self._assert_write_mode()
+        self._root._assert_write_mode()
 
         # If fn is None check if vector contains only 1D data
         if fn is None:
@@ -250,7 +261,7 @@ class VectorMixin:
                 # check 1D variables with matching index_dim
                 if len(dims) > 1 or dims[0] != ds.vector.index_dim:
                     fn = join(
-                        dirname(join(self.root.path, fn_geom)),
+                        dirname(join(self._root.path, fn_geom)),
                         f"{basename(fn_geom).split('.')[0]}.nc",
                     )
                     self.logger.warning(
@@ -260,7 +271,7 @@ class VectorMixin:
 
         # write to netcdf only
         if fn_geom is None:
-            os.makedirs(dirname(join(self.root.path, fn)), exist_ok=True)
+            os.makedirs(dirname(join(self._root.path, fn)), exist_ok=True)
             # cannot call directly ds.vector.to_netcdf
             # because of possible PermissionError
             if ogr_compliant:
@@ -268,146 +279,45 @@ class VectorMixin:
             else:
                 ds = ds.vector.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
             # write_nc requires dict - use dummy key
-            self.write_nc({"vector": ds}, fn, engine="netcdf4", **kwargs)
+            write_nc(
+                {"vector": ds},
+                fn,
+                engine="netcdf4",
+                root=self._root.path,
+                logger=self._logger,
+                **kwargs,
+            )
         # write to geojson only
         elif fn is None:
-            os.makedirs(dirname(join(self.root.path, fn_geom)), exist_ok=True)
+            os.makedirs(dirname(join(self._root.path, fn_geom)), exist_ok=True)
             gdf = ds.vector.to_gdf(**kwargs)
-            gdf.to_file(join(self.root.path, fn_geom))
+            gdf.to_file(join(self._root.path, fn_geom))
         # write data to netcdf and geometry to geojson
         else:
-            os.makedirs(dirname(join(self.root.path, fn_geom)), exist_ok=True)
+            os.makedirs(dirname(join(self._root.path, fn_geom)), exist_ok=True)
             # write geometry
             gdf = ds.vector.geometry.to_frame("geometry")
-            gdf.to_file(join(self.root.path, fn_geom))
+            gdf.to_file(join(self._root.path, fn_geom))
             # write_nc requires dict - use dummy key
-            self.write_nc({"vector": ds.drop_vars("geometry")}, fn, **kwargs)
+            write_nc(
+                {"vector": ds.drop_vars("geometry")},
+                fn,
+                root=self._root.path,
+                logger=self._logger,
+                **kwargs,
+            )
 
     # Other vector properties
     @property
-    def vector_geometry(self) -> gpd.GeoSeries:
+    def geometry(self) -> gpd.GeoSeries:
         """Returns the geometry of the model vector as gpd.GeoSeries."""
         # check if vector is empty
-        if len(self.vector.sizes) == 0:
+        if len(self.data.sizes) == 0:
             return None
         else:
-            return self.vector.vector.geometry
+            return self.data.vector.geometry
 
     @property
     def index_dim(self) -> str:
         """Returns the index dimension of the model vector."""
-        return self.vector.vector.index_dim
-
-
-class VectorModel(VectorMixin, Model):
-    """Model class Vector Model for vector (polygons) models in HydroMT."""
-
-    _CLI_ARGS = {"region": "setup_region"}
-    _NAME = "vector_model"
-
-    def __init__(
-        self,
-        root: str = None,
-        mode: str = "w",
-        config_fn: str = None,
-        data_libs: List[str] = None,
-        logger=logger,
-    ):
-        """Initialize a VectorModel for lumped and semi-distributed models."""
-        super().__init__(
-            root=root,
-            mode=mode,
-            config_fn=config_fn,
-            data_libs=data_libs,
-            logger=logger,
-        )
-
-    def read(
-        self,
-        components: List = None,
-    ) -> None:
-        """Read the complete model from model files.
-
-        Parameters
-        ----------
-        components : List, optional
-            List of model components to read, each should have an
-            associated read_<component> method.
-            By default ['config', 'maps', 'vector', 'geoms', 'tables',
-            'forcing', 'states', 'results']
-        """
-        components = components or [
-            "config",
-            "vector",
-            "geoms",
-            "tables",
-            "forcing",
-            "states",
-            "results",
-        ]
-        super().read(components=components)
-
-    def write(
-        self,
-        components: List = None,
-    ) -> None:
-        """Write the complete model schematization and configuration to model files.
-
-        Parameters
-        ----------
-        components : List, optional
-            List of model components to write, each should have an
-            associated write_<component> method. By default ['config',
-            'maps', 'vector', 'geoms', 'tables', 'forcing', 'states']
-        """
-        components = components or [
-            "config",
-            "vector",
-            "geoms",
-            "tables",
-            "forcing",
-            "states",
-        ]
-        super().write(components=components)
-
-    def _test_equal(self, other, skip_component=None) -> Tuple[bool, Dict]:
-        """Test if two models including their data components are equal.
-
-        Parameters
-        ----------
-        other : Model (or subclass)
-            Model to compare against
-        skip_component: list
-            List of components to skip when testing equality. By default root.
-
-        Returns
-        -------
-        equal: bool
-            True if equal
-        errors: dict
-            Dictionary with errors per model component which is not equal
-        """
-        skip_component = skip_component or []
-        if "vector" not in skip_component:
-            # add vector to skip_component list
-            skip_component.append("vector")
-
-        equal, errors = super()._test_equal(other, skip_component=skip_component)
-
-        # test vector separately especially for the geometry
-        geods = self.vector
-        geods_other = other.vector
-        # test geometry
-        gdf = geods.vector.geometry.to_frame("geometry")
-        gdf_other = geods_other.vector.geometry.to_frame("geometry")
-        errors.update(_check_equal(gdf, gdf_other, name="vector.geometry"))
-        # test vector data only
-        if geods.vector.geom_format == "xy":
-            drop_vars = [geods.vector.x_name, geods.vector.y_name]
-        else:
-            drop_vars = [geods.vector.geom_name]
-        ds = geods.drop_vars(drop_vars)
-        ds_other = geods_other.drop_vars(drop_vars)
-        errors.update(_check_equal(ds, ds_other, name="vector.data"))
-
-        return len(errors) == 0, errors
+        return self.data.vector.index_dim
