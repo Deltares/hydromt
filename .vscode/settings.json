@@ -22,10 +22,12 @@
     "cSpell.words": [
         "GDAL",
         "hydromt",
+        "ndarray",
         "pixi",
         "pydantic",
         "pygeos",
         "SFINCS",
+        "xarray",
         "zarr"
     ]
 }
