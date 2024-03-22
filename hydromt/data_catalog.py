@@ -676,7 +676,9 @@ class DataCatalog(object):
             uri = self.predefined_catalogs[name]
         cat_versions = _yml_from_uri_or_path(uri)
         valid_versions = [
-            v for v in cat_versions["versions"] if v["name"].startswith(self._version)
+            v
+            for v in cat_versions["versions"]
+            if v["version"].startswith(self._version)
         ]
         if len(valid_versions) == 0:
             raise RuntimeError(
@@ -684,16 +686,16 @@ class DataCatalog(object):
             )
         if version == "latest":
             vdict = valid_versions[
-                np.argmax([Version(v["name"]) for v in valid_versions])
+                np.argmax([Version(v["version"]) for v in valid_versions])
             ]
         else:
-            known_versions = [v["name"] for v in valid_versions]
+            known_versions = [v["version"] for v in valid_versions]
             if version not in known_versions:
                 raise RuntimeError(
                     f"Unknown version requested {version}. "
                     f"options are :{known_versions}"
                 )
-            vdict = [v for v in valid_versions if v["name"] == version]
+            vdict = [v for v in valid_versions if v["version"] == version]
 
         if base_url is None:
             base_url = cat_versions.get("base_url")
