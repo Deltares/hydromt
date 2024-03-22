@@ -1,12 +1,12 @@
 import logging
 from os.path import join
-from unittest.mock import MagicMock, create_autospec, patch
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pytest_mock import MockerFixture
 
 from hydromt.components import ModelRegionComponent
 from hydromt.components.grid import GridComponent
@@ -19,11 +19,16 @@ logger.propagate = True
 
 
 @pytest.fixture()
-def mock_model(tmpdir):
-    model = create_autospec(Model)
+def mock_model(tmpdir, mocker: MockerFixture):
+    model = mocker.create_autospec(Model)
     model.root = ModelRoot(path=tmpdir)
     model.data_catalog = DataCatalog()
-    model.region = ModelRegionComponent(model=model)
+    model.region = ModelRegionComponent(model)
+    model.get_component = mocker.Mock()
+    model.get_component.return_value = None
+    model.get_component.side_effect = (
+        lambda name, _: model.region if name == "region" else None
+    )
     model.logger = logger
     return model
 
@@ -59,7 +64,7 @@ def test_set_raise_errors(mock_model, hydds):
         grid_component.set(ndarray, name="ndarray")
 
 
-def test_write(mock_model, tmpdir, caplog):
+def test_write(mock_model, tmpdir, caplog, mocker: MockerFixture):
     grid_component = GridComponent(model=mock_model)
     # Test skipping writing when no grid data has been set
     caplog.set_level(logging.WARNING)
@@ -68,12 +73,12 @@ def test_write(mock_model, tmpdir, caplog):
     # Test raise IOerror when model is in read only mode
     mock_model.root = ModelRoot(tmpdir, mode="r")
     grid_component = GridComponent(model=mock_model)
-    with patch.object(GridComponent, "data", ["test"]):
-        with pytest.raises(IOError, match="Model opened in read-only mode"):
-            grid_component.write()
+    mocker.patch.object(GridComponent, "data", ["test"])
+    with pytest.raises(IOError, match="Model opened in read-only mode"):
+        grid_component.write()
 
 
-def test_read(tmpdir, mock_model, hydds):
+def test_read(tmpdir, mock_model, hydds, mocker: MockerFixture):
     # Test for raising IOError when model is in writing mode
     mock_model.root = ModelRoot(path=tmpdir, mode="w")
     grid_component = GridComponent(model=mock_model)
@@ -81,13 +86,13 @@ def test_read(tmpdir, mock_model, hydds):
         grid_component.read()
     mock_model.root = ModelRoot(path=tmpdir, mode="r+")
     grid_component = GridComponent(model=mock_model)
-    with patch("hydromt.components.grid.read_nc", return_value={"grid": hydds}):
-        grid_component.read()
-        assert grid_component.data == hydds
+    mocker.patch("hydromt.components.grid.read_nc", return_value={"grid": hydds})
+    grid_component.read()
+    assert grid_component.data == hydds
 
 
 def test_create_grid_from_bbox_rotated(mock_model):
-    grid_component = GridComponent(model=mock_model)
+    grid_component = GridComponent(mock_model)
     grid_component.create(
         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
         res=0.05,
@@ -98,9 +103,6 @@ def test_create_grid_from_bbox_rotated(mock_model):
     assert "xc" in grid_component.data.coords
     assert grid_component.data.raster.y_dim == "y"
     assert np.isclose(grid_component.data.raster.res[0], 0.05)
-    # Check set_geoms call
-    geom = grid_component._model.method_calls[0][1][0]
-    assert isinstance(geom, gpd.GeoDataFrame)
 
 
 def test_create_grid_from_bbox(mock_model):
@@ -116,43 +118,37 @@ def test_create_grid_from_bbox(mock_model):
     assert grid_component.data.raster.dims == ("y", "x")
     assert grid_component.data.raster.shape == (7, 16)
     assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
-    # Check set_geoms call
-    geom = grid_component._model.method_calls[0][1][0]
-    assert isinstance(geom, gpd.GeoDataFrame)
 
 
 def test_create_raise_errors(mock_model):
     grid_component = GridComponent(mock_model)
     # Wrong region kind
-    with pytest.raises(ValueError, match="Region for grid must be of kind"):
+    with pytest.raises(ValueError, match='Region key "vector_model" not understood'):
         grid_component.create(region={"vector_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(
         ValueError, match="res argument required for kind 'bbox', 'geom'"
     ):
-        grid_component.create({"bbox": bbox})
+        grid_component.create(region={"bbox": bbox})
 
 
-@pytest.mark.skip(reason="needs working artifact data")
+@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
 def test_create_basin_grid(tmpdir):
-    model_root = ModelRoot(path=join(tmpdir, "grid_model"))
-    data_catalog = DataCatalog(data_libs=["artifact_data"])
-    grid_component = GridComponent(
-        root=model_root,
-        data_catalog=data_catalog,
-        model_region=None,
-        model=Model(),
+    model = Model(
+        components={"grid": {"type": str(GridComponent)}},
+        data_libs=["artifact_data"],
+        root=join(tmpdir, "grid_model"),
     )
-    grid_component.create(
+    model.grid.create(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
         crs="utm",
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert not np.all(grid_component.data["mask"].values is True)
-    assert grid_component.data.raster.shape == (47, 61)
+    assert not np.all(model.grid.data["mask"].values is True)
+    assert model.grid.data.raster.shape == (47, 61)
 
 
 def test_properties(caplog, demda, mock_model):
@@ -184,13 +180,13 @@ def test_properties(caplog, demda, mock_model):
     assert all(region.bounds == demda.raster.bounds)
 
 
-def test_initialize_grid(mock_model, tmpdir):
+def test_initialize_grid(mock_model, tmpdir, mocker: MockerFixture):
     mock_model.root = ModelRoot(path=tmpdir, mode="r")
     grid_component = GridComponent(mock_model)
-    grid_component.read = MagicMock()
+    read_func_mock = mocker.patch.object(grid_component, "read")
     grid_component._initialize_grid()
     assert isinstance(grid_component._data, xr.Dataset)
-    assert grid_component.read.called
+    assert read_func_mock.called
 
 
 def test_set_crs(mock_model, demda):
@@ -200,67 +196,91 @@ def test_set_crs(mock_model, demda):
     assert grid_component.data.raster.crs == 4326
 
 
-def test_add_data_from_constant(mock_model, demda):
+def test_add_data_from_constant(mock_model, demda, mocker: MockerFixture):
     grid_component = GridComponent(mock_model)
     demda.name = "demda"
-    with patch("hydromt.components.grid.grid_from_constant", return_value=demda):
-        name = grid_component.add_data_from_constant(constant=0.01, name="demda")
-        assert name == ["demda"]
-        assert grid_component.data == demda
+    mocker.patch("hydromt.components.grid.grid_from_constant", return_value=demda)
+    name = grid_component.add_data_from_constant(constant=0.01, name="demda")
+    assert name == ["demda"]
+    assert grid_component.data == demda
 
 
-@patch("hydromt.components.grid.grid_from_rasterdataset")
-def test_add_data_from_rasterdataset(
-    mock_grid_from_rasterdataset, demda, caplog, mock_model
-):
+def test_add_data_from_rasterdataset(demda, caplog, mock_model, mocker: MockerFixture):
+    mock_grid_from_rasterdataset = mocker.patch(
+        "hydromt.components.grid.grid_from_rasterdataset"
+    )
     caplog.set_level(logging.INFO)
     demda.name = "demda"
     demda = demda.to_dataset()
     grid_component = GridComponent(mock_model)
     mock_grid_from_rasterdataset.return_value = demda
-    with patch.object(
+    mock_get_rasterdataset = mocker.patch.object(
         grid_component._data_catalog, "get_rasterdataset"
-    ) as mock_get_rasterdataset:
-        mock_get_rasterdataset.return_value = demda
-        raster_fn = "your_raster_file.tif"
-        result = grid_component.add_data_from_rasterdataset(
-            raster_fn=raster_fn,
-            variables=["variable1", "variable2"],
-            fill_method="mean",
-            reproject_method="nearest",
-            mask_name="mask",
-            rename={"old_var": "new_var"},
-        )
-        # Test logging
-        assert f"Preparing grid data from raster source {raster_fn}" in caplog.text
-        # Test whether get_rasterdataset and grid_from_rasterdataset are called
-        mock_get_rasterdataset.assert_called_once()
-        mock_grid_from_rasterdataset.assert_called_once()
-        # Test if grid_component.set() succeeded
-        assert grid_component.data == demda
-        # Test returned result from add_data_from_rasterdataset
-        assert all([x in result for x in demda.data_vars.keys()])
+    )
+    mock_get_rasterdataset.return_value = demda
+    raster_fn = "your_raster_file.tif"
+    result = grid_component.add_data_from_rasterdataset(
+        raster_fn=raster_fn,
+        variables=["variable1", "variable2"],
+        fill_method="mean",
+        reproject_method="nearest",
+        mask_name="mask",
+        rename={"old_var": "new_var"},
+    )
+    # Test logging
+    assert f"Preparing grid data from raster source {raster_fn}" in caplog.text
+    # Test whether get_rasterdataset and grid_from_rasterdataset are called
+    mock_get_rasterdataset.assert_called_once()
+    mock_grid_from_rasterdataset.assert_called_once()
+    # Test if grid_component.set() succeeded
+    assert grid_component.data == demda
+    # Test returned result from add_data_from_rasterdataset
+    assert all([x in result for x in demda.data_vars.keys()])
 
 
-def test_add_data_from_raster_reclass(caplog, demda, mock_model):
+def test_add_data_from_raster_reclass(caplog, demda, mock_model, mocker: MockerFixture):
     grid_component = GridComponent(mock_model)
     caplog.set_level(logging.INFO)
     raster_fn = "vito"
     reclass_table_fn = "vito_mapping"
 
     demda.name = "name"
-    grid_component._data_catalog.get_rasterdataset = create_autospec(
+    grid_component._data_catalog.get_rasterdataset = mocker.create_autospec(
         grid_component._data_catalog.get_rasterdataset, return_value=demda
     )
-    grid_component._data_catalog.get_dataframe = create_autospec(
+    grid_component._data_catalog.get_dataframe = mocker.create_autospec(
         grid_component._data_catalog.get_dataframe, return_value=pd.DataFrame()
     )
 
-    with patch(
+    mock_grid_from_raster_reclass = mocker.patch(
         "hydromt.components.grid.grid_from_raster_reclass"
-    ) as mock_grid_from_raster_reclass:
-        mock_grid_from_raster_reclass.return_value = demda.to_dataset()
+    )
+    mock_grid_from_raster_reclass.return_value = demda.to_dataset()
 
+    result = grid_component.add_data_from_raster_reclass(
+        raster_fn=raster_fn,
+        fill_method="nearest",
+        reclass_table_fn=reclass_table_fn,
+        reclass_variables=["roughness_manning"],
+        reproject_method=["average"],
+    )
+    # Test logging
+    assert (
+        f"Preparing grid data by reclassifying the data in {raster_fn} based "
+        f"on {reclass_table_fn}"
+    ) in caplog.text
+    mock_grid_from_raster_reclass.assert_called_once()
+    assert grid_component.data == demda
+    # Test returned result from add_data_from_rasterdataset
+    assert all([x in result for x in demda.to_dataset().data_vars.keys()])
+
+    grid_component._data_catalog.get_rasterdataset.return_value = demda.to_dataset()
+
+    with pytest.raises(
+        ValueError,
+        match=f"raster_fn {raster_fn} should be a single variable. "
+        "Please select one using the 'variable' argument",
+    ):
         result = grid_component.add_data_from_raster_reclass(
             raster_fn=raster_fn,
             fill_method="nearest",
@@ -268,74 +288,52 @@ def test_add_data_from_raster_reclass(caplog, demda, mock_model):
             reclass_variables=["roughness_manning"],
             reproject_method=["average"],
         )
-        # Test logging
-        assert (
-            f"Preparing grid data by reclassifying the data in {raster_fn} based "
-            f"on {reclass_table_fn}"
-        ) in caplog.text
-        mock_grid_from_raster_reclass.assert_called_once()
-        assert grid_component.data == demda
-        # Test returned result from add_data_from_rasterdataset
-        assert all([x in result for x in demda.to_dataset().data_vars.keys()])
-
-        grid_component._data_catalog.get_rasterdataset.return_value = demda.to_dataset()
-
-        with pytest.raises(
-            ValueError,
-            match=f"raster_fn {raster_fn} should be a single variable. "
-            "Please select one using the 'variable' argument",
-        ):
-            result = grid_component.add_data_from_raster_reclass(
-                raster_fn=raster_fn,
-                fill_method="nearest",
-                reclass_table_fn=reclass_table_fn,
-                reclass_variables=["roughness_manning"],
-                reproject_method=["average"],
-            )
 
 
-def test_add_data_from_geodataframe(caplog, geodf, demda, mock_model):
+def test_add_data_from_geodataframe(
+    caplog, geodf, demda, mock_model, mocker: MockerFixture
+):
     grid_component = GridComponent(mock_model)
     caplog.set_level(logging.INFO)
     demda.name = "name"
-    grid_component._data_catalog.get_geodataframe = create_autospec(
+    grid_component._data_catalog.get_geodataframe = mocker.create_autospec(
         grid_component._data_catalog.get_geodataframe, return_value=geodf
     )
-    with patch(
+    mock_grid_from_geodataframe = mocker.patch(
         "hydromt.components.grid.grid_from_geodataframe"
-    ) as mock_grid_from_geodataframe:
-        mock_grid_from_geodataframe.return_value = demda.to_dataset()
-        vector_fn = "hydro_lakes"
-        result = grid_component.add_data_from_geodataframe(
-            vector_fn=vector_fn,
-            variables=["waterbody_id", "Depth_avg"],
-            nodata=[-1, -999.0],
-            rasterize_method="value",
-            rename={
-                "waterbody_id": "lake_id",
-                "Depth_avg": "lake_depth",
-                vector_fn: "hydrolakes",
-            },
-        )
-        assert f"Preparing grid data from vector '{vector_fn}'." in caplog.text
-        mock_grid_from_geodataframe.assert_called_once()
-        assert grid_component.data == demda
-        assert all([x in result for x in demda.to_dataset().data_vars.keys()])
-        grid_component._data_catalog.get_geodataframe.return_value = gpd.GeoDataFrame()
-        caplog.set_level(logging.WARNING)
-        result = grid_component.add_data_from_geodataframe(
-            vector_fn=vector_fn,
-            variables=["waterbody_id", "Depth_avg"],
-            nodata=[-1, -999.0],
-            rasterize_method="value",
-            rename={
-                "waterbody_id": "lake_id",
-                "Depth_avg": "lake_depth",
-                vector_fn: "hydrolakes",
-            },
-        )
-        assert (
-            f"No shapes of {vector_fn} found within region,"
-            " skipping setup_grid_from_vector."
-        ) in caplog.text
-        assert result is None
+    )
+    mock_grid_from_geodataframe.return_value = demda.to_dataset()
+    vector_fn = "hydro_lakes"
+    result = grid_component.add_data_from_geodataframe(
+        vector_fn=vector_fn,
+        variables=["waterbody_id", "Depth_avg"],
+        nodata=[-1, -999.0],
+        rasterize_method="value",
+        rename={
+            "waterbody_id": "lake_id",
+            "Depth_avg": "lake_depth",
+            vector_fn: "hydrolakes",
+        },
+    )
+    assert f"Preparing grid data from vector '{vector_fn}'." in caplog.text
+    mock_grid_from_geodataframe.assert_called_once()
+    assert grid_component.data == demda
+    assert all([x in result for x in demda.to_dataset().data_vars.keys()])
+    grid_component._data_catalog.get_geodataframe.return_value = gpd.GeoDataFrame()
+    caplog.set_level(logging.WARNING)
+    result = grid_component.add_data_from_geodataframe(
+        vector_fn=vector_fn,
+        variables=["waterbody_id", "Depth_avg"],
+        nodata=[-1, -999.0],
+        rasterize_method="value",
+        rename={
+            "waterbody_id": "lake_id",
+            "Depth_avg": "lake_depth",
+            vector_fn: "hydrolakes",
+        },
+    )
+    assert (
+        f"No shapes of {vector_fn} found within region,"
+        " skipping setup_grid_from_vector."
+    ) in caplog.text
+    assert result is None
