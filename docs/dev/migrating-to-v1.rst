@@ -60,6 +60,53 @@ The following changes are required in your code:
 +--------------------------+--------------------------------------+
 
 
+Changes to the format of the yaml interface
+-------------------------------------------
+
+The first change to the YAML format is that now, at the root of the documents are three keys:
+`model_type`, `global` and `steps`.
+- `model_type` details what kind of model is going to be used in the model. This used to be provided only through the CLI,
+but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
+- `global` is intended for any configuration for the model object itself, here you may override any default
+configuration for the components provided by your implementation
+- `steps` should contain a list of function calls. In pre-v1 versions this used to be a dictionary, but now it has become a list
+which removes the necessity for adding numbers to the end of function calls of the same name. You may prefix a component name
+for the step in a dotted manner to indicate the function should be called on that component instead of the model. In general any step
+listed here will correspond to a function on either the model or one of its components. Any keys that are listed under a step will be
+provided to the function call as arguments.
+
+An example of a fictional Wflow YAML file would be:
+
+```yaml
+model_type: wflow
+global:
+	data_libs: deltares_data
+	components:
+		config:
+			filename: wflow_sbm_calibrated.toml
+steps:
+	- setup_basemaps:
+		region: {'basin': [6.16, 51.84]}
+		res: 0.008333
+		hydrography_fn: merit_hydro
+	- grid.add_data_from_geodataframe:
+	         vector_fn: administrative_areas
+	         variables: "id_level1"
+	- grid.add_data_from_geodataframe:
+	          vector_fn: administrative_areas
+	          variables: "id_level3"
+	- setup_reservoirs:
+		reservoirs_fn: hydro_reservoirs
+		min_area: 1.0
+	- write:
+		components:
+			- grid
+			- config
+	- geoms.write:
+		filename: geoms/*.gpkg
+		driver: GPKG
+```
+
 Data catalog
 ------------
 
@@ -185,7 +232,7 @@ with it as you please.
 In the core of HydroMT, the available components are (list or maybe table):
   - `GridComponent` for data on a regular grid
   - etc.
- 
+
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
 Making the model region its own component
@@ -268,53 +315,6 @@ has not been changed compared to the GridModel.
 +------------------------------+-------------------------------------------+
 | model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
-
-Changes to the format of the yaml interface
--------------------------------------------
-
-The first change to the YAML format is that now, at the root of the documents are three keys:
-`model_type`, `global` and `steps`.
-- `model_type` details what kind of model is going to be used in the model. This used to be provided only through the CLI,
-but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
-- `global` is intended for any configuration for the model object itself, here you may override any default
-configuration for the components provided by your implementation
-- `steps` should contain a list of function calls. In pre-v1 versions this used to be a dictionary, but now it has become a list
-which removes the necessity for adding numbers to the end of function calls of the same name. You may prefix a component name
-for the step in a dotted manner to indicate the function should be called on that component instead of the model. In general any step
-listed here will correspond to a function on either the model or one of its components. Any keys that are listed under a step will be
-provided to the function call as arguments.
-
-An example of a fictional Wflow YAML file would be:
-
-```yaml
-model_type: wflow
-global:
-	data_libs: deltares_data
-	components:
-		config:
-			filename: wflow_sbm_calibrated.toml
-steps:
-	- setup_basemaps:
-		region: {'basin': [6.16, 51.84]}
-		res: 0.008333
-		hydrography_fn: merit_hydro
-	- grid.add_data_from_geodataframe:
-	         vector_fn: administrative_areas
-	         variables: "id_level1"
-	- grid.add_data_from_geodataframe:
-	          vector_fn: administrative_areas
-	          variables: "id_level3"
-	- setup_reservoirs:
-		reservoirs_fn: hydro_reservoirs
-		min_area: 1.0
-	- write:
-		components:
-			- grid
-			- config
-	- geoms.write:
-		filename: geoms/*.gpkg
-		driver: GPKG
-```
 
 
 Plugins
