@@ -41,7 +41,6 @@ class ModelRegionComponent(ModelComponent):
     ) -> None:
         super().__init__(model)
         self._data: Optional[GeoDataFrame] = None
-        self._initialized = False
 
     @hydromt_step
     def create(
@@ -197,8 +196,6 @@ class ModelRegionComponent(ModelComponent):
             self._data = data
         else:
             raise ValueError("Only GeoSeries or GeoDataFrame can be used as region.")
-
-        self._initialized = True
 
     @property
     def bounds(self):
