@@ -342,7 +342,7 @@ class Model(object, metaclass=ABCMeta):
         for c in [self._components[name] for name in components]:
             c.write()
 
-    def read(self, components: Optional[List[str]]) -> None:
+    def read(self, components: Optional[List[str]] = None) -> None:
         """Read provided components from disk.
 
         Parameters
