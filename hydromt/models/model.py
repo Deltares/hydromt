@@ -339,10 +339,14 @@ class Model(object, metaclass=ABCMeta):
         for c in [self._components[name] for name in components]:
             c.write()
 
-    def read(self) -> None:
+    def read(self, components: Optional[List[str]]) -> None:
         """Read the complete model schematization and configuration from model files."""
         self.logger.info(f"Reading model data from {self.root.path}")
-        for c in self._components.values():
+        if components is not None:
+            components_to_read = [self._components[x] for x in components]
+        else:
+            components_to_read = self._components.values()
+        for c in components_to_read:
             c.read()
 
     @staticmethod
