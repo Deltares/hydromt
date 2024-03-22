@@ -398,31 +398,28 @@ def test_maps_setup(tmpdir):
     mod.write(components=["config", "geoms", "maps"])
 
 
-@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
-def test_gridmodel(grid_model, tmpdir, demda):
-    assert "grid" in grid_model.api
-    non_compliant = grid_model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
+@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+def test_gridmodel(model, tmpdir, demda):
+    model.add_component("grid", GridComponent(model))
     # grid specific attributes
-    assert np.all(grid_model.res == grid_model.grid.raster.res)
-    assert np.all(grid_model.bounds == grid_model.grid.raster.bounds)
-    assert np.all(grid_model.transform == grid_model.grid.raster.transform)
+    assert np.all(model.grid.res == model.grid.data.raster.res)
+    assert np.all(model.grid.bounds == model.grid.data.raster.bounds)
+    assert np.all(model.grid.transform == model.grid.data.raster.transform)
     # write model
-    grid_model.root.set(str(tmpdir), mode="w")
-    grid_model.write()
+    model.root.set(str(tmpdir), mode="w")
+    model.write()
     # read model
-    GridModel: Any = ...  # bypass ruff
-    model1 = GridModel(str(tmpdir), mode="r")
+    model1 = Model(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors = grid_model._test_equal(model1)
+    equal, errors = model._test_equal(model1)
     assert equal, errors
 
     # try update
-    grid_model.root.set(str(join(tmpdir, "update")), mode="w")
-    grid_model.write()
+    model.root.set(str(join(tmpdir, "update")), mode="w")
+    model.write()
 
-    model1 = GridModel(str(join(tmpdir, "update")), mode="r+")
+    model1 = Model(str(join(tmpdir, "update")), mode="r+")
     model1.update(
         opt={
             "set_grid": {"data": demda, "name": "testdata"},
@@ -798,9 +795,6 @@ def test_meshmodel_setup(griduda, world):
     )
     assert "roughness_manning" in mod1.mesh.data_vars
     assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
-
-
-# NEW TESTS FOR REFACTOR MODEL COMPONENTS
 
 
 def test_initialize_model():
