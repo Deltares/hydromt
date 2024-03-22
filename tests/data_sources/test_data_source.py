@@ -3,44 +3,12 @@ from typing import Any, Dict
 import pytest
 
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.data_source import DataSource, GeoDataFrameSource
+from hydromt.data_source import DataSource, GeoDataFrameSource, create_source
 from hydromt.data_source.data_source import get_nested_var, set_nested_var
 from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
 
 
 class TestDataSource:
-    def test_polymorphism_model_validate(
-        self,
-        mock_geodf_driver: GeoDataFrameDriver,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
-    ):
-        submodel: DataSource = DataSource.model_validate(
-            {
-                "name": "geojsonfile",
-                "data_type": "GeoDataFrame",
-                "driver": mock_geodf_driver,
-                "data_adapter": mock_geodataframe_adapter,
-                "uri": "test_uri",
-            }
-        )
-        assert isinstance(submodel, GeoDataFrameSource)
-
-    def test_polymorphism_unknown_data_type(
-        self,
-        mock_geodf_driver: GeoDataFrameDriver,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
-    ):
-        with pytest.raises(ValueError, match="Unknown 'data_type'"):
-            DataSource.model_validate(
-                {
-                    "name": "geojsonfile",
-                    "data_type": "Bogus",
-                    "driver": mock_geodf_driver,
-                    "data_adapter": mock_geodataframe_adapter,
-                    "uri": "test_uri",
-                }
-            )
-
     def test_summary(
         self,
         mock_geodf_driver: GeoDataFrameDriver,
@@ -52,7 +20,7 @@ class TestDataSource:
 
         mock_gdf_adapter = MockGeoDataFrameAdapter(meta={"custom_meta": "test"})
 
-        submodel: DataSource = DataSource.model_validate(
+        submodel: DataSource = GeoDataFrameSource.model_validate(
             {
                 "root": root,
                 "name": "geojsonfile",
@@ -80,7 +48,7 @@ class TestGetNestedVar:
 
         mock_geodf_driver = FakeGeoDfDriver(metadata_resolver={"name": "convention"})
 
-        submodel: DataSource = DataSource.model_validate(
+        submodel: DataSource = create_source(
             {
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",

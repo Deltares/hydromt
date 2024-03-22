@@ -46,7 +46,7 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
-from hydromt.data_source import DataSource
+from hydromt.data_source import DataSource, create_source
 
 logger = logging.getLogger(__name__)
 
@@ -1758,7 +1758,7 @@ def _parse_data_source_dict(
             )
     source["driver_kwargs"] = driver_kwargs
 
-    return DataSource.model_validate(source)
+    return create_source(source)
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:

@@ -4,7 +4,7 @@ from abc import ABC
 from logging import Logger, getLogger
 from os.path import abspath, join
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Dict, List, Optional, TypeVar, Union
+from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union
 
 from pydantic import (
     BaseModel,
@@ -60,41 +60,6 @@ class DataSource(BaseModel, ABC):
         return summ
 
     # TODO: def to_file(self, **query_params) https://github.com/Deltares/hydromt/issues/840
-
-    @model_validator(mode="wrap")
-    @classmethod
-    def _init_subclass_data_type(cls, data: Any, handler: Callable):
-        """Initialize the subclass based on the 'data_type' class variable.
-
-        All DataSources should be parsed based on their `data_type` class variable;
-        e.g. a dict with `data_type` = `RasterDataset` should be parsed as a
-        `RasterDatasetSource`. This class searches all subclasses until the correct
-        `DataSource` is found and initialized that one.
-        This allow an API as: `DataSource.model_validate(raster_ds_dict)` or
-        `DataSource(raster_ds_dict)`, but also `RasterDatasetSource(raster_ds_dict)`.
-
-        Inspired by: https://github.com/pydantic/pydantic/discussions/7008#discussioncomment
-        This validator does not yet support submodels of submodels.
-        """
-        if not isinstance(data, dict):
-            # Other objects should already be the correct subclass.
-            return handler(data)
-
-        if DataSource in cls.__bases__:
-            # If cls is subclass DataSource, just validate as normal
-            return handler(data)
-
-        if data_type := data.get("data_type"):
-            try:
-                # Find which DataSource to instantiate.
-                target_cls: DataSource = next(
-                    filter(lambda sc: sc.data_type == data_type, cls.__subclasses__())
-                )  # subclasses should be loaded from __init__.py
-                return target_cls.model_validate(data)
-            except StopIteration:
-                raise ValueError(f"Unknown 'data_type': '{data_type}'")
-
-        raise ValueError(f"{cls.__name__} needs 'data_type'")
 
     @model_validator(mode="before")
     @classmethod
