@@ -401,11 +401,11 @@ class MeshMixin(object):
                 drop_coords = [c for c in uds.coords if not c.startswith(grid_name)]
                 uds = uds.drop_vars(drop_coords)
             elif variables and len(variables) == len(self.mesh.data_vars):
-                uds = self.mesh.copy()
-            else:
                 grid = self.mesh_grids[grid_name]
                 uds = xu.UgridDataset(grid.to_dataset(optional_attributes=True))
                 uds.ugrid.grid.set_crs(grid.crs)
+            else:
+                uds = self.mesh.copy()
 
             return uds
 
