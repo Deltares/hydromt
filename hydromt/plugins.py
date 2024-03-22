@@ -1,6 +1,6 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
 
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Type, TypedDict, cast
+from typing import TYPE_CHECKING, Dict, Optional, Type, TypedDict, cast
 
 from importlib_metadata import entry_points
 
@@ -23,7 +23,7 @@ def _discover_plugins(group: str) -> Dict[str, Plugin]:
             if attr_name not in plugins:
                 # this is for display only, hence string
                 plugins[attr_name] = {
-                    "plugin_name": str(ep.name),
+                    "plugin_name": str(ep.dist.name),
                     "type": attr,
                     "version": str(ep.dist.version),
                 }
@@ -33,10 +33,11 @@ def _discover_plugins(group: str) -> Dict[str, Plugin]:
     return plugins
 
 
-def _format_metadata(t: Tuple[str, Dict[str, str]]):
-    n, d = t
+def _format_metadata(metadata: Dict[str, str]) -> str:
     return "{type} ({plugin_name} {version})".format(
-        type=d["type"].__name__, plugin_name=d["plugin_name"], version=d["version"]
+        type=metadata["type"].__name__,  # type: ignore
+        plugin_name=metadata["plugin_name"],
+        version=metadata["version"],
     )
 
 
@@ -86,7 +87,7 @@ class Plugins:
             )
 
     @property
-    def model_metadata(self) -> Dict[str, str]:
+    def model_metadata(self) -> Dict[str, Dict[str, str]]:
         """Load and provide access to all known model plugins."""
         if self._model_plugins is None:
             self._initialize_plugins()
@@ -96,12 +97,12 @@ class Plugins:
             raise RuntimeError("Could not load any model plugins")
         else:
             return cast(
-                Dict[str, str],
+                Dict[str, Dict[str, str]],
                 {k: v for k, v in self._model_plugins.items() if k != "type"},
             )
 
     @property
-    def component_metadata(self) -> Dict[str, str]:
+    def component_metadata(self) -> Dict[str, Dict[str, str]]:
         """Load and provide access to all known model plugins."""
         if self._component_plugins is None:
             self._initialize_plugins()
@@ -111,25 +112,25 @@ class Plugins:
             raise RuntimeError("Could not load any model plugins")
         else:
             return cast(
-                Dict[str, str],
+                Dict[str, Dict[str, str]],
                 {k: v for k, v in self._component_plugins.items() if k != "type"},
             )
 
     def model_summary(self) -> str:
         """Generate string representation containing the registered model entrypoints."""
+        s = ""
+        for metadata in self.model_metadata.values():
+            s += f"\n\t- {_format_metadata(metadata)}"
         model_plugins = "\n\t- ".join(
-            map(_format_metadata, self.model_metadata.items())
+            map(_format_metadata, self.model_metadata.values())
         )
         return f"Model plugins:\n\t- {model_plugins}"
 
     def component_summary(self) -> str:
         """Generate string representation containing the registered component entrypoints."""
         self._initialize_plugins()
-        self._component_metadata = cast(
-            Dict[str, Dict[str, str]], self._component_metadata
-        )
         component_plugins = "\n\t- ".join(
-            map(_format_metadata, self._component_metadata.values())
+            list(map(_format_metadata, self.component_metadata.values()))
         )
         return f"Component plugins:\n\t- {component_plugins}"
 

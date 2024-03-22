@@ -4,6 +4,7 @@ from hydromt import hydromt_step
 from hydromt._utils.steps_validator import validate_steps
 from hydromt.components.base import ModelComponent
 from hydromt.models.model import Model
+from hydromt.plugins import PLUGINS
 
 
 class FooComponent(ModelComponent):
@@ -59,17 +60,36 @@ def test_validate_steps_correct():
 
 
 def test_validate_steps_in_model_correct():
+    # modify plugin for testing
+    _ = PLUGINS.model_plugins
+    PLUGINS._model_plugins["FooModel"] = {  # type: ignore
+        "name": "foo",
+        "type": FooModel,
+        "plugin_name": "testing",
+        "version": "999",
+    }
     model = FooModel()
     validate_steps(model, [{"foo": {"a": 1, "b": "2"}}, {"bar": None}])
+    PLUGINS._model_plugins = None
 
 
 def test_validate_steps_disallowed_function():
+    # modify plugin for testing
+    _ = PLUGINS.model_plugins
+    PLUGINS._model_plugins["FooModel"] = {  # type: ignore
+        "name": "foo",
+        "type": FooModel,
+        "plugin_name": "testing",
+        "version": "999",
+    }
     model = FooModel()
     with pytest.raises(
         AttributeError,
         match="Method baz is not allowed to be called on model, since it is not a HydroMT step definition. Add @hydromt_step if that is your intention.",
     ):
         validate_steps(model, [{"baz": None}])
+
+    PLUGINS._model_plugins = None
 
 
 def test_validate_steps_blacklisted_function():
