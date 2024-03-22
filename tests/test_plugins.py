@@ -42,6 +42,8 @@ def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str])
     PLUGINS._model_plugins = None
 
     mock_single_entrypoint = mocker.create_autospec(EntryPoint, spec_set=True)
+    mock_single_entrypoint.dist.version = "999.9.9"
+    mock_single_entrypoint.dist.name = "hydromt-test"
     mock_multiple_entrypoints = mocker.create_autospec(EntryPoints, spec_set=True)
     mock_multiple_entrypoints.__iter__.return_value = [mock_single_entrypoint]
 

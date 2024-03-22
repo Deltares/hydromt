@@ -24,7 +24,7 @@ def _discover_plugins(group: str) -> Tuple[Dict[str, Type], Dict[str, Dict[str, 
 
                 # this is for display only, hence string
                 plugin_metadata[attr_name] = {
-                    "name": str(ep.name),
+                    "name": str(ep.dist.name),
                     "object": attr_name,
                     "version": str(ep.dist.version),
                 }
