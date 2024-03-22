@@ -200,14 +200,12 @@ class Model(object, metaclass=ABCMeta):
         write: Optional[bool] = True,
         steps: Optional[list[dict[str, dict[str, Any]]]] = None,
     ):
-        r"""Single method to build a model from scratch based on settings in `opt`.
+        r"""Single method to build a model from scratch based on settings in `steps`.
 
-        Methods will be run one by one based on the order of appearance in `opt`
-        (configuration file). All model methods are supported including
-        setup\_\*, read\_\* and write\_\* methods.
+        Methods will be run one by one based on the order of appearance in `steps`
+        (configuration file). Model and component methods decorated with @hydromt_step
+        Are allowed to be used in this list.
 
-        If a write\_\* option is listed in `opt` (configuration file) the full writing of the
-        model at the end of the update process is skipped.
 
         Parameters
         ----------
@@ -216,23 +214,23 @@ class Model(object, metaclass=ABCMeta):
             for all options.
         write: bool, optional
             Write complete model after executing all methods in opt, by default True.
-        opt: dict, optional
+        steps: Optional[list[dict[str, dict[str, Any]]]]
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
-            This is a nested dictionary where the first-level keys are the names
-            of model specific methods and the second-level contain
-            argument-value pairs of the method.
+            This is a list of nested dictionary where the first-level keys are the names
+            of a component followed by the name of the method to run seperated by a dot.
+            anny subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
 
-                {
-                    <name of method1>: {
+                [
+                    - <component_name>.<name of method1>: {
                         <argument1>: <value1>, <argument2>: <value2>
                     },
-                    <name of method2>: {
+                    - <component_name>.<name of method2>: {
                         ...
                     }
-                }
+                ]
 
         """
         steps = steps or []
@@ -259,14 +257,12 @@ class Model(object, metaclass=ABCMeta):
         steps: Optional[list[dict[str, dict[str, Any]]]] = None,
         forceful_overwrite: bool = False,
     ):
-        r"""Single method to update a model based the settings in `opt`.
+        r"""Single method to update a model based the settings in `steps`.
 
-        Methods will be run one by one based on the order of appearance in `opt`
-        (configuration file).
+        Methods will be run one by one based on the order of appearance in `steps`
+        (configuration file). Model and component methods decorated with @hydromt_step
+        Are allowed to be used in this list.
 
-        All model methods are supported including setup\_\*, read\_\* and write\_\* methods.
-        If a write\_\* option is listed in `opt` (configuration file) the full writing of the model
-        at the end of the update process is skipped.
 
         Parameters
         ----------
@@ -276,23 +272,23 @@ class Model(object, metaclass=ABCMeta):
             current model schematization if these exist. By default None.
         write: bool, optional
             Write the updated model schematization to disk. By default True.
-        opt: dict, optional
+        steps: Optional[list[dict[str, dict[str, Any]]]]
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
-            This is a nested dictionary where the first-level keys
-            are the names of model specific methods and
-            the second-level contain argument-value pairs of the method.
+            This is a list of nested dictionary where the first-level keys are the names
+            of a component followed by the name of the method to run seperated by a dot.
+            anny subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
 
-                {
-                    <name of method1>: {
+                [
+                    - <component_name>.<name of method1>: {
                         <argument1>: <value1>, <argument2>: <value2>
                     },
-                    <name of method2>: {
+                    - <component_name>.<name of method2>: {
                         ...
                     }
-                }
+                ]
           forceful_overwrite:
             Force open files to close when attempting to write them. In the case you
             try to write to a file that's already opened. The output will be written
