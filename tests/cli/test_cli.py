@@ -21,10 +21,15 @@ def test_cli_verison():
 def test_cli_models():
     r = CliRunner().invoke(hydromt_cli, "--models")
     assert r.exit_code == 0
-    assert "component plugins" in r.output
-    assert "model plugins" in r.output
-    assert "ModelRegionComponent" in r.output
+    assert "Model plugins" in r.output
     assert "Model" in r.output
+
+
+def test_cli_components():
+    r = CliRunner().invoke(hydromt_cli, "--components")
+    assert r.exit_code == 0
+    assert "Component plugins" in r.output
+    assert "ModelRegionComponent" in r.output
 
 
 def test_cli_help():

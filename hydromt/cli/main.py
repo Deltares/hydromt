@@ -195,7 +195,7 @@ cache_opt = click.option(
     callback=print_available_plugins,
 )
 @click.pass_context
-def main(ctx, models):  # , quiet, verbose):
+def main(ctx, models, components, plugins):
     """Command line interface for hydromt models."""
     if ctx.obj is None:
         ctx.obj = {}

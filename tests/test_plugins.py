@@ -26,13 +26,14 @@ def test_core_model_plugins():
 
 
 def test_summary():
-    summary = PLUGINS.summary()
-    assert "component plugins:" in summary
-    assert "model plugins:" in summary
-    assert "ModelRegionComponent" in summary
-    assert "GridComponent" in summary
-    assert "ModelComponent" in summary
-    assert "Model" in summary
+    component_summary = PLUGINS.component_summary()
+    model_summary = PLUGINS.model_summary()
+    assert "Component plugins:" in component_summary
+    assert "Model plugins:" in model_summary
+    assert "ModelRegionComponent" in component_summary
+    assert "GridComponent" in component_summary
+    assert "ModelComponent" in component_summary
+    assert "Model" in model_summary
 
 
 def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str]):
