@@ -333,20 +333,31 @@ class Model(object, metaclass=ABCMeta):
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
     @hydromt_step
-    def write(self, components: Optional[list[str]] = None):
-        """Write all components of the model to disk with defaults."""
+    def write(self, components: Optional[List[str]] = None) -> None:
+        """Write provided components to disk with defaults.
+
+        Parameters
+        ----------
+            components: Optional[List[str]]
+                the components that should be writen to disk. If None is provided
+                all components will be written.
+        """
         components = components or list(self._components.keys())
         for c in [self._components[name] for name in components]:
             c.write()
 
     def read(self, components: Optional[List[str]]) -> None:
-        """Read the complete model schematization and configuration from model files."""
+        """Read provided components from disk.
+
+        Parameters
+        ----------
+            components: Optional[List[str]]
+                the components that should be read from disk. If None is provided
+                all components will be read.
+        """
         self.logger.info(f"Reading model data from {self.root.path}")
-        if components is not None:
-            components_to_read = [self._components[x] for x in components]
-        else:
-            components_to_read = self._components.values()
-        for c in components_to_read:
+        components = components or list(self._components.keys())
+        for c in [self._components[name] for name in components]:
             c.read()
 
     @staticmethod
