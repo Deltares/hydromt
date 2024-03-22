@@ -294,10 +294,16 @@ global:
 		config:
 			filename: wflow_sbm_calibrated.toml
 steps:
-	- grid.create:
-		shape: [10, 10]
-		dtype: float32
-		fill: 0.0
+	- setup_basemaps:
+		region: {'basin': [6.16, 51.84]}
+		res: 0.008333
+		hydrography_fn: merit_hydro
+	- grid.add_data_from_geodataframe:
+	         vector_fn: administrative_areas
+	         variables: "id_level1"
+	- grid.add_data_from_geodataframe:
+	          vector_fn: administrative_areas
+	          variables: "id_level3"
 	- setup_reservoirs:
 		reservoirs_fn: hydro_reservoirs
 		min_area: 1.0
