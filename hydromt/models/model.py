@@ -242,7 +242,10 @@ class Model(object, metaclass=ABCMeta):
             step, kwargs = next(iter(step_dict.items()))
             self.logger.info(f"build: {step}")
             # Call the methods.
-            rgetattr(self, step)(**kwargs)
+            method = rgetattr(self, step)
+            for k, v in kwargs.items():
+                self.logger.info(f"{method}.{k}: {v}")
+            method(**kwargs)
 
         # If there are any write options included in the steps,
         # we don't need to write the whole model.
@@ -319,7 +322,10 @@ class Model(object, metaclass=ABCMeta):
             step, kwargs = next(iter(step_dict.items()))
             self.logger.info(f"update: {step}")
             # Call the methods.
-            rgetattr(self, step)(kwargs)
+            method = rgetattr(self, step)
+            for k, v in kwargs.items():
+                self.logger.info(f"{method}.{k}: {v}")
+            method(**kwargs)
 
         # If there are any write options included in the steps,
         # we don't need to write the whole model.
