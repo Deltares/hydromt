@@ -68,7 +68,7 @@ The first change to the YAML format is that now, at the root of the documents ar
 - `model_type` (optional) details what kind of model is going to be used in the model. This can currently also be provided only through the CLI,
 but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
 - `global` is intended for any configuration for the model object itself, here you may override any default
-configuration for the components provided by your implementation
+configuration for the components provided by your implementation. Any options mentioned here will be passed to the `Model.__init__` function
 - `steps` should contain a list of function calls. In pre-v1 versions this used to be a dictionary, but now it has become a list
 which removes the necessity for adding numbers to the end of function calls of the same name. You may prefix a component name
 for the step in a dotted manner to indicate the function should be called on that component instead of the model. In general any step
