@@ -65,7 +65,7 @@ Changes to the format of the yaml interface
 
 The first change to the YAML format is that now, at the root of the documents are three keys:
 `model_type`, `global` and `steps`.
-- `model_type` details what kind of model is going to be used in the model. This used to be provided only through the CLI,
+- `model_type` (optional) details what kind of model is going to be used in the model. This can currently also be provided only through the CLI,
 but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
 - `global` is intended for any configuration for the model object itself, here you may override any default
 configuration for the components provided by your implementation
