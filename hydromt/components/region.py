@@ -209,6 +209,7 @@ class ModelRegionComponent(ModelComponent):
         else:
             raise ValueError("Could not read or construct region to read crs from")
 
+    @hydromt_step
     def read(
         self,
         rel_path: StrPath = Path(DEFAULT_REGION_FILE_PATH),

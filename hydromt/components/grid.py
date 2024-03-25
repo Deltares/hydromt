@@ -151,6 +151,7 @@ class GridComponent(ModelComponent):
             )
         return None
 
+    @hydromt_step
     def read(
         self,
         fn: str = "grid/grid.nc",
