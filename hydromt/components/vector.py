@@ -264,7 +264,7 @@ class VectorComponent(ModelComponent):
                         dirname(join(self._root.path, fn_geom)),
                         f"{basename(fn_geom).split('.')[0]}.nc",
                     )
-                    self.logger.warning(
+                    self._logger.warning(
                         "2D data found in vector," f"will write data to {fn} instead."
                     )
                     break
