@@ -425,6 +425,59 @@ Setup methods
    GridComponent.add_data_from_geodataframe
 
 
+MeshComponent
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshComponent.model
+   MeshComponent.data_catalog
+   MeshComponent.logger
+   MeshComponent.model_root
+   MeshComponent.data
+   MeshComponent.crs
+   MeshComponent.bounds
+   MeshComponent.region
+   MeshComponent.mesh_names
+   MeshComponent.mesh_grids
+   MeshComponent.mesh_datasets
+   MeshComponent.mesh_gdf
+
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshComponent.set
+   MeshComponent.write
+   MeshComponent.read
+
+
+Setup methods
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshComponent.create
+   MeshComponent.add_data_from_constant
+   MeshComponent.add_data_from_rasterdataset
+   MeshComponent.add_data_from_raster_reclass
+
+
 .. _vector_model_api:
 
 VectorModel
