@@ -209,6 +209,9 @@ class Model(object, metaclass=ABCMeta):
         By default the full model will be written at the end, except if a write step
         is called for somewhere in steps, then this is skipped.
 
+        Note that the \* in the signature signifies that all of the arguments to this function
+        MUST be provided as keyword arguments.
+
         Parameters
         ----------
         region: dict
@@ -267,6 +270,9 @@ class Model(object, metaclass=ABCMeta):
         Methods will be run one by one based on the order of appearance in `steps`
         (configuration file). Model and component methods decorated with @hydromt_step
         Are allowed to be used in this list.
+
+        Note that the \* in the signature signifies that all of the arguments to this function
+        MUST be provided as keyword arguments.
 
 
         Parameters
