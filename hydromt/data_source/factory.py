@@ -1,4 +1,5 @@
 """Factory function for DataSource."""
+from inspect import isabstract
 from typing import Any, Dict, Union
 
 from hydromt._typing.type_def import DataType
@@ -17,7 +18,7 @@ def create_source(data: Union[Dict[str, Any], DataSource]) -> DataSource:
     Create a datasource from a dictionary, or another DataSource.
     """
     if isinstance(data, DataSource):
-        if type(data) == DataSource:
+        if isabstract(DataSource):
             raise ValueError("DataSource is an Abstract Class")
         else:
             # Already is a subclass of DataSource
