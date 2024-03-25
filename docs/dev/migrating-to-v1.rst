@@ -165,7 +165,7 @@ users more flexibility with adding components to their model class, for instance
 grids. In addition, the `ModelComponent`s improve maintainability of the code and
 terminology of the components and their methods.
 
-**Changes
+**Changes**
 
 The `GridMixin` and `GridModel` have been restructured into one `GridComponent` with only
 a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
@@ -183,3 +183,19 @@ has not been changed compared to the GridModel.
 | model.setup_grid(...)        | model.grid_component.create(...)          |
 | model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
+
+
+MeshComponent
+^^^^^^^^^^^^^
+
+**Rationale**
+
+See `GridComponent` rationale
+
+
+**Changes**
+
+The MeshModel has just like the `GridModel` been replaced with its implementation
+of the `ModelComponent`: `MeshComponent`. The restructering of `MeshModel` follows the same pattern
+as the `GridComponent`. Do note that MeshComponent.get_mesh() has already been updated to work with
+XUgrid 0.0.9.
