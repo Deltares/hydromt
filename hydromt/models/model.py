@@ -149,7 +149,7 @@ class Model(object, metaclass=ABCMeta):
             Dict[str, str], PLUGINS.model_metadata[self.__class__.__name__]
         )
         self.logger.info(
-            f"Initializing {self.__class__.__name__} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
+            f"Initializing {self._NAME} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
         )
 
     def _add_components(self, components: dict[str, dict[str, Any]]) -> None:
