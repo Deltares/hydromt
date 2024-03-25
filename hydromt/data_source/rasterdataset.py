@@ -33,6 +33,7 @@ class RasterDatasetSource(DataSource):
 
     def read_data(
         self,
+        *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0,

@@ -36,6 +36,7 @@ class GeoDataFrameSource(DataSource):
 
     def read_data(
         self,
+        *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0.0,

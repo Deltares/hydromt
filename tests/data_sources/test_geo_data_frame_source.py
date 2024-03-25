@@ -104,7 +104,7 @@ class TestGeoDataFrameSource:
             data_adapter=GeoDataFrameAdapter(),
             driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
         )
-        gdf = source.read_data(list(geodf.total_bounds))
+        gdf = source.read_data(bbox=list(geodf.total_bounds))
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert np.all(gdf == geodf)
 
