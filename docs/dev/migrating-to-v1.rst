@@ -188,7 +188,7 @@ has not been changed compared to the GridModel.
 DataAdapter
 -----------
 
-The previous version of the `DataAdapter` and it's subclasses had a lot of
+The previous version of the `DataAdapter` and its subclasses had a lot of
 responsabilities:
 - Validate the input from the `DataCatalog` entry.
 - Find the right paths to the data based on a naming convention.
