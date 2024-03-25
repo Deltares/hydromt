@@ -202,9 +202,9 @@ class Model(object, metaclass=ABCMeta):
     ):
         r"""Single method to build a model from scratch based on settings in `steps`.
 
-        Methods will be run one by one based on the order of appearance in `steps`
-        (configuration file). Model and component methods decorated with @hydromt_step
-        Are allowed to be used in this list.
+        Methods will be run one by one based on the /order of appearance in `steps`
+        (configuration file). For a list of available functions see :ref:`The model API<model_api>`
+        and :ref:`The plugin documentation<plugin_create>`
 
         By default the full model will be written at the end, except if a write step
         is called for somewhere in steps, then this is skipped.
@@ -267,9 +267,9 @@ class Model(object, metaclass=ABCMeta):
     ):
         r"""Single method to update a model based the settings in `steps`.
 
-        Methods will be run one by one based on the order of appearance in `steps`
-        (configuration file). Model and component methods decorated with @hydromt_step
-        Are allowed to be used in this list.
+        Methods will be run one by one based on the /order of appearance in `steps`
+        (configuration file). For a list of available functions see :ref:`The model API<model_api>`
+        and :ref:`The plugin documentation<plugin_create>`
 
         Note that the \* in the signature signifies that all of the arguments to this function
         MUST be provided as keyword arguments.
