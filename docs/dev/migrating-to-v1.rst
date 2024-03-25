@@ -235,6 +235,19 @@ In the core of HydroMT, the available components are (list or maybe table):
 
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
+The `Model.__init__` function can be used to add default components by plugins like so:
+
+```python
+
+class ExampleModel(Model):
+	def __init__(self):
+        self.root: ModelRoot = ModelRoot(".")
+		self.add_component("region", ModelRegionComponent)
+		self.add_component("grid", GridComponent)
+		...
+
+```
+
 Making the model region its own component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
