@@ -12,6 +12,7 @@ Unreleased
 Changed
 -------
 - Development environment is now set up via pixi instead of mamba / conda. See the documentation for more information on how to install.
+- Use the native data CRS when determining zoom levels over the data catalog crs. (#851)
 
 Fixed
 -----
