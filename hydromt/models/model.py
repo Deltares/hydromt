@@ -218,8 +218,8 @@ class Model(object, metaclass=ABCMeta):
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
             This is a list of nested dictionary where the first-level keys are the names
-            of a component followed by the name of the method to run seperated by a dot.
-            anny subsequent pairs will be passed to the method as arguments.
+            of the method for a ``Model`` method (e.g. `write`) OR the name of a component followed by the name of the method to run separated by a dot for ``ModelComponent`` method (e.g. `grid.write`).
+            Any subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
 
