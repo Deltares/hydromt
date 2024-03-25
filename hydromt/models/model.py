@@ -206,6 +206,8 @@ class Model(object, metaclass=ABCMeta):
         (configuration file). Model and component methods decorated with @hydromt_step
         Are allowed to be used in this list.
 
+        By default the full model will be written at the end, except if a write step
+        is called for somewhere in steps, then this is skipped.
 
         Parameters
         ----------
@@ -266,6 +268,8 @@ class Model(object, metaclass=ABCMeta):
         (configuration file). Model and component methods decorated with @hydromt_step
         Are allowed to be used in this list.
 
+        By default the full model will be written at the end, except if a write step
+        is called for somewhere in steps, then this is skipped.
 
         Parameters
         ----------
