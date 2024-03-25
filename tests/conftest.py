@@ -13,6 +13,7 @@ import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
 
+from hydromt.components.region import ModelRegionComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
@@ -338,6 +339,7 @@ def vector_model(ts, geodf):
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     da.vector.set_crs(geodf.crs)
+    mod.get_component("region", ModelRegionComponent).set(geodf)
     mod.get_component("vector", VectorComponent).set(da)
     return mod
 
