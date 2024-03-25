@@ -252,6 +252,7 @@ def build(
     logger.info("User settings:")
     opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
+    model_type = opt.pop("model_type", model)
     # Set region to None if empty string json
     if len(region) == 0:
         region = None
@@ -263,7 +264,7 @@ def build(
     try:
         # initialize model and create folder structure
         mode = "w+" if fo else "w"
-        mod = PLUGINS.model_plugins[model](
+        mod = PLUGINS.model_plugins[model_type](
             root=model_root,
             mode=mode,
             logger=logger,
@@ -356,6 +357,7 @@ def update(
     logger.info("User settings:")
     opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
+    model_type = opt.pop("model_type", model)
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -363,7 +365,7 @@ def update(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
-        mod = PLUGINS.model_plugins[model](
+        mod = PLUGINS.model_plugins[model_type](
             root=model_root,
             mode=mode,
             data_libs=data_libs,
