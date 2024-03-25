@@ -28,14 +28,6 @@ class ModelComponent(ABC):
         """Write the component to file(s)."""
         ...
 
-    def _assert_write_mode(self) -> None:
-        if not self._model_root.is_writing_mode():
-            raise IOError("Model opened in read-only mode")
-
-    def _assert_read_mode(self) -> None:
-        if not self._model_root.is_reading_mode():
-            raise IOError("Model opened in write-only mode")
-
     @property
     def _model(self) -> "Model":
         """Return the model object this component is associated with."""

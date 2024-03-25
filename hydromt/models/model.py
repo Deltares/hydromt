@@ -268,8 +268,6 @@ class Model(object, metaclass=ABCMeta):
         (configuration file). Model and component methods decorated with @hydromt_step
         Are allowed to be used in this list.
 
-        By default the full model will be written at the end, except if a write step
-        is called for somewhere in steps, then this is skipped.
 
         Parameters
         ----------
@@ -435,7 +433,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_write_mode()
+        self.root._assert_write_mode()
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root.path, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
         # read hydromt_data yml file and add to data catalog
@@ -513,7 +511,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_write_mode()
+        self.root._assert_write_mode()
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
             if not self.root.is_reading_mode():  # write-only mode > read default config
@@ -552,7 +550,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_write_mode()
+        self.root._assert_write_mode()
         if config_name is not None:
             self._config_fn = config_name
         elif self._config_fn is None:
@@ -645,7 +643,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_write_mode()
+        self.root._assert_write_mode()
         if self.tables:
             self.logger.info("Writing table files.")
             local_kwargs = {"index": False, "header": True, "sep": ","}
@@ -662,7 +660,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self.logger.info("Reading model table files.")
         fns = glob.glob(join(self.root.path, fn.format(name="*")))
@@ -926,7 +924,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_maps(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -949,7 +947,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_write_mode()
+        self.root._assert_write_mode()
         if len(self.maps) == 0:
             self.logger.debug("No maps data found, skip writing.")
         else:
@@ -1016,7 +1014,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_geoms(skip_read=True)
         fns = glob.glob(join(self.root.path, fn))
         for fn in fns:
@@ -1045,7 +1043,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_write_mode()
+        self.root._assert_write_mode()
         if len(self.geoms) == 0:
             self.logger.debug("No geoms data found, skip writing.")
             return
@@ -1148,7 +1146,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_read_mode()
+        self.root._assert_read_mode()
         if len(self.forcing) == 0:
             self.logger.debug("No forcing data found, skip writing.")
         else:
@@ -1210,7 +1208,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_states(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -1233,7 +1231,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_write_mode()
+        self.root._assert_write_mode()
         if len(self.states) == 0:
             self.logger.debug("No states data found, skip writing.")
         else:
@@ -1300,7 +1298,7 @@ class Model(object, metaclass=ABCMeta):
         # put it on region since it needs to be called on a component
         # when the relevant component is implemented the assert should
         # be done one self.
-        self.region._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_results(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
