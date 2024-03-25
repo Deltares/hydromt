@@ -359,18 +359,27 @@ class MeshComponent(ModelComponent):
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid {grid_name} not found in mesh.")
         if include_data:
-            grid = self.mesh_grids[grid_name]
-            uds = xu.UgridDataset(grid.to_dataset(optional_attributes=True))
-            uds.ugrid.grid.set_crs(grid.crs)
             # Look for data_vars that are defined on grid_name
+            variables = []
             for var in self.data.data_vars:
                 if hasattr(self.data[var], "ugrid"):
-                    if self.data[var].ugrid.grid.name == grid_name:
-                        uds[var] = self.data[var]
+                    if self.data[var].ugrid.grid.name != grid_name:
+                        variables.append(var)
                 # additionnal topology properties
-                elif var.startswith(grid_name):
-                    uds[var] = self.data[var]
+                elif not var.startswith(grid_name):
+                    variables.append(var)
                 # else is global property (not grid specific)
+            if variables and len(variables) < len(self.data.data_vars):
+                uds = self.data.drop_vars(variables)
+                # Drop coords as well
+                drop_coords = [c for c in uds.coords if not c.startswith(grid_name)]
+                uds = uds.drop_vars(drop_coords)
+            elif variables and len(variables) == len(self.data.data_vars):
+                grid = self.mesh_grids[grid_name]
+                uds = xu.UgridDataset(grid.to_dataset(optional_attributes=True))
+                uds.ugrid.grid.set_crs(grid.crs)
+            else:
+                uds = self.data.copy()
 
             return uds
 
