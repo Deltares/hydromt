@@ -430,9 +430,6 @@ class Model(object, metaclass=ABCMeta):
         save_csv: bool, optional
             If True, save the data catalog also as an csv table. By default False.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_write_mode()
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root.path, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
@@ -508,9 +505,6 @@ class Model(object, metaclass=ABCMeta):
 
         If no config file found a default config file is returned in writing mode.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_write_mode()
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
@@ -547,9 +541,6 @@ class Model(object, metaclass=ABCMeta):
         self, config_name: Optional[str] = None, config_root: Optional[str] = None
     ):
         """Write config to <root/config_fn>."""
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_write_mode()
         if config_name is not None:
             self._config_fn = config_name
@@ -640,9 +631,6 @@ class Model(object, metaclass=ABCMeta):
 
     def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Write tables at <root>/tables."""
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_write_mode()
         if self.tables:
             self.logger.info("Writing table files.")
@@ -657,9 +645,6 @@ class Model(object, metaclass=ABCMeta):
 
     def read_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Read table files at <root>/tables and parse to dict of dataframes."""
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self.logger.info("Reading model table files.")
@@ -921,9 +906,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `read_nc` function.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_read_mode()
         self._initialize_maps(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
@@ -944,9 +926,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `write_nc` function.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_write_mode()
         if len(self.maps) == 0:
             self.logger.debug("No maps data found, skip writing.")
@@ -1011,9 +990,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_read_mode()
         self._initialize_geoms(skip_read=True)
         fns = glob.glob(join(self.root.path, fn))
@@ -1040,9 +1016,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_write_mode()
         if len(self.geoms) == 0:
             self.logger.debug("No geoms data found, skip writing.")
@@ -1143,9 +1116,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_read_mode()
         if len(self.forcing) == 0:
             self.logger.debug("No forcing data found, skip writing.")
@@ -1205,9 +1175,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_read_mode()
         self._initialize_states(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
@@ -1228,9 +1195,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_write_mode()
         if len(self.states) == 0:
             self.logger.debug("No states data found, skip writing.")
@@ -1295,9 +1259,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        # put it on region since it needs to be called on a component
-        # when the relevant component is implemented the assert should
-        # be done one self.
         self.root._assert_read_mode()
         self._initialize_results(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
