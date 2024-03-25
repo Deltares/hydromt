@@ -19,10 +19,12 @@ from hydromt import _compat, hydromt_step
 from hydromt._typing.type_def import StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
+from hydromt.plugins import PLUGINS
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:
     from hydromt.models import Model
+
 
 logger = getLogger(__name__)
 
@@ -290,6 +292,10 @@ def _parse_region(
 
     if kind == "grid":
         kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
+    elif kind in PLUGINS.model_plugins:
+        model_class = PLUGINS.model_plugins[kind]
+        kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
+        kind = "model"
     elif kind == "mesh":
         if _compat.HAS_XUGRID:
             if isinstance(value0, (str, Path)) and isfile(value0):
