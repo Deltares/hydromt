@@ -165,7 +165,7 @@ class GeoDataFrameSource(DataSource):
                 raise RuntimeError(
                     f"Unknown extention: {ext} cannot determine media type"
                 )
-        except (IndexError, KeyError, CRSError) as e:
+        except (IndexError, KeyError, CRSError):
             if on_error == ErrorHandleMethod.SKIP:
                 logger.warning(
                     "Skipping {name} during stac conversion because"
@@ -177,7 +177,7 @@ class GeoDataFrameSource(DataSource):
                 props = self.data_adapter.meta
                 media_type = MediaType.JSON
             else:
-                raise e
+                raise
         else:
             stac_catalog = StacCatalog(
                 self.name,
