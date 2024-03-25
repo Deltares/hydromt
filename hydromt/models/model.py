@@ -402,6 +402,7 @@ class Model(object, metaclass=ABCMeta):
         except StopIteration:
             pass
 
+    @hydromt_step
     def write_data_catalog(
         self,
         root: Optional[StrPath] = None,
