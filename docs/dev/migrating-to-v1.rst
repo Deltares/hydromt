@@ -204,7 +204,7 @@ DataSource
 
 The `DataSource` is the python representation of a parsed entry in the `DataCatalog`.
 The `DataSource` is responsable for validating the `DataCatalog` entry. It also carries
-the soon-to-be introduced `DataAdapter` and `DataDriver` and serves as an entrypoint to
+the `DataAdapter` and `DataDriver` (more info below) and serves as an entrypoint to
 the data.
 Per HydroMT data type (e.g. `RasterDataset`, `GeoDataFrame`), HydroMT has one
 `DataSource`, e.g. `RasterDatasetSource`, `GeoDataFrameSource`.
