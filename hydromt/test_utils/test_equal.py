@@ -2,11 +2,13 @@
 
 from typing import Tuple
 
-import geopandas as gpd
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 
 from hydromt.components.base import ModelComponent
+from hydromt.components.grid import GridComponent
+from hydromt.components.region import ModelRegionComponent
+from hydromt.components.vector import VectorComponent
 from hydromt.models.model import Model
 
 
@@ -50,14 +52,18 @@ def check_components_equal(
     errors: dict[str, str] = {}
     try:
         assert isinstance(other, type(one)), "property types do not match"
-        if hasattr(one, "data"):
-            assert hasattr(other, "data")
+        if isinstance(one, ModelRegionComponent):
+            assert isinstance(other, ModelRegionComponent)
             property_name = f"{property_name}.data"
-            if isinstance(one.data, xr.Dataset):
-                assert isinstance(other.data, xr.Dataset)
-                xr.testing.assert_allclose(one.data, other.data)
-            elif isinstance(one.data, gpd.GeoDataFrame):
-                assert_geodataframe_equal(one.data, other.data)
+            assert_geodataframe_equal(one.data, other.data)
+        elif isinstance(one, GridComponent):
+            assert isinstance(other, GridComponent)
+            property_name = f"{property_name}.data"
+            xr.testing.assert_allclose(one.data, other.data)
+        elif isinstance(one, VectorComponent):
+            assert isinstance(other, VectorComponent)
+            property_name = f"{property_name}.data"
+            xr.testing.assert_allclose(one.data, other.data)
     except AssertionError as e:
         errors.update({property_name: str(e)})
     return len(errors) == 0, errors
