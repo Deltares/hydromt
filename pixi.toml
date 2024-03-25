@@ -200,7 +200,6 @@ pytest = ">=2.7.3"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-timeout = "*"
-polyfactory = ">=2"  # factory for pydantic models
 xugrid = "*"
 
 [feature.doc.dependencies]
