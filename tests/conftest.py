@@ -3,7 +3,6 @@ from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Generator
-from unittest.mock import create_autospec
 
 import geopandas as gpd
 import numpy as np
@@ -13,6 +12,7 @@ import pytest
 import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
+from pytest_mock import MockerFixture
 
 from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
@@ -329,12 +329,14 @@ def artifact_data():
 
 
 @pytest.fixture()
-def mock_model(tmpdir):
+def mock_model(tmpdir, mocker: MockerFixture):
     logger = logging.getLogger(__name__)
     logger.propagate = True
-    model = create_autospec(Model)
-    model.root = ModelRoot(path=tmpdir)
-    model.data_catalog = DataCatalog()
-    model.region = ModelRegionComponent(model=model)
+    model = mocker.create_autospec(Model)
+    model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
+    model.data_catalog = mocker.create_autospec(DataCatalog)
+    model.region = mocker.create_autospec(
+        ModelRegionComponent(model=model), instance=True
+    )
     model.logger = logger
     return model

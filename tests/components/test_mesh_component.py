@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 import xugrid as xu
+from pytest_mock import MockerFixture
 
 from hydromt.components.mesh import MeshComponent, _check_UGrid
 from hydromt.root import ModelRoot
@@ -124,6 +125,7 @@ def test_create(mock_model):
 def test_write(mock_model, caplog, tmpdir):
     mesh_component = MeshComponent(mock_model)
     caplog.set_level(logging.DEBUG)
+    mesh_component._model_root.is_reading_mode.return_value = False
     mesh_component.write()
     assert "No mesh data found, skip writing." in caplog.text
     mock_model.root = ModelRoot(path=tmpdir, mode="r")
@@ -176,10 +178,6 @@ def test_properties(mock_model):
     assert mesh_component.crs == 4326
     # Test bounds
     assert mesh_component.bounds == data.ugrid.bounds
-    # Test region
-    region = mesh_component.region
-    assert isinstance(region, gpd.GeoDataFrame)
-    assert all(region.bounds == data.ugrid.total_bounds)
     # Test mesh_names
     mesh_names = mesh_component.mesh_names
     assert len(mesh_names) == 1
@@ -200,6 +198,7 @@ def test_properties(mock_model):
 
 def test_get_mesh(mock_model):
     mesh_component = MeshComponent(mock_model)
+    mesh_component._model_root.is_reading_mode.return_value = False
     with pytest.raises(ValueError, match="Mesh is not set, please use set_mesh first."):
         mesh_component.get_mesh(grid_name="")
     mesh_component._data = xu.data.elevation_nl().to_dataset()
@@ -214,11 +213,9 @@ def test_get_mesh(mock_model):
     assert isinstance(mesh, xu.UgridDataset)
 
 
-def test_add_data_from_rasterdataset(mock_model, caplog):
+def test_add_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixture):
     mesh_component = MeshComponent(mock_model)
-    mesh_component._data_catalog.get_rasterdataset = create_autospec(
-        mesh_component._data_catalog.get_rasterdataset, return_value=xr.Dataset()
-    )
+    mesh_component._data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
     mock_data.grid.set_crs(28992)
     mesh_component._data = mock_data
@@ -234,24 +231,22 @@ def test_add_data_from_rasterdataset(mock_model, caplog):
             raster_fn="mock_raster", grid_name=grid_name
         )
 
-    with patch(
+    mock_mesh2d_from_rasterdataset = mocker.patch(
         "hydromt.components.mesh.mesh2d_from_rasterdataset"
-    ) as mock_mesh2d_from_rasterdataset:
-        mock_mesh2d_from_rasterdataset.return_value = mock_data
-        data_vars = mesh_component.add_data_from_rasterdataset(
-            raster_fn="vito", grid_name="mesh2d", resampling_method="mode"
-        )
-        assert "Preparing mesh data from raster source vito" in caplog.text
-        assert all([var in mock_data.data_vars.keys() for var in data_vars])
-        assert mesh_component.data == mock_data
-        assert "mesh2d" in mesh_component.mesh_names
-
-
-def test_add_data_from_raster_reclass(mock_model, caplog):
-    mesh_component = MeshComponent(mock_model)
-    mesh_component._data_catalog.get_rasterdataset = create_autospec(
-        mesh_component._data_catalog.get_rasterdataset, return_value=xr.Dataset()
     )
+    mock_mesh2d_from_rasterdataset.return_value = mock_data
+    data_vars = mesh_component.add_data_from_rasterdataset(
+        raster_fn="vito", grid_name="mesh2d", resampling_method="mode"
+    )
+    assert "Preparing mesh data from raster source vito" in caplog.text
+    assert all([var in mock_data.data_vars.keys() for var in data_vars])
+    assert mesh_component.data == mock_data
+    assert "mesh2d" in mesh_component.mesh_names
+
+
+def test_add_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixture):
+    mesh_component = MeshComponent(mock_model)
+    mesh_component._data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
     mock_data.grid.set_crs(28992)
     mesh_component._data = mock_data
@@ -283,24 +278,23 @@ def test_add_data_from_raster_reclass(mock_model, caplog):
         )
 
     mesh_component._data_catalog.get_rasterdataset.return_value = xr.DataArray()
-    mesh_component._data_catalog.get_dataframe = create_autospec(
-        spec=mesh_component._data_catalog.get_dataframe, return_value=pd.DataFrame()
-    )
-    with patch(
+    mesh_component._data_catalog.get_dataframe.return_value = pd.DataFrame()
+    mock_mesh2d_from_rasterdataset = mocker.patch(
         "hydromt.components.mesh.mesh2d_from_raster_reclass"
-    ) as mock_mesh2d_from_rasterdataset:
-        mock_mesh2d_from_rasterdataset.return_value = mock_data
-        data_vars = mesh_component.add_data_from_raster_reclass(
-            raster_fn="vito",
-            grid_name="mesh2d",
-            resampling_method="mode",
-            reclass_table_fn="vito_mapping",
-            reclass_variables=["landuse", "roughness_manning"],
-        )
-        assert (
-            "Preparing mesh data by reclassifying the data in vito based on vito_mapping"
-            in caplog.text
-        )
-        assert all([var in mock_data.data_vars.keys() for var in data_vars])
-        assert mesh_component.data == mock_data
-        assert "mesh2d" in mesh_component.mesh_names
+    )
+
+    mock_mesh2d_from_rasterdataset.return_value = mock_data
+    data_vars = mesh_component.add_data_from_raster_reclass(
+        raster_fn="vito",
+        grid_name="mesh2d",
+        resampling_method="mode",
+        reclass_table_fn="vito_mapping",
+        reclass_variables=["landuse", "roughness_manning"],
+    )
+    assert (
+        "Preparing mesh data by reclassifying the data in vito based on vito_mapping"
+        in caplog.text
+    )
+    assert all([var in mock_data.data_vars.keys() for var in data_vars])
+    assert mesh_component.data == mock_data
+    assert "mesh2d" in mesh_component.mesh_names

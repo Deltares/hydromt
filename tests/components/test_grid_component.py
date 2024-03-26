@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pytest_mock import MockerFixture
 
 from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
@@ -19,6 +20,7 @@ logger.propagate = True
 
 def test_set_dataset(mock_model, hydds):
     grid_component = GridComponent(model=mock_model)
+    grid_component._model_root.is_reading_mode.return_value = False
     grid_component.set(data=hydds)
     assert len(grid_component.data) > 0
     assert isinstance(grid_component.data, xr.Dataset)
@@ -27,6 +29,7 @@ def test_set_dataset(mock_model, hydds):
 def test_set_dataarray(mock_model, hydds):
     grid_component = GridComponent(model=mock_model)
     data_array = hydds.to_array()
+    grid_component._model_root.is_reading_mode.return_value = False
     grid_component.set(data=data_array, name="data_array")
     assert "data_array" in grid_component.data.data_vars.keys()
     assert len(grid_component.data.data_vars) == 1
@@ -34,6 +37,7 @@ def test_set_dataarray(mock_model, hydds):
 
 def test_set_raise_errors(mock_model, hydds):
     grid_component = GridComponent(model=mock_model)
+    grid_component._model_root.is_reading_mode.return_value = False
     # Test setting nameless data array
     data_array = hydds.to_array()
     with pytest.raises(
@@ -48,8 +52,9 @@ def test_set_raise_errors(mock_model, hydds):
         grid_component.set(ndarray, name="ndarray")
 
 
-def test_write(mock_model, tmpdir, caplog):
+def test_write(mock_model, tmpdir, caplog, mocker: MockerFixture):
     grid_component = GridComponent(model=mock_model)
+    grid_component._model_root.is_reading_mode.return_value = False
     # Test skipping writing when no grid data has been set
     caplog.set_level(logging.WARNING)
     grid_component.write()
@@ -62,17 +67,18 @@ def test_write(mock_model, tmpdir, caplog):
             grid_component.write()
 
 
-def test_read(tmpdir, mock_model, hydds):
+def test_read(tmpdir, mock_model, hydds, mocker: MockerFixture):
     # Test for raising IOError when model is in writing mode
-    mock_model.root = ModelRoot(path=tmpdir, mode="w")
     grid_component = GridComponent(model=mock_model)
+    grid_component._model_root.is_reading_mode.return_value = False
+
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_component.read()
-    mock_model.root = ModelRoot(path=tmpdir, mode="r+")
+    # mock_model.root = ModelRoot(path=tmpdir, mode="r+")
     grid_component = GridComponent(model=mock_model)
-    with patch("hydromt.components.grid.read_nc", return_value={"grid": hydds}):
-        grid_component.read()
-        assert grid_component.data == hydds
+    mocker.patch("hydromt.components.grid.read_nc", return_value={"grid": hydds})
+    grid_component.read()
+    assert grid_component.data == hydds
 
 
 def test_create_grid_from_bbox_rotated(mock_model):

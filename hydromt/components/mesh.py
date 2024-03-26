@@ -10,7 +10,6 @@ import pandas as pd
 import xarray as xr
 import xugrid as xu
 from pyproj import CRS
-from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -36,6 +35,7 @@ class MeshComponent(ModelComponent):
     def set(
         self,
         data: Union[xu.UgridDataArray, xu.UgridDataset],
+        *,
         name: Optional[str] = None,
         grid_name: Optional[str] = None,
         overwrite_grid: bool = False,
@@ -72,7 +72,6 @@ class MeshComponent(ModelComponent):
         elif grid_name != data.ugrid.grid.name:
             data = rename_mesh(data, name=grid_name)
 
-        # new_grid = grid_name not in self.mesh_names
         crs = self._add_mesh(
             data=data, grid_name=grid_name, overwrite_grid=overwrite_grid
         )
@@ -80,13 +79,6 @@ class MeshComponent(ModelComponent):
         if crs:  # Restore crs
             for grid in self.data.ugrid.grids:
                 grid.set_crs(crs)
-
-        # # update related geoms if necessary: region TODO: Check if is still needed
-        # if overwrite_grid or new_grid:
-        #     # add / updates region
-        #     if "region" in self.geoms:
-        #         self._geoms.pop("region", None)
-        #     _ = self.region
 
     def write(
         self,
@@ -112,8 +104,8 @@ class MeshComponent(ModelComponent):
         if self.data is None:
             self._logger.debug("No mesh data found, skip writing.")
             return
-        if not self._model_root.is_writing_mode():
-            raise IOError("Model opened in read-only mode")
+        self._model_root._assert_write_mode()
+
         # filename
         _fn = join(self._model_root.path, fn)
         if not isdir(dirname(_fn)):
@@ -145,8 +137,7 @@ class MeshComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        if not self._model_root.is_reading_mode():
-            raise IOError("Model not opend in read mode")
+        self._model_root._assert_read_mode()
         ds = xr.merge(
             read_nc(
                 fn, root=self._model_root.path, logger=self._logger, **kwargs
@@ -276,16 +267,6 @@ class MeshComponent(ModelComponent):
         return None
 
     @property
-    def region(self) -> gpd.GeoDataFrame:
-        """Returns geometry of region of the model area of interest based on mesh total bounds."""  # noqa: E501
-        region = gpd.GeoDataFrame()
-        if self.data is not None:
-            region = gpd.GeoDataFrame(
-                geometry=[box(*self.data.ugrid.total_bounds)], crs=self.crs
-            )
-        return region
-
-    @property
     def mesh_names(self) -> List[str]:
         """List of grid names in mesh."""
         if self.data is not None:
@@ -388,6 +369,7 @@ class MeshComponent(ModelComponent):
 
     def add_data_from_rasterdataset(
         self,
+        *,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
         grid_name: Optional[str] = "mesh2d",
         variables: Optional[list] = None,
@@ -588,7 +570,7 @@ class MeshComponent(ModelComponent):
             if grid_name in self.mesh_names:
                 # check if the two grids are the same
                 if not self._grid_is_equal(grid_name, data):
-                    if not overwrite_grid:  # TODO: add is_overwrite_mode
+                    if not overwrite_grid or not self._model_root.is_override_mode():
                         raise ValueError(
                             f"Grid {grid_name} already exists in mesh"
                             " and has a different topology. "
