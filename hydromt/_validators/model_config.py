@@ -75,11 +75,11 @@ class HydromtGlobalConfig(BaseModel):
 class HydromtModelSetup(BaseModel):
     """A Pydantic model for the validation of model setup files."""
 
-    model_type: Type[Model]
+    modeltype: Type[Model]
     steps: list[HydromtModelStep]
     globals: HydromtGlobalConfig = Field(serialization_alias="global")
 
-    @field_validator("model_type", mode="before")
+    @field_validator("modeltype", mode="before")
     @classmethod
     def validate_model_type(cls, v):
         if isinstance(v, str):
@@ -92,11 +92,11 @@ class HydromtModelSetup(BaseModel):
         if isinstance(v, dict):
             global_config = HydromtGlobalConfig(**v["global"])
             return {
-                "model_type": v["model_type"],
+                "modeltype": v["modeltype"],
                 "globals": global_config,
                 "steps": [
                     cls._create_step(
-                        model_type=cls.validate_model_type(v["model_type"]),
+                        modeltype=cls.validate_model_type(v["modeltype"]),
                         components=global_config.components,
                         step=step,
                     )
@@ -108,7 +108,7 @@ class HydromtModelSetup(BaseModel):
     @staticmethod
     def _create_step(
         *,
-        model_type: Type[Model],
+        modeltype: Type[Model],
         components: list[HydromtComponentConfig],
         step: dict[str, dict[str, Any]],
     ) -> HydromtModelStep:
@@ -119,7 +119,7 @@ class HydromtModelSetup(BaseModel):
                 f"Invalid step name {name}. Must be in the format <component>.<function> or <function> if the function is in the model itself."
             )
 
-        function_owner: Type = model_type
+        function_owner: Type = modeltype
         if len(split_name) == 2:
             function_owner = next(x.type for x in components if x.name == split_name[0])
 
