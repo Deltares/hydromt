@@ -51,6 +51,21 @@ class TestGeoDataFrameSource:
         )
         assert error_driver["type"] == "model_type"
 
+    def test_raises_on_invalid_fields(
+        self,
+        mock_geodataframe_adapter: GeoDataFrameAdapter,
+        mock_geodf_driver: GeoDataFrameDriver,
+    ):
+        with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+            GeoDataFrameSource(
+                root=".",
+                name="name",
+                uri="uri",
+                data_adapter=mock_geodataframe_adapter,
+                driver=mock_geodf_driver,
+                foo="bar",
+            )
+
     def test_model_validate(
         self,
         mock_geodf_driver: GeoDataFrameDriver,

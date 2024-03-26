@@ -47,6 +47,7 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
 from hydromt.data_source import DataSource, create_source
+from hydromt.data_source.data_source import get_nested_var, set_nested_var
 
 logger = logging.getLogger(__name__)
 
@@ -1740,23 +1741,23 @@ def _parse_data_source_dict(
         source.update({"root": str(root)})
 
     # source meta data
-    meta = source.pop("meta", {})
+    meta = get_nested_var(["data_adapter", "meta"], source, {})
     if "category" not in meta and category is not None:
         meta.update(category=category)
 
-    source["meta"] = meta
+    set_nested_var(["data_adapter", "meta"], source, meta)
 
     # driver arguments
-    driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
+    # driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
     # TODO: remove code under this depending on subclasses
     #       The DataCatalog should now have specific implementations for different drivers
-    for driver_kwarg in driver_kwargs:
-        # required for geodataset where driver_kwargs can be a path
-        if "fn" in driver_kwarg:
-            driver_kwargs.update(
-                {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
-            )
-    source["driver_kwargs"] = driver_kwargs
+    # for driver_kwarg in driver_kwargs:
+    #     # required for geodataset where driver_kwargs can be a path
+    #     if "fn" in driver_kwarg:
+    #         driver_kwargs.update(
+    #             {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
+    #         )
+    # source["driver_kwargs"] = driver_kwargs
 
     return create_source(source)
 

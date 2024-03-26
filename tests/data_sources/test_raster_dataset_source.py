@@ -25,7 +25,6 @@ class TestRasterDatasetSource:
                 name="name",
                 uri="uri",
                 data_adapter=mock_raster_ds_adapter,
-                metadata_resolver="does not exist",
                 driver="does not exist",
             )
 

@@ -28,7 +28,6 @@ class TestDataSource:
                 "driver": mock_geodf_driver,
                 "data_adapter": mock_gdf_adapter,
                 "uri": "test_uri",
-                "meta": {"custom_meta": "test"},
             }
         )
         summ: Dict[str, Any] = submodel.summary()

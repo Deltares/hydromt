@@ -1,6 +1,7 @@
 """Abstract DataSource class."""
 
 from abc import ABC
+from copy import deepcopy
 from logging import Logger, getLogger
 from os.path import abspath, join
 from pathlib import Path
@@ -8,6 +9,7 @@ from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     PrivateAttr,
     model_validator,
@@ -33,6 +35,8 @@ class DataSource(BaseModel, ABC):
     the driver that the data should be read with, and is responsible for initializing
     this driver.
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     _used: bool = PrivateAttr(default=False)
 
@@ -84,13 +88,12 @@ class DataSource(BaseModel, ABC):
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:
         """Pydantic does not check class variables, so it is checked here."""
-        if (
-            isinstance(data, dict)
-            and data.get("data_type")
-            and data.get("data_type") != cls.data_type
-        ):
-            raise ValueError(f"'data_type' must be '{cls.data_type}'.")
-        return data
+        if isinstance(data, dict):
+            copy_data: dict = deepcopy(data)
+            if data_type := copy_data.pop("data_type", None):
+                if data_type != cls.data_type:
+                    raise ValueError(f"'data_type' must be '{cls.data_type}'.")
+        return copy_data
 
     @model_validator(mode="after")
     def _validate_uri(self) -> str:
