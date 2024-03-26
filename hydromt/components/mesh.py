@@ -110,15 +110,15 @@ class MeshComponent(ModelComponent):
             `xarray.Dataset.to_netcdf` method.
         """
         if self.data is None:
-            self.logger.debug("No mesh data found, skip writing.")
+            self._logger.debug("No mesh data found, skip writing.")
             return
-        if not self.model_root.is_writing_mode():
+        if not self._model_root.is_writing_mode():
             raise IOError("Model opened in read-only mode")
         # filename
-        _fn = join(self.model_root.path, fn)
+        _fn = join(self._model_root.path, fn)
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
-        self.logger.debug(f"Writing file {fn}")
+        self._logger.debug(f"Writing file {fn}")
         ds_out = self.data.ugrid.to_dataset(
             optional_attributes=write_optional_ugrid_attributes,
         )
@@ -145,11 +145,11 @@ class MeshComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        if not self.model_root.is_reading_mode():
+        if not self._model_root.is_reading_mode():
             raise IOError("Model not opend in read mode")
         ds = xr.merge(
             read_nc(
-                fn, root=self.model_root.path, logger=self.logger, **kwargs
+                fn, root=self._model_root.path, logger=self._logger, **kwargs
             ).values()
         )
         uds = xu.UgridDataset(ds)
@@ -163,7 +163,7 @@ class MeshComponent(ModelComponent):
                 )
             else:
                 uds.ugrid.set_crs(crs)
-                self.logger.info(
+                self._logger.info(
                     "no crs is found in the file, assigning from user input."
                 )
         self._data = uds
@@ -218,14 +218,14 @@ class MeshComponent(ModelComponent):
             Generated mesh2d.
 
         """  # noqa: E501
-        self.logger.info("Preparing 2D mesh.")
+        self._logger.info("Preparing 2D mesh.")
 
         # Create mesh2d
         mesh2d = create_mesh2d(
             region=region,
             res=res,
             crs=crs,
-            logger=self.logger,
+            logger=self._logger,
         )
         # Add mesh2d to self.mesh
         self.set(mesh2d, grid_name=grid_name)
@@ -244,7 +244,7 @@ class MeshComponent(ModelComponent):
         method.
         """
         # XU grid data type Xarray dataset with xu sampling.
-        if self._data is None and self.model_root.is_reading_mode():
+        if self._data is None and self._model_root.is_reading_mode():
             self.read()
         return self._data
 
@@ -433,13 +433,13 @@ class MeshComponent(ModelComponent):
         list
             List of variables added to mesh.
         """  # noqa: E501
-        self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
+        self._logger.info(f"Preparing mesh data from raster source {raster_fn}")
         # Check if grid name in self.mesh
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
         # Read raster data and select variables
         bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
-        ds = self.data_catalog.get_rasterdataset(
+        ds = self._data_catalog.get_rasterdataset(
             raster_fn,
             bbox=bounds,
             buffer=2,
@@ -454,7 +454,7 @@ class MeshComponent(ModelComponent):
             fill_method=fill_method,
             resampling_method=resampling_method,
             rename=rename,
-            logger=self.logger,
+            logger=self._logger,
         )
 
         self.set(uds_sample, grid_name=grid_name, overwrite_grid=False)
@@ -529,7 +529,7 @@ class MeshComponent(ModelComponent):
         ValueError
             If `raster_fn` is not a single variable raster.
         """  # noqa: E501
-        self.logger.info(
+        self._logger.info(
             f"Preparing mesh data by reclassifying the data in {raster_fn} "
             f"based on {reclass_table_fn}."
         )
@@ -538,7 +538,7 @@ class MeshComponent(ModelComponent):
             raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
         # Read raster data and mapping table
         bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
-        da = self.data_catalog.get_rasterdataset(
+        da = self._data_catalog.get_rasterdataset(
             raster_fn,
             bbox=bounds,
             buffer=2,
@@ -550,7 +550,7 @@ class MeshComponent(ModelComponent):
                 f"raster_fn {raster_fn} should be a single variable raster. "
                 "Please select one using the 'variable' argument"
             )
-        df_vars = self.data_catalog.get_dataframe(
+        df_vars = self._data_catalog.get_dataframe(
             reclass_table_fn, variables=reclass_variables
         )
 
@@ -562,7 +562,7 @@ class MeshComponent(ModelComponent):
             fill_method=fill_method,
             resampling_method=resampling_method,
             rename=rename,
-            logger=self.logger,
+            logger=self._logger,
         )
 
         self.set(uds_sample, grid_name=grid_name, overwrite_grid=False)
@@ -597,7 +597,7 @@ class MeshComponent(ModelComponent):
                         )
                     else:
                         # Remove grid and all corresponding data variables from mesh
-                        self.logger.warning(
+                        self._logger.warning(
                             f"Overwriting grid {grid_name} and the corresponding"
                             " data variables in mesh."
                         )
@@ -615,7 +615,7 @@ class MeshComponent(ModelComponent):
             if grid_name in self.mesh_names:
                 for dvar in data.data_vars:
                     if dvar in self._data:
-                        self.logger.warning(f"Replacing mesh parameter: {dvar}")
+                        self._logger.warning(f"Replacing mesh parameter: {dvar}")
                     self._data[dvar] = data[dvar]
             else:
                 # We are potentially adding a new grid without any data variables

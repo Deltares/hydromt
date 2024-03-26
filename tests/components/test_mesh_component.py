@@ -10,8 +10,8 @@ import pytest
 import xarray as xr
 import xugrid as xu
 
-from hydromt.models.components.mesh import MeshComponent, _check_UGrid
-from hydromt.models.root import ModelRoot
+from hydromt.components.mesh import MeshComponent, _check_UGrid
+from hydromt.root import ModelRoot
 
 
 def test_check_UGrid():
@@ -91,7 +91,7 @@ def test_add_mesh(mock_model):
     assert data.grid.name in mesh_component.mesh_names
 
 
-@patch("hydromt.models.components.mesh._check_UGrid")
+@patch("hydromt.components.mesh._check_UGrid")
 def test_set_raises_errors(mock_check_Ugrid, mock_model):
     mesh_component = MeshComponent(mock_model)
     data = create_autospec(xu.UgridDataset)
@@ -112,11 +112,11 @@ def test_create(mock_model):
     crs = 28992
     test_data = xu.data.elevation_nl().to_dataset()
     test_data.grid.crs = crs
-    with patch("hydromt.models.components.mesh.create_mesh2d") as mock_create_mesh2d:
+    with patch("hydromt.components.mesh.create_mesh2d") as mock_create_mesh2d:
         mock_create_mesh2d.return_value = test_data
         mesh_component.create(region=region, res=res, crs=crs)
         mock_create_mesh2d.assert_called_once_with(
-            region=region, res=res, crs=crs, logger=mesh_component.logger
+            region=region, res=res, crs=crs, logger=mesh_component._logger
         )
         assert mesh_component.data == test_data
 
@@ -135,7 +135,7 @@ def test_write(mock_model, caplog, tmpdir):
     fn = "mesh/fake_mesh.nc"
     mesh_component._data.grid.crs = 28992
     mesh_component.write(fn=fn)
-    file_dir = join(mesh_component.model_root.path, dirname(fn))
+    file_dir = join(mesh_component._model_root.path, dirname(fn))
     file_path = join(tmpdir, fn)
     assert isdir(file_dir)
     assert f"Writing file {fn}" in caplog.text
@@ -216,8 +216,8 @@ def test_get_mesh(mock_model):
 
 def test_add_data_from_rasterdataset(mock_model, caplog):
     mesh_component = MeshComponent(mock_model)
-    mesh_component.data_catalog.get_rasterdataset = create_autospec(
-        mesh_component.data_catalog.get_rasterdataset, return_value=xr.Dataset()
+    mesh_component._data_catalog.get_rasterdataset = create_autospec(
+        mesh_component._data_catalog.get_rasterdataset, return_value=xr.Dataset()
     )
     mock_data = xu.data.elevation_nl().to_dataset()
     mock_data.grid.set_crs(28992)
@@ -235,7 +235,7 @@ def test_add_data_from_rasterdataset(mock_model, caplog):
         )
 
     with patch(
-        "hydromt.models.components.mesh.mesh2d_from_rasterdataset"
+        "hydromt.components.mesh.mesh2d_from_rasterdataset"
     ) as mock_mesh2d_from_rasterdataset:
         mock_mesh2d_from_rasterdataset.return_value = mock_data
         data_vars = mesh_component.add_data_from_rasterdataset(
@@ -249,8 +249,8 @@ def test_add_data_from_rasterdataset(mock_model, caplog):
 
 def test_add_data_from_raster_reclass(mock_model, caplog):
     mesh_component = MeshComponent(mock_model)
-    mesh_component.data_catalog.get_rasterdataset = create_autospec(
-        mesh_component.data_catalog.get_rasterdataset, return_value=xr.Dataset()
+    mesh_component._data_catalog.get_rasterdataset = create_autospec(
+        mesh_component._data_catalog.get_rasterdataset, return_value=xr.Dataset()
     )
     mock_data = xu.data.elevation_nl().to_dataset()
     mock_data.grid.set_crs(28992)
@@ -282,12 +282,12 @@ def test_add_data_from_raster_reclass(mock_model, caplog):
             reclass_variables=["landuse", "roughness_manning"],
         )
 
-    mesh_component.data_catalog.get_rasterdataset.return_value = xr.DataArray()
-    mesh_component.data_catalog.get_dataframe = create_autospec(
-        spec=mesh_component.data_catalog.get_dataframe, return_value=pd.DataFrame()
+    mesh_component._data_catalog.get_rasterdataset.return_value = xr.DataArray()
+    mesh_component._data_catalog.get_dataframe = create_autospec(
+        spec=mesh_component._data_catalog.get_dataframe, return_value=pd.DataFrame()
     )
     with patch(
-        "hydromt.models.components.mesh.mesh2d_from_raster_reclass"
+        "hydromt.components.mesh.mesh2d_from_raster_reclass"
     ) as mock_mesh2d_from_rasterdataset:
         mock_mesh2d_from_rasterdataset.return_value = mock_data
         data_vars = mesh_component.add_data_from_raster_reclass(
