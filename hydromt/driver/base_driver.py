@@ -41,7 +41,9 @@ class BaseDriver(BaseModel, ABC):
 
         elif v is None:  # let default factory handle it
             return None
-        elif hasattr(v, "resolve"):  # MetaDataResolver duck-typing
+        elif hasattr(
+            v, MetaDataResolver.resolve.__name__
+        ):  # MetaDataResolver duck-typing
             return v
         else:
             raise ValueError(
