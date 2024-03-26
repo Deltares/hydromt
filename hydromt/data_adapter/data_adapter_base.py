@@ -1,10 +1,16 @@
-"""Base class for data adapters."""
-from pydantic import BaseModel
+"""BaseModel for DataAdapter."""
 
-from hydromt.data_sources.data_source import DataSource
+from typing import Any, Dict, Union
+
+from pydantic import BaseModel, Field
 
 
 class DataAdapterBase(BaseModel):
-    """Base class for data adapters."""
+    """BaseModel for DataAdapter."""
 
-    source: DataSource
+    unit_add: Dict[str, Any] = Field(default_factory=dict)
+    unit_mult: Dict[str, Any] = Field(default_factory=dict)
+    rename: Dict[str, str] = Field(default_factory=dict)
+    attrs: Dict[str, Any] = Field(default_factory=dict)
+    meta: Dict[str, Any] = Field(default_factory=dict)
+    nodata: Union[float, int, Dict[str, Union[float, int]], None] = Field(default=None)

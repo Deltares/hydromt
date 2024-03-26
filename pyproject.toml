@@ -77,7 +77,6 @@ dev = [
   "twine",       # needed to publish to pypi
 ]
 test = [
-  "polyfactory>=2", # factory for pydantic models
   "pytest>=2.7.3",  # testing framework
   "pytest-cov",     # test coverage
   "pytest-mock",    # mocking
@@ -114,6 +113,9 @@ core = "hydromt.components"
 
 [project.entry-points."hydromt.models"]
 core = "hydromt.models"
+
+[tool.setuptools.dynamic]
+description = { file = "hydromt/__init__.py" }
 
 [tool.ruff]
 line-length = 88
