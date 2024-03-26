@@ -33,8 +33,7 @@ class BaseDriver(BaseModel, ABC):
                 name: str = v.pop("name")
                 if name not in RESOLVERS:
                     raise ValueError(f"unknown MetaDataResolver: '{name}'.")
-                else:
-                    return RESOLVERS.get(name).model_validate(v)
+                return RESOLVERS.get(name).model_validate(v)
             except KeyError:
                 # return default when name is missing
                 return cls.model_fields.get("metadata_resolver").default_factory(**v)
