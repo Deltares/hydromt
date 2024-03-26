@@ -7,6 +7,7 @@ import os
 import shutil
 import typing
 from abc import ABCMeta
+from inspect import _empty, signature
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -248,7 +249,13 @@ class Model(object, metaclass=ABCMeta):
             self.logger.info(f"build: {step}")
             # Call the methods.
             method = rgetattr(self, step)
-            for k, v in kwargs.items():
+            params = {
+                param: arg.default
+                for param, arg in signature(method).parameters.items()
+                if arg.default != _empty
+            }
+            merged = {**params, **kwargs}
+            for k, v in merged.items():
                 self.logger.info(f"{method}.{k}: {v}")
             method(**kwargs)
 
@@ -331,7 +338,13 @@ class Model(object, metaclass=ABCMeta):
             self.logger.info(f"update: {step}")
             # Call the methods.
             method = rgetattr(self, step)
-            for k, v in kwargs.items():
+            params = {
+                param: arg.default
+                for param, arg in signature(method).parameters.items()
+                if arg.default != _empty
+            }
+            merged = {**params, **kwargs}
+            for k, v in merged.items():
                 self.logger.info(f"{method}.{k}: {v}")
             method(**kwargs)
 

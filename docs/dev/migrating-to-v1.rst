@@ -193,10 +193,10 @@ Additionally, it is highly recommended to also provide the following methods to 
 - `set`: provide the ability to override the current data in the component.
 - `_initialize`: provide the ability to override the current data in the component.
 
-Finally you can provide additional functionality by providing the following optional functions:
+Finally, you can provide additional functionality by providing the following optional functions:
 
-- `create`: the ability to construct the schematization of the component (computation units like grid cells, mesh1d or network lines, vector units for lumped model etc.) from the provided arguments.
-- `add_data`: the ability to add model data and parameters to the component once the schematization is well defined (ie add landuse data to grid or mesh etc.).
+- `create`: the ability to construct the schematization of the component (computation units like grid cells, `mesh1d` or network lines, vector units for lumped model etc.) from the provided arguments.
+- `add_data`: the ability to add model data and parameters to the component once the schematization is well-defined (i.e. add land-use data to grid or mesh etc.).
 
 It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
