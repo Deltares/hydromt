@@ -59,7 +59,7 @@ class ConventionResolver(MetaDataResolver):
     ) -> pd.PeriodIndex:
         dt: pd.Timedelta = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
         t_range: pd.DatetimeIndex = pd.to_datetime(list(timerange)) - dt
-        freq: str = "m" if "month" in keys else "a"
+        freq: str = "M" if "month" in keys else "a"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
 
