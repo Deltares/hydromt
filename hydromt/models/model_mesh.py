@@ -387,11 +387,9 @@ class MeshMixin(object):
             for var in self.mesh.data_vars:
                 if hasattr(self.mesh[var], "ugrid"):
                     if self.mesh[var].ugrid.grid.name != grid_name:
-                        # uds[var] = self.mesh[var]
                         variables.append(var)
-                # additionnal topology properties
+                # additional topology properties
                 elif not var.startswith(grid_name):
-                    # uds[var] = self.mesh[var]
                     variables.append(var)
                 # else is global property (not grid specific)
 
