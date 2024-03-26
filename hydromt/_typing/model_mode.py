@@ -29,13 +29,13 @@ class ModelMode(Enum):
             raise ValueError(f"Unknown mode: {s}, options are: r, r+, w, w+")
 
     def is_writing_mode(self):
-        """Asster whether mode is writing or not."""
+        """Assert whether mode is writing or not."""
         return self in [ModelMode.WRITE, ModelMode.FORCED_WRITE, ModelMode.APPEND]
 
     def is_reading_mode(self):
-        """Asster whether mode is reading or not."""
+        """Assert whether mode is reading or not."""
         return self in [ModelMode.READ, ModelMode.APPEND]
 
     def is_override_mode(self):
-        """Asster whether mode is able to overwrite or not."""
+        """Assert whether mode is able to overwrite or not."""
         return self in [ModelMode.FORCED_WRITE, ModelMode.APPEND]
