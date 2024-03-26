@@ -26,7 +26,6 @@ from typing import (
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pydantic.v1.utils
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
@@ -34,6 +33,7 @@ from pyproj import CRS
 from hydromt import hydromt_step
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
+from hydromt._utils.deep_merge import deep_merge
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import ModelRegionComponent
@@ -111,7 +111,7 @@ class Model(object, metaclass=ABCMeta):
         """
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
-        components = pydantic.v1.utils.deep_update(
+        components = deep_merge(
             {"region": {"type": "ModelRegionComponent"}}, components
         )
 
