@@ -77,11 +77,10 @@ dev = [
   "twine",       # needed to publish to pypi
 ]
 test = [
-  "polyfactory>=2", # factory for pydantic models
-  "pytest>=2.7.3",  # testing framework
-  "pytest-cov",     # test coverage
-  "pytest-mock",    # mocking
-  "pytest-timeout", # darn hanging tests
+  "pytest>=2.7.3",       # testing framework
+  "pytest-cov",          # test coverage
+  "pytest-mock",         # mocking
+  "pytest-timeout",      # darn hanging tests
   "xugrid",
 ]
 doc = [
@@ -108,6 +107,9 @@ Source = "https://github.com/Deltares/hydromt"
 
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
+
+[tool.setuptools.dynamic]
+description = {file = "hydromt/__init__.py"}
 
 [tool.ruff]
 line-length = 88

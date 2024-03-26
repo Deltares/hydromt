@@ -92,6 +92,107 @@ Get data
    data_catalog.DataCatalog.get_dataframe
    data_catalog.DataCatalog.get_dataset
 
+DataSource
+==========
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.data_source.DataSource
+   data_source.data_source.DataSource.summary
+
+RasterDataset
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.rasterdataset.RasterDatasetSource
+   data_source.rasterdataset.RasterDatasetSource.get_data
+   data_source.rasterdataset.RasterDatasetSource.to_stac_catalog
+   data_source.rasterdataset.RasterDatasetSource.get_bbox
+   data_source.rasterdataset.RasterDatasetSource.get_time_range
+   data_source.rasterdataset.RasterDatasetSource.detect_bbox
+   data_source.rasterdataset.RasterDatasetSource.detect_time_range
+
+GeoDataFrame
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.geodataframe.GeoDataFrameSource.get_data
+   data_source.geodataframe.GeoDataFrameSource.to_stac_catalog
+   data_source.geodataframe.GeoDataFrameSource.get_bbox
+   data_source.geodataframe.GeoDataFrameSource.detect_bbox
+
+MetaDataResolver
+================
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   metadata_resolver.metadata_resolver.MetaDataResolver
+   metadata_resolver.metadata_resolver.MetaDataResolver.resolve
+
+ConventionResolver
+------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   metadata_resolver.convention_resolver.ConventionResolver
+   metadata_resolver.convention_resolver.ConventionResolver.resolve
+
+Driver
+======
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   driver.base_driver.BaseDriver
+
+RasterDataset
+-------------
+
+.. autosummary::
+   :toctree: _generated
+   driver.rasterdataset_driver.RasterDatasetDriver
+   driver.rasterdataset_driver.RasterDatasetDriver.read
+
+ZarrDriver
+^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+   driver.zarr_driver.ZarrDriver
+   driver.zarr_driver.ZarrDriver.read
+
+PyogrioDriver
+^^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+   driver.pyogrio_driver.PyogrioDriver
+   driver.pyogrio_driver.PyogrioDriver.read
+
+GeoDataFrame
+------------
+
+.. autosummary::
+   :toctree: _generated
+   driver.geodataframe_driver.GeoDataFrameDriver
+   driver.geodataframe_driver.GeoDataFrameDriver.read
+
 DataAdapter
 ===========
 
@@ -112,14 +213,7 @@ RasterDataset
    :toctree: _generated
 
    data_adapter.RasterDatasetAdapter
-   data_adapter.RasterDatasetAdapter.summary
-   data_adapter.RasterDatasetAdapter.get_data
-   data_adapter.RasterDatasetAdapter.to_dict
-   data_adapter.RasterDatasetAdapter.to_file
-   data_adapter.RasterDatasetAdapter.get_bbox
-   data_adapter.RasterDatasetAdapter.get_time_range
-   data_adapter.RasterDatasetAdapter.detect_bbox
-   data_adapter.RasterDatasetAdapter.detect_time_range
+   data_adapter.RasterDatasetAdapter.transform
    data_adapter.RasterDatasetAdapter.to_stac_catalog
 
 GeoDataset
@@ -146,12 +240,7 @@ GeoDataFrame
    :toctree: _generated
 
    data_adapter.GeoDataFrameAdapter
-   data_adapter.GeoDataFrameAdapter.summary
    data_adapter.GeoDataFrameAdapter.get_data
-   data_adapter.GeoDataFrameAdapter.to_dict
-   data_adapter.GeoDataFrameAdapter.to_file
-   data_adapter.GeoDataFrameAdapter.get_bbox
-   data_adapter.GeoDataFrameAdapter.detect_bbox
    data_adapter.GeoDataFrameAdapter.to_stac_catalog
 
 DataFrame

@@ -9,7 +9,7 @@ from hydromt.cli.api import (
 )
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="Needs implementation of all data types.")
 def test_api_datasets():
     # datasets
     assert "artifact_data" in get_predifined_catalogs()

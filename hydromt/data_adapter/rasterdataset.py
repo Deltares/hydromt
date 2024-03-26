@@ -1,30 +1,23 @@
 """Implementation for the RasterDatasetAdapter."""
+
 from __future__ import annotations
 
 import os
-import warnings
-from datetime import datetime
 from logging import Logger, getLogger
-from os.path import basename, join, splitext
-from typing import Dict, List, Optional, Tuple, Union, cast
+from os.path import join
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
-from pyproj.exceptions import CRSError
-from pystac import Asset as StacAsset
-from pystac import Catalog as StacCatalog
-from pystac import Item as StacItem
-from pystac import MediaType
+from pyproj import CRS
 from rasterio.errors import RasterioIOError
 
-from hydromt import io
 from hydromt._typing import (
     Bbox,
     Data,
-    ErrorHandleMethod,
     Geom,
     GeomBuffer,
     NoDataException,
@@ -32,12 +25,10 @@ from hydromt._typing import (
     RasterDatasetSource,
     StrPath,
     TimeRange,
-    TotalBounds,
     Variables,
     _exec_nodata_strat,
 )
-from hydromt.data_adapter import PREPROCESSORS, DataAdapter
-from hydromt.data_adapter.caching import cache_vrt_tiles
+from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import has_no_data
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -47,143 +38,8 @@ logger = getLogger(__name__)
 __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 
 
-class RasterDatasetAdapter(DataAdapter):
-
+class RasterDatasetAdapter(DataAdapterBase):
     """Implementation for the RasterDatasetAdapter."""
-
-    _DEFAULT_DRIVER = "raster"
-    _DRIVERS = {
-        "nc": "netcdf",
-        "zarr": "zarr",
-    }
-
-    def __init__(
-        self,
-        path: StrPath,
-        driver: Optional[str] = None,
-        filesystem: Optional[str] = None,
-        crs: Optional[Union[int, str, dict]] = None,
-        nodata: Optional[Union[dict, float, int]] = None,
-        rename: Optional[dict] = None,
-        unit_mult: Optional[dict] = None,
-        unit_add: Optional[dict] = None,
-        meta: Optional[dict] = None,
-        attrs: Optional[dict] = None,
-        extent: Optional[dict] = None,
-        driver_kwargs: Optional[dict] = None,
-        storage_options: Optional[dict] = None,
-        zoom_levels: Optional[dict] = None,
-        name: str = "",  # optional for now
-        catalog_name: str = "",  # optional for now
-        provider: Optional[str] = None,
-        version: Optional[str] = None,
-        **kwargs,
-    ):
-        """Initiate data adapter for geospatial raster data.
-
-        This object contains all properties required to read supported raster files into
-        a single unified RasterDataset, i.e. :py:class:`xarray.Dataset` with geospatial
-        attributes. In addition it keeps meta data to be able to reproduce
-        which data is used.
-
-        Parameters
-        ----------
-        path: str, Path
-            Path to data source. If the dataset consists of multiple files, the path may
-            contain {variable}, {year}, {month} placeholders as well as path
-            search pattern using a ``*`` wildcard.
-        driver: {'raster', 'netcdf', 'zarr', 'raster_tindex'}, optional
-            Driver to read files with,
-            for 'raster' :py:func:`~hydromt.io.open_mfraster`,
-            for 'netcdf' :py:func:`xarray.open_mfdataset`,
-            and for 'zarr' :py:func:`xarray.open_zarr`
-            By default the driver is inferred from the file extension and falls back to
-            'raster' if unknown.
-        filesystem: str, optional
-            Filesystem where the data is stored (local, cloud, http etc.).
-            If None (default) the filesystem is inferred from the path.
-            See :py:func:`fsspec.registry.known_implementations` for all options.
-        crs: int, dict, or str, optional
-            Coordinate Reference System. Accepts EPSG codes (int or str);
-            proj (str or dict) or wkt (str). Only used if the data has no native CRS.
-        nodata: float, int, optional
-            Missing value number. Only used if the data has no native missing value.
-            Nodata values can be differentiated between variables using a dictionary.
-        rename: dict, optional
-            Mapping of native data source variable to output source variable name as
-            required by hydroMT.
-        unit_mult, unit_add: dict, optional
-            Scaling multiplication and addition to change to map from the native
-            data unit to the output data unit as required by hydroMT.
-        meta: dict, optional
-            Metadata information of dataset, prefably containing the following keys:
-            - 'source_version'
-            - 'source_url'
-            - 'source_license'
-            - 'paper_ref'
-            - 'paper_doi'
-            - 'category'
-        placeholders: dict, optional
-            Placeholders to expand yaml entry to multiple entries (name and path)
-            based on placeholder values
-        attrs: dict, optional
-            Additional attributes relating to data variables. For instance unit
-            or long name of the variable.
-        extent: Extent(typed dict), Optional
-            Dictionary describing the spatial and time range the dataset covers.
-            should be of the form:
-            -  "bbox": [xmin, ymin, xmax, ymax],
-            -  "time_range": [start_datetime, end_datetime],
-            data, and time_range should be inclusive on both sides.
-        driver_kwargs, dict, optional
-            Additional key-word arguments passed to the driver.
-        storage_options: dict, optional
-            Additional key-word arguments passed to the fsspec FileSystem object.
-        zoomlevels: dict, optional
-            Dictionary with zoom levels and associated resolution in the unit of the
-            data CRS.
-        name, catalog_name: str, optional
-            Name of the dataset and catalog, optional.
-        provider: str, optional
-            A name to identifiy the specific provider of the dataset requested.
-            if None is provided, the last added source will be used.
-        version: str, optional
-            A name to identifiy the specific version of the dataset requested.
-            if None is provided, the last added source will be used.
-
-        """
-        driver_kwargs = driver_kwargs or {}
-        extent = extent or {}
-        if kwargs:
-            warnings.warn(
-                "Passing additional keyword arguments to be used by the "
-                "RasterDatasetAdapter driver is deprecated and will be removed "
-                "in a future version. Please use 'driver_kwargs' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            driver_kwargs.update(kwargs)
-        super().__init__(
-            path=path,
-            driver=driver,
-            filesystem=filesystem,
-            nodata=nodata,
-            rename=rename,
-            unit_mult=unit_mult,
-            unit_add=unit_add,
-            meta=meta,
-            attrs=attrs,
-            driver_kwargs=driver_kwargs,
-            storage_options=storage_options,
-            name=name,
-            catalog_name=catalog_name,
-            provider=provider,
-            version=version,
-        )
-        self.crs = crs
-        # should be None or non-empty dict when initialized
-        self.zoom_levels = zoom_levels
-        self.extent = extent
 
     def to_file(
         self,
@@ -281,11 +137,14 @@ class RasterDatasetAdapter(DataAdapter):
 
         return fn_out, driver, read_kwargs
 
-    def get_data(
+    def transform(
         self,
+        ds: xr.Dataset,
+        *,
         bbox: Optional[Bbox] = None,
-        geom: Optional[Geom] = None,
+        mask: Optional[Geom] = None,
         buffer: GeomBuffer = 0,
+        crs: Optional[CRS] = None,
         zoom_level: Optional[int] = None,
         align: Optional[bool] = None,
         variables: Optional[Variables] = None,
@@ -301,32 +160,19 @@ class RasterDatasetAdapter(DataAdapter):
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
         try:
-            # load data
-            fns = self._resolve_paths(
-                time_tuple, variables, zoom_level, geom, bbox, logger
-            )
-            self.mark_as_used()  # mark used
-            ds = self._read_data(
-                fns,
-                geom,
-                bbox,
-                cache_root,
-                zoom_level=zoom_level,
-                logger=logger,
-            )
             if has_no_data(ds):
                 raise NoDataException()
             # rename variables and parse data and attrs
             ds = self._rename_vars(ds)
             ds = self._validate_spatial_dims(ds)
-            ds = self._set_crs(ds, logger)
+            ds = self._set_crs(ds, crs, logger)
             ds = self._set_nodata(ds)
             ds = self._shift_time(ds, logger)
             # slice data
             ds = RasterDatasetAdapter._slice_data(
                 ds,
                 variables,
-                geom,
+                mask,
                 bbox,
                 buffer,
                 align,
@@ -343,92 +189,10 @@ class RasterDatasetAdapter(DataAdapter):
             return self._single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
             _exec_nodata_strat(
-                f"No data was read from source: {self.name}",
+                "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,
             )
-
-    def _resolve_paths(
-        self,
-        time_tuple: Optional[TimeRange] = None,
-        variables: Optional[Variables] = None,
-        zoom_level: Optional[int] = 0,
-        geom: Optional[Geom] = None,
-        bbox: Optional[Bbox] = None,
-        logger: Logger = logger,
-    ):
-        if zoom_level is not None and "{zoom_level}" in str(self.path):
-            zoom_level = self._parse_zoom_level(zoom_level, geom, bbox, logger=logger)
-
-        # resolve path based on time, zoom level and/or variables
-        fns = super()._resolve_paths(
-            time_tuple=time_tuple,
-            variables=variables,
-            zoom_level=zoom_level,
-        )
-        return fns
-
-    def _read_data(
-        self,
-        fns: List[StrPath],
-        geom: Optional[Geom],
-        bbox: Optional[Bbox],
-        cache_root: Optional[StrPath],
-        zoom_level: Optional[int] = None,
-        logger: Logger = logger,
-    ):
-        kwargs = self.driver_kwargs.copy()
-
-        # read using various readers
-        logger.info(f"Reading {self.name} {self.driver} data from {self.path}")
-        if self.driver == "netcdf":
-            if "preprocess" in kwargs:
-                preprocess = PREPROCESSORS.get(kwargs["preprocess"], None)
-                kwargs.update(preprocess=preprocess)
-            ds = xr.open_mfdataset(fns, decode_coords="all", **kwargs)
-        elif self.driver == "zarr":
-            preprocess = None
-            if "preprocess" in kwargs:  # for zarr preprocess is done after reading
-                preprocess = PREPROCESSORS.get(kwargs.pop("preprocess"), None)
-            ds_lst = []
-            for fn in fns:
-                ds = xr.open_zarr(fn, **kwargs)
-                if preprocess:
-                    ds = preprocess(ds)  # type: ignore
-                ds_lst.append(ds)
-            ds = xr.merge(ds_lst)
-        elif self.driver == "raster_tindex":
-            if np.issubdtype(type(self.nodata), np.number):
-                kwargs.update(nodata=self.nodata)
-            ds = io.open_raster_from_tindex(fns[0], bbox=bbox, geom=geom, **kwargs)
-        elif self.driver == "raster":  # rasterio files
-            if cache_root is not None and all([str(fn).endswith(".vrt") for fn in fns]):
-                cache_dir = join(cache_root, self.catalog_name, self.name)
-                fns_cached = []
-                for fn in fns:
-                    fn1 = cache_vrt_tiles(
-                        fn, geom=geom, cache_dir=cache_dir, logger=logger
-                    )
-                    fns_cached.append(fn1)
-                fns = fns_cached
-            if np.issubdtype(type(self.nodata), np.number):
-                kwargs.update(nodata=self.nodata)
-            if zoom_level is not None and "{zoom_level}" not in str(self.path):
-                zls_dict, crs = self._get_zoom_levels_and_crs(fns[0], logger=logger)
-                zoom_level = self._parse_zoom_level(
-                    zoom_level, geom, bbox, zls_dict, crs, logger=logger
-                )
-                if isinstance(zoom_level, int) and zoom_level > 0:
-                    # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
-                    kwargs.update(overview_level=zoom_level - 1)
-            ds = io.open_mfraster(fns, logger=logger, **kwargs)
-        else:
-            raise ValueError(f"RasterDataset: Driver {self.driver} unknown")
-
-        if has_no_data(ds):
-            return None
-        else:
-            return ds
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
@@ -450,19 +214,15 @@ class RasterDatasetAdapter(DataAdapter):
             )
         return ds
 
-    def _set_crs(self, ds: Data, logger: Logger = logger) -> Data:
+    def _set_crs(self, ds: Data, crs: Optional[CRS], logger: Logger = logger) -> Data:
         # set crs
-        if ds.raster.crs is None and self.crs is not None:
-            ds.raster.set_crs(self.crs)
+        if ds.raster.crs is None and crs is not None:
+            ds.raster.set_crs(crs)
         elif ds.raster.crs is None:
-            raise ValueError(
-                f"RasterDataset {self.name}: CRS not defined in data catalog or data."
-            )
-        elif self.crs is not None and ds.raster.crs != pyproj.CRS.from_user_input(
-            self.crs
-        ):
+            raise ValueError("RasterDataset: CRS not defined in data catalog or data.")
+        elif crs is not None and ds.raster.crs != pyproj.CRS.from_user_input(crs):
             logger.warning(
-                f"RasterDataset {self.name}: CRS from data catalog does not match CRS "
+                "RasterDataset: CRS from data catalog does not match CRS "
                 " of data. The original CRS will be used. Please check your catalog."
             )
         return ds
@@ -639,14 +399,17 @@ class RasterDatasetAdapter(DataAdapter):
         return ds
 
     def _set_nodata(self, ds):
+        """Parse and apply nodata values from the data catalog."""
         # set nodata value
         if self.nodata is not None:
             if not isinstance(self.nodata, dict):
-                nodata = {k: self.nodata for k in ds.data_vars.keys()}
+                no_data_values: Dict[str, Any] = {
+                    k: self.nodata for k in ds.data_vars.keys()
+                }
             else:
-                nodata = self.nodata
+                no_data_values: Dict[str, Any] = self.nodata
             for k in ds.data_vars:
-                mv = nodata.get(k, None)
+                mv = no_data_values.get(k, None)
                 if mv is not None and ds[k].raster.nodata is None:
                     ds[k].raster.set_nodata(mv)
         return ds
@@ -659,16 +422,17 @@ class RasterDatasetAdapter(DataAdapter):
         ds.attrs.update(self.meta)
         return ds
 
+    # TODO: uses rasterio and is specific to driver. Should be moved to driver
     def _get_zoom_levels_and_crs(
         self, fn: Optional[StrPath] = None, logger=logger
     ) -> Tuple[int, int]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
-        if self.zoom_levels is not None and self.crs is not None:
-            return self.zoom_levels, self.crs
+        if self.source.zoom_levels is not None and self.source.crs is not None:
+            return self.zoom_levels, self.source.crs
         zoom_levels = {}
         crs = None
         if fn is None:
-            fn = self.path
+            fn = self.source.uri
         try:
             with rasterio.open(fn) as src:
                 res = abs(src.res[0])
@@ -684,8 +448,8 @@ class RasterDatasetAdapter(DataAdapter):
         except RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
         self.zoom_levels = zoom_levels
-        if self.crs is None:
-            self.crs = crs
+        if self.source.crs is None:
+            self.source.crs = crs
         return zoom_levels, crs
 
     def _parse_zoom_level(
@@ -715,7 +479,7 @@ class RasterDatasetAdapter(DataAdapter):
         """
         # check zoom level
         zls_dict = self.zoom_levels if zls_dict is None else zls_dict
-        dst_crs = self.crs if dst_crs is None else dst_crs
+        dst_crs = self.source.crs if dst_crs is None else dst_crs
         if zls_dict is None or len(zls_dict) == 0 or zoom_level is None:
             return None
         elif isinstance(zoom_level, int):
@@ -775,200 +539,18 @@ class RasterDatasetAdapter(DataAdapter):
         logger.debug(f"Using zoom level {zl} ({dst_res:.2f})")
         return zl
 
-    def get_bbox(self, detect=True) -> TotalBounds:
-        """Return the bounding box and espg code of the dataset.
-
-        if the bounding box is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_bbox` will be used to detect it.
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the bounding box if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
-            the bounding box coordinates of the data. coordinates are returned as
-            [xmin,ymin,xmax,ymax]
-        crs: int
-            The ESPG code of the CRS of the coordinates returned in bbox
-        """
-        bbox = self.extent.get("bbox", None)
-        crs = cast(int, self.crs)
-        if bbox is None and detect:
-            bbox, crs = self.detect_bbox()
-
-        return bbox, crs
-
-    def get_time_range(
-        self,
-        detect=True,
-    ) -> TimeRange:
-        """Detect the time range of the dataset.
-
-        if the time range is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_time_range` will be used
-        to detect it.
-
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the time range if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
-            inclusive on both sides.
-        """
-        time_range = self.extent.get("time_range", None)
-        if time_range is None and detect:
-            time_range = self.detect_time_range()
-
-        return time_range
-
-    def detect_bbox(
-        self,
-        ds=None,
-    ) -> TotalBounds:
-        """Detect the bounding box and crs of the dataset.
-
-        If no dataset is provided, it will be fetched according to the settings in the
-        adapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`. the
-        coordinates are in the CRS of the dataset itself, which is also returned
-        alongside the coordinates.
-
-
-        Parameters
-        ----------
-        ds: xr.Dataset, xr.DataArray, Optional
-            the dataset to detect the bounding box of.
-            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
-            will be used to fetch the it before detecting.
-
-        Returns
-        -------
-        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
-            the bounding box coordinates of the data. coordinates are returned as
-            [xmin,ymin,xmax,ymax]
-        crs: int
-            The ESPG code of the CRS of the coordinates returned in bbox
-        """
-        if ds is None:
-            ds = self.get_data()
-        crs = ds.raster.crs.to_epsg()
-        bounds = ds.raster.bounds
-
-        return bounds, crs
-
-    def detect_time_range(
-        self,
-        ds=None,
-    ) -> TimeRange:
-        """Detect the temporal range of the dataset.
-
-        If no dataset is provided, it will be fetched accodring to the settings in the
-        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`.
-
-        Parameters
-        ----------
-        ds: xr.Dataset, xr.DataArray, Optional
-            the dataset to detect the time range of. It must have a time dimentsion set.
-            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
-            will be used to fetch the it before detecting.
-
-        Returns
-        -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
-            inclusive on both sides.
-        """
-        if ds is None:
-            ds = self.get_data()
-        return (
-            ds[ds.raster.time_dim].min().values,
-            ds[ds.raster.time_dim].max().values,
-        )
-
-    def to_stac_catalog(
-        self,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
-    ) -> Optional[StacCatalog]:
-        """
-        Convert a rasterdataset into a STAC Catalog representation.
-
-        The collection will contain an asset for each of the associated files.
-
-
-        Parameters
-        ----------
-        - on_error (str, optional): The error handling strategy.
-          Options are: "raise" to raise an error on failure, "skip" to skip the
-          dataset on failure, and "coerce" (default) to set default values on failure.
-
-        Returns
-        -------
-        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
-          if the dataset was skipped.
-        """
-        try:
-            bbox, crs = self.get_bbox(detect=True)
-            bbox = list(bbox)
-            start_dt, end_dt = self.get_time_range(detect=True)
-            start_dt = pd.to_datetime(start_dt)
-            end_dt = pd.to_datetime(end_dt)
-            props = {**self.meta, "crs": crs}
-            ext = splitext(self.path)[-1]
-            if ext == ".nc" or ext == ".vrt":
-                media_type = MediaType.HDF5
-            elif ext == ".tiff":
-                media_type = MediaType.TIFF
-            elif ext == ".cog":
-                media_type = MediaType.COG
-            elif ext == ".png":
-                media_type = MediaType.PNG
-            else:
-                raise RuntimeError(
-                    f"Unknown extention: {ext} cannot determine media type"
-                )
-        except (IndexError, KeyError, CRSError) as e:
-            if on_error == ErrorHandleMethod.SKIP:
-                logger.warning(
-                    "Skipping {name} during stac conversion because"
-                    "because detecting spacial extent failed."
-                )
-                return
-            elif on_error == ErrorHandleMethod.COERCE:
-                bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.meta
-                start_dt = datetime(1, 1, 1)
-                end_dt = datetime(1, 1, 1)
-                media_type = MediaType.JSON
-            else:
-                raise e
-
+    @staticmethod
+    def _single_var_as_array(
+        ds: Data, single_var_as_array: bool, variable_name: Optional[List[str]] = None
+    ) -> Data:
+        # return data array if single variable dataset
+        dvars = list(ds.data_vars.keys())
+        if single_var_as_array and len(dvars) == 1:
+            da = ds[dvars[0]]
+            if isinstance(variable_name, list) and len(variable_name) == 1:
+                da.name = variable_name[0]
+            elif isinstance(variable_name, str):
+                da.name = variable_name
+            return da
         else:
-            # else makes type checkers a bit happier
-            stac_catalog = StacCatalog(
-                self.name,
-                description=self.name,
-            )
-            stac_item = StacItem(
-                self.name,
-                geometry=None,
-                bbox=list(bbox),
-                properties=props,
-                datetime=None,
-                start_datetime=start_dt,
-                end_datetime=end_dt,
-            )
-            stac_asset = StacAsset(str(self.path), media_type=media_type)
-            base_name = basename(self.path)
-            stac_item.add_asset(base_name, stac_asset)
-
-            stac_catalog.add_item(stac_item)
-            return stac_catalog
+            return ds

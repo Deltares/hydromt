@@ -1,7 +1,8 @@
+from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator
+from typing import Generator, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -13,10 +14,12 @@ import xugrid as xu
 from dask import config as dask_config
 from shapely.geometry import box
 
+from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
+from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
 from hydromt.gis import raster, utils, vector
-from hydromt.metadata_resolvers import MetaDataResolver
+from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.models import MODELS
 from hydromt.models.api import Model
 from hydromt.models.components.network import NetworkModel
@@ -31,6 +34,11 @@ DATADIR = join(dirname(abspath(__file__)), "data")
 def tmp_dir() -> Generator[Path, None, None]:
     with TemporaryDirectory() as tempdirname:
         yield Path(tempdirname)
+
+
+@pytest.fixture(scope="session")
+def root() -> str:
+    return abspath(sep)
 
 
 @pytest.fixture()
@@ -250,6 +258,26 @@ def obsda():
 
 
 @pytest.fixture()
+def rasterds():
+    temp = 15 + 8 * np.random.randn(2, 2, 3)
+    precip = 10 * np.random.rand(2, 2, 3)
+    lon = [[-99.83, -99.32], [-99.79, -99.23]]
+    lat = [[42.25, 42.21], [42.63, 42.59]]
+    return xr.Dataset(
+        {
+            "temperature": (["x", "y", "time"], temp),
+            "precipitation": (["x", "y", "time"], precip),
+        },
+        coords={
+            "lon": (["x", "y"], lon),
+            "lat": (["x", "y"], lat),
+            "time": pd.date_range("2014-09-06", periods=3),
+            "reference_time": pd.Timestamp("2014-09-05"),
+        },
+    )
+
+
+@pytest.fixture()
 def ts_extremes():
     rng = np.random.default_rng(12345)
     normal = pd.DataFrame(
@@ -339,23 +367,46 @@ def mesh_model(griduda):
 
 
 @pytest.fixture()
-def mock_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
-    class MockGeoDataFrameDriver(GeoDataFrameDriver):
-        def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
-            return geodf
-
-    driver = MockGeoDataFrameDriver.model_validate({})
-    return driver
-
-
-@pytest.fixture()
 def mock_resolver() -> MetaDataResolver:
     class MockMetaDataResolver(MetaDataResolver):
         def resolve(self, uri, *args, **kwargs):
             return [uri]
 
-    resolver = MockMetaDataResolver.model_validate({})
+    resolver = MockMetaDataResolver()
     return resolver
+
+
+@pytest.fixture()
+def mock_geodataframe_adapter():
+    class MockGeoDataFrameAdapter(GeoDataFrameAdapter):
+        def transform(
+            self, gdf: gpd.GeoDataFrame, **kwargs
+        ) -> Optional[gpd.GeoDataFrame]:
+            return gdf
+
+    return MockGeoDataFrameAdapter()
+
+
+@pytest.fixture()
+def mock_geodf_driver(
+    geodf: gpd.GeoDataFrame, mock_resolver: MetaDataResolver
+) -> GeoDataFrameDriver:
+    class MockGeoDataFrameDriver(GeoDataFrameDriver):
+        def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
+            return geodf
+
+    return MockGeoDataFrameDriver(metadata_resolver=mock_resolver)
+
+
+@pytest.fixture()
+def mock_raster_ds_driver(
+    rasterds: xr.Dataset, mock_resolver: MetaDataResolver
+) -> RasterDatasetDriver:
+    class MockRasterDatasetDriver(RasterDatasetDriver):
+        def read(self, *args, **kwargs) -> xr.Dataset:
+            return rasterds
+
+    return MockRasterDatasetDriver(metadata_resolver=mock_resolver)
 
 
 @pytest.fixture()

@@ -15,8 +15,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import yaml
-
-# from pystac import Item as StacItem
 from pystac import Catalog as StacCatalog
 from upath import UPath
 
