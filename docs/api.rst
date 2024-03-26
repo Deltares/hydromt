@@ -191,7 +191,7 @@ Discovery
 .. autosummary::
    :toctree: _generated
 
-   ModelCatalog
+   PLUGINS
 
 
 .. _model_api:
@@ -217,6 +217,8 @@ High level methods
    Model.build
    Model.update
    Model.write_data_catalog
+   Model.get_component
+   Model.add_component
 
 Model attributes
 ----------------
@@ -225,7 +227,7 @@ Model attributes
    :toctree: _generated
 
    Model.crs
-   Model.root
+   Model.model_root
    Model.region
    Model.api
 

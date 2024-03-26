@@ -4,6 +4,7 @@
         "ms-python.debugpy",
         "ms-python.vscode-pylance",
         "charliermarsh.ruff",
-        "njpwerner.autodocstring"
+        "njpwerner.autodocstring",
+        "streetsidesoftware.code-spell-checker"
     ]
 }

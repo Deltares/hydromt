@@ -58,9 +58,54 @@ The following changes are required in your code:
 +--------------------------+--------------------------------------+
 | hydromt.gis_utils        | hydromt.gis.utils                    |
 +--------------------------+--------------------------------------+
-| hydromt.raster           | hydromt.gis.raster                   |
-+--------------------------+--------------------------------------+
 
+
+Changes to the format of the yaml interface
+-------------------------------------------
+
+The first change to the YAML format is that now, at the root of the documents are three keys:
+`model_type`, `global` and `steps`.
+- `model_type` (optional) details what kind of model is going to be used in the model. This can currently also be provided only through the CLI,
+but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
+- `global` is intended for any configuration for the model object itself, here you may override any default
+configuration for the components provided by your implementation. Any options mentioned here will be passed to the `Model.__init__` function
+- `steps` should contain a list of function calls. In pre-v1 versions this used to be a dictionary, but now it has become a list
+which removes the necessity for adding numbers to the end of function calls of the same name. You may prefix a component name
+for the step in a dotted manner to indicate the function should be called on that component instead of the model. In general any step
+listed here will correspond to a function on either the model or one of its components. Any keys that are listed under a step will be
+provided to the function call as arguments.
+
+An example of a fictional Wflow YAML file would be:
+
+```yaml
+model_type: wflow
+global:
+	data_libs: deltares_data
+	components:
+		config:
+			filename: wflow_sbm_calibrated.toml
+steps:
+	- setup_basemaps:
+		region: {'basin': [6.16, 51.84]}
+		res: 0.008333
+		hydrography_fn: merit_hydro
+	- grid.add_data_from_geodataframe:
+	         vector_fn: administrative_areas
+	         variables: "id_level1"
+	- grid.add_data_from_geodataframe:
+	          vector_fn: administrative_areas
+	          variables: "id_level3"
+	- setup_reservoirs:
+		reservoirs_fn: hydro_reservoirs
+		min_area: 1.0
+	- write:
+		components:
+			- grid
+			- config
+	- geoms.write:
+		filename: geoms/*.gpkg
+		driver: GPKG
+```
 
 Data catalog
 ------------
@@ -77,19 +122,19 @@ data catalog has undergone some changes. Now since a catalog entry no longer uni
 identifies one source, (since it can refer to any of the variants mentioned above) it
 becomes insufficient to request a data source by string only. Since the dictionary
 interface in python makes it impossible to add additional arguments when requesting a
-data source, we created a more extensive API for this. In order to make sure users's
+data source, we created a more extensive API for this. In order to make sure users'
 code remains working consistently and have a clear upgrade path when adding new
 variants we have decided to remove the old dictionary like interface.
 
 **Changes required**
 
 Dictionary like features such as `catalog['source']`, `catalog['source'] = data`,
-`source in catalog` etc should be removed for v1. Equivalent interfaces have been
-provided for each operation so it should be fairly simple. Below is a small table
+`source in catalog` etc. should be removed for v1. Equivalent interfaces have been
+provided for each operation, so it should be fairly simple. Below is a small table
 with their equivalent functions
 
 
-.. table:: Dictionary translation guide for v1
+..table:: Dictionary translation guide for v1
    :widths: auto
 
 +--------------------------+--------------------------------------+
@@ -107,7 +152,103 @@ with their equivalent functions
 Model
 -----
 
-Making the model region it's own component
+Moving from an inheritance to composition structure for the Model class
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Rationale**
+
+Prior to v1, the `Model` class was the only real place where developers could
+modify the behavior of Core through either subclassing it, or using various
+`Mixin` classes. All parts of a model were implemented as class properties
+forcing every model to use the same terminology. While this was enough for
+some users, it was too restrictive for others. For example, the SFINCS
+plugin uses multiple grids for its computation, which was not possible in
+the setup pre-v1. There was also a lot of code duplication for the use of
+several parts of a model such as `maps`, `forcing` and `states`. To offer
+users more modularity and flexibility, as well as improve maintainability, we
+have decided to move the core to a component based architecture rather than
+an inheritance based one.
+
+**Changes required**
+
+Here we will describe the specific changes needed to use a `Model` object.
+The changes necessary to have core recognize your plugins are described below.
+Now a `Model` is made up of several `Component` classes to which it can delegate work.
+While it should still be responsible for workloads that span multiple components
+it should delegate work to components whenever possible. For specific changes needed
+for appropriate components see their entry in this migration guide, but general
+changes will be described here.
+
+Implementing Model Components
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Components are objects that the `Model` class can delegate work to. Typically, they are associated with one object such as a grid,
+forcing or tables. To be able to work within a `Model` class properly a component must implement the following methods:
+
+- `read`: reading the component and its data from disk.
+- `write`: write the component in its current state to disk in the provided root.
+
+Additionally, it is highly recommended to also provide the following methods:
+
+- `set`: provide the ability to override the current data in the component.
+- `create`: the ability to construct the schematization of the component (computation units like grid cells, mesh1d or network lines, vector units for lumped model etc.) from the provided arguments.
+- `add_data`: the ability to add model data and parameters to the component once the schematization is well defined (ie add landuse data to grid or mesh etc.).
+
+It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
+
+```python
+@hydromt_step
+def write(self, ...) -> None:
+	pass
+```
+
+This decorator can be imported from the root of core. When implementing a component, you should inherit from the core provided class called
+`ModelComponent`. When you do this, not only will it provide some additional validation that you have implemented the correct functions,
+but your components will also gain access to the following attributes:
+
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+| Attribute name | Description                                                                                       | Example                                  |
++================+===================================================================================================+==========================================+
+| model          | A reference to the model containing the component which can be used to retrieve other components  | self.model.get_component(...)            |
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+| data_catalog   | A reference to the model's data catalog which can be used to retrieve data                        | self.data_catalog.get_rasterdataset(...) |
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+| logger         | A reference to the logger of the model                                                            | self.logger.info(....)                   |
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+| model_root     | A reference to the model root which can be used for permissions checking and determining IO paths | self.model_root.path                     |
++----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
+
+As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it receives. Note that this makes it impractical if not impossible to use components outside of the model they are assigned to.
+
+**Manipulating Components**
+
+Components can be added to a `Model` object by using the `model.add_component` function. This function takes the name of the component, and the TYPE (not an instance) of the component as argument. When these components
+are added, they are uninitialized (i.e. empty). You can populate them by calling functions such as `create` or `read` from the yaml interface or any other means through the interactive Python API.
+
+Once a component has been added, any component (or other object or scope that has access to the model class) can retrieve necessary components by using the
+`model.get_component` function which takes the name of the desired component and the TYPE of the component you wish to retrieve. At this point you can do
+with it as you please.
+
+In the core of HydroMT, the available components are (list or maybe table):
+  - `GridComponent` for data on a regular grid
+  - etc.
+
+ A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
+
+The `Model.__init__` function can be used to add default components by plugins like so:
+
+```python
+
+class ExampleModel(Model):
+	def __init__(self):
+        self.root: ModelRoot = ModelRoot(".")
+		self.add_component("region", ModelRegionComponent)
+		self.add_component("grid", GridComponent)
+		...
+
+```
+
+Making the model region its own component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Rationale**
@@ -159,7 +300,7 @@ GridComponent
 
 **Rationale**
 
-In v1 the `GridModel` will no longer exist, instead of it we created a `GridComponent`,
+In v1 the `GridModel` will no longer exist. Instead we created a `GridComponent`,
 which is an implementation of the `ModelComponent` class. The idea is that this gives
 users more flexibility with adding components to their model class, for instance multiple
 grids. In addition, the `ModelComponent`s improve maintainability of the code and
@@ -169,7 +310,7 @@ terminology of the components and their methods.
 
 The `GridMixin` and `GridModel` have been restructured into one `GridComponent` with only
 a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
-`read_grid`, and `setup_grid` have been changed to the more genericly named `set`,
+`read_grid`, and `setup_grid` have been changed to the more generically named `set`,
 `write`, `read`, and `create` methods respectively. Also, the `setup_grid_from_*`
 methods have been changed to `add_data_from_*`. The functionality of the GridComponent
 has not been changed compared to the GridModel.
@@ -178,9 +319,13 @@ has not been changed compared to the GridModel.
 | v0.x                         | v1                                        |
 +==============================+===========================================+
 | model.set_grid(...)          | model.grid_component.set(...)             |
++------------------------------+-------------------------------------------+
 | model.read_grid(...)         | model.grid_component.read(...)            |
++------------------------------+-------------------------------------------+
 | model.write_grid(...)        | model.grid_component.write(...)           |
++------------------------------+-------------------------------------------+
 | model.setup_grid(...)        | model.grid_component.create(...)          |
++------------------------------+-------------------------------------------+
 | model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
 
@@ -198,4 +343,33 @@ See `GridComponent` rationale
 The MeshModel has just like the `GridModel` been replaced with its implementation
 of the `ModelComponent`: `MeshComponent`. The restructering of `MeshModel` follows the same pattern
 as the `GridComponent`. Do note that MeshComponent.get_mesh() has already been updated to work with
-XUgrid 0.0.9.
+XUgrid 0.9.0.
+
+Plugins
+-------
+
+Previously the `Model` class was the only entrypoint for providing core with custom behavior.
+Now, there are three:
+
+- `Model`: This class is mostly responsible for dispatching function calls and otherwise delegating work to components.
+- `ModelComponent`. This class provides more specialized functionalities to do with a single part of a model such as a mesh or grid.
+- `Driver`. TBC
+
+Each of these parts have entry points at their relevant submodules. For example, see how these are specified in the `pyproject.toml`
+
+```toml
+[project.entry-points."hydromt.components"]
+core = "hydromt.components"
+
+[project.entry-points."hydromt.models"]
+core = "hydromt.models"
+```
+
+To have post v1 core recognize there are a few new requirements:
+1. There must be a dedicated separate submodule (i.e. a folder with a `__init__.py` file that you can import from) for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
+2. These submodules must have an `__init__.py` and this file must specify a `__all__` attribute.
+3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant category. This means these submodules should not re-export anything that is not a plugin.
+4. Though this cannot be enforced in Python, there is a base class for each of the plugin categories in core, which your objects should inherit from, this makes sure that you implement all the relevant functionality.
+
+When you have specified the plugins you wish to make available to core in your `pyproject.toml`, all objects should be made available through a global static object called `PLUGINS`. This object has attributes
+for each of the corresponding plugin categories.

@@ -13,18 +13,14 @@ import pytest
 import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
-from shapely.geometry import box
 
+from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolvers import MetaDataResolver
-from hydromt.models import MODELS
-from hydromt.models.api import Model
-from hydromt.models.components.network import NetworkModel
-from hydromt.models.components.region import ModelRegionComponent
-from hydromt.models.components.vector import VectorModel
-from hydromt.models.root import ModelRoot
+from hydromt.models.model import Model
+from hydromt.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
@@ -39,7 +35,7 @@ def tmp_dir() -> Generator[Path, None, None]:
 
 @pytest.fixture()
 def test_model(tmpdir) -> Model:
-    return Model(tmpdir)
+    return Model(root=tmpdir)
 
 
 @pytest.fixture()
@@ -297,48 +293,11 @@ def model(demda, world, obsda):
     mod = Model(data_libs=["artifact_data"])
     mod.region.create({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
-    with pytest.deprecated_call():
-        mod.set_staticmaps(demda, "elevtn")
     mod.set_geoms(world, "world")
     mod.set_maps(demda, "elevtn")
     mod.set_forcing(obsda, "waterlevel")
     mod.set_states(demda, "zsini")
     mod.set_results(obsda, "zs")
-    return mod
-
-
-@pytest.fixture()
-def vector_model(ts, geodf):
-    mod = VectorModel()
-    mod.setup_config(**{"header": {"setting": "value"}})
-    da = xr.DataArray(
-        ts,
-        dims=["index", "time"],
-        coords={"index": ts.index, "time": ts.columns},
-        name="zs",
-    )
-    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
-    da.vector.set_crs(geodf.crs)
-    mod.set_vector(da)
-    return mod
-
-
-@pytest.fixture()
-def network_model():
-    mod = NetworkModel()
-    # TODO set data and attributes of mod
-    return mod
-
-
-@pytest.fixture()
-def mesh_model(griduda):
-    mod = MODELS.load("mesh_model")()
-    region = gpd.GeoDataFrame(
-        geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
-    )
-    mod.region.create({"geom": region})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_mesh(griduda, "elevtn")
     return mod
 
 

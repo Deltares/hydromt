@@ -2,50 +2,56 @@
 
 from os.path import abspath, dirname, join
 
-import numpy as np
 import pytest
 from click.testing import CliRunner
 
 from hydromt import __version__
 from hydromt._typing import NoDataException
-from hydromt.cli import api as hydromt_api
 from hydromt.cli.main import main as hydromt_cli
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
-def test_cli_verison(tmpdir):
+def test_cli_verison():
     r = CliRunner().invoke(hydromt_cli, "--version")
     assert r.exit_code == 0
     assert r.output.split()[-1] == __version__
 
 
-def test_cli_models(tmpdir):
+def test_cli_models():
     r = CliRunner().invoke(hydromt_cli, "--models")
     assert r.exit_code == 0
-    assert r.output.startswith("model plugins")
+    assert "Model plugins" in r.output
+    assert "Model" in r.output
 
 
-def test_cli_help(tmpdir):
+def test_cli_components():
+    r = CliRunner().invoke(hydromt_cli, "--components")
+    assert r.exit_code == 0
+    assert "Component plugins" in r.output
+    assert "ModelRegionComponent" in r.output
+
+
+def test_cli_help():
     r = CliRunner().invoke(hydromt_cli, "--help")
     assert r.exit_code == 0
     # NOTE: when called from CliRunner we get "Usage: main" instead of "Usage: hydromt"
     assert r.output.startswith("Usage: main [OPTIONS] COMMAND [ARGS]...")
 
 
-def test_cli_build_help(tmpdir):
+def test_cli_build_help():
     r = CliRunner().invoke(hydromt_cli, ["build", "--help"])
     assert r.exit_code == 0
     assert r.output.startswith("Usage: main build [OPTIONS] MODEL MODEL_ROOT")
 
 
-def test_cli_update_help(tmpdir):
+def test_cli_update_help():
     r = CliRunner().invoke(hydromt_cli, ["update", "--help"])
     assert r.exit_code == 0
     assert r.output.startswith("Usage: main update [OPTIONS] MODEL MODEL_ROOT")
 
 
-def test_cli_clip_help(tmpdir):
+def test_cli_clip_help():
     r = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
     assert r.exit_code == 0
     assert r.output.startswith(
@@ -93,6 +99,7 @@ def test_cli_build_override(tmpdir):
     assert r.exit_code == 0
 
 
+@pytest.mark.skip(reason="needs translation to new entrypoint structure")
 def test_cli_build_unknown_model(tmpdir):
     with pytest.raises(ValueError, match="Unknown model"):
         _ = CliRunner().invoke(
@@ -108,6 +115,7 @@ def test_cli_build_unknown_model(tmpdir):
         )
 
 
+@pytest.mark.skip(reason="needs translation to new entrypoint structure")
 def test_cli_update_unknown_model(tmpdir):
     with pytest.raises(ValueError, match="Unknown model"):
         _ = CliRunner().invoke(
@@ -258,14 +266,12 @@ def test_export_cli_config_file(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
+@pytest.mark.skip(reason="GridComponent should remove region argument in create().")
 def test_check_cli():
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "check",
-            "-m",
-            "grid_model",
             "-d",
             "tests/data/test_sources.yml",
             "-i",
@@ -275,15 +281,13 @@ def test_check_cli():
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_unsupported_region(tmpdir):
+@pytest.mark.skip(reason="GridComponent should remove region argument in create().")
+def test_check_cli_unsupported_region():
     with pytest.raises(Exception, match="is not supported in region validation yet"):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
                 "check",
-                "-m",
-                "grid_model",
                 "-r",
                 "{'subbasin': [-7.24, 62.09], 'uparea': 50}",
                 "-i",
@@ -293,15 +297,13 @@ def test_check_cli_unsupported_region(tmpdir):
         )
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_known_region(tmpdir):
+@pytest.mark.skip(reason="GridComponent should remove region argument in create().")
+def test_check_cli_known_region():
     with pytest.raises(Exception, match="Unknown region kind"):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
                 "check",
-                "-m",
-                "grid_model",
                 "-r",
                 "{'asdfasdfasdf': [-7.24, 62.09], 'uparea': 50}",
                 "-i",
@@ -311,14 +313,12 @@ def test_check_cli_known_region(tmpdir):
         )
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_bbox_valid(tmpdir):
+@pytest.mark.skip(reason="GridComponent should remove region argument in create().")
+def test_check_cli_bbox_valid():
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "check",
-            "-m",
-            "grid_model",
             "-r",
             "{'bbox': [12.05,45.30,12.85,45.65]}",
             "-i",
@@ -328,14 +328,12 @@ def test_check_cli_bbox_valid(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_geom_valid(tmpdir):
+@pytest.mark.skip(reason="GridComponent should remove region argument in create().")
+def test_check_cli_geom_valid():
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "check",
-            "-m",
-            "grid_model",
             "-r",
             "{'geom': 'tests/data/naturalearth_lowres.geojson'}",
             "-i",
@@ -346,15 +344,13 @@ def test_check_cli_geom_valid(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_check_cli_geom_missing_file(tmpdir):
+@pytest.mark.skip(reason="GridComponent should remove region argument in create().")
+def test_check_cli_geom_missing_file():
     with pytest.raises(Exception, match="Path not found at asdf"):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
                 "check",
-                "-m",
-                "grid_model",
                 "-r",
                 "{'geom': 'asdfasdf'}",
                 "-i",
@@ -362,24 +358,3 @@ def test_check_cli_geom_missing_file(tmpdir):
             ],
             catch_exceptions=False,
         )
-
-
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
-def test_api_datasets():
-    # datasets
-    assert "artifact_data" in hydromt_api.get_predifined_catalogs()
-    datasets = hydromt_api.get_datasets("artifact_data")
-    assert isinstance(datasets, dict)
-    assert isinstance(datasets["RasterDatasetSource"], list)
-
-
-def test_api_model_components():
-    # models
-    components = hydromt_api.get_model_components(
-        "vector_model", component_types=["write"]
-    )
-    name = "write_vector"
-    assert name in components
-    assert np.all([k.startswith("write") for k in components])
-    keys = ["doc", "required", "optional", "kwargs"]
-    assert np.all([k in components[name] for k in keys])

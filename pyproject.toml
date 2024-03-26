@@ -109,6 +109,12 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
+[project.entry-points."hydromt.components"]
+core = "hydromt.components"
+
+[project.entry-points."hydromt.models"]
+core = "hydromt.models"
+
 [tool.ruff]
 line-length = 88
 target-version = "py39"
@@ -140,7 +146,6 @@ testpaths = ["tests"]
 markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
-  "ignore:.*staticmaps:DeprecationWarning", # our own deprecation, will be removed soon
   # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
   "ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
 ]

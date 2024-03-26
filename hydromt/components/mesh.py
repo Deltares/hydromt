@@ -12,10 +12,10 @@ import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt.components.base import ModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
-from hydromt.models.api import Model
-from hydromt.models.components.base import ModelComponent
+from hydromt.models import Model
 from hydromt.workflows.mesh import (
     create_mesh2d,
     mesh2d_from_raster_reclass,

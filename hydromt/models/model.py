@@ -2,54 +2,67 @@
 """General and basic API for models in HydroMT."""
 
 import glob
-import inspect
 import logging
 import os
 import shutil
 import typing
-import warnings
 from abc import ABCMeta
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pydantic.v1.utils
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 
-from hydromt import __version__
-from hydromt._compat import Distribution
+from hydromt import hydromt_step
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
+from hydromt._utils.rgetattr import rgetattr
+from hydromt._utils.steps_validator import validate_steps
+from hydromt.components import ModelRegionComponent
+from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io import configread
 from hydromt.io.writers import configwrite
-from hydromt.models.components import ModelRegionComponent
-from hydromt.models.root import ModelRoot
+from hydromt.plugins import PLUGINS
+from hydromt.root import ModelRoot
 
 __all__ = ["Model"]
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
+T = TypeVar("T", bound=ModelComponent)
 
 
 class Model(object, metaclass=ABCMeta):
+    """
+    General and basic API for models in HydroMT.
 
-    """General and basic API for models in HydroMT."""
+    Inherit from this class to pre-define mandatory components in the model.
+    """
 
     _DATADIR = ""  # path to the model data folder
     _NAME: str = "modelname"
     _CONF: StrPath = "model.yml"
-    _CF = dict()  # configreader kwargs
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
-    # tell hydroMT which methods should receive the res and region arguments
-    _CLI_ARGS = {"region": "region.create"}
     _TMP_DATA_DIR = None
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
@@ -69,11 +82,12 @@ class Model(object, metaclass=ABCMeta):
 
     def __init__(
         self,
+        components: Optional[dict[str, dict[str, Any]]] = None,
         root: Optional[str] = None,
         mode: str = "w",
         config_fn: Optional[str] = None,
         data_libs: Optional[Union[List, str]] = None,
-        logger=logger,
+        logger=_logger,
         **artifact_keys,
     ):
         r"""Initialize a model.
@@ -94,21 +108,15 @@ class Model(object, metaclass=ABCMeta):
         logger:
             The logger to be used.
         """
+        # Recursively update the options with any defaults that are missing in the configuration.
+        components = components or {}
+        components = pydantic.v1.utils.deep_update(
+            {"region": {"type": "ModelRegionComponent"}}, components
+        )
+
         data_libs = data_libs or []
-        from . import MODELS  # avoid circular import
 
         self.logger = logger
-        dist_name, version = "unknown", "NA"
-        if self._NAME in MODELS:
-            ep = MODELS[self._NAME]
-            dist: Optional[Distribution] = ep.dist
-            if dist:
-                dist_name = dist.name
-                version = dist.version
-            else:
-                # insert hydromt defaults
-                dist_name = "hydromt"
-                version = __version__
 
         # link to data
         self.data_catalog = DataCatalog(
@@ -125,25 +133,52 @@ class Model(object, metaclass=ABCMeta):
         self._forcing: Optional[XArrayDict] = None
         self._states: Optional[XArrayDict] = None
         self._results: Optional[XArrayDict] = None
-        # To be deprecated in future versions!
-        self._staticmaps = None
-        self._staticgeoms = None
 
         # file system
-        if root is None:
-            self.root: ModelRoot = ModelRoot(".", mode=mode)
-        else:
-            self.root: ModelRoot = ModelRoot(root, mode=mode)
+        self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
 
-        self.region: ModelRegionComponent = ModelRegionComponent(self)
+        self._components: Dict[str, ModelComponent] = {}
+        self._add_components(components)
 
         self._defered_file_closes = []
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
-        self.logger.info(
-            f"Initializing {self._NAME} model from {dist_name} (v{version})."
+
+        model_metadata = cast(
+            Dict[str, str], PLUGINS.model_metadata[self.__class__.__name__]
         )
+        self.logger.info(
+            f"Initializing {self._NAME} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
+        )
+
+    def _add_components(self, components: dict[str, dict[str, Any]]) -> None:
+        """Add all components that are specified in the config file."""
+        for name, options in components.items():
+            type_name = options.pop("type")
+            component_type = PLUGINS.component_plugins[type_name]
+            self.add_component(name, component_type(self, **options))
+
+    def add_component(self, name: str, component: ModelComponent) -> None:
+        """Add a component to the model. Will raise an error if the component already exists."""
+        if name in self._components:
+            raise ValueError(f"Component {name} already exists in the model.")
+        if not name.isidentifier():
+            raise ValueError(f"Component name {name} is not a valid identifier.")
+        self._components[name] = component
+
+    def get_component(self, name: str, _: Type[T]) -> T:
+        """Get a component from the model. Will raise an error if the component does not exist."""
+        return cast(T, self._components[name])
+
+    def __getattr__(self, name: str) -> ModelComponent:
+        """Get a component from the model. Will raise an error if the component does not exist."""
+        return self._components[name]
+
+    @property
+    def region(self) -> ModelRegionComponent:
+        """Return the model region component."""
+        return self.get_component("region", ModelRegionComponent)
 
     @_classproperty
     def api(cls) -> Dict:
@@ -158,67 +193,24 @@ class Model(object, metaclass=ABCMeta):
                 _api.update(getattr(base_cls, "_API", {}))
         return _api
 
-    def _check_get_opt(self, opt):
-        """Check all opt keys and raise sensible error messages if unknown."""
-        for method in opt.keys():
-            m = method.strip("0123456789")
-            meth = self._get_sub_method(m)
-            if not callable(meth):
-                raise ValueError(f'Model {self._NAME} has no method "{method}"')
-        return opt
-
-    def _get_sub_method(self, method_name: str) -> Optional[Callable]:
-        # temporary code until the component logic is added.
-        # now we need this to be able to call region.create
-        obj = self
-        for subojb in method_name.split("."):
-            try:
-                obj = getattr(obj, subojb)
-            except AttributeError:
-                return None
-        func = cast(Callable, obj)
-        return func
-
-    def _run_log_method(self, method, *args, **kwargs):
-        """Log method parameters before running a method."""
-        method = method.strip("0123456789")
-        func = self._get_sub_method(method)
-        if not callable(func):
-            raise ValueError(f'Model {self._NAME} has no method "{method}"')
-        signature = inspect.signature(func)
-        # combine user and default options
-        params = {}
-        for i, (k, v) in enumerate(signature.parameters.items()):
-            if k in ["args", "kwargs"]:
-                if k == "args":
-                    params[k] = args[i:]
-                else:
-                    params.update(**kwargs)
-            else:
-                v = kwargs.get(k, v.default)
-                if len(args) > i:
-                    v = args[i]
-                params[k] = v
-        # log options
-        for k, v in params.items():
-            if v is not inspect._empty:
-                self.logger.info(f"{method}.{k}: {v}")
-        return func(*args, **kwargs)
-
     def build(
         self,
-        region: Optional[dict] = None,
+        *,
+        region: dict[str, Any],
         write: Optional[bool] = True,
-        opt: Optional[dict] = None,
+        steps: Optional[list[dict[str, dict[str, Any]]]] = None,
     ):
-        r"""Single method to build a model from scratch based on settings in `opt`.
+        r"""Single method to build a model from scratch based on settings in `steps`.
 
-        Methods will be run one by one based on the order of appearance in `opt`
-        (configuration file). All model methods are supported including
-        setup\_\*, read\_\* and write\_\* methods.
+        Methods will be run one by one based on the /order of appearance in `steps`
+        (configuration file). For a list of available functions see :ref:`The model API<model_api>`
+        and :ref:`The plugin documentation<plugin_create>`
 
-        If a write\_\* option is listed in `opt` (configuration file) the full writing of the
-        model at the end of the update process is skipped.
+        By default the full model will be written at the end, except if a write step
+        is called for somewhere in steps, then this is skipped.
+
+        Note that the \* in the signature signifies that all of the arguments to this function
+        MUST be provided as keyword arguments.
 
         Parameters
         ----------
@@ -227,61 +219,61 @@ class Model(object, metaclass=ABCMeta):
             for all options.
         write: bool, optional
             Write complete model after executing all methods in opt, by default True.
-        opt: dict, optional
+        steps: Optional[list[dict[str, dict[str, Any]]]]
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
-            This is a nested dictionary where the first-level keys are the names
-            of model specific methods and the second-level contain
-            argument-value pairs of the method.
+            This is a list of nested dictionary where the first-level keys are the names
+            of the method for a ``Model`` method (e.g. `write`) OR the name of a component followed by the name of the method to run separated by a dot for ``ModelComponent`` method (e.g. `grid.write`).
+            Any subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
 
-                {
-                    <name of method1>: {
+                [
+                    - <component_name>.<name of method1>: {
                         <argument1>: <value1>, <argument2>: <value2>
                     },
-                    <name of method2>: {
+                    - <component_name>.<name of method2>: {
                         ...
                     }
-                }
+                ]
 
         """
-        opt = opt or {}
-        opt = self._check_get_opt(opt)
+        steps = steps or []
+        validate_steps(self, steps)
+        self._update_region_from_arguments(steps, region)
+        self._move_region_create_to_front(steps)
 
-        # merge cli region and res arguments with opt
-        if region is not None:
-            if self._CLI_ARGS["region"] not in opt:
-                opt = {self._CLI_ARGS["region"]: {}, **opt}
-            opt[self._CLI_ARGS["region"]].update(region=region)
+        for step_dict in steps:
+            step, kwargs = next(iter(step_dict.items()))
+            self.logger.info(f"build: {step}")
+            # Call the methods.
+            method = rgetattr(self, step)
+            for k, v in kwargs.items():
+                self.logger.info(f"{method}.{k}: {v}")
+            method(**kwargs)
 
-        # then loop over other methods
-        for method in opt:
-            # if any write_* functions are present in opt, skip the final self.write()
-            if method.startswith("write_"):
-                write = False
-            kwargs = {} if opt[method] is None else opt[method]
-            self._run_log_method(method, **kwargs)
-
-        # write
-        if write:
+        # If there are any write options included in the steps,
+        # we don't need to write the whole model.
+        if write and not self._options_contain_write(steps):
             self.write()
 
     def update(
         self,
+        *,
         model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
-        opt: Optional[Dict] = None,
+        steps: Optional[list[dict[str, dict[str, Any]]]] = None,
         forceful_overwrite: bool = False,
     ):
-        r"""Single method to update a model based the settings in `opt`.
+        r"""Single method to update a model based the settings in `steps`.
 
-        Methods will be run one by one based on the order of appearance in `opt`
-        (configuration file).
+        Methods will be run one by one based on the /order of appearance in `steps`
+        (configuration file). For a list of available functions see :ref:`The model API<model_api>`
+        and :ref:`The plugin documentation<plugin_create>`
 
-        All model methods are supported including setup\_\*, read\_\* and write\_\* methods.
-        If a write\_\* option is listed in `opt` (configuration file) the full writing of the model
-        at the end of the update process is skipped.
+        Note that the \* in the signature signifies that all of the arguments to this function
+        MUST be provided as keyword arguments.
+
 
         Parameters
         ----------
@@ -291,150 +283,134 @@ class Model(object, metaclass=ABCMeta):
             current model schematization if these exist. By default None.
         write: bool, optional
             Write the updated model schematization to disk. By default True.
-        opt: dict, optional
+        steps: Optional[list[dict[str, dict[str, Any]]]]
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
-            This is a nested dictionary where the first-level keys
-            are the names of model specific methods and
-            the second-level contain argument-value pairs of the method.
+            This is a list of nested dictionary where the first-level keys are the names
+            of a component followed by the name of the method to run seperated by a dot.
+            anny subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
 
-                {
-                    <name of method1>: {
+                [
+                    - <component_name>.<name of method1>: {
                         <argument1>: <value1>, <argument2>: <value2>
                     },
-                    <name of method2>: {
+                    - <component_name>.<name of method2>: {
                         ...
                     }
-                }
+                ]
           forceful_overwrite:
             Force open files to close when attempting to write them. In the case you
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        opt = opt or {}
-        opt = self._check_get_opt(opt)
+        steps = steps or []
+        validate_steps(self, steps)
+
+        # check if region.create is in the steps, and remove it.
+        self._remove_region_create(steps)
 
         # read current model
         if not self.root.is_writing_mode():
             if model_out is None:
                 raise ValueError(
-                    '"model_out" directory required when updating in "read-only" mode'
+                    '"model_out" directory required when updating in "read-only" mode.'
                 )
             self.read()
-            if forceful_overwrite:
-                self.root.set(model_out, mode="w+")
-            else:
-                self.root.set(model_out, mode="w")
+            mode = "w+" if forceful_overwrite else "w"
+            self.root.set(model_out, mode=mode)
 
         # check if model has a region
         if self.region.data is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
-        # remove CLI_ARGS method from options and throw warning
-        method = self._CLI_ARGS["region"]
-        if method in opt:
-            opt.pop(method)  # remove from opt
-            self.logger.warning(f'"{method}" can only be called when building a model.')
+        # loop over methods from config file
+        for step_dict in steps:
+            step, kwargs = next(iter(step_dict.items()))
+            self.logger.info(f"update: {step}")
+            # Call the methods.
+            method = rgetattr(self, step)
+            for k, v in kwargs.items():
+                self.logger.info(f"{method}.{k}: {v}")
+            method(**kwargs)
 
-        # loop over other methods from config file
-        for method in opt:
-            # if any write_* functions are present in opt, skip the final self.write()
-            if "write" in method:
-                write = False
-            kwargs = {} if opt[method] is None else opt[method]
-            self._run_log_method(method, **kwargs)
-
-        # write
-        if write:
+        # If there are any write options included in the steps,
+        # we don't need to write the whole model.
+        if write and not self._options_contain_write(steps):
             self.write()
 
         self._cleanup(forceful_overwrite=forceful_overwrite)
 
-    ## file system
-    def _assert_write_mode(self):
-        if not self.root.is_writing_mode():
-            raise IOError("Model opened in read-only mode")
-
-    def _assert_read_mode(self):
-        if not self.root.is_reading_mode():
-            raise IOError("Model opened in write-only mode")
-
-    # I/O
-    def read(
-        self,
-        components: List = None,
-    ) -> None:
-        """Read the complete model schematization and configuration from model files.
+    @hydromt_step
+    def write(self, components: Optional[List[str]] = None) -> None:
+        """Write provided components to disk with defaults.
 
         Parameters
         ----------
-        components : List, optional
-            List of model components to read, each should have an associated
-            read_<component> method. By default ['config', 'maps', 'staticmaps',
-            'geoms', 'forcing', 'states', 'results']
+            components: Optional[List[str]]
+                the components that should be writen to disk. If None is provided
+                all components will be written.
         """
-        if components is None:
-            components = [
-                "config",
-                "staticmaps",
-                "maps",
-                "region",
-                "tables",
-                "geoms",
-                "forcing",
-                "states",
-                "results",
-            ]
+        components = components or list(self._components.keys())
+        for c in [self._components[name] for name in components]:
+            c.write()
+
+    @hydromt_step
+    def read(self, components: Optional[List[str]] = None) -> None:
+        """Read provided components from disk.
+
+        Parameters
+        ----------
+            components: Optional[List[str]]
+                the components that should be read from disk. If None is provided
+                all components will be read.
+        """
         self.logger.info(f"Reading model data from {self.root.path}")
-        for component in components:
-            if hasattr(self, f"read_{component}"):
-                getattr(self, f"read_{component}")()
-            elif hasattr(self, component) and hasattr(getattr(self, component), "read"):
-                getattr(self, component).read()
-            else:
-                raise AttributeError(
-                    f"{type(self).__name__} does not have read_{component} or a component of that name with a read attr"
-                )
+        components = components or list(self._components.keys())
+        for c in [self._components[name] for name in components]:
+            c.read()
 
-    def write(
-        self,
-        components: Optional[List] = None,
+    @staticmethod
+    def _options_contain_write(steps: list[dict[str, dict[str, Any]]]) -> bool:
+        return any(
+            next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps
+        )
+
+    @staticmethod
+    def _update_region_from_arguments(
+        steps: list[dict[str, dict[str, Any]]], region: dict[str, Any]
     ) -> None:
-        """Write the complete model schematization and configuration to model files.
+        try:
+            region_step = next(
+                step_dict
+                for step_dict in enumerate(steps)
+                if next(iter(step_dict)) == "region.create"
+            )
+            region_step[1]["region"] = region
+        except StopIteration:
+            steps.insert(0, {"region.create": {"region": region}})
 
-        Parameters
-        ----------
-        components : List, optional
-            List of model components to write, each should have an
-            associated write_<component> method. By default ['config', 'maps',
-            'staticmaps', 'geoms', 'forcing', 'states']
-        """
-        if components is None:
-            components = [
-                "staticmaps",
-                "maps",
-                "tables",
-                "geoms",
-                "region",
-                "forcing",
-                "states",
-                "config",
-            ]
-        self.logger.info(f"Writing model data to {self.root.path}")
-        for component in components:
-            if hasattr(self, f"write_{component}"):
-                getattr(self, f"write_{component}")()
-            elif hasattr(self, component) and hasattr(
-                getattr(self, component), "write"
-            ):
-                getattr(self, component).write()
-            else:
-                raise AttributeError(
-                    f"{type(self).__name__} does not have write_{component} or a component of that name with a write attr"
-                )
+    @staticmethod
+    def _move_region_create_to_front(steps: list[dict[str, dict[str, Any]]]) -> None:
+        region_create = next(
+            step_dict for step_dict in steps if "region.create" in step_dict
+        )
+        steps.remove(region_create)
+        steps.insert(0, region_create)
 
+    def _remove_region_create(self, steps: list[dict[str, dict[str, Any]]]) -> None:
+        try:
+            steps.remove(
+                next(step_dict for step_dict in steps if "region.create" in step_dict)
+            )
+            self.logger.warning(
+                "region.create can only be called when building a model."
+            )
+        except StopIteration:
+            pass
+
+    @hydromt_step
     def write_data_catalog(
         self,
         root: Optional[StrPath] = None,
@@ -460,6 +436,7 @@ class Model(object, metaclass=ABCMeta):
         save_csv: bool, optional
             If True, save the data catalog also as an csv table. By default False.
         """
+        self.root._assert_write_mode()
         path = data_lib_fn if isabs(data_lib_fn) else join(self.root.path, data_lib_fn)
         cat = DataCatalog(logger=self.logger, fallback_lib=None)
         # read hydromt_data yml file and add to data catalog
@@ -470,7 +447,6 @@ class Model(object, metaclass=ABCMeta):
             cat.add_source(name, source)
         # write data catalog
         if cat.sources:
-            self._assert_write_mode()
             if save_csv:
                 csv_path = os.path.splitext(path)[0] + ".csv"
                 cat.to_dataframe().reset_index().to_csv(
@@ -535,6 +511,7 @@ class Model(object, metaclass=ABCMeta):
 
         If no config file found a default config file is returned in writing mode.
         """
+        self.root._assert_write_mode()
         prefix = "User defined"
         if config_fn is None:  # prioritize user defined config path (new v0.4.1)
             if not self.root.is_reading_mode():  # write-only mode > read default config
@@ -570,7 +547,7 @@ class Model(object, metaclass=ABCMeta):
         self, config_name: Optional[str] = None, config_root: Optional[str] = None
     ):
         """Write config to <root/config_fn>."""
-        self._assert_write_mode()
+        self.root._assert_write_mode()
         if config_name is not None:
             self._config_fn = config_name
         elif self._config_fn is None:
@@ -660,8 +637,8 @@ class Model(object, metaclass=ABCMeta):
 
     def write_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Write tables at <root>/tables."""
+        self.root._assert_write_mode()
         if self.tables:
-            self._assert_write_mode()
             self.logger.info("Writing table files.")
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
@@ -674,7 +651,7 @@ class Model(object, metaclass=ABCMeta):
 
     def read_tables(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Read table files at <root>/tables and parse to dict of dataframes."""
-        self._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self.logger.info("Reading model table files.")
         fns = glob.glob(join(self.root.path, fn.format(name="*")))
@@ -721,121 +698,6 @@ class Model(object, metaclass=ABCMeta):
         return pd.concat(
             [df.assign(table_origin=name) for name, df in self.tables.items()], axis=0
         )
-
-    # model static maps
-    @property
-    def staticmaps(self):
-        """Model static maps.
-
-        Returns xarray.Dataset,
-        ..NOTE: will be deprecated in future versions and replaced by `grid`.
-        """
-        warnings.warn(
-            "The staticmaps property of the Model class will be deprecated in future"
-            "versions. Use the grid property of the GridModel class instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if self._staticmaps is None:
-            self._staticmaps = xr.Dataset()
-            if self.root.is_reading_mode():
-                self.read_staticmaps()
-        return self._staticmaps
-
-    def set_staticmaps(
-        self, data: Union[xr.DataArray, xr.Dataset], name: Optional[str] = None
-    ):
-        """Add data to staticmaps.
-
-        All layers of staticmaps must have identical spatial coordinates.
-        This method will be deprecated in future versions. See
-        :py:meth:`~hydromt.models.GridModel.set_grid`.
-
-        Parameters
-        ----------
-        data: xarray.DataArray or xarray.Dataset
-            new map layer to add to staticmaps
-        name: str, optional
-            Name of new map layer, this is used to overwrite the name of a DataArray
-            or to select a variable from a Dataset.
-        """
-        warnings.warn(
-            "The set_staticmaps method will be deprecated in future versions, "
-            + "use set_grid instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if name is None:
-            if isinstance(data, xr.DataArray) and data.name is not None:
-                name = data.name
-            elif not isinstance(data, xr.Dataset):
-                raise ValueError("Setting a map requires a name")
-        elif name is not None and isinstance(data, xr.Dataset):
-            data_vars = list(data.data_vars)
-            if len(data_vars) == 1 and name not in data_vars:
-                data = data.rename_vars({data_vars[0]: name})
-            elif name not in data_vars:
-                raise ValueError("Name not found in DataSet")
-            else:
-                data = data[[name]]
-        if isinstance(data, xr.DataArray):
-            data.name = name
-            data = data.to_dataset()
-        if len(self.staticmaps) == 0:  # new data / trigger read
-            self._staticmaps = data
-        else:
-            if isinstance(data, np.ndarray):
-                if data.shape != self.shape:
-                    raise ValueError("Shape of data and staticmaps do not match")
-                data = xr.DataArray(dims=self.dims, data=data, name=name).to_dataset()
-            for dvar in data.data_vars.keys():
-                if dvar in self._staticmaps:
-                    self.logger.warning(f"Replacing staticmap: {dvar}")
-                self._staticmaps[dvar] = data[dvar]
-
-    def read_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
-        r"""Read static model maps at <root>/<fn> and add to staticmaps property.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
-
-        .. NOTE: this method is deprecated.
-        Use the grid property of the GridMixin instead.
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, by default "staticmaps/staticmaps.nc"
-        \**kwargs:
-            Additional keyword arguments that are passed to the
-            `read_nc` function.
-        """
-        self._assert_read_mode()
-        for ds in self.read_nc(fn, **kwargs).values():
-            self.set_staticmaps(ds)
-
-    def write_staticmaps(self, fn: str = "staticmaps/staticmaps.nc", **kwargs) -> None:
-        r"""Write static model maps to netcdf file at <root>/<fn>.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
-
-        .. NOTE: this method is deprecated.
-        Use the grid property of the GridMixin instead.
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, by default 'staticmaps/staticmaps.nc'
-        \**kwargs:
-            Additional keyword arguments that are passed to the
-            `write_nc` function.
-        """
-        if len(self.staticmaps) == 0:
-            self.logger.debug("No staticmaps data found, skip writing.")
-        else:
-            self._assert_write_mode()
-            # write_nc requires dict - use dummy 'staticmaps' key
-            nc_dict = {"staticmaps": self.staticmaps}
-            self.write_nc(nc_dict, fn, **kwargs)
 
     # map files setup methods
     def setup_maps_from_rasterdataset(
@@ -1050,7 +912,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `read_nc` function.
         """
-        self._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_maps(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -1070,10 +932,10 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `write_nc` function.
         """
+        self.root._assert_write_mode()
         if len(self.maps) == 0:
             self.logger.debug("No maps data found, skip writing.")
         else:
-            self._assert_write_mode()
             self.write_nc(self.maps, fn, **kwargs)
 
     # model geometry files
@@ -1134,7 +996,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
         """
-        self._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_geoms(skip_read=True)
         fns = glob.glob(join(self.root.path, fn))
         for fn in fns:
@@ -1160,10 +1022,10 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
+        self.root._assert_write_mode()
         if len(self.geoms) == 0:
             self.logger.debug("No geoms data found, skip writing.")
             return
-        self._assert_write_mode()
         for name, gdf in self.geoms.items():
             if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
                 self.logger.warning(
@@ -1180,66 +1042,6 @@ class Model(object, metaclass=ABCMeta):
             ):
                 gdf = gdf.to_crs(4326)
             gdf.to_file(_fn, **kwargs)
-
-    @property
-    def staticgeoms(self):
-        """Access the geometryes.
-
-        This property will be deprecated in future versions,
-        use :py:meth:`~hydromt.Model.geom`.
-        """
-        warnings.warn(
-            "The staticgeoms method will be deprecated in future versions,"
-            " use geoms instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if self._geoms is None and self.root.is_reading_mode():
-            self.read_staticgeoms()
-        self._staticgeoms = self._geoms
-        return self._staticgeoms
-
-    def set_staticgeoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
-        """Set the geometries.
-
-        This method will be deprecated in future versions,
-        use :py:meth:`~hydromt.Model.set_geoms`.
-        """
-        warnings.warn(
-            "The set_staticgeoms method will be deprecated in future versions,"
-            " use set_geoms instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.set_geoms(geom, name)
-
-    def read_staticgeoms(self):
-        """Read gemoetries from disk.
-
-        This method will be deprecated in future versions
-        use :py:meth:`~hydromt.Model.read_geoms`.
-        """
-        warnings.warn(
-            'The read_staticgeoms" method will be deprecated in future versions," \
-            " use read_geoms instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.read_geoms(fn="staticgeoms/*.geojson")
-
-    def write_staticgeoms(self):
-        """Write the geometries to disk.
-
-        This method will be deprecated in future versions,
-        use :py:meth:`~hydromt.Model.write_geoms`.
-        """
-        warnings.warn(
-            'The "write_staticgeoms" method will be deprecated in future versions,"\
-             " use  "write_geoms" instead.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.write_geoms(fn="staticgeoms/{name}.geojson")
 
     # model forcing files
     @property
@@ -1301,7 +1103,6 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode()
         self._initialize_forcing(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -1321,10 +1122,10 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
+        self.root._assert_read_mode()
         if len(self.forcing) == 0:
             self.logger.debug("No forcing data found, skip writing.")
         else:
-            self._assert_write_mode()
             self.write_nc(self.forcing, fn, **kwargs)
 
     # model state files
@@ -1380,7 +1181,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_states(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -1400,10 +1201,10 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
+        self.root._assert_write_mode()
         if len(self.states) == 0:
             self.logger.debug("No states data found, skip writing.")
         else:
-            self._assert_write_mode()
             self.write_nc(self.states, fn, **kwargs)
 
     # model results files; NOTE we don't have a write_results method
@@ -1464,7 +1265,7 @@ class Model(object, metaclass=ABCMeta):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_results(skip_read=True)
         ncs = self.read_nc(fn, **kwargs)
         for name, ds in ncs.items():
@@ -1572,7 +1373,7 @@ class Model(object, metaclass=ABCMeta):
             try:
                 ds.to_netcdf(_fn, **kwargs)
             except PermissionError:
-                logger.warning(f"Could not write to file {_fn}, defering write")
+                _logger.warning(f"Could not write to file {_fn}, defering write")
                 if self._TMP_DATA_DIR is None:
                     self._TMP_DATA_DIR = TemporaryDirectory()
 
@@ -1647,131 +1448,12 @@ class Model(object, metaclass=ABCMeta):
             ncs.update({name: ds})
         return ncs
 
-    ## properties / methods below can be used directly in actual class
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.crs
-        else:
-            return self.region.crs
-
-    def set_crs(self, crs) -> None:
-        """Set the coordinate reference system."""
-        warnings.warn(
-            '"set_crs" is deprecated. Please set the crs of all model'
-            " components instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.set_crs(crs)
-
-    @property
-    def dims(self) -> Tuple:
-        """Returns spatial dimension names of staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.dims
-
-    @property
-    def coords(self) -> Dict:
-        """Returns the coordinates of model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.coords
-
-    @property
-    def res(self) -> Tuple:
-        """Returns the resolution of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.res
-
-    @property
-    def transform(self):
-        """Returns the geospatial transform of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.transform
-
-    @property
-    def width(self):
-        """Returns the width of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.width
-
-    @property
-    def height(self):
-        """Returns the height of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.height
-
-    @property
-    def shape(self) -> Tuple:
-        """Returns the shape of the model staticmaps.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.shape
-
-    @property
-    def bounds(self) -> Tuple:
-        """Returns the bounding box of the model region.
-
-        ..NOTE: will be deprecated in future versions.
-        """
-        if len(self.staticmaps) > 0:
-            return self.staticmaps.raster.bounds
-        else:
-            return self.region.bounds
+        return self.region.crs
 
     # test methods
-    def test_model_api(self):
-        """Test compliance with HydroMT Model API."""
-        warnings.warn(
-            '"test_model_api" is now part of the internal API, use "_test_model_api"'
-            " instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._test_model_api()
-
-    def _test_model_api(self) -> List:
-        """Test compliance with HydroMT Model API.
-
-        Returns
-        -------
-        non_compliant: list
-            List of model components that are non-compliant with the model API
-            structure.
-        """
-        non_compliant = []
-        for component, dtype in self.api.items():
-            obj = getattr(self, component, None)
-            try:
-                assert obj is not None, component
-                _assert_isinstance(obj, dtype, component)
-            except AssertionError as err:
-                non_compliant.append(str(err))
-
-        return non_compliant
-
     def _test_equal(self, other, skip_component=None) -> Tuple[bool, Dict]:
         """Test if two models including their data components are equal.
 

@@ -1,67 +1,73 @@
 
 ---
-setup_config:
-  header.settings: value
-  timers.end: '2010-02-15'
-  timers.start: '2010-02-05'
-
-setup_grid:
-  res: 0.05
-  crs: 4326
-  basin_index_fn: merit_hydro_index
-  hydrography_fn: merit_hydro
-
-setup_grid_from_constant:
-  constant: 0.01
-  name: c1
-  dtype: float32
-  nodata: -99.0
-
-setup_grid_from_rasterdataset:
-  raster_fn: merit_hydro_1k
-  variables:
-    - elevtn
-    - basins
-  reproject_method:
-    - average
-    - mode
-
-setup_grid_from_rasterdataset2:
-  raster_fn: vito
-  fill_method: nearest
-  reproject_method: mode
-  rename:
-    vito: landuse
-
-setup_grid_from_raster_reclass:
-  raster_fn: vito
-  reclass_table_fn: vito_reclass
-  reclass_variables:
-    - manning
-  reproject_method:
-    - average
-
-setup_grid_from_geodataframe:
-  vector_fn: hydro_lakes
-  variables:
-    - waterbody_id
-    - Depth_avg
-  nodata:
-    - -1
-    - -999.0
-  rasterize_method: value
-  rename:
-    waterbody_id: lake_id
-    Detph_avg: lake_depth
-
-setup_grid_from_geodataframe2:
-  vector_fn: hydro_lakes
-  rasterize_method: fraction
-  rename:
-    hydro_lakes: water_frac
-
-write:
+model_type: Model
+global:
   components:
-    - config
-    - geoms
-    - grid
+    grid:
+      type: GridComponent
+steps:
+  # - config.create:
+  #   header.settings: value
+  #   timers.end: '2010-02-15'
+  #   timers.start: '2010-02-05'
+
+  - grid.create:
+      res: 0.05
+      crs: 4326
+      basin_index_fn: merit_hydro_index
+      hydrography_fn: merit_hydro
+
+  - grid.add_data_from_constant:
+      constant: 0.01
+      name: c1
+      dtype: float32
+      nodata: -99.0
+
+  - grid.add_data_from_rasterdataset:
+      raster_fn: merit_hydro_1k
+      variables:
+        - elevtn
+        - basins
+      reproject_method:
+        - average
+        - mode
+
+  - grid.add_data_from_rasterdataset:
+      raster_fn: vito
+      fill_method: nearest
+      reproject_method: mode
+      rename:
+        vito: landuse
+
+  - grid.add_data_from_raster_reclass:
+      raster_fn: vito
+      reclass_table_fn: vito_reclass
+      reclass_variables:
+        - manning
+      reproject_method:
+        - average
+
+  - grid.add_data_from_geodataframe:
+      vector_fn: hydro_lakes
+      variables:
+        - waterbody_id
+        - Depth_avg
+      nodata:
+        - -1
+        - -999.0
+      rasterize_method: value
+      rename:
+        waterbody_id: lake_id
+        Detph_avg: lake_depth
+
+  - grid.add_data_from_geodataframe:
+      vector_fn: hydro_lakes
+      rasterize_method: fraction
+      rename:
+        hydro_lakes: water_frac
+
+  - write:
+      components:
+        # - config
+        - region
+        - grid

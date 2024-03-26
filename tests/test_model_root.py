@@ -4,7 +4,7 @@ from os.path import abspath, exists, join
 import pytest
 
 from hydromt._typing import ModelMode
-from hydromt.models.root import ModelRoot
+from hydromt.root import ModelRoot
 
 # we need to compensate for where the repo is located when
 # we run the tests

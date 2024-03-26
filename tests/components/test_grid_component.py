@@ -8,10 +8,10 @@ import pandas as pd
 import pytest
 import xarray as xr
 
+from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.models.api import Model
-from hydromt.models.components.grid import GridComponent
-from hydromt.models.root import ModelRoot
+from hydromt.models.model import Model
+from hydromt.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 logger.propagate = True
@@ -70,7 +70,7 @@ def test_read(tmpdir, mock_model, hydds):
         grid_component.read()
     mock_model.root = ModelRoot(path=tmpdir, mode="r+")
     grid_component = GridComponent(model=mock_model)
-    with patch("hydromt.models.components.grid.read_nc", return_value={"grid": hydds}):
+    with patch("hydromt.components.grid.read_nc", return_value={"grid": hydds}):
         grid_component.read()
         assert grid_component.data == hydds
 
@@ -88,7 +88,7 @@ def test_create_grid_from_bbox_rotated(mock_model):
     assert grid_component.data.raster.y_dim == "y"
     assert np.isclose(grid_component.data.raster.res[0], 0.05)
     # Check set_geoms call
-    geom = grid_component.model.method_calls[0][1][0]
+    geom = grid_component._model.method_calls[0][1][0]
     assert isinstance(geom, gpd.GeoDataFrame)
 
 
@@ -106,7 +106,7 @@ def test_create_grid_from_bbox(mock_model):
     assert grid_component.data.raster.shape == (7, 16)
     assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
     # Check set_geoms call
-    geom = grid_component.model.method_calls[0][1][0]
+    geom = grid_component._model.method_calls[0][1][0]
     assert isinstance(geom, gpd.GeoDataFrame)
 
 
@@ -192,13 +192,13 @@ def test_set_crs(mock_model, demda):
 def test_add_data_from_constant(mock_model, demda):
     grid_component = GridComponent(mock_model)
     demda.name = "demda"
-    with patch("hydromt.models.components.grid.grid_from_constant", return_value=demda):
+    with patch("hydromt.components.grid.grid_from_constant", return_value=demda):
         name = grid_component.add_data_from_constant(constant=0.01, name="demda")
         assert name == ["demda"]
         assert grid_component.data == demda
 
 
-@patch("hydromt.models.components.grid.grid_from_rasterdataset")
+@patch("hydromt.components.grid.grid_from_rasterdataset")
 def test_add_data_from_rasterdataset(
     mock_grid_from_rasterdataset, demda, caplog, mock_model
 ):
@@ -208,7 +208,7 @@ def test_add_data_from_rasterdataset(
     grid_component = GridComponent(mock_model)
     mock_grid_from_rasterdataset.return_value = demda
     with patch.object(
-        grid_component.data_catalog, "get_rasterdataset"
+        grid_component._data_catalog, "get_rasterdataset"
     ) as mock_get_rasterdataset:
         mock_get_rasterdataset.return_value = demda
         raster_fn = "your_raster_file.tif"
@@ -238,15 +238,15 @@ def test_add_data_from_raster_reclass(caplog, demda, mock_model):
     reclass_table_fn = "vito_mapping"
 
     demda.name = "name"
-    grid_component.data_catalog.get_rasterdataset = create_autospec(
-        grid_component.data_catalog.get_rasterdataset, return_value=demda
+    grid_component._data_catalog.get_rasterdataset = create_autospec(
+        grid_component._data_catalog.get_rasterdataset, return_value=demda
     )
-    grid_component.data_catalog.get_dataframe = create_autospec(
-        grid_component.data_catalog.get_dataframe, return_value=pd.DataFrame()
+    grid_component._data_catalog.get_dataframe = create_autospec(
+        grid_component._data_catalog.get_dataframe, return_value=pd.DataFrame()
     )
 
     with patch(
-        "hydromt.models.components.grid.grid_from_raster_reclass"
+        "hydromt.components.grid.grid_from_raster_reclass"
     ) as mock_grid_from_raster_reclass:
         mock_grid_from_raster_reclass.return_value = demda.to_dataset()
 
@@ -267,7 +267,7 @@ def test_add_data_from_raster_reclass(caplog, demda, mock_model):
         # Test returned result from add_data_from_rasterdataset
         assert all([x in result for x in demda.to_dataset().data_vars.keys()])
 
-        grid_component.data_catalog.get_rasterdataset.return_value = demda.to_dataset()
+        grid_component._data_catalog.get_rasterdataset.return_value = demda.to_dataset()
 
         with pytest.raises(
             ValueError,
@@ -287,11 +287,11 @@ def test_add_data_from_geodataframe(caplog, geodf, demda, mock_model):
     grid_component = GridComponent(mock_model)
     caplog.set_level(logging.INFO)
     demda.name = "name"
-    grid_component.data_catalog.get_geodataframe = create_autospec(
-        grid_component.data_catalog.get_geodataframe, return_value=geodf
+    grid_component._data_catalog.get_geodataframe = create_autospec(
+        grid_component._data_catalog.get_geodataframe, return_value=geodf
     )
     with patch(
-        "hydromt.models.components.grid.grid_from_geodataframe"
+        "hydromt.components.grid.grid_from_geodataframe"
     ) as mock_grid_from_geodataframe:
         mock_grid_from_geodataframe.return_value = demda.to_dataset()
         vector_fn = "hydro_lakes"
@@ -310,7 +310,7 @@ def test_add_data_from_geodataframe(caplog, geodf, demda, mock_model):
         mock_grid_from_geodataframe.assert_called_once()
         assert grid_component.data == demda
         assert all([x in result for x in demda.to_dataset().data_vars.keys()])
-        grid_component.data_catalog.get_geodataframe.return_value = gpd.GeoDataFrame()
+        grid_component._data_catalog.get_geodataframe.return_value = gpd.GeoDataFrame()
         caplog.set_level(logging.WARNING)
         result = grid_component.add_data_from_geodataframe(
             vector_fn=vector_fn,
