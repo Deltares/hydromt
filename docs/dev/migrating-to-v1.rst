@@ -188,9 +188,13 @@ forcing or tables. To be able to work within a `Model` class properly a componen
 - `read`: reading the component and its data from disk.
 - `write`: write the component in its current state to disk in the provided root.
 
-Additionally, it is highly recommended to also provide the following methods:
+Additionally, it is highly recommended to also provide the following methods to ensure HydroMT can properly handle your objects:
 
 - `set`: provide the ability to override the current data in the component.
+- `_initialize`: provide the ability to override the current data in the component.
+
+Finally you can provide additional functionality by providing the following optional functions:
+
 - `create`: the ability to construct the schematization of the component (computation units like grid cells, mesh1d or network lines, vector units for lumped model etc.) from the provided arguments.
 - `add_data`: the ability to add model data and parameters to the component once the schematization is well defined (ie add landuse data to grid or mesh etc.).
 
