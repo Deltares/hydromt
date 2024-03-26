@@ -44,6 +44,6 @@ class ModelComponent(ABC):
         return self._model.logger
 
     @property
-    def _model_root(self) -> "ModelRoot":
+    def _root(self) -> "ModelRoot":
         """Return the root of the model this component is associated with."""
         return self._model.root
