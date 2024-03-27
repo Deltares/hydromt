@@ -1,4 +1,4 @@
-from hydromt._utils.deep_merge import deep_merge
+from hydromt.utils.deep_merge import deep_merge
 
 
 def test_deep_merge_simple():

@@ -1,7 +1,13 @@
+"""Helper function to merge deeply nested dictionaries."""
+
 from typing import Any, Dict
 
 
 def deep_merge(left: Dict[str, Any], right: Dict[str, Any]) -> Dict[str, Any]:
+    """Merge deeply nested dictionaries.
+
+    Given overlap in the leaves the right dictionary will take precedence.
+    """
     merged = {}
 
     for k_left, v_left in left.items():

@@ -33,7 +33,6 @@ from pyproj import CRS
 from hydromt import hydromt_step
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
-from hydromt._utils.deep_merge import deep_merge
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import ModelRegionComponent
@@ -44,6 +43,7 @@ from hydromt.io import configread
 from hydromt.io.writers import configwrite
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
+from hydromt.utils.deep_merge import deep_merge
 
 __all__ = ["Model"]
 
