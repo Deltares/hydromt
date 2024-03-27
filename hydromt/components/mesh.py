@@ -265,7 +265,15 @@ class MeshComponent(ModelComponent):
         if self.data is not None:
             return self.data.ugrid.bounds
         return None
-
+    @property 
+    def mesh_region(self) -> Optional[gpd.GeoDataFrame]:
+        """Return mesh total_bounds as a geodataframe."""
+        if self.data is not None:
+            region = gpd.GeoDataFrame(
+                geometry=[box(*self.data.ugrid.total_bounds)], crs=self.crs
+            )
+            return region
+        return None
     @property
     def mesh_names(self) -> List[str]:
         """List of grid names in mesh."""
