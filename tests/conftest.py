@@ -329,34 +329,6 @@ def model(demda, world, obsda):
     return mod
 
 
-# @pytest.fixture()
-# def vector_model(ts, geodf):
-#     mod = VectorModel()
-#     mod.setup_config(**{"header": {"setting": "value"}})
-#     da = xr.DataArray(
-#         ts,
-#         dims=["index", "time"],
-#         coords={"index": ts.index, "time": ts.columns},
-#         name="zs",
-#     )
-#     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
-#     da.vector.set_crs(geodf.crs)
-#     mod.set_vector(da)
-#     return mod
-
-
-# @pytest.fixture()
-# def mesh_model(griduda):
-#     mod = MODELS.load("mesh_model")()
-#     region = gpd.GeoDataFrame(
-#         geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
-#     )
-#     mod.region.create({"geom": region})
-#     mod.setup_config(**{"header": {"setting": "value"}})
-#     mod.set_mesh(griduda, "elevtn")
-#     return mod
-
-
 @pytest.fixture()
 def mock_resolver() -> MetaDataResolver:
     class MockMetaDataResolver(MetaDataResolver):

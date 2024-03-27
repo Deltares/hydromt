@@ -3,7 +3,7 @@
 import os
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -16,7 +16,6 @@ from hydromt import hydromt_step
 from hydromt.components.base import ModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
-from hydromt.models.model import Model
 from hydromt.workflows.mesh import (
     create_mesh2d,
     mesh2d_from_raster_reclass,
@@ -24,13 +23,17 @@ from hydromt.workflows.mesh import (
     rename_mesh,
 )
 
+if TYPE_CHECKING:
+    from hydromt.models import Model
+
+
 DEFAULT_FN = "mesh/mesh.nc"
 
 
 class MeshComponent(ModelComponent):
     """ModelComponent class for mesh components."""
 
-    def __init__(self, model: Model):
+    def __init__(self, model: "Model"):
         super().__init__(model=model)
         self._data = None
 

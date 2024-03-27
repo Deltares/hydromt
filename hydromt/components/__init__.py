@@ -2,6 +2,7 @@
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
+from hydromt.components.mesh import MeshComponent
 from hydromt.components.region import ModelRegionComponent
 
 __all__ = [
