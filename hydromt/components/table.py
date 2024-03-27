@@ -13,7 +13,6 @@ from typing import (
 
 import pandas as pd
 
-from hydromt._typing.type_def import PandasLike
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
 
@@ -37,11 +36,11 @@ class TableComponent(ModelComponent):
         model: Model
             HydroMT model instance
         """
-        self._data: Optional[Dict[str, PandasLike]] = None
+        self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
         super().__init__(model=model)
 
     @property
-    def data(self) -> Dict[str, PandasLike]:
+    def data(self) -> Dict[str, Union[pd.DataFrame, pd.Series]]:
         """Model tables."""
         if self._data is None:
             self._initialize_tables()
@@ -85,7 +84,11 @@ class TableComponent(ModelComponent):
                 tbl = pd.read_csv(fn, **kwargs)
                 self.set(tbl, name=name)
 
-    def set(self, tables: Union[PandasLike, Dict], name: Optional[str] = None) -> None:
+    def set(
+        self,
+        tables: Union[Union[pd.DataFrame, pd.Series], Dict],
+        name: Optional[str] = None,
+    ) -> None:
         """Add (a) table(s) <pandas.DataFrame> to model.
 
         Parameters
@@ -97,7 +100,7 @@ class TableComponent(ModelComponent):
             Name of table, by default None. Required when tables is not a dict.
         """
         self._initialize_tables()
-        self._data = cast(Dict[str, PandasLike], self._data)
+        self._data = cast(Dict[str, Union[pd.DataFrame, pd.Series]], self._data)
         if not isinstance(tables, dict) and name is None:
             raise ValueError("name required when tables is not a dict")
         elif not isinstance(tables, dict):

@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 
 import geopandas as gpd
-import pandas as pd
 from dateutil.parser import parse
 from pydantic.functional_validators import AfterValidator, BeforeValidator
 from shapely.geometry.base import BaseGeometry
@@ -98,4 +97,3 @@ Variables = Union[str, List[str]]
 GeomBuffer = int
 
 ModeLike = Union[ModelMode, str]
-PandasLike = Union[pd.DataFrame, pd.Series]
