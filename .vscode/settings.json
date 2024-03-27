@@ -21,11 +21,14 @@
     "files.insertFinalNewline": true,
     "cSpell.words": [
         "GDAL",
+        "geoms",
         "hydromt",
+        "ndarray",
         "pixi",
         "pydantic",
         "pygeos",
         "SFINCS",
+        "xarray",
         "zarr"
     ]
 }
