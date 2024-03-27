@@ -26,6 +26,7 @@ from hydromt.workflows.basin_mask import get_basin_geometry
 if TYPE_CHECKING:
     from hydromt.models import Model
 
+__all__ = ["RegionComponent"]
 
 logger = getLogger(__name__)
 

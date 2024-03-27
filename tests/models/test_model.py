@@ -222,7 +222,7 @@ def test_model_does_not_overwrite_in_write_mode(tmpdir):
     bbox = [12.05, 45.30, 12.85, 45.65]
     root = join(tmpdir, "tmp")
     model = Model(root=root, mode="w")
-    model.region.create(region={"bbox": bbox})
+    model.region.create({"bbox": bbox})
     model.region.write()
     assert exists(join(root, "region.geojson"))
     with pytest.raises(
@@ -348,7 +348,7 @@ def test_model_set_geoms(tmpdir):
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom_28992 = geom.to_crs(epsg=28992)
     model = Model(root=str(tmpdir), mode="w")
-    model.region.create(region={"geom": geom_28992})  # set model crs based on epsg28992
+    model.region.create({"geom": geom_28992})  # set model crs based on epsg28992
     model.set_geoms(geom, "geom_wgs84")  # this should convert the geom crs to epsg28992
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
 

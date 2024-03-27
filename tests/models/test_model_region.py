@@ -20,6 +20,6 @@ def test_model_writes_region(test_model, geodf):
     test_model.root.mode = ModelMode.WRITE
     region_file_path = join(test_dir, "region.geojson")
     assert not exists(region_file_path)
-    test_model.region.create(region={"bbox": geodf.total_bounds})
+    test_model.region.create({"bbox": geodf.total_bounds})
     test_model.region.write()
     assert exists(region_file_path)
