@@ -15,6 +15,7 @@ import pandas as pd
 
 from hydromt._typing.type_def import PandasLike
 from hydromt.components.base import ModelComponent
+from hydromt.hydromt_step import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
@@ -56,6 +57,7 @@ class TableComponent(ModelComponent):
             if self._root.is_reading_mode() and not skip_read:
                 self.read()
 
+    @hydromt_step
     def write(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Write tables at <root>/tables."""
         self._root._assert_write_mode()
@@ -70,6 +72,7 @@ class TableComponent(ModelComponent):
         else:
             self._model.logger.debug("No tables found, skip writing.")
 
+    @hydromt_step
     def read(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
         """Read table files at <root>/tables and parse to dict of dataframes."""
         self._root._assert_read_mode()
@@ -82,7 +85,7 @@ class TableComponent(ModelComponent):
                 tbl = pd.read_csv(fn, **kwargs)
                 self.set(tbl, name=name)
 
-    def set(self, tables: Union[PandasLike, Dict], name:Optional[str]=None) -> None:
+    def set(self, tables: Union[PandasLike, Dict], name: Optional[str] = None) -> None:
         """Add (a) table(s) <pandas.DataFrame> to model.
 
         Parameters
