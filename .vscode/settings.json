@@ -10,5 +10,22 @@
             "source.fixAll": "explicit"
         }
     },
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "files.exclude": {
+        ".mypy_cache": true,
+        ".pixi": true,
+        ".pytest_cache": true,
+        ".ruff_cache": true,
+        "**/__pycache__": true
+    },
+    "files.insertFinalNewline": true,
+    "cSpell.words": [
+        "GDAL",
+        "hydromt",
+        "pixi",
+        "pydantic",
+        "pygeos",
+        "SFINCS",
+        "zarr"
+    ]
 }

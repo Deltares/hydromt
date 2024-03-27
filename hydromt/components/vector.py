@@ -11,7 +11,7 @@ import numpy as np
 import xarray as xr
 
 from hydromt.gis.vector import GeoDataset
-from hydromt.models.api import Model, _check_equal
+from hydromt.models.model import Model, _check_equal
 
 __all__ = ["VectorModel"]
 logger = logging.getLogger(__name__)
@@ -300,7 +300,6 @@ class VectorMixin:
 
 
 class VectorModel(VectorMixin, Model):
-
     """Model class Vector Model for vector (polygons) models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_region"}

@@ -1,13 +1,12 @@
-import os
-
 import geopandas as gpd
 import numpy as np
 import pytest
 import xarray as xr
 
 from hydromt import DataCatalog, raster
-from hydromt.models import MODELS
-from hydromt.models.components.region import _parse_region, _parse_region_value
+
+# from hydromt.models import MODELS
+from hydromt.components.region import _parse_region, _parse_region_value
 from hydromt.workflows.basin_mask import _check_size
 
 
@@ -114,16 +113,16 @@ def test_region_from_inter_basin(geodf):
     assert "xy" in region
 
 
-@pytest.mark.skip(reason="region from model not yet imported")
-def test_region_from_model(tmpdir, world, geodf, rioda):
-    # prepare test data
-    model = MODELS.generic[0]
-    root = str(tmpdir.join(model)) + "_test_region"
-    if not os.path.isdir(root):
-        os.mkdir(root)
-    region = {model: root}
-    kind, region = _parse_region(region)
-    assert kind == "model"
+# @pytest.mark.skip(reason="region from model not yet imported")
+# def test_region_from_model(tmpdir, world, geodf, rioda):
+#     # prepare test data
+#     model = MODELS.generic[0]
+#     root = str(tmpdir.join(model)) + "_test_region"
+#     if not os.path.isdir(root):
+#         os.mkdir(root)
+##     region = {model: root}
+#     kind, region = _parse_region(region)
+#     assert kind == "model"
 
 
 @pytest.mark.skip(reason="MODEL import does not work yet")

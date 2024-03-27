@@ -1,4 +1,5 @@
 """Implementations for model mesh workloads."""
+
 import logging
 import os
 from os.path import dirname, isdir, join
@@ -13,7 +14,7 @@ from pyproj import CRS
 
 from hydromt import workflows
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.models.api import Model
+from hydromt.models.model import Model
 
 __all__ = ["MeshModel"]
 logger = logging.getLogger(__name__)
@@ -524,7 +525,6 @@ class MeshMixin(object):
 
 
 class MeshModel(MeshMixin, Model):
-
     """Model class Mesh Model for mesh models in HydroMT.
 
     Uses xugrid for working with unstructured grids, for data and topology stored

@@ -6,14 +6,13 @@ from typing import List
 
 import xarray as xr
 
-from hydromt.models.api import Model
+from hydromt.models.model import Model
 
 __all__ = ["NetworkModel"]
 logger = logging.getLogger(__name__)
 
 
 class NetworkModel(Model):
-
     """Implementation for the network models."""
 
     _CLI_ARGS = {"region": "setup_region"}

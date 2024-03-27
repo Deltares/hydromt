@@ -15,14 +15,16 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely import box
 
-from hydromt import _compat
+from hydromt import _compat, hydromt_step
 from hydromt._typing.type_def import StrPath
+from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.models.components.base import ModelComponent
+from hydromt.plugins import PLUGINS
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:
     from hydromt.models import Model
+
 
 logger = getLogger(__name__)
 
@@ -39,6 +41,7 @@ class ModelRegionComponent(ModelComponent):
         super().__init__(model)
         self._data: Optional[GeoDataFrame] = None
 
+    @hydromt_step
     def create(
         self,
         region: dict,
@@ -136,18 +139,18 @@ class ModelRegionComponent(ModelComponent):
             parsed region json
         """
         kind, region = _parse_region(
-            region, data_catalog=self.data_catalog, logger=self.logger
+            region, data_catalog=self._data_catalog, logger=self._logger
         )
         if kind in ["basin", "subbasin", "interbasin"]:
             # retrieve global hydrography data (lazy!)
-            ds_org = self.data_catalog.get_rasterdataset(hydrography_fn)
+            ds_org = self._data_catalog.get_rasterdataset(hydrography_fn)
             if "bounds" not in region:
-                region.update(basin_index=self.data_catalog.get_source(basin_index_fn))
+                region.update(basin_index=self._data_catalog.get_source(basin_index_fn))
             # get basin geometry
             geom, xy = get_basin_geometry(
                 ds=ds_org,
                 kind=kind,
-                logger=self.logger,
+                logger=self._logger,
                 **region,
             )
             region.update(xy=xy)
@@ -175,7 +178,7 @@ class ModelRegionComponent(ModelComponent):
         # if nothing is provided, record that the region was set by the user
         self.kind = kind
         if self._data is not None:
-            self.logger.info("Updating region geometry.")
+            self._logger.info("Updating region geometry.")
 
         if isinstance(data, GeoSeries):
             self._data = GeoDataFrame(data)
@@ -195,7 +198,7 @@ class ModelRegionComponent(ModelComponent):
     @property
     def data(self) -> Optional[GeoDataFrame]:
         """Provide access to the underlying GeoDataFrame data of the model region."""
-        if self._data is None and self.model_root.is_reading_mode():
+        if self._data is None and self._root.is_reading_mode():
             self.read()
 
         return self._data
@@ -208,21 +211,23 @@ class ModelRegionComponent(ModelComponent):
         else:
             raise ValueError("Could not read or construct region to read crs from")
 
+    @hydromt_step
     def read(
         self,
         rel_path: StrPath = Path(DEFAULT_REGION_FILE_PATH),
         **read_kwargs,
     ):
         """Read the model region from a file on disk."""
-        self.model._assert_read_mode()
+        self._root._assert_read_mode()
         # cannot read geom files for purely in memory models
-        self.logger.debug(f"Reading model file {rel_path}.")
+        self._logger.debug(f"Reading model file {rel_path}.")
         self._data = cast(
             GeoDataFrame,
-            gpd.read_file(join(self.model_root.path, rel_path), **read_kwargs),
+            gpd.read_file(join(self._root.path, rel_path), **read_kwargs),
         )
         self.kind = "geom"
 
+    @hydromt_step
     def write(
         self,
         rel_path: StrPath = Path(DEFAULT_REGION_FILE_PATH),
@@ -230,10 +235,10 @@ class ModelRegionComponent(ModelComponent):
         **write_kwargs,
     ):
         """Write the model region to a file."""
-        write_path = join(self.model_root.path, rel_path)
-        self.model._assert_write_mode()
+        self._root._assert_write_mode()
+        write_path = join(self._root.path, rel_path)
 
-        if exists(write_path) and not self.model_root.is_override_mode():
+        if exists(write_path) and not self._root.is_override_mode():
             raise OSError(
                 f"Model dir already exists and cannot be overwritten: {write_path}"
             )
@@ -242,9 +247,9 @@ class ModelRegionComponent(ModelComponent):
             makedirs(base_name, exist_ok=True)
 
         if self.data is None:
-            self.logger.info("No region data found. skipping writing...")
+            self._logger.info("No region data found. skipping writing...")
         else:
-            self.logger.info(f"writing region data to {write_path}")
+            self._logger.info(f"writing region data to {write_path}")
             gdf = self.data.copy()
 
             if to_wgs84 and (
@@ -284,15 +289,13 @@ def _parse_region(
     }
     kind = next(iter(kwargs))  # first key of region
     value0 = kwargs.pop(kind)
-    from hydromt.models import MODELS
-
-    if kind in MODELS:
-        model_class = MODELS.load(kind)
-        kwargs = dict(mod=model_class.__init__(root=value0, mode="r", logger=logger))
-        kind = "model"
 
     if kind == "grid":
         kwargs = {"grid": data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)}
+    elif kind in PLUGINS.model_plugins:
+        model_class = PLUGINS.model_plugins[kind]
+        kwargs = dict(mod=model_class(root=value0, mode="r", logger=logger))
+        kind = "model"
     elif kind == "mesh":
         if _compat.HAS_XUGRID:
             if isinstance(value0, (str, Path)) and isfile(value0):

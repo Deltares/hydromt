@@ -62,6 +62,14 @@ class ModelRoot:
             l.flush()
             l.close()
 
+    def _assert_write_mode(self) -> None:
+        if not self.mode.is_writing_mode():
+            raise IOError("Model opened in read-only mode")
+
+    def _assert_read_mode(self) -> None:
+        if not self.mode.is_reading_mode():
+            raise IOError("Model opened in write-only mode")
+
     @property
     def mode(self) -> ModelMode:
         """The mode of the model this object belongs to."""

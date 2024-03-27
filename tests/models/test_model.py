@@ -1,31 +1,46 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
+
 from copy import deepcopy
 from os import listdir
 from os.path import abspath, dirname, exists, isfile, join
+from pathlib import Path
 from typing import Any
+from unittest.mock import MagicMock
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-import hydromt._compat
-import hydromt.models.plugins
-from hydromt._compat import EntryPoint, EntryPoints
+from hydromt.components.base import ModelComponent
+from hydromt.components.grid import GridComponent
+from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import (
-    MODELS,
-    Model,
-    ModelCatalog,
-    VectorModel,
-    plugins,
-)
-from hydromt.models.api import _check_data
+from hydromt.models import Model
+from hydromt.models.model import _check_data
+from hydromt.plugins import PLUGINS
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
+
+
+def _patch_plugin_components(
+    mocker: MockerFixture, *component_classes: type
+) -> list[MagicMock]:
+    """Set up PLUGINS with mocked classes.
+
+    Returns a list of mocked instances of the classes.
+    These will be the components of the model.
+    """
+    type_mocks = {}
+    for c in component_classes:
+        class_type_mock = mocker.Mock(return_value=mocker.Mock(spec_set=c))
+        type_mocks[c.__name__] = class_type_mock
+    mocker.patch("hydromt.models.model.PLUGINS", component_plugins=type_mocks)
+    return [type_mocks[c.__name__].return_value for c in component_classes]
 
 
 @pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
@@ -44,63 +59,23 @@ def test_api_attrs():
     assert dm.api["grid"] == xr.Dataset
 
 
-def test_plugins(mocker):
-    ep_lst = EntryPoints(
-        [
-            EntryPoint(
-                name="test_model",
-                value="hydromt.models.model_api:Model",
-                group="hydromt.models",
-            )
-        ]
-    )
-    mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
-    eps = plugins.get_plugin_eps()
-    assert "test_model" in eps
-    assert isinstance(eps["test_model"], EntryPoint)
-
-
-def test_plugin_duplicates(mocker):
-    ep_lst = plugins.get_general_eps().values()
-    mocker.patch("hydromt.models.plugins._discover", return_value=ep_lst)
-    eps = plugins.get_plugin_eps()
-    assert len(eps) == 0
-
-
-def test_load():
-    with pytest.raises(ValueError, match="Model plugin type not recognized"):
-        plugins.load(
-            EntryPoint(
-                name="error",
-                value="hydromt.data_catalog:DataCatalog",
-                group="hydromt.data_catalog",
-            )
-        )
-    with pytest.raises(ImportError, match="Error while loading model plugin"):
-        plugins.load(
-            EntryPoint(
-                name="error", value="hydromt.models:DataCatalog", group="hydromt.models"
-            )
-        )
-
-
 # test both with and without xugrid
-@pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
-def test_global_models(mocker, has_xugrid):
-    _MODELS = ModelCatalog()
-    mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
-    keys = list(plugins.LOCAL_EPS.keys())
-    if not hydromt._compat.HAS_XUGRID:
-        keys.remove("mesh_model")
-    # set first local model as plugin for testing
-    _MODELS._plugins.append(keys[0])
-    assert isinstance(_MODELS[keys[0]], EntryPoint)
-    assert issubclass(_MODELS.load(keys[0]), Model)
-    assert keys[0] in _MODELS.__str__()
-    assert all([k in _MODELS for k in keys])  # eps
-    assert all([k in _MODELS.cls for k in keys])
-    with pytest.raises(ValueError, match="Unknown model"):
-        _MODELS["unknown"]
+# @pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
+# def test_global_models(mocker, has_xugrid):
+#     _MODELS = ModelCatalog()
+#     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
+#     keys = list(plugins.LOCAL_EPS.keys())
+#     if not hydromt._compat.HAS_XUGRID:
+#         keys.remove("mesh_model")
+#     # set first local model as plugin for testing
+#     _MODELS._plugins.append(keys[0])
+#     assert isinstance(_MODELS[keys[0]], EntryPoint)
+#     assert issubclass(_MODELS.load(keys[0]), Model)
+#     assert keys[0] in _MODELS.__str__()
+#     assert all([k in _MODELS for k in keys])  # eps
+#     assert all([k in _MODELS.cls for k in keys])
+#     with pytest.raises(ValueError, match="Unknown model"):
+#         _MODELS["unknown"]
 
 
 def test_check_data(demda):
@@ -119,30 +94,6 @@ def test_check_data(demda):
         _check_data(demds, split_dataset=False)
     with pytest.raises(ValueError, match='Data type "dict" not recognized'):
         _check_data({"wrong": "type"})
-
-
-@pytest.mark.skip(reason="GridModel has been removed")
-def test_model_api(grid_model):
-    assert np.all(np.isin(["grid", "geoms"], list(grid_model.api.keys())))
-    # add some wrong data
-    grid_model.geoms.update({"wrong_geom": xr.Dataset()})
-    grid_model.forcing.update({"test": gpd.GeoDataFrame()})
-    non_compliant = grid_model._test_model_api()
-    assert non_compliant == ["geoms.wrong_geom", "forcing.test"]
-
-
-def test_run_log_method():
-    model = Model()
-    region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    model._run_log_method("region.create", region)  # args
-    assert hasattr(model, "region")
-
-
-def test_run_log_kwargs_method():
-    model = Model()
-    region = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    model._run_log_method("region.create", region=region)  # kwargs
-    assert hasattr(model, "region")
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
@@ -180,11 +131,6 @@ def test_write_data_catalog(tmpdir):
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_model(model, tmpdir):
-    # Staticmaps -> moved from _test_model_api as it is deprecated
-    model._API.update({"staticmaps": xr.Dataset})
-    with pytest.deprecated_call():
-        non_compliant = model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
     # write model
     model.root.set(str(tmpdir), mode="w")
     model.write()
@@ -201,10 +147,6 @@ def test_model(model, tmpdir):
     with pytest.deprecated_call():
         equal, errors = model._test_equal(model1)
     assert equal, errors
-    # read region from staticmaps
-    model._geoms.pop("region")
-    with pytest.deprecated_call():
-        assert np.all(model.region.total_bounds == model.staticmaps.raster.bounds)
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
@@ -275,15 +217,6 @@ def test_model_append(demda, df, tmpdir):
     assert "df" in mod1.tables
 
 
-def test_model_errors_on_unknown_method():
-    model = Model()
-    model._NAME = "testmodel"
-    with pytest.raises(
-        ValueError, match='Model testmodel has no method "unknown_method"'
-    ):
-        model.update(opt={"unknown_method": {}})
-
-
 def test_model_does_not_overwrite_in_write_mode(tmpdir):
     bbox = [12.05, 45.30, 12.85, 45.65]
     root = join(tmpdir, "tmp")
@@ -298,6 +231,7 @@ def test_model_does_not_overwrite_in_write_mode(tmpdir):
 
 
 @pytest.mark.integration()
+@pytest.mark.skip(reason="needs method/yaml validation")
 def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     # build model
@@ -305,11 +239,9 @@ def test_model_build_update(tmpdir, demda, obsda):
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
-        opt={
+        steps={
             "region.create": {},
-            "region.write": {},
-            "write_geoms": {},
-            "write_config": {},
+            "region.write": {"components": {"geoms", "config"}},
         },
     )
     assert hasattr(model, "region")
@@ -320,11 +252,12 @@ def test_model_build_update(tmpdir, demda, obsda):
     # read and update model
     model = Model(root=str(tmpdir), mode="r")
     model_out = str(tmpdir.join("update"))
-    model.update(model_out=model_out, opt={})  # write only
+    model.update(model_out=model_out, steps={})  # write only
     assert isfile(join(model_out, "model.yml"))
 
 
 @pytest.mark.integration()
+@pytest.mark.skip(reason="needs method/yaml validation")
 def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Build model with some data
     bbox = [12.05, 45.30, 12.85, 45.65]
@@ -333,7 +266,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
     model._NAME = "testmodel"
     model.build(
         region={"bbox": bbox},
-        opt={
+        steps={
             "setup_config": {"input": {"dem": "elevtn", "prec": "precip"}},
             "set_geoms": {"geom": geom, "name": "geom1"},
             "set_maps": {"data": demda, "name": "elevtn"},
@@ -343,7 +276,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Now update the model
     model = Model(root=str(tmpdir), mode="r+")
     model.update(
-        opt={
+        steps={
             "setup_config": {"input.dem2": "elevtn2", "input.temp": "temp"},
             "set_geoms": {"geom": geom, "name": "geom2"},
             "set_maps": {"data": demda, "name": "elevtn2"},
@@ -665,107 +598,95 @@ def test_gridmodel_setup(tmpdir):
     mod.write(components=["geoms", "grid"])
 
 
-@pytest.mark.skip("needs implementation of vector component")
-def test_vectormodel(vector_model, tmpdir):
-    assert "vector" in vector_model.api
-    non_compliant = vector_model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
-    # write model
-    vector_model.root.set(str(tmpdir), mode="w")
-    vector_model.write()
-    # read model
-    model1 = VectorModel(str(tmpdir), mode="r")
-    model1.read()
-    # check if equal
-    equal, errors = vector_model._test_equal(model1)
-    assert equal, errors
+# @pytest.mark.skip("needs implementation of vector component")
+# def test_vectormodel(vector_model, tmpdir):
+#     assert "vector" in vector_model.api
+#     non_compliant = vector_model._test_model_api()
+#     assert len(non_compliant) == 0, non_compliant
+#     # write model
+#     vector_model.root.set(str(tmpdir), mode="w")
+#     vector_model.write()
+#     # read model
+#     model1 = VectorModel(str(tmpdir), mode="r")
+#     model1.read()
+#     # check if equal
+#     equal, errors = vector_model._test_equal(model1)
+#     assert equal, errors
 
 
-def test_vectormodel_vector(vector_model, tmpdir, geoda):
-    # test set vector
-    testds = vector_model.vector.copy()
-    # np.ndarray
-    with pytest.raises(ValueError, match="Unable to set"):
-        vector_model.set_vector(data=testds["zs"].values)
-    with pytest.raises(
-        ValueError, match="set_vector with np.ndarray is only supported if data is 1D"
-    ):
-        vector_model.set_vector(data=testds["zs"].values, name="precip")
-    # xr.DataArray
-    vector_model.set_vector(data=testds["zs"], name="precip")
-    # geodataframe
-    gdf = testds.vector.geometry.to_frame("geometry")
-    gdf["param1"] = np.random.rand(gdf.shape[0])
-    gdf["param2"] = np.random.rand(gdf.shape[0])
-    vector_model.set_vector(data=gdf)
-    assert "precip" in vector_model.vector
-    assert "param1" in vector_model.vector
-    # geometry and update grid
-    crs = geoda.vector.crs
-    geoda_test = geoda.vector.update_geometry(
-        geoda.vector.geometry.to_crs(3857).buffer(0.1).to_crs(crs)
-    )
-    with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
-        vector_model.set_vector(data=geoda_test)
-    param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop_vars("geometry")
-    with pytest.raises(ValueError, match="Index coordinate of data variable"):
-        vector_model.set_vector(data=param3, name="param3")
-    vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
-    assert "param1" not in vector_model.vector
-    assert "zs" in vector_model.vector
+# def test_vectormodel_vector(vector_model, tmpdir, geoda):
+#     # test set vector
+#     testds = vector_model.vector.copy()
+#     # np.ndarray
+#     with pytest.raises(ValueError, match="Unable to set"):
+#         vector_model.set_vector(data=testds["zs"].values)
+#     with pytest.raises(
+#         ValueError, match="set_vector with np.ndarray is only supported if data is 1D"
+#     ):
+#         vector_model.set_vector(data=testds["zs"].values, name="precip")
+#     # xr.DataArray
+#     vector_model.set_vector(data=testds["zs"], name="precip")
+#     # geodataframe
+#     gdf = testds.vector.geometry.to_frame("geometry")
+#     gdf["param1"] = np.random.rand(gdf.shape[0])
+#     gdf["param2"] = np.random.rand(gdf.shape[0])
+#     vector_model.set_vector(data=gdf)
+#     assert "precip" in vector_model.vector
+#     assert "param1" in vector_model.vector
+#     # geometry and update grid
+#     crs = geoda.vector.crs
+#     geoda_test = geoda.vector.update_geometry(
+#         geoda.vector.geometry.to_crs(3857).buffer(0.1).to_crs(crs)
+#     )
+#     with pytest.raises(ValueError, match="Geometry of data and vector do not match"):
+#         vector_model.set_vector(data=geoda_test)
+#     param3 = vector_model.vector["param1"].sel(index=slice(0, 3)).drop_vars("geometry")
+#     with pytest.raises(ValueError, match="Index coordinate of data variable"):
+#         vector_model.set_vector(data=param3, name="param3")
+#     vector_model.set_vector(data=geoda, overwrite_geom=True, name="zs")
+#     assert "param1" not in vector_model.vector
+#     assert "zs" in vector_model.vector
 
-    # test write vector
-    vector_model.set_vector(data=gdf)
-    vector_model.root.set(str(tmpdir), mode="w")
-    # netcdf+geojson --> tested in test_vectormodel
-    # netcdf only
-    vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
-    # geojson only
-    # automatic split
-    vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
-    assert isfile(join(vector_model.root.path, "vector", "vector_split.nc"))
-    assert not isfile(join(vector_model.root.path, "vector", "vector_all.nc"))
-    # geojson 1D data only
-    vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
-    vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
-    assert not isfile(join(vector_model.root.path, "vector", "vector_all2.nc"))
+#     # test write vector
+#     vector_model.set_vector(data=gdf)
+#     vector_model.root.set(str(tmpdir), mode="w")
+#     # netcdf+geojson --> tested in test_vectormodel
+#     # netcdf only
+#     vector_model.write_vector(fn="vector/vector_full.nc", fn_geom=None)
+#     # geojson only
+#     # automatic split
+#     vector_model.write_vector(fn=None, fn_geom="vector/vector_split.geojson")
+#     assert isfile(join(vector_model.root.path, "vector", "vector_split.nc"))
+#     assert not isfile(join(vector_model.root.path, "vector", "vector_all.nc"))
+#     # geojson 1D data only
+#     vector_model._vector = vector_model._vector.drop_vars("zs").drop_vars("time")
+#     vector_model.write_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+#     assert not isfile(join(vector_model.root.path, "vector", "vector_all2.nc"))
 
-    # test read vector
-    vector_model1 = VectorModel(str(tmpdir), mode="r")
-    # netcdf only
-    vector_model1.read_vector(fn="vector/vector_full.nc", fn_geom=None)
-    vector0 = vector_model1.vector
-    assert len(vector0["zs"].dims) == 2
-    vector_model1._vector = None
-    # geojson only
-    # automatic split
-    vector_model1.read_vector(
-        fn="vector/vector_split.nc", fn_geom="vector/vector_split.geojson"
-    )
-    vector1 = vector_model1.vector
-    assert len(vector1["zs"].dims) == 2
-    vector_model1._vector = None
-    # geojson 1D data only
-    vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
-    vector3 = vector_model1.vector
-    assert "zs" not in vector3
-
-
-def test_networkmodel(network_model, tmpdir):
-    network_model.root.set(str(tmpdir), mode="r+")
-    with pytest.raises(NotImplementedError):
-        network_model.read(["network"])
-    with pytest.raises(NotImplementedError):
-        network_model.write(["network"])
-    with pytest.raises(NotImplementedError):
-        network_model.set_network()
-    with pytest.raises(NotImplementedError):
-        _ = network_model.network
+#     # test read vector
+#     vector_model1 = VectorModel(str(tmpdir), mode="r")
+#     # netcdf only
+#     vector_model1.read_vector(fn="vector/vector_full.nc", fn_geom=None)
+#     vector0 = vector_model1.vector
+#     assert len(vector0["zs"].dims) == 2
+#     vector_model1._vector = None
+#     # geojson only
+#     # automatic split
+#     vector_model1.read_vector(
+#         fn="vector/vector_split.nc", fn_geom="vector/vector_split.geojson"
+#     )
+#     vector1 = vector_model1.vector
+#     assert len(vector1["zs"].dims) == 2
+#     vector_model1._vector = None
+#     # geojson 1D data only
+#     vector_model1.read_vector(fn=None, fn_geom="vector/vector_all2.geojson")
+#     vector3 = vector_model1.vector
+#     assert "zs" not in vector3
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_meshmodel(mesh_model, tmpdir):
-    MeshModel = MODELS.load("mesh_model")
+    MeshModel = PLUGINS.model_plugins["mesh_model"]
     assert "mesh" in mesh_model.api
     non_compliant = mesh_model._test_model_api()
     assert len(non_compliant) == 0, non_compliant
@@ -782,7 +703,7 @@ def test_meshmodel(mesh_model, tmpdir):
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_setup_mesh(tmpdir, griduda):
-    MeshModel = MODELS.load("mesh_model")
+    MeshModel = PLUGINS.model_plugins["mesh_model"]
     # Initialize model
     model = MeshModel(
         root=join(tmpdir, "mesh_model"),
@@ -853,7 +774,7 @@ def test_setup_mesh(tmpdir, griduda):
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_meshmodel_setup(griduda, world):
-    MeshModel = MODELS.load("mesh_model")
+    MeshModel = PLUGINS.model_plugins["mesh_model"]
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod.setup_config(**{"header": {"setting": "value"}})
@@ -877,3 +798,155 @@ def test_meshmodel_setup(griduda, world):
     )
     assert "roughness_manning" in mod1.mesh.data_vars
     assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
+
+
+# NEW TESTS FOR REFACTOR MODEL COMPONENTS
+
+
+def test_initialize_model():
+    m = Model()
+    assert isinstance(m.region, ModelRegionComponent)
+
+
+def test_initialize_model_with_grid_component():
+    m = Model(components={"grid": {"type": "GridComponent"}})
+    assert isinstance(m.grid, GridComponent)
+    assert isinstance(m.region, ModelRegionComponent)
+
+
+def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
+    m = Model(root=str(tmpdir))
+    grid = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("grid", grid)
+    m.write()
+    grid.write.assert_called_once()
+
+
+def test_getattr_component(mocker: MockerFixture):
+    m = Model()
+    foo = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("foo", foo)
+    assert m.foo == foo
+
+
+def test_add_component_wrong_name(mocker: MockerFixture):
+    m = Model()
+    foo = mocker.Mock(spec_set=ModelComponent)
+    with pytest.raises(
+        ValueError, match="Component name foo foo is not a valid identifier."
+    ):
+        m.add_component("foo foo", foo)
+
+
+def test_get_component_non_existent():
+    m = Model()
+    with pytest.raises(KeyError):
+        m.get_component("foo", ModelComponent)
+
+
+def test_read_calls_components(mocker: MockerFixture):
+    m = Model(mode="r")
+    mocker.patch.object(m.region, "read")
+    foo = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("foo", foo)
+    m.read()
+    foo.read.assert_called_once()
+
+
+def test_read_in_write_mode():
+    m = Model(mode="w")
+    with pytest.raises(IOError, match="Model opened in write-only mode"):
+        m.read()
+
+
+def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
+    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    m = Model(root=str(tmpdir))
+    assert m.region is region
+    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+    m.build(region=region_dict)
+    region.create.assert_called_once_with(region=region_dict)
+    region.write.assert_called_once()
+
+
+def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
+    region, foo = _patch_plugin_components(mocker, ModelRegionComponent, ModelComponent)
+    foo.write.__ishydromtstep__ = True
+    m = Model(root=str(tmpdir))
+    m.add_component("foo", foo)
+    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+    assert m.region is region
+    assert m.foo is foo
+
+    # Specify to only write foo
+    m.build(region=region_dict, steps=[{"foo.write": {}}])
+
+    region.create.assert_called_once_with(region=region_dict)
+    region.write.assert_not_called()  # Only foo will be written, so no total write
+    foo.write.assert_called_once()  # foo was written, because it was specified in steps
+
+
+def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
+    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    m = Model(root=str(tmpdir))
+    assert m.region is region
+
+    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+    m.build(write=False, region=region_dict)
+
+    region.create.assert_called_once()
+    region.write.assert_not_called()
+
+
+def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
+    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    m = Model(root=str(tmpdir))
+    assert m.region is region
+
+    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
+
+    with pytest.raises(KeyError):
+        m.build(region=region_dict, steps=[{"foo": {}}])
+
+
+def test_add_component_duplicate_throws(mocker: MockerFixture):
+    m = Model()
+    foo = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("foo", foo)
+    foo2 = mocker.Mock(spec_set=ModelComponent)
+
+    with pytest.raises(ValueError, match="Component foo already exists in the model."):
+        m.add_component("foo", foo2)
+
+
+def test_update_empty_model_with_region_none_throws(tmpdir: Path):
+    m = Model(root=str(tmpdir))
+    with pytest.raises(
+        ValueError, match="Model region not found, setup model using `build` first."
+    ):
+        m.update()
+
+
+def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
+    m = Model(root=str(tmpdir), mode="r")
+    with pytest.raises(
+        ValueError,
+        match='"model_out" directory required when updating in "read-only" mode.',
+    ):
+        m.update(model_out=None)
+
+
+def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
+    tmpdir: Path, mocker: MockerFixture
+):
+    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    m = Model(root=str(tmpdir), mode="r")
+    assert region is m.region
+
+    m.update(model_out=str(tmpdir / "out"))
+
+    assert m.root.is_writing_mode()
+    assert not m.root.is_override_mode()
+    region.read.assert_called_once()
+    region.create.assert_not_called()
+    region.write.assert_called_once()

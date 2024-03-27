@@ -77,10 +77,10 @@ dev = [
   "twine",       # needed to publish to pypi
 ]
 test = [
-  "pytest>=2.7.3",       # testing framework
-  "pytest-cov",          # test coverage
-  "pytest-mock",         # mocking
-  "pytest-timeout",      # darn hanging tests
+  "pytest>=2.7.3",  # testing framework
+  "pytest-cov",     # test coverage
+  "pytest-mock",    # mocking
+  "pytest-timeout", # darn hanging tests
   "xugrid",
 ]
 doc = [
@@ -108,8 +108,14 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
+[project.entry-points."hydromt.components"]
+core = "hydromt.components"
+
+[project.entry-points."hydromt.models"]
+core = "hydromt.models"
+
 [tool.setuptools.dynamic]
-description = {file = "hydromt/__init__.py"}
+description = { file = "hydromt/__init__.py" }
 
 [tool.ruff]
 line-length = 88
@@ -142,7 +148,6 @@ testpaths = ["tests"]
 markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
-  "ignore:.*staticmaps:DeprecationWarning", # our own deprecation, will be removed soon
   # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
   "ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
 ]
