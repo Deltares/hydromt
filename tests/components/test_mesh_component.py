@@ -37,8 +37,7 @@ def test_check_UGrid():
     assert "new_dataset" in dataset.data_vars.keys()
 
 
-@patch.object(MeshComponent, "_grid_is_equal")
-def test_add_mesh_errors(mock_grid_is_equal, mock_model):
+def test_add_mesh_errors(mock_model, mocker: MockerFixture):
     mesh_component = MeshComponent(mock_model)
     data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(ValueError, match="Data should have CRS."):
@@ -47,11 +46,10 @@ def test_add_mesh_errors(mock_grid_is_equal, mock_model):
     mesh_component._data = data
     data4326 = xu.data.elevation_nl().to_dataset()
     data4326.grid.crs = 4326
-    with pytest.raises(
-        ValueError, match="Data and self.data should have the same CRS."
-    ):
+    with pytest.raises(ValueError, match="Data and Mesh should have the same CRS."):
         mesh_component._add_mesh(data=data4326, grid_name="", overwrite_grid=False)
     grid_name = "mesh2d"
+    mock_grid_is_equal = mocker.patch.object(MeshComponent, "_grid_is_equal")
     mock_grid_is_equal.return_value = False
     with pytest.raises(
         ValueError,
@@ -87,8 +85,8 @@ def test_add_mesh(mock_model):
     data = xu.data.elevation_nl().to_dataset()
     data.grid.crs = 28992
     mesh_component._data = data
-    crs = mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
-    assert crs == 28992
+    mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
+    assert mesh_component.crs == 28992
     assert data.grid.name in mesh_component.mesh_names
 
 
@@ -106,38 +104,37 @@ def test_set_raises_errors(mock_check_Ugrid, mock_model):
         mesh_component.set(data=data)
 
 
-def test_create(mock_model):
+def test_create(mock_model, mocker: MockerFixture):
     mesh_component = MeshComponent(mock_model)
     region = {"bbox": [-1, -1, 1, 1]}
     res = 20
     crs = 28992
     test_data = xu.data.elevation_nl().to_dataset()
     test_data.grid.crs = crs
-    with patch("hydromt.components.mesh.create_mesh2d") as mock_create_mesh2d:
-        mock_create_mesh2d.return_value = test_data
-        mesh_component.create(region=region, res=res, crs=crs)
-        mock_create_mesh2d.assert_called_once_with(
-            region=region, res=res, crs=crs, logger=mesh_component._logger
-        )
-        assert mesh_component.data == test_data
+    mock_create_mesh2d = mocker.patch("hydromt.components.mesh.create_mesh2d")
+    mock_create_mesh2d.return_value = test_data
+    mesh_component.create2d(region=region, res=res, crs=crs)
+    mock_create_mesh2d.assert_called_once_with(
+        region=region, res=res, crs=crs, logger=mesh_component._logger
+    )
+    assert mesh_component.data == test_data
 
 
 def test_write(mock_model, caplog, tmpdir):
     mesh_component = MeshComponent(mock_model)
     caplog.set_level(logging.DEBUG)
-    mesh_component._model_root.is_reading_mode.return_value = False
+    mesh_component._root.is_reading_mode.return_value = False
     mesh_component.write()
     assert "No mesh data found, skip writing." in caplog.text
     mock_model.root = ModelRoot(path=tmpdir, mode="r")
     mesh_component._data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(IOError, match="Model opened in read-only mode"):
         mesh_component.write()
-
     mock_model.root = ModelRoot(path=tmpdir, mode="w")
     fn = "mesh/fake_mesh.nc"
     mesh_component._data.grid.crs = 28992
     mesh_component.write(fn=fn)
-    file_dir = join(mesh_component._model_root.path, dirname(fn))
+    file_dir = join(mesh_component._root.path, dirname(fn))
     file_path = join(tmpdir, fn)
     assert isdir(file_dir)
     assert f"Writing file {fn}" in caplog.text
@@ -198,7 +195,7 @@ def test_properties(mock_model):
 
 def test_get_mesh(mock_model):
     mesh_component = MeshComponent(mock_model)
-    mesh_component._model_root.is_reading_mode.return_value = False
+    mesh_component._root.is_reading_mode.return_value = False
     with pytest.raises(ValueError, match="Mesh is not set, please use set_mesh first."):
         mesh_component.get_mesh(grid_name="")
     mesh_component._data = xu.data.elevation_nl().to_dataset()

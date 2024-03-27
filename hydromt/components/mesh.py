@@ -98,7 +98,7 @@ class MeshComponent(ModelComponent):
             Additional keyword arguments to be passed to the
             `xarray.Dataset.to_netcdf` method.
         """
-        if self.data is None:
+        if len(self.data) < 1:
             self._logger.debug("No mesh data found, skip writing.")
             return
         self._root._assert_write_mode()
@@ -247,21 +247,9 @@ class MeshComponent(ModelComponent):
     def crs(self) -> Optional[CRS]:
         """Returns model mesh crs."""
         if self.data is not None:
-            grid_crs = self.data.ugrid.crs
-            # Check if all the same
-            crs = None
-            for _k, v in grid_crs.items():
-                if crs is None:
-                    crs = v
-                if v == crs:
-                    continue
-                else:
-                    raise ValueError(
-                        f"Mesh crs is not uniform, please check {grid_crs}"
-                    )
-            return crs
-        else:
-            return None
+            for _, v in self.data.ugrid.crs.items():
+                return v
+        return None
 
     @property
     def bounds(self) -> Optional[Dict]:
@@ -349,7 +337,7 @@ class MeshComponent(ModelComponent):
         uds: Union[xu.Ugrid1d, xu.Ugrid2d, xu.UgridDataArray, xu.UgridDataset]
             Grid topology with or without data variables.
         """
-        if self.data is None:
+        if len(self.data) < 1:
             raise ValueError("Mesh is not set, please use set_mesh first.")
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid {grid_name} not found in mesh.")

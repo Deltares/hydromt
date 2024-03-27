@@ -413,6 +413,7 @@ def mock_model(tmpdir, mocker: MockerFixture):
     logger.propagate = True
     model = mocker.create_autospec(Model)
     model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
+    model.root.path.return_value = tmpdir
     model.data_catalog = mocker.create_autospec(DataCatalog)
     model.region = mocker.create_autospec(
         ModelRegionComponent(model=model), instance=True
