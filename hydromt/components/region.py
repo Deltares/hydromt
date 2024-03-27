@@ -19,19 +19,23 @@ from hydromt import _compat, hydromt_step
 from hydromt._typing.type_def import StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
+from hydromt.gis import utils as gis_utils
 from hydromt.plugins import PLUGINS
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:
     from hydromt.models import Model
 
+__all__ = ["RegionComponent"]
 
 logger = getLogger(__name__)
 
 DEFAULT_REGION_FILE_PATH = "region.geojson"
+DEFAULT_HYDROGRAPHY_FN = "merit_hydro"
+DEFAULT_BASIN_INDEX_FN = "merit_hydro_index"
 
 
-class ModelRegionComponent(ModelComponent):
+class RegionComponent(ModelComponent):
     """Define the model region."""
 
     def __init__(
@@ -45,9 +49,11 @@ class ModelRegionComponent(ModelComponent):
     def create(
         self,
         region: dict,
-        hydrography_fn: str = "merit_hydro",
-        basin_index_fn: str = "merit_hydro_index",
-    ) -> Dict[str, Any]:
+        *,
+        crs: Optional[int] = None,
+        hydrography_fn: str = DEFAULT_HYDROGRAPHY_FN,
+        basin_index_fn: str = DEFAULT_BASIN_INDEX_FN,
+    ) -> None:
         """Check and return parsed region arguments.
 
         Parameters
@@ -128,16 +134,13 @@ class ModelRegionComponent(ModelComponent):
             * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
 
             * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
-        logger:
-            The logger to use.
-
-        Returns
-        -------
-        kind : {'basin', 'subbasin', 'interbasin', 'geom', 'bbox', 'grid'}
-            region kind
-        kwargs : dict
-            parsed region json
+        crs: int, optional
+            EPSG code of the model or "utm" to let hydromt find the closest projected
         """
+        if self.data is not None:
+            self._logger.warn("Model region already initialized. Skipping creation.")
+            return
+
         kind, region = _parse_region(
             region, data_catalog=self._data_catalog, logger=self._logger
         )
@@ -154,26 +157,44 @@ class ModelRegionComponent(ModelComponent):
                 **region,
             )
             region.update(xy=xy)
+            # get ds_hyd again but clipped to geom, one variable is enough
+            da_hyd = self._data_catalog.get_rasterdataset(
+                hydrography_fn, geom=geom, variables=["flwdir"]
+            )
+            assert da_hyd is not None
+            if geom.crs != da_hyd.raster.crs:
+                crs = da_hyd.raster.crs
+                geom = geom.to_crs(crs)
         elif "bbox" in region:
             bbox = region["bbox"]
+            # TODO: Use the crs from the parameters directly?
             geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+            if crs is not None:
+                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+                geom = geom.to_crs(crs)
         elif "geom" in region:
             geom = region["geom"]
+            # TODO: What if the crs is defined in the parameters? grid.py also used to raise an error.
             if geom.crs is None:
                 raise ValueError('Model region "geom" has no CRS')
+            if crs is not None:
+                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+                geom = geom.to_crs(crs)
         elif "grid" in region:  # Grid specific - should be removed in the future
             geom = region["grid"].raster.box
+            # TODO: Update crs with argument from function?
+            if crs is not None:
+                self._logger.warning(
+                    f"For region kind 'grid', the grid's crs is used and not user-defined crs {crs}"
+                )
         elif "model" in region:
             geom = region["model"].region
         else:
             raise ValueError(f"model region argument not understood: {region}")
 
         self.set(geom, kind)
-        # This setup method returns region so that it can be wrapped for models which
-        # require more information, e.g. grid RasterDataArray or xy coordinates.
-        return region
 
-    def set(self, data: GeoDataFrame, kind: str = "geom"):
+    def set(self, data: GeoDataFrame, kind: str = "geom") -> None:
         """Set the model region based on provided GeoDataFrame."""
         # if nothing is provided, record that the region was set by the user
         self.kind = kind
@@ -261,7 +282,7 @@ class ModelRegionComponent(ModelComponent):
             gdf.to_file(write_path, **write_kwargs)
 
     def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, ModelRegionComponent):
+        if not isinstance(__value, RegionComponent):
             return False
         else:
             try:

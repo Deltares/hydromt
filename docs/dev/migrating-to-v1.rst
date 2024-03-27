@@ -246,8 +246,8 @@ The `Model.__init__` function can be used to add default components by plugins l
 class ExampleModel(Model):
 	def __init__(self):
 		self.root: ModelRoot = ModelRoot(".")
-		self.add_component("region", ModelRegionComponent)
-		self.add_component("grid", GridComponent)
+		self.add_component("region", RegionComponent(self))
+		self.add_component("grid", GridComponent(self))
 		...
 
 ```
@@ -265,8 +265,8 @@ class ExampleEditModel(Model):
         # Recursively update the components with any defaults that are missing in the components provided by the user.
         components = components or {}
         default_components = {
-            "region": {"type": "ModelRegionComponent"},
-            "grid": {"type": GridComponent},
+            "region": {"type": RegionComponent.__name__},
+            "grid": {"type": GridComponent.__name__},
         }
         components = hydromt.utils.deep_merge.deep_merge(
             default_components, components
@@ -288,9 +288,9 @@ Making the model region its own component
 The model region is a very integral part for the functioning of HydroMT. Additionally
 there was a lot of logic to handle the different ways of specifying a region
 through the code. To simplify this, highlight the importance of the model region,
-make this part of the code easier to customise and consolidate a lot of functionality
+make this part of the code easier to customize and consolidate a lot of functionality
 for easier maintenance, we decided to bring all this functionality together in
-the `ModelRegionComponent` class. This is a required component for a HydroMT model,
+the `RegionComponent` class. This is a required component for a HydroMT model,
 and should contain all functionality necessary to deal with it.
 
 

@@ -1,0 +1,1 @@
+DEFAULT_REGION_COMPONENT = "region"

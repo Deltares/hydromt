@@ -16,9 +16,10 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
+from hydromt._utils.constants import DEFAULT_REGION_COMPONENT
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.region import RegionComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data
@@ -163,7 +164,7 @@ def test_model_tables(model, df, tmpdir):
         model.set_tables(d, name=i)
         assert df.equals(model.tables[i])
 
-    # now do the same but interating over the stables instead
+    # now do the same but iterating over the stables instead
     for i, d in model.tables.items():
         model.set_tables(d, name=i)
         assert df.equals(model.tables[i])
@@ -244,7 +245,7 @@ def test_model_build_update(tmpdir, demda, obsda):
             "region.write": {"components": {"geoms", "config"}},
         },
     )
-    assert hasattr(model, "region")
+    assert hasattr(model, DEFAULT_REGION_COMPONENT)
     assert isfile(join(model.root.path, "model.yml"))
     assert isfile(join(model.root.path, "hydromt.log"))
     assert isfile(join(model.root.path, "region.geojson")), listdir(model.root.path)
@@ -398,31 +399,28 @@ def test_maps_setup(tmpdir):
     mod.write(components=["config", "geoms", "maps"])
 
 
-@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
-def test_gridmodel(grid_model, tmpdir, demda):
-    assert "grid" in grid_model.api
-    non_compliant = grid_model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
+@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+def test_gridmodel(model, tmpdir, demda):
+    model.add_component("grid", GridComponent(model))
     # grid specific attributes
-    assert np.all(grid_model.res == grid_model.grid.raster.res)
-    assert np.all(grid_model.bounds == grid_model.grid.raster.bounds)
-    assert np.all(grid_model.transform == grid_model.grid.raster.transform)
+    assert np.all(model.grid.res == model.grid.data.raster.res)
+    assert np.all(model.grid.bounds == model.grid.data.raster.bounds)
+    assert np.all(model.grid.transform == model.grid.data.raster.transform)
     # write model
-    grid_model.root.set(str(tmpdir), mode="w")
-    grid_model.write()
+    model.root.set(str(tmpdir), mode="w")
+    model.write()
     # read model
-    GridModel: Any = ...  # bypass ruff
-    model1 = GridModel(str(tmpdir), mode="r")
+    model1 = Model(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors = grid_model._test_equal(model1)
+    equal, errors = model._test_equal(model1)
     assert equal, errors
 
     # try update
-    grid_model.root.set(str(join(tmpdir, "update")), mode="w")
-    grid_model.write()
+    model.root.set(str(join(tmpdir, "update")), mode="w")
+    model.write()
 
-    model1 = GridModel(str(join(tmpdir, "update")), mode="r+")
+    model1 = Model(str(join(tmpdir, "update")), mode="r+")
     model1.update(
         opt={
             "set_grid": {"data": demda, "name": "testdata"},
@@ -800,18 +798,15 @@ def test_meshmodel_setup(griduda, world):
     assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
 
 
-# NEW TESTS FOR REFACTOR MODEL COMPONENTS
-
-
 def test_initialize_model():
     m = Model()
-    assert isinstance(m.region, ModelRegionComponent)
+    assert isinstance(m.region, RegionComponent)
 
 
 def test_initialize_model_with_grid_component():
-    m = Model(components={"grid": {"type": "GridComponent"}})
+    m = Model(components={"grid": {"type": GridComponent.__name__}})
     assert isinstance(m.grid, GridComponent)
-    assert isinstance(m.region, ModelRegionComponent)
+    assert isinstance(m.region, RegionComponent)
 
 
 def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
@@ -860,53 +855,47 @@ def test_read_in_write_mode():
 
 
 def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, RegionComponent)[0]
+    region.create.__ishydromtstep__ = True
     m = Model(root=str(tmpdir))
     assert m.region is region
     region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    m.build(region=region_dict)
-    region.create.assert_called_once_with(region=region_dict)
+    m.build(steps=[{"region.create": {"region": region_dict}}])
+    region.create.assert_called_once()
     region.write.assert_called_once()
 
 
 def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
-    region, foo = _patch_plugin_components(mocker, ModelRegionComponent, ModelComponent)
+    region, foo = _patch_plugin_components(mocker, RegionComponent, ModelComponent)
     foo.write.__ishydromtstep__ = True
     m = Model(root=str(tmpdir))
     m.add_component("foo", foo)
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
     assert m.region is region
     assert m.foo is foo
 
-    # Specify to only write foo
-    m.build(region=region_dict, steps=[{"foo.write": {}}])
+    m.build(steps=[{"foo.write": {}}])
 
-    region.create.assert_called_once_with(region=region_dict)
     region.write.assert_not_called()  # Only foo will be written, so no total write
     foo.write.assert_called_once()  # foo was written, because it was specified in steps
 
 
 def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, RegionComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
 
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    m.build(write=False, region=region_dict)
+    m.build(write=False, steps=[])
 
-    region.create.assert_called_once()
     region.write.assert_not_called()
 
 
 def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, RegionComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
 
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-
-    with pytest.raises(KeyError):
-        m.build(region=region_dict, steps=[{"foo": {}}])
+    with pytest.raises(KeyError, match="foo"):
+        m.build(steps=[{"foo": {}}])
 
 
 def test_add_component_duplicate_throws(mocker: MockerFixture):
@@ -939,7 +928,7 @@ def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
 def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
     tmpdir: Path, mocker: MockerFixture
 ):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, RegionComponent)[0]
     m = Model(root=str(tmpdir), mode="r")
     assert region is m.region
 

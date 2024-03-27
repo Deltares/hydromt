@@ -8,6 +8,7 @@ from click.testing import CliRunner
 from hydromt import __version__
 from hydromt._typing import NoDataException
 from hydromt.cli.main import main as hydromt_cli
+from hydromt.components.region import RegionComponent
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
@@ -29,7 +30,7 @@ def test_cli_components():
     r = CliRunner().invoke(hydromt_cli, "--components")
     assert r.exit_code == 0
     assert "Component plugins" in r.output
-    assert "ModelRegionComponent" in r.output
+    assert RegionComponent.__name__ in r.output
 
 
 def test_cli_help():

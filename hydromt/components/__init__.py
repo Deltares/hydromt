@@ -2,10 +2,10 @@
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.region import RegionComponent
 
 __all__ = [
-    "ModelRegionComponent",
+    "RegionComponent",
     "ModelComponent",
     "GridComponent",
 ]

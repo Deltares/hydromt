@@ -424,13 +424,13 @@ Attributes
    ModelComponent.logger
    ModelComponent.model_root
 
-ModelRegionComponent
+RegionComponent
 ====================
 
 .. autosummary::
    :toctree: _generated
 
-   ModelRegionComponent
+   RegionComponent
 
 Attributes
 ----------
@@ -438,13 +438,13 @@ Attributes
 .. autosummary::
    :toctree: _generated
 
-   ModelRegionComponent.data
-   ModelRegionComponent.model
-   ModelRegionComponent.crs
-   ModelRegionComponent.bounds
-   ModelRegionComponent.data_catalog
-   ModelRegionComponent.logger
-   ModelRegionComponent.model_root
+   RegionComponent.data
+   RegionComponent.model
+   RegionComponent.crs
+   RegionComponent.bounds
+   RegionComponent.data_catalog
+   RegionComponent.logger
+   RegionComponent.model_root
 
 General Methods
 ---------------
@@ -452,9 +452,9 @@ General Methods
 .. autosummary::
    :toctree: _generated
 
-   ModelRegionComponent.set
-   ModelRegionComponent.read
-   ModelRegionComponent.write
+   RegionComponent.set
+   RegionComponent.read
+   RegionComponent.write
 
 Data Methods
 ------------
@@ -462,7 +462,7 @@ Data Methods
 .. autosummary::
    :toctree: _generated
 
-   ModelRegionComponent.create
+   RegionComponent.create
 
 
 GridComponent
