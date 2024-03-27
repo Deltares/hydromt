@@ -2,7 +2,8 @@
 
 import glob
 import os
-from os.path import basename, dirname, join
+from os.path import basename, dirname, isdir, join
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Dict,
@@ -19,6 +20,8 @@ from hydromt.hydromt_step import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
+
+DEFAULT_GEOM_FILENAME = "geoms/{name}.geojson"
 
 
 class GeomComponent(ModelComponent):
@@ -70,15 +73,19 @@ class GeomComponent(ModelComponent):
         self._initialize_geoms()
         if name in self._geoms:
             self._logger.warning(f"Replacing geom: {name}")
-        if hasattr(self, "crs"):
-            # Verify if a geom is set to model crs and if not sets geom to model crs
-            if self.crs and self.crs != geom.crs:
-                geom.to_crs(self.crs.to_epsg(), inplace=True)
+
+        if isinstance(geom, GeoSeries):
+            geom = cast(GeoDataFrame, geom.to_frame())
+
+        # Verify if a geom is set to model crs and if not sets geom to model crs
+        model_crs = self._model.crs
+        if model_crs and model_crs != geom.crs:
+            geom.to_crs(model_crs.to_epsg(), inplace=True)
         self._geoms[name] = geom
 
     @hydromt_step
-    def read(self, fn: str = "geoms/*.geojson", **kwargs) -> None:
-        r"""Read model geometries files at <root>/<fn> and add to geoms property.
+    def read(self, filename: str = DEFAULT_GEOM_FILENAME, **kwargs) -> None:
+        r"""Read model geometries files at <root>/<filename>.
 
         key-word arguments are passed to :py:func:`geopandas.read_file`
 
@@ -86,14 +93,14 @@ class GeomComponent(ModelComponent):
         ----------
         fn : str, optional
             filename relative to model root, may contain wildcards,
-            by default ``geoms/\*.nc``
+            by default ``geoms/\*.geojson``
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
         """
         self._root._assert_read_mode()
         self._initialize_geoms(skip_read=True)
-        fns = glob.glob(join(self._root.path, fn))
+        fns = glob.glob(join(self._root.path, filename))
         for fn in fns:
             name = basename(fn).split(".")[0]
             self._logger.debug(f"Reading model file {name}.")
@@ -103,7 +110,7 @@ class GeomComponent(ModelComponent):
 
     @hydromt_step
     def write(
-        self, fn: str = "geoms/{name}.geojson", to_wgs84: bool = False, **kwargs
+        self, filename: str = DEFAULT_GEOM_FILENAME, to_wgs84: bool = False, **kwargs
     ) -> None:
         r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
 
@@ -120,23 +127,27 @@ class GeomComponent(ModelComponent):
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
-        self.root._assert_write_mode()
-        if len(self.geoms) == 0:
-            self.logger.debug("No geoms data found, skip writing.")
+        self._root._assert_write_mode()
+
+        if len(self.data) == 0:
+            self._logger.debug("No geoms data found, skip writing.")
             return
-        for name, gdf in self.geoms.items():
-            if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
-                self.logger.warning(
-                    f"{name} object of type {type(gdf).__name__} not recognized"
-                )
+
+        for name, gdf in self.data.items():
+            if len(gdf) == 0:
+                self._logger.warning(f"{name} is empty. Skipping...")
                 continue
-            self.logger.debug(f"Writing file {fn.format(name=name)}")
-            _fn = join(self.root.path, fn.format(name=name))
-            if not isdir(dirname(_fn)):
-                os.makedirs(dirname(_fn))
-            if to_wgs84 and (
-                kwargs.get("driver") == "GeoJSON"
-                or str(fn).lower().endswith(".geojson")
-            ):
+
+            self._logger.debug(f"Writing file {filename.format(name=name)}")
+
+            write_path = Path(join(self._root.path, filename.format(name=name)))
+
+            write_folder = dirname(write_path)
+            if not isdir(write_folder):
+                os.makedirs(write_folder, exist_ok=True)
+
+            if to_wgs84:
                 gdf = gdf.to_crs(4326)
-            gdf.to_file(_fn, **kwargs)
+                assert gdf is not None
+
+            gdf.to_file(write_path, **kwargs)
