@@ -1,30 +1,37 @@
 """Driver for GeoDataFrames."""
+
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
 from typing import List, Optional
 
 import geopandas as gpd
-from pydantic import BaseModel
 from pyproj import CRS
 
-# from hydromt.nodata import NoDataStrategy
+from hydromt._typing import Bbox, Geom
+from hydromt._typing.error import NoDataStrategy
+from hydromt.driver import BaseDriver
 
 logger: Logger = getLogger(__name__)
 
 
-class GeoDataFrameDriver(ABC, BaseModel):
+class GeoDataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
 
     @abstractmethod
     def read(
         self,
         uri: str,
-        bbox: Optional[List[int]] = None,
-        mask: Optional[gpd.GeoDataFrame] = None,
+        *,
+        bbox: Optional[Bbox] = None,
+        mask: Optional[Geom] = None,
         buffer: float = 0.0,
         crs: Optional[CRS] = None,
+        variables: Optional[List[str]] = None,
         predicate: str = "intersects",
-        logger: Optional[Logger] = logger,
+        logger: Logger = logger,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        # TODO: https://github.com/Deltares/hydromt/issues/802
+        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read in any compatible data source to a geopandas `GeoDataFrame`.

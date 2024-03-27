@@ -198,7 +198,7 @@ class ModelRegionComponent(ModelComponent):
     @property
     def data(self) -> Optional[GeoDataFrame]:
         """Provide access to the underlying GeoDataFrame data of the model region."""
-        if self._data is None and self._model_root.is_reading_mode():
+        if self._data is None and self._root.is_reading_mode():
             self.read()
 
         return self._data
@@ -218,12 +218,12 @@ class ModelRegionComponent(ModelComponent):
         **read_kwargs,
     ):
         """Read the model region from a file on disk."""
-        self._model_root._assert_read_mode()
+        self._root._assert_read_mode()
         # cannot read geom files for purely in memory models
         self._logger.debug(f"Reading model file {rel_path}.")
         self._data = cast(
             GeoDataFrame,
-            gpd.read_file(join(self._model_root.path, rel_path), **read_kwargs),
+            gpd.read_file(join(self._root.path, rel_path), **read_kwargs),
         )
         self.kind = "geom"
 
@@ -235,10 +235,10 @@ class ModelRegionComponent(ModelComponent):
         **write_kwargs,
     ):
         """Write the model region to a file."""
-        self._model_root._assert_write_mode()
-        write_path = join(self._model_root.path, rel_path)
+        self._root._assert_write_mode()
+        write_path = join(self._root.path, rel_path)
 
-        if exists(write_path) and not self._model_root.is_override_mode():
+        if exists(write_path) and not self._root.is_override_mode():
             raise OSError(
                 f"Model dir already exists and cannot be overwritten: {write_path}"
             )

@@ -161,7 +161,7 @@ def test_export_cli_deltares_data(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_export_cli_no_data_ignore(tmpdir):
     with pytest.raises(NoDataException):
         _ = CliRunner().invoke(
@@ -197,7 +197,7 @@ def test_export_cli_unsupported_region(tmpdir):
         )
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_export_cli_catalog(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -214,7 +214,7 @@ def test_export_cli_catalog(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_export_time_tuple(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -233,7 +233,7 @@ def test_export_time_tuple(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_export_multiple_sources(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -256,7 +256,7 @@ def test_export_multiple_sources(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(reason="Needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_export_cli_config_file(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,

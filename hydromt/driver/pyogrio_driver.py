@@ -1,6 +1,7 @@
 """Driver to read geodataframes using Pyogrio."""
+
 from logging import Logger, getLogger
-from typing import Optional
+from typing import List, Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info
@@ -8,7 +9,8 @@ from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt._typing.error import NoDataStrategy
+from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
@@ -17,28 +19,47 @@ logger: Logger = getLogger(__name__)
 class PyogrioDriver(GeoDataFrameDriver):
     """Driver to read GeoDataFrames using the `pyogrio` package."""
 
+    name = "pyogrio"
+
     def read(
         self,
         uri: str,
+        *,
         bbox: Optional[Bbox] = None,
-        mask: Optional[gpd.GeoDataFrame] = None,
+        mask: Optional[Geom] = None,
         buffer: float = 0,
         crs: Optional[CRS] = None,
+        variables: Optional[List[str]] = None,
         predicate: str = "intersects",
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        # TODO: https://github.com/Deltares/hydromt/issues/802
         logger: Logger = logger,
-        # handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
 
         args:
         """
+        uris = self.metadata_resolver.resolve(
+            uri,
+            bbox=bbox,
+            mask=mask,
+            buffer=buffer,
+            predicate=predicate,
+            variables=variables,
+            handle_nodata=handle_nodata,
+            **kwargs,
+        )
+        if len(uris) != 1:
+            raise ValueError("Length of uris for Pyogrio Driver must be 1.")
+        _uri = uris[0]
         if bbox is not None:  # buffer bbox
             bbox: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         if mask is not None:  # buffer mask
             mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
-        bbox_reader = bbox_from_file_and_filters(uri, bbox, mask, crs)
-        return read_dataframe(uri, bbox=bbox_reader)
+        bbox_reader = bbox_from_file_and_filters(_uri, bbox, mask, crs)
+        return read_dataframe(_uri, bbox=bbox_reader)
 
 
 def bbox_from_file_and_filters(

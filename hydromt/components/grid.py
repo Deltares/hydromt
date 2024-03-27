@@ -98,7 +98,7 @@ class GridComponent(ModelComponent):
         else:
             for dvar in data.data_vars:
                 if dvar in self._data:
-                    if self._model_root.is_reading_mode():
+                    if self._root.is_reading_mode():
                         self._logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
@@ -131,7 +131,7 @@ class GridComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `write_nc` method.
         """
-        self._model_root._assert_write_mode()
+        self._root._assert_write_mode()
         if len(self.data) == 0:
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
@@ -174,15 +174,15 @@ class GridComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._model_root._assert_read_mode()
+        self._root._assert_read_mode()
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwritting netcdf files
-        if self._model_root.is_reading_mode() and self._model_root.is_writing_mode():
+        if self._root.is_reading_mode() and self._root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
             fn,
-            self._model_root,
+            self._root,
             logger=self._logger,
             single_var_as_array=False,
             mask_and_scale=mask_and_scale,
@@ -487,7 +487,7 @@ class GridComponent(ModelComponent):
         """Initialize grid object."""
         if self._data is None:
             self._data = xr.Dataset()
-            if self._model_root.is_reading_mode() and not skip_read:
+            if self._root.is_reading_mode() and not skip_read:
                 self.read()
 
     def set_crs(self, crs: CRS) -> None:

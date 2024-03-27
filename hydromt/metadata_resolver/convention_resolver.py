@@ -1,7 +1,9 @@
 """MetaDataResolver using HydroMT naming conventions."""
+
 from itertools import product
+from logging import Logger, getLogger
 from string import Formatter
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple
+from typing import Any, List, Optional, Set, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -11,8 +13,7 @@ from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
 
 from .metadata_resolver import MetaDataResolver
 
-if TYPE_CHECKING:
-    from hydromt.data_sources.data_source import DataSource
+logger: Logger = getLogger(__name__)
 
 
 class ConventionResolver(MetaDataResolver):
@@ -53,47 +54,45 @@ class ConventionResolver(MetaDataResolver):
 
     def _get_dates(
         self,
-        source: "DataSource",
         keys: List[str],
         timerange: TimeRange,
     ) -> pd.PeriodIndex:
-        dt: pd.Timedelta = pd.to_timedelta(source.unit_add.get("time", 0), unit="s")
+        dt: pd.Timedelta = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
         t_range: pd.DatetimeIndex = pd.to_datetime(list(timerange)) - dt
-        freq: str = "m" if "month" in keys else "a"
+        freq: str = "M" if "month" in keys else "a"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
 
-    def _get_variables(self, variables: List[str], rename: Dict[str, str]) -> List[str]:
+    def _get_variables(self, variables: List[str]) -> List[str]:
         variables: list[str] = np.atleast_1d(variables).tolist()
-        mv_inv: dict[str, str] = {v: k for k, v in rename.items()}
-        vrs: dict[str] = [mv_inv.get(var, var) for var in variables]
+        inverse_rename_mapping: dict[str, str] = {v: k for k, v in self.rename.items()}
+        vrs: dict[str] = [inverse_rename_mapping.get(var, var) for var in variables]
         return vrs
 
     def resolve(
         self,
-        source: "DataSource",
+        uri: str,
         *,
         timerange: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
-        # TODO: align? -> from RasterDataSetAdapter
-        geom: Optional[gpd.GeoDataFrame] = None,
+        # TODO: align? -> from RasterDatasetAdapter
+        mask: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
         **kwargs,
     ) -> list[str]:
         """Resolve the placeholders in the URI."""
-        uri_expanded, keys = self._expand_uri_placeholders(
-            source.uri, timerange, variables
-        )
+        uri_expanded, keys = self._expand_uri_placeholders(uri, timerange, variables)
         if timerange:
-            dates = self._get_dates(source, keys, timerange)
+            dates = self._get_dates(keys, timerange)
         else:
             dates = pd.PeriodIndex(["2023-01-01"], freq="d")
         if variables:
-            variables = self._get_variables(variables, source.rename)
+            variables = self._get_variables(variables)
         else:
             variables = [""]
         fmts: list[dict[str, Any]] = list(

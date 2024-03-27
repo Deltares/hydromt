@@ -1,4 +1,5 @@
-"""Mesh component."""
+"""Implementations for model mesh workloads."""
+
 import os
 from logging import getLogger
 from os.path import dirname, isdir, join
@@ -14,7 +15,7 @@ from pyproj import CRS
 from hydromt.components.base import ModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
-from hydromt.models import Model
+from hydromt.models.model import Model
 from hydromt.workflows.mesh import (
     create_mesh2d,
     mesh2d_from_raster_reclass,
@@ -104,10 +105,10 @@ class MeshComponent(ModelComponent):
         if self.data is None:
             self._logger.debug("No mesh data found, skip writing.")
             return
-        self._model_root._assert_write_mode()
+        self._root._assert_write_mode()
 
         # filename
-        _fn = join(self._model_root.path, fn)
+        _fn = join(self._root.path, fn)
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
         self._logger.debug(f"Writing file {fn}")
@@ -137,11 +138,9 @@ class MeshComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._model_root._assert_read_mode()
+        self._root._assert_read_mode()
         ds = xr.merge(
-            read_nc(
-                fn, root=self._model_root.path, logger=self._logger, **kwargs
-            ).values()
+            read_nc(fn, root=self._root.path, logger=self._logger, **kwargs).values()
         )
         uds = xu.UgridDataset(ds)
         if ds.rio.crs is not None:  # parse crs
@@ -235,7 +234,7 @@ class MeshComponent(ModelComponent):
         method.
         """
         # XU grid data type Xarray dataset with xu sampling.
-        if self._data is None and self._model_root.is_reading_mode():
+        if self._data is None and self._root.is_reading_mode():
             self.read()
         return self._data
 
@@ -570,7 +569,7 @@ class MeshComponent(ModelComponent):
             if grid_name in self.mesh_names:
                 # check if the two grids are the same
                 if not self._grid_is_equal(grid_name, data):
-                    if not overwrite_grid or not self._model_root.is_override_mode():
+                    if not overwrite_grid or not self._root.is_override_mode():
                         raise ValueError(
                             f"Grid {grid_name} already exists in mesh"
                             " and has a different topology. "

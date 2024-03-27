@@ -64,8 +64,8 @@ Changes to the format of the yaml interface
 -------------------------------------------
 
 The first change to the YAML format is that now, at the root of the documents are three keys:
-`model_type`, `global` and `steps`.
-- `model_type` (optional) details what kind of model is going to be used in the model. This can currently also be provided only through the CLI,
+`modeltype`, `global` and `steps`.
+- `modeltype` (optional) details what kind of model is going to be used in the model. This can currently also be provided only through the CLI,
 but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
 - `global` is intended for any configuration for the model object itself, here you may override any default
 configuration for the components provided by your implementation. Any options mentioned here will be passed to the `Model.__init__` function
@@ -78,7 +78,7 @@ provided to the function call as arguments.
 An example of a fictional Wflow YAML file would be:
 
 ```yaml
-model_type: wflow
+modeltype: wflow
 global:
 	data_libs: deltares_data
 	components:
@@ -188,11 +188,15 @@ forcing or tables. To be able to work within a `Model` class properly a componen
 - `read`: reading the component and its data from disk.
 - `write`: write the component in its current state to disk in the provided root.
 
-Additionally, it is highly recommended to also provide the following methods:
+Additionally, it is highly recommended to also provide the following methods to ensure HydroMT can properly handle your objects:
 
 - `set`: provide the ability to override the current data in the component.
-- `create`: the ability to construct the schematization of the component (computation units like grid cells, mesh1d or network lines, vector units for lumped model etc.) from the provided arguments.
-- `add_data`: the ability to add model data and parameters to the component once the schematization is well defined (ie add landuse data to grid or mesh etc.).
+- `_initialize`: provide the ability to override the current data in the component.
+
+Finally, you can provide additional functionality by providing the following optional functions:
+
+- `create`: the ability to construct the schematization of the component (computation units like grid cells, `mesh1d` or network lines, vector units for lumped model etc.) from the provided arguments.
+- `add_data`: the ability to add model data and parameters to the component once the schematization is well-defined (i.e. add land-use data to grid or mesh etc.).
 
 It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
@@ -215,7 +219,7 @@ but your components will also gain access to the following attributes:
 +----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
 | logger         | A reference to the logger of the model                                                            | self.logger.info(....)                   |
 +----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
-| model_root     | A reference to the model root which can be used for permissions checking and determining IO paths | self.model_root.path                     |
+| root           | A reference to the model root which can be used for permissions checking and determining IO paths | self.root.path                           |
 +----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
 
 As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it receives. Note that this makes it impractical if not impossible to use components outside of the model they are assigned to.
@@ -241,10 +245,38 @@ The `Model.__init__` function can be used to add default components by plugins l
 
 class ExampleModel(Model):
 	def __init__(self):
-        self.root: ModelRoot = ModelRoot(".")
+		self.root: ModelRoot = ModelRoot(".")
 		self.add_component("region", ModelRegionComponent)
 		self.add_component("grid", GridComponent)
 		...
+
+```
+
+If you want to allow your plugin user to modify the root and update or add new component during instantiation then you can use:
+
+``` python
+
+class ExampleEditModel(Model):
+    def __init__(
+        self,
+        components: Optional[dict[str, dict[str, Any]]] = None,
+        root: Optional[str] = None,
+    ):
+        # Recursively update the components with any defaults that are missing in the components provided by the user.
+        components = components or {}
+        default_components = {
+            "region": {"type": "ModelRegionComponent"},
+            "grid": {"type": GridComponent},
+        }
+        components = hydromt.utils.deep_merge.deep_merge(
+            default_components, components
+        )
+
+        # Now instantiate the Model
+        super().__init__(
+            root = root,
+            components = components,
+        )
 
 ```
 
@@ -373,3 +405,68 @@ To have post v1 core recognize there are a few new requirements:
 
 When you have specified the plugins you wish to make available to core in your `pyproject.toml`, all objects should be made available through a global static object called `PLUGINS`. This object has attributes
 for each of the corresponding plugin categories.
+
+
+DataAdapter
+-----------
+
+The previous version of the `DataAdapter` and its subclasses had a lot of
+responsabilities:
+- Validate the input from the `DataCatalog` entry.
+- Find the right paths to the data based on a naming convention.
+- Deserialize/read many different file formats into python objects.
+- Merge these different python objects into one that represent that data source in the
+model region.
+- Homogenize the data based on the data catalog entry and HydroMT conventions.
+
+In v1, this class has been split into three extentable components:
+
+DataSource
+^^^^^^^^^^
+
+The `DataSource` is the python representation of a parsed entry in the `DataCatalog`.
+The `DataSource` is responsable for validating the `DataCatalog` entry. It also carries
+the `DataAdapter` and `DataDriver` (more info below) and serves as an entrypoint to
+the data.
+Per HydroMT data type (e.g. `RasterDataset`, `GeoDataFrame`), HydroMT has one
+`DataSource`, e.g. `RasterDatasetSource`, `GeoDataFrameSource`.
+
+MetaDataResolver
+^^^^^^^^^^^^^^^^
+
+The `MetaDataResolver` takes a single `uri` and the query parameters from the model,
+such as the region, or the timerange, and returns multiple absolute paths, or `uri`s,
+that can be read into a single python representation (e.g. `xarray.Dataset`). This
+functionality was previously covered in the `resolve_paths` function. However, there
+are more ways than to resolve a single uri, so the `MetaDataResolver` makes this
+behaviour extendable. Plugins or other code can subclass the Abstract `MetaDataResolver`
+class to implement their own conventions for data discovery.
+The `MetaDataResolver` is injected into the `Driver` objects and can be used there.
+
+Driver
+^^^^^^
+
+The `Driver` class is responsable for deserializing/reading a set of file types, like
+a geojson or zarr file, into their python in-memory representations:
+`geopandas.DataFrame` or `xarray.Dataset` respectively. To find the relevant files based
+on a single `uri` in the `DataCatalog`, a `MetaDataResolver` is used.
+The driver has a `read` method. This method accepts a `uri`, a
+unique identifier for a single datasource. It also accepts different query parameters,
+such a the region, timerange or zoom level of the query from the model.
+This `read` method returns the python representation of the DataSource.
+Because the merging of different files from different `DataSource`s can be
+non-trivial, the driver is responsable to merge the different python objects coming
+from the driver to a single representation. This is then returned from the `read`
+method.
+Because the query parameters vary per HydroMT data type, the is a different driver
+interface per type, e.g. `RasterDatasetDriver`, `GeoDataFrameDriver`.
+
+DataAdapter
+^^^^^^^^^^^
+
+The `DataAdapter` now has its previous responsabilities reduced to just homogenizing
+the data coming from the `Driver`. This means slicing the data to the right region,
+renaming variables, changing units, regridding and more. The `DataAdapter` has a
+`transform` method that takes a HydroMT data type and returns this same type. This
+method also accepts query parameters based on the data type, so there is a single
+`DataAdapter` per HydroMT data type.

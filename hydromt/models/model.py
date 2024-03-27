@@ -7,6 +7,7 @@ import os
 import shutil
 import typing
 from abc import ABCMeta
+from inspect import _empty, signature
 from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -25,7 +26,6 @@ from typing import (
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import pydantic.v1.utils
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
@@ -43,6 +43,7 @@ from hydromt.io import configread
 from hydromt.io.writers import configwrite
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
+from hydromt.utils.deep_merge import deep_merge
 
 __all__ = ["Model"]
 
@@ -110,7 +111,7 @@ class Model(object, metaclass=ABCMeta):
         """
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
-        components = pydantic.v1.utils.deep_update(
+        components = deep_merge(
             {"region": {"type": "ModelRegionComponent"}}, components
         )
 
@@ -248,7 +249,13 @@ class Model(object, metaclass=ABCMeta):
             self.logger.info(f"build: {step}")
             # Call the methods.
             method = rgetattr(self, step)
-            for k, v in kwargs.items():
+            params = {
+                param: arg.default
+                for param, arg in signature(method).parameters.items()
+                if arg.default != _empty
+            }
+            merged = {**params, **kwargs}
+            for k, v in merged.items():
                 self.logger.info(f"{method}.{k}: {v}")
             method(**kwargs)
 
@@ -331,7 +338,13 @@ class Model(object, metaclass=ABCMeta):
             self.logger.info(f"update: {step}")
             # Call the methods.
             method = rgetattr(self, step)
-            for k, v in kwargs.items():
+            params = {
+                param: arg.default
+                for param, arg in signature(method).parameters.items()
+                if arg.default != _empty
+            }
+            merged = {**params, **kwargs}
+            for k, v in merged.items():
                 self.logger.info(f"{method}.{k}: {v}")
             method(**kwargs)
 

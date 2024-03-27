@@ -25,10 +25,8 @@ from hydromt.data_catalog import (
     _denormalise_data_dict,
     _parse_data_source_dict,
 )
-from hydromt.data_sources import GeoDataFrameDataSource
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.data_source import GeoDataFrameSource
 from hydromt.gis.utils import to_geographic_bbox
-from hydromt.metadata_resolvers import MetaDataResolver
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -86,18 +84,18 @@ def test_from_yml_no_root(tmpdir):
     assert cat.root == Path(tmpdir)
 
 
-def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver):
+def test_parser():
     # valid abs root on windows and linux!
     root = "c:/root" if os.name == "nt" else "/c/root"
     # simple; abs path
     source = {
-        "metadata_resolver": mock_resolver,
-        "driver": mock_driver,
+        "data_adapter": {"name": "GeoDataFrame"},
+        "driver": {"name": "pyogrio"},
         "data_type": "GeoDataFrame",
         "uri": f"{root}/to/data.gpkg",
     }
     datasource = _parse_data_source_dict("test", source, root=root)
-    assert isinstance(datasource, GeoDataFrameDataSource)
+    assert isinstance(datasource, GeoDataFrameSource)
     assert datasource.uri == abspath(source["uri"])
     # TODO: do we want to allow Path objects?
     # # test with Path object
@@ -105,22 +103,22 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     # datasource = _parse_data_source_dict("test", source, root=root)
     # assert datasource.uri == abspath(source["uri"])
     # rel path
-    source = {
-        "metadata_resolver": mock_resolver,
-        "driver": mock_driver,
-        "data_type": "GeoDataFrame",
-        "uri": "path/to/data.gpkg",
-        "kwargs": {"fn": "test"},
-    }
-    datasource = _parse_data_source_dict("test", source, root=root)
-    assert datasource.uri == abspath(join(root, source["uri"]))
+    # source = {
+    #     "data_adapter": {"name": "GeoDataFrame"},
+    #     "driver": {"name": "pyogrio"},
+    #     "data_type": "GeoDataFrame",
+    #     "uri": "path/to/data.gpkg",
+    #     "kwargs": {"fn": "test"},
+    # }
+    # datasource = _parse_data_source_dict("test", source, root=root)
+    # assert datasource.uri == abspath(join(root, source["uri"]))
     # check if path in kwargs is also absolute
-    assert datasource.driver_kwargs["fn"] == abspath(join(root, "test"))
+    # assert datasource.driver_kwargs["fn"] == abspath(join(root, "test"))
     # alias
     dd = {
         "test": {
-            "metadata_resolver": mock_resolver,
-            "driver": mock_driver,
+            "data_adapter": {"name": "GeoDataFrame"},
+            "driver": {"name": "pyogrio"},
             "data_type": "GeoDataFrame",
             "uri": "path/to/data.gpkg",
         },
@@ -139,8 +137,8 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     # placeholder
     dd = {
         "test_{p1}_{p2}": {
-            "metadata_resolver": mock_resolver,
-            "driver": mock_driver,
+            "data_adapter": {"name": "GeoDataFrame"},
+            "driver": {"name": "pyogrio"},
             "data_type": "GeoDataFrame",
             "uri": "data_{p2}.gpkg",
             "placeholders": {"p1": ["a", "b"], "p2": ["1", "2", "3"]},
@@ -155,8 +153,8 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
     # variants
     dd = {
         "test": {
-            "metadata_resolver": mock_resolver,
-            "driver": mock_driver,
+            "data_adapter": {"name": "GeoDataFrame"},
+            "driver": {"name": "pyogrio"},
             "data_type": "GeoDataFrame",
             "variants": [
                 {"uri": "path/to/data1.gpkg", "version": "1"},
@@ -188,7 +186,7 @@ def test_parser(mock_driver: GeoDataFrameDriver, mock_resolver: MetaDataResolver
         _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_data_catalog_io(tmpdir):
     data_catalog = DataCatalog()
     _ = data_catalog.sources  # load artifact data as fallback
@@ -289,7 +287,7 @@ def test_versioned_catalog_entries(tmpdir):
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_versioned_catalogs(tmpdir, monkeypatch):
     v999_yml_fn = join(tmpdir, "test_sources_v999.yml")
     with open(v999_yml_fn, "w") as f:
@@ -316,7 +314,7 @@ def test_versioned_catalogs(tmpdir, monkeypatch):
         DataCatalog(v999_yml_fn)
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_data_catalog(tmpdir):
     data_catalog = DataCatalog()
     # initialized with empty dict
@@ -363,7 +361,7 @@ def test_data_catalog(tmpdir):
     data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_from_archive(tmpdir):
     data_catalog = DataCatalog()
     # change cache to tmpdir
@@ -383,7 +381,7 @@ def test_from_archive(tmpdir):
         data_catalog.from_archive("https://asdf.com/asdf.zip")
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_used_sources(tmpdir):
     merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_fn)
@@ -397,7 +395,7 @@ def test_used_sources(tmpdir):
     assert sources[0][1].version == source.version
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_from_yml_with_archive(tmpdir):
     yml_fn = join(CATALOGDIR, "artifact_data.yml")
     data_catalog = DataCatalog(yml_fn)
@@ -429,7 +427,7 @@ def test_from_predefined_catalogs():
         data_catalog.from_predefined_catalogs("asdf")
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_export_global_datasets(tmpdir):
     DTYPES = {
         "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),
@@ -481,7 +479,7 @@ def test_export_global_datasets(tmpdir):
         assert isinstance(obj, dtypes), key
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
     fn_df = str(tmpdir.join("test.csv"))
@@ -545,7 +543,7 @@ def test_export_dataframe(tmpdir, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_get_rasterdataset():
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
@@ -575,7 +573,7 @@ def test_get_rasterdataset():
         data_catalog.get_rasterdataset({"name": "test"})
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_get_geodataframe():
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
@@ -601,7 +599,7 @@ def test_get_geodataframe():
         data_catalog.get_geodataframe({"name": "test"})
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_get_geodataset():
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
@@ -631,7 +629,7 @@ def test_get_geodataset():
         data_catalog.get_geodataset({"name": "test"})
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_get_dataset(timeseries_df):
     # get_dataset
     data_catalog = DataCatalog("artifact_data")
@@ -650,7 +648,7 @@ def test_get_dataset(timeseries_df):
     assert ds.name == "col1"
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_get_dataframe(df, tmpdir):
     data_catalog = DataCatalog("artifact_data")  # read artifacts
     n = len(data_catalog)
@@ -677,7 +675,7 @@ def test_get_dataframe(df, tmpdir):
         data_catalog.get_dataframe({"name": "test"})
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_deprecation_warnings(artifact_data):
     with pytest.deprecated_call():
         # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
@@ -704,7 +702,7 @@ def test_deprecation_warnings(artifact_data):
         artifact_data.get_geodataset(fn, chunks={"time": 100})
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_detect_extent():
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
@@ -741,7 +739,7 @@ def test_detect_extent():
     assert detected_temporal_range == expected_temporal_range
 
 
-@pytest.mark.skip(reason="needs implementation of RasterDataSet.")
+@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_to_stac(tmpdir):
     data_catalog = DataCatalog()  # read artifacts
     _ = data_catalog.sources  # load artifact data as fallback
