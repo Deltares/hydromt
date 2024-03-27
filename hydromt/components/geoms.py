@@ -17,11 +17,10 @@ from geopandas import GeoDataFrame, GeoSeries
 
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
+from hydromt.utils import DEFAULT_GEOM_FILENAME
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
-
-DEFAULT_GEOM_FILENAME = "geoms/{name}.geojson"
 
 
 class GeomComponent(ModelComponent):
