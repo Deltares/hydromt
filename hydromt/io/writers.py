@@ -1,20 +1,33 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
+
 import logging
 import os
 from logging import Logger
-from os.path import dirname, isdir, join, splitext
+from os.path import dirname, isdir, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 import xarray as xr
-import yaml
+from tomli_w import dump as dump_toml
+from yaml import dump as dump_yaml
 
 from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
-from hydromt.io.path import make_config_paths_relative
 
 logger = logging.getLogger(__name__)
+
+
+def write_yaml(path: StrPath, data: Dict[str, Any]):
+    """Write a dictionary to a yaml formatted file."""
+    with open(path, "wb") as f:
+        dump_yaml(data, f)
+
+
+def write_toml(path: StrPath, data: Dict[str, Any]):
+    """Write a dictionary to a toml formatted file."""
+    with open(path, "wb") as f:
+        dump_toml(data, f)
 
 
 def write_xy(fn, gdf, fmt="%.4f"):
@@ -34,40 +47,6 @@ def write_xy(fn, gdf, fmt="%.4f"):
     xy = np.stack((gdf.geometry.x.values, gdf.geometry.y.values)).T
     with open(fn, "w") as f:
         np.savetxt(f, xy, fmt=fmt)
-
-
-def configwrite(config_fn: Union[str, Path], cfdict: dict, **kwargs) -> None:
-    """Write configuration/workflow dictionary to file.
-
-    Parameters
-    ----------
-    config_fn : Union[Path, str]
-        Path to configuration file
-    cfdict : dict
-        Configuration dictionary. If the configuration contains headers,
-        the first level keys are the section headers, the second level
-        option-value pairs.
-    encoding : str, optional
-        File encoding, by default "utf-8"
-    cf : ConfigParser, optional
-        Alternative configuration parser, by default None
-    noheader : bool, optional
-        Set true for a single-level configuration dictionary with no headers,
-        by default False
-    **kwargs
-        Additional keyword arguments that are passed to the `write_ini_config`
-        function.
-    """
-    root = Path(dirname(config_fn))
-    _cfdict = make_config_paths_relative(cfdict.copy(), root)
-    ext = splitext(config_fn)[-1].strip()
-    if ext in [".yaml", ".yml"]:
-        with open(config_fn, "w") as f:
-            yaml.dump(_cfdict, f, sort_keys=False)
-    else:
-        raise ValueError(
-            f"Could not write to unknown extension: {ext} hydromt only supports yaml"
-        )
 
 
 def netcdf_writer(

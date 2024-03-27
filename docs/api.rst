@@ -740,7 +740,6 @@ Writing methods
 .. autosummary::
    :toctree: _generated
 
-   io.configwrite
    io.netcdf_writer
    io.write_xy
    io.zarr_writer
