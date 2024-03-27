@@ -45,8 +45,8 @@ class ModelRegionComponent(ModelComponent):
     @hydromt_step
     def create(
         self,
-        *,
         region: dict,
+        *,
         crs: Optional[int] = None,
         hydrography_fn: str = "merit_hydro",
         basin_index_fn: str = "merit_hydro_index",
