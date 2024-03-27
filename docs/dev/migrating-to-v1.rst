@@ -233,9 +233,14 @@ Once a component has been added, any component (or other object or scope that ha
 `model.get_component` function which takes the name of the desired component and the TYPE of the component you wish to retrieve. At this point you can do
 with it as you please.
 
-In the core of HydroMT, the available components are (list or maybe table):
-  - `GridComponent` for data on a regular grid
-  - etc.
+In the core of HydroMT, the available components are:
++-----------------------+-----------------+
+| v0.x Model Attribute  | Component       |
++=======================+=================+
+| model.tables          | TableComponent  |
+| model.grid            | GridComponent   |
+| model.geoms('region') | RegionComponent |
++-----------------------+-----------------+
 
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
