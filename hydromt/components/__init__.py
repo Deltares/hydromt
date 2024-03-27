@@ -8,4 +8,5 @@ __all__ = [
     "ModelRegionComponent",
     "ModelComponent",
     "GridComponent",
+    "MeshComponent",
 ]

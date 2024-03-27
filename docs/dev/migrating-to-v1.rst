@@ -235,6 +235,7 @@ with it as you please.
 
 In the core of HydroMT, the available components are (list or maybe table):
   - `GridComponent` for data on a regular grid
+  - `MeshComponent` for data on a unstructured grid
   - etc.
 
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
@@ -350,15 +351,15 @@ has not been changed compared to the GridModel.
 +------------------------------+-------------------------------------------+
 | v0.x                         | v1                                        |
 +==============================+===========================================+
-| model.set_grid(...)          | model.grid_component.set(...)             |
+| model.set_grid(...)          | model.grid.set(...)             |
 +------------------------------+-------------------------------------------+
-| model.read_grid(...)         | model.grid_component.read(...)            |
+| model.read_grid(...)         | model.grid.read(...)            |
 +------------------------------+-------------------------------------------+
-| model.write_grid(...)        | model.grid_component.write(...)           |
+| model.write_grid(...)        | model.grid.write(...)           |
 +------------------------------+-------------------------------------------+
-| model.setup_grid(...)        | model.grid_component.create(...)          |
+| model.setup_grid(...)        | model.grid.create(...)          |
 +------------------------------+-------------------------------------------+
-| model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
+| model.setup_grid_from_*(...) | model.grid.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
 
 
@@ -374,8 +375,7 @@ See `GridComponent` rationale
 
 The MeshModel has just like the `GridModel` been replaced with its implementation
 of the `ModelComponent`: `MeshComponent`. The restructering of `MeshModel` follows the same pattern
-as the `GridComponent`. Do note that MeshComponent.get_mesh() has already been updated to work with
-XUgrid 0.9.0.
+as the `GridComponent`.
 
 Plugins
 -------

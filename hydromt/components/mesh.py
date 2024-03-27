@@ -1,7 +1,6 @@
 """Implementations for model mesh workloads."""
 
 import os
-from logging import getLogger
 from os.path import dirname, isdir, join
 from pathlib import Path
 from typing import Dict, List, Optional, Union
@@ -11,6 +10,7 @@ import pandas as pd
 import xarray as xr
 import xugrid as xu
 from pyproj import CRS
+from shapely.geometry import box
 
 from hydromt import hydromt_step
 from hydromt.components.base import ModelComponent
@@ -24,7 +24,7 @@ from hydromt.workflows.mesh import (
     rename_mesh,
 )
 
-logger = getLogger(__name__)
+DEFAULT_FN = "mesh/mesh.nc"
 
 
 class MeshComponent(ModelComponent):
@@ -74,17 +74,12 @@ class MeshComponent(ModelComponent):
         elif grid_name != data.ugrid.grid.name:
             data = rename_mesh(data, name=grid_name)
 
-        crs = self._add_mesh(
-            data=data, grid_name=grid_name, overwrite_grid=overwrite_grid
-        )
+        self._add_mesh(data=data, grid_name=grid_name, overwrite_grid=overwrite_grid)
 
-        if crs:  # Restore crs
-            for grid in self.data.ugrid.grids:
-                grid.set_crs(crs)
-
+    @hydromt_step
     def write(
         self,
-        fn: str = "mesh/mesh.nc",
+        fn: str = DEFAULT_FN,
         write_optional_ugrid_attributes: bool = True,
         **kwargs,
     ) -> None:
@@ -121,8 +116,9 @@ class MeshComponent(ModelComponent):
             ds_out = ds_out.rio.write_crs(self.crs)
         ds_out.to_netcdf(_fn, **kwargs)
 
+    @hydromt_step
     def read(
-        self, fn: str = "mesh/mesh.nc", crs: Optional[Union[CRS, int]] = None, **kwargs
+        self, fn: str = DEFAULT_FN, crs: Optional[Union[CRS, int]] = None, **kwargs
     ) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
@@ -159,7 +155,8 @@ class MeshComponent(ModelComponent):
                 )
         self._data = uds
 
-    def create(
+    @hydromt_step
+    def create2d(
         self,
         region: dict,
         res: Optional[float] = None,
@@ -235,9 +232,16 @@ class MeshComponent(ModelComponent):
         method.
         """
         # XU grid data type Xarray dataset with xu sampling.
-        if self._data is None and self._root.is_reading_mode():
-            self.read()
+        if self._data is None:
+            self._initialize_mesh()
         return self._data
+
+    def _initialize_mesh(self, skip_read: bool = False) -> None:
+        """Initialize mesh object."""
+        if self._data is None:
+            self._data = xu.UgridDataset(xr.Dataset())
+            if self._root.is_reading_mode() and not skip_read:
+                self.read()
 
     @property
     def crs(self) -> Optional[CRS]:
@@ -265,7 +269,8 @@ class MeshComponent(ModelComponent):
         if self.data is not None:
             return self.data.ugrid.bounds
         return None
-    @property 
+
+    @property
     def mesh_region(self) -> Optional[gpd.GeoDataFrame]:
         """Return mesh total_bounds as a geodataframe."""
         if self.data is not None:
@@ -274,6 +279,7 @@ class MeshComponent(ModelComponent):
             )
             return region
         return None
+
     @property
     def mesh_names(self) -> List[str]:
         """List of grid names in mesh."""
@@ -580,7 +586,7 @@ class MeshComponent(ModelComponent):
             if grid_name in self.mesh_names:
                 # check if the two grids are the same
                 if not self._grid_is_equal(grid_name, data):
-                    if not overwrite_grid or not self._root.is_override_mode():
+                    if not overwrite_grid:
                         raise ValueError(
                             f"Grid {grid_name} already exists in mesh"
                             " and has a different topology. "
@@ -619,7 +625,9 @@ class MeshComponent(ModelComponent):
                         ]
                     )
                 )
-            return crs
+            if crs:  # Restore crs
+                for grid in self.data.ugrid.grids:
+                    grid.set_crs(crs)
 
     def _grid_is_equal(self, grid_name: str, data: xu.UgridDataset) -> bool:
         return self.mesh_grids[grid_name].to_dataset().equals(data.grid.to_dataset())

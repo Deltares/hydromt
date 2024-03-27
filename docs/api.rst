@@ -517,7 +517,7 @@ Setup methods
 
 
 MeshComponent
-=========
+=============
 
 .. autosummary::
    :toctree: _generated
@@ -531,14 +531,14 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   MeshComponent.model
-   MeshComponent.data_catalog
-   MeshComponent.logger
-   MeshComponent.model_root
+   MeshComponent._model
+   MeshComponent._data_catalog
+   MeshComponent._logger
+   MeshComponent._root
    MeshComponent.data
    MeshComponent.crs
    MeshComponent.bounds
-   MeshComponent.region
+   MeshComponent.mesh_region
    MeshComponent.mesh_names
    MeshComponent.mesh_grids
    MeshComponent.mesh_datasets
@@ -563,7 +563,7 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   MeshComponent.create
+   MeshComponent.create2d
    MeshComponent.add_data_from_constant
    MeshComponent.add_data_from_rasterdataset
    MeshComponent.add_data_from_raster_reclass
