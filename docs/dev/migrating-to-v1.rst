@@ -252,6 +252,32 @@ class ExampleModel(Model):
 
 ```
 
+If you want to allow your plugin user to modify the root and update or add new component during instantiation then you can use:
+
+``` python
+
+class ExampleEditModel(Model):
+    def __init__(
+        self,
+        components: Optional[dict[str, dict[str, Any]]] = None,
+        root: Optional[str] = None,
+    ):        
+        # Recursively update the components with any defaults that are missing in the components provided by the user.
+        components = components or {}
+        default_components = {
+            "region": {"type": "ModelRegionComponent"},
+            "grid": {"type": GridComponent},
+        }
+        components = hydromt._utils.deep_merge.deep_merge(
+            default_components, components
+        )
+        
+        # Now instantiate the Model
+        super().__init__(
+            root = root,
+            components = components,
+        )
+
 Making the model region its own component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
