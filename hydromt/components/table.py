@@ -8,7 +8,6 @@ from typing import (
     Dict,
     Optional,
     Union,
-    cast,
 )
 
 import pandas as pd
@@ -86,7 +85,9 @@ class TableComponent(ModelComponent):
 
     def set(
         self,
-        tables: Union[Union[pd.DataFrame, pd.Series], Dict],
+        tables: Union[
+            Union[pd.DataFrame, pd.Series], Dict[str, Union[pd.DataFrame, pd.Series]]
+        ],
         name: Optional[str] = None,
     ) -> None:
         """Add (a) table(s) <pandas.DataFrame> to model.
@@ -100,23 +101,29 @@ class TableComponent(ModelComponent):
             Name of table, by default None. Required when tables is not a dict.
         """
         self._initialize_tables()
-        self._data = cast(Dict[str, Union[pd.DataFrame, pd.Series]], self._data)
-        if not isinstance(tables, dict) and name is None:
-            raise ValueError("name required when tables is not a dict")
-        elif not isinstance(tables, dict):
-            tables = {name: tables}
-        for name, df in tables.items():
+        assert self._data is not None
+        if not isinstance(tables, dict):
+            if name is None:
+                raise ValueError("name required when tables is not a dict")
+            else:
+                tables_to_add: Dict[str, Union[pd.DataFrame, pd.Series]] = {
+                    name: tables
+                }
+        else:
+            tables_to_add: Dict[str, Union[pd.DataFrame, pd.Series]] = tables
+
+        for df_name, df in tables_to_add.items():
             if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
                 raise ValueError(
                     "table type not recognized, should be pandas DataFrame or Series."
                 )
-            if name in self._data:
+            if df_name in self._data:
                 if not self._root.is_writing_mode():
-                    raise IOError(f"Cannot overwrite table {name} in read-only mode")
+                    raise IOError(f"Cannot overwrite table {df_name} in read-only mode")
                 elif self._root.is_reading_mode():
-                    self._root.logger.warning(f"Overwriting table: {name}")
+                    self._root.logger.warning(f"Overwriting table: {df_name}")
 
-            self._data[name] = df
+            self._data[str(df_name)] = df
 
     def get_tables_merged(self) -> pd.DataFrame:
         """Return all tables of a model merged into one dataframe."""
