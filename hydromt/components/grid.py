@@ -19,7 +19,7 @@ from hydromt.components.base import ModelComponent
 from hydromt.components.region import (
     DEFAULT_BASIN_INDEX_FN,
     DEFAULT_HYDROGRAPHY_FN,
-    ModelRegionComponent,
+    RegionComponent,
 )
 from hydromt.gis import raster
 from hydromt.io.readers import read_nc
@@ -225,7 +225,7 @@ class GridComponent(ModelComponent):
         ----------
         region : dict
             Dictionary describing region of interest, e.g.:
-            See :func:`ModelRegionComponent.create` for details.
+            See :func:`RegionComponent.create` for details.
         res: float
             Resolution used to generate 2D grid [unit of the CRS], required if region
             is not based on 'grid'.
@@ -266,7 +266,7 @@ class GridComponent(ModelComponent):
 
         # Pass region creation information to model.region.
         region_component = self._model.get_component(
-            self._region_component, ModelRegionComponent
+            self._region_component, RegionComponent
         )
         if region is not None:
             region_component.create(

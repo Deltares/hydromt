@@ -36,7 +36,7 @@ from hydromt._utils import _classproperty
 from hydromt._utils.constants import DEFAULT_REGION_COMPONENT
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
-from hydromt.components import ModelRegionComponent
+from hydromt.components import RegionComponent
 from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -77,7 +77,7 @@ class Model(object, metaclass=ABCMeta):
         "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
-        "region": ModelRegionComponent,
+        "region": RegionComponent,
         "results": XArrayDict,
         "states": XArrayDict,
     }
@@ -113,7 +113,7 @@ class Model(object, metaclass=ABCMeta):
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
         components = deep_merge(
-            {DEFAULT_REGION_COMPONENT: {"type": ModelRegionComponent.__name__}},
+            {DEFAULT_REGION_COMPONENT: {"type": RegionComponent.__name__}},
             components,
         )
 
@@ -143,7 +143,7 @@ class Model(object, metaclass=ABCMeta):
         self._components: dict[str, ModelComponent] = {}
         self._add_components(components)
 
-        self._defered_file_closes = []
+        self._defered_file_closes: list[DeferedFileClose] = []
 
         # model paths
         self._config_fn = self._CONF if config_fn is None else config_fn
@@ -179,9 +179,9 @@ class Model(object, metaclass=ABCMeta):
         return self._components[name]
 
     @property
-    def region(self) -> ModelRegionComponent:
+    def region(self) -> RegionComponent:
         """Return the model region component."""
-        return self.get_component(DEFAULT_REGION_COMPONENT, ModelRegionComponent)
+        return self.get_component(DEFAULT_REGION_COMPONENT, RegionComponent)
 
     @_classproperty
     def api(cls) -> Dict:

@@ -19,7 +19,7 @@ from shapely.geometry import box
 from hydromt._utils.constants import DEFAULT_REGION_COMPONENT
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.region import RegionComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data
@@ -800,13 +800,13 @@ def test_meshmodel_setup(griduda, world):
 
 def test_initialize_model():
     m = Model()
-    assert isinstance(m.region, ModelRegionComponent)
+    assert isinstance(m.region, RegionComponent)
 
 
 def test_initialize_model_with_grid_component():
-    m = Model(components={"grid": {"type": "GridComponent"}})
+    m = Model(components={"grid": {"type": GridComponent.__name__}})
     assert isinstance(m.grid, GridComponent)
-    assert isinstance(m.region, ModelRegionComponent)
+    assert isinstance(m.region, RegionComponent)
 
 
 def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
@@ -855,7 +855,7 @@ def test_read_in_write_mode():
 
 
 def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, RegionComponent)[0]
     region.create.__ishydromtstep__ = True
     m = Model(root=str(tmpdir))
     assert m.region is region
@@ -866,7 +866,7 @@ def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
 
 
 def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
-    region, foo = _patch_plugin_components(mocker, ModelRegionComponent, ModelComponent)
+    region, foo = _patch_plugin_components(mocker, RegionComponent, ModelComponent)
     foo.write.__ishydromtstep__ = True
     m = Model(root=str(tmpdir))
     m.add_component("foo", foo)
@@ -880,7 +880,7 @@ def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
 
 
 def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, RegionComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
 
@@ -890,7 +890,7 @@ def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path
 
 
 def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, RegionComponent)[0]
     m = Model(root=str(tmpdir))
     assert m.region is region
 
@@ -928,7 +928,7 @@ def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
 def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
     tmpdir: Path, mocker: MockerFixture
 ):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    region = _patch_plugin_components(mocker, RegionComponent)[0]
     m = Model(root=str(tmpdir), mode="r")
     assert region is m.region
 

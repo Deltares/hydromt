@@ -34,7 +34,7 @@ DEFAULT_HYDROGRAPHY_FN = "merit_hydro"
 DEFAULT_BASIN_INDEX_FN = "merit_hydro_index"
 
 
-class ModelRegionComponent(ModelComponent):
+class RegionComponent(ModelComponent):
     """Define the model region."""
 
     def __init__(
@@ -281,7 +281,7 @@ class ModelRegionComponent(ModelComponent):
             gdf.to_file(write_path, **write_kwargs)
 
     def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, ModelRegionComponent):
+        if not isinstance(__value, RegionComponent):
             return False
         else:
             try:

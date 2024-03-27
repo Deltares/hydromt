@@ -9,7 +9,7 @@ import xarray as xr
 from pytest_mock import MockerFixture
 
 from hydromt._utils.constants import DEFAULT_REGION_COMPONENT
-from hydromt.components import ModelRegionComponent
+from hydromt.components import RegionComponent
 from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models.model import Model
@@ -24,7 +24,7 @@ def mock_model(tmpdir, mocker: MockerFixture):
     model = mocker.create_autospec(Model)
     model.root = ModelRoot(path=tmpdir)
     model.data_catalog = DataCatalog()
-    model.region = ModelRegionComponent(model)
+    model.region = RegionComponent(model)
     model.get_component = mocker.Mock()
     model.get_component.return_value = None
     model.get_component.side_effect = (
