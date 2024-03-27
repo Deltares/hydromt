@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
-from copy import deepcopy
 from os import listdir
 from os.path import abspath, dirname, exists, isfile, join
 from pathlib import Path
@@ -17,6 +16,7 @@ from pytest_mock import MockerFixture
 from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
+from hydromt.components.geoms import GeomComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
@@ -147,39 +147,6 @@ def test_model(model, tmpdir):
     with pytest.deprecated_call():
         equal, errors = model._test_equal(model1)
     assert equal, errors
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_model_tables(model, df, tmpdir):
-    # make a couple copies of the dfs for testing
-    dfs = {str(i): df.copy() for i in range(5)}
-    model.root.set(tmpdir, mode="r+")  # append mode
-    clean_model = deepcopy(model)
-
-    with pytest.raises(KeyError):
-        model.tables[1]
-
-    for i, d in dfs.items():
-        model.set_tables(d, name=i)
-        assert df.equals(model.tables[i])
-
-    # now do the same but interating over the stables instead
-    for i, d in model.tables.items():
-        model.set_tables(d, name=i)
-        assert df.equals(model.tables[i])
-
-    assert list(model.tables.keys()) == list(map(str, range(5)))
-
-    model.write_tables()
-    clean_model.read_tables()
-
-    model_merged = model.get_tables_merged().sort_values(["table_origin", "city"])
-    clean_model_merged = clean_model.get_tables_merged().sort_values(
-        ["table_origin", "city"]
-    )
-    assert np.all(
-        np.equal(model_merged, clean_model_merged)
-    ), f"model: {model_merged}\nclean_model: {clean_model_merged}"
 
 
 @pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
@@ -333,23 +300,36 @@ def test_setup_region(model, demda, tmpdir):
 
 def test_model_write_geoms(tmpdir):
     model = Model(root=str(tmpdir), mode="w")
-    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
+    model.add_component("geom", GeomComponent(model))
+    geom_component = model.get_component("geom", GeomComponent)
+
+    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom.to_crs(epsg=28992, inplace=True)
-    model.region.set(geom)
-    model.region.write(to_wgs84=True)
-    region_geom = gpd.read_file(str(join(tmpdir, "region.geojson")))
+
+    geom_component.set(geom, "test_geom")
+    geom_component.write(to_wgs84=True)
+    region_geom = gpd.read_file(str(join(tmpdir, "geoms/test_geom.geojson")))
+
     assert region_geom.crs.to_epsg() == 4326
 
 
 def test_model_set_geoms(tmpdir):
-    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
+    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
-    geom_28992 = geom.to_crs(epsg=28992)
+
     model = Model(root=str(tmpdir), mode="w")
-    model.region.create({"geom": geom_28992})  # set model crs based on epsg28992
-    model.set_geoms(geom, "geom_wgs84")  # this should convert the geom crs to epsg28992
-    assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
+    model.add_component("geom", GeomComponent(model))
+
+    geom_component = model.get_component("geom", GeomComponent)
+    # model.region.create({"geom": geom_28992})  # set model crs based on epsg28992
+
+    geom_component.set(
+        geom, "geom_wgs84"
+    )  # this should convert the geom crs to epsg28992
+
+    assert list(geom_component.data.keys()) == ["geom_wgs84"]
+    assert list(geom_component.data.values())[0].equals(geom)
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")

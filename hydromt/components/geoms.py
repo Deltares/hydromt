@@ -55,8 +55,8 @@ class GeomComponent(ModelComponent):
 
     def _initialize_geoms(self, skip_read=False) -> None:
         """Initialize geoms."""
-        if self._geoms is None:
-            self._geoms = dict()
+        if self._data is None:
+            self._data = dict()
             if self._root.is_reading_mode() and not skip_read:
                 self.read()
 
@@ -71,7 +71,7 @@ class GeomComponent(ModelComponent):
             Geometry name.
         """
         self._initialize_geoms()
-        if name in self._geoms:
+        if name in self._data:
             self._logger.warning(f"Replacing geom: {name}")
 
         if isinstance(geom, GeoSeries):
@@ -81,7 +81,7 @@ class GeomComponent(ModelComponent):
         model_crs = self._model.crs
         if model_crs and model_crs != geom.crs:
             geom.to_crs(model_crs.to_epsg(), inplace=True)
-        self._geoms[name] = geom
+        self._data[name] = geom
 
     @hydromt_step
     def read(self, filename: str = DEFAULT_GEOM_FILENAME, **kwargs) -> None:

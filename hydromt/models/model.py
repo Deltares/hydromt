@@ -61,7 +61,6 @@ class Model(object, metaclass=ABCMeta):
     _DATADIR = ""  # path to the model data folder
     _NAME: str = "modelname"
     _CONF: StrPath = "model.yml"
-    _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
     _TMP_DATA_DIR = None
@@ -72,7 +71,6 @@ class Model(object, metaclass=ABCMeta):
     _API = {
         "crs": CRS,
         "config": Dict[str, Any],
-        "geoms": Dict[str, gpd.GeoDataFrame],
         "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
@@ -88,7 +86,7 @@ class Model(object, metaclass=ABCMeta):
         mode: str = "w",
         config_fn: Optional[str] = None,
         data_libs: Optional[Union[List, str]] = None,
-        target_model_crs: Union[str, int] = 4236,
+        target_model_crs: Union[str, int] = 4326,
         logger=_logger,
         **artifact_keys,
     ):
@@ -116,6 +114,8 @@ class Model(object, metaclass=ABCMeta):
             {"region": {"type": "ModelRegionComponent"}}, components
         )
 
+        self.target_crs = CRS.from_user_input(target_model_crs)
+
         data_libs = data_libs or []
 
         self.logger = logger
@@ -131,7 +131,6 @@ class Model(object, metaclass=ABCMeta):
         self._maps: Optional[XArrayDict] = None
         self._tables: Optional[Dict[str, pd.DataFrame]] = None
 
-        self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
         self._forcing: Optional[XArrayDict] = None
         self._states: Optional[XArrayDict] = None
         self._results: Optional[XArrayDict] = None
@@ -1361,7 +1360,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
-        return self.region.crs
+        return self.target_crs
 
     # test methods
     def _test_equal(self, other, skip_component=None) -> Tuple[bool, Dict]:
