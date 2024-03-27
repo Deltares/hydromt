@@ -1,3 +1,4 @@
+import logging
 from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
@@ -12,7 +13,9 @@ import pytest
 import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
+from pytest_mock import MockerFixture
 
+from hydromt.components.region import ModelRegionComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
@@ -20,6 +23,7 @@ from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.models.model import Model
+from hydromt.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
@@ -325,34 +329,6 @@ def model(demda, world, obsda):
     return mod
 
 
-# @pytest.fixture()
-# def vector_model(ts, geodf):
-#     mod = VectorModel()
-#     mod.setup_config(**{"header": {"setting": "value"}})
-#     da = xr.DataArray(
-#         ts,
-#         dims=["index", "time"],
-#         coords={"index": ts.index, "time": ts.columns},
-#         name="zs",
-#     )
-#     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
-#     da.vector.set_crs(geodf.crs)
-#     mod.set_vector(da)
-#     return mod
-
-
-# @pytest.fixture()
-# def mesh_model(griduda):
-#     mod = MODELS.load("mesh_model")()
-#     region = gpd.GeoDataFrame(
-#         geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
-#     )
-#     mod.region.create({"geom": region})
-#     mod.setup_config(**{"header": {"setting": "value"}})
-#     mod.set_mesh(griduda, "elevtn")
-#     return mod
-
-
 @pytest.fixture()
 def mock_resolver() -> MetaDataResolver:
     class MockMetaDataResolver(MetaDataResolver):
@@ -401,3 +377,18 @@ def artifact_data():
     datacatalog = DataCatalog()
     datacatalog.from_predefined_catalogs("artifact_data")
     return datacatalog
+
+
+@pytest.fixture()
+def mock_model(tmpdir, mocker: MockerFixture):
+    logger = logging.getLogger(__name__)
+    logger.propagate = True
+    model = mocker.create_autospec(Model)
+    model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
+    model.root.path.return_value = tmpdir
+    model.data_catalog = mocker.create_autospec(DataCatalog)
+    model.region = mocker.create_autospec(
+        ModelRegionComponent(model=model), instance=True
+    )
+    model.logger = logger
+    return model
