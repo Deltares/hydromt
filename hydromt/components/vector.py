@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """HydroMT VectorComponent class definition."""
 
-import logging
 import os
 from os.path import basename, dirname, isfile, join
 from typing import Optional, Union
@@ -16,7 +15,10 @@ from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.models.model import Model
 
-logger = logging.getLogger(__name__)
+__all__ = ["VectorComponent"]
+
+DEFAULT_FN = "vector/vector.nc"
+DEFAULT_FN_GEOM = "vector/vector.geojson"
 
 
 class VectorComponent(ModelComponent):
@@ -137,8 +139,8 @@ class VectorComponent(ModelComponent):
     def read(
         self,
         *,
-        fn: Optional[str] = "vector/vector.nc",
-        fn_geom: str = "vector/vector.geojson",
+        fn: Optional[str] = DEFAULT_FN,
+        fn_geom: str = DEFAULT_FN_GEOM,
         **kwargs,
     ) -> None:
         """Read model vector from combined netcdf and geojson file.
@@ -203,8 +205,8 @@ class VectorComponent(ModelComponent):
     def write(
         self,
         *,
-        fn: str = "vector/vector.nc",
-        fn_geom: str = "vector/vector.geojson",
+        fn: str = DEFAULT_FN,
+        fn_geom: str = DEFAULT_FN_GEOM,
         ogr_compliant: bool = False,
         **kwargs,
     ):
