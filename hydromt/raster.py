@@ -1249,8 +1249,9 @@ class XRasterBase(XGeoBase):
         # use round to get integer slices
         c0 = max(int(np.round(cs.min() - buffer)), 0)
         r0 = max(int(np.round(rs.min() - buffer)), 0)
-        c1 = int(np.round(cs.max() + buffer))
-        r1 = int(np.round(rs.max() + buffer))
+        # max to avoid negative slices (which start to count from the end of the array)
+        c1 = max(int(np.round(cs.max() + buffer)), 0)
+        r1 = max(int(np.round(rs.max() + buffer)), 0)
         return self.clip(slice(c0, c1), slice(r0, r1))
 
     def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
