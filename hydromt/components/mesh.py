@@ -12,6 +12,7 @@ import xarray as xr
 import xugrid as xu
 from pyproj import CRS
 
+from hydromt import hydromt_step
 from hydromt.components.base import ModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
@@ -366,14 +367,15 @@ class MeshComponent(ModelComponent):
         else:
             return self.mesh_grids[grid_name]
 
+    @hydromt_step
     def add_data_from_rasterdataset(
         self,
-        *,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
+        *,
         grid_name: Optional[str] = "mesh2d",
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
-        resampling_method: Optional[str] = "centroid",
+        resampling_method: Optional[Union[str, List]] = "centroid",
         rename: Optional[Dict] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to 2D ``grid_name`` in mesh object.
@@ -442,6 +444,7 @@ class MeshComponent(ModelComponent):
 
         return list(uds_sample.data_vars.keys())
 
+    @hydromt_step
     def add_data_from_raster_reclass(
         self,
         raster_fn: Union[str, Path, xr.DataArray],
@@ -562,7 +565,7 @@ class MeshComponent(ModelComponent):
         else:
             # Check on crs
             if not data.ugrid.grid.crs == self.crs:
-                raise ValueError("Data and self.data should have the same CRS.")
+                raise ValueError("Data and Mesh should have the same CRS.")
             # Save crs as it will be lost when converting to xarray
             crs = self.crs
             # Check on new grid topology
