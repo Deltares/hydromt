@@ -45,10 +45,9 @@ class TableComponent(ModelComponent):
         """Model tables."""
         if self._data is None:
             self._initialize_tables()
-        if self._data is None:
-            raise RuntimeError("Could not load data for table component")
-        else:
-            return self._data
+
+        assert self._data is not None
+        return self._data
 
     def _initialize_tables(self, skip_read=False) -> None:
         """Initialize the model tables."""
