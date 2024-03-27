@@ -201,7 +201,7 @@ def mesh2d_from_rasterdataset(
     mesh2d: Union[xu.UgridDataArray, xu.Ugrid2d],
     variables: Optional[List] = None,
     fill_method: Optional[str] = None,
-    resampling_method: Optional[str] = "centroid",
+    resampling_method: Optional[Union[str, List]] = "centroid",
     rename: Optional[Dict] = None,
     logger: logging.Logger = logger,
 ) -> xu.UgridDataset:
