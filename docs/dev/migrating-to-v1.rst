@@ -268,7 +268,7 @@ class ExampleEditModel(Model):
             "region": {"type": "ModelRegionComponent"},
             "grid": {"type": GridComponent},
         }
-        components = hydromt._utils.deep_merge.deep_merge(
+        components = hydromt.utils.deep_merge.deep_merge(
             default_components, components
         )
 
