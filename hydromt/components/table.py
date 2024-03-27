@@ -82,7 +82,7 @@ class TableComponent(ModelComponent):
                 tbl = pd.read_csv(fn, **kwargs)
                 self.set(tbl, name=name)
 
-    def set(self, tables: Union[PandasLike, Dict], name=None) -> None:
+    def set(self, tables: Union[PandasLike, Dict], name:Optional[str]=None) -> None:
         """Add (a) table(s) <pandas.DataFrame> to model.
 
         Parameters
