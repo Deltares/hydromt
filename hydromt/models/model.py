@@ -88,6 +88,7 @@ class Model(object, metaclass=ABCMeta):
         mode: str = "w",
         config_fn: Optional[str] = None,
         data_libs: Optional[Union[List, str]] = None,
+        target_model_crs: Union[str, int] = 4236,
         logger=_logger,
         **artifact_keys,
     ):
@@ -952,110 +953,6 @@ class Model(object, metaclass=ABCMeta):
             self.write_nc(self.maps, fn, **kwargs)
 
     # model geometry files
-    @property
-    def geoms(self) -> Dict[str, Union[gpd.GeoDataFrame, gpd.GeoSeries]]:
-        """Model geometries.
-
-        Return dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
-        ..NOTE: previously call staticgeoms.
-        """
-        if self._geoms is None:
-            self._initialize_geoms()
-        return self._geoms
-
-    def _initialize_geoms(self, skip_read=False) -> None:
-        """Initialize geoms."""
-        if self._geoms is None:
-            self._geoms = dict()
-            if self.root.is_reading_mode() and not skip_read:
-                self.read_geoms()
-
-    def set_geoms(self, geom: Union[gpd.GeoDataFrame, gpd.GeoSeries], name: str):
-        """Add data to the geoms attribute.
-
-        Arguments
-        ---------
-        geom: geopandas.GeoDataFrame or geopandas.GeoSeries
-            New geometry data to add
-        name: str
-            Geometry name.
-        """
-        self._initialize_geoms()
-        gtypes = [gpd.GeoDataFrame, gpd.GeoSeries]
-        if not np.any([isinstance(geom, t) for t in gtypes]):
-            raise ValueError(
-                "First parameter map(s) should be geopandas.GeoDataFrame"
-                " or geopandas.GeoSeries"
-            )
-        if name in self._geoms:
-            self.logger.warning(f"Replacing geom: {name}")
-        if hasattr(self, "crs"):
-            # Verify if a geom is set to model crs and if not sets geom to model crs
-            if self.crs and self.crs != geom.crs:
-                geom.to_crs(self.crs.to_epsg(), inplace=True)
-        self._geoms[name] = geom
-
-    def read_geoms(self, fn: str = "geoms/*.geojson", **kwargs) -> None:
-        r"""Read model geometries files at <root>/<fn> and add to geoms property.
-
-        key-word arguments are passed to :py:func:`geopandas.read_file`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, may contain wildcards,
-            by default ``geoms/\*.nc``
-        **kwargs:
-            Additional keyword arguments that are passed to the
-            `geopandas.read_file` function.
-        """
-        self.root._assert_read_mode()
-        self._initialize_geoms(skip_read=True)
-        fns = glob.glob(join(self.root.path, fn))
-        for fn in fns:
-            name = basename(fn).split(".")[0]
-            self.logger.debug(f"Reading model file {name}.")
-            self.set_geoms(gpd.read_file(fn, **kwargs), name=name)
-
-    def write_geoms(
-        self, fn: str = "geoms/{name}.geojson", to_wgs84: bool = False, **kwargs
-    ) -> None:
-        r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
-
-        key-word arguments are passed to :py:meth:`geopandas.GeoDataFrame.to_file`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root and should contain a {name} placeholder,
-            by default 'geoms/{name}.geojson'
-        to_wgs84: bool, optional
-            Option to enforce writing GeoJSONs with WGS84(EPSG:4326) coordinates.
-        \**kwargs:
-            Additional keyword arguments that are passed to the
-            `geopandas.to_file` function.
-        """
-        self.root._assert_write_mode()
-        if len(self.geoms) == 0:
-            self.logger.debug("No geoms data found, skip writing.")
-            return
-        for name, gdf in self.geoms.items():
-            if not isinstance(gdf, (gpd.GeoDataFrame, gpd.GeoSeries)) or len(gdf) == 0:
-                self.logger.warning(
-                    f"{name} object of type {type(gdf).__name__} not recognized"
-                )
-                continue
-            self.logger.debug(f"Writing file {fn.format(name=name)}")
-            _fn = join(self.root.path, fn.format(name=name))
-            if not isdir(dirname(_fn)):
-                os.makedirs(dirname(_fn))
-            if to_wgs84 and (
-                kwargs.get("driver") == "GeoJSON"
-                or str(fn).lower().endswith(".geojson")
-            ):
-                gdf = gdf.to_crs(4326)
-            gdf.to_file(_fn, **kwargs)
-
     # model forcing files
     @property
     def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
