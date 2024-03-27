@@ -32,7 +32,7 @@ class TestRasterDatasetSource:
         error_driver = next(
             filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
         )
-        assert error_driver["type"] == "model_type"
+        assert error_driver["type"] == "modeltype"
 
     def test_model_validate(
         self,
