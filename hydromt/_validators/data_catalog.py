@@ -1,4 +1,5 @@
 """Pydantic models for the validation of Data catalogs."""
+
 from logging import warning
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Union
@@ -13,7 +14,6 @@ from pyproj.exceptions import CRSError
 
 from hydromt import __version__ as HYDROMT_VERSION
 from hydromt._typing import Bbox, Number, TimeRange
-from hydromt.data_catalog import _yml_from_uri_or_path
 
 
 class SourceSpecDict(BaseModel):

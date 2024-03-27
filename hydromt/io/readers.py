@@ -7,7 +7,7 @@ from ast import literal_eval
 from logging import Logger
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 
 import dask
 import geopandas as gpd
@@ -17,6 +17,7 @@ import pyproj
 import rioxarray
 import xarray as xr
 from pyogrio import read_dataframe
+from requests import get as fetch
 from shapely.geometry import Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 from tomli import load as load_toml
@@ -24,11 +25,13 @@ from yaml import safe_load as load_yaml
 
 from hydromt import gis
 from hydromt._typing.type_def import StrPath
-from hydromt._validators.model_config import HydromtModelStep
+from hydromt.data_adapter.caching import _uri_validator
 from hydromt.gis import merge, raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.path import make_config_paths_abs
 
+if TYPE_CHECKING:
+    from hydromt._validators.model_config import HydromtModelStep
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -750,7 +753,7 @@ def open_vector_from_table(
 
 def read_workflow_yaml(
     path: StrPath,
-) -> Tuple[str, Dict[str, Any], List[HydromtModelStep]]:
+) -> Tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
     d = read_yaml(path)
     modeltype = d.pop("modeltype", None)
     model_init = d.pop("global", {})
@@ -925,8 +928,24 @@ def read_yaml(path: StrPath) -> Dict[str, Any]:
     return yml
 
 
+def parse_yaml(text: str) -> Dict[str, Any]:
+    return load_yaml(text)
+
+
 def read_toml(path: StrPath) -> Dict[str, Any]:
     with open(path, "rb") as f:
         data = load_toml(f)
 
     return data
+
+
+def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
+    if _uri_validator(str(uri_or_path)):
+        with fetch(str(uri_or_path), stream=True) as r:
+            if r.status_code != 200:
+                raise IOError(f"URL {r.content}: {uri_or_path}")
+            yml = parse_yaml(r.text)
+
+    else:
+        yml = read_yaml(uri_or_path)
+    return yml

@@ -847,10 +847,12 @@ def test_get_component_non_existent():
 def test_read_calls_components(mocker: MockerFixture):
     m = Model(mode="r")
     mocker.patch.object(m.region, "read")
+    mocker.patch.object(m.kernel_config, "read")
     foo = mocker.Mock(spec_set=ModelComponent)
     m.add_component("foo", foo)
     m.read()
     foo.read.assert_called_once()
+    foo.kernel_config.assert_called_once()
 
 
 def test_read_in_write_mode():
