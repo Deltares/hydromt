@@ -516,15 +516,13 @@ Setup methods
    GridComponent.add_data_from_geodataframe
 
 
-.. _vector_model_api:
-
-VectorModel
-===========
+VectorComponent
+===============
 
 .. autosummary::
    :toctree: _generated
 
-   VectorModel
+   VectorComponent
 
 
 Components and attributes
@@ -533,9 +531,9 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   VectorModel.vector
-   VectorModel.crs
-   VectorModel.region
+   VectorComponent.data
+   VectorComponent.geometry
+   VectorComponent.index_dim
 
 General methods
 ---------------
@@ -543,9 +541,9 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   VectorModel.set_vector
-   VectorModel.read_vector
-   VectorModel.write_vector
+   VectorComponent.set
+   VectorComponent.read
+   VectorComponent.write
 
 Setup methods
 -------------
@@ -553,10 +551,7 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   VectorModel.setup_config
-   VectorModel.setup_region
-   VectorModel.setup_maps_from_rasterdataset
-   VectorModel.setup_maps_from_raster_reclass
+   VectorModel.create
 
 
 .. _mesh_model_api:
