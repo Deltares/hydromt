@@ -33,6 +33,7 @@ from pyproj import CRS
 from hydromt import hydromt_step
 from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
+from hydromt._utils.constants import DEFAULT_REGION_COMPONENT
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import ModelRegionComponent
@@ -112,7 +113,8 @@ class Model(object, metaclass=ABCMeta):
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
         components = deep_merge(
-            {"region": {"type": "ModelRegionComponent"}}, components
+            {DEFAULT_REGION_COMPONENT: {"type": ModelRegionComponent.__name__}},
+            components,
         )
 
         data_libs = data_libs or []
@@ -179,7 +181,7 @@ class Model(object, metaclass=ABCMeta):
     @property
     def region(self) -> ModelRegionComponent:
         """Return the model region component."""
-        return self.get_component("region", ModelRegionComponent)
+        return self.get_component(DEFAULT_REGION_COMPONENT, ModelRegionComponent)
 
     @_classproperty
     def api(cls) -> Dict:

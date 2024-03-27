@@ -16,6 +16,7 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
+from hydromt._utils.constants import DEFAULT_REGION_COMPONENT
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
@@ -244,7 +245,7 @@ def test_model_build_update(tmpdir, demda, obsda):
             "region.write": {"components": {"geoms", "config"}},
         },
     )
-    assert hasattr(model, "region")
+    assert hasattr(model, DEFAULT_REGION_COMPONENT)
     assert isfile(join(model.root.path, "model.yml"))
     assert isfile(join(model.root.path, "hydromt.log"))
     assert isfile(join(model.root.path, "region.geojson")), listdir(model.root.path)

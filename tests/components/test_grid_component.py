@@ -8,6 +8,7 @@ import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
 
+from hydromt._utils.constants import DEFAULT_REGION_COMPONENT
 from hydromt.components import ModelRegionComponent
 from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
@@ -27,7 +28,7 @@ def mock_model(tmpdir, mocker: MockerFixture):
     model.get_component = mocker.Mock()
     model.get_component.return_value = None
     model.get_component.side_effect = (
-        lambda name, _: model.region if name == "region" else None
+        lambda name, _: model.region if name == DEFAULT_REGION_COMPONENT else None
     )
     model.logger = logger
     return model

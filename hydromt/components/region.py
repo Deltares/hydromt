@@ -30,6 +30,8 @@ if TYPE_CHECKING:
 logger = getLogger(__name__)
 
 DEFAULT_REGION_FILE_PATH = "region.geojson"
+DEFAULT_HYDROGRAPHY_FN = "merit_hydro"
+DEFAULT_BASIN_INDEX_FN = "merit_hydro_index"
 
 
 class ModelRegionComponent(ModelComponent):
@@ -48,8 +50,8 @@ class ModelRegionComponent(ModelComponent):
         region: dict,
         *,
         crs: Optional[int] = None,
-        hydrography_fn: str = "merit_hydro",
-        basin_index_fn: str = "merit_hydro_index",
+        hydrography_fn: str = DEFAULT_HYDROGRAPHY_FN,
+        basin_index_fn: str = DEFAULT_BASIN_INDEX_FN,
     ) -> None:
         """Check and return parsed region arguments.
 
@@ -131,17 +133,8 @@ class ModelRegionComponent(ModelComponent):
             * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
 
             * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
-        logger:
-            The logger to use.
         crs: int, optional
             EPSG code of the model or "utm" to let hydromt find the closest projected
-
-        Returns
-        -------
-        kind : {'basin', 'subbasin', 'interbasin', 'geom', 'bbox', 'grid'}
-            region kind
-        kwargs : dict
-            parsed region json
         """
         if self.data is not None:
             self._logger.warn("Model region already initialized. Skipping creation.")

@@ -14,8 +14,13 @@ from shapely.geometry import box
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
+from hydromt._utils.constants import DEFAULT_REGION_COMPONENT
 from hydromt.components.base import ModelComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.region import (
+    DEFAULT_BASIN_INDEX_FN,
+    DEFAULT_HYDROGRAPHY_FN,
+    ModelRegionComponent,
+)
 from hydromt.gis import raster
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
@@ -32,6 +37,8 @@ if TYPE_CHECKING:
 
 __all__ = ["GridComponent"]
 
+DEFAULT_FN = "grid/grid.nc"
+
 
 class GridComponent(ModelComponent):
     """ModelComponent class for grid components.
@@ -44,7 +51,7 @@ class GridComponent(ModelComponent):
     def __init__(
         self,
         model: "Model",
-        region: str = "region",
+        region: str = DEFAULT_REGION_COMPONENT,
     ):
         """Initialize a GridComponent.
 
@@ -105,7 +112,7 @@ class GridComponent(ModelComponent):
     @hydromt_step
     def write(
         self,
-        fn: str = "grid/grid.nc",
+        fn: str = DEFAULT_FN,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
@@ -154,7 +161,7 @@ class GridComponent(ModelComponent):
     @hydromt_step
     def read(
         self,
-        fn: str = "grid/grid.nc",
+        fn: str = DEFAULT_FN,
         mask_and_scale: bool = False,
         **kwargs,
     ) -> None:
@@ -199,14 +206,14 @@ class GridComponent(ModelComponent):
         res: Optional[float] = None,
         crs: Optional[int] = None,
         rotated: bool = False,
-        hydrography_fn: Optional[str] = None,
-        basin_index_fn: Optional[str] = None,
+        hydrography_fn: str = DEFAULT_HYDROGRAPHY_FN,
+        basin_index_fn: str = DEFAULT_BASIN_INDEX_FN,
         add_mask: bool = True,
         align: bool = True,
         dec_origin: int = 0,
         dec_rotation: int = 3,
     ) -> None:
-        """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
+        """HYDROMT CORE METHOD: Create a 2D regular grid.
 
         A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
         existing grid is given, then no new grid will be generated.
@@ -218,12 +225,7 @@ class GridComponent(ModelComponent):
         ----------
         region : dict
             Dictionary describing region of interest, e.g.:
-            * {'bbox': [xmin, ymin, xmax, ymax]}
-            * {'geom': 'path/to/polygon_geometry'}
-            * {'grid': 'path/to/grid_file'}
-            * {'basin': [x, y]}
-
-            Region must be of kind [grid, bbox, geom, basin, subbasin, interbasin].
+            See :func:`ModelRegionComponent.create` for details.
         res: float
             Resolution used to generate 2D grid [unit of the CRS], required if region
             is not based on 'grid'.
