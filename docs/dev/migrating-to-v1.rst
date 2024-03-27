@@ -245,7 +245,7 @@ The `Model.__init__` function can be used to add default components by plugins l
 
 class ExampleModel(Model):
 	def __init__(self):
-        self.root: ModelRoot = ModelRoot(".")
+		self.root: ModelRoot = ModelRoot(".")
 		self.add_component("region", ModelRegionComponent)
 		self.add_component("grid", GridComponent)
 		...
@@ -261,7 +261,7 @@ class ExampleEditModel(Model):
         self,
         components: Optional[dict[str, dict[str, Any]]] = None,
         root: Optional[str] = None,
-    ):        
+    ):
         # Recursively update the components with any defaults that are missing in the components provided by the user.
         components = components or {}
         default_components = {
@@ -271,12 +271,14 @@ class ExampleEditModel(Model):
         components = hydromt._utils.deep_merge.deep_merge(
             default_components, components
         )
-        
+
         # Now instantiate the Model
         super().__init__(
             root = root,
             components = components,
         )
+
+```
 
 Making the model region its own component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
