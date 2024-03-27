@@ -516,7 +516,7 @@ Setup methods
    GridComponent.add_data_from_geodataframe
 
 TableComponent
-=========
+==============
 
 .. autosummary::
    :toctree: _generated
