@@ -4,7 +4,6 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "hydromt"
-
 authors = [
   { name = "Dirk Eilander", email = "dirk.eilander@deltares.nl" },
   { name = "Hélène Boisgontier", email = "helene.boisgontier@deltares.nl" },
