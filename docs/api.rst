@@ -515,6 +515,37 @@ Setup methods
    GridComponent.add_data_from_raster_reclass
    GridComponent.add_data_from_geodataframe
 
+TableComponent
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+    TableComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   TableComponent.model
+   TableComponent.data_catalog
+   TableComponent.logger
+   TableComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   TableComponent.set
+   TableComponent.write
+   TableComponent.read
+
 
 .. _vector_model_api:
 
