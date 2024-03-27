@@ -54,6 +54,8 @@ def check_components_equal(
         assert isinstance(other, type(one)), "property types do not match"
         if isinstance(one, ModelRegionComponent):
             assert isinstance(other, ModelRegionComponent)
+            property_name = f"{property_name}.kind"
+            assert one.kind == other.kind
             property_name = f"{property_name}.data"
             assert_geodataframe_equal(one.data, other.data)
         elif isinstance(one, GridComponent):
