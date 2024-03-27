@@ -15,6 +15,7 @@ import pandas as pd
 
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
+from hydromt.utils.constants import DEFAULT_TABLE_FILENAME
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
@@ -57,10 +58,10 @@ class TableComponent(ModelComponent):
                 self.read()
 
     @hydromt_step
-    def write(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
+    def write(self, fn: str = DEFAULT_TABLE_FILENAME, **kwargs) -> None:
         """Write tables at <root>/tables."""
         self._root._assert_write_mode()
-        if self.data:
+        if len(self.data) > 0:
             self._model.logger.info("Writing table files.")
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
@@ -72,7 +73,7 @@ class TableComponent(ModelComponent):
             self._model.logger.debug("No tables found, skip writing.")
 
     @hydromt_step
-    def read(self, fn: str = "tables/{name}.csv", **kwargs) -> None:
+    def read(self, fn: str = DEFAULT_TABLE_FILENAME, **kwargs) -> None:
         """Read table files at <root>/tables and parse to dict of dataframes."""
         self._root._assert_read_mode()
         self._initialize_tables(skip_read=True)
