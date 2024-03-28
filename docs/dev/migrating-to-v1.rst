@@ -234,13 +234,13 @@ Once a component has been added, any component (or other object or scope that ha
 with it as you please.
 
 In the core of HydroMT, the available components are:
-+-----------------------+-----------------+
-| v0.x Model Attribute  | Component       |
-+=======================+=================+
-| model.tables          | TableComponent  |
-| model.grid            | GridComponent   |
-| model.geoms('region') | RegionComponent |
-+-----------------------+-----------------+
++-----------------------+-----------------+-----------------------------------------------------------------+
+| v0.x Model Attribute  | Component       | Description                                                     |
++=======================+=================+=================================================================+
+| model.tables          | TableComponent  | Component for storing non-geospatial data in pandas DataFrames  |
+| model.grid            | GridComponent   | A component for managing regular grids and adding data to it    |
+| model.geoms('region') | RegionComponent | A component for managing the area of interest for the model.    |
++-----------------------+-----------------+-----------------------------------------------------------------+
 
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
