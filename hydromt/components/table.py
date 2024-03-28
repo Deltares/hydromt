@@ -23,7 +23,10 @@ __all__ = ["TableComponent"]
 
 
 class TableComponent(ModelComponent):
-    """Table Component."""
+    """TablesComponent contains data as a dictionnary of pandas.DataFrame.
+
+    It is well suited to represent non-geospatial tabular model data.
+    """
 
     def __init__(
         self,
