@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
-from os import listdir
+from os import listdir, makedirs
 from os.path import abspath, dirname, exists, isfile, join
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from unittest.mock import MagicMock
 
 import geopandas as gpd
+from geopandas.geoseries import CRS
 import numpy as np
 import pandas as pd
 import pytest
@@ -23,6 +24,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data
 from hydromt.plugins import PLUGINS
+from hydromt.utils.constants import DEFAULT_GEOM_GLOB
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
@@ -305,13 +307,18 @@ def test_model_write_geoms(tmpdir):
 
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
-    geom.to_crs(epsg=28992, inplace=True)
+    geom.to_crs(3857, inplace=True)
+    assert geom.crs.to_epsg() == 3857
 
+    write_folder = join(tmpdir, "geoms")
+    write_path = join(write_folder, "test_geom.geojson")
+    makedirs(write_folder, exist_ok=True)
     geom_component.set(geom, "test_geom")
-    geom_component.write(to_wgs84=True)
-    region_geom = gpd.read_file(str(join(tmpdir, "geoms/test_geom.geojson")))
+    breakpoint()
+    geom_component.write()
+    region_geom = gpd.read_file(write_path)
 
-    assert region_geom.crs.to_epsg() == 4326
+    assert region_geom.crs.to_epsg() == 3857
 
 
 def test_model_set_geoms(tmpdir):
@@ -322,14 +329,33 @@ def test_model_set_geoms(tmpdir):
     model.add_component("geom", GeomComponent(model))
 
     geom_component = model.get_component("geom", GeomComponent)
-    # model.region.create({"geom": geom_28992})  # set model crs based on epsg28992
 
-    geom_component.set(
-        geom, "geom_wgs84"
-    )  # this should convert the geom crs to epsg28992
+    geom_component.set(geom, "geom_wgs84")
 
     assert list(geom_component.data.keys()) == ["geom_wgs84"]
     assert list(geom_component.data.values())[0].equals(geom)
+
+
+def test_model_write_geoms_wgs84_with_model_crs(tmpdir):
+    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
+    geom_4326 = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
+    geom_3857 = cast(gpd.GeoDataFrame, geom_4326.copy().to_crs(3857))
+
+    model = Model(root=str(tmpdir), target_model_crs=3857, mode="w")
+    model.add_component("geom", GeomComponent(model))
+
+    geom_component = model.get_component("geom", GeomComponent)
+    geom_component.set(geom_4326, "geom")
+
+    assert geom_component.data["geom"].equals(geom_3857)
+    write_folder = join(tmpdir, "geoms")
+    write_path = join(write_folder, "test_geom.geojson")
+    makedirs(write_folder, exist_ok=True)
+    geom_component.write(to_wgs84=True)
+
+    gdf = gpd.read_file(write_path)
+    assert gdf is not None
+    assert gdf.equals(geom_4326)
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")

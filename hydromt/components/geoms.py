@@ -2,11 +2,12 @@
 
 import glob
 import os
-from os.path import basename, dirname, isdir, join
+from os.path import basename, dirname, isdir, join, splitext
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Dict,
+    List,
     Optional,
     Union,
     cast,
@@ -17,14 +18,14 @@ from geopandas import GeoDataFrame, GeoSeries
 
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
-from hydromt.utils import DEFAULT_GEOM_FILENAME
+from hydromt.utils import DEFAULT_GEOM_FOLDER
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
 
 
 class GeomComponent(ModelComponent):
-    """Geom Component."""
+    """A component to manage geo-spatial geometries."""
 
     def __init__(
         self,
@@ -45,10 +46,10 @@ class GeomComponent(ModelComponent):
         """Model geometries.
 
         Return dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
-        ..NOTE: previously call staticgeoms.
         """
         if self._data is None:
             self._initialize_geoms()
+
         assert self._data is not None
         return self._data
 
@@ -70,6 +71,7 @@ class GeomComponent(ModelComponent):
             Geometry name.
         """
         self._initialize_geoms()
+        assert self._data is not None
         if name in self._data:
             self._logger.warning(f"Replacing geom: {name}")
 
@@ -83,7 +85,9 @@ class GeomComponent(ModelComponent):
         self._data[name] = geom
 
     @hydromt_step
-    def read(self, filename: str = DEFAULT_GEOM_FILENAME, **kwargs) -> None:
+    def read(
+        self, folder: str = DEFAULT_GEOM_FOLDER, extention: str = ".geojson", **kwargs
+    ) -> None:
         r"""Read model geometries files at <root>/<filename>.
 
         key-word arguments are passed to :py:func:`geopandas.read_file`
@@ -99,17 +103,25 @@ class GeomComponent(ModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize_geoms(skip_read=True)
-        fns = glob.glob(join(self._root.path, filename))
+        fns = glob.glob(join(self._root.path, folder, "*"))
         for fn in fns:
             name = basename(fn).split(".")[0]
-            self._logger.debug(f"Reading model file {name}.")
+            ext = splitext(fn)[-1]
+            if ext != extention:
+                continue
             geom = cast(GeoDataFrame, gpd.read_file(fn, **kwargs))
+            self._logger.debug(f"Reading model file {name} at {fn}.")
 
             self.set(geom=geom, name=name)
 
     @hydromt_step
     def write(
-        self, filename: str = DEFAULT_GEOM_FILENAME, to_wgs84: bool = False, **kwargs
+        self,
+        folder: str = DEFAULT_GEOM_FOLDER,
+        extention: str = ".geojson",
+        paths: Optional[Dict[str, Path]] = None,
+        to_wgs84: bool = False,
+        **kwargs,
     ) -> None:
         r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
 
@@ -120,6 +132,8 @@ class GeomComponent(ModelComponent):
         fn : str, optional
             filename relative to model root and should contain a {name} placeholder,
             by default 'geoms/{name}.geojson'
+        paths: Optional[Dict[str,Path]]
+            a dictionary mapping names of components to file paths. Will override fn.
         to_wgs84: bool, optional
             Option to enforce writing GeoJSONs with WGS84(EPSG:4326) coordinates.
         \**kwargs:
@@ -137,9 +151,14 @@ class GeomComponent(ModelComponent):
                 self._logger.warning(f"{name} is empty. Skipping...")
                 continue
 
-            self._logger.debug(f"Writing file {filename.format(name=name)}")
-
-            write_path = Path(join(self._root.path, filename.format(name=name)))
+            write_path = Path(
+                join(
+                    self._root.path,
+                    folder.format(name=name),
+                )
+                + extention
+            )
+            self._logger.debug(f"Writing file {write_path}")
 
             write_folder = dirname(write_path)
             if not isdir(write_folder):
