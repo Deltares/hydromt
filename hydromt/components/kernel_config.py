@@ -5,7 +5,6 @@ from os.path import abspath, dirname, isabs, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from hydromt._typing.type_def import StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.io.path import make_config_paths_relative
 from hydromt.io.readers import read_toml, read_yaml
@@ -115,17 +114,16 @@ class KernelConfigComponent(ModelComponent):
         >> {'a': 99, 'b': {'c': {'d': 24}}}
         """
         self._initialize_kernel_config()
-        part_iter = iter(key.split("."))
+        parts = key.split(".")
+        num_parts = len(parts)
         current = self.data
-        prev = current
-        while part := next(part_iter):
-            prev = current
+        for i, part in enumerate(parts):
             if part not in current:
                 current[part] = {}
-
-            current = current[part]
-
-        prev[part] = value
+            if i < num_parts - 1:
+                current = current[part]
+            else:
+                current[part] = value
 
     def get_config_value(self, key: str, abs_path: bool = False):
         """Get a config value at key(s).
@@ -160,14 +158,20 @@ class KernelConfigComponent(ModelComponent):
 
         """
         self._initialize_kernel_config()
-        part_iter = iter(key.split("."))
+        parts = key.split(".")
+        num_parts = len(parts)
         current = self.data
-        while part := next(part_iter):
-            current = current[part]
+        value = None
+        for i, part in enumerate(parts):
+            if i < num_parts - 1:
+                current = current[part]
+            else:
+                value = current[part]
+                break
 
-        if abs_path and isinstance(current, StrPath):
-            current = Path(current)
-            if not isabs(current):
-                current = Path(abspath(join(self._root.path, current)))
+        if abs_path and isinstance(value, (str, Path)):
+            value = Path(value)
+            if not isabs(value):
+                value = Path(abspath(join(self._root.path, value)))
 
-        return current
+        return value

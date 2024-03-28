@@ -18,6 +18,7 @@ from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
+from hydromt.components.kernel_config import KernelConfigComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
@@ -352,19 +353,22 @@ def test_model_set_geoms(tmpdir):
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_config(model, tmpdir):
-    # config
-    model.root.set(str(tmpdir))
-    model.set_config("global.name", "test")
-    assert "name" in model._config["global"]
-    assert model.get_config("global.name") == "test"
-    fn = str(tmpdir.join("test.file"))
-    with open(fn, "w") as f:
+def test_config(tmpdir):
+    model = Model(root=tmpdir)
+    model.add_component("config", KernelConfigComponent(model))
+    config_component = model.get_component("config", KernelConfigComponent)
+    config_component.set("global.name", "test")
+    assert config_component._data is not None
+    assert "name" in config_component._data["global"]
+    assert config_component.get_config_value("global.name") == "test"
+    filename = str(tmpdir.join("test.file"))
+    with open(filename, "w") as f:
         f.write("")
-    model.set_config("global.file", "test.file")
-    assert str(model.get_config("global.file")) == "test.file"
-    assert str(model.get_config("global.file", abs_path=True)) == fn
+    config_component.set("global.file", "test.file")
+    assert str(config_component.get_config_value("global.file")) == "test.file"
+    assert (
+        str(config_component.get_config_value("global.file", abs_path=True)) == filename
+    )
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
@@ -847,12 +851,10 @@ def test_get_component_non_existent():
 def test_read_calls_components(mocker: MockerFixture):
     m = Model(mode="r")
     mocker.patch.object(m.region, "read")
-    mocker.patch.object(m.kernel_config, "read")
     foo = mocker.Mock(spec_set=ModelComponent)
     m.add_component("foo", foo)
     m.read()
     foo.read.assert_called_once()
-    foo.kernel_config.assert_called_once()
 
 
 def test_read_in_write_mode():

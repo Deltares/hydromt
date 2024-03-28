@@ -36,7 +36,6 @@ from hydromt._utils import _classproperty
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import (
-    KernelConfigComponent,
     ModelComponent,
     ModelRegionComponent,
 )
@@ -137,8 +136,6 @@ class Model(object, metaclass=ABCMeta):
 
         self._components: Dict[str, ModelComponent] = {}
         self._add_components(components)
-
-        self.add_component("kernel_config", KernelConfigComponent(self))
 
         self._defered_file_closes = []
 
