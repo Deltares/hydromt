@@ -121,7 +121,7 @@ class TableComponent(ModelComponent):
                 if not self._root.is_writing_mode():
                     raise IOError(f"Cannot overwrite table {df_name} in read-only mode")
                 elif self._root.is_reading_mode():
-                    self._root.logger.warning(f"Overwriting table: {df_name}")
+                    self._logger.warning(f"Overwriting table: {df_name}")
 
             self._data[str(df_name)] = df
 
