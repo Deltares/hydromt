@@ -530,9 +530,10 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   TableComponent.model
-   TableComponent.data_catalog
-   TableComponent.logger
+   TableComponent._model
+   TableComponent._data_catalog
+   TableComponent._logger
+   TableComponent._root
    TableComponent.data
 
 
