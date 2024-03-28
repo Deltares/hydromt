@@ -7,11 +7,13 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from hydromt.components.base import ModelComponent
 from hydromt.io.path import make_config_paths_relative
-from hydromt.io.readers import read_toml, read_yaml
+from hydromt.io.readers import read_yaml
 from hydromt.io.writers import write_toml, write_yaml
 
 if TYPE_CHECKING:
     from hydromt.models import Model
+
+DEFAULT_KERNEL_CONFIG_PATH = "kernel_config.yml"
 
 
 class KernelConfigComponent(ModelComponent):
@@ -50,7 +52,7 @@ class KernelConfigComponent(ModelComponent):
 
     def write(
         self,
-        path: str = "kernel_config.yaml",
+        path: str = DEFAULT_KERNEL_CONFIG_PATH,
     ) -> None:
         """Write kernel config at <root>/{path}."""
         self._root._assert_write_mode()
@@ -71,7 +73,7 @@ class KernelConfigComponent(ModelComponent):
         else:
             self._model.logger.debug("No kernel config found, skip writing.")
 
-    def read(self, path: str = "kernel_config.yml") -> None:
+    def read(self, path: str = DEFAULT_KERNEL_CONFIG_PATH) -> None:
         """Read table files at <root>/tables and parse to dict of dataframes."""
         self._root._assert_read_mode()
         self._initialize_kernel_config(skip_read=True)
@@ -86,8 +88,6 @@ class KernelConfigComponent(ModelComponent):
         ext = splitext(path)[-1]
         if ext in [".yml", ".yaml"]:
             self._data = read_yaml(read_path)
-        elif ext == ".toml":
-            self._data = read_toml(read_path)
         else:
             raise ValueError(f"Unknown file extention: {ext}")
 

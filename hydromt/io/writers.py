@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def write_yaml(path: StrPath, data: Dict[str, Any]):
     """Write a dictionary to a yaml formatted file."""
-    with open(path, "wb") as f:
+    with open(path, "w") as f:
         dump_yaml(data, f)
 
 

@@ -18,9 +18,13 @@ from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.components.kernel_config import KernelConfigComponent
+from hydromt.components.kernel_config import (
+    DEFAULT_KERNEL_CONFIG_PATH,
+    KernelConfigComponent,
+)
 from hydromt.components.region import ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
+from hydromt.io.readers import read_yaml
 from hydromt.models import Model
 from hydromt.models.model import _check_data
 from hydromt.plugins import PLUGINS
@@ -353,7 +357,7 @@ def test_model_set_geoms(tmpdir):
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
 
 
-def test_config(tmpdir):
+def test_set_config(tmpdir):
     model = Model(root=tmpdir)
     model.add_component("config", KernelConfigComponent(model))
     config_component = model.get_component("config", KernelConfigComponent)
@@ -361,13 +365,30 @@ def test_config(tmpdir):
     assert config_component._data is not None
     assert "name" in config_component._data["global"]
     assert config_component.get_config_value("global.name") == "test"
-    filename = str(tmpdir.join("test.file"))
-    with open(filename, "w") as f:
-        f.write("")
+
+
+def test_write_config(tmpdir):
+    model = Model(root=tmpdir)
+    model.add_component("config", KernelConfigComponent(model))
+    config_component = model.get_component("config", KernelConfigComponent)
+    config_component.set("global.name", "test")
+    write_path = join(tmpdir, DEFAULT_KERNEL_CONFIG_PATH)
+    assert not isfile(write_path)
+    config_component.write()
+    assert isfile(write_path)
+    read_contents = read_yaml(write_path)
+    assert read_contents == {"global": {"name": "test"}}
+
+
+def test_get_config_abs_path(tmpdir):
+    model = Model(root=tmpdir)
+    model.add_component("config", KernelConfigComponent(model))
+    config_component = model.get_component("config", KernelConfigComponent)
+    abs_path = str(tmpdir.join("test.file"))
     config_component.set("global.file", "test.file")
     assert str(config_component.get_config_value("global.file")) == "test.file"
     assert (
-        str(config_component.get_config_value("global.file", abs_path=True)) == filename
+        str(config_component.get_config_value("global.file", abs_path=True)) == abs_path
     )
 
 
