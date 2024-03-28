@@ -1,0 +1,5 @@
+name: artifact_data
+versions:
+- version: v0.0.8
+  hash: f5b46d7539d143f6cebc41fde8aae9b3
+  path: v0.0.8/data_catalog.yml
