@@ -356,7 +356,7 @@ class RasterDatasetAdapter(DataAdapter):
         bbox: Optional[Bbox] = None,
         logger: Logger = logger,
     ):
-        if zoom_level is not None and "{zoom_level}" in str(self.path):
+        if zoom_level is not None and "{zoom_level" in str(self.path):
             zoom_level = self._parse_zoom_level(zoom_level, geom, bbox, logger=logger)
 
         # resolve path based on time, zoom level and/or variables
@@ -412,7 +412,8 @@ class RasterDatasetAdapter(DataAdapter):
                 fns = fns_cached
             if np.issubdtype(type(self.nodata), np.number):
                 kwargs.update(nodata=self.nodata)
-            if zoom_level is not None and "{zoom_level}" not in str(self.path):
+            # check if {zoom_level*} is in path
+            if zoom_level is not None and "{zoom_level" not in str(self.path):
                 zls_dict, crs = self._get_zoom_levels_and_crs(fns[0], logger=logger)
                 zoom_level = self._parse_zoom_level(
                     zoom_level, geom, bbox, zls_dict, crs, logger=logger
