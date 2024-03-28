@@ -79,9 +79,9 @@ class TableComponent(ModelComponent):
         self._root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self._model.logger.info("Reading model table files.")
-        fns = glob.glob(join(self._root.path, fn.format(name="*")))
-        if len(fns) > 0:
-            for fn in fns:
+        filenames = glob.glob(join(self._root.path, fn.format(name="*")))
+        if len(filenames) > 0:
+            for fn in filenames:
                 name = basename(fn).split(".")[0]
                 tbl = pd.read_csv(fn, **kwargs)
                 self.set(tbl, name=name)
@@ -105,15 +105,16 @@ class TableComponent(ModelComponent):
         """
         self._initialize_tables()
         assert self._data is not None
+        # added here so we only have to declare types once
+        tables_to_add: Dict[str, Union[pd.DataFrame, pd.Series]]
+
         if not isinstance(tables, dict):
             if name is None:
                 raise ValueError("name required when tables is not a dict")
             else:
-                tables_to_add: Dict[str, Union[pd.DataFrame, pd.Series]] = {
-                    name: tables
-                }
+                tables_to_add = {name: tables}
         else:
-            tables_to_add: Dict[str, Union[pd.DataFrame, pd.Series]] = tables
+            tables_to_add = tables
 
         for df_name, df in tables_to_add.items():
             if not (isinstance(df, pd.DataFrame) or isinstance(df, pd.Series)):
