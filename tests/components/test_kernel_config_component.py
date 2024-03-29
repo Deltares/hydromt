@@ -19,7 +19,6 @@ def test_config_dict():
     return {
         "section1": {
             "list": [1, 2, 3],
-            # "tuple": (1, "b"), # yaml cannot deal with tuple
             "bool": True,
             "str": "test",
             "int": 1,
