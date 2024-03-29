@@ -23,7 +23,7 @@ class KernelConfigComponent(ModelComponent):
         self,
         model: "Model",
     ):
-        """Initialize a TableComponent.
+        """Initialize a KernelConfigComponent.
 
         Parameters
         ----------
@@ -35,16 +35,16 @@ class KernelConfigComponent(ModelComponent):
 
     @property
     def data(self) -> Dict[str, Any]:
-        """Model tables."""
+        """Kernel config values."""
         if self._data is None:
             self._initialize_kernel_config()
         if self._data is None:
-            raise RuntimeError("Could not load data for table component")
+            raise RuntimeError("Could not load data for kernel config component")
         else:
             return self._data
 
     def _initialize_kernel_config(self, skip_read=False) -> None:
-        """Initialize the model tables."""
+        """Initialize the kernel configs."""
         if self._data is None:
             self._data = dict()
             if self._root.is_reading_mode() and not skip_read:
@@ -74,7 +74,7 @@ class KernelConfigComponent(ModelComponent):
             self._model.logger.debug("No kernel config found, skip writing.")
 
     def read(self, path: str = DEFAULT_KERNEL_CONFIG_PATH) -> None:
-        """Read table files at <root>/tables and parse to dict of dataframes."""
+        """Read kernel config at <root>/{path}."""
         self._root._assert_read_mode()
         self._initialize_kernel_config(skip_read=True)
 
