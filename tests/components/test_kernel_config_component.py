@@ -1,10 +1,15 @@
-from os.path import abspath, isabs, join
+from os.path import abspath, isabs, isfile, join
 from pathlib import Path
 
 import pytest
 
+from hydromt.components.kernel_config import (
+    DEFAULT_KERNEL_CONFIG_PATH,
+    KernelConfigComponent,
+)
 from hydromt.io.path import make_config_paths_abs, make_config_paths_relative
-from hydromt.io.readers import configread
+from hydromt.io.readers import configread, read_yaml
+from hydromt.models import Model
 
 ABS_PATH = Path(abspath(__name__))
 
@@ -71,3 +76,38 @@ def test_make_rel_abs(tmpdir, test_config_dict):
             if isinstance(p, Path)
         ]
     ), parsed_config["section2"]
+
+
+def test_set_config(tmpdir):
+    model = Model(root=tmpdir)
+    model.add_component("config", KernelConfigComponent(model))
+    config_component = model.get_component("config", KernelConfigComponent)
+    config_component.set("global.name", "test")
+    assert config_component._data is not None
+    assert "name" in config_component._data["global"]
+    assert config_component.get_config_value("global.name") == "test"
+
+
+def test_write_config(tmpdir):
+    model = Model(root=tmpdir)
+    model.add_component("config", KernelConfigComponent(model))
+    config_component = model.get_component("config", KernelConfigComponent)
+    config_component.set("global.name", "test")
+    write_path = join(tmpdir, DEFAULT_KERNEL_CONFIG_PATH)
+    assert not isfile(write_path)
+    config_component.write()
+    assert isfile(write_path)
+    read_contents = read_yaml(write_path)
+    assert read_contents == {"global": {"name": "test"}}
+
+
+def test_get_config_abs_path(tmpdir):
+    model = Model(root=tmpdir)
+    model.add_component("config", KernelConfigComponent(model))
+    config_component = model.get_component("config", KernelConfigComponent)
+    abs_path = str(tmpdir.join("test.file"))
+    config_component.set("global.file", "test.file")
+    assert str(config_component.get_config_value("global.file")) == "test.file"
+    assert (
+        str(config_component.get_config_value("global.file", abs_path=True)) == abs_path
+    )
