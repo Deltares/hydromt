@@ -362,6 +362,17 @@ has not been changed compared to the GridModel.
 +------------------------------+-------------------------------------------+
 
 
+KernelConfig Component
+----------------------
+
+What was previously called `model.config` as well as some other class variables such as `Model._CONF`
+To make it clearer that this component is about writing configurations for kernels or simulations it is now called
+`KernelConfigComponent`. Otherwise it still works identically, meaning that it will parse dotted keys like
+`a.b.c` into nested dictionaries such as `{'a':{'b':{'c': value}}}`. By default the data will be writen to
+`<root>/kernel_config.yml` which can be overwritten either by providing different arguments or by subclassing
+the component and providing a different default value.
+
+
 Plugins
 -------
 
