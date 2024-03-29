@@ -516,6 +516,50 @@ Setup methods
    GridComponent.add_data_from_geodataframe
 
 
+KernelConfigComponent
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   KernelConfigComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   KernelConfigComponent.model
+   KernelConfigComponent.data_catalog
+   KernelConfigComponent.logger
+   KernelConfigComponent.model_root
+   KernelConfigComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   KernelConfigComponent.set
+   KernelConfigComponent.write
+   KernelConfigComponent.read
+   KernelConfigComponent.get_config_value
+
+
+
+Setup methods
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   KernelConfigComponent.create
+
+
 .. _vector_model_api:
 
 VectorModel
