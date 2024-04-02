@@ -1,4 +1,5 @@
 """All the definitions of type aliases used in HydroMT."""
+
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
@@ -41,6 +42,7 @@ def _validate_bbox(
     assert (
         bbox[1] < bbox[3]
     ), f"bbox miny: '{bbox[1]}' should be less than maxy: '{bbox[3]}'."
+    return bbox
 
 
 DataType = Literal[
