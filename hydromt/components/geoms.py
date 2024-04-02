@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from hydromt.models.model import Model
 
 
-class GeomComponent(ModelComponent):
+class GeomsComponent(ModelComponent):
     """A component to manage geo-spatial geometries."""
 
     def __init__(

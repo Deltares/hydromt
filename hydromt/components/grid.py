@@ -14,7 +14,7 @@ from shapely.geometry import box
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
-from hydromt.components import GeomComponent
+from hydromt.components import GeomsComponent
 from hydromt.components.base import ModelComponent
 from hydromt.components.region import _parse_region
 from hydromt.gis import raster
@@ -413,7 +413,7 @@ class GridComponent(ModelComponent):
             grid = grid.drop_vars("mask")
 
         # Add region and grid to model
-        self._model.get_component("geom", GeomComponent).set(geom, "region")
+        self._model.get_component("geom", GeomsComponent).set(geom, "region")
         self.set(grid)
 
         return grid
