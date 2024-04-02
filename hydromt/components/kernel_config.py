@@ -20,10 +20,7 @@ DEFAULT_KERNEL_CONFIG_PATH = "kernel_config.yml"
 class KernelConfigComponent(ModelComponent):
     """A component to write configuration files for simulations/kernels."""
 
-    def __init__(
-        self,
-        model: "Model",
-    ):
+    def __init__(self, model: "Model", config_fn: Optional[str] = None):
         """Initialize a KernelConfigComponent.
 
         Parameters
@@ -32,6 +29,11 @@ class KernelConfigComponent(ModelComponent):
             HydroMT model instance
         """
         self._data: Optional[Dict[str, Any]] = None
+        if config_fn is not None:
+            self._config_fn: str = config_fn
+        else:
+            self._config_fn = DEFAULT_KERNEL_CONFIG_PATH
+
         super().__init__(model=model)
 
     @property
@@ -44,26 +46,32 @@ class KernelConfigComponent(ModelComponent):
         else:
             return self._data
 
-    def _initialize(self) -> None:
+    def _initialize(self, skip_read=False) -> None:
         """Initialize the kernel configs."""
         if self._data is None:
             self._data = dict()
-            self.read()
+            if not skip_read:
+                self.read()
 
     @hydromt_step
     def write(
         self,
-        path: str = DEFAULT_KERNEL_CONFIG_PATH,
+        path: Optional[str] = None,
     ) -> None:
         """Write kernel config at <root>/{path}."""
         self._root._assert_write_mode()
         if self.data:
-            write_path = join(self._root.path, path)
+            if path is not None:
+                p = join(self._root.path, path)
+            else:
+                p = join(self._root.path, self._config_fn)
+
+            write_path = join(self._root.path, p)
             self._model.logger.info(f"Writing kernel config to {write_path}.")
             makedirs(dirname(write_path), exist_ok=True)
 
             write_data = make_config_paths_relative(self.data, self._root.path)
-            ext = splitext(path)[-1]
+            ext = splitext(p)[-1]
             if ext in [".yml", ".yaml"]:
                 write_yaml(write_path, write_data)
             elif ext == ".toml":
@@ -75,15 +83,15 @@ class KernelConfigComponent(ModelComponent):
             self._model.logger.debug("No kernel config found, skip writing.")
 
     @hydromt_step
-    def read(self, path: str = DEFAULT_KERNEL_CONFIG_PATH) -> None:
+    def read(self, path: Optional[str] = None) -> None:
         """Read kernel config at <root>/{path}."""
-        self._initialize()
-
-        if isabs(path):
-            read_path = path
+        self._initialize(skip_read=True)
+        # if path is abs, join will just return path
+        if path is not None:
+            p = path
         else:
-            read_path = join(self._root.path, path)
-
+            p = self._config_fn
+        read_path = join(self._root.path, p)
         if isfile(read_path):
             self._model.logger.info(f"Reading kernel config file from {read_path}.")
         else:
@@ -92,7 +100,7 @@ class KernelConfigComponent(ModelComponent):
             )
             return
 
-        ext = splitext(path)[-1]
+        ext = splitext(p)[-1]
         if ext in [".yml", ".yaml"]:
             self._data = read_yaml(read_path)
         else:

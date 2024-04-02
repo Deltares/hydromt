@@ -54,16 +54,14 @@ def test_config_always_reads(tmpdir):
     write_yaml(kernel_config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
-    model.add_component("kernel_config", KernelConfigComponent(model))
-    comp = model.get_component("kernel_config", KernelConfigComponent)
-    assert comp.data == config_data
+    assert (
+        model.get_component("kernel_config", KernelConfigComponent).data == config_data
+    )
 
 
 def test_raises_warning_on_no_config_template_found(tmpdir, caplog):
     model = Model(root=tmpdir, mode="w")
-    model.add_component("kernel_config", KernelConfigComponent(model))
-    comp = model.get_component("kernel_config", KernelConfigComponent)
-    assert comp.data == {}
+    assert model.get_component("kernel_config", KernelConfigComponent).data == {}
     assert "No default kernel config was found " in caplog.text
 
 
