@@ -19,7 +19,7 @@ def test_core_component_plugins():
         "ModelRegionComponent": ModelRegionComponent,
         "GridComponent": GridComponent,
         "ModelComponent": ModelComponent,
-        "GeomComponent": GeomsComponent,
+        "GeomsComponent": GeomsComponent,
         "TablesComponent": TablesComponent,
     }
 

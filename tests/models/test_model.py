@@ -16,7 +16,7 @@ from pytest_mock import MockerFixture
 from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
-from hydromt.components.geoms import GeomComponent
+from hydromt.components.geoms import GeomsComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.components.tables import TablesComponent
@@ -358,8 +358,8 @@ def test_setup_region(model, demda, tmpdir):
 
 def test_model_write_geoms(tmpdir):
     model = Model(root=str(tmpdir), mode="w", target_model_crs=3857)
-    model.add_component("geom", GeomComponent(model))
-    geom_component = model.get_component("geom", GeomComponent)
+    model.add_component("geom", GeomsComponent(model))
+    geom_component = model.get_component("geom", GeomsComponent)
 
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
@@ -380,9 +380,9 @@ def test_model_set_geoms(tmpdir):
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
 
     model = Model(root=str(tmpdir), mode="w")
-    model.add_component("geom", GeomComponent(model))
+    model.add_component("geom", GeomsComponent(model))
 
-    geom_component = model.get_component("geom", GeomComponent)
+    geom_component = model.get_component("geom", GeomsComponent)
 
     geom_component.set(geom, "geom_wgs84")
 
@@ -396,9 +396,9 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir):
     geom_3857 = cast(gpd.GeoDataFrame, geom_4326.copy().to_crs(3857))
 
     model = Model(root=str(tmpdir), target_model_crs=3857, mode="w")
-    model.add_component("test_geom", GeomComponent(model))
+    model.add_component("test_geom", GeomsComponent(model))
 
-    geom_component = model.get_component("test_geom", GeomComponent)
+    geom_component = model.get_component("test_geom", GeomsComponent)
     geom_component.set(geom_4326, "test_geom")
 
     assert geom_component.data["test_geom"].equals(geom_3857)
