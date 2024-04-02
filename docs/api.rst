@@ -515,7 +515,7 @@ Setup methods
    GridComponent.add_data_from_raster_reclass
    GridComponent.add_data_from_geodataframe
 
-TableComponent
+TablesComponent
 ==============
 
 .. autosummary::
