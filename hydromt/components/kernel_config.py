@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from hydromt.components.base import ModelComponent
+from hydromt.hydromt_step import hydromt_step
 from hydromt.io.path import make_config_paths_relative
 from hydromt.io.readers import read_yaml
 from hydromt.io.writers import write_toml, write_yaml
@@ -37,19 +38,20 @@ class KernelConfigComponent(ModelComponent):
     def data(self) -> Dict[str, Any]:
         """Kernel config values."""
         if self._data is None:
-            self._initialize_kernel_config()
+            self._initialize_()
         if self._data is None:
             raise RuntimeError("Could not load data for kernel config component")
         else:
             return self._data
 
-    def _initialize_kernel_config(self, skip_read=False) -> None:
+    def _initialize_(self, skip_read=False) -> None:
         """Initialize the kernel configs."""
         if self._data is None:
             self._data = dict()
             if self._root.is_reading_mode() and not skip_read:
                 self.read()
 
+    @hydromt_step
     def write(
         self,
         path: str = DEFAULT_KERNEL_CONFIG_PATH,
@@ -73,10 +75,11 @@ class KernelConfigComponent(ModelComponent):
         else:
             self._model.logger.debug("No kernel config found, skip writing.")
 
+    @hydromt_step
     def read(self, path: str = DEFAULT_KERNEL_CONFIG_PATH) -> None:
         """Read kernel config at <root>/{path}."""
         self._root._assert_read_mode()
-        self._initialize_kernel_config(skip_read=True)
+        self._initialize_(skip_read=True)
 
         if isabs(path):
             read_path = path
@@ -113,7 +116,7 @@ class KernelConfigComponent(ModelComponent):
         >> self.set('b.d.e', 24)
         >> {'a': 99, 'b': {'c': {'d': 24}}}
         """
-        self._initialize_kernel_config()
+        self._initialize_()
         parts = key.split(".")
         num_parts = len(parts)
         current = self.data
@@ -157,7 +160,7 @@ class KernelConfigComponent(ModelComponent):
         >> {'d': 2}
 
         """
-        self._initialize_kernel_config()
+        self._initialize_()
         parts = key.split(".")
         num_parts = len(parts)
         current = self.data

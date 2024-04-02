@@ -563,10 +563,10 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   KernelConfigComponent.model
-   KernelConfigComponent.data_catalog
-   KernelConfigComponent.logger
-   KernelConfigComponent.model_root
+   KernelConfigComponent._model
+   KernelConfigComponent._data_catalog
+   KernelConfigComponent._logger
+   KernelConfigComponent._root
    KernelConfigComponent.data
 
 

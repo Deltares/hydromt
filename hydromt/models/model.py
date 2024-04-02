@@ -84,7 +84,6 @@ class Model(object, metaclass=ABCMeta):
         components: Optional[dict[str, dict[str, Any]]] = None,
         root: Optional[str] = None,
         mode: str = "w",
-        kernel_config_path: str = "kernel.yml",
         data_libs: Optional[Union[List, str]] = None,
         logger=_logger,
         **artifact_keys,
@@ -97,9 +96,6 @@ class Model(object, metaclass=ABCMeta):
             Model root, by default None
         mode : {'r','r+','w'}, optional
             read/append/write mode, by default "w"
-        kernel_config_path : str, optional
-            Path to where the configuration file for the kernel/simulation
-            that is going to consume the model should be written.
         data_libs : List[str], optional
             List of data catalog configuration files, by default None
         \**artifact_keys:
