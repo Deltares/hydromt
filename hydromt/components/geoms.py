@@ -48,12 +48,12 @@ class GeomsComponent(ModelComponent):
         Return dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
         """
         if self._data is None:
-            self._initialize_geoms()
+            self._initialize()
 
         assert self._data is not None
         return self._data
 
-    def _initialize_geoms(self, skip_read=False) -> None:
+    def _initialize(self, skip_read=False) -> None:
         """Initialize geoms."""
         if self._data is None:
             self._data = dict()
@@ -70,7 +70,7 @@ class GeomsComponent(ModelComponent):
         name: str
             Geometry name.
         """
-        self._initialize_geoms()
+        self._initialize()
         assert self._data is not None
         if name in self._data:
             self._logger.warning(f"Replacing geom: {name}")
@@ -100,7 +100,7 @@ class GeomsComponent(ModelComponent):
             `geopandas.read_file` function.
         """
         self._root._assert_read_mode()
-        self._initialize_geoms(skip_read=True)
+        self._initialize(skip_read=True)
         read_path = join(self._root.path, geom_fn)
         fn_glob, regex = capture_glob(read_path)
         fns = glob(fn_glob)
