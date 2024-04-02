@@ -84,7 +84,7 @@ def test_set_config(tmpdir):
     config_component.set("global.name", "test")
     assert config_component._data is not None
     assert "name" in config_component._data["global"]
-    assert config_component.get_config_value("global.name") == "test"
+    assert config_component.get_value("global.name") == "test"
 
 
 def test_write_config(tmpdir):
@@ -106,7 +106,5 @@ def test_get_config_abs_path(tmpdir):
     config_component = model.get_component("config", KernelConfigComponent)
     abs_path = str(tmpdir.join("test.file"))
     config_component.set("global.file", "test.file")
-    assert str(config_component.get_config_value("global.file")) == "test.file"
-    assert (
-        str(config_component.get_config_value("global.file", abs_path=True)) == abs_path
-    )
+    assert str(config_component.get_value("global.file")) == "test.file"
+    assert str(config_component.get_value("global.file", abs_path=True)) == abs_path

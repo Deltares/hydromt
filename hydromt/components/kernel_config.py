@@ -125,7 +125,7 @@ class KernelConfigComponent(ModelComponent):
             else:
                 current[part] = value
 
-    def get_config_value(self, key: str, abs_path: bool = False):
+    def get_value(self, key: str, abs_path: bool = False):
         """Get a config value at key(s).
 
         Parameters
