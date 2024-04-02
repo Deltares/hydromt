@@ -9,8 +9,8 @@ from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom
 from hydromt._typing.error import NoDataStrategy
-from hydromt.driver.preprocessing import PREPROCESSORS
-from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.preprocessing import PREPROCESSORS
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 
 class ZarrDriver(RasterDatasetDriver):

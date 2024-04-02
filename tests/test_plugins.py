@@ -30,12 +30,16 @@ def test_core_model_plugins():
 def test_summary():
     component_summary = PLUGINS.component_summary()
     model_summary = PLUGINS.model_summary()
+    driver_summary = PLUGINS.driver_summary()
     assert "Component plugins:" in component_summary
     assert "Model plugins:" in model_summary
     assert "ModelRegionComponent" in component_summary
     assert "GridComponent" in component_summary
     assert "ModelComponent" in component_summary
     assert "Model" in model_summary
+    assert "Driver Plugins:" in driver_summary
+    assert "PyogrioDriver" in driver_summary
+    assert "RasterDatasetDriver" not in driver_summary
 
 
 def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str]):
@@ -68,9 +72,11 @@ def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str])
 @pytest.fixture()
 def _reset_plugins():
     PLUGINS._component_plugins = None
+    PLUGINS._driver_plugins = None
     PLUGINS._model_plugins = None
     yield
     PLUGINS._component_plugins = None
+    PLUGINS._driver_plugins = None
     PLUGINS._model_plugins = None
 
 

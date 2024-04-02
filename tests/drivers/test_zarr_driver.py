@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 import zarr
 
-from hydromt.driver.zarr_driver import ZarrDriver
+from hydromt.drivers.zarr_driver import ZarrDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 

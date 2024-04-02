@@ -16,8 +16,8 @@ from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_source.geodataframe import GeoDataFrameSource
-from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
-from hydromt.driver.pyogrio_driver import PyogrioDriver
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 

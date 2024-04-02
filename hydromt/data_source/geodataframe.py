@@ -16,7 +16,7 @@ from pystac import MediaType
 
 from hydromt._typing import Bbox, ErrorHandleMethod, Geom, NoDataStrategy, TotalBounds
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 
 from .data_source import DataSource
 

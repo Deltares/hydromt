@@ -1,11 +1,13 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
 
+from abc import ABC
 from typing import TYPE_CHECKING, Dict, Optional, Type, TypedDict, cast
 
 from importlib_metadata import entry_points
 
 if TYPE_CHECKING:
     from hydromt.components import ModelComponent  # noqa
+    from hydromt.drivers import BaseDriver
     from hydromt.models import Model  # noqa
 
 __all__ = ["PLUGINS"]
@@ -47,10 +49,12 @@ class Plugins:
     def __init__(self):
         """Initiate the catalog object."""
         self._component_plugins: Optional[Dict[str, Plugin]] = None
+        self._driver_plugins: Optional[Dict[str, Plugin]] = None
         self._model_plugins: Optional[Dict[str, Plugin]] = None
 
     def _initialize_plugins(self) -> None:
         self._component_plugins = _discover_plugins(group="hydromt.components")
+        self._driver_plugins = _discover_plugins(group="hydromt.drivers")
         self._model_plugins = _discover_plugins(group="hydromt.models")
 
     @property
@@ -70,6 +74,25 @@ class Plugins:
                     for name, value in self._component_plugins.items()
                 },
             )
+
+    @property
+    def driver_plugins(self) -> dict[str, Type["BaseDriver"]]:
+        """Load and provide access to all known driver plugins."""
+        if self._driver_plugins is None:
+            self._initialize_plugins()
+
+        if self._driver_plugins is None:
+            # core itself exposes plugins so if we can't find anything, something is wrong
+            raise RuntimeError("Could not load any driver plugins")
+
+        drivers: dict[str, Type["BaseDriver"]] = cast(
+            Dict[str, Type["BaseDriver"]],
+            {name: value["type"] for name, value in self._driver_plugins.items()},
+        )
+        # Do not return ABCs, such as BaseDriver, or RasterDatasetDriver
+        return {
+            key: value for key, value in drivers.items() if ABC not in value.__bases__
+        }
 
     @property
     def model_plugins(self) -> dict[str, type["Model"]]:
@@ -116,6 +139,25 @@ class Plugins:
                 {k: v for k, v in self._component_plugins.items() if k != "type"},
             )
 
+    @property
+    def driver_metadata(self) -> Dict[str, Dict[str, str]]:
+        """Load and provide access to all known driver plugin metadata."""
+        if self._driver_plugins is None:
+            self._initialize_plugins()
+
+        if self._driver_plugins is None:
+            # core itself exposes plugins so if we can't find anything, something is wrong
+            raise RuntimeError("Could not load any driver plugins")
+        else:
+            return cast(
+                Dict[str, Dict[str, str]],
+                {
+                    k: v
+                    for k, v in self._driver_plugins.items()
+                    if ABC not in v["type"].__bases__  # filter ABCs from core
+                },
+            )
+
     def model_summary(self) -> str:
         """Generate string representation containing the registered model entrypoints."""
         s = ""
@@ -125,6 +167,14 @@ class Plugins:
             map(_format_metadata, self.model_metadata.values())
         )
         return f"Model plugins:\n\t- {model_plugins}"
+
+    def driver_summary(self) -> str:
+        """Generate string representation container the registered driver entrypoints."""
+        self._initialize_plugins()
+        driver_plugins = "\n\t ".join(
+            list(map(_format_metadata, self.driver_metadata.values()))
+        )
+        return f"Driver Plugins:\n\t- {driver_plugins}"
 
     def component_summary(self) -> str:
         """Generate string representation containing the registered component entrypoints."""

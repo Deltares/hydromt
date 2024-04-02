@@ -1,12 +1,13 @@
 """Base class for different drivers."""
 
 from abc import ABC
-from typing import Any, Callable, ClassVar
+from typing import Any, Callable, ClassVar, Generator, List, Type
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.metadata_resolver.resolver_plugin import RESOLVERS
+from hydromt.plugins import PLUGINS
 
 
 class BaseDriver(BaseModel, ABC):
@@ -72,20 +73,31 @@ class BaseDriver(BaseModel, ABC):
             return handler(data)
 
         if name := data.get("name"):
-            try:
-                # Find which DataSource to instantiate.
-                target_cls: BaseDriver = next(
-                    filter(lambda sc: sc.name == name, cls._find_all_possible_types())
-                )  # subclasses should be loaded from __init__.py
-                return target_cls.model_validate(data)
-            except StopIteration:
-                raise ValueError(f"Unknown 'name': '{name}'")
+            # Load plugins, importing subclasses of BaseDriver
+            PLUGINS.driver_plugins  # noqa: B018
 
+            # Find which Driver to instantiate.
+            possible_drivers: List[Type["BaseDriver"]] = list(
+                filter(lambda dr: dr.name == name, cls._find_all_possible_types())
+            )
+            if len(possible_drivers) == 0:
+                raise ValueError(f"Unknown 'name': '{name}'")
+            elif len(possible_drivers) > 1:
+                raise ValueError(
+                    f"""Duplication between driver name {name} in classes:
+                    {list(map(lambda dr: dr.__qualname__, possible_drivers))}"""
+                )
+            else:
+                return possible_drivers[0].model_validate(data)
         raise ValueError(f"{cls.__name__} needs 'name'")
 
     @classmethod
-    def _find_all_possible_types(cls):
-        """Recursively generate all possible types for this object."""
+    def _find_all_possible_types(cls) -> Generator[None, None, Type["BaseDriver"]]:
+        """Recursively generate all possible types for this object.
+
+        Logic relies on __bases__ and __subclass__() of the BaseDriver class,
+        which means that all drivers and plugins should be loaded in before.
+        """
         # any concrete class is a possible type
         if ABC not in cls.__bases__:
             yield cls
