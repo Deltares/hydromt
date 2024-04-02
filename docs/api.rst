@@ -579,7 +579,7 @@ General methods
    KernelConfigComponent.set
    KernelConfigComponent.write
    KernelConfigComponent.read
-   KernelConfigComponent.get_config_value
+   KernelConfigComponent.get_value
 
 
 
