@@ -800,15 +800,17 @@ Reading methods
    :toctree: _generated
 
    io.configread
-   io.open_raster
+   io.open_geodataset
+   io.open_mfcsv
    io.open_mfraster
+   io.open_raster
    io.open_raster_from_tindex
+   io.open_timeseries_from_table
    io.open_vector
    io.open_vector_from_table
-   io.open_geodataset
-   io.open_timeseries_from_table
-   io.open_mfcsv
    io.read_nc
+   io.read_toml
+   io.read_yaml
 
 Writing methods
 ===============
@@ -817,9 +819,11 @@ Writing methods
    :toctree: _generated
 
    io.netcdf_writer
-   io.write_xy
-   io.zarr_writer
    io.write_nc
+   io.write_toml
+   io.write_xy
+   io.write_yaml
+   io.zarr_writer
 
 
 .. _raster_api:
