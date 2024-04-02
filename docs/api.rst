@@ -577,6 +577,7 @@ General methods
    :toctree: _generated
 
    KernelConfigComponent.set
+   KernelConfigComponent.set_value
    KernelConfigComponent.write
    KernelConfigComponent.read
    KernelConfigComponent.get_value

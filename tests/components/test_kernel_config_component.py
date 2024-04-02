@@ -9,6 +9,7 @@ from hydromt.components.kernel_config import (
 )
 from hydromt.io.path import make_config_paths_abs, make_config_paths_relative
 from hydromt.io.readers import configread, read_yaml
+from hydromt.io.writers import write_yaml
 from hydromt.models import Model
 
 ABS_PATH = Path(abspath(__name__))
@@ -45,6 +46,25 @@ def test_rejects_non_yaml_format(tmpdir):
 
     with pytest.raises(ValueError, match="Unknown extention"):
         _ = configread(config_file, abs_path=True)
+
+
+def test_config_always_reads(tmpdir):
+    kernel_config_path = join(tmpdir, DEFAULT_KERNEL_CONFIG_PATH)
+    config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
+    write_yaml(kernel_config_path, config_data)
+    # notice the write mode
+    model = Model(root=tmpdir, mode="w")
+    model.add_component("kernel_config", KernelConfigComponent(model))
+    comp = model.get_component("kernel_config", KernelConfigComponent)
+    assert comp.data == config_data
+
+
+def test_raises_warning_on_no_config_template_found(tmpdir, caplog):
+    model = Model(root=tmpdir, mode="w")
+    model.add_component("kernel_config", KernelConfigComponent(model))
+    comp = model.get_component("kernel_config", KernelConfigComponent)
+    assert comp.data == {}
+    assert "No default kernel config was found " in caplog.text
 
 
 def test_make_config_abs(tmpdir, test_config_dict):

@@ -1,7 +1,7 @@
 """A component to write configuration files for simulations/kernels."""
 
 from os import makedirs
-from os.path import abspath, dirname, isabs, join, splitext
+from os.path import abspath, dirname, isabs, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
@@ -44,12 +44,11 @@ class KernelConfigComponent(ModelComponent):
         else:
             return self._data
 
-    def _initialize(self, skip_read=False) -> None:
+    def _initialize(self) -> None:
         """Initialize the kernel configs."""
         if self._data is None:
             self._data = dict()
-            if self._root.is_reading_mode() and not skip_read:
-                self.read()
+            self.read()
 
     @hydromt_step
     def write(
@@ -78,15 +77,20 @@ class KernelConfigComponent(ModelComponent):
     @hydromt_step
     def read(self, path: str = DEFAULT_KERNEL_CONFIG_PATH) -> None:
         """Read kernel config at <root>/{path}."""
-        self._root._assert_read_mode()
-        self._initialize(skip_read=True)
+        self._initialize()
 
         if isabs(path):
             read_path = path
         else:
             read_path = join(self._root.path, path)
 
-        self._model.logger.info(f"Reading kernel config file from {read_path}.")
+        if isfile(read_path):
+            self._model.logger.info(f"Reading kernel config file from {read_path}.")
+        else:
+            self._model.logger.warning(
+                f"No default kernel config was found at {read_path}. It wil be initialized as empty dictionary"
+            )
+            return
 
         ext = splitext(path)[-1]
         if ext in [".yml", ".yaml"]:
