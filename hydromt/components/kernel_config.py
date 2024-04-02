@@ -38,13 +38,13 @@ class KernelConfigComponent(ModelComponent):
     def data(self) -> Dict[str, Any]:
         """Kernel config values."""
         if self._data is None:
-            self._initialize_()
+            self._initialize()
         if self._data is None:
             raise RuntimeError("Could not load data for kernel config component")
         else:
             return self._data
 
-    def _initialize_(self, skip_read=False) -> None:
+    def _initialize(self, skip_read=False) -> None:
         """Initialize the kernel configs."""
         if self._data is None:
             self._data = dict()
@@ -79,7 +79,7 @@ class KernelConfigComponent(ModelComponent):
     def read(self, path: str = DEFAULT_KERNEL_CONFIG_PATH) -> None:
         """Read kernel config at <root>/{path}."""
         self._root._assert_read_mode()
-        self._initialize_(skip_read=True)
+        self._initialize(skip_read=True)
 
         if isabs(path):
             read_path = path
@@ -94,7 +94,26 @@ class KernelConfigComponent(ModelComponent):
         else:
             raise ValueError(f"Unknown file extention: {ext}")
 
-    def set(self, key: str, value: Any):
+    def set(self, data: Dict[str, Any]):
+        """Set the config dictionary at key(s) with values.
+
+        Parameters
+        ----------
+        data: Dict[str,Any]
+            A dictionary with the values to be set. keys can be dotted like in
+            :py:meth:`~hydromt.components.kernel_config.KernelConfigComponent.set_value`
+
+        Examples
+        --------
+        >> self.set({'a': 1, 'b': {'c': {'d': 2}}})
+        >> self.data
+            {'a': 1, 'b': {'c': {'d': 2}}}
+        >> self.set({'a.d.f.g': 1, 'b': {'c': {'d': 2}}})
+        >> self.data
+            {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
+        """
+
+    def set_value(self, key: str, value: Any):
         """Update the config dictionary at key(s) with values.
 
         Parameters
@@ -110,13 +129,13 @@ class KernelConfigComponent(ModelComponent):
         >> self.set({'a': 1, 'b': {'c': {'d': 2}}})
         >> self.data
             {'a': 1, 'b': {'c': {'d': 2}}}
-        >> self.set('a', 99)
+        >> self.set_value('a', 99)
         >> {'a': 99, 'b': {'c': {'d': 2}}}
 
-        >> self.set('b.d.e', 24)
+        >> self.set_value('b.d.e', 24)
         >> {'a': 99, 'b': {'c': {'d': 24}}}
         """
-        self._initialize_()
+        self._initialize()
         parts = key.split(".")
         num_parts = len(parts)
         current = self.data
@@ -160,7 +179,7 @@ class KernelConfigComponent(ModelComponent):
         >> {'d': 2}
 
         """
-        self._initialize_()
+        self._initialize()
         parts = key.split(".")
         num_parts = len(parts)
         current = self.data
