@@ -72,7 +72,6 @@ class Model(object, metaclass=ABCMeta):
         "crs": CRS,
         "config": Dict[str, Any],
         "geoms": Dict[str, gpd.GeoDataFrame],
-        "tables": Dict[str, pd.DataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
         "region": ModelRegionComponent,
@@ -124,7 +123,6 @@ class Model(object, metaclass=ABCMeta):
         )
 
         self._maps: Optional[XArrayDict] = None
-        self._tables: Optional[Dict[str, pd.DataFrame]] = None
 
         self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
         self._forcing: Optional[XArrayDict] = None

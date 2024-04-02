@@ -8,6 +8,7 @@ from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.kernel_config import KernelConfigComponent
 from hydromt.components.region import ModelRegionComponent
+from hydromt.components.tables import TablesComponent
 from hydromt.models.model import Model
 from hydromt.plugins import PLUGINS
 
@@ -19,6 +20,7 @@ def test_core_component_plugins():
         "GridComponent": GridComponent,
         "ModelComponent": ModelComponent,
         "KernelConfigComponent": KernelConfigComponent,
+        "TablesComponent": TablesComponent,
     }
 
 

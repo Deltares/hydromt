@@ -233,9 +233,14 @@ Once a component has been added, any component (or other object or scope that ha
 `model.get_component` function which takes the name of the desired component and the TYPE of the component you wish to retrieve. At this point you can do
 with it as you please.
 
-In the core of HydroMT, the available components are (list or maybe table):
-  - `GridComponent` for data on a regular grid
-  - etc.
+In the core of HydroMT, the available components are:
++-----------------------+-----------------+-----------------------------------------------------------------+
+| v0.x Model Attribute  | Component       | Description                                                     |
++=======================+=================+=================================================================+
+| model.tables          | TablesComponent  | Component for managing non-geospatial data in pandas DataFrames  |
+| model.grid            | GridComponent   | Component for managing regular gridded data in single hydromt RasterDataset    |
+| model.geoms('region') | RegionComponent | Component for managing the area of interest for the model in a geopandas GeoDataFrame.    |
++-----------------------+-----------------+-----------------------------------------------------------------+
 
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
@@ -281,7 +286,7 @@ class ExampleEditModel(Model):
 ```
 
 Making the model region its own component
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Rationale**
 
@@ -361,6 +366,10 @@ has not been changed compared to the GridModel.
 | model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
 
+TablesComponent
+^^^^^^^^^^^^^^
+
+The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionnary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
 KernelConfig Component
 ----------------------
