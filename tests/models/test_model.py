@@ -18,7 +18,7 @@ from shapely.geometry import box
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
-from hydromt.components.table import TableComponent
+from hydromt.components.tables import TablesComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data
@@ -151,8 +151,8 @@ def test_model(model, tmpdir):
 
 def test_model_tables_key_error(df, tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("test_table", TableComponent(m))
-    component = m.get_component("test_table", TableComponent)
+    m.add_component("test_table", TablesComponent(m))
+    component = m.get_component("test_table", TablesComponent)
 
     with pytest.raises(KeyError):
         component.data["1"]
@@ -160,8 +160,8 @@ def test_model_tables_key_error(df, tmpdir: Path):
 
 def test_model_tables_merges_correctly(df, tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("test_table", TableComponent(m))
-    component = m.get_component("test_table", TableComponent)
+    m.add_component("test_table", TablesComponent(m))
+    component = m.get_component("test_table", TablesComponent)
 
     # make a couple copies of the dfs for testing
     dfs = {str(i): df.copy() * i for i in range(5)}
@@ -175,8 +175,8 @@ def test_model_tables_merges_correctly(df, tmpdir: Path):
 
 def test_model_tables_sets_correctly(df, tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("test_table", TableComponent(m))
-    component = m.get_component("test_table", TableComponent)
+    m.add_component("test_table", TablesComponent(m))
+    component = m.get_component("test_table", TablesComponent)
 
     # make a couple copies of the dfs for testing
     dfs = {str(i): df.copy() for i in range(5)}
@@ -191,17 +191,17 @@ def test_model_tables_sets_correctly(df, tmpdir: Path):
 @pytest.mark.skip(reason="Needs raster dataset implementation")
 def test_model_tables_reads_and_writes_correctly(df, tmpdir: Path):
     model = Model(root=str(tmpdir), mode="r+")
-    model.add_component("test_table", TableComponent(model))
-    component = model.get_component("test_table", TableComponent)
+    model.add_component("test_table", TablesComponent(model))
+    component = model.get_component("test_table", TablesComponent)
 
     component.set(tables=df, name="table")
 
     model.write()
     clean_model = Model(root=str(tmpdir), mode="r")
-    clean_model.add_component("test_table", TableComponent(model))
+    clean_model.add_component("test_table", TablesComponent(model))
     clean_model.read()
 
-    clean_component = clean_model.get_component("test_table", TableComponent)
+    clean_component = clean_model.get_component("test_table", TablesComponent)
 
     assert component.data["table"].equals(clean_component.data["table"])
 

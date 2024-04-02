@@ -521,7 +521,7 @@ TablesComponent
 .. autosummary::
    :toctree: _generated
 
-    TableComponent
+    TablesComponent
 
 
 Components and attributes
@@ -530,11 +530,11 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   TableComponent._model
-   TableComponent._data_catalog
-   TableComponent._logger
-   TableComponent._root
-   TableComponent.data
+   TablesComponent._model
+   TablesComponent._data_catalog
+   TablesComponent._logger
+   TablesComponent._root
+   TablesComponent.data
 
 
 General methods
@@ -543,9 +543,9 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   TableComponent.set
-   TableComponent.write
-   TableComponent.read
+   TablesComponent.set
+   TablesComponent.write
+   TablesComponent.read
 
 
 .. _vector_model_api:

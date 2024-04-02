@@ -366,10 +366,10 @@ has not been changed compared to the GridModel.
 | model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
 
-TableComponent
+TablesComponent
 ^^^^^^^^^^^^^^
 
-Same as Grid, but it's called Table component and has less methods.
+The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionnary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
 Plugins
 -------

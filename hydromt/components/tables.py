@@ -19,10 +19,10 @@ from hydromt.utils.constants import DEFAULT_TABLE_FILENAME
 if TYPE_CHECKING:
     from hydromt.models.model import Model
 
-__all__ = ["TableComponent"]
+__all__ = ["TablesComponent"]
 
 
-class TableComponent(ModelComponent):
+class TablesComponent(ModelComponent):
     """TablesComponent contains data as a dictionnary of pandas.DataFrame.
 
     It is well suited to represent non-geospatial tabular model data.
@@ -32,7 +32,7 @@ class TableComponent(ModelComponent):
         self,
         model: "Model",
     ):
-        """Initialize a TableComponent.
+        """Initialize a TablesComponent.
 
         Parameters
         ----------
