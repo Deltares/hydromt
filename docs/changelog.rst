@@ -16,7 +16,7 @@ Added
 - Added DataSource class to represent and validate DataCatalog entries.
 - Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
 - A Github action now checks whether the migration guide is updated (#829)
-- Added a `KernelConfigComponent` to write configurations for kernels/simulations. (#TBA)
+- Added a `KernelConfigComponent` to write configurations for kernels/simulations. (#863)
 
 Changed
 -------
