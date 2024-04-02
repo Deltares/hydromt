@@ -1,13 +1,12 @@
 """Table component."""
 
-import glob
 import os
-from os.path import basename, dirname, isdir, join, splitext
+from glob import glob
+from os.path import dirname, isdir, join
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Dict,
-    List,
     Optional,
     Union,
     cast,
@@ -16,9 +15,10 @@ from typing import (
 import geopandas as gpd
 from geopandas import GeoDataFrame, GeoSeries
 
+from hydromt._utils.capture_glob import capture_glob
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
-from hydromt.utils import DEFAULT_GEOM_FOLDER
+from hydromt.utils import DEFAULT_GEOM_FILENAME
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
@@ -85,9 +85,7 @@ class GeomComponent(ModelComponent):
         self._data[name] = geom
 
     @hydromt_step
-    def read(
-        self, folder: str = DEFAULT_GEOM_FOLDER, extention: str = ".geojson", **kwargs
-    ) -> None:
+    def read(self, geom_fn: str = DEFAULT_GEOM_FILENAME, **kwargs) -> None:
         r"""Read model geometries files at <root>/<filename>.
 
         key-word arguments are passed to :py:func:`geopandas.read_file`
@@ -103,12 +101,11 @@ class GeomComponent(ModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize_geoms(skip_read=True)
-        fns = glob.glob(join(self._root.path, folder, "*"))
+        read_path = join(self._root.path, geom_fn)
+        fn_glob, regex = capture_glob(read_path)
+        fns = glob(fn_glob)
         for fn in fns:
-            name = basename(fn).split(".")[0]
-            ext = splitext(fn)[-1]
-            if ext != extention:
-                continue
+            name = ".".join(regex.match(fn).groups())  # type: ignore
             geom = cast(GeoDataFrame, gpd.read_file(fn, **kwargs))
             self._logger.debug(f"Reading model file {name} at {fn}.")
 
@@ -117,8 +114,7 @@ class GeomComponent(ModelComponent):
     @hydromt_step
     def write(
         self,
-        folder: str = DEFAULT_GEOM_FOLDER,
-        extention: str = ".geojson",
+        geom_fn: str = DEFAULT_GEOM_FILENAME,
         paths: Optional[Dict[str, Path]] = None,
         to_wgs84: bool = False,
         **kwargs,
@@ -151,13 +147,18 @@ class GeomComponent(ModelComponent):
                 self._logger.warning(f"{name} is empty. Skipping...")
                 continue
 
+            if paths is not None and name in paths:
+                n = paths[name]
+            else:
+                n = name
+
             write_path = Path(
                 join(
                     self._root.path,
-                    folder.format(name=name),
+                    geom_fn.format(name=n),
                 )
-                + extention
             )
+
             self._logger.debug(f"Writing file {write_path}")
 
             write_folder = dirname(write_path)
@@ -165,7 +166,6 @@ class GeomComponent(ModelComponent):
                 os.makedirs(write_folder, exist_ok=True)
 
             if to_wgs84:
-                gdf = gdf.to_crs(4326)
-                assert gdf is not None
+                gdf.to_crs(epsg=4326, inplace=True)
 
             gdf.to_file(write_path, **kwargs)

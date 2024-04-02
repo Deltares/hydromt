@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
-from os import listdir, makedirs
+from os import listdir
 from os.path import abspath, dirname, exists, isfile, join
 from pathlib import Path
 from typing import Any, cast
@@ -357,7 +357,7 @@ def test_setup_region(model, demda, tmpdir):
 
 
 def test_model_write_geoms(tmpdir):
-    model = Model(root=str(tmpdir), mode="w")
+    model = Model(root=str(tmpdir), mode="w", target_model_crs=3857)
     model.add_component("geom", GeomComponent(model))
     geom_component = model.get_component("geom", GeomComponent)
 
@@ -368,7 +368,6 @@ def test_model_write_geoms(tmpdir):
 
     write_folder = join(tmpdir, "geoms")
     write_path = join(write_folder, "test_geom.geojson")
-    makedirs(write_folder, exist_ok=True)
     geom_component.set(geom, "test_geom")
     geom_component.write()
     region_geom = gpd.read_file(write_path)
@@ -397,15 +396,14 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir):
     geom_3857 = cast(gpd.GeoDataFrame, geom_4326.copy().to_crs(3857))
 
     model = Model(root=str(tmpdir), target_model_crs=3857, mode="w")
-    model.add_component("geom", GeomComponent(model))
+    model.add_component("test_geom", GeomComponent(model))
 
-    geom_component = model.get_component("geom", GeomComponent)
-    geom_component.set(geom_4326, "geom")
+    geom_component = model.get_component("test_geom", GeomComponent)
+    geom_component.set(geom_4326, "test_geom")
 
-    assert geom_component.data["geom"].equals(geom_3857)
+    assert geom_component.data["test_geom"].equals(geom_3857)
     write_folder = join(tmpdir, "geoms")
     write_path = join(write_folder, "test_geom.geojson")
-    makedirs(write_folder, exist_ok=True)
     geom_component.write(to_wgs84=True)
 
     gdf = gpd.read_file(write_path)
