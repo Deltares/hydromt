@@ -106,6 +106,7 @@ class KernelConfigComponent(ModelComponent):
         else:
             raise ValueError(f"Unknown file extention: {ext}")
 
+    @hydromt_step
     def set(self, data: Dict[str, Any]):
         """Set the config dictionary at key(s) with values.
 
@@ -125,9 +126,10 @@ class KernelConfigComponent(ModelComponent):
             {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
         """
         for k, v in data.items():
-            self.set_value(k, v)
+            self.update(k, v)
 
-    def set_value(self, key: str, value: Any):
+    @hydromt_step
+    def update(self, key: str, value: Any):
         """Update the config dictionary at key(s) with values.
 
         Parameters
