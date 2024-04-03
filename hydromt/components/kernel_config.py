@@ -124,6 +124,8 @@ class KernelConfigComponent(ModelComponent):
         >> self.data
             {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
         """
+        for k, v in data.items():
+            self.set_value(k, v)
 
     def set_value(self, key: str, value: Any):
         """Update the config dictionary at key(s) with values.
