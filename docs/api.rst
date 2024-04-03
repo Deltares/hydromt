@@ -554,7 +554,7 @@ ConfigComponent
 .. autosummary::
    :toctree: _generated
 
-   KernelConfigComponent
+   ConfigComponent
 
 
 Components and attributes
@@ -563,11 +563,11 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   KernelConfigComponent._model
-   KernelConfigComponent._data_catalog
-   KernelConfigComponent._logger
-   KernelConfigComponent._root
-   KernelConfigComponent.data
+   ConfigComponent._model
+   ConfigComponent._data_catalog
+   ConfigComponent._logger
+   ConfigComponent._root
+   ConfigComponent.data
 
 
 General methods
@@ -576,11 +576,11 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   KernelConfigComponent.set
-   KernelConfigComponent.set_value
-   KernelConfigComponent.write
-   KernelConfigComponent.read
-   KernelConfigComponent.get_value
+   ConfigComponent.set
+   ConfigComponent.set_value
+   ConfigComponent.write
+   ConfigComponent.read
+   ConfigComponent.get_value
 
 
 
@@ -590,7 +590,7 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   KernelConfigComponent.create
+   ConfigComponent.create
 
 
 .. _vector_model_api:
