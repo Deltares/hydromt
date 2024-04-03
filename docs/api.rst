@@ -571,6 +571,11 @@ Components and attributes
    VectorComponent.data
    VectorComponent.geometry
    VectorComponent.index_dim
+   VectorComponent._model
+   VectorComponent._data_catalog
+   VectorComponent._logger
+   VectorComponent._root
+
 
 General methods
 ---------------
@@ -581,14 +586,6 @@ General methods
    VectorComponent.set
    VectorComponent.read
    VectorComponent.write
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   VectorModel.create
 
 
 .. _mesh_model_api:

@@ -8,6 +8,7 @@ from typing import Optional, Union
 import geopandas as gpd
 import numpy as np
 import xarray as xr
+from pyproj import CRS
 
 from hydromt.components.base import ModelComponent
 from hydromt.gis.vector import GeoDataset
@@ -321,5 +322,13 @@ class VectorComponent(ModelComponent):
 
     @property
     def index_dim(self) -> str:
-        """Returns the index dimension of the model vector."""
+        """Returns the index dimension of the vector."""
         return self.data.vector.index_dim
+
+    @property
+    def crs(self) -> Optional[CRS]:
+        """Returns coordinate reference system embedded in the vector."""
+        if self.data.vector.crs is not None:
+            return self.data.vector.crs
+        self._logger.warning("No CRS found in vector data.")
+        return None
