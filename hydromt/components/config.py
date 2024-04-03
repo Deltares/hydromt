@@ -14,14 +14,14 @@ from hydromt.io.writers import write_toml, write_yaml
 if TYPE_CHECKING:
     from hydromt.models import Model
 
-DEFAULT_KERNEL_CONFIG_PATH = "kernel_config.yml"
+DEFAULT_CONFIG_PATH = "config.yml"
 
 
-class KernelConfigComponent(ModelComponent):
+class ConfigComponent(ModelComponent):
     """A component to write configuration files for simulations/kernels."""
 
     def __init__(self, model: "Model", config_fn: Optional[str] = None):
-        """Initialize a KernelConfigComponent.
+        """Initialize a ConfigComponent.
 
         Parameters
         ----------
@@ -32,7 +32,7 @@ class KernelConfigComponent(ModelComponent):
         if config_fn is not None:
             self._config_fn: str = config_fn
         else:
-            self._config_fn = DEFAULT_KERNEL_CONFIG_PATH
+            self._config_fn = DEFAULT_CONFIG_PATH
 
         super().__init__(model=model)
 
@@ -114,7 +114,7 @@ class KernelConfigComponent(ModelComponent):
         ----------
         data: Dict[str,Any]
             A dictionary with the values to be set. keys can be dotted like in
-            :py:meth:`~hydromt.components.kernel_config.KernelConfigComponent.set_value`
+            :py:meth:`~hydromt.components.config.ConfigComponent.set_value`
 
         Examples
         --------

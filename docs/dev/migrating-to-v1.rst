@@ -371,14 +371,13 @@ TablesComponent
 
 The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionnary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
-KernelConfig Component
-----------------------
+ConfigComponent
+^^^^^^^^^^^^^^^
 
-What was previously called `model.config` as well as some other class variables such as `Model._CONF`
-To make it clearer that this component is about writing configurations for kernels or simulations it is now called
-`KernelConfigComponent`. Otherwise it still works identically, meaning that it will parse dotted keys like
+What was previously called `model.config` as well as some other class variables such as `Model._CONF` this is now located in
+`ConfigComponent`. Otherwise it still works identically, meaning that it will parse dotted keys like
 `a.b.c` into nested dictionaries such as `{'a':{'b':{'c': value}}}`. By default the data will be writen to
-`<root>/kernel_config.yml` which can be overwritten either by providing different arguments or by subclassing
+`<root>/config.yml` which can be overwritten either by providing different arguments or by subclassing
 the component and providing a different default value.
 
 

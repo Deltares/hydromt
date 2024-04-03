@@ -39,8 +39,8 @@ from hydromt.components import (
     ModelComponent,
     ModelRegionComponent,
 )
-from hydromt.components.kernel_config import (
-    KernelConfigComponent,
+from hydromt.components.config import (
+    ConfigComponent,
 )
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -135,8 +135,8 @@ class Model(object, metaclass=ABCMeta):
         self._components: Dict[str, ModelComponent] = {}
         self._add_components(components)
 
-        config_component: KernelConfigComponent = KernelConfigComponent(self, config_fn)
-        self.add_component("kernel_config", config_component)
+        config_component: ConfigComponent = ConfigComponent(self, config_fn)
+        self.add_component("config", config_component)
 
         self._defered_file_closes = []
 
