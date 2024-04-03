@@ -548,8 +548,8 @@ General methods
    TablesComponent.read
 
 
-KernelConfigComponent
-=========
+ConfigComponent
+===============
 
 .. autosummary::
    :toctree: _generated
