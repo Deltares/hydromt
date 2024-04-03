@@ -27,6 +27,9 @@ class ConfigComponent(ModelComponent):
         ----------
         model: Model
             HydroMT model instance
+        config_fn: Optional[str]
+            a path relative to the root where the configurations will
+            be written if user does not provide a path themselves.
         """
         self._data: Optional[Dict[str, Any]] = None
         self._config_fn: str = config_fn or DEFAULT_CONFIG_PATH
@@ -188,7 +191,6 @@ class ConfigComponent(ModelComponent):
         >> {'d': 2}
 
         """
-        self._initialize()
         parts = key.split(".")
         num_parts = len(parts)
         current = self.data
