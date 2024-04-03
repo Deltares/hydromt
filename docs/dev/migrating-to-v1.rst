@@ -381,8 +381,8 @@ terminology of the components and their methods.
 
 The `VectorMixin` and `VectorModel` have been restructured into one `VectorComponent` with only
 a weak reference to one general `Model` instance. The `set_vector`, `write_vector`,
-`read_vector`, and `setup_vector` have been changed to the more generically named `set`,
-`write`, `read`, and `create` methods respectively. Also, the `setup_vector_from_*`
+and `read_vector` have been changed to the more generically named `set`,
+`write`, and `read` methods respectively. Also, the `setup_vector_from_*`
 methods have been changed to `add_data_from_*`. The functionality of the VectorComponent
 has not been changed compared to the VectorModel.
 
@@ -394,20 +394,16 @@ Or you can set it up in the yml file by using the `components` part.
 	global:
 		components:
 			vector:
-			type: VectorComponent
+				type: VectorComponent
 
 +------------------------------+-------------------------------------------+
 | v0.x                         | v1                                        |
 +==============================+===========================================+
-| model.set_vector(...)        | model.vectort.set(...)                    |
+| model.set_vector(...)        | model.vector.set(...)                    |
 +------------------------------+-------------------------------------------+
 | model.read_vector(...)       | model.vector.read(...)                    |
 +------------------------------+-------------------------------------------+
 | model.write_vector(...)      | model.vector.write(...)                   |
-+------------------------------+-------------------------------------------+
-| model.setup_vector(...)      | model.vector.create(...)                  |
-+------------------------------+-------------------------------------------+
-| model.setup_vector_from_*(...) | model.vector.add_data_from_*(...)       |
 +------------------------------+-------------------------------------------+
 
 TablesComponent
