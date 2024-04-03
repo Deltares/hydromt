@@ -2,6 +2,7 @@
 
 from .base_driver import BaseDriver
 from .geodataframe_driver import GeoDataFrameDriver
+from .netcdf_driver import NetcdfDriver
 from .pyogrio_driver import PyogrioDriver
 from .rasterdataset_driver import RasterDatasetDriver
 from .zarr_driver import ZarrDriver
@@ -9,6 +10,7 @@ from .zarr_driver import ZarrDriver
 __all__ = [
     "BaseDriver",
     "GeoDataFrameDriver",
+    "NetcdfDriver",
     "PyogrioDriver",
     "RasterDatasetDriver",
     "ZarrDriver",
