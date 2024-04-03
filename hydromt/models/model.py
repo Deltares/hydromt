@@ -135,7 +135,7 @@ class Model(object, metaclass=ABCMeta):
         self._components: Dict[str, ModelComponent] = {}
         self._add_components(components)
 
-        config_component: ConfigComponent = ConfigComponent(self, config_fn)
+        config_component: ConfigComponent = ConfigComponent(self, config_fn=config_fn)
         self.add_component("config", config_component)
 
         self._defered_file_closes = []

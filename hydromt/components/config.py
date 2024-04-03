@@ -58,10 +58,7 @@ class ConfigComponent(ModelComponent):
         """Write kernel config at <root>/{path}."""
         self._root._assert_write_mode()
         if self.data:
-            if path is not None:
-                p = join(self._root.path, path)
-            else:
-                p = join(self._root.path, self._config_fn)
+            p = path or self._config_fn
 
             write_path = join(self._root.path, p)
             self._model.logger.info(f"Writing kernel config to {write_path}.")
@@ -84,10 +81,7 @@ class ConfigComponent(ModelComponent):
         """Read kernel config at <root>/{path}."""
         self._initialize(skip_read=True)
         # if path is abs, join will just return path
-        if path is not None:
-            p = path
-        else:
-            p = self._config_fn
+        p = path or self._config_fn
         read_path = join(self._root.path, p)
         if isfile(read_path):
             self._model.logger.info(f"Reading kernel config file from {read_path}.")
