@@ -19,8 +19,8 @@ import hydromt.test_utils as test_utils
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
-from hydromt.components.vector import VectorComponent
 from hydromt.components.tables import TablesComponent
+from hydromt.components.vector import VectorComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data

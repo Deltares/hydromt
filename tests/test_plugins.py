@@ -7,8 +7,8 @@ from pytest_mock import MockerFixture
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
-from hydromt.components.vector import VectorComponent
 from hydromt.components.tables import TablesComponent
+from hydromt.components.vector import VectorComponent
 from hydromt.models.model import Model
 from hydromt.plugins import PLUGINS
 
