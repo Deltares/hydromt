@@ -20,7 +20,7 @@ DEFAULT_CONFIG_PATH = "config.yml"
 class ConfigComponent(ModelComponent):
     """A component to write configuration files for simulations/kernels."""
 
-    def __init__(self, model: "Model", config_fn: Optional[str] = None):
+    def __init__(self, model: "Model", *, config_fn: Optional[str] = None):
         """Initialize a ConfigComponent.
 
         Parameters
@@ -29,10 +29,7 @@ class ConfigComponent(ModelComponent):
             HydroMT model instance
         """
         self._data: Optional[Dict[str, Any]] = None
-        if config_fn is not None:
-            self._config_fn: str = config_fn
-        else:
-            self._config_fn = DEFAULT_CONFIG_PATH
+        self._config_fn: str = config_fn or DEFAULT_CONFIG_PATH
 
         super().__init__(model=model)
 
@@ -163,7 +160,7 @@ class ConfigComponent(ModelComponent):
             else:
                 current[part] = value
 
-    def get_value(self, key: str, abs_path: bool = False):
+    def get_value(self, key: str, abs_path: bool = False) -> Any:
         """Get a config value at key(s).
 
         Parameters
