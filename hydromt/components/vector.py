@@ -10,6 +10,7 @@ import numpy as np
 import xarray as xr
 from pyproj import CRS
 
+from hydromt import hydromt_step
 from hydromt.components.base import ModelComponent
 from hydromt.gis.vector import GeoDataset
 from hydromt.io.readers import read_nc
@@ -82,7 +83,7 @@ class VectorComponent(ModelComponent):
 
         # check the type of data
         if isinstance(data, np.ndarray) and "geometry" in self.data:
-            index_dim = self.data.vector.index_dim
+            index_dim = self.index_dim
             index = self.data[index_dim]
             if data.size != index.size:
                 if data.ndim == 1:
@@ -137,6 +138,7 @@ class VectorComponent(ModelComponent):
                         "does not match vector index coordinate"
                     )
 
+    @hydromt_step
     def read(
         self,
         *,
@@ -203,6 +205,7 @@ class VectorComponent(ModelComponent):
 
         self.set(data=ds)
 
+    @hydromt_step
     def write(
         self,
         *,
