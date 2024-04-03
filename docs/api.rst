@@ -282,7 +282,6 @@ Discovery
 
    PLUGINS
 
-
 .. _model_api:
 
 Model
