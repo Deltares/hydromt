@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
 from hydromt.io.path import make_config_paths_relative
-from hydromt.io.readers import read_yaml
+from hydromt.io.readers import read_toml, read_yaml
 from hydromt.io.writers import write_toml, write_yaml
 
 if TYPE_CHECKING:
@@ -94,6 +94,8 @@ class ConfigComponent(ModelComponent):
         ext = splitext(p)[-1]
         if ext in [".yml", ".yaml"]:
             self._data = read_yaml(read_path)
+        elif ext == ".toml":
+            self._data = read_toml(read_path)
         else:
             raise ValueError(f"Unknown file extention: {ext}")
 
