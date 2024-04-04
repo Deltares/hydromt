@@ -48,9 +48,6 @@ def _validate_bbox(
 DataType = Literal[
     "DataFrame", "DataSet", "GeoDataFrame", "GeoDataSet", "RasterDataset"
 ]
-GeoDataframeSource = Union[str, Path]
-GeoDatasetSource = Union[str, Path]
-RasterDatasetSource = Union[str, Path]
 Bbox = Annotated[Tuple[float, float, float, float], _validate_bbox]
 
 StrPath = Union[str, Path]
@@ -59,7 +56,7 @@ GeoDatasetSource = StrPath
 RasterDatasetSource = StrPath
 DatasetSource = StrPath
 
-Bbox = Tuple[float, float, float, float]
+# Bbox = Tuple[float, float, float, float]
 Crs = int
 TotalBounds = Tuple[Bbox, Crs]
 TimeRange = Annotated[

@@ -5,11 +5,10 @@ from logging import Logger, getLogger
 from string import Formatter
 from typing import Any, List, Optional, Set, Tuple
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
+from hydromt._typing import Bbox, Geom, NoDataStrategy, Predicate, TimeRange
 
 from .metadata_resolver import MetaDataResolver
 
@@ -76,7 +75,7 @@ class ConventionResolver(MetaDataResolver):
         timerange: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
         # TODO: align? -> from RasterDatasetAdapter
-        mask: Optional[gpd.GeoDataFrame] = None,
+        mask: Optional[Geom] = None,
         buffer: float = 0.0,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
