@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 
 DEFAULT_FN = "mesh/mesh.nc"
 
+__all__ = ["MeshComponent"]
+
 
 class MeshComponent(ModelComponent):
     """ModelComponent class for mesh components."""
