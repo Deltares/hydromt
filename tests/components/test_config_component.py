@@ -45,19 +45,37 @@ def test_rejects_non_yaml_format(tmpdir):
         _ = configread(config_file, abs_path=True)
 
 
-def test_config_always_reads(tmpdir):
+def test_config_create_always_reads(tmpdir):
     config_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w", default_config_template_filename=config_path)
-    assert model.get_component("config", ConfigComponent).data == config_data
+    comp = model.get_component("config", ConfigComponent)
+    comp.create()
+    # we use _data here to avoid initilaizing it through lazy loading
+    assert comp._data == config_data
+
+
+def test_config_always_reads_at_lazy_init(tmpdir):
+    config_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
+    config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
+    write_yaml(config_path, config_data)
+    # notice the write mode
+    model = Model(root=tmpdir, mode="w", default_config_template_filename=config_path)
+    comp = model.get_component("config", ConfigComponent)
+    assert comp.data == config_data
 
 
 def test_raises_warning_on_no_config_template_found(tmpdir, caplog):
-    model = Model(root=tmpdir, mode="w")
-    assert model.get_component("config", ConfigComponent).data == {}
-    assert "No default model config was found at " in caplog.text
+    default_template_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
+    model = Model(
+        root=tmpdir, mode="w", default_config_template_filename=default_template_path
+    )
+    comp = model.get_component("config", ConfigComponent)
+    comp.create()
+    assert comp._data == {}
+    assert "Template was provided but file did not exist" in caplog.text
 
 
 def test_make_config_abs(tmpdir, test_config_dict):

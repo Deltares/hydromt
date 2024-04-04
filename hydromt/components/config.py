@@ -237,7 +237,7 @@ class ConfigComponent(ModelComponent):
             {'a': 1, 'b': {'c': {'d': 2}}}
         """
         # Check if self.data is not empty
-        if len(self.data) == 0:
+        if self._data is not None and len(self._data) >= 0:
             raise ValueError(
                 "Model config already exists, cannot create new config."
                 "Use ``update`` method to update the existing config."
@@ -251,18 +251,23 @@ class ConfigComponent(ModelComponent):
             template = self._default_template_filename
             prefix = "default"
         else:
-            self._logger.warning("No template or default template found")
+            self._logger.warning(
+                f"No default model config was found at {template}. "
+                "It wil be initialized as empty dictionary"
+            )
+            self._data = {}
             return
 
-        template = cast(Path, template)
         if not isfile(template):
             self._logger.warning(
                 f"Template was provided but file did not exist: {template}"
+                "It wil be initialized as empty dictionary"
             )
+            self._data = {}
             return
+
+        template = Path(template)
         # Here directly overwrite config with template
-        if not template.is_file():
-            raise FileNotFoundError(f"Template file not found: {template}")
         self._logger.info(f"Creating model config from {prefix} template: {template}")
         if template.suffix in [".yml", ".yaml"]:
             self._data = read_yaml(template)
