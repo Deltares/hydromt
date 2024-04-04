@@ -177,13 +177,11 @@ ZarrDriver
    driver.zarr_driver.ZarrDriver
    driver.zarr_driver.ZarrDriver.read
 
-PyogrioDriver
-^^^^^^^^^^^^^
-
+NetcdfDriver
 .. autosummary::
    :toctree: _generated
-   driver.pyogrio_driver.PyogrioDriver
-   driver.pyogrio_driver.PyogrioDriver.read
+   driver.netcdf_driver.NetcdfDriver
+   driver.netcdf_driver.NetcdfDriver.read
 
 GeoDataFrame
 ------------
@@ -193,6 +191,13 @@ GeoDataFrame
    driver.geodataframe_driver.GeoDataFrameDriver
    driver.geodataframe_driver.GeoDataFrameDriver.read
 
+PyogrioDriver
+^^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+   driver.pyogrio_driver.PyogrioDriver
+   driver.pyogrio_driver.PyogrioDriver.read
 DataAdapter
 ===========
 
