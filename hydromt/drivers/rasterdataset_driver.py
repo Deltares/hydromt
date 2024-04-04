@@ -19,7 +19,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
     @abstractmethod
     def read(
         self,
-        uris: str,
+        uri: str,
         *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,

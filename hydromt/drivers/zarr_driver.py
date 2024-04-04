@@ -42,10 +42,11 @@ class ZarrDriver(RasterDatasetDriver):
         uris = self.metadata_resolver.resolve(
             uri,
             bbox=bbox,
-            geom=mask,
+            mask=mask,
             buffer=buffer,
             predicate=predicate,
             variables=variables,
+            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
             **kwargs,
         )
