@@ -36,6 +36,11 @@ class TablesComponent(ModelComponent):
         ----------
         model: Model
             HydroMT model instance
+        default_filename: str
+            The default place that should be used for reading and writing unless the user
+            overrides it. If a relative is given it will be used as being relative to the
+            model root. By default `tables/{name}.csv` for this component, and can be either
+            relative or absolute.
         """
         self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
         self._filename = default_filename
@@ -59,7 +64,7 @@ class TablesComponent(ModelComponent):
 
     @hydromt_step
     def write(self, filename: Optional[str] = None, **kwargs) -> None:
-        """Write tables at <root>/tables."""
+        """Write tables at provided or default filepath if none is provided."""
         self._root._assert_write_mode()
         fn = filename or self._filename
         if len(self.data) > 0:
@@ -75,7 +80,7 @@ class TablesComponent(ModelComponent):
 
     @hydromt_step
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
-        """Read table files at <root>/tables and parse to dict of dataframes."""
+        """Read tables at provided or default filepath if none is provided."""
         self._root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self._model.logger.info("Reading model table files.")
