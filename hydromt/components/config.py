@@ -199,9 +199,6 @@ class ConfigComponent(ModelComponent):
         for i, part in enumerate(parts):
             if i < num_parts - 1:
                 current = current.get(part, {})
-                if not isinstance(current, dict):
-                    current = dict()
-                    break
             else:
                 value = current.get(part, fallback)
 
@@ -237,7 +234,7 @@ class ConfigComponent(ModelComponent):
             {'a': 1, 'b': {'c': {'d': 2}}}
         """
         # Check if self.data is not empty
-        if self._data is not None and len(self._data) >= 0:
+        if self._data is not None and len(self._data) > 0:
             raise ValueError(
                 "Model config already exists, cannot create new config."
                 "Use ``update`` method to update the existing config."
