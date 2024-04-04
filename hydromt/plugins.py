@@ -85,14 +85,7 @@ class Plugins:
             # core itself exposes plugins so if we can't find anything, something is wrong
             raise RuntimeError("Could not load any driver plugins")
 
-        drivers: dict[str, Type["BaseDriver"]] = cast(
-            Dict[str, Type["BaseDriver"]],
-            {name: value["type"] for name, value in self._driver_plugins.items()},
-        )
-        # Do not return ABCs, such as BaseDriver, or RasterDatasetDriver
-        return {
-            key: value for key, value in drivers.items() if ABC not in value.__bases__
-        }
+        return {name: value["type"] for name, value in self._driver_plugins.items() if not inspect.isabstract(value["type"])}
 
     @property
     def model_plugins(self) -> dict[str, type["Model"]]:
