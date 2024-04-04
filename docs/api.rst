@@ -331,7 +331,6 @@ Model default components
 .. autosummary::
    :toctree: _generated
 
-   Model.config
    Model.maps
    Model.geoms
    Model.forcing
@@ -343,11 +342,6 @@ General methods
 
 .. autosummary::
    :toctree: _generated
-
-   Model.get_config
-   Model.set_config
-   Model.read_config
-   Model.write_config
 
    Model.set_maps
    Model.read_maps
@@ -376,7 +370,6 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   Model.setup_config
    Model.setup_maps_from_rasterdataset
    Model.setup_maps_from_raster_reclass
 
@@ -582,7 +575,6 @@ General methods
    :toctree: _generated
 
    ConfigComponent.set
-   ConfigComponent.set_value
    ConfigComponent.write
    ConfigComponent.read
    ConfigComponent.get_value
@@ -596,6 +588,7 @@ Setup methods
    :toctree: _generated
 
    ConfigComponent.create
+   ConfigComponent.update
 
 
 .. _vector_model_api:

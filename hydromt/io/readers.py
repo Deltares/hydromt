@@ -43,6 +43,8 @@ __all__ = [
     "open_geodataset",
     "open_vector_from_table",
     "open_timeseries_from_table",
+    "read_yaml",
+    "read_toml",
 ]
 
 
@@ -922,6 +924,7 @@ def read_nc(
 
 
 def read_yaml(path: StrPath) -> Dict[str, Any]:
+    """Read yaml file and return as dict."""
     with open(path, "rb") as stream:
         yml = load_yaml(stream)
 
@@ -933,6 +936,7 @@ def parse_yaml(text: str) -> Dict[str, Any]:
 
 
 def read_toml(path: StrPath) -> Dict[str, Any]:
+    """Read toml file and return as dict."""
     with open(path, "rb") as f:
         data = load_toml(f)
 

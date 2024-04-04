@@ -1,9 +1,9 @@
-"""A component to write configuration files for simulations/kernels."""
+"""A component to write configuration files for model simulations/kernels."""
 
 from os import makedirs
 from os.path import abspath, dirname, isabs, isfile, join, splitext
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
@@ -18,39 +18,59 @@ DEFAULT_CONFIG_PATH = "config.yml"
 
 
 class ConfigComponent(ModelComponent):
-    """A component to write configuration files for simulations/kernels."""
+    """
+    A component to write configuration files for model simulations/settings.
 
-    def __init__(self, model: "Model", *, config_fn: Optional[str] = None):
+    ``ConfigComponent`` data is stored as a dictionary and can be written to a file
+    in yaml or toml format. The component can be used to store model settings
+    and parameters that are used in the model simulations or in the model
+    settings.
+    """
+
+    def __init__(
+        self,
+        model: "Model",
+        *,
+        filename: Optional[str] = None,
+        default_template_filename: Optional[Path] = None,
+    ):
         """Initialize a ConfigComponent.
 
         Parameters
         ----------
         model: Model
             HydroMT model instance
-        config_fn: Optional[str]
-            a path relative to the root where the configurations will
-            be written if user does not provide a path themselves.
+        filename: Optional[str]
+            A path relative to the root where the configuration file will
+            be read and written if user does not provide a path themselves.
+            By default 'config.yml'
+        default_template_filename: Optional[Path]
+            A path to a template file that will be used as default in the ``create``
+            method to initialize the configuration file if the user does not provide
+            its own template file. This can be used by model plugins to provide a
+            default configuration template. By default None.
         """
         self._data: Optional[Dict[str, Any]] = None
-        self._config_fn: str = config_fn or DEFAULT_CONFIG_PATH
+        self._filename: str = filename or DEFAULT_CONFIG_PATH
+        self._default_template_filename: Optional[Path] = default_template_filename
 
         super().__init__(model=model)
 
     @property
     def data(self) -> Dict[str, Any]:
-        """Kernel config values."""
+        """Model config values."""
         if self._data is None:
             self._initialize()
         if self._data is None:
-            raise RuntimeError("Could not load data for kernel config component")
+            raise RuntimeError("Could not load data for model config component")
         else:
             return self._data
 
     def _initialize(self, skip_read=False) -> None:
-        """Initialize the kernel configs."""
+        """Initialize the model config."""
         if self._data is None:
             self._data = dict()
-            if not skip_read:
+            if self._root.is_reading_mode() and not skip_read:
                 self.read()
 
     @hydromt_step
@@ -58,13 +78,13 @@ class ConfigComponent(ModelComponent):
         self,
         path: Optional[str] = None,
     ) -> None:
-        """Write kernel config at <root>/{path}."""
+        """Write model config at <root>/{path}."""
         self._root._assert_write_mode()
         if self.data:
-            p = path or self._config_fn
+            p = path or self._filename
 
             write_path = join(self._root.path, p)
-            self._model.logger.info(f"Writing kernel config to {write_path}.")
+            self._logger.info(f"Writing model config to {write_path}.")
             makedirs(dirname(write_path), exist_ok=True)
 
             write_data = make_config_paths_relative(self.data, self._root.path)
@@ -74,58 +94,38 @@ class ConfigComponent(ModelComponent):
             elif ext == ".toml":
                 write_toml(write_path, write_data)
             else:
-                raise ValueError(f"Unknown file extention: {ext}")
+                raise ValueError(f"Unknown file extension: {ext}")
 
         else:
-            self._model.logger.debug("No kernel config found, skip writing.")
+            self._logger.debug("Model config has no data, skip writing.")
 
     @hydromt_step
     def read(self, path: Optional[str] = None) -> None:
-        """Read kernel config at <root>/{path}."""
+        """Read model config at <root>/{path}."""
+        self._root._assert_read_mode()
         self._initialize(skip_read=True)
         # if path is abs, join will just return path
-        p = path or self._config_fn
+        p = path or self._filename
         read_path = join(self._root.path, p)
         if isfile(read_path):
-            self._model.logger.info(f"Reading kernel config file from {read_path}.")
+            self._logger.info(f"Reading model config file from {read_path}.")
         else:
-            self._model.logger.warning(
-                f"No default kernel config was found at {read_path}. It wil be initialized as empty dictionary"
+            self._logger.warning(
+                f"No default model config was found at {read_path}. "
+                "It wil be initialized as empty dictionary"
             )
             return
 
         ext = splitext(p)[-1]
+        # Always overwrite config when reading
         if ext in [".yml", ".yaml"]:
             self._data = read_yaml(read_path)
         elif ext == ".toml":
             self._data = read_toml(read_path)
         else:
-            raise ValueError(f"Unknown file extention: {ext}")
+            raise ValueError(f"Unknown file extension: {ext}")
 
-    @hydromt_step
-    def set(self, data: Dict[str, Any]):
-        """Set the config dictionary at key(s) with values.
-
-        Parameters
-        ----------
-        data: Dict[str,Any]
-            A dictionary with the values to be set. keys can be dotted like in
-            :py:meth:`~hydromt.components.config.ConfigComponent.set_value`
-
-        Examples
-        --------
-        >> self.set({'a': 1, 'b': {'c': {'d': 2}}})
-        >> self.data
-            {'a': 1, 'b': {'c': {'d': 2}}}
-        >> self.set({'a.d.f.g': 1, 'b': {'c': {'d': 2}}})
-        >> self.data
-            {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
-        """
-        for k, v in data.items():
-            self.update(k, v)
-
-    @hydromt_step
-    def update(self, key: str, value: Any):
+    def set(self, key: str, value: Any):
         """Update the config dictionary at key(s) with values.
 
         Parameters
@@ -150,26 +150,27 @@ class ConfigComponent(ModelComponent):
         self._initialize()
         parts = key.split(".")
         num_parts = len(parts)
-        current = self.data
+        current = self._data
         for i, part in enumerate(parts):
-            if part not in current:
+            if part not in current or not isinstance(current[part], dict):
                 current[part] = {}
             if i < num_parts - 1:
                 current = current[part]
             else:
                 current[part] = value
 
-    def get_value(self, key: str, abs_path: bool = False) -> Any:
+    def get_value(self, key: str, fallback=None, abs_path: bool = False) -> Any:
         """Get a config value at key(s).
 
         Parameters
         ----------
         args : tuple or string
-            keys can given by multiple args: ('key1', 'key2')
-            or a string with '.' indicating a new level: ('key1.key2')
+            key can given as a string with '.' indicating a new level: ('key1.key2')
+        fallback: any, optional
+            Fallback value if key not found in config, by default None.
         abs_path: bool, optional
             If True return the absolute path relative to the model root,
-            by deafult False.
+            by default False.
             NOTE: this assumes the config is located in model root!
 
         Returns
@@ -179,28 +180,29 @@ class ConfigComponent(ModelComponent):
 
         Examples
         --------
-        >> self.set({'a': 1, 'b': {'c': {'d': 2}}})
+        >> self.data = {'a': 1, 'b': {'c': {'d': 2}}}
 
-        >> get_config_value('a')
+        >> get_value('a')
         >> 1
 
-        >> get_config_value('b.c.d')
+        >> get_value('b.c.d')
         >> 2
 
-        >> get_config_value('b.c')
+        >> get_value('b.c')
         >> {'d': 2}
 
         """
         parts = key.split(".")
         num_parts = len(parts)
-        current = self.data
-        value = None
+        current = self.data  # reads config at first call
         for i, part in enumerate(parts):
             if i < num_parts - 1:
-                current = current[part]
+                current = current.get(part, {})
+                if not isinstance(current, dict):
+                    current = dict()
+                    break
             else:
-                value = current[part]
-                break
+                value = current.get(part, fallback)
 
         if abs_path and isinstance(value, (str, Path)):
             value = Path(value)
@@ -208,3 +210,80 @@ class ConfigComponent(ModelComponent):
                 value = Path(abspath(join(self._root.path, value)))
 
         return value
+
+    @hydromt_step
+    def create(
+        self,
+        template: Optional[Union[str, Path]] = None,
+    ):
+        """Create a new config file based on a template file.
+
+        It the template is not provided, the default template will be used if available.
+
+        Parameters
+        ----------
+        template : str or Path, optional
+            Path to a template config file, by default None
+
+        Examples
+        --------
+        >> self.create()
+        >> self.data
+            {}
+
+        >> self.create(template='path/to/template.yml')
+        >> self.data
+            {'a': 1, 'b': {'c': {'d': 2}}}
+        """
+        # Check if self.data is not empty
+        if len(self.data) == 0:
+            raise ValueError(
+                "Model config already exists, cannot create new config."
+                "Use ``update`` method to update the existing config."
+            )
+
+        if template is not None:
+            if isinstance(template, str):
+                template = Path(template)
+            prefix = "user-defined"
+        elif self._default_template_filename is not None:
+            template = self._default_template_filename
+            prefix = "default"
+        else:
+            self._logger.warning("No template provided and no default template found.")
+            return
+
+        # Here directly overwrite config with template
+        if not template.is_file():
+            raise FileNotFoundError(f"Template file not found: {template}")
+        self._logger.info(f"Creating model config from {prefix} template: {template}")
+        if template.suffix in [".yml", ".yaml"]:
+            self._data = read_yaml(template)
+        elif template.suffix == ".toml":
+            self._data = read_toml(template)
+        else:
+            raise ValueError(f"Unknown file extension: {template.suffix}")
+
+    @hydromt_step
+    def update(self, data: Dict[str, Any]):
+        """Set the config dictionary at key(s) with values.
+
+        Parameters
+        ----------
+        data: Dict[str,Any]
+            A dictionary with the values to be set. keys can be dotted like in
+            :py:meth:`~hydromt.components.config.ConfigComponent.set_value`
+
+        Examples
+        --------
+        >> self.update({'a': 1, 'b': {'c': {'d': 2}}})
+        >> self.data
+            {'a': 1, 'b': {'c': {'d': 2}}}
+        >> self.update({'a.d.f.g': 1, 'b': {'c': {'d': 2}}})
+        >> self.data
+            {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
+        """
+        if len(data) > 0:
+            self.logger.debug("Setting model config options.")
+        for k, v in data.items():
+            self.set(k, v)
