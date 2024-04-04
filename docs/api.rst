@@ -177,13 +177,11 @@ ZarrDriver
    driver.zarr_driver.ZarrDriver
    driver.zarr_driver.ZarrDriver.read
 
-PyogrioDriver
-^^^^^^^^^^^^^
-
+NetcdfDriver
 .. autosummary::
    :toctree: _generated
-   driver.pyogrio_driver.PyogrioDriver
-   driver.pyogrio_driver.PyogrioDriver.read
+   driver.netcdf_driver.NetcdfDriver
+   driver.netcdf_driver.NetcdfDriver.read
 
 GeoDataFrame
 ------------
@@ -193,6 +191,13 @@ GeoDataFrame
    driver.geodataframe_driver.GeoDataFrameDriver
    driver.geodataframe_driver.GeoDataFrameDriver.read
 
+PyogrioDriver
+^^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+   driver.pyogrio_driver.PyogrioDriver
+   driver.pyogrio_driver.PyogrioDriver.read
 DataAdapter
 ===========
 
@@ -514,6 +519,38 @@ Setup methods
    GridComponent.add_data_from_rasterdataset
    GridComponent.add_data_from_raster_reclass
    GridComponent.add_data_from_geodataframe
+
+TablesComponent
+==============
+
+.. autosummary::
+   :toctree: _generated
+
+    TablesComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   TablesComponent._model
+   TablesComponent._data_catalog
+   TablesComponent._logger
+   TablesComponent._root
+   TablesComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   TablesComponent.set
+   TablesComponent.write
+   TablesComponent.read
 
 
 MeshComponent

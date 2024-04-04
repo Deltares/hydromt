@@ -4,10 +4,12 @@ from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.mesh import MeshComponent
 from hydromt.components.region import ModelRegionComponent
+from hydromt.components.tables import TablesComponent
 
 __all__ = [
     "ModelRegionComponent",
     "ModelComponent",
     "GridComponent",
+    "TablesComponent",
     "MeshComponent",
 ]
