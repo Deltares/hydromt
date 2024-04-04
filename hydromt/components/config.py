@@ -16,9 +16,6 @@ if TYPE_CHECKING:
 
 
 _DEFAULT_CONFIG_FILENAME = "config.yaml"
-# TODO: document also why we did this
-# update in dev (plugin) guide
-# default template file is for config only
 
 
 class ConfigComponent(ModelComponent):
@@ -108,7 +105,7 @@ class ConfigComponent(ModelComponent):
         """Read model config at <root>/{path}."""
         self._initialize(skip_read=True)
         # if path is abs, join will just return path
-        p = path or self._filename or self._default_template_filename
+        p = path or self._default_template_filename or self._filename
         read_path = join(self._root.path, p)
         if isfile(read_path):
             self._logger.info(f"Reading model config file from {read_path}.")
