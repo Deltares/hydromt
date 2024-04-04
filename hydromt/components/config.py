@@ -3,7 +3,7 @@
 from os import makedirs
 from os.path import abspath, dirname, isabs, isfile, join, splitext
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
 
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
@@ -14,7 +14,11 @@ from hydromt.io.writers import write_toml, write_yaml
 if TYPE_CHECKING:
     from hydromt.models import Model
 
-DEFAULT_CONFIG_PATH = "config.yml"
+
+_DEFAULT_CONFIG_FILENAME = "config.yaml"
+# TODO: document also why we did this
+# update in dev (plugin) guide
+# default template file is for config only
 
 
 class ConfigComponent(ModelComponent):
@@ -31,8 +35,8 @@ class ConfigComponent(ModelComponent):
         self,
         model: "Model",
         *,
-        filename: Optional[str] = None,
-        default_template_filename: Optional[Path] = None,
+        filename: str = _DEFAULT_CONFIG_FILENAME,
+        default_template_filename: Optional[str] = None,
     ):
         """Initialize a ConfigComponent.
 
@@ -47,12 +51,12 @@ class ConfigComponent(ModelComponent):
         default_template_filename: Optional[Path]
             A path to a template file that will be used as default in the ``create``
             method to initialize the configuration file if the user does not provide
-            its own template file. This can be used by model plugins to provide a
+            their own template file. This can be used by model plugins to provide a
             default configuration template. By default None.
         """
         self._data: Optional[Dict[str, Any]] = None
-        self._filename: str = filename or DEFAULT_CONFIG_PATH
-        self._default_template_filename: Optional[Path] = default_template_filename
+        self._filename: str = filename
+        self._default_template_filename: Optional[str] = default_template_filename
 
         super().__init__(model=model)
 
@@ -70,7 +74,7 @@ class ConfigComponent(ModelComponent):
         """Initialize the model config."""
         if self._data is None:
             self._data = dict()
-            if self._root.is_reading_mode() and not skip_read:
+            if not skip_read:
                 self.read()
 
     @hydromt_step
@@ -102,10 +106,9 @@ class ConfigComponent(ModelComponent):
     @hydromt_step
     def read(self, path: Optional[str] = None) -> None:
         """Read model config at <root>/{path}."""
-        self._root._assert_read_mode()
         self._initialize(skip_read=True)
         # if path is abs, join will just return path
-        p = path or self._filename
+        p = path or self._filename or self._default_template_filename
         read_path = join(self._root.path, p)
         if isfile(read_path):
             self._logger.info(f"Reading model config file from {read_path}.")
@@ -150,7 +153,7 @@ class ConfigComponent(ModelComponent):
         self._initialize()
         parts = key.split(".")
         num_parts = len(parts)
-        current = self._data
+        current = cast(Dict[str, Any], self._data)
         for i, part in enumerate(parts):
             if part not in current or not isinstance(current[part], dict):
                 current[part] = {}
@@ -195,6 +198,7 @@ class ConfigComponent(ModelComponent):
         parts = key.split(".")
         num_parts = len(parts)
         current = self.data  # reads config at first call
+        value = fallback
         for i, part in enumerate(parts):
             if i < num_parts - 1:
                 current = current.get(part, {})
@@ -250,9 +254,15 @@ class ConfigComponent(ModelComponent):
             template = self._default_template_filename
             prefix = "default"
         else:
-            self._logger.warning("No template provided and no default template found.")
+            self._logger.warning("No template or default template found")
             return
 
+        template = cast(Path, template)
+        if not isfile(template):
+            self._logger.warning(
+                f"Template was provided but file did not exist: {template}"
+            )
+            return
         # Here directly overwrite config with template
         if not template.is_file():
             raise FileNotFoundError(f"Template file not found: {template}")
@@ -284,6 +294,6 @@ class ConfigComponent(ModelComponent):
             {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
         """
         if len(data) > 0:
-            self.logger.debug("Setting model config options.")
+            self._logger.debug("Setting model config options.")
         for k, v in data.items():
             self.set(k, v)
