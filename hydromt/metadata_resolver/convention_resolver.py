@@ -2,8 +2,9 @@
 
 from itertools import product
 from logging import Logger, getLogger
+from re import compile as compile_regex
 from string import Formatter
-from typing import Any, List, Optional, Set, Tuple
+from typing import Any, List, Optional, Pattern, Set, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -26,16 +27,19 @@ class ConventionResolver(MetaDataResolver):
         uri: str,
         time_tuple: Optional[Tuple[str, str]] = None,
         variables: Optional[Set[str]] = None,
-    ) -> Tuple[str, List[str]]:
+    ) -> Tuple[str, List[str], Pattern[str]]:
         """Expand known placeholders in the URI."""
         keys: list[str] = []
+        pattern: str = ""
 
         if "{" in uri:
             uri_expanded = ""
             for literal_text, key, fmt, _ in Formatter().parse(uri):
                 uri_expanded += literal_text
+                pattern += literal_text
                 if key is None:
                     continue
+                pattern += "(.*)"
                 key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
                 # remove unused fields
                 if key in ["year", "month"] and time_tuple is None:
@@ -50,7 +54,8 @@ class ConventionResolver(MetaDataResolver):
                     keys.append(key)
             uri = uri_expanded
 
-        return (uri, keys)
+        regex = compile_regex(pattern)
+        return (uri, keys, regex)
 
     def _get_dates(
         self,
@@ -86,7 +91,7 @@ class ConventionResolver(MetaDataResolver):
         **kwargs,
     ) -> list[str]:
         """Resolve the placeholders in the URI."""
-        uri_expanded, keys = self._expand_uri_placeholders(uri, timerange, variables)
+        uri_expanded, keys, _ = self._expand_uri_placeholders(uri, timerange, variables)
         if timerange:
             dates = self._get_dates(keys, timerange)
         else:
@@ -95,6 +100,7 @@ class ConventionResolver(MetaDataResolver):
             variables = self._get_variables(variables)
         else:
             variables = [""]
+
         fmts: list[dict[str, Any]] = list(
             map(
                 lambda t: {

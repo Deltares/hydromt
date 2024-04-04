@@ -15,22 +15,20 @@ from typing import (
 import geopandas as gpd
 from geopandas import GeoDataFrame, GeoSeries
 
-from hydromt._utils.capture_glob import capture_glob
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
-from hydromt.utils import DEFAULT_GEOM_FILENAME
+from hydromt.metadata_resolver import ConventionResolver
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
+
+DEFAULT_GEOMS_FILENAME = "geoms/{name}.geojson"
 
 
 class GeomsComponent(ModelComponent):
     """A component to manage geo-spatial geometries."""
 
-    def __init__(
-        self,
-        model: "Model",
-    ):
+    def __init__(self, model: "Model", default_filename: str = DEFAULT_GEOMS_FILENAME):
         """Initialize a GeomComponent.
 
         Parameters
@@ -39,6 +37,7 @@ class GeomsComponent(ModelComponent):
             HydroMT model instance
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
+        self._filename = default_filename
         super().__init__(model=model)
 
     @property
@@ -85,7 +84,7 @@ class GeomsComponent(ModelComponent):
         self._data[name] = geom
 
     @hydromt_step
-    def read(self, geom_fn: str = DEFAULT_GEOM_FILENAME, **kwargs) -> None:
+    def read(self, filename: Optional[str] = None, **kwargs) -> None:
         r"""Read model geometries files at <root>/<filename>.
 
         key-word arguments are passed to :py:func:`geopandas.read_file`
@@ -101,8 +100,9 @@ class GeomsComponent(ModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize(skip_read=True)
-        read_path = join(self._root.path, geom_fn)
-        fn_glob, regex = capture_glob(read_path)
+        read_path = join(self._root.path, filename or self._filename)
+        # TODO: figure out if _expand_uri_placeholders should remain private
+        fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(read_path)
         fns = glob(fn_glob)
         for fn in fns:
             name = ".".join(regex.match(fn).groups())  # type: ignore
@@ -114,8 +114,7 @@ class GeomsComponent(ModelComponent):
     @hydromt_step
     def write(
         self,
-        geom_fn: str = DEFAULT_GEOM_FILENAME,
-        paths: Optional[Dict[str, Path]] = None,
+        filename: Optional[str] = None,
         to_wgs84: bool = False,
         **kwargs,
     ) -> None:
@@ -147,15 +146,12 @@ class GeomsComponent(ModelComponent):
                 self._logger.warning(f"{name} is empty. Skipping...")
                 continue
 
-            if paths is not None and name in paths:
-                n = paths[name]
-            else:
-                n = name
+            geom_filename = filename or self._filename
 
             write_path = Path(
                 join(
                     self._root.path,
-                    geom_fn.format(name=n),
+                    geom_filename.format(name=name),
                 )
             )
 
@@ -166,6 +162,8 @@ class GeomsComponent(ModelComponent):
                 os.makedirs(write_folder, exist_ok=True)
 
             if to_wgs84:
-                gdf.to_crs(epsg=4326, inplace=True)
+                # no idea why pyright complains about the next line
+                # so just ignoring it
+                gdf.to_crs(epsg=4326, inplace=True)  # type: ignore
 
             gdf.to_file(write_path, **kwargs)

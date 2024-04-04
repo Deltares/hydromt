@@ -14,12 +14,13 @@ import pandas as pd
 
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
-from hydromt.utils.constants import DEFAULT_TABLE_FILENAME
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
 
 __all__ = ["TablesComponent"]
+
+DEFAULT_TABLE_FILENAME = "tables/{name}.csv"
 
 
 class TablesComponent(ModelComponent):
