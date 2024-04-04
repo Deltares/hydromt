@@ -1,5 +1,6 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
 
+import inspect
 from abc import ABC
 from typing import TYPE_CHECKING, Dict, Optional, Type, TypedDict, cast
 
@@ -46,7 +47,7 @@ def _format_metadata(metadata: Dict[str, str]) -> str:
 class Plugins:
     """The model catalogue provides access to plugins."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initiate the catalog object."""
         self._component_plugins: Optional[Dict[str, Plugin]] = None
         self._driver_plugins: Optional[Dict[str, Plugin]] = None
@@ -85,7 +86,11 @@ class Plugins:
             # core itself exposes plugins so if we can't find anything, something is wrong
             raise RuntimeError("Could not load any driver plugins")
 
-        return {name: value["type"] for name, value in self._driver_plugins.items() if not inspect.isabstract(value["type"])}
+        return {
+            name: value["type"]
+            for name, value in self._driver_plugins.items()
+            if not inspect.isabstract(value["type"])
+        }
 
     @property
     def model_plugins(self) -> dict[str, type["Model"]]:
