@@ -8,6 +8,7 @@ from typing import Any, List, Optional, Set, Tuple
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from fsspec import AbstractFileSystem
 
 from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
 
@@ -72,6 +73,7 @@ class ConventionResolver(MetaDataResolver):
     def resolve(
         self,
         uri: str,
+        fs: AbstractFileSystem,
         *,
         timerange: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,

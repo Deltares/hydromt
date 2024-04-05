@@ -43,6 +43,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         """
         uris = self.metadata_resolver.resolve(
             uri,
+            self.filesystem,
             bbox=bbox,
             mask=mask,
             buffer=buffer,
