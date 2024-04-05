@@ -1,6 +1,7 @@
 """Implementations of the core ModelComponents."""
 
 from hydromt.components.base import ModelComponent
+from hydromt.components.config import ConfigComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.mesh import MeshComponent
 from hydromt.components.region import ModelRegionComponent
@@ -12,4 +13,5 @@ __all__ = [
     "GridComponent",
     "TablesComponent",
     "MeshComponent",
+    "ConfigComponent",
 ]

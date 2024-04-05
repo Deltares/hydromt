@@ -5,6 +5,7 @@ from importlib_metadata import EntryPoint, EntryPoints, entry_points
 from pytest_mock import MockerFixture
 
 from hydromt.components.base import ModelComponent
+from hydromt.components.config import ConfigComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.mesh import MeshComponent
 from hydromt.components.region import ModelRegionComponent
@@ -19,6 +20,7 @@ def test_core_component_plugins():
         "ModelRegionComponent": ModelRegionComponent,
         "GridComponent": GridComponent,
         "ModelComponent": ModelComponent,
+        "ConfigComponent": ConfigComponent,
         "TablesComponent": TablesComponent,
         "MeshComponent": MeshComponent,
     }

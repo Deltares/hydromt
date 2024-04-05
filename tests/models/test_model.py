@@ -319,21 +319,6 @@ def test_model_set_geoms(tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_config(model, tmpdir):
-    # config
-    model.root.set(str(tmpdir))
-    model.set_config("global.name", "test")
-    assert "name" in model._config["global"]
-    assert model.get_config("global.name") == "test"
-    fn = str(tmpdir.join("test.file"))
-    with open(fn, "w") as f:
-        f.write("")
-    model.set_config("global.file", "test.file")
-    assert str(model.get_config("global.file")) == "test.file"
-    assert str(model.get_config("global.file", abs_path=True)) == fn
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_maps_setup(tmpdir):
     dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = Model(data_libs=["artifact_data", dc_param_fn], mode="w")

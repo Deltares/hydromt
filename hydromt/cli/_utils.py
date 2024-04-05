@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 import click
-import yaml
 
 from hydromt._typing.error import DeprecatedError
 from hydromt.io import configread
@@ -105,12 +104,3 @@ def parse_config(
             for option, value in opt_cli[section].items():
                 opt[section].update({option: value})
     return opt
-
-
-def parse_export_config_yaml(ctx, param, value) -> Dict[str, Any]:
-    if value:
-        with open(value, "r") as stream:
-            yml = yaml.load(stream, Loader=yaml.FullLoader)
-        return yml
-    else:
-        return {}

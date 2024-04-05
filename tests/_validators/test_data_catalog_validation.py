@@ -1,6 +1,5 @@
 """Testing of the Pydantic models for validation of Data catalogs."""
 
-
 from pathlib import Path
 
 import pytest
@@ -12,7 +11,7 @@ from hydromt._validators.data_catalog import (
     DataCatalogMetaData,
     DataCatalogValidator,
 )
-from hydromt.data_catalog import _yml_from_uri_or_path
+from hydromt.io.readers import _yml_from_uri_or_path
 
 
 @pytest.mark.parametrize(

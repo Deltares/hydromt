@@ -1,4 +1,5 @@
 """DataCatalog module for HydroMT."""
+
 from __future__ import annotations
 
 import copy
@@ -24,7 +25,6 @@ from typing import (
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-import requests
 import xarray as xr
 import yaml
 from packaging.specifiers import SpecifierSet
@@ -45,9 +45,10 @@ from hydromt.data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
+from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile
 from hydromt.data_source import DataSource, create_source
 from hydromt.data_source.data_source import get_nested_var, set_nested_var
+from hydromt.io.readers import _yml_from_uri_or_path
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,6 @@ __all__ = [
 
 
 class DataCatalog(object):
-
     """Base class for the data catalog object."""
 
     # root URL with data_catalog file
@@ -1760,18 +1760,6 @@ def _parse_data_source_dict(
     # source["driver_kwargs"] = driver_kwargs
 
     return create_source(source)
-
-
-def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
-    if _uri_validator(str(uri_or_path)):
-        with requests.get(uri_or_path, stream=True) as r:
-            if r.status_code != 200:
-                raise IOError(f"URL {r.content}: {uri_or_path}")
-            yml = yaml.load(r.text, Loader=yaml.FullLoader)
-    else:
-        with open(uri_or_path, "r") as stream:
-            yml = yaml.load(stream, Loader=yaml.FullLoader)
-    return yml
 
 
 def _process_dict(d: Dict, logger=logger) -> Dict:
