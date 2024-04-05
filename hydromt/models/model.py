@@ -37,13 +37,12 @@ from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import (
     ModelComponent,
-    ModelRegionComponent,
 )
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
-from hydromt.utils.deep_merge import deep_merge
+from hydromt.workflows.region import HasRegion
 
 __all__ = ["Model"]
 
@@ -74,18 +73,19 @@ class Model(object, metaclass=ABCMeta):
         "geoms": Dict[str, gpd.GeoDataFrame],
         "maps": XArrayDict,
         "forcing": XArrayDict,
-        "region": ModelRegionComponent,
         "results": XArrayDict,
         "states": XArrayDict,
     }
 
     def __init__(
         self,
+        *,
         components: Optional[dict[str, dict[str, Any]]] = None,
         root: Optional[str] = None,
         mode: str = "w",
         data_libs: Optional[Union[List, str]] = None,
         logger=_logger,
+        region_component: Optional[str] = None,
         **artifact_keys,
     ):
         r"""Initialize a model.
@@ -105,10 +105,6 @@ class Model(object, metaclass=ABCMeta):
         """
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
-        components = deep_merge(
-            {"region": {"type": "ModelRegionComponent"}}, components
-        )
-
         data_libs = data_libs or []
 
         self.logger = logger
@@ -140,6 +136,36 @@ class Model(object, metaclass=ABCMeta):
             f"Initializing {self._NAME} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
         )
 
+        self._region_component_name = self._determine_region_component(region_component)
+
+    def _determine_region_component(self, region_component: Optional[str]) -> str:
+        if region_component is not None:
+            if region_component not in self._components:
+                self.logger.warn(
+                    f"Component {region_component} not found in components."
+                    "You can add it afterwards with add_component."
+                )
+            if not isinstance(self._components.get(region_component, None), HasRegion):
+                raise ValueError(
+                    f"Component {region_component} is not a region component."
+                )
+            return region_component
+        else:
+            has_region_components = [
+                (name, c)
+                for name, c in self._components.items()
+                if isinstance(c, HasRegion)
+            ]
+            if len(has_region_components) > 1:
+                raise ValueError(
+                    "Multiple region components found in components. "
+                    "Specify region_component."
+                )
+            if len(has_region_components) == 0:
+                self.logger.warn("No region component found in components.")
+                return ""
+            return has_region_components[0][0]
+
     def _add_components(self, components: dict[str, dict[str, Any]]) -> None:
         """Add all components that are specified in the config file."""
         for name, options in components.items():
@@ -164,9 +190,9 @@ class Model(object, metaclass=ABCMeta):
         return self._components[name]
 
     @property
-    def region(self) -> ModelRegionComponent:
+    def region(self) -> HasRegion:
         """Return the model region component."""
-        return self.get_component("region", ModelRegionComponent)
+        return cast(HasRegion, self._components[self._region_component_name])
 
     @_classproperty
     def api(cls) -> Dict:
@@ -224,7 +250,6 @@ class Model(object, metaclass=ABCMeta):
         """
         steps = steps or []
         validate_steps(self, steps)
-        self._move_region_create_to_front(steps)
 
         for step_dict in steps:
             step, kwargs = next(iter(step_dict.items()))
@@ -297,9 +322,6 @@ class Model(object, metaclass=ABCMeta):
         steps = steps or []
         validate_steps(self, steps)
 
-        # check if region.create is in the steps, and remove it.
-        self._remove_region_create(steps)
-
         # read current model
         if not self.root.is_writing_mode():
             if model_out is None:
@@ -311,7 +333,7 @@ class Model(object, metaclass=ABCMeta):
             self.root.set(model_out, mode=mode)
 
         # check if model has a region
-        if self.region.data is None:
+        if self.region.region is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
         # loop over methods from config file
@@ -371,28 +393,6 @@ class Model(object, metaclass=ABCMeta):
         return any(
             next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps
         )
-
-    @staticmethod
-    def _move_region_create_to_front(steps: list[dict[str, dict[str, Any]]]) -> None:
-        try:
-            region_create = next(
-                step_dict for step_dict in steps if "region.create" in step_dict
-            )
-            steps.remove(region_create)
-            steps.insert(0, region_create)
-        except StopIteration:
-            pass
-
-    def _remove_region_create(self, steps: list[dict[str, dict[str, Any]]]) -> None:
-        try:
-            steps.remove(
-                next(step_dict for step_dict in steps if "region.create" in step_dict)
-            )
-            self.logger.warning(
-                "region.create can only be called when building a model."
-            )
-        except StopIteration:
-            pass
 
     @hydromt_step
     def write_data_catalog(

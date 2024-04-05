@@ -8,7 +8,6 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from hydromt.components import ModelRegionComponent
 from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models.model import Model
@@ -23,7 +22,6 @@ def mock_model(tmpdir):
     model = create_autospec(Model)
     model.root = ModelRoot(path=tmpdir)
     model.data_catalog = DataCatalog()
-    model.region = ModelRegionComponent(model=model)
     model.logger = logger
     return model
 

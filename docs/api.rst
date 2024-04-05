@@ -422,46 +422,6 @@ Attributes
    ModelComponent.logger
    ModelComponent.model_root
 
-ModelRegionComponent
-====================
-
-.. autosummary::
-   :toctree: _generated
-
-   ModelRegionComponent
-
-Attributes
-----------
-
-.. autosummary::
-   :toctree: _generated
-
-   ModelRegionComponent.data
-   ModelRegionComponent.model
-   ModelRegionComponent.crs
-   ModelRegionComponent.bounds
-   ModelRegionComponent.data_catalog
-   ModelRegionComponent.logger
-   ModelRegionComponent.model_root
-
-General Methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   ModelRegionComponent.set
-   ModelRegionComponent.read
-   ModelRegionComponent.write
-
-Data Methods
-------------
-
-.. autosummary::
-   :toctree: _generated
-
-   ModelRegionComponent.create
-
 
 GridComponent
 =========

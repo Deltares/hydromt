@@ -1,5 +1,6 @@
 """Model Region class."""
 
+from abc import ABC, abstractmethod
 from logging import getLogger
 from os import makedirs
 from os.path import basename, exists, isdir, isfile, join
@@ -11,13 +12,11 @@ import numpy as np
 import xarray as xr
 import xugrid as xu
 from geopandas import GeoDataFrame, GeoSeries
-from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely import box
 
-from hydromt import _compat, hydromt_step
+from hydromt import _compat
 from hydromt._typing.type_def import StrPath
-from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
 from hydromt.workflows.basin_mask import get_basin_geometry
@@ -28,26 +27,32 @@ if TYPE_CHECKING:
 
 logger = getLogger(__name__)
 
-DEFAULT_REGION_FILE_PATH = "region.geojson"
 
-
-class ModelRegionComponent(ModelComponent):
+class ModelRegion:
     """Define the model region."""
+
+    DEFAULT_REGION_FILENAME = "region.geojson"
+    DEFAULT_HYDROGRAPHY_FILENAME = "merit_hydro"
+    DEFAULT_BASIN_INDEX_FILENAME = "merit_hydro_index"
 
     def __init__(
         self,
         model: "Model",
+        filename: StrPath = DEFAULT_REGION_FILENAME,
     ) -> None:
-        super().__init__(model)
+        self._root = model.root
+        self._logger = model.logger
+        self._data_catalog = model.data_catalog
         self._data: Optional[GeoDataFrame] = None
+        self._filename = filename
 
-    @hydromt_step
     def create(
         self,
+        *,
         region: dict,
-        hydrography_fn: str = "merit_hydro",
-        basin_index_fn: str = "merit_hydro_index",
-    ) -> Dict[str, Any]:
+        hydrography_fn: str = DEFAULT_HYDROGRAPHY_FILENAME,
+        basin_index_fn: str = DEFAULT_BASIN_INDEX_FILENAME,
+    ) -> None:
         """Check and return parsed region arguments.
 
         Parameters
@@ -169,11 +174,8 @@ class ModelRegionComponent(ModelComponent):
             raise ValueError(f"model region argument not understood: {region}")
 
         self.set(geom, kind)
-        # This setup method returns region so that it can be wrapped for models which
-        # require more information, e.g. grid RasterDataArray or xy coordinates.
-        return region
 
-    def set(self, data: GeoDataFrame, kind: str = "geom"):
+    def set(self, data: GeoDataFrame, kind: str = "geom") -> None:
         """Set the model region based on provided GeoDataFrame."""
         # if nothing is provided, record that the region was set by the user
         self.kind = kind
@@ -211,32 +213,26 @@ class ModelRegionComponent(ModelComponent):
         else:
             raise ValueError("Could not read or construct region to read crs from")
 
-    @hydromt_step
     def read(
         self,
-        rel_path: StrPath = Path(DEFAULT_REGION_FILE_PATH),
+        filename: Optional[StrPath] = None,
         **read_kwargs,
     ):
         """Read the model region from a file on disk."""
         self._root._assert_read_mode()
+        filename = filename or self._filename
         # cannot read geom files for purely in memory models
-        self._logger.debug(f"Reading model file {rel_path}.")
+        self._logger.debug(f"Reading model file {filename}.")
         self._data = cast(
-            GeoDataFrame,
-            gpd.read_file(join(self._root.path, rel_path), **read_kwargs),
+            GeoDataFrame, gpd.read_file(join(self._root.path, filename), **read_kwargs)
         )
         self.kind = "geom"
 
-    @hydromt_step
-    def write(
-        self,
-        rel_path: StrPath = Path(DEFAULT_REGION_FILE_PATH),
-        to_wgs84=False,
-        **write_kwargs,
-    ):
+    def write(self, filename: Optional[StrPath] = None, to_wgs84=False, **write_kwargs):
         """Write the model region to a file."""
         self._root._assert_write_mode()
-        write_path = join(self._root.path, rel_path)
+        filename = filename or self._filename
+        write_path = join(self._root.path, filename)
 
         if exists(write_path) and not self._root.is_override_mode():
             raise OSError(
@@ -254,21 +250,11 @@ class ModelRegionComponent(ModelComponent):
 
             if to_wgs84 and (
                 write_kwargs.get("driver") == "GeoJSON"
-                or str(rel_path).lower().endswith(".geojson")
+                or str(filename).lower().endswith(".geojson")
             ):
                 gdf = gdf.to_crs(4326)
 
             gdf.to_file(write_path, **write_kwargs)
-
-    def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, ModelRegionComponent):
-            return False
-        else:
-            try:
-                assert_geodataframe_equal(self.data, __value.data)
-                return True
-            except AssertionError:
-                return False
 
 
 def _parse_region(
@@ -370,3 +356,29 @@ def _parse_region_value(value, data_catalog):
         )
         kwarg = dict(xy=xy)
     return kwarg
+
+
+class HasRegion(ABC):
+    """Interface to define a component that has a region."""
+
+    @property
+    @abstractmethod
+    def region(self) -> GeoDataFrame:
+        """Get the region associated with the component.
+
+        Returns
+        -------
+            GeoDataFrame: The region associated with the component.
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def crs(self) -> CRS:
+        """Get the CRS of the region associated with the component.
+
+        Returns
+        -------
+            CRS: The CRS of the region associated with the component.
+        """
+        ...

@@ -15,7 +15,6 @@ from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.components.base import ModelComponent
-from hydromt.components.region import _parse_region
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
@@ -28,6 +27,7 @@ from hydromt.workflows.grid import (
     grid_from_rasterdataset,
     rotated_grid,
 )
+from hydromt.workflows.region import HasRegion, _parse_region
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 __all__ = ["GridComponent"]
 
 
-class GridComponent(ModelComponent):
+class GridComponent(ModelComponent, HasRegion):
     """ModelComponent class for grid components.
 
     This class is used for setting, creating, writing, and reading regular grid data for a
