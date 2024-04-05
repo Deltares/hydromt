@@ -331,7 +331,6 @@ Model default components
 .. autosummary::
    :toctree: _generated
 
-   Model.config
    Model.maps
    Model.geoms
    Model.forcing
@@ -343,11 +342,6 @@ General methods
 
 .. autosummary::
    :toctree: _generated
-
-   Model.get_config
-   Model.set_config
-   Model.read_config
-   Model.write_config
 
    Model.set_maps
    Model.read_maps
@@ -376,7 +370,6 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   Model.setup_config
    Model.setup_maps_from_rasterdataset
    Model.setup_maps_from_raster_reclass
 
@@ -551,6 +544,51 @@ General methods
    TablesComponent.set
    TablesComponent.write
    TablesComponent.read
+
+
+ConfigComponent
+===============
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent._model
+   ConfigComponent._data_catalog
+   ConfigComponent._logger
+   ConfigComponent._root
+   ConfigComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent.set
+   ConfigComponent.write
+   ConfigComponent.read
+   ConfigComponent.get_value
+
+
+
+Setup methods
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent.create
+   ConfigComponent.update
 
 
 .. _vector_model_api:
@@ -761,15 +799,17 @@ Reading methods
    :toctree: _generated
 
    io.configread
-   io.open_raster
+   io.open_geodataset
+   io.open_mfcsv
    io.open_mfraster
+   io.open_raster
    io.open_raster_from_tindex
+   io.open_timeseries_from_table
    io.open_vector
    io.open_vector_from_table
-   io.open_geodataset
-   io.open_timeseries_from_table
-   io.open_mfcsv
    io.read_nc
+   io.read_toml
+   io.read_yaml
 
 Writing methods
 ===============
@@ -777,11 +817,12 @@ Writing methods
 .. autosummary::
    :toctree: _generated
 
-   io.configwrite
    io.netcdf_writer
-   io.write_xy
-   io.zarr_writer
    io.write_nc
+   io.write_toml
+   io.write_xy
+   io.write_yaml
+   io.zarr_writer
 
 
 .. _raster_api:
