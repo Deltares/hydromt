@@ -212,7 +212,7 @@ def test_get_mesh(mock_model):
     assert isinstance(mesh, xu.UgridDataset)
 
 
-def test_add_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixture):
+def test_add_2d_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixture):
     mesh_component = MeshComponent(mock_model)
     mesh_component._data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
@@ -226,7 +226,7 @@ def test_add_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixture):
             f"Grid name {grid_name} not in mesh ({mesh_component.mesh_names})."
         ),
     ):
-        mesh_component.add_data_from_rasterdataset(
+        mesh_component.add_2d_data_from_rasterdataset(
             raster_fn="mock_raster", grid_name=grid_name
         )
 
@@ -234,7 +234,7 @@ def test_add_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixture):
         "hydromt.components.mesh.mesh2d_from_rasterdataset"
     )
     mock_mesh2d_from_rasterdataset.return_value = mock_data
-    data_vars = mesh_component.add_data_from_rasterdataset(
+    data_vars = mesh_component.add_2d_data_from_rasterdataset(
         raster_fn="vito", grid_name="mesh2d", resampling_method="mode"
     )
     assert "Preparing mesh data from raster source vito" in caplog.text
@@ -243,7 +243,7 @@ def test_add_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixture):
     assert "mesh2d" in mesh_component.mesh_names
 
 
-def test_add_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixture):
+def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixture):
     mesh_component = MeshComponent(mock_model)
     mesh_component._data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
@@ -257,7 +257,7 @@ def test_add_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixture)
             f"Grid name {grid_name} not in mesh ({mesh_component.mesh_names})."
         ),
     ):
-        mesh_component.add_data_from_raster_reclass(
+        mesh_component.add_2d_data_from_raster_reclass(
             raster_fn="mock_raster",
             grid_name=grid_name,
             reclass_table_fn="mock_reclass_table",
@@ -269,7 +269,7 @@ def test_add_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixture)
         match=f"raster_fn {raster_fn} should be a single variable raster. "
         "Please select one using the 'variable' argument",
     ):
-        mesh_component.add_data_from_raster_reclass(
+        mesh_component.add_2d_data_from_raster_reclass(
             raster_fn=raster_fn,
             reclass_table_fn="reclass_table",
             grid_name="mesh2d",
@@ -283,7 +283,7 @@ def test_add_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixture)
     )
 
     mock_mesh2d_from_rasterdataset.return_value = mock_data
-    data_vars = mesh_component.add_data_from_raster_reclass(
+    data_vars = mesh_component.add_2d_data_from_raster_reclass(
         raster_fn="vito",
         grid_name="mesh2d",
         resampling_method="mode",
