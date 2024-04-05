@@ -39,6 +39,7 @@ def test_check_UGrid():
 
 def test_add_mesh_errors(mock_model, mocker: MockerFixture):
     mesh_component = MeshComponent(mock_model)
+    mesh_component._root.is_reading_mode.return_value = False
     data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(ValueError, match="Data should have CRS."):
         mesh_component._add_mesh(data=data, grid_name="", overwrite_grid=False)
@@ -106,6 +107,7 @@ def test_set_raises_errors(mock_check_Ugrid, mock_model):
 
 def test_create(mock_model, mocker: MockerFixture):
     mesh_component = MeshComponent(mock_model)
+    mesh_component._root.is_reading_mode.return_value = False
     region = {"bbox": [-1, -1, 1, 1]}
     res = 20
     crs = 28992

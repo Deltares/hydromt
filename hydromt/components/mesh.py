@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from hydromt.models import Model
 
 
-DEFAULT_FN = "mesh/mesh.nc"
+_DEFAULT_MESH_FILENAME = "mesh/mesh.nc"
 
 __all__ = ["MeshComponent"]
 
@@ -35,9 +35,10 @@ __all__ = ["MeshComponent"]
 class MeshComponent(ModelComponent):
     """ModelComponent class for mesh components."""
 
-    def __init__(self, model: "Model"):
+    def __init__(self, model: "Model", filename: str = _DEFAULT_MESH_FILENAME):
         super().__init__(model=model)
         self._data = None
+        self._filename = filename
 
     def set(
         self,
@@ -84,7 +85,7 @@ class MeshComponent(ModelComponent):
     @hydromt_step
     def write(
         self,
-        fn: str = DEFAULT_FN,
+        fn: Optional[str] = None,
         write_optional_ugrid_attributes: bool = True,
         **kwargs,
     ) -> None:
@@ -109,6 +110,7 @@ class MeshComponent(ModelComponent):
         self._root._assert_write_mode()
 
         # filename
+        fn = fn or self._filename
         _fn = join(self._root.path, fn)
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
@@ -123,7 +125,7 @@ class MeshComponent(ModelComponent):
 
     @hydromt_step
     def read(
-        self, fn: str = DEFAULT_FN, crs: Optional[Union[CRS, int]] = None, **kwargs
+        self, fn: Optional[str] = None, crs: Optional[Union[CRS, int]] = None, **kwargs
     ) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
@@ -141,6 +143,7 @@ class MeshComponent(ModelComponent):
             Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._root._assert_read_mode()
+        fn = fn or self._filename
         ds = xr.merge(
             read_nc(fn, root=self._root.path, logger=self._logger, **kwargs).values()
         )
@@ -238,20 +241,19 @@ class MeshComponent(ModelComponent):
         """
         # XU grid data type Xarray dataset with xu sampling.
         if self._data is None:
-            self._initialize_mesh()
+            self._initialize()
         return self._data
 
-    def _initialize_mesh(self, skip_read: bool = False) -> None:
+    def _initialize(self, skip_read: bool = False) -> None:
         """Initialize mesh object."""
-        if self._data is None:
-            self._data = xu.UgridDataset(xr.Dataset())
-            if self._root.is_reading_mode() and not skip_read:
-                self.read()
+        self._data = xu.UgridDataset(xr.Dataset())
+        if self._root.is_reading_mode() and not skip_read:
+            self.read()
 
     @property
     def crs(self) -> Optional[CRS]:
         """Returns model mesh crs."""
-        if self.data is not None:
+        if len(self.data) > 0:
             for _, v in self.data.ugrid.crs.items():
                 return v
         return None
@@ -259,14 +261,14 @@ class MeshComponent(ModelComponent):
     @property
     def bounds(self) -> Optional[Dict]:
         """Returns model mesh bounds."""
-        if self.data is not None:
+        if len(self.data) > 0:
             return self.data.ugrid.bounds
         return None
 
     @property
     def mesh_region(self) -> Optional[gpd.GeoDataFrame]:
         """Return mesh total_bounds as a geodataframe."""
-        if self.data is not None:
+        if len(self.data) > 0:
             region = gpd.GeoDataFrame(
                 geometry=[box(*self.data.ugrid.total_bounds)], crs=self.crs
             )
@@ -276,7 +278,7 @@ class MeshComponent(ModelComponent):
     @property
     def mesh_names(self) -> List[str]:
         """List of grid names in mesh."""
-        if self.data is not None:
+        if len(self.data) > 0:
             return [grid.name for grid in self.data.ugrid.grids]
         else:
             return []
@@ -285,7 +287,7 @@ class MeshComponent(ModelComponent):
     def mesh_grids(self) -> Dict[str, Union[xu.Ugrid1d, xu.Ugrid2d]]:
         """Dictionnary of grid names and Ugrid topologies in mesh."""
         grids = dict()
-        if self.data is not None:
+        if len(self.data) > 0:
             for grid in self.data.ugrid.grids:
                 grids[grid.name] = grid
 
@@ -295,7 +297,7 @@ class MeshComponent(ModelComponent):
     def mesh_datasets(self) -> Dict[str, xu.UgridDataset]:
         """Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh."""  # noqa: E501
         datasets = dict()
-        if self.data is not None:
+        if len(self.data) > 0:
             for grid in self.data.ugrid.grids:
                 datasets[grid.name] = self.get_mesh(
                     grid_name=grid.name, include_data=True
@@ -307,7 +309,7 @@ class MeshComponent(ModelComponent):
     def mesh_gdf(self) -> Dict[str, gpd.GeoDataFrame]:
         """Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame."""
         mesh_gdf = dict()
-        if self.data is not None:
+        if len(self.data) > 0:
             for k, grid in self.mesh_grids.items():
                 if grid.topology_dimension == 1:
                     dim = grid.edge_dimension
@@ -342,7 +344,7 @@ class MeshComponent(ModelComponent):
         uds: Union[xu.Ugrid1d, xu.Ugrid2d, xu.UgridDataArray, xu.UgridDataset]
             Grid topology with or without data variables.
         """
-        if len(self.data) < 1:
+        if len(self.data) == 0:
             raise ValueError("Mesh is not set, please use set_mesh first.")
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid {grid_name} not found in mesh.")
@@ -563,7 +565,7 @@ class MeshComponent(ModelComponent):
     def _add_mesh(
         self, data: xu.UgridDataset, grid_name: str, overwrite_grid: bool
     ) -> Optional[CRS]:
-        if self._data is None:  # NOTE: mesh is initialized with None
+        if len(self.data) == 0:
             # Check on crs
             if not data.ugrid.grid.crs:
                 raise ValueError("Data should have CRS.")
@@ -621,6 +623,7 @@ class MeshComponent(ModelComponent):
             if crs:  # Restore crs
                 for grid in self.data.ugrid.grids:
                     grid.set_crs(crs)
+            return None
 
     def _grid_is_equal(self, grid_name: str, data: xu.UgridDataset) -> bool:
         return self.mesh_grids[grid_name].to_dataset().equals(data.grid.to_dataset())
