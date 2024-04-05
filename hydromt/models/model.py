@@ -39,10 +39,6 @@ from hydromt.components import (
     ModelComponent,
     ModelRegionComponent,
 )
-from hydromt.components.config import (
-    _DEFAULT_CONFIG_FILENAME,
-    ConfigComponent,
-)
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.plugins import PLUGINS
@@ -87,8 +83,6 @@ class Model(object, metaclass=ABCMeta):
         self,
         components: Optional[dict[str, dict[str, Any]]] = None,
         root: Optional[str] = None,
-        config_filename: str = _DEFAULT_CONFIG_FILENAME,
-        default_config_template_filename: str = _DEFAULT_CONFIG_FILENAME,
         mode: str = "w",
         data_libs: Optional[Union[List, str]] = None,
         logger=_logger,
@@ -136,13 +130,6 @@ class Model(object, metaclass=ABCMeta):
 
         self._components: Dict[str, ModelComponent] = {}
         self._add_components(components)
-
-        config_component: ConfigComponent = ConfigComponent(
-            self,
-            filename=config_filename,
-            default_template_filename=default_config_template_filename,
-        )
-        self.add_component("config", config_component)
 
         self._defered_file_closes = []
 

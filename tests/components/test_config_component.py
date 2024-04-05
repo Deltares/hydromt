@@ -50,11 +50,16 @@ def test_config_create_always_reads(tmpdir):
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
-    model = Model(root=tmpdir, mode="w", default_config_template_filename=config_path)
-    comp = model.get_component("config", ConfigComponent)
-    comp.create()
+    model = Model(root=tmpdir, mode="w")
+    config_component: ConfigComponent = ConfigComponent(
+        model,
+        filename=_DEFAULT_CONFIG_FILENAME,
+        default_template_filename=config_path,
+    )
+    model.add_component("config", config_component)
+    config_component.create()
     # we use _data here to avoid initilaizing it through lazy loading
-    assert comp._data == config_data
+    assert config_component._data == config_data
 
 
 def test_config_does_not_read_at_lazy_init(tmpdir):
@@ -62,20 +67,24 @@ def test_config_does_not_read_at_lazy_init(tmpdir):
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
-    model = Model(root=tmpdir, mode="w", default_config_template_filename=config_path)
-    comp = model.get_component("config", ConfigComponent)
-    assert comp.data == {}
-
-
-def test_raises_warning_on_no_config_template_found(tmpdir, caplog):
-    default_template_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
-    model = Model(
-        root=tmpdir, mode="w", default_config_template_filename=default_template_path
+    model = Model(root=tmpdir, mode="w")
+    config_component: ConfigComponent = ConfigComponent(
+        model,
+        filename=_DEFAULT_CONFIG_FILENAME,
+        default_template_filename=config_path,
     )
-    comp = model.get_component("config", ConfigComponent)
-    comp.create()
-    assert comp._data == {}
-    assert "Template was provided but file did not exist" in caplog.text
+    model.add_component("config", config_component)
+    assert config_component.data == {}
+
+
+def test_raises_on_no_config_template_found(tmpdir):
+    model = Model(root=tmpdir, mode="w")
+    config_component: ConfigComponent = ConfigComponent(
+        model,
+    )
+    model.add_component("config", config_component)
+    with pytest.raises(FileNotFoundError, match="No template file was provided"):
+        config_component.create()
 
 
 def test_make_config_abs(tmpdir, test_config_dict):
@@ -110,6 +119,10 @@ def test_make_rel_abs(tmpdir, test_config_dict):
 
 def test_set_config(tmpdir):
     model = Model(root=tmpdir)
+    config_component: ConfigComponent = ConfigComponent(
+        model,
+    )
+    model.add_component("config", config_component)
     config_component = model.get_component("config", ConfigComponent)
     config_component.set("global.name", "test")
     assert config_component._data is not None
@@ -119,6 +132,10 @@ def test_set_config(tmpdir):
 
 def test_write_config(tmpdir):
     model = Model(root=tmpdir)
+    config_component: ConfigComponent = ConfigComponent(
+        model,
+    )
+    model.add_component("config", config_component)
     config_component = model.get_component("config", ConfigComponent)
     config_component.set("global.name", "test")
     write_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
@@ -131,6 +148,10 @@ def test_write_config(tmpdir):
 
 def test_get_config_abs_path(tmpdir):
     model = Model(root=tmpdir)
+    config_component: ConfigComponent = ConfigComponent(
+        model,
+    )
+    model.add_component("config", config_component)
     config_component = model.get_component("config", ConfigComponent)
     abs_path = str(tmpdir.join("test.file"))
     config_component.set("global.file", "test.file")
