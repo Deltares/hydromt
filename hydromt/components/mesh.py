@@ -144,24 +144,26 @@ class MeshComponent(ModelComponent):
         """
         self._root._assert_read_mode()
         fn = fn or self._filename
-        ds = xr.merge(
-            read_nc(fn, root=self._root.path, logger=self._logger, **kwargs).values()
-        )
-        uds = xu.UgridDataset(ds)
-        if ds.rio.crs is not None:  # parse crs
-            uds.ugrid.set_crs(ds.raster.crs)
-            uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
-        else:
-            if not crs:
-                raise ValueError(
-                    "no crs is found in the file nor passed to the reader."
-                )
+        files = read_nc(
+            fn, root=self._root.path, logger=self._logger, **kwargs
+        ).values()
+        if len(files) > 0:
+            ds = xr.merge(files)
+            uds = xu.UgridDataset(ds)
+            if ds.rio.crs is not None:  # parse crs
+                uds.ugrid.set_crs(ds.raster.crs)
+                uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
             else:
-                uds.ugrid.set_crs(crs)
-                self._logger.info(
-                    "no crs is found in the file, assigning from user input."
-                )
-        self._data = uds
+                if not crs:
+                    raise ValueError(
+                        "no crs is found in the file nor passed to the reader."
+                    )
+                else:
+                    uds.ugrid.set_crs(crs)
+                    self._logger.info(
+                        "no crs is found in the file, assigning from user input."
+                    )
+            self._data = uds
 
     @hydromt_step
     def create2d(
@@ -223,7 +225,7 @@ class MeshComponent(ModelComponent):
             crs=crs,
             logger=self._logger,
         )
-        # Add mesh2d to self.mesh
+        # Add mesh2d to self
         self.set(mesh2d, grid_name=grid_name)
 
         # This setup method returns mesh2d so that it can be wrapped for models

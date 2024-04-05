@@ -2,6 +2,7 @@ import logging
 import os
 import re
 from os.path import dirname, isdir, isfile, join
+from pathlib import Path
 from unittest.mock import create_autospec, patch
 
 import geopandas as gpd
@@ -12,6 +13,7 @@ import xugrid as xu
 from pytest_mock import MockerFixture
 
 from hydromt.components.mesh import MeshComponent, _check_UGrid
+from hydromt.models import Model
 from hydromt.root import ModelRoot
 
 
@@ -105,6 +107,16 @@ def test_set_raises_errors(mock_check_Ugrid, mock_model):
         mesh_component.set(data=data)
 
 
+def test_model_mesh_sets_correctly(tmpdir: Path):
+    m = Model(root=str(tmpdir), mode="r+")
+    m.add_component("mesh", MeshComponent(m))
+    component = m.get_component("mesh", MeshComponent)
+    uds = xu.data.elevation_nl().to_dataset()
+    uds.grid.crs = 28992
+    component.set(data=uds)
+    assert component.data == uds
+
+
 def test_create(mock_model, mocker: MockerFixture):
     mesh_component = MeshComponent(mock_model)
     mesh_component._root.is_reading_mode.return_value = False
@@ -166,6 +178,33 @@ def test_read(mock_model, caplog, tmpdir, griduda):
     mesh_component.read(fn=fn, crs=4326)
     assert "no crs is found in the file, assigning from user input." in caplog.text
     assert mesh_component._data.ugrid.crs == 4326
+
+
+@pytest.mark.integration()
+def test_model_mesh_workflow(tmpdir: Path):
+    m = Model(root=str(tmpdir), mode="r+")
+    m.add_component("mesh", MeshComponent(m))
+    component = m.get_component("mesh", MeshComponent)
+    region = {
+        "bbox": [11.949099, 45.9722, 12.004855, 45.998441]
+    }  # small area in Piave basin
+    crs = 4326
+    res = 0.001
+    mesh = component.create2d(region=region, res=res, crs=crs)
+    assert mesh.grid == component.data.grid
+    assert component.data.grid.crs == crs
+    # clear empty mesh dataset
+    mesh._data = None
+    # Test with sample data
+    data = xu.data.elevation_nl().to_dataset()
+    data.grid.crs = 28992
+    component.set(data=data, grid_name="elevation_mesh")
+    assert "elevation_mesh" in component.mesh_names
+    assert component.data == data
+    component.write()
+    component._data = None
+    component.read()
+    assert component.data == data
 
 
 def test_properties(mock_model):
