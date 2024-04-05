@@ -234,14 +234,17 @@ Once a component has been added, any component (or other object or scope that ha
 with it as you please.
 
 In the core of HydroMT, the available components are:
-+-----------------------+-----------------+-----------------------------------------------------------------+
-| v0.x Model Attribute  | Component       | Description                                                     |
-+=======================+=================+=================================================================+
-| model.tables          | TablesComponent  | Component for managing non-geospatial data in pandas DataFrames  |
-| model.grid            | GridComponent   | Component for managing regular gridded data in single hydromt RasterDataset    |
-| model.geoms('region') | RegionComponent | Component for managing the area of interest for the model in a geopandas GeoDataFrame.    |
-| model.mesh			| MeshComponent	  | Component for managing unstructured grids as a hydromt RasterDataset
-+-----------------------+-----------------+-----------------------------------------------------------------+
++-----------------------+-----------------+----------------------------------------------------------------------------------------+
+| v0.x Model Attribute  | Component       | Description                                                     					   |
++=======================+=================+========================================================================================+
+| model.tables          | TablesComponent | Component for managing non-geospatial data in pandas DataFrames  					   |
++-----------------------+-----------------+----------------------------------------------------------------------------------------+
+| model.grid            | GridComponent   | Component for managing regular gridded data in single hydromt RasterDataset            |
++-----------------------+-----------------+----------------------------------------------------------------------------------------+
+| model.geoms('region') | RegionComponent | Component for managing the area of interest for the model in a geopandas GeoDataFrame. |
++-----------------------+-----------------+----------------------------------------------------------------------------------------+
+| model.mesh			| MeshComponent	  | Component for managing unstructured grids as a hydromt RasterDataset                   |
++-----------------------+-----------------+----------------------------------------------------------------------------------------+
 
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
@@ -356,15 +359,15 @@ has not been changed compared to the GridModel.
 +------------------------------+-------------------------------------------+
 | v0.x                         | v1                                        |
 +==============================+===========================================+
-| model.set_grid(...)          | model.grid.set(...)             |
+| model.set_grid(...)          | model.grid.set(...)             		   |
 +------------------------------+-------------------------------------------+
-| model.read_grid(...)         | model.grid.read(...)            |
+| model.read_grid(...)         | model.grid.read(...)            		   |
 +------------------------------+-------------------------------------------+
-| model.write_grid(...)        | model.grid.write(...)           |
+| model.write_grid(...)        | model.grid.write(...)            		   |
 +------------------------------+-------------------------------------------+
-| model.setup_grid(...)        | model.grid.create(...)          |
+| model.setup_grid(...)        | model.grid.create(...)          		   |
 +------------------------------+-------------------------------------------+
-| model.setup_grid_from_*(...) | model.grid.add_data_from_*(...) |
+| model.setup_grid_from_*(...) | model.grid.add_data_from_*(...) 		   |
 +------------------------------+-------------------------------------------+
 
 TablesComponent
