@@ -57,14 +57,14 @@ def test_config_create_always_reads(tmpdir):
     assert comp._data == config_data
 
 
-def test_config_always_reads_at_lazy_init(tmpdir):
+def test_config_does_not_read_at_lazy_init(tmpdir):
     config_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w", default_config_template_filename=config_path)
     comp = model.get_component("config", ConfigComponent)
-    assert comp.data == config_data
+    assert comp.data == {}
 
 
 def test_raises_warning_on_no_config_template_found(tmpdir, caplog):

@@ -71,7 +71,7 @@ class ConfigComponent(ModelComponent):
         """Initialize the model config."""
         if self._data is None:
             self._data = dict()
-            if not skip_read:
+            if self._root.is_reading_mode() and not skip_read:
                 self.read()
 
     @hydromt_step
@@ -105,7 +105,7 @@ class ConfigComponent(ModelComponent):
         """Read model config at <root>/{path}."""
         self._initialize(skip_read=True)
         # if path is abs, join will just return path
-        p = path or self._default_template_filename or self._filename
+        p = path or self._filename
         read_path = join(self._root.path, p)
         if isfile(read_path):
             self._logger.info(f"Reading model config file from {read_path}.")
