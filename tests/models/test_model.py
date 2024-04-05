@@ -15,7 +15,6 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-import hydromt.test_utils as test_utils
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
@@ -147,7 +146,7 @@ def test_model(model, tmpdir):
     # check if equal
     model._results = {}  # reset results for comparison
     with pytest.deprecated_call():
-        equal, errors = test_utils.test_model_equal(model1)
+        equal, errors = model.test_equal(model1)
     assert equal, errors
 
 
@@ -424,37 +423,33 @@ def test_maps_setup(tmpdir):
     mod.write(components=["config", "geoms", "maps"])
 
 
-@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
-def test_gridmodel(grid_model, tmpdir, demda):
-    assert "grid" in grid_model.api
-    non_compliant = grid_model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
+@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
+def test_gridmodel(tmpdir, demda):
+    grid_model = Model(
+        components={"grid": {"type": GridComponent.__name__}},
+        root=str(tmpdir),
+        mode="w",
+    )
     # grid specific attributes
-    assert np.all(grid_model.res == grid_model.grid.raster.res)
-    assert np.all(grid_model.bounds == grid_model.grid.raster.bounds)
-    assert np.all(grid_model.transform == grid_model.grid.raster.transform)
+    assert np.all(grid_model.grid.res == grid_model.grid.data.raster.res)
+    assert np.all(grid_model.grid.bounds == grid_model.grid.data.raster.bounds)
+    assert np.all(grid_model.grid.transform == grid_model.grid.data.raster.transform)
     # write model
-    grid_model.root.set(str(tmpdir), mode="w")
     grid_model.write()
     # read model
-    GridModel: Any = ...  # bypass ruff
-    model1 = GridModel(str(tmpdir), mode="r")
+    model1 = Model(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors = grid_model._test_equal(model1)
+    equal, errors = grid_model.test_equal(model1)
     assert equal, errors
 
     # try update
     grid_model.root.set(str(join(tmpdir, "update")), mode="w")
     grid_model.write()
 
-    model1 = GridModel(str(join(tmpdir, "update")), mode="r+")
-    model1.update(
-        opt={
-            "set_grid": {"data": demda, "name": "testdata"},
-            "write_grid": {},
-        }
-    )
+    model1 = Model(str(join(tmpdir, "update")), mode="r+")
+    model1.grid.set(demda, name="testdata")
+    model1.grid.write()
     assert "testdata" in model1.grid
     assert "elevtn" in model1.grid
 
@@ -635,7 +630,7 @@ def test_vectormodel(vector_model, tmpdir):
         components={"vector": {"type": VectorComponent.__name__}},
     )
     model1.read()
-    equal, errors = test_utils.check_models_equal(vector_model, model1)
+    equal, errors = vector_model.test_equal(model1)
     assert equal, errors
 
 
@@ -739,7 +734,7 @@ def test_meshmodel(mesh_model, tmpdir):
     model1 = MeshModel(str(tmpdir), mode="r")
     model1.read()
     # check if equal
-    equal, errors = test_utils.test_model_equal(model1)
+    equal, errors = mesh_model.test_equal(model1)
     assert equal, errors
 
 

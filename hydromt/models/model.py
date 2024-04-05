@@ -464,6 +464,31 @@ class Model(object, metaclass=ABCMeta):
 
             cat.to_yml(path, root=root)
 
+    def test_equal(self, other: "Model") -> tuple[bool, dict[str, str]]:
+        """Test if two models are equal, based on their components.
+
+        Parameters
+        ----------
+        other : Model
+            The model to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if equal, dictionary with errors per model component which is not equal.
+        """
+        assert isinstance(other, self.__class__)
+        components = list(self._components.keys())
+        components_other = list(other._components.keys())
+        assert components == components_other
+        errors: dict[str, str] = {}
+        is_equal = True
+        for name, c in self._components.items():
+            component_equal, component_errors = c.test_equal(other._components[name])
+            is_equal &= component_equal
+            errors.update(**component_errors)
+        return is_equal, errors
+
     # model configuration
     @property
     def config(self) -> Dict[str, Union[Dict, str]]:

@@ -3,11 +3,12 @@
 
 import os
 from os.path import basename, dirname, isfile, join
-from typing import Optional, Union
+from typing import Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
 import xarray as xr
+from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 
 from hydromt import hydromt_step
@@ -378,3 +379,45 @@ class VectorComponent(ModelComponent):
             return self.data.vector.crs
         self._logger.warning("No CRS found in vector data.")
         return None
+
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_vector = cast(VectorComponent, other)
+
+        geods = self.data
+        other_geods = other_vector.data
+        gdf = self.geometry.to_frame("geometry")
+        gdf_other = other_vector.geometry.to_frame("geometry")
+        try:
+            assert_geodataframe_equal(
+                gdf, gdf_other, check_like=True, check_less_precise=True
+            )
+        except AssertionError as e:
+            errors["geometry"] = str(e)
+        drop_vars = (
+            [geods.vector.x_name, geods.vector.y_name]
+            if geods.vector.geom_format == "xy"
+            else [geods.vector.geom_name]
+        )
+        ds = geods.drop_vars(drop_vars)
+        ds_other = other_geods.drop_vars(drop_vars)
+        try:
+            xr.testing.assert_allclose(ds, ds_other)
+        except AssertionError as e:
+            errors["data"] = str(e)
+
+        return len(errors) == 0, errors

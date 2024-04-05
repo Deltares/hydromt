@@ -260,15 +260,33 @@ class ModelRegionComponent(ModelComponent):
 
             gdf.to_file(write_path, **write_kwargs)
 
-    def __eq__(self, __value: object) -> bool:
-        if not isinstance(__value, ModelRegionComponent):
-            return False
-        else:
-            try:
-                assert_geodataframe_equal(self.data, __value.data)
-                return True
-            except AssertionError:
-                return False
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_region = cast(ModelRegionComponent, other)
+
+        if self.kind != other_region.kind:
+            errors["kind"] = f"kind {self.kind} != {other_region.kind}"
+
+        try:
+            assert_geodataframe_equal(self.data, other_region.data)
+        except AssertionError as e:
+            errors["data"] = str(e)
+
+        return len(errors) == 0, errors
 
 
 def _parse_region(

@@ -1,7 +1,7 @@
 """Grid Component."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -781,3 +781,27 @@ class GridComponent(ModelComponent):
         self.set(ds)
 
         return list(ds.data_vars.keys())
+
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_grid = cast(GridComponent, other)
+        try:
+            xr.testing.assert_allclose(self.data, other_grid.data)
+        except AssertionError as e:
+            errors["data"] = str(e)
+
+        return len(errors) == 0, errors
