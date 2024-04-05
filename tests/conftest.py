@@ -344,6 +344,31 @@ def vector_model(ts, geodf):
     return mod
 
 
+@pytest.fixture()
+def vector_model_no_defaults(ts, geodf):
+    mod = Model(
+        components={
+            "vector": {
+                "type": VectorComponent.__name__,
+                "filename": None,
+                "geometry_filename": None,
+            }
+        }
+    )
+    mod.setup_config(**{"header": {"setting": "value"}})
+    da = xr.DataArray(
+        ts,
+        dims=["index", "time"],
+        coords={"index": ts.index, "time": ts.columns},
+        name="zs",
+    )
+    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+    da.vector.set_crs(geodf.crs)
+    mod.get_component("region", ModelRegionComponent).set(geodf)
+    mod.get_component("vector", VectorComponent).set(da)
+    return mod
+
+
 # @pytest.fixture()
 # def mesh_model(griduda):
 #     mod = MODELS.load("mesh_model")()

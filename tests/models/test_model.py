@@ -639,10 +639,10 @@ def test_vectormodel(vector_model, tmpdir):
     assert equal, errors
 
 
-def test_vectormodel_vector(vector_model, tmpdir, geoda):
+def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
     # test set vector
-    testds = vector_model.vector.data.copy()
-    vector_component = vector_model.get_component("vector", VectorComponent)
+    testds = vector_model_no_defaults.vector.data.copy()
+    vector_component = vector_model_no_defaults.get_component("vector", VectorComponent)
     # np.ndarray
     with pytest.raises(ValueError, match="Unable to set"):
         vector_component.set(testds["zs"].values)
@@ -657,8 +657,8 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
     gdf["param1"] = np.random.rand(gdf.shape[0])
     gdf["param2"] = np.random.rand(gdf.shape[0])
     vector_component.set(gdf)
-    assert "precip" in vector_model.vector.data
-    assert "param1" in vector_model.vector.data
+    assert "precip" in vector_model_no_defaults.vector.data
+    assert "param1" in vector_model_no_defaults.vector.data
     # geometry and update grid
     crs = geoda.vector.crs
     geoda_test = geoda.vector.update_geometry(
@@ -677,40 +677,51 @@ def test_vectormodel_vector(vector_model, tmpdir, geoda):
 
     # test write vector
     vector_component.set(gdf)
-    vector_model.root.set(str(tmpdir), mode="w")
+    vector_model_no_defaults.root.set(str(tmpdir), mode="w")
     # netcdf+geojson --> tested in test_vectormodel
     # netcdf only
-    vector_component.write(fn="vector/vector_full.nc", fn_geom=None)
+    vector_component.write(filename="vector/vector_full.nc", geometry_filename=None)
     # geojson only
     # automatic split
-    vector_component.write(fn=None, fn_geom="vector/vector_split.geojson")
-    assert isfile(join(vector_model.root.path, "vector", "vector_split.nc"))
-    assert not isfile(join(vector_model.root.path, "vector", "vector_all.nc"))
+    vector_component.write(
+        filename=None, geometry_filename="vector/vector_split.geojson"
+    )
+    assert isfile(join(vector_model_no_defaults.root.path, "vector", "vector_split.nc"))
+    assert not isfile(
+        join(vector_model_no_defaults.root.path, "vector", "vector_all.nc")
+    )
     # geojson 1D data only
     vector_component._vector = vector_component._vector.drop_vars("zs").drop_vars(
         "time"
     )
-    vector_component.write(fn=None, fn_geom="vector/vector_all2.geojson")
-    assert not isfile(join(vector_model.root.path, "vector", "vector_all2.nc"))
+    vector_component.write(
+        filename=None, geometry_filename="vector/vector_all2.geojson"
+    )
+    assert not isfile(
+        join(vector_model_no_defaults.root.path, "vector", "vector_all2.nc")
+    )
 
     # test read vector
     vector_model1 = Model(root=str(tmpdir), mode="r")
     vector_model1.add_component("vector", VectorComponent(vector_model1))
     # netcdf only
-    vector_model1.vector.read(fn="vector/vector_full.nc", fn_geom=None)
+    vector_model1.vector.read(filename="vector/vector_full.nc", geometry_filename=None)
     vector0 = vector_model1.vector.data
     assert len(vector0["zs"].dims) == 2
     vector_model1.vector._vector = None
     # geojson only
     # automatic split
     vector_model1.vector.read(
-        fn="vector/vector_split.nc", fn_geom="vector/vector_split.geojson"
+        filename="vector/vector_split.nc",
+        geometry_filename="vector/vector_split.geojson",
     )
     vector1 = vector_model1.vector.data
     assert len(vector1["zs"].dims) == 2
     vector_model1.vector._vector = None
     # geojson 1D data only
-    vector_model1.vector.read(fn=None, fn_geom="vector/vector_all2.geojson")
+    vector_model1.vector.read(
+        filename=None, geometry_filename="vector/vector_all2.geojson"
+    )
     vector3 = vector_model1.vector.data
     assert "zs" not in vector3
 
