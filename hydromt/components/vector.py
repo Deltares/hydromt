@@ -47,8 +47,8 @@ class VectorComponent(ModelComponent):
         """
         super().__init__(model)
         self._vector: Optional[xr.Dataset] = None
-        self.filename = filename
-        self.geometry_filename = geometry_filename
+        self._filename = filename
+        self._geometry_filename = geometry_filename
 
     @property
     def data(self) -> xr.Dataset:
@@ -193,8 +193,8 @@ class VectorComponent(ModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize_vector(skip_read=True)
-        filename = filename or self.filename
-        geometry_filename = geometry_filename or self.geometry_filename
+        filename = filename or self._filename
+        geometry_filename = geometry_filename or self._geometry_filename
 
         if filename is None and geometry_filename is None:
             raise ValueError(
@@ -283,8 +283,8 @@ class VectorComponent(ModelComponent):
             self._logger.debug("No vector data found, skip writing.")
             return
         self._root._assert_write_mode()
-        filename = filename or self.filename
-        geometry_filename = geometry_filename or self.geometry_filename
+        filename = filename or self._filename
+        geometry_filename = geometry_filename or self._geometry_filename
 
         if filename is None and geometry_filename is None:
             raise ValueError(
