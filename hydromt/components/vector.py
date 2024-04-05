@@ -19,16 +19,32 @@ from hydromt.models.model import Model
 
 __all__ = ["VectorComponent"]
 
-DEFAULT_FN = "vector/vector.nc"
-DEFAULT_FN_GEOM = "vector/vector.geojson"
-
 
 class VectorComponent(ModelComponent):
     """Component to handle vector data in a model."""
 
-    def __init__(self, model: Model) -> None:
+    def __init__(
+        self,
+        model: Model,
+        *,
+        fn: str = "vector/vector.nc",
+        fn_geom: str = "vector/vector.geojson",
+    ) -> None:
+        """Initialize a vector component.
+
+        Parameters
+        ----------
+        model : Model
+            Parent model
+        fn : str, optional
+            File name of the vector component, by default "vector/vector.nc"
+        fn_geom : str, optional
+            File name of the vector geometry, by default "vector/vector.geojson"
+        """
         super().__init__(model)
         self._vector: Optional[xr.Dataset] = None
+        self.fn = fn
+        self.fn_geom = fn_geom
 
     @property
     def data(self) -> xr.Dataset:
@@ -42,7 +58,6 @@ class VectorComponent(ModelComponent):
         return self._vector
 
     def _initialize_vector(self, skip_read=False) -> None:
-        """Initialize vector data."""
         if self._vector is None:
             self._vector = xr.Dataset()
             if self._root.is_reading_mode() and not skip_read:
@@ -142,8 +157,8 @@ class VectorComponent(ModelComponent):
     def read(
         self,
         *,
-        fn: Optional[str] = DEFAULT_FN,
-        fn_geom: str = DEFAULT_FN_GEOM,
+        fn: Optional[str] = None,
+        fn_geom: Optional[str] = None,
         **kwargs,
     ) -> None:
         """Read model vector from combined netcdf and geojson file.
@@ -174,6 +189,9 @@ class VectorComponent(ModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize_vector(skip_read=True)
+        fn = fn or self.fn
+        fn_geom = fn_geom or self.fn_geom
+
         if fn is not None:
             # Disable lazy loading of data
             # to avoid issues with reading object dtype data
@@ -209,8 +227,8 @@ class VectorComponent(ModelComponent):
     def write(
         self,
         *,
-        fn: str = DEFAULT_FN,
-        fn_geom: str = DEFAULT_FN_GEOM,
+        fn: Optional[str] = None,
+        fn_geom: Optional[str] = None,
         ogr_compliant: bool = False,
         **kwargs,
     ):
@@ -254,6 +272,8 @@ class VectorComponent(ModelComponent):
             self._logger.debug("No vector data found, skip writing.")
             return
         self._root._assert_write_mode()
+        fn = fn or self.fn
+        fn_geom = fn_geom or self.fn_geom
 
         # If fn is None check if vector contains only 1D data
         if fn is None:

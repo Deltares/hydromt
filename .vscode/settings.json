@@ -30,5 +30,6 @@
         "SFINCS",
         "xarray",
         "zarr"
-    ]
+    ],
+    "autoDocstring.docstringFormat": "numpy"
 }
