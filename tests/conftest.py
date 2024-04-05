@@ -2,7 +2,7 @@ from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator, Optional
+from typing import Any, Generator, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -327,9 +327,8 @@ def model(demda, world, obsda):
     return mod
 
 
-@pytest.fixture()
-def vector_model(ts, geodf):
-    mod = Model(components={"vector": {"type": VectorComponent.__name__}})
+def _create_vector_model(components: dict[str, dict[str, Any]], *, ts, geodf) -> Model:
+    mod = Model(components=components)
     mod.setup_config(**{"header": {"setting": "value"}})
     da = xr.DataArray(
         ts,
@@ -345,28 +344,27 @@ def vector_model(ts, geodf):
 
 
 @pytest.fixture()
+def vector_model(ts, geodf):
+    return _create_vector_model(
+        {"vector": {"type": VectorComponent.__name__}},
+        ts=ts,
+        geodf=geodf,
+    )
+
+
+@pytest.fixture()
 def vector_model_no_defaults(ts, geodf):
-    mod = Model(
-        components={
+    return _create_vector_model(
+        {
             "vector": {
                 "type": VectorComponent.__name__,
                 "filename": None,
                 "geometry_filename": None,
             }
-        }
+        },
+        ts=ts,
+        geodf=geodf,
     )
-    mod.setup_config(**{"header": {"setting": "value"}})
-    da = xr.DataArray(
-        ts,
-        dims=["index", "time"],
-        coords={"index": ts.index, "time": ts.columns},
-        name="zs",
-    )
-    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
-    da.vector.set_crs(geodf.crs)
-    mod.get_component("region", ModelRegionComponent).set(geodf)
-    mod.get_component("vector", VectorComponent).set(da)
-    return mod
 
 
 # @pytest.fixture()
