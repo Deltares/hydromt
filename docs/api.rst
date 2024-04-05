@@ -592,6 +592,7 @@ General methods
    MeshComponent.set
    MeshComponent.write
    MeshComponent.read
+   MeshComponent.get_mesh
 
 
 Setup methods
@@ -601,9 +602,8 @@ Setup methods
    :toctree: _generated
 
    MeshComponent.create2d
-   MeshComponent.add_data_from_constant
-   MeshComponent.add_data_from_rasterdataset
-   MeshComponent.add_data_from_raster_reclass
+   MeshComponent.add_2d_data_from_rasterdataset
+   MeshComponent.add_2d_data_from_raster_reclass
 
 
 .. _vector_model_api:

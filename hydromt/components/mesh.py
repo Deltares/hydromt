@@ -266,7 +266,7 @@ class MeshComponent(ModelComponent):
         return None
 
     @property
-    def mesh_region(self) -> Optional[gpd.GeoDataFrame]:
+    def region(self) -> Optional[gpd.GeoDataFrame]:
         """Return mesh total_bounds as a geodataframe."""
         if len(self.data) > 0:
             region = gpd.GeoDataFrame(
@@ -377,7 +377,7 @@ class MeshComponent(ModelComponent):
             return self.mesh_grids[grid_name]
 
     @hydromt_step
-    def add_data_from_rasterdataset(
+    def add_2d_data_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
         *,
@@ -454,7 +454,7 @@ class MeshComponent(ModelComponent):
         return list(uds_sample.data_vars.keys())
 
     @hydromt_step
-    def add_data_from_raster_reclass(
+    def add_2d_data_from_raster_reclass(
         self,
         raster_fn: Union[str, Path, xr.DataArray],
         reclass_table_fn: Union[str, Path, pd.DataFrame],
