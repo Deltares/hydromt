@@ -220,7 +220,6 @@ class VectorComponent(ModelComponent):
         ):
             gdf = gpd.read_file(join(self._root.path, geometry_filename))
             # geom + netcdf data
-            # TODO: What if ds is None?
             if filename is not None:
                 ds = GeoDataset.from_gdf(gdf, data_vars=ds)
             # geom only
