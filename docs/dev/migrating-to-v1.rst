@@ -198,6 +198,12 @@ Finally, you can provide additional functionality by providing the following opt
 - `create`: the ability to construct the schematization of the component (computation units like grid cells, `mesh1d` or network lines, vector units for lumped model etc.) from the provided arguments.
 - `add_data`: the ability to add model data and parameters to the component once the schematization is well-defined (i.e. add land-use data to grid or mesh etc.).
 
+Additionally we encourage some best practices to be aware of when implementing a components:
+
+- Make sure that your component calles `super().__init__(model=model)` in the `__init__` function of your component. This will make sure that references such as `self._logger` and `self._root` are registered properly so you can access them.
+- Your component should take some variation of a `default_filename` agument in its `__init__` function that is either required or provides a default that is not `None`. This should be saved as an attribute and be used for reading and writing when the user does not provide a different path as an argument to the read or write functions. This allows developers, plugin developers and users alike to both provide sensible defaults as well as the opportunity to override them when necessary.
+
+
 It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
 ```python
@@ -369,7 +375,23 @@ has not been changed compared to the GridModel.
 TablesComponent
 ^^^^^^^^^^^^^^
 
-The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionnary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+
+ConfigComponent
+^^^^^^^^^^^^^^^
+
+What was previously called `model.config` as well as some other class variables such as `Model._CONF` is now located in
+`ConfigComponent`. Otherwise it still works mostly identically, meaning that it will parse dotted keys like
+`a.b.c` into nested dictionaries such as `{'a':{'b':{'c': value}}}`. By default the data will be read from and written to
+`<root>/config.yml` which can be overwritten either by providing different arguments or by subclassing
+the component and providing a different default value.
+
+One main change is that the `model.config` used to be created by default from a template file which was usually located
+in `join(Model._DATADIR, Model._NAME, Model._CONF)`. To create a config from a template, users now need to directly call
+th new `config.create` method, which is similar to how other components work. Each plugin can still define a default config file
+template without subclassing the `ConfigComponent` by providing a `default_template_filename` when initializing their
+`ConfigComponent`.
+
 
 Plugins
 -------
