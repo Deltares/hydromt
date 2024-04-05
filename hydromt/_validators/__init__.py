@@ -1,13 +1,13 @@
 """Pydantic models for validation of various hydromt internal components."""
 
-from .data_catalog import (
+from hydromt._validators.data_catalog import (
     DataCatalogItem,
     DataCatalogItemMetadata,
     DataCatalogMetaData,
     DataCatalogValidator,
 )
-from .model_config import HydromtModelSetup, HydromtModelStep
-from .region import (
+from hydromt._validators.model_config import HydromtModelSetup, HydromtModelStep
+from hydromt._validators.region import (
     BoundingBoxRegion,
     PathRegion,
     Region,
