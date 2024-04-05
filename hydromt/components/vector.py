@@ -27,8 +27,8 @@ class VectorComponent(ModelComponent):
         self,
         model: Model,
         *,
-        fn: str = "vector/vector.nc",
-        fn_geom: str = "vector/vector.geojson",
+        fn: Optional[str] = "vector/vector.nc",
+        fn_geom: Optional[str] = "vector/vector.geojson",
     ) -> None:
         """Initialize a vector component.
 
@@ -37,9 +37,13 @@ class VectorComponent(ModelComponent):
         model : Model
             Parent model
         fn : str, optional
-            File name of the vector component, by default "vector/vector.nc"
+            File name of the vector component, by default "vector/vector.nc".
+            If set to None, and the write/read function fn is also None, then vector will be read from/written to the geometry file only.
+            See read and write functions for more details.
         fn_geom : str, optional
             File name of the vector geometry, by default "vector/vector.geojson"
+            If set to None, and the write/read function fn_geom is also None, then vector will be read from/written to the netcdf file only.
+            See read and write functions for more details.
         """
         super().__init__(model)
         self._vector: Optional[xr.Dataset] = None
@@ -192,6 +196,9 @@ class VectorComponent(ModelComponent):
         fn = fn or self.fn
         fn_geom = fn_geom or self.fn_geom
 
+        if fn is None and fn_geom is None:
+            raise ValueError("Both fn and fn_geom are None, no source file given.")
+
         if fn is not None:
             # Disable lazy loading of data
             # to avoid issues with reading object dtype data
@@ -275,8 +282,14 @@ class VectorComponent(ModelComponent):
         fn = fn or self.fn
         fn_geom = fn_geom or self.fn_geom
 
+        if fn is None and fn_geom is None:
+            raise ValueError(
+                "Both fn and fn_geom are None, no destination file given. Please provide either fn or fn_geom."
+            )
+
         # If fn is None check if vector contains only 1D data
         if fn is None:
+            assert fn_geom is not None
             # Check if 1D data only is present
             snames = ["y_name", "x_name", "index_dim", "geom_name"]
             sdims = [ds.vector.attrs.get(n) for n in snames if n in ds.vector.attrs]
@@ -297,6 +310,7 @@ class VectorComponent(ModelComponent):
 
         # write to netcdf only
         if fn_geom is None:
+            assert fn is not None
             os.makedirs(dirname(join(self._root.path, fn)), exist_ok=True)
             # cannot call directly ds.vector.to_netcdf
             # because of possible PermissionError
