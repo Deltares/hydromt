@@ -29,7 +29,7 @@ class TablesComponent(ModelComponent):
     It is well suited to represent non-geospatial tabular model data.
     """
 
-    def __init__(self, model: "Model", default_filename: str = _DEFAULT_TABLE_FILENAME):
+    def __init__(self, model: "Model", filename: str = _DEFAULT_TABLE_FILENAME):
         """Initialize a TablesComponent.
 
         Parameters
@@ -43,7 +43,7 @@ class TablesComponent(ModelComponent):
             relative or absolute.
         """
         self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
-        self._filename = default_filename
+        self._filename = filename
         super().__init__(model=model)
 
     @property
