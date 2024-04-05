@@ -240,7 +240,7 @@ In the core of HydroMT, the available components are:
 +=======================+==================+========================================================================================+
 | model.tables          | TablesComponent  | Component for managing non-geospatial data in pandas DataFrames                        |
 +-----------------------+------------------+----------------------------------------------------------------------------------------+
-| model.grid            | GridComponent    |  Component for managing regular gridded data in single hydromt RasterDataset           |
+| model.grid            | GridComponent    | Component for managing regular gridded data in single hydromt RasterDataset           |
 +-----------------------+------------------+----------------------------------------------------------------------------------------+
 | model.geoms('region') | RegionComponent  | Component for managing the area of interest for the model in a geopandas GeoDataFrame. |
 +-----------------------+------------------+----------------------------------------------------------------------------------------+
@@ -372,8 +372,9 @@ has not been changed compared to the GridModel.
 | model.setup_grid_from_*(...) | model.grid.add_data_from_*(...) 		   |
 +------------------------------+-------------------------------------------+
 
+
 TablesComponent
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionnary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
