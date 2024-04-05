@@ -13,6 +13,7 @@ import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
 
+from hydromt.components.config import ConfigComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
@@ -327,9 +328,24 @@ def model(demda, world, obsda):
     return mod
 
 
-def _create_vector_model(components: dict[str, dict[str, Any]], *, ts, geodf) -> Model:
+def _create_vector_model(
+    *,
+    use_default_filename: bool = True,
+    use_default_geometry_filename: bool = True,
+    ts,
+    geodf,
+) -> Model:
+    components: dict[str, Any] = {
+        "vector": {"type": VectorComponent.__name__},
+        "config": {"type": ConfigComponent.__name__},
+    }
+    if not use_default_filename:
+        components["vector"]["filename"] = None
+    if not use_default_geometry_filename:
+        components["vector"]["geometry_filename"] = None
+
     mod = Model(components=components)
-    mod.setup_config(**{"header": {"setting": "value"}})
+    mod.get_component("config", ConfigComponent).set("header.setting", "value")
     da = xr.DataArray(
         ts,
         dims=["index", "time"],
@@ -346,7 +362,6 @@ def _create_vector_model(components: dict[str, dict[str, Any]], *, ts, geodf) ->
 @pytest.fixture()
 def vector_model(ts, geodf):
     return _create_vector_model(
-        {"vector": {"type": VectorComponent.__name__}},
         ts=ts,
         geodf=geodf,
     )
@@ -355,13 +370,8 @@ def vector_model(ts, geodf):
 @pytest.fixture()
 def vector_model_no_defaults(ts, geodf):
     return _create_vector_model(
-        {
-            "vector": {
-                "type": VectorComponent.__name__,
-                "filename": None,
-                "geometry_filename": None,
-            }
-        },
+        use_default_filename=False,
+        use_default_geometry_filename=False,
         ts=ts,
         geodf=geodf,
     )

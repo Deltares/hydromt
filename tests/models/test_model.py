@@ -16,9 +16,9 @@ from pytest_mock import MockerFixture
 from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
+from hydromt.components.config import ConfigComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
-from hydromt.components.tables import TablesComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
@@ -148,63 +148,6 @@ def test_model(model, tmpdir):
     with pytest.deprecated_call():
         equal, errors = model.test_equal(model1)
     assert equal, errors
-
-
-def test_model_tables_key_error(df, tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("test_table", TablesComponent(m))
-    component = m.get_component("test_table", TablesComponent)
-
-    with pytest.raises(KeyError):
-        component.data["1"]
-
-
-def test_model_tables_merges_correctly(df, tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("test_table", TablesComponent(m))
-    component = m.get_component("test_table", TablesComponent)
-
-    # make a couple copies of the dfs for testing
-    dfs = {str(i): df.copy() * i for i in range(5)}
-
-    component.set(tables=dfs)
-
-    computed = component.get_tables_merged()
-    expected = pd.concat([df.assign(table_origin=name) for name, df in dfs.items()])
-    assert computed.equals(expected)
-
-
-def test_model_tables_sets_correctly(df, tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("test_table", TablesComponent(m))
-    component = m.get_component("test_table", TablesComponent)
-
-    # make a couple copies of the dfs for testing
-    dfs = {str(i): df.copy() for i in range(5)}
-
-    for i, d in dfs.items():
-        component.set(tables=d, name=i)
-        assert df.equals(component.data[i])
-
-    assert list(component.data.keys()) == list(map(str, range(5)))
-
-
-@pytest.mark.skip(reason="Needs raster dataset implementation")
-def test_model_tables_reads_and_writes_correctly(df, tmpdir: Path):
-    model = Model(root=str(tmpdir), mode="r+")
-    model.add_component("test_table", TablesComponent(model))
-    component = model.get_component("test_table", TablesComponent)
-
-    component.set(tables=df, name="table")
-
-    model.write()
-    clean_model = Model(root=str(tmpdir), mode="r")
-    clean_model.add_component("test_table", TablesComponent(model))
-    clean_model.read()
-
-    clean_component = clean_model.get_component("test_table", TablesComponent)
-
-    assert component.data["table"].equals(clean_component.data["table"])
 
 
 @pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
@@ -375,21 +318,6 @@ def test_model_set_geoms(tmpdir):
     model.region.create({"geom": geom_28992})  # set model crs based on epsg28992
     model.set_geoms(geom, "geom_wgs84")  # this should convert the geom crs to epsg28992
     assert model._geoms["geom_wgs84"].crs.to_epsg() == model.crs.to_epsg()
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_config(model, tmpdir):
-    # config
-    model.root.set(str(tmpdir))
-    model.set_config("global.name", "test")
-    assert "name" in model._config["global"]
-    assert model.get_config("global.name") == "test"
-    fn = str(tmpdir.join("test.file"))
-    with open(fn, "w") as f:
-        f.write("")
-    model.set_config("global.file", "test.file")
-    assert str(model.get_config("global.file")) == "test.file"
-    assert str(model.get_config("global.file", abs_path=True)) == fn
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
@@ -627,7 +555,10 @@ def test_vectormodel(vector_model, tmpdir):
     model1 = Model(
         root=str(tmpdir),
         mode="r",
-        components={"vector": {"type": VectorComponent.__name__}},
+        components={
+            "vector": {"type": VectorComponent.__name__},
+            "config": {"type": ConfigComponent.__name__},
+        },
     )
     model1.read()
     equal, errors = vector_model.test_equal(model1)

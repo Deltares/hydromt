@@ -8,7 +8,7 @@ import shutil
 import typing
 from abc import ABCMeta
 from inspect import _empty, signature
-from os.path import abspath, basename, dirname, isabs, isdir, isfile, join
+from os.path import basename, dirname, isabs, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import (
@@ -33,12 +33,12 @@ from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
-from hydromt.components import ModelRegionComponent
-from hydromt.components.base import ModelComponent
+from hydromt.components import (
+    ModelComponent,
+    ModelRegionComponent,
+)
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io import configread
-from hydromt.io.writers import configwrite
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
 from hydromt.utils.deep_merge import deep_merge
@@ -58,7 +58,6 @@ class Model(object, metaclass=ABCMeta):
 
     _DATADIR = ""  # path to the model data folder
     _NAME: str = "modelname"
-    _CONF: StrPath = "model.yml"
     _GEOMS = {"<general_hydromt_name>": "<model_name>"}
     _MAPS = {"<general_hydromt_name>": "<model_name>"}
     _FOLDERS = [""]
@@ -83,7 +82,6 @@ class Model(object, metaclass=ABCMeta):
         components: Optional[dict[str, dict[str, Any]]] = None,
         root: Optional[str] = None,
         mode: str = "w",
-        config_fn: Optional[str] = None,
         data_libs: Optional[Union[List, str]] = None,
         logger=_logger,
         **artifact_keys,
@@ -96,9 +94,6 @@ class Model(object, metaclass=ABCMeta):
             Model root, by default None
         mode : {'r','r+','w'}, optional
             read/append/write mode, by default "w"
-        config_fn : str, optional
-            Model simulation configuration file, by default None.
-            Note that this is not the HydroMT model setup configuration file!
         data_libs : List[str], optional
             List of data catalog configuration files, by default None
         \**artifact_keys:
@@ -121,9 +116,6 @@ class Model(object, metaclass=ABCMeta):
             data_libs=data_libs, logger=self.logger, **artifact_keys
         )
 
-        # placeholders
-        # metadata maps that can be at different resolutions
-        self._config: Optional[Dict[str, Any]] = None  # nested dictionary
         self._maps: Optional[XArrayDict] = None
 
         self._geoms: Optional[Dict[str, gpd.GeoDataFrame]] = None
@@ -138,9 +130,6 @@ class Model(object, metaclass=ABCMeta):
         self._add_components(components)
 
         self._defered_file_closes = []
-
-        # model paths
-        self._config_fn = self._CONF if config_fn is None else config_fn
 
         model_metadata = cast(
             Dict[str, str], PLUGINS.model_metadata[self.__class__.__name__]
@@ -477,10 +466,17 @@ class Model(object, metaclass=ABCMeta):
         tuple[bool, dict[str, str]]
             True if equal, dictionary with errors per model component which is not equal.
         """
-        assert isinstance(other, self.__class__)
+        if not isinstance(other, self.__class__):
+            return False, {
+                "__class__": f"f{other.__class__} does not inherit from {self.__class__}."
+            }
         components = list(self._components.keys())
         components_other = list(other._components.keys())
-        assert components == components_other
+        if components != components_other:
+            return False, {
+                "components": f"Components do not match: {components} != {components_other}"
+            }
+
         errors: dict[str, str] = {}
         is_equal = True
         for name, c in self._components.items():
@@ -488,172 +484,6 @@ class Model(object, metaclass=ABCMeta):
             is_equal &= component_equal
             errors.update(**component_errors)
         return is_equal, errors
-
-    # model configuration
-    @property
-    def config(self) -> Dict[str, Union[Dict, str]]:
-        """Model configuration. Returns a (nested) dictionary."""
-        if self._config is None:
-            self._initialize_config()
-        return self._config
-
-    def _initialize_config(self, skip_read=False) -> None:
-        """Initialize the model config."""
-        if self._config is None:
-            self._config = dict()
-            if not skip_read:
-                # no check for read mode here
-                # model config is read if in read-mode and it exists
-                # default config if in write-mode
-                self.read_config()
-
-    def set_config(self, *args):
-        """Update the config dictionary at key(s) with values.
-
-        Parameters
-        ----------
-        args : key(s), value tuple, with minimal length of two
-            keys can given by multiple args: ('key1', 'key2', 'value')
-            or a string with '.' indicating a new level: ('key1.key2', 'value')
-
-        Examples
-        --------
-        >> # self.config = {'a': 1, 'b': {'c': {'d': 2}}}
-
-        >> set_config('a', 99)
-        >> {'a': 99, 'b': {'c': {'d': 2}}}
-
-        >> set_config('b', 'c', 'd', 99) # identical to set_config('b.d.e', 99)
-        >> {'a': 1, 'b': {'c': {'d': 99}}}
-        """
-        self._initialize_config()
-        if len(args) < 2:
-            raise TypeError("set_config() requires a least one key and one value.")
-        args = list(args)
-        value = args.pop(-1)
-        if len(args) == 1 and "." in args[0]:
-            args = args[0].split(".") + args[1:]
-        branch = self._config
-        for key in args[:-1]:
-            if key not in branch or not isinstance(branch[key], dict):
-                branch[key] = {}
-            branch = branch[key]
-        branch[args[-1]] = value
-
-    def read_config(self, config_fn: Optional[str] = None):
-        """Parse config from file.
-
-        If no config file found a default config file is returned in writing mode.
-        """
-        self.root._assert_write_mode()
-        prefix = "User defined"
-        if config_fn is None:  # prioritize user defined config path (new v0.4.1)
-            if not self.root.is_reading_mode():  # write-only mode > read default config
-                config_fn = join(self._DATADIR, self._NAME, self._CONF)
-                prefix = "Default"
-            elif self.root is not None:  # append or write mode > read model config
-                config_fn = join(self.root.path, self._config_fn)
-                prefix = "Model"
-        cfdict = dict()
-        if config_fn is not None:
-            if isfile(config_fn):
-                cfdict = self._configread(config_fn)
-                self.logger.debug(f"{prefix} config read from {config_fn}")
-            elif (
-                self.root is not None
-                and not isabs(config_fn)
-                and isfile(join(self.root.path, config_fn))
-            ):
-                cfdict = self._configread(join(self.root.path, config_fn))
-                self.logger.debug(
-                    f"{prefix} config read from {join(self.root.path,config_fn)}"
-                )
-            elif isfile(abspath(config_fn)):
-                cfdict = self._configread(abspath(config_fn))
-                self.logger.debug(f"{prefix} config read from {abspath(config_fn)}")
-            else:  # skip for missing default
-                self.logger.error(f"{prefix} config file not found at {config_fn}")
-
-        # always overwrite config when reading
-        self._config = cfdict
-
-    def write_config(
-        self, config_name: Optional[str] = None, config_root: Optional[str] = None
-    ):
-        """Write config to <root/config_fn>."""
-        self.root._assert_write_mode()
-        if config_name is not None:
-            self._config_fn = config_name
-        elif self._config_fn is None:
-            self._config_fn = self._CONF
-        if config_root is None:
-            config_root = self.root.path
-        fn = join(config_root, self._config_fn)
-        self.logger.info(f"Writing model config to {fn}")
-        self._configwrite(fn)
-
-    def _configread(self, fn: str):
-        return configread(fn, abs_path=False)
-
-    def _configwrite(self, fn: str):
-        return configwrite(fn, self.config)
-
-    def setup_config(self, **cfdict):
-        """Update config with a dictionary."""
-        # TODO rename to update_config
-        if len(cfdict) > 0:
-            self.logger.debug("Setting model config options.")
-        for key, value in cfdict.items():
-            self.set_config(key, value)
-
-    def get_config(self, *args, fallback=None, abs_path: Optional[bool] = False):
-        """Get a config value at key(s).
-
-        Parameters
-        ----------
-        args : tuple or string
-            keys can given by multiple args: ('key1', 'key2')
-            or a string with '.' indicating a new level: ('key1.key2')
-        fallback: any, optional
-            fallback value if key(s) not found in config, by default None.
-        abs_path: bool, optional
-            If True return the absolute path relative to the model root,
-            by deafult False.
-            NOTE: this assumes the config is located in model root!
-
-        Returns
-        -------
-        value : any type
-            dictionary value
-
-        Examples
-        --------
-        >> # self.config = {'a': 1, 'b': {'c': {'d': 2}}}
-
-        >> get_config('a')
-        >> 1
-
-        >> get_config('b', 'c', 'd') # identical to get_config('b.c.d')
-        >> 2
-
-        >> get_config('b.c') # # identical to get_config('b','c')
-        >> {'d': 2}
-        """
-        args = list(args)
-        if len(args) == 1 and "." in args[0]:
-            args = args[0].split(".") + args[1:]
-        branch = self.config  # reads config at first call
-        for key in args[:-1]:
-            branch = branch.get(key, {})
-            if not isinstance(branch, dict):
-                branch = dict()
-                break
-        value = branch.get(args[-1], fallback)
-        if abs_path and isinstance(value, str):
-            value = Path(value)
-            if not value.is_absolute():
-                value = Path(abspath(join(self.root.path, value)))
-        return value
 
     # map files setup methods
     def setup_maps_from_rasterdataset(
