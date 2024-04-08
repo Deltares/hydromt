@@ -165,7 +165,7 @@ class MeshComponent(ModelComponent):
                     self._logger.info(
                         "no crs is found in the file, assigning from user input."
                     )
-            self._data = uds
+            self.set(uds)
 
     @hydromt_step
     def create2d(
