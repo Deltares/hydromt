@@ -3,7 +3,7 @@
 from os import makedirs
 from os.path import abspath, dirname, isabs, isfile, join, splitext
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
@@ -262,6 +262,30 @@ class ConfigComponent(ModelComponent):
             self._data = read_toml(template)
         else:
             raise ValueError(f"Unknown file extension: {template.suffix}")
+
+    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_config = cast(ConfigComponent, other)
+
+        # for once python does the recusion for us
+        if self.data == other_config.data:
+            return True, {}
+        else:
+            return False, {"config": "Configs are not equal"}
 
     @hydromt_step
     def update(self, data: Dict[str, Any]):
