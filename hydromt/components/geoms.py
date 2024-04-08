@@ -22,22 +22,25 @@ from hydromt.metadata_resolver import ConventionResolver
 if TYPE_CHECKING:
     from hydromt.models.model import Model
 
-DEFAULT_GEOMS_FILENAME = "geoms/{name}.geojson"
+_DEFAULT_GEOMS_FILENAME = "geoms/{name}.geojson"
 
 
 class GeomsComponent(ModelComponent):
     """A component to manage geo-spatial geometries."""
 
-    def __init__(self, model: "Model", default_filename: str = DEFAULT_GEOMS_FILENAME):
+    def __init__(self, model: "Model", filename: str = _DEFAULT_GEOMS_FILENAME):
         """Initialize a GeomComponent.
 
         Parameters
         ----------
         model: Model
             HydroMT model instance
+        filename: str
+            The path to use for reading and writing of component data by default.
+            by default DEFAULT_GEOMS_FILENAME
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
-        self._filename = default_filename
+        self._filename = filename
         super().__init__(model=model)
 
     @property
@@ -60,7 +63,7 @@ class GeomsComponent(ModelComponent):
                 self.read()
 
     def set(self, geom: Union[GeoDataFrame, GeoSeries], name: str):
-        """Add data to the geoms attribute.
+        """Add data to the geom component.
 
         Arguments
         ---------
@@ -91,9 +94,10 @@ class GeomsComponent(ModelComponent):
 
         Parameters
         ----------
-        fn : str, optional
-            filename relative to model root, may contain wildcards,
-            by default ``geoms/\*.geojson``
+        filename : str, optional
+            filename relative to model root. should contain a {name} placeholder
+            which will be used to determine the names/keys of the geometries.
+            if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
@@ -101,7 +105,6 @@ class GeomsComponent(ModelComponent):
         self._root._assert_read_mode()
         self._initialize(skip_read=True)
         read_path = join(self._root.path, filename or self._filename)
-        # TODO: figure out if _expand_uri_placeholders should remain private
         fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(read_path)
         fns = glob(fn_glob)
         for fn in fns:
@@ -118,20 +121,19 @@ class GeomsComponent(ModelComponent):
         to_wgs84: bool = False,
         **kwargs,
     ) -> None:
-        r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<fn>.
+        r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<filename>.
 
         key-word arguments are passed to :py:meth:`geopandas.GeoDataFrame.to_file`
 
         Parameters
         ----------
-        fn : str, optional
-            filename relative to model root and should contain a {name} placeholder,
-            by default 'geoms/{name}.geojson'
-        paths: Optional[Dict[str,Path]]
-            a dictionary mapping names of components to file paths. Will override fn.
+        filename : str, optional
+            filename relative to model root. should contain a {name} placeholder
+            which will be used to determine the names/keys of the geometries.
+            if None, the path that was provided at init will be used.
         to_wgs84: bool, optional
-            Option to enforce writing GeoJSONs with WGS84(EPSG:4326) coordinates.
-        \**kwargs:
+            If True, the geoms will be reprojected to WGS84(EPSG:4326) before they are written.
+        **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
