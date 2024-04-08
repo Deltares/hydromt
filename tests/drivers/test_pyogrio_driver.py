@@ -4,12 +4,12 @@ from pathlib import Path
 import geopandas as gpd
 import numpy as np
 import pytest
-from pyogrio.errors import DataSourceError
 from shapely import box
 
 from hydromt._typing import Bbox
 from hydromt.driver.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
+from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 
 class TestPyogrioDriver:
@@ -69,10 +69,18 @@ class TestPyogrioDriver:
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
     def test_read_nodata(self, driver: PyogrioDriver):
-        with pytest.raises(DataSourceError):
+        with pytest.raises(FileNotFoundError):
             driver.read("no_data.geojson")
 
     def test_read_multiple_uris(self, driver: PyogrioDriver):
+        # Create Resolver that returns multiple uris
+        class FakeResolver(MetaDataResolver):
+            def resolve(self, uri: str, *args, **kwargs):
+                return ["more", "than", "one"]
+
+        driver: PyogrioDriver = PyogrioDriver(
+            metadata_resolver=FakeResolver(),
+        )
         with pytest.raises(ValueError, match="must be 1"):
             driver.read("uri_{variable}", variables=["more", "than", "one"])
 

@@ -7,7 +7,6 @@ import geopandas as gpd
 import numpy as np
 import pytest
 from pydantic import ValidationError
-from pyogrio.errors import DataSourceError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
@@ -148,7 +147,7 @@ class TestGeoDataFrameSource:
             data_adapter=GeoDataFrameAdapter(),
             driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
         )
-        with pytest.raises(DataSourceError):
+        with pytest.raises(FileNotFoundError):
             source.read_data()
 
     def test_instantiate_directly(

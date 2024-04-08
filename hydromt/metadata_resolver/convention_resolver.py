@@ -1,9 +1,10 @@
 """MetaDataResolver using HydroMT naming conventions."""
 
+from functools import reduce
 from itertools import product
 from logging import Logger, getLogger
 from string import Formatter
-from typing import Any, List, Optional, Set, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -70,6 +71,11 @@ class ConventionResolver(MetaDataResolver):
         vrs: dict[str] = [inverse_rename_mapping.get(var, var) for var in variables]
         return vrs
 
+    def _resolve_wildcards(
+        self, uris: Iterable[str], fs: AbstractFileSystem
+    ) -> Set[str]:
+        return set(reduce(lambda uri_res, uri: uri_res + fs.glob(uri), uris, []))
+
     def resolve(
         self,
         uri: str,
@@ -86,26 +92,31 @@ class ConventionResolver(MetaDataResolver):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
-    ) -> list[str]:
+    ) -> List[str]:
         """Resolve the placeholders in the URI."""
         uri_expanded, keys = self._expand_uri_placeholders(uri, timerange, variables)
         if timerange:
             dates = self._get_dates(keys, timerange)
         else:
-            dates = pd.PeriodIndex(["2023-01-01"], freq="d")
+            dates = pd.PeriodIndex(["2023-01-01"], freq="d")  # fill any valid value
         if variables:
             variables = self._get_variables(variables)
         else:
-            variables = [""]
-        fmts: list[dict[str, Any]] = list(
-            map(
-                lambda t: {
-                    "year": t[0].year,
-                    "month": t[0].month,
-                    "variable": t[1],
-                    "zoom_level": zoom_level,
-                },
-                product(dates, variables),
+            variables = [""]  # fill any valid value
+        fmts: Iterable[Dict[str, Any]] = map(
+            lambda t: {
+                "year": t[0].year,
+                "month": t[0].month,
+                "variable": t[1],
+                "zoom_level": zoom_level,
+            },
+            product(dates, variables),
+        )
+        uris: List[str] = list(
+            self._resolve_wildcards(
+                map(lambda fmt: uri_expanded.format(**fmt), fmts), fs
             )
         )
-        return [uri_expanded.format(**fmt) for fmt in fmts]
+        if not uris:
+            raise FileNotFoundError(f"No files found for: {uri_expanded}")
+        return uris
