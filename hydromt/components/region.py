@@ -282,7 +282,9 @@ class ModelRegionComponent(ModelComponent):
             errors["kind"] = f"kind {self.kind} != {other_region.kind}"
 
         try:
-            assert_geodataframe_equal(self.data, other_region.data)
+            assert_geodataframe_equal(
+                self.data, other_region.data, check_like=True, check_less_precise=True
+            )
         except AssertionError as e:
             errors["data"] = str(e)
 

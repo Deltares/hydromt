@@ -610,6 +610,7 @@ Components and attributes
    VectorComponent.data
    VectorComponent.geometry
    VectorComponent.index_dim
+   VectorComponent.crs
    VectorComponent._model
    VectorComponent._data_catalog
    VectorComponent._logger

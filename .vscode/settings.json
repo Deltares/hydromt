@@ -21,6 +21,7 @@
     "files.insertFinalNewline": true,
     "cSpell.words": [
         "GDAL",
+        "geodataframe",
         "geoms",
         "hydromt",
         "ndarray",

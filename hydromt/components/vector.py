@@ -47,7 +47,7 @@ class VectorComponent(ModelComponent):
             See read and write functions for more details.
         """
         super().__init__(model)
-        self._vector: Optional[xr.Dataset] = None
+        self._data: Optional[xr.Dataset] = None
         self._filename = filename
         self._geometry_filename = geometry_filename
 
@@ -57,14 +57,14 @@ class VectorComponent(ModelComponent):
 
         Returns xr.Dataset with a polygon geometry coordinate.
         """
-        if self._vector is None:
-            self._initialize_vector()
-        assert self._vector is not None
-        return self._vector
+        if self._data is None:
+            self._initialize()
+        assert self._data is not None
+        return self._data
 
-    def _initialize_vector(self, skip_read=False) -> None:
-        if self._vector is None:
-            self._vector = xr.Dataset()
+    def _initialize(self, skip_read=False) -> None:
+        if self._data is None:
+            self._data = xr.Dataset()
             if self._root.is_reading_mode() and not skip_read:
                 self.read()
 
@@ -94,7 +94,7 @@ class VectorComponent(ModelComponent):
         overwrite_geom: bool, optional
             If True, overwrite the complete vector object with data, by default False
         """
-        self._initialize_vector()
+        self._initialize()
         name_required = isinstance(data, np.ndarray) or (
             isinstance(data, xr.DataArray) and data.name is None
         )
@@ -131,7 +131,7 @@ class VectorComponent(ModelComponent):
             else:
                 if overwrite_geom:
                     self._logger.warning("Overwriting vector object with data")
-                self._vector = data
+                self._data = data
         # 2. self.vector has a geometry
         else:
             # data has a geometry - check if it is the same as self.vector
@@ -193,7 +193,7 @@ class VectorComponent(ModelComponent):
             function.
         """
         self._root._assert_read_mode()
-        self._initialize_vector(skip_read=True)
+        self._initialize(skip_read=True)
         filename = filename or self._filename
         geometry_filename = geometry_filename or self._geometry_filename
 

@@ -617,9 +617,7 @@ def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
         join(vector_model_no_defaults.root.path, "vector", "vector_all.nc")
     )
     # geojson 1D data only
-    vector_component._vector = vector_component._vector.drop_vars("zs").drop_vars(
-        "time"
-    )
+    vector_component._data = vector_component._data.drop_vars("zs").drop_vars("time")
     vector_component.write(
         filename=None, geometry_filename="vector/vector_all2.geojson"
     )
@@ -634,7 +632,7 @@ def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
     vector_model1.vector.read(filename="vector/vector_full.nc", geometry_filename=None)
     vector0 = vector_model1.vector.data
     assert len(vector0["zs"].dims) == 2
-    vector_model1.vector._vector = None
+    vector_model1.vector._data = None
     # geojson only
     # automatic split
     vector_model1.vector.read(
@@ -643,7 +641,7 @@ def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
     )
     vector1 = vector_model1.vector.data
     assert len(vector1["zs"].dims) == 2
-    vector_model1.vector._vector = None
+    vector_model1.vector._data = None
     # geojson 1D data only
     vector_model1.vector.read(
         filename=None, geometry_filename="vector/vector_all2.geojson"
