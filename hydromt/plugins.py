@@ -1,7 +1,6 @@
 """Implementation of the mechanism to access the plugin entrypoints."""
 
 import inspect
-from abc import ABC
 from typing import TYPE_CHECKING, Dict, Optional, Type, TypedDict, cast
 
 from importlib_metadata import entry_points
@@ -152,7 +151,7 @@ class Plugins:
                 {
                     k: v
                     for k, v in self._driver_plugins.items()
-                    if ABC not in v["type"].__bases__  # filter ABCs from core
+                    if not inspect.isabstract(v["type"])  # filter ABCs from core
                 },
             )
 
