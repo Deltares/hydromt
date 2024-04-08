@@ -144,6 +144,7 @@ class MeshComponent(ModelComponent):
             Additional keyword arguments to be passed to the `read_nc` method.
         """
         self._root._assert_read_mode()
+        self._initialize(skip_read=True)
         fn = fn or self._filename
         files = read_nc(
             fn, root=self._root.path, logger=self._logger, **kwargs
