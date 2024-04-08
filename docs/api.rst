@@ -566,7 +566,7 @@ Components and attributes
    MeshComponent.data
    MeshComponent.crs
    MeshComponent.bounds
-   MeshComponent.mesh_region
+   MeshComponent.region
    MeshComponent.mesh_names
    MeshComponent.mesh_grids
    MeshComponent.mesh_datasets
