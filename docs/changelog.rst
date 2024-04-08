@@ -17,6 +17,7 @@ Added
 - Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
 - A Github action now checks whether the migration guide is updated (#829)
 - Added a `ConfigComponent` to write configurations for kernels/simulations. (#863)
+- Added a `GeomsComponent` to manage any go-spatial geometry data of a model. (#867)
 
 Changed
 -------

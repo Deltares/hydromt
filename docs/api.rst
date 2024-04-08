@@ -545,6 +545,38 @@ General methods
    TablesComponent.write
    TablesComponent.read
 
+GeomsComponent
+==============
+
+.. autosummary::
+   :toctree: _generated
+
+    GeomsComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GeomsComponent._model
+   GeomsComponent._data_catalog
+   GeomsComponent._logger
+   GeomsComponent._root
+   GeomsComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GeomsComponent.set
+   GeomsComponent.write
+   GeomsComponent.read
+
 
 ConfigComponent
 ===============
