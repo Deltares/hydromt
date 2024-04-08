@@ -41,7 +41,8 @@ def test_summary():
     assert "Model" in model_summary
     assert "Driver Plugins:" in driver_summary
     assert "PyogrioDriver" in driver_summary
-    assert "RasterDatasetDriver" not in driver_summary
+    assert "RasterDatasetDriver" not in driver_summary  # No ABCs in Plugins
+    assert "harmonize_dims" not in driver_summary  # only drivers in Plugins
 
 
 def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str]):
