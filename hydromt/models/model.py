@@ -38,11 +38,11 @@ from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import (
     ModelComponent,
 )
+from hydromt.components.region import SpatialModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
-from hydromt.workflows.region import HasRegion
 
 __all__ = ["Model"]
 
@@ -145,16 +145,18 @@ class Model(object, metaclass=ABCMeta):
                     f"Component {region_component} not found in components."
                     "You can add it afterwards with add_component."
                 )
-            if not isinstance(self._components.get(region_component, None), HasRegion):
+            if not isinstance(
+                self._components.get(region_component, None), SpatialModelComponent
+            ):
                 raise ValueError(
-                    f"Component {region_component} is not a region component."
+                    f"Component {region_component} is not a {SpatialModelComponent.__name__}."
                 )
             return region_component
         else:
             has_region_components = [
                 (name, c)
                 for name, c in self._components.items()
-                if isinstance(c, HasRegion)
+                if isinstance(c, SpatialModelComponent)
             ]
             if len(has_region_components) > 1:
                 raise ValueError(
@@ -190,9 +192,11 @@ class Model(object, metaclass=ABCMeta):
         return self._components[name]
 
     @property
-    def region(self) -> HasRegion:
-        """Return the model region component."""
-        return cast(HasRegion, self._components[self._region_component_name])
+    def region(self) -> SpatialModelComponent:
+        """Return the model's region component."""
+        return cast(
+            SpatialModelComponent, self._components[self._region_component_name]
+        )
 
     @_classproperty
     def api(cls) -> Dict:

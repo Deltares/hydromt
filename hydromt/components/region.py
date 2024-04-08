@@ -1,6 +1,6 @@
 """Model Region class."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from logging import getLogger
 from os import makedirs
 from os.path import basename, exists, isdir, isfile, join
@@ -17,6 +17,7 @@ from shapely import box
 
 from hydromt import _compat
 from hydromt._typing.type_def import StrPath
+from hydromt.components.base import ModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
 from hydromt.workflows.basin_mask import get_basin_geometry
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
 logger = getLogger(__name__)
 
 
-class ModelRegion:
+class SpatialModelComponent(ModelComponent, ABC):
     """Define the model region."""
 
     DEFAULT_REGION_FILENAME = "region.geojson"
@@ -38,13 +39,11 @@ class ModelRegion:
     def __init__(
         self,
         model: "Model",
-        filename: StrPath = DEFAULT_REGION_FILENAME,
+        region_filename: StrPath = DEFAULT_REGION_FILENAME,
     ) -> None:
-        self._root = model.root
-        self._logger = model.logger
-        self._data_catalog = model.data_catalog
-        self._data: Optional[GeoDataFrame] = None
-        self._filename = filename
+        super().__init__(model)
+        self.__data: Optional[GeoDataFrame] = None
+        self.__filename = region_filename
 
     def create(
         self,
@@ -179,39 +178,36 @@ class ModelRegion:
         """Set the model region based on provided GeoDataFrame."""
         # if nothing is provided, record that the region was set by the user
         self.kind = kind
-        if self._data is not None:
+        if self.__data is not None:
             self._logger.info("Updating region geometry.")
 
         if isinstance(data, GeoSeries):
-            self._data = GeoDataFrame(data)
+            self.__data = GeoDataFrame(data)
         elif isinstance(data, GeoDataFrame):
-            self._data = data
+            self.__data = data
         else:
             raise ValueError("Only GeoSeries or GeoDataFrame can be used as region.")
 
     @property
     def bounds(self):
         """Return the total bound sof the model region."""
-        if self.data is not None:
-            return self.data.total_bounds
-        else:
-            raise ValueError("Could not read or construct region to read bounds from")
+        if self.region is not None:
+            return self.region.total_bounds
+        return None
 
     @property
-    def data(self) -> Optional[GeoDataFrame]:
+    def region(self) -> Optional[GeoDataFrame]:
         """Provide access to the underlying GeoDataFrame data of the model region."""
-        if self._data is None and self._root.is_reading_mode():
+        if self.__data is None and self._root.is_reading_mode():
             self.read()
-
-        return self._data
+        return self.__data
 
     @property
-    def crs(self) -> CRS:
+    def crs(self) -> Optional[CRS]:
         """Provide access to the CRS of the model region."""
-        if self.data is not None:
-            return self.data.crs
-        else:
-            raise ValueError("Could not read or construct region to read crs from")
+        if self.region is not None:
+            return self.region.crs
+        return None
 
     def read(
         self,
@@ -220,10 +216,10 @@ class ModelRegion:
     ):
         """Read the model region from a file on disk."""
         self._root._assert_read_mode()
-        filename = filename or self._filename
+        filename = filename if filename is not None else self.__filename
         # cannot read geom files for purely in memory models
         self._logger.debug(f"Reading model file {filename}.")
-        self._data = cast(
+        self.__data = cast(
             GeoDataFrame, gpd.read_file(join(self._root.path, filename), **read_kwargs)
         )
         self.kind = "geom"
@@ -231,7 +227,7 @@ class ModelRegion:
     def write(self, filename: Optional[StrPath] = None, to_wgs84=False, **write_kwargs):
         """Write the model region to a file."""
         self._root._assert_write_mode()
-        filename = filename or self._filename
+        filename = filename or self.__filename
         write_path = join(self._root.path, filename)
 
         if exists(write_path) and not self._root.is_override_mode():
@@ -242,11 +238,11 @@ class ModelRegion:
         if not exists(base_name):
             makedirs(base_name, exist_ok=True)
 
-        if self.data is None:
+        if self.region is None:
             self._logger.info("No region data found. skipping writing...")
         else:
             self._logger.info(f"writing region data to {write_path}")
-            gdf = self.data.copy()
+            gdf = self.region.copy()
 
             if to_wgs84 and (
                 write_kwargs.get("driver") == "GeoJSON"
@@ -356,29 +352,3 @@ def _parse_region_value(value, data_catalog):
         )
         kwarg = dict(xy=xy)
     return kwarg
-
-
-class HasRegion(ABC):
-    """Interface to define a component that has a region."""
-
-    @property
-    @abstractmethod
-    def region(self) -> GeoDataFrame:
-        """Get the region associated with the component.
-
-        Returns
-        -------
-            GeoDataFrame: The region associated with the component.
-        """
-        ...
-
-    @property
-    @abstractmethod
-    def crs(self) -> CRS:
-        """Get the CRS of the region associated with the component.
-
-        Returns
-        -------
-            CRS: The CRS of the region associated with the component.
-        """
-        ...

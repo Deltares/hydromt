@@ -17,17 +17,13 @@ from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
+from hydromt.components.region import SpatialModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data
 from hydromt.plugins import PLUGINS
-from hydromt.workflows.region import HasRegion
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
-
-
-class FakeRegionComponent(ModelComponent, HasRegion):
-    pass
 
 
 def _patch_plugin_components(
@@ -290,12 +286,12 @@ def test_setup_region(model, demda, tmpdir):
 
 @pytest.mark.skip(reason="Needs GeomsComponent")
 def test_model_write_geoms(tmpdir, mocker: MockerFixture):
-    (region,) = _patch_plugin_components(mocker, FakeRegionComponent)
+    (region,) = _patch_plugin_components(mocker, SpatialModelComponent)
     region.set.return_value = None
     model = Model(
         root=str(tmpdir),
         mode="w",
-        components={"region": {"type": FakeRegionComponent.__name__}},
+        components={"region": {"type": SpatialModelComponent.__name__}},
     )
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727])
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
@@ -757,15 +753,14 @@ def test_initialize_empty_model_fails_on_region():
 
 
 def test_initialize_with_region_component(mocker: MockerFixture):
-    (region,) = _patch_plugin_components(mocker, FakeRegionComponent)
-    m = Model(components={"region": {"type": FakeRegionComponent.__name__}})
+    (region,) = _patch_plugin_components(mocker, SpatialModelComponent)
+    m = Model(components={"region": {"type": SpatialModelComponent.__name__}})
     assert m.region is region
 
 
 def test_initialize_model_with_grid_component():
     m = Model(components={"grid": {"type": GridComponent.__name__}})
     assert isinstance(m.grid, GridComponent)
-    assert isinstance(m.region, HasRegion)
 
 
 def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
@@ -857,10 +852,10 @@ def test_add_component_duplicate_throws(mocker: MockerFixture):
 def test_update_empty_model_with_region_none_throws(
     tmpdir: Path, mocker: MockerFixture
 ):
-    (foo,) = _patch_plugin_components(mocker, FakeRegionComponent)
+    (foo,) = _patch_plugin_components(mocker, SpatialModelComponent)
     foo.region = None
     m = Model(
-        root=str(tmpdir), components={"foo": {"type": FakeRegionComponent.__name__}}
+        root=str(tmpdir), components={"foo": {"type": SpatialModelComponent.__name__}}
     )
     with pytest.raises(
         ValueError, match="Model region not found, setup model using `build` first."
@@ -880,11 +875,11 @@ def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
 def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
     tmpdir: Path, mocker: MockerFixture
 ):
-    (region,) = _patch_plugin_components(mocker, FakeRegionComponent)
+    (region,) = _patch_plugin_components(mocker, SpatialModelComponent)
     m = Model(
         root=str(tmpdir),
         mode="r",
-        components={"region": {"type": FakeRegionComponent.__name__}},
+        components={"region": {"type": SpatialModelComponent.__name__}},
     )
     assert region is m.region
 
