@@ -31,6 +31,7 @@ Removed
 - support for dictionary like features on the DataCatalog have been removed. (#790)
 - Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
 - `staticmaps` and `staticgeoms` attributes on the `Model` object have been removed. (#845)
+- Code refering to the unimplemented Network Model type has been removed (#871)
 
 
 Unreleased
