@@ -114,7 +114,7 @@ class MeshComponent(ModelComponent):
         fn = fn or self._filename
         _fn = join(self._root.path, fn)
         if not isdir(dirname(_fn)):
-            os.makedirs(dirname(_fn))
+            os.makedirs(dirname(_fn), exist_ok=True)
         self._logger.debug(f"Writing file {fn}")
         ds_out = self.data.ugrid.to_dataset(
             optional_attributes=write_optional_ugrid_attributes,

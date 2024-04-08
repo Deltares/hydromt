@@ -207,6 +207,24 @@ def test_model_mesh_workflow(tmpdir: Path):
     assert component.data == data
 
 
+@pytest.mark.integration()
+def test_model_mesh_read_plus(tmpdir: Path):
+    m = Model(root=str(tmpdir), mode="w")
+    m.add_component("mesh", MeshComponent(m))
+    data = xu.data.elevation_nl().to_dataset()
+    data.grid.crs = 28992
+    m.mesh.set(data=data, grid_name="elevation_mesh")
+    m.write()
+    m2 = Model(root=str(tmpdir), mode="r+")
+    m2.add_component("mesh", MeshComponent(m2))
+    data = xu.data.elevation_nl().to_dataset()
+    data.grid.crs = 28992
+    data = data.rename({"elevation": "elevation_v2"})
+    m2.mesh.set(data=data, grid_name="elevation_mesh")
+    assert "elevation_v2" in m2.mesh.data.data_vars
+    assert "elevation" in m2.mesh.data.data_vars
+
+
 def test_properties(mock_model):
     mesh_component = MeshComponent(mock_model)
     data = xu.data.adh_san_diego()
