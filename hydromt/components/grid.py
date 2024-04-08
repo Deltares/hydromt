@@ -14,7 +14,7 @@ from shapely.geometry import box
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
-from hydromt.components.region import SpatialModelComponent, _parse_region
+from hydromt.components.spatial import SpatialModelComponent, _parse_region
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc

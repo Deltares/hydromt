@@ -38,7 +38,7 @@ from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import (
     ModelComponent,
 )
-from hydromt.components.region import SpatialModelComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.plugins import PLUGINS

@@ -17,7 +17,7 @@ from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.components.region import SpatialModelComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
 from hydromt.models.model import _check_data
