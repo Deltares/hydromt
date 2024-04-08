@@ -66,6 +66,7 @@ class MeshComponent(ModelComponent):
         overwrite_grid: bool, optional
             If True, overwrite the grid with the same name as the grid in self.mesh.
         """
+        self._initialize()
         # Checks on data
         data = _check_UGrid(data, name)
 
