@@ -165,7 +165,7 @@ class GeomsComponent(ModelComponent):
 
             if to_wgs84 and (
                 kwargs.get("driver") == "GeoJSON"
-                or str(fn).lower().endswith(".geojson")
+                or str(write_path).lower().endswith(".geojson")
             ):
                 # no idea why pyright complains about the next line
                 # so just ignoring it

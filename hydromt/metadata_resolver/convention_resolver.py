@@ -20,7 +20,7 @@ logger: Logger = getLogger(__name__)
 class ConventionResolver(MetaDataResolver):
     """MetaDataResolver using HydroMT naming conventions."""
 
-    _uri_placeholders = frozenset({"year", "month", "variable", "zoom_level"})
+    _uri_placeholders = frozenset({"year", "month", "variable", "zoom_level", "name"})
 
     def _expand_uri_placeholders(
         self,
@@ -45,6 +45,8 @@ class ConventionResolver(MetaDataResolver):
                 if key in ["year", "month"] and time_tuple is None:
                     uri_expanded += "*"
                 elif key == "variable" and variables is None:
+                    uri_expanded += "*"
+                elif key == "name":
                     uri_expanded += "*"
                 # escape unknown fields
                 elif key is not None and key not in self._uri_placeholders:

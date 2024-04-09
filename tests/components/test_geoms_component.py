@@ -1,3 +1,4 @@
+from os import makedirs
 from os.path import join
 from typing import cast
 
@@ -21,6 +22,23 @@ def test_model_set_geoms(tmpdir):
 
     assert list(geom_component.data.keys()) == ["geom_wgs84"]
     assert list(geom_component.data.values())[0].equals(geom)
+
+
+def test_model_read_geoms(tmpdir):
+    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
+    geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
+    write_folder = join(tmpdir, "geoms")
+    makedirs(write_folder, exist_ok=True)
+    write_path = join(write_folder, "test_geom.geojson")
+    geom.to_file(write_path)
+
+    model = Model(root=str(tmpdir), mode="r")
+    model.add_component("geom", GeomsComponent(model))
+
+    geom_component = model.get_component("geom", GeomsComponent)
+
+    component_data = geom_component.data["test_geom"]
+    assert geom.equals(component_data)
 
 
 def test_model_write_geoms_wgs84_with_model_crs(tmpdir):
