@@ -1,4 +1,4 @@
-"""Table component."""
+"""Geoms component."""
 
 import os
 from glob import glob
@@ -37,7 +37,7 @@ class GeomsComponent(ModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default DEFAULT_GEOMS_FILENAME
+            by default "geoms/{name}.geojson" ie one file per geodataframe in the data dictionnary.
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
         self._filename = filename
@@ -47,7 +47,7 @@ class GeomsComponent(ModelComponent):
     def data(self) -> Dict[str, Union[GeoDataFrame, GeoSeries]]:
         """Model geometries.
 
-        Return dict of geopandas.GeoDataFrame or geopandas.GeoDataSeries
+        Return dict of geopandas.GeoDataFrame or geopandas.GeoSeries
         """
         if self._data is None:
             self._initialize()
@@ -163,7 +163,10 @@ class GeomsComponent(ModelComponent):
             if not isdir(write_folder):
                 os.makedirs(write_folder, exist_ok=True)
 
-            if to_wgs84:
+            if to_wgs84 and (
+                kwargs.get("driver") == "GeoJSON"
+                or str(fn).lower().endswith(".geojson")
+            ):
                 # no idea why pyright complains about the next line
                 # so just ignoring it
                 gdf.to_crs(epsg=4326, inplace=True)  # type: ignore

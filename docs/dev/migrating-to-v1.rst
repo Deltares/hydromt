@@ -380,7 +380,7 @@ The previous `Model.tables` is now replaces by a `TablesComponent` that can used
 GeomsComponent
 ^^^^^^^^^^^^^^
 
-The previous `Model.geoms` is now replaces by a `GeomsComponent` that can used to store several geospatial geometry based data into a dictionary of geopandas GeoDataFrames. The `GeomsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+The previous `Model.geoms` is now replaced by a `GeomsComponent` that can be used to store several geospatial geometry based data into a dictionary of geopandas GeoDataFrames. The `GeomsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
 ConfigComponent
 ^^^^^^^^^^^^^^^
