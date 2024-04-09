@@ -15,8 +15,8 @@ from dask import config as dask_config
 
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
-from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.models.model import Model
@@ -379,6 +379,8 @@ def mock_geodf_driver(
     geodf: gpd.GeoDataFrame, mock_resolver: MetaDataResolver
 ) -> GeoDataFrameDriver:
     class MockGeoDataFrameDriver(GeoDataFrameDriver):
+        name = "mock_geodf_driver"
+
         def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
             return geodf
 
@@ -390,6 +392,8 @@ def mock_raster_ds_driver(
     rasterds: xr.Dataset, mock_resolver: MetaDataResolver
 ) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
+        name = "mock_raster_ds_driver"
+
         def read(self, *args, **kwargs) -> xr.Dataset:
             return rasterds
 
