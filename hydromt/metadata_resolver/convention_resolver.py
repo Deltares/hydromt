@@ -62,7 +62,7 @@ class ConventionResolver(MetaDataResolver):
             regex = compile_regex(pattern)
         except error:
             # try it as raw path if regular string fails
-            regex = compile_regex(rf"{pattern}")
+            regex = compile_regex(pattern.encode("escape_unicode").decode())
 
         return (uri, keys, regex)
 
