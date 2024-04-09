@@ -54,5 +54,4 @@ __all__ = [
     "create_mesh2d",
     "mesh2d_from_rasterdataset",
     "mesh2d_from_raster_reclass",
-    "rename_mesh",
 ]
