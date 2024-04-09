@@ -107,8 +107,11 @@ class GeomsComponent(ModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize(skip_read=True)
-        read_path = join(self._root.path, filename or self._filename)
-        fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(read_path)
+        f = filename or self._filename
+        read_path = self._root.path / f
+        fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
+            str(read_path)
+        )
         fns = glob(fn_glob)
         for fn in fns:
             name = ".".join(regex.match(fn).groups())  # type: ignore
