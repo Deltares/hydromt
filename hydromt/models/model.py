@@ -68,11 +68,8 @@ class Model(object, metaclass=ABCMeta):
     _MODEL_VERSION = None
 
     _API = {
-        "crs": CRS,
-        "config": Dict[str, Any],
         "maps": XArrayDict,
         "forcing": XArrayDict,
-        "region": ModelRegionComponent,
         "results": XArrayDict,
         "states": XArrayDict,
     }
