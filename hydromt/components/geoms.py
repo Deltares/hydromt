@@ -26,7 +26,10 @@ _DEFAULT_GEOMS_FILENAME = "geoms/{name}.geojson"
 
 
 class GeomsComponent(ModelComponent):
-    """A component to manage geo-spatial geometries."""
+    """A component to manage geo-spatial geometries.
+
+    It contains a dictionary of geopandas GeoDataFrames.
+    """
 
     def __init__(self, model: "Model", filename: str = _DEFAULT_GEOMS_FILENAME):
         """Initialize a GeomComponent.
