@@ -1,5 +1,6 @@
 from os import makedirs
 from os.path import join
+from pathlib import Path
 from typing import cast
 
 import geopandas as gpd
@@ -29,7 +30,7 @@ def test_model_read_geoms(tmpdir):
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     write_folder = join(tmpdir, "geoms")
     makedirs(write_folder, exist_ok=True)
-    write_path = join(write_folder, "test_geom.geojson")
+    write_path = Path(write_folder) / "test_geom.geojson"
     geom.to_file(write_path)
 
     model = Model(root=tmpdir, mode="r")
