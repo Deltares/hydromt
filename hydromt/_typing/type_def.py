@@ -56,7 +56,6 @@ GeoDatasetSource = StrPath
 RasterDatasetSource = StrPath
 DatasetSource = StrPath
 
-# Bbox = Tuple[float, float, float, float]
 Crs = int
 TotalBounds = Tuple[Bbox, Crs]
 TimeRange = Annotated[
