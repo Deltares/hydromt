@@ -377,6 +377,11 @@ TablesComponent
 
 The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
+GeomsComponent
+^^^^^^^^^^^^^^
+
+The previous `Model.geoms` is now replaced by a `GeomsComponent` that can be used to store several geospatial geometry based data into a dictionary of geopandas GeoDataFrames. The `GeomsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+
 ConfigComponent
 ^^^^^^^^^^^^^^^
 
