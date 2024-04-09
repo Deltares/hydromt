@@ -32,7 +32,7 @@ def test_model_read_geoms(tmpdir):
     write_path = join(write_folder, "test_geom.geojson")
     geom.to_file(write_path)
 
-    model = Model(root=str(tmpdir), mode="r")
+    model = Model(root=tmpdir, mode="r")
     model.add_component("geom", GeomsComponent(model))
 
     geom_component = model.get_component("geom", GeomsComponent)
