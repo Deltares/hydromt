@@ -3,7 +3,7 @@
 from itertools import product
 from logging import Logger, getLogger
 from re import compile as compile_regex
-from re import error
+from re import error as regex_error
 from string import Formatter
 from typing import Any, List, Optional, Pattern, Set, Tuple
 
@@ -60,9 +60,9 @@ class ConventionResolver(MetaDataResolver):
         # darn windows paths creating invalid escape sequences grrrrr
         try:
             regex = compile_regex(pattern)
-        except error:
+        except regex_error:
             # try it as raw path if regular string fails
-            regex = compile_regex(pattern.encode("escape_unicode").decode())
+            regex = compile_regex(pattern.encode("unicode_escape").decode())
 
         return (uri, keys, regex)
 
