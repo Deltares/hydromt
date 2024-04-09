@@ -3,6 +3,7 @@
 from itertools import product
 from logging import Logger, getLogger
 from re import compile as compile_regex
+from re import error
 from string import Formatter
 from typing import Any, List, Optional, Pattern, Set, Tuple
 
@@ -56,7 +57,13 @@ class ConventionResolver(MetaDataResolver):
                     keys.append(key)
             uri = uri_expanded
 
-        regex = compile_regex(pattern)
+        # darn windows paths creating invalid escape sequences grrrrr
+        try:
+            regex = compile_regex(pattern)
+        except error:
+            # try it as raw path if regular string fails
+            regex = compile_regex(rf"{pattern}")
+
         return (uri, keys, regex)
 
     def _get_dates(
