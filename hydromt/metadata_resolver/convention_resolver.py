@@ -74,7 +74,7 @@ class ConventionResolver(MetaDataResolver):
         *,
         timerange: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
-        # TODO: align? -> from RasterDatasetAdapter
+        # TODO: align? https://github.com/Deltares/hydromt/issues/874
         mask: Optional[Geom] = None,
         buffer: float = 0.0,
         predicate: Predicate = "intersects",
