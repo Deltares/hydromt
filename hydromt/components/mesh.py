@@ -20,7 +20,6 @@ from hydromt.workflows.mesh import (
     create_mesh2d,
     mesh2d_from_raster_reclass,
     mesh2d_from_rasterdataset,
-    rename_mesh,
 )
 
 if TYPE_CHECKING:
@@ -79,8 +78,7 @@ class MeshComponent(ModelComponent):
         if grid_name is None:
             grid_name = data.ugrid.grid.name
         elif grid_name != data.ugrid.grid.name:
-            data = rename_mesh(data, name=grid_name)
-
+            data = data.ugrid.rename({data.ugrid.grid.name: grid_name})
         self._add_mesh(data=data, grid_name=grid_name, overwrite_grid=overwrite_grid)
 
     @hydromt_step
@@ -151,21 +149,24 @@ class MeshComponent(ModelComponent):
         ).values()
         if len(files) > 0:
             ds = xr.merge(files)
-            uds = xu.UgridDataset(ds)
             if ds.rio.crs is not None:  # parse crs
-                uds.ugrid.set_crs(ds.raster.crs)
-                uds = uds.drop_vars(GEO_MAP_COORD, errors="ignore")
+                ds_crs = ds.raster.crs
+                ds = ds.drop_vars(GEO_MAP_COORD, errors="ignore")
+                uds = xu.UgridDataset(ds)
+                uds.ugrid.set_crs(ds_crs)
             else:
                 if not crs:
                     raise ValueError(
                         "no crs is found in the file nor passed to the reader."
                     )
                 else:
+                    uds = xu.UgridDataset(ds)
                     uds.ugrid.set_crs(crs)
                     self._logger.info(
                         "no crs is found in the file, assigning from user input."
                     )
-            self.set(uds)
+
+            self._data = uds
 
     @hydromt_step
     def create2d(
@@ -250,9 +251,10 @@ class MeshComponent(ModelComponent):
 
     def _initialize(self, skip_read: bool = False) -> None:
         """Initialize mesh object."""
-        self._data = xu.UgridDataset(xr.Dataset())
-        if self._root.is_reading_mode() and not skip_read:
-            self.read()
+        if self._data is None:
+            self._data = xu.UgridDataset(xr.Dataset())
+            if self._root.is_reading_mode() and not skip_read:
+                self.read()
 
     @property
     def crs(self) -> Optional[CRS]:
@@ -630,7 +632,13 @@ class MeshComponent(ModelComponent):
             return None
 
     def _grid_is_equal(self, grid_name: str, data: xu.UgridDataset) -> bool:
-        return self.mesh_grids[grid_name].to_dataset().equals(data.grid.to_dataset())
+        return (
+            self.mesh_grids[grid_name]
+            .to_dataset(optional_attributes=True)
+            .equals(
+                data.ugrid.grid.to_dataset(optional_attributes=True),
+            )
+        )
 
 
 def _check_UGrid(
