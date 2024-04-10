@@ -85,7 +85,7 @@ class MeshComponent(ModelComponent):
     def write(
         self,
         fn: Optional[str] = None,
-        write_optional_ugrid_attributes: bool = True,
+        write_optional_ugrid_attributes: bool = False,
         **kwargs,
     ) -> None:
         """Write model grid data to a netCDF file at <root>/<fn>.
@@ -145,7 +145,11 @@ class MeshComponent(ModelComponent):
         self._initialize(skip_read=True)
         fn = fn or self._filename
         files = read_nc(
-            fn, root=self._root.path, logger=self._logger, **kwargs
+            fn,
+            root=self._root.path,
+            single_var_as_array=False,
+            logger=self._logger,
+            **kwargs,
         ).values()
         if len(files) > 0:
             ds = xr.merge(files)
@@ -585,6 +589,7 @@ class MeshComponent(ModelComponent):
             crs = self.crs
             # Check on new grid topology
             if grid_name in self.mesh_names:
+                # This makes sure the data has the same coordinates as the existing data
                 # check if the two grids are the same
                 if not self._grid_is_equal(grid_name, data):
                     if not overwrite_grid:
@@ -635,9 +640,7 @@ class MeshComponent(ModelComponent):
         return (
             self.mesh_grids[grid_name]
             .to_dataset(optional_attributes=True)
-            .equals(
-                data.ugrid.grid.to_dataset(optional_attributes=True),
-            )
+            .equals(data.grid.to_dataset(optional_attributes=True))
         )
 
 
