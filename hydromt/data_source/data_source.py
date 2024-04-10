@@ -18,7 +18,7 @@ from pydantic import (
 from hydromt._typing import DataType
 from hydromt.data_adapter.caching import _uri_validator
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
-from hydromt.driver import BaseDriver
+from hydromt.drivers import BaseDriver
 
 logger: Logger = getLogger(__name__)
 

@@ -159,45 +159,46 @@ General
 .. autosummary::
    :toctree: _generated
 
-   driver.base_driver.BaseDriver
+   drivers.base_driver.BaseDriver
 
 RasterDataset
 -------------
 
 .. autosummary::
    :toctree: _generated
-   driver.rasterdataset_driver.RasterDatasetDriver
-   driver.rasterdataset_driver.RasterDatasetDriver.read
+   drivers.rasterdataset_driver.RasterDatasetDriver
+   drivers.rasterdataset_driver.RasterDatasetDriver.read
 
 ZarrDriver
 ^^^^^^^^^^
 
 .. autosummary::
    :toctree: _generated
-   driver.zarr_driver.ZarrDriver
-   driver.zarr_driver.ZarrDriver.read
+   drivers.zarr_driver.ZarrDriver
+   drivers.zarr_driver.ZarrDriver.read
 
 NetcdfDriver
 .. autosummary::
    :toctree: _generated
-   driver.netcdf_driver.NetcdfDriver
-   driver.netcdf_driver.NetcdfDriver.read
+   drivers.netcdf_driver.NetcdfDriver
+   drivers.netcdf_driver.NetcdfDriver.read
 
 GeoDataFrame
 ------------
 
 .. autosummary::
    :toctree: _generated
-   driver.geodataframe_driver.GeoDataFrameDriver
-   driver.geodataframe_driver.GeoDataFrameDriver.read
+   drivers.geodataframe_driver.GeoDataFrameDriver
+   drivers.geodataframe_driver.GeoDataFrameDriver.read
 
 PyogrioDriver
 ^^^^^^^^^^^^^
 
 .. autosummary::
    :toctree: _generated
-   driver.pyogrio_driver.PyogrioDriver
-   driver.pyogrio_driver.PyogrioDriver.read
+   drivers.pyogrio_driver.PyogrioDriver
+   drivers.pyogrio_driver.PyogrioDriver.read
+
 DataAdapter
 ===========
 
@@ -286,7 +287,6 @@ Discovery
    :toctree: _generated
 
    PLUGINS
-
 
 .. _model_api:
 
@@ -544,6 +544,38 @@ General methods
    TablesComponent.set
    TablesComponent.write
    TablesComponent.read
+
+GeomsComponent
+==============
+
+.. autosummary::
+   :toctree: _generated
+
+    GeomsComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GeomsComponent._model
+   GeomsComponent._data_catalog
+   GeomsComponent._logger
+   GeomsComponent._root
+   GeomsComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GeomsComponent.set
+   GeomsComponent.write
+   GeomsComponent.read
 
 
 ConfigComponent

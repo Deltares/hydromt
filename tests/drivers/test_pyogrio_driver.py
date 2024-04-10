@@ -7,7 +7,7 @@ import pytest
 from shapely import box
 
 from hydromt._typing import Bbox
-from hydromt.driver.pyogrio_driver import PyogrioDriver
+from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 

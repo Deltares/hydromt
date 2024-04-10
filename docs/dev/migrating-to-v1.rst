@@ -377,6 +377,11 @@ TablesComponent
 
 The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
+GeomsComponent
+^^^^^^^^^^^^^^
+
+The previous `Model.geoms` is now replaced by a `GeomsComponent` that can be used to store several geospatial geometry based data into a dictionary of geopandas GeoDataFrames. The `GeomsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+
 ConfigComponent
 ^^^^^^^^^^^^^^^
 
@@ -401,7 +406,7 @@ Now, there are three:
 
 - `Model`: This class is mostly responsible for dispatching function calls and otherwise delegating work to components.
 - `ModelComponent`. This class provides more specialized functionalities to do with a single part of a model such as a mesh or grid.
-- `Driver`. TBC
+- `Driver`. This class provides customizable loading of any data source.
 
 Each of these parts have entry points at their relevant submodules. For example, see how these are specified in the `pyproject.toml`
 
@@ -411,6 +416,9 @@ core = "hydromt.components"
 
 [project.entry-points."hydromt.models"]
 core = "hydromt.models"
+
+[project.entry-points."hydromt.drivers"]
+core = "hydromt.drivers"
 ```
 
 To have post v1 core recognize there are a few new requirements:

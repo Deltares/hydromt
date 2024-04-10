@@ -1,20 +1,19 @@
-"""Driver for GeoDataFrames."""
+"""Driver for RasterDatasets."""
 
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
+from logging import Logger
 from typing import List, Optional
 
-import geopandas as gpd
+import xarray as xr
 from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom
 from hydromt._typing.error import NoDataStrategy
-from hydromt.driver import BaseDriver
 
-logger: Logger = getLogger(__name__)
+from .base_driver import BaseDriver
 
 
-class GeoDataFrameDriver(BaseDriver, ABC):
+class RasterDatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
 
     @abstractmethod
@@ -28,13 +27,14 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         crs: Optional[CRS] = None,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
-        logger: Logger = logger,
+        zoom_level: int = 0,
+        logger: Optional[Logger] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
         **kwargs,
-    ) -> gpd.GeoDataFrame:
+    ) -> xr.Dataset:
         """
-        Read in any compatible data source to a geopandas `GeoDataFrame`.
+        Read in any compatible data source to an xarray Dataset.
 
         args:
         """

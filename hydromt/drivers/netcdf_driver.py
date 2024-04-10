@@ -8,8 +8,8 @@ from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom
 from hydromt._typing.error import NoDataStrategy
-from hydromt.driver.preprocessing import PREPROCESSORS
-from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.preprocessing import PREPROCESSORS
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 
 class NetcdfDriver(RasterDatasetDriver):
@@ -19,7 +19,7 @@ class NetcdfDriver(RasterDatasetDriver):
 
     def read(
         self,
-        uris: str,
+        uri: str,
         *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
@@ -40,5 +40,18 @@ class NetcdfDriver(RasterDatasetDriver):
             if not preprocessor:
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
             kwargs.update({"preprocess": preprocessor})
+
+        uris: List[str] = self.metadata_resolver.resolve(
+            uri,
+            self.filesystem,
+            bbox=bbox,
+            mask=mask,
+            buffer=buffer,
+            predicate=predicate,
+            variables=variables,
+            zoom_level=zoom_level,
+            handle_nodata=handle_nodata,
+            **kwargs,
+        )
 
         return xr.open_mfdataset(uris, decode_coords="all", **kwargs)

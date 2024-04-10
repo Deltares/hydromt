@@ -1,4 +1,4 @@
-from hydromt.driver.base_driver import BaseDriver
+from hydromt.drivers.base_driver import BaseDriver
 
 
 class TestBaseDriver:

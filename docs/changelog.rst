@@ -12,11 +12,13 @@ V1
 Added
 -----
 - Added Driver class for customizable io
+- Added entrypoints for Driver Plugins as "hydromt.drivers"
 - Added MetaDataResolver class for customizable metadata discovery
 - Added DataSource class to represent and validate DataCatalog entries.
 - Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
 - A Github action now checks whether the migration guide is updated (#829)
 - Added a `ConfigComponent` to write configurations for kernels/simulations. (#863)
+- Added a `GeomsComponent` to manage geo-spatial geometry data of a model. (#867)
 
 Changed
 -------
@@ -31,6 +33,7 @@ Removed
 - support for dictionary like features on the DataCatalog have been removed. (#790)
 - Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
 - `staticmaps` and `staticgeoms` attributes on the `Model` object have been removed. (#845)
+- Code refering to the unimplemented Network Model type has been removed (#871)
 
 
 Unreleased

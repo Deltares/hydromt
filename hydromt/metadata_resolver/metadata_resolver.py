@@ -4,11 +4,10 @@ from abc import ABC, abstractmethod
 from logging import Logger, getLogger
 from typing import Any, Dict, List, Optional
 
-import geopandas as gpd
 from fsspec import AbstractFileSystem
 from pydantic import BaseModel, Field
 
-from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
+from hydromt._typing import Bbox, Geom, NoDataStrategy, Predicate, TimeRange
 
 logger: Logger = getLogger(__name__)
 
@@ -28,7 +27,7 @@ class MetaDataResolver(BaseModel, ABC):
         *,
         timerange: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
-        mask: Optional[gpd.GeoDataFrame] = None,
+        mask: Optional[Geom] = None,
         buffer: float = 0.0,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
