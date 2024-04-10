@@ -52,6 +52,7 @@ class ModelComponent(ABC):
         """Test if two components are equal.
 
         Inherit this method in the subclass to test for equality on data.
+        Don't forget to call super().test_equal(other) in the subclass.
 
         Parameters
         ----------

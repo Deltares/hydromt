@@ -95,6 +95,7 @@ class VectorComponent(ModelComponent):
             If True, overwrite the complete vector object with data, by default False
         """
         self._initialize()
+        assert self._data is not None
         name_required = isinstance(data, np.ndarray) or (
             isinstance(data, xr.DataArray) and data.name is None
         )
@@ -102,9 +103,9 @@ class VectorComponent(ModelComponent):
             raise ValueError(f"Unable to set {type(data).__name__} data without a name")
 
         # check the type of data
-        if isinstance(data, np.ndarray) and "geometry" in self.data:
+        if isinstance(data, np.ndarray) and "geometry" in self._data:
             index_dim = self.index_dim
-            index = self.data[index_dim]
+            index = self._data[index_dim]
             if data.size != index.size:
                 if data.ndim == 1:
                     raise ValueError("Size of data and number of vector do not match")
@@ -144,14 +145,14 @@ class VectorComponent(ModelComponent):
                     raise ValueError("Geometry of data and vector do not match")
             # add data (with check on index)
             for dvar in data.data_vars:
-                if dvar in self.data:
+                if dvar in self._data:
                     self._logger.warning(f"Replacing vector variable: {dvar}")
                 # check on index coordinate before merging
                 dims = data[dvar].dims
                 if np.array_equal(
-                    data[dims[0]].values, self.data[self.index_dim].values
+                    data[dims[0]].values, self._data[self.index_dim].values
                 ):
-                    self.data[dvar] = data[dvar]
+                    self._data[dvar] = data[dvar]
                 else:
                     raise ValueError(
                         f"Index coordinate of data variable {dvar} "
