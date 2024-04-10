@@ -18,7 +18,7 @@ from pystac import MediaType
 from hydromt._typing import Bbox, ErrorHandleMethod, Geom, TimeRange, TotalBounds
 from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
 from hydromt.data_source.data_source import DataSource
-from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 logger: Logger = getLogger(__name__)
 

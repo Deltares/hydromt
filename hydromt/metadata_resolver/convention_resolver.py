@@ -2,14 +2,15 @@
 
 from itertools import product
 from logging import Logger, getLogger
+from re import compile as compile_regex
+from re import error as regex_error
 from string import Formatter
-from typing import Any, List, Optional, Set, Tuple
+from typing import Any, List, Optional, Pattern, Set, Tuple
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from hydromt._typing import Bbox, NoDataStrategy, Predicate, TimeRange
+from hydromt._typing import Bbox, Geom, NoDataStrategy, Predicate, TimeRange
 
 from .metadata_resolver import MetaDataResolver
 
@@ -19,28 +20,33 @@ logger: Logger = getLogger(__name__)
 class ConventionResolver(MetaDataResolver):
     """MetaDataResolver using HydroMT naming conventions."""
 
-    _uri_placeholders = frozenset({"year", "month", "variable", "zoom_level"})
+    _uri_placeholders = frozenset({"year", "month", "variable", "zoom_level", "name"})
 
     def _expand_uri_placeholders(
         self,
         uri: str,
         time_tuple: Optional[Tuple[str, str]] = None,
         variables: Optional[Set[str]] = None,
-    ) -> Tuple[str, List[str]]:
+    ) -> Tuple[str, List[str], Pattern[str]]:
         """Expand known placeholders in the URI."""
         keys: list[str] = []
+        pattern: str = ""
 
         if "{" in uri:
             uri_expanded = ""
             for literal_text, key, fmt, _ in Formatter().parse(uri):
                 uri_expanded += literal_text
+                pattern += literal_text
                 if key is None:
                     continue
+                pattern += "(.*)"
                 key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
                 # remove unused fields
                 if key in ["year", "month"] and time_tuple is None:
                     uri_expanded += "*"
                 elif key == "variable" and variables is None:
+                    uri_expanded += "*"
+                elif key == "name":
                     uri_expanded += "*"
                 # escape unknown fields
                 elif key is not None and key not in self._uri_placeholders:
@@ -50,7 +56,14 @@ class ConventionResolver(MetaDataResolver):
                     keys.append(key)
             uri = uri_expanded
 
-        return (uri, keys)
+        # darn windows paths creating invalid escape sequences grrrrr
+        try:
+            regex = compile_regex(pattern)
+        except regex_error:
+            # try it as raw path if regular string fails
+            regex = compile_regex(pattern.encode("unicode_escape").decode())
+
+        return (uri, keys, regex)
 
     def _get_dates(
         self,
@@ -75,8 +88,8 @@ class ConventionResolver(MetaDataResolver):
         *,
         timerange: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
-        # TODO: align? -> from RasterDatasetAdapter
-        mask: Optional[gpd.GeoDataFrame] = None,
+        # TODO: align? https://github.com/Deltares/hydromt/issues/874
+        mask: Optional[Geom] = None,
         buffer: float = 0.0,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
@@ -86,7 +99,7 @@ class ConventionResolver(MetaDataResolver):
         **kwargs,
     ) -> list[str]:
         """Resolve the placeholders in the URI."""
-        uri_expanded, keys = self._expand_uri_placeholders(uri, timerange, variables)
+        uri_expanded, keys, _ = self._expand_uri_placeholders(uri, timerange, variables)
         if timerange:
             dates = self._get_dates(keys, timerange)
         else:
@@ -95,6 +108,7 @@ class ConventionResolver(MetaDataResolver):
             variables = self._get_variables(variables)
         else:
             variables = [""]
+
         fmts: list[dict[str, Any]] = list(
             map(
                 lambda t: {

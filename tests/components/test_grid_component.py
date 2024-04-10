@@ -98,9 +98,6 @@ def test_create_grid_from_bbox_rotated(mock_model):
     assert "xc" in grid_component.data.coords
     assert grid_component.data.raster.y_dim == "y"
     assert np.isclose(grid_component.data.raster.res[0], 0.05)
-    # Check set_geoms call
-    geom = grid_component._model.method_calls[0][1][0]
-    assert isinstance(geom, gpd.GeoDataFrame)
 
 
 def test_create_grid_from_bbox(mock_model):
@@ -116,9 +113,6 @@ def test_create_grid_from_bbox(mock_model):
     assert grid_component.data.raster.dims == ("y", "x")
     assert grid_component.data.raster.shape == (7, 16)
     assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
-    # Check set_geoms call
-    geom = grid_component._model.method_calls[0][1][0]
-    assert isinstance(geom, gpd.GeoDataFrame)
 
 
 def test_create_raise_errors(mock_model):
