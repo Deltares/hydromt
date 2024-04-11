@@ -1,3 +1,4 @@
+import pytest
 from fsspec.implementations.local import LocalFileSystem
 from fsspec.implementations.memory import MemoryFileSystem
 
@@ -23,3 +24,15 @@ class TestValidateFileSystem:
             validate_filesystem(LocalFileSystem()),
             LocalFileSystem,
         )
+
+    def test_validates_unknown(self):
+        with pytest.raises(ValueError, match="Unknown filesystem"):
+            validate_filesystem(42)
+
+    def test_validates_dict(self):
+        fs = validate_filesystem({"protocol": "memory", "max_paths": 50})
+        assert isinstance(fs, MemoryFileSystem)
+
+    def test_validates_dict_no_protocol(self):
+        with pytest.raises(ValueError, match="requires 'protocol'"):
+            validate_filesystem({"max_paths": 50})

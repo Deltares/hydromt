@@ -1,16 +1,22 @@
-from typing import Tuple, Union
+from typing import Any, Dict, Tuple, Union
 
 from fsspec import AbstractFileSystem, filesystem
 from pydantic import PlainSerializer, PlainValidator
 from typing_extensions import Annotated
 
 
-def validate_filesystem(_fs: Union[AbstractFileSystem, str]) -> AbstractFileSystem:
+def validate_filesystem(
+    _fs: Union[AbstractFileSystem, Dict[str, Any], str],
+) -> AbstractFileSystem:
     if isinstance(_fs, str):
         return filesystem(_fs)
+    elif isinstance(_fs, dict):
+        if protocol := _fs.pop("protocol", None):
+            return filesystem(protocol=protocol, **_fs)
+        else:
+            raise ValueError(f"Filesystem dict {_fs} requires 'protocol'.")
     elif isinstance(_fs, AbstractFileSystem):
         return _fs
-
     else:
         raise ValueError(f"Unknown filesystem: {_fs}")
 
