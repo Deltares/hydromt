@@ -661,7 +661,7 @@ class RasterDatasetAdapter(DataAdapter):
 
     def _get_zoom_levels_and_crs(
         self, fn: Optional[StrPath] = None, logger=logger
-    ) -> Tuple[dict, int]:
+    ) -> Tuple[Optional[dict], Optional[int]]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         if self.zoom_levels is not None and self.crs is not None:
             return self.zoom_levels, self.crs
