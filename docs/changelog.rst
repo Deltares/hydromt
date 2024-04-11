@@ -19,6 +19,7 @@ Fixed
 - Bug in `raster.transform` with lazy coordinates. (#801)
 - Bug in `workflows.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
 - Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
+- Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 
 
 v0.9.4 (2024-02-26)
