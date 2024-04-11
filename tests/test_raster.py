@@ -299,12 +299,24 @@ def test_clip(transform, shape):
     assert raster1d.raster._crs is not None
     assert raster1d.raster.transform is not None
     # create gdf covering approx half raster
-    w, s, _, n = da.raster.bounds
-    e, _ = da.raster.transform * (shape[1] // 2, shape[0] // 2)
+    w, s, e, n = da.raster.bounds
     gdf = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=da.raster.crs)
     # test bbox - buffer
     da_clip = da.raster.clip_bbox(gdf.total_bounds, buffer=da.raster.width)
     assert np.all(np.isclose(da.raster.bounds, da_clip.raster.bounds))
+    # test bbox - no overlap with raster
+    # left
+    da_clip = da.raster.clip_bbox((w - 0.2, s, w - 0.1, n))
+    assert len(da_clip[da_clip.raster.x_dim]) == 0
+    # right
+    da_clip = da.raster.clip_bbox((e + 0.1, s, e + 0.2, n))
+    assert len(da_clip[da_clip.raster.x_dim]) == 0
+    # top
+    da_clip = da.raster.clip_bbox((w, n + 0.1, e, n + 0.2))
+    assert len(da_clip[da_clip.raster.y_dim]) == 0
+    # bottom
+    da_clip = da.raster.clip_bbox((w, s - 0.2, e, s - 0.1))
+    assert len(da_clip[da_clip.raster.y_dim]) == 0
     # test bbox
     da_clip0 = da.raster.clip_bbox(gdf.total_bounds)
     # test geom

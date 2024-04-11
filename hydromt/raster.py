@@ -1239,18 +1239,24 @@ class XRasterBase(XGeoBase):
             e = (e // align + 1) * align
             n = (n // align + 1) * align
         xs, ys = [w, e], [s, n]
-        if self.rotation > 0:  # update bbox based on clip to rotated box
-            gdf_bbox = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=self.crs).clip(
-                self.box
-            )
-            if not np.all(gdf_bbox.is_empty):
-                xs, ys = zip(*gdf_bbox.dissolve().boundary[0].coords[:])
+        if self.rotation > 0 and w != e and s != n:  # if rotated not a point
+            # make sure bbox touches the rotated raster box
+            r_w, r_s, r_e, r_n = self.bounds
+            bbox_geom = box(min(w, r_e), min(s, r_n), max(e, r_w), max(n, r_s))
+            # get overlap between bbox and rotated raster box
+            gdf_bbox = gpd.GeoDataFrame(geometry=[bbox_geom], crs=self.crs)
+            gdf_bbox_clip = gdf_bbox.clip(self.box).dissolve()
+            # get the new bounds
+            if gdf_bbox_clip.type[0] == "Point":  # if bbox only touches a corner
+                xs, ys = gdf_bbox_clip.geometry.x, gdf_bbox_clip.geometry.y
+            else:  # Polygon if bbox overlaps with rotated box
+                xs, ys = zip(*gdf_bbox_clip.boundary[0].coords[:])
         cs, rs = ~self.transform * (np.array(xs), np.array(ys))
-        # use round to get integer slices
+        # use round to get integer slices, max to avoid negative indices
         c0 = max(int(np.round(cs.min() - buffer)), 0)
         r0 = max(int(np.round(rs.min() - buffer)), 0)
-        c1 = int(np.round(cs.max() + buffer))
-        r1 = int(np.round(rs.max() + buffer))
+        c1 = max(int(np.round(cs.max() + buffer)), 0)
+        r1 = max(int(np.round(rs.max() + buffer)), 0)
         return self.clip(slice(c0, c1), slice(r0, r1))
 
     def clip_mask(self, da_mask: xr.DataArray, mask: bool = False):
