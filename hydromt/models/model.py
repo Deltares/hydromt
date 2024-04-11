@@ -16,18 +16,14 @@ from typing import (
     Dict,
     List,
     Optional,
-    Tuple,
     Type,
     TypeVar,
     Union,
     cast,
 )
 
-import geopandas as gpd
-import numpy as np
 import pandas as pd
 import xarray as xr
-from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 
 from hydromt import hydromt_step
@@ -451,6 +447,38 @@ class Model(object, metaclass=ABCMeta):
                 )
 
             cat.to_yml(path, root=root)
+
+    def test_equal(self, other: "Model") -> tuple[bool, dict[str, str]]:
+        """Test if two models are equal, based on their components.
+
+        Parameters
+        ----------
+        other : Model
+            The model to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if equal, dictionary with errors per model component which is not equal.
+        """
+        if not isinstance(other, self.__class__):
+            return False, {
+                "__class__": f"f{other.__class__} does not inherit from {self.__class__}."
+            }
+        components = list(self._components.keys())
+        components_other = list(other._components.keys())
+        if components != components_other:
+            return False, {
+                "components": f"Components do not match: {components} != {components_other}"
+            }
+
+        errors: dict[str, str] = {}
+        is_equal = True
+        for name, c in self._components.items():
+            component_equal, component_errors = c.test_equal(other._components[name])
+            is_equal &= component_equal
+            errors.update(**component_errors)
+        return is_equal, errors
 
     # map files setup methods
     def setup_maps_from_rasterdataset(
@@ -1102,39 +1130,6 @@ class Model(object, metaclass=ABCMeta):
         """Returns coordinate reference system embedded in region."""
         return self.target_crs
 
-    # test methods
-    def _test_equal(self, other, skip_component=None) -> Tuple[bool, Dict]:
-        """Test if two models including their data components are equal.
-
-        Parameters
-        ----------
-        other : Model (or subclass)
-            Model to compare against
-        skip_component: list
-            List of components to skip when testing equality. By default root.
-
-        Returns
-        -------
-        equal: bool
-            True if equal
-        errors: dict
-            Dictionary with errors per model component which is not equal
-        """
-        skip_component = skip_component or ["root"]
-        assert isinstance(other, type(self))
-        components = list(self.api.keys())
-        components_other = list(other.api.keys())
-        assert components == components_other
-        for cp in skip_component:
-            if cp in components:
-                components.remove(cp)
-        errors = {}
-        for prop in components:
-            errors.update(
-                **_check_equal(getattr(self, prop), getattr(other, prop), prop)
-            )
-        return len(errors) == 0, errors
-
 
 def _check_data(
     data: Union[xr.DataArray, xr.Dataset],
@@ -1177,28 +1172,3 @@ def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
         for key, val in obj.items():
             _assert_isinstance(key, args[0], f"{name}.{str(key)}")
             _assert_isinstance(val, args[1], f"{name}.{str(key)}")
-
-
-def _check_equal(a, b, name="") -> Dict[str, str]:
-    """Recursive test of model components.
-
-    Returns dict with component name and associated error message.
-    """
-    errors = {}
-    try:
-        assert isinstance(b, type(a)), "property types do not match"
-        if isinstance(a, dict):
-            for key in a:
-                assert key in b, f"{key} missing"
-                errors.update(**_check_equal(a[key], b[key], f"{name}.{key}"))
-        elif isinstance(a, (xr.DataArray, xr.Dataset)):
-            xr.testing.assert_allclose(a, b)
-        elif isinstance(a, gpd.GeoDataFrame):
-            assert_geodataframe_equal(a, b, check_like=True, check_less_precise=True)
-        elif isinstance(a, np.ndarray):
-            np.testing.assert_allclose(a, b)
-        else:
-            assert a == b, "values not equal"
-    except AssertionError as e:
-        errors.update({name: e})
-    return errors

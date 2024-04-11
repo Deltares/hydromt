@@ -10,6 +10,7 @@ from hydromt.components.geoms import GeomsComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.components.tables import TablesComponent
+from hydromt.components.vector import VectorComponent
 from hydromt.models.model import Model
 from hydromt.plugins import PLUGINS
 
@@ -21,8 +22,9 @@ def test_core_component_plugins():
         "GeomsComponent": GeomsComponent,
         "GridComponent": GridComponent,
         "ModelComponent": ModelComponent,
-        "ModelRegionComponent": ModelRegionComponent,
+        "VectorComponent": VectorComponent,
         "TablesComponent": TablesComponent,
+        "ModelRegionComponent": ModelRegionComponent,
     }
 
 

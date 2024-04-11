@@ -77,35 +77,36 @@ provided to the function call as arguments.
 
 An example of a fictional Wflow YAML file would be:
 
-```yaml
-modeltype: wflow
-global:
-	data_libs: deltares_data
-	components:
-		config:
-			filename: wflow_sbm_calibrated.toml
-steps:
-	- setup_basemaps:
-		region: {'basin': [6.16, 51.84]}
-		res: 0.008333
-		hydrography_fn: merit_hydro
-	- grid.add_data_from_geodataframe:
-	         vector_fn: administrative_areas
-	         variables: "id_level1"
-	- grid.add_data_from_geodataframe:
-	          vector_fn: administrative_areas
-	          variables: "id_level3"
-	- setup_reservoirs:
-		reservoirs_fn: hydro_reservoirs
-		min_area: 1.0
-	- write:
+.. code-block:: yaml
+
+	modeltype: wflow
+	global:
+		data_libs: deltares_data
 		components:
-			- grid
-			- config
-	- geoms.write:
-		filename: geoms/*.gpkg
-		driver: GPKG
-```
+			config:
+				filename: wflow_sbm_calibrated.toml
+	steps:
+		- setup_basemaps:
+			region: {'basin': [6.16, 51.84]}
+			res: 0.008333
+			hydrography_fn: merit_hydro
+		- grid.add_data_from_geodataframe:
+				vector_fn: administrative_areas
+				variables: "id_level1"
+		- grid.add_data_from_geodataframe:
+				vector_fn: administrative_areas
+				variables: "id_level3"
+		- setup_reservoirs:
+			reservoirs_fn: hydro_reservoirs
+			min_area: 1.0
+		- write:
+			components:
+				- grid
+				- config
+		- geoms.write:
+			filename: geoms/*.gpkg
+			driver: GPKG
+
 
 Data catalog
 ------------
@@ -206,11 +207,11 @@ Additionally we encourage some best practices to be aware of when implementing a
 
 It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
-```python
-@hydromt_step
-def write(self, ...) -> None:
-	pass
-```
+.. code-block:: python
+	@hydromt_step
+	def write(self, ...) -> None:
+		pass
+
 
 This decorator can be imported from the root of core. When implementing a component, you should inherit from the core provided class called
 `ModelComponent`. When you do this, not only will it provide some additional validation that you have implemented the correct functions,
@@ -252,44 +253,43 @@ In the core of HydroMT, the available components are:
 
 The `Model.__init__` function can be used to add default components by plugins like so:
 
-```python
+.. code-block:: python
 
-class ExampleModel(Model):
-	def __init__(self):
-		self.root: ModelRoot = ModelRoot(".")
-		self.add_component("region", ModelRegionComponent)
-		self.add_component("grid", GridComponent)
-		...
+	class ExampleModel(Model):
+		def __init__(self):
+			self.root: ModelRoot = ModelRoot(".")
+			self.add_component("region", ModelRegionComponent)
+			self.add_component("grid", GridComponent)
+			...
 
-```
+
 
 If you want to allow your plugin user to modify the root and update or add new component during instantiation then you can use:
 
-``` python
+.. code-block:: python
 
-class ExampleEditModel(Model):
-    def __init__(
-        self,
-        components: Optional[dict[str, dict[str, Any]]] = None,
-        root: Optional[str] = None,
-    ):
-        # Recursively update the components with any defaults that are missing in the components provided by the user.
-        components = components or {}
-        default_components = {
-            "region": {"type": "ModelRegionComponent"},
-            "grid": {"type": GridComponent},
-        }
-        components = hydromt.utils.deep_merge.deep_merge(
-            default_components, components
-        )
+	class ExampleEditModel(Model):
+		def __init__(
+			self,
+			components: Optional[dict[str, dict[str, Any]]] = None,
+			root: Optional[str] = None,
+		):
+			# Recursively update the components with any defaults that are missing in the components provided by the user.
+			components = components or {}
+			default_components = {
+				"region": {"type": "ModelRegionComponent"},
+				"grid": {"type": GridComponent},
+			}
+			components = hydromt.utils.deep_merge.deep_merge(
+				default_components, components
+			)
 
-        # Now instantiate the Model
-        super().__init__(
-            root = root,
-            components = components,
-        )
+			# Now instantiate the Model
+			super().__init__(
+				root = root,
+				components = components,
+			)
 
-```
 
 Making the model region its own component
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -372,6 +372,46 @@ has not been changed compared to the GridModel.
 | model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
 +------------------------------+-------------------------------------------+
 
+VectorComponent
+^^^^^^^^^^^^^^^
+
+**Rationale**
+
+In v1 the `VectorModel` will no longer exist. Instead we created a `VectorComponent`,
+which is an implementation of the `ModelComponent` class. The idea is that this gives
+users more flexibility with adding components to their model class, for instance multiple
+vectors. In addition, the `ModelComponent`s improve maintainability of the code and
+terminology of the components and their methods.
+
+**Changes**
+
+The `VectorMixin` and `VectorModel` have been restructured into one `VectorComponent` with only
+a weak reference to one general `Model` instance. The `set_vector`, `write_vector`,
+and `read_vector` have been changed to the more generically named `set`,
+`write`, and `read` methods respectively. Also, the `setup_vector_from_*`
+methods have been changed to `add_data_from_*`. The functionality of the VectorComponent
+has not been changed compared to the VectorModel.
+
+VectorComponent is not in the model by default. You can add the VectorComponent to the model by using the `model.add_component("vector", VectorComponent)` function.
+Or you can set it up in the yml file by using the `components` part.
+
+.. code-block:: yaml
+
+	global:
+		components:
+			vector:
+				type: VectorComponent
+
++------------------------------+-------------------------------------------+
+| v0.x                         | v1                                        |
++==============================+===========================================+
+| model.set_vector(...)        | model.vector.set(...)                    |
++------------------------------+-------------------------------------------+
+| model.read_vector(...)       | model.vector.read(...)                    |
++------------------------------+-------------------------------------------+
+| model.write_vector(...)      | model.vector.write(...)                   |
++------------------------------+-------------------------------------------+
+
 TablesComponent
 ^^^^^^^^^^^^^^
 
@@ -410,16 +450,15 @@ Now, there are three:
 
 Each of these parts have entry points at their relevant submodules. For example, see how these are specified in the `pyproject.toml`
 
-```toml
-[project.entry-points."hydromt.components"]
-core = "hydromt.components"
+.. code-block:: toml
+	[project.entry-points."hydromt.components"]
+	core = "hydromt.components"
 
-[project.entry-points."hydromt.models"]
-core = "hydromt.models"
+	[project.entry-points."hydromt.models"]
+	core = "hydromt.models"
 
-[project.entry-points."hydromt.drivers"]
-core = "hydromt.drivers"
-```
+    [project.entry-points."hydromt.drivers"]
+    core = "hydromt.drivers"
 
 To have post v1 core recognize there are a few new requirements:
 1. There must be a dedicated separate submodule (i.e. a folder with a `__init__.py` file that you can import from) for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
@@ -435,7 +474,7 @@ DataAdapter
 -----------
 
 The previous version of the `DataAdapter` and its subclasses had a lot of
-responsabilities:
+responsibilities:
 - Validate the input from the `DataCatalog` entry.
 - Find the right paths to the data based on a naming convention.
 - Deserialize/read many different file formats into python objects.
@@ -449,7 +488,7 @@ DataSource
 ^^^^^^^^^^
 
 The `DataSource` is the python representation of a parsed entry in the `DataCatalog`.
-The `DataSource` is responsable for validating the `DataCatalog` entry. It also carries
+The `DataSource` is responsible for validating the `DataCatalog` entry. It also carries
 the `DataAdapter` and `DataDriver` (more info below) and serves as an entrypoint to
 the data.
 Per HydroMT data type (e.g. `RasterDataset`, `GeoDataFrame`), HydroMT has one
@@ -459,27 +498,27 @@ MetaDataResolver
 ^^^^^^^^^^^^^^^^
 
 The `MetaDataResolver` takes a single `uri` and the query parameters from the model,
-such as the region, or the timerange, and returns multiple absolute paths, or `uri`s,
+such as the region, or the time range, and returns multiple absolute paths, or `uri`s,
 that can be read into a single python representation (e.g. `xarray.Dataset`). This
 functionality was previously covered in the `resolve_paths` function. However, there
 are more ways than to resolve a single uri, so the `MetaDataResolver` makes this
-behaviour extendable. Plugins or other code can subclass the Abstract `MetaDataResolver`
+behavior extendable. Plugins or other code can subclass the Abstract `MetaDataResolver`
 class to implement their own conventions for data discovery.
 The `MetaDataResolver` is injected into the `Driver` objects and can be used there.
 
 Driver
 ^^^^^^
 
-The `Driver` class is responsable for deserializing/reading a set of file types, like
+The `Driver` class is responsible for deserializing/reading a set of file types, like
 a geojson or zarr file, into their python in-memory representations:
 `geopandas.DataFrame` or `xarray.Dataset` respectively. To find the relevant files based
 on a single `uri` in the `DataCatalog`, a `MetaDataResolver` is used.
 The driver has a `read` method. This method accepts a `uri`, a
-unique identifier for a single datasource. It also accepts different query parameters,
-such a the region, timerange or zoom level of the query from the model.
+unique identifier for a single data source. It also accepts different query parameters,
+such a the region, time range or zoom level of the query from the model.
 This `read` method returns the python representation of the DataSource.
 Because the merging of different files from different `DataSource`s can be
-non-trivial, the driver is responsable to merge the different python objects coming
+non-trivial, the driver is responsible to merge the different python objects coming
 from the driver to a single representation. This is then returned from the `read`
 method.
 Because the query parameters vary per HydroMT data type, the is a different driver
@@ -488,7 +527,7 @@ interface per type, e.g. `RasterDatasetDriver`, `GeoDataFrameDriver`.
 DataAdapter
 ^^^^^^^^^^^
 
-The `DataAdapter` now has its previous responsabilities reduced to just homogenizing
+The `DataAdapter` now has its previous responsibilities reduced to just homogenizing
 the data coming from the `Driver`. This means slicing the data to the right region,
 renaming variables, changing units, regridding and more. The `DataAdapter` has a
 `transform` method that takes a HydroMT data type and returns this same type. This
