@@ -6,7 +6,29 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+Unreleased
+==========
 
+Changed
+-------
+- Development environment is now set up via pixi instead of mamba / conda. See the documentation for more information on how to install.
+
+Fixed
+-----
+- Bug in `raster.transform` with lazy coordinates. (#801)
+- Bug in `workflows.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
+- Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
+
+
+v0.9.4 (2024-02-26)
+===================
+This release fixes a performance regression when reading geometry masks, relaxed warnings for empty raster datasets and updated the documention of the new hydromt commands.
+
+Fixed
+-----
+- Added back geometry mask when reading vector files with `fiona` as engine/ driver. (#777)
+- Relaxed empty data checking on `RasterDatasetAdapter`. (#782)
+- Add documentation for `hydromt check` and `hydromt export` commands. (#767)
 
 v0.9.3 (2024-02-08)
 ===================

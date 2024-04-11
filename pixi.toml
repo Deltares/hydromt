@@ -8,33 +8,11 @@ platforms = ["linux-64", "win-64"]
 
 [tasks]
 
-dev = { depends_on = [
-  "dev-env-file",
-  "dev-create-mamba-env",
-  "dev-install-hydromt",
-  "dev-install-pre-commit",
-] }
-dev-env-file = "python make_env.py full -n hydromt-dev -p 3.9"
-dev-create-mamba-env = "mamba env remove -n hydromt-dev; mamba env create -f environment.yml"
-dev-install-hydromt = "mamba run -n hydromt-dev pip install -e ."
-dev-install-pre-commit = "mamba run -n hydromt-dev pre-commit install"
+install = { depends_on = ["install-hydromt", "install-pre-commit"] }
+install-hydromt = "pip install --no-deps --editable ."
+install-pre-commit = "pre-commit install"
 
 lint = { cmd = ["pre-commit", "run", "--all"] }
-env-slim = { cmd = [
-  "python",
-  "make_env.py",
-  "slim",
-  "-o",
-  "slim-environment.yml",
-] }
-env-full = { cmd = [
-  "python",
-  "make_env.py",
-  "full",
-  "-o",
-  "full-environment.yml",
-] }
-env-min = { cmd = ["python", "make_env.py", "-o", "min-environment.yml"] }
 
 docker-build-min = { cmd = [
   "docker",
@@ -42,32 +20,40 @@ docker-build-min = { cmd = [
   "-t",
   "deltares/hydromt:min",
   "--target=min",
+  "--build-arg",
+  "PIXIENV=min-py311",
   ".",
-], depends_on = "env-min" }
+] }
 docker-build-full = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:full",
   "--target=full",
+  "--build-arg",
+  "PIXIENV=full-py311",
   ".",
-], depends_on = "env-full" }
+] }
 docker-build-slim = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:slim",
   "--target=slim",
+  "--build-arg",
+  "PIXIENV=slim-py311",
   ".",
-], depends_on = "env-slim" }
+] }
 docker-build-latest = { cmd = [
   "docker",
   "build",
   "-t",
   "deltares/hydromt:latest",
   "--target=slim",
+  "--build-arg",
+  "PIXIENV=slim-py311",
   ".",
-], depends_on = "env-slim" }
+] }
 
 docker-publish-min = { cmd = [
   "docker",
@@ -138,3 +124,154 @@ clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 test = { cmd = ["pytest"] }
 test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
+test-cov = { cmd = [
+  "pytest",
+  "--verbose",
+  "--cov=hydromt",
+  "--cov-report",
+  "xml",
+] }
+
+[dependencies]
+affine = "*"
+bottleneck = "*"
+click = "*"
+dask = "*"
+fsspec = "*"
+geopandas = ">=0.10"
+importlib_metadata = "*"
+mercantile = "*"
+netcdf4 = "*"
+numba = "*"
+numpy = ">=1.23"
+packaging = "*"
+pandas = "*"
+pip = "*"
+pydantic = "~=2.4"
+pyflwdir = ">=0.5.4"
+pyogrio = ">=0.6"
+pyproj = "*"
+pystac = "*"
+pyyaml = "*"
+rasterio = "*"
+requests = "*"
+rioxarray = "*"
+scipy = "*"
+shapely = ">=2.0.0"
+tomli = "*"
+tomli-w = "*"
+universal_pathlib = ">=0.2"
+xarray = "*"
+xmltodict = "*"
+zarr = "*"
+
+[feature.py39.dependencies]
+python = "3.9.*"
+
+[feature.py310.dependencies]
+python = "3.10.*"
+
+[feature.py311.dependencies]
+python = "3.11.*"
+
+[feature.io.dependencies]
+gcsfs = ">=2023.12.1"
+openpyxl = "*"
+fastparquet = "*"
+pillow = "*"
+rio-vrt = "*"
+s3fs = "*"
+
+[feature.extra.dependencies]
+matplotlib = "*"
+pyet = "*"
+xugrid = ">=0.9.0"
+
+[feature.dev.dependencies]
+black = "*"
+flit = "*"
+pip = ">=23.1.2"
+pre-commit = "*"
+ruff = "*"
+twine = "*"
+
+[feature.test.dependencies]
+pytest = ">=2.7.3"
+pytest-cov = "*"
+pytest-mock = "*"
+pytest-timeout = "*"
+xugrid = "*"
+
+[feature.doc.dependencies]
+nbsphinx = "*"
+pydata-sphinx-theme = ">=0.15.2"
+sphinx = "*"
+
+[feature.doc.pypi-dependencies]
+sphinx_autosummary_accessors = "*"
+sphinx_design = "*"
+"sphinx-click" = "*"
+
+[feature.examples.dependencies]
+cartopy = "*"
+jupyterlab = "*"
+notebook = "*"
+
+[environments]
+default = { features = [
+  "py39",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py39" }
+full-py311 = { features = [
+  "py311",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py311" }
+slim-py311 = { features = [
+  "py311",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py311" }
+min-py311 = { features = ["py311"], solve-group = "py311" }
+full-py310 = { features = [
+  "py310",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py310" }
+slim-py310 = { features = [
+  "py310",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py310" }
+min-py310 = { features = ["py310"], solve-group = "py310" }
+full-py39 = { features = [
+  "py39",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py39" }
+slim-py39 = { features = [
+  "py39",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py39" }
+min-py39 = { features = ["py39"], solve-group = "py39" }
