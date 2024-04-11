@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Optional, Tuple, Union
+from typing import Literal, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -89,11 +89,13 @@ def flwdir_from_da(
 
 def d8_from_dem(
     da_elv: xr.DataArray,
-    gdf_stream: Optional[gpd.GeoDataFrame] = None,
     max_depth: float = -1.0,
-    outlets: str = "edge",
+    outlets: Literal["edge", "min"] = "edge",
     idxs_pit: Optional[np.ndarray] = None,
-    rivdph: float = 5,
+    gdf_riv: Optional[gpd.GeoDataFrame] = None,
+    riv_burn_method: Literal["fixed", "rivdph", "uparea"] = "fixed",
+    riv_depth: float = 5,
+    logger=logger,
     **kwargs,
 ) -> xr.DataArray:
     """Derive D8 flow directions grid from an elevation grid.
@@ -108,25 +110,29 @@ def d8_from_dem(
     ----------
     da_elv: 2D xarray.DataArray
         elevation raster
-    gdf_stream: geopandas.GeoDataArray, optional
-        stream vector layer
-        If the layer has a 'rivdph' [m] column, this is used to burn in (i.e. subtract from) the DEM.
-        Otherwise if it has an 'uparea' [km2] column this is used to create a synthetic elevation grid for river cells.
-        If both are not present a fixed depth (rivdph) is used.
     max_depth: float, optional
         Maximum pour point depth. Depressions with a larger pour point
         depth are set as pit. A negative value (default) equals an infinitely
         large pour point depth causing all depressions to be filled.
-    outlets: {'edge', 'min'}
-        Position for basin outlet(s) at the all valid elevation edge cell ('edge')
-        or only the minimum elevation edge cell ('min')
-    rivdph: float
-        fixed depth value used to burn in the dem
+    outlets: {'edge', 'min', 'idxs_pit'}
+        Position of basin outlet(s)
+        If 'edge' (default) all valid elevation edge cell are considered.
+        If 'min' only the global  minimum elevation edge cell is considered and all flow is directed to this cell.
+        If 'idxs_pit' the linear indices of the outlet cells are provided in `idxs_pit`.
     idxs_pit: 1D array of int
         Linear indices of outlet cells.
+    gdf_riv: geopandas.GeoDataArray, optional
+        River vector data. If provided, the river cells are burned into the dem.
+        Different methods can be used to burn in the river cells, see `riv_burn_method`.
+    riv_burn_method: {'uparea', 'rivdph', 'fixed'}, optional
+        Method to burn in river vector to aid the flow direction derivation, requires `gdf_riv`.
+        If 'fixed' (default) a fixed river depth `rivdph` value is used to burn in the river cells.
+        If 'rivdph' the rivdph column is used to burn in the river cells directly.
+        If 'uparea' the uparea column is used to create a synthetic river depth based on `max(1, log10(uparea[m2]))`.
+    riv_depth: float
+        fixed depth value used to burn in the dem
     **kwargs:
-        Additional keyword arguments that are passed to the `fill_depressions`
-        function.
+        Additional keyword arguments that are passed to the :py:func:`pyflwdir.dem.fill_depressions` function.
 
     Returns
     -------
@@ -137,33 +143,42 @@ def d8_from_dem(
     --------
     pyflwdir.dem.fill_depressions
     """
+    if outlets == "idxs_pit" and idxs_pit is None:
+        raise ValueError("idxs_pit required if outlets='idxs_pit'")
+    elif idxs_pit is not None and outlets != "idxs_pit":
+        logger.warning("idxs_pit provided but outlets not set to 'idxs_pit'")
+
     nodata = da_elv.raster.nodata
     crs = da_elv.raster.crs
-    assert da_elv.raster.res[1] < 0
-    assert nodata is not None
-    assert ~np.isnan(nodata)
-    # burn in river if
-    nodata_mask = da_elv == nodata
-    if isinstance(gdf_stream, gpd.GeoDataFrame):
-        if "uparea" not in gdf_stream.columns and "rivdph" not in gdf_stream.columns:
-            gdf_stream = gdf_stream.assign(rivdph=rivdph)  # fixed depth
+    assert da_elv.raster.res[1] < 0, "N->S orientation required"
+    assert nodata is not None, "Nodata value required"
 
-        if "rivdph" in gdf_stream.columns:  # burn in river depth
-            da_rivdph = da_elv.raster.rasterize(gdf_stream, col_name="rivdph", nodata=0)
-            da_elv = da_elv - np.maximum(0, da_rivdph)
-            da_elv = da_elv.where(~nodata_mask, nodata)
-        elif "uparea" in gdf_stream.columns:  # synthetic elevation for river cells
-            gdf_stream = gdf_stream.sort_values(by="uparea")
-            da_uparea = da_elv.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
-            # create synthetic elevation for river cells
-            # make sure the rivers have a slope and are below all other elevation cells.
-            # river elevation = min(elv) - log10(uparea[m2]) from rasterized river uparea.
-            elvmin = da_elv.where(~nodata_mask).min()
-            elvriv = elvmin - np.log10(np.maximum(1.0, da_uparea * 1e3))
-            # combine synthetic elevation for river cells with original elevation
-            da_elv = elvriv.where(np.logical_and(nodata_mask, da_uparea > 0), da_elv)
+    nodata_mask = np.isnan(da_elv) if np.isnan(nodata) else da_elv == nodata
+    if isinstance(gdf_riv, gpd.GeoDataFrame):
+        # checks and pre-processing gdf_riv
+        gdf_riv = gdf_riv.copy()
+        if riv_burn_method == "uparea":
+            if "uparea" not in gdf_riv.columns:
+                raise ValueError("uparea column required in gdf_riv")
+            gdf_riv = gdf_riv.sort_values(by="uparea")
+            # log10(uparea[m2]) as river depth
+            gdf_riv["rivdph"] = np.maximum(1, np.log10(gdf_riv["uparea"].values * 1e3))
+        elif riv_burn_method == "rivdph":
+            if "rivdph" not in gdf_riv.columns:
+                raise ValueError("rivdph column required in gdf_riv")
+            gdf_riv = gdf_riv.sort_values(by="rivdph")
+        elif riv_burn_method == "fixed":
+            gdf_riv = gdf_riv.assign(rivdph=riv_depth)  # fixed depth
+        else:
+            raise ValueError(f"Unknown riv_burn_method: {riv_burn_method}")
+
+        # burn in river depth
+        da_rivdph = da_elv.raster.rasterize(gdf_riv, col_name="rivdph", nodata=0)
+        da_elv = da_elv - np.maximum(0, da_rivdph)
+        da_elv = da_elv.where(~nodata_mask, nodata)
         da_elv.raster.set_nodata(nodata)
         da_elv.raster.set_crs(crs)
+
     # derive new flow directions from (synthetic) elevation
     d8 = pyflwdir.dem.fill_depressions(
         da_elv.values.astype(np.float32),
@@ -173,6 +188,7 @@ def d8_from_dem(
         idxs_pit=idxs_pit,
         **kwargs,
     )[1]
+
     # return xarray data array
     da_flw = xr.DataArray(
         dims=da_elv.raster.dims,
@@ -182,6 +198,7 @@ def d8_from_dem(
     )
     da_flw.raster.set_nodata(247)
     da_flw.raster.set_crs(crs)
+
     return da_flw
 
 
