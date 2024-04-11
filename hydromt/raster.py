@@ -1245,11 +1245,14 @@ class XRasterBase(XGeoBase):
             )
             if not np.all(gdf_bbox.is_empty):
                 xs, ys = zip(*gdf_bbox.dissolve().boundary[0].coords[:])
+            else:  # no overlap -> return empty array
+                return self._obj.isel(
+                    {self.x_dim: slice(0, 0), self.y_dim: slice(0, 0)}
+                )
         cs, rs = ~self.transform * (np.array(xs), np.array(ys))
-        # use round to get integer slices
+        # use round to get integer slices, max to avoid negative indices
         c0 = max(int(np.round(cs.min() - buffer)), 0)
         r0 = max(int(np.round(rs.min() - buffer)), 0)
-        # max to avoid negative slices (which start to count from the end of the array)
         c1 = max(int(np.round(cs.max() + buffer)), 0)
         r1 = max(int(np.round(rs.max() + buffer)), 0)
         return self.clip(slice(c0, c1), slice(r0, r1))
