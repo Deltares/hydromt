@@ -208,7 +208,7 @@ def test_model_mesh_workflow(tmpdir: Path):
 
 
 # @pytest.mark.integration()
-@pytest.mark.skip(reason="Probably needs fix on side of XUgrid, issue is pending")
+# @pytest.mark.skip(reason="Probably needs fix on side of XUgrid, issue is pending")
 def test_model_mesh_read_plus(tmpdir: Path):
     m = Model(root=str(tmpdir), mode="w")
     m.add_component("mesh", MeshComponent(m))

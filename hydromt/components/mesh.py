@@ -591,6 +591,9 @@ class MeshComponent(ModelComponent):
             if grid_name in self.mesh_names:
                 # This makes sure the data has the same coordinates as the existing data
                 # check if the two grids are the same
+                data = xu.UgridDataset(
+                    data.ugrid.to_dataset()
+                )  # add nFaces coordinates to grid
                 if not self._grid_is_equal(grid_name, data):
                     if not overwrite_grid:
                         raise ValueError(
