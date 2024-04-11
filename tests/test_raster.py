@@ -300,8 +300,7 @@ def test_clip(transform, shape):
     assert raster1d.raster.transform is not None
     # create gdf covering approx half raster
     w, s, e, n = da.raster.bounds
-    e_clip, _ = da.raster.transform * (shape[1] // 2, shape[0] // 2)
-    gdf = gpd.GeoDataFrame(geometry=[box(w, s, e_clip, n)], crs=da.raster.crs)
+    gdf = gpd.GeoDataFrame(geometry=[box(w, s, e, n)], crs=da.raster.crs)
     # test bbox - buffer
     da_clip = da.raster.clip_bbox(gdf.total_bounds, buffer=da.raster.width)
     assert np.all(np.isclose(da.raster.bounds, da_clip.raster.bounds))
