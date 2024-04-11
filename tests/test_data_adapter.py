@@ -158,7 +158,7 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
             "crs": 4326,
             "data_type": "RasterDataset",
             "driver": "raster",
-            "path": f"{str(tmpdir)}/test_zl{{zoom_level}}.tif",
+            "path": f"{str(tmpdir)}/test_zl{{zoom_level:d}}.tif",  # test with str format for zoom level
             "zoom_levels": {0: 0.1, 1: 0.3},
         }
     }
