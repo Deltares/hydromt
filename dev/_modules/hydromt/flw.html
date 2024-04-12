@@ -449,7 +449,7 @@ document.write(`
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -541,10 +541,13 @@ document.write(`
 <a class="viewcode-back" href="../../_generated/hydromt.flw.d8_from_dem.html#hydromt.flw.d8_from_dem">[docs]</a>
 <span class="k">def</span> <span class="nf">d8_from_dem</span><span class="p">(</span>
     <span class="n">da_elv</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">gdf_stream</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">max_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">outlets</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
+    <span class="n">outlets</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;idxs_pit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span>
     <span class="n">idxs_pit</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">gdf_riv</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">riv_burn_method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fixed&quot;</span><span class="p">,</span> <span class="s2">&quot;rivdph&quot;</span><span class="p">,</span> <span class="s2">&quot;uparea&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;fixed&quot;</span><span class="p">,</span>
+    <span class="n">riv_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive D8 flow directions grid from an elevation grid.</span>
@@ -559,21 +562,29 @@ document.write(`
 <span class="sd">    ----------</span>
 <span class="sd">    da_elv: 2D xarray.DataArray</span>
 <span class="sd">        elevation raster</span>
-<span class="sd">    gdf_stream: geopandas.GeoDataArray, optional</span>
-<span class="sd">        stream vector layer with &#39;uparea&#39; [km2] column which is used to burn</span>
-<span class="sd">        the river in the elevation data.</span>
 <span class="sd">    max_depth: float, optional</span>
 <span class="sd">        Maximum pour point depth. Depressions with a larger pour point</span>
 <span class="sd">        depth are set as pit. A negative value (default) equals an infinitely</span>
 <span class="sd">        large pour point depth causing all depressions to be filled.</span>
-<span class="sd">    outlets: {&#39;edge&#39;, &#39;min&#39;}</span>
-<span class="sd">        Position for basin outlet(s) at the all valid elevation edge cell (&#39;edge&#39;)</span>
-<span class="sd">        or only the minimum elevation edge cell (&#39;min&#39;)</span>
+<span class="sd">    outlets: {&#39;edge&#39;, &#39;min&#39;, &#39;idxs_pit&#39;}</span>
+<span class="sd">        Position of basin outlet(s)</span>
+<span class="sd">        If &#39;edge&#39; (default) all valid elevation edge cell are considered.</span>
+<span class="sd">        If &#39;min&#39; only the global  minimum elevation edge cell is considered and all flow is directed to this cell.</span>
+<span class="sd">        If &#39;idxs_pit&#39; the linear indices of the outlet cells are provided in `idxs_pit`.</span>
 <span class="sd">    idxs_pit: 1D array of int</span>
 <span class="sd">        Linear indices of outlet cells.</span>
+<span class="sd">    gdf_riv: geopandas.GeoDataArray, optional</span>
+<span class="sd">        River vector data. If provided, the river cells are burned into the dem.</span>
+<span class="sd">        Different methods can be used to burn in the river cells, see `riv_burn_method`.</span>
+<span class="sd">    riv_burn_method: {&#39;uparea&#39;, &#39;rivdph&#39;, &#39;fixed&#39;}, optional</span>
+<span class="sd">        Method to burn in river vector to aid the flow direction derivation, requires `gdf_riv`.</span>
+<span class="sd">        If &#39;fixed&#39; (default) a fixed river depth `rivdph` value is used to burn in the river cells.</span>
+<span class="sd">        If &#39;rivdph&#39; the rivdph column is used to burn in the river cells directly.</span>
+<span class="sd">        If &#39;uparea&#39; the uparea column is used to create a synthetic river depth based on `max(1, log10(uparea[m2]))`.</span>
+<span class="sd">    riv_depth: float</span>
+<span class="sd">        fixed depth value used to burn in the dem</span>
 <span class="sd">    **kwargs:</span>
-<span class="sd">        Additional keyword arguments that are passed to the `fill_depressions`</span>
-<span class="sd">        function.</span>
+<span class="sd">        Additional keyword arguments that are passed to the :py:func:`pyflwdir.dem.fill_depressions` function.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -584,23 +595,42 @@ document.write(`
 <span class="sd">    --------</span>
 <span class="sd">    pyflwdir.dem.fill_depressions</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">outlets</span> <span class="o">==</span> <span class="s2">&quot;idxs_pit&quot;</span> <span class="ow">and</span> <span class="n">idxs_pit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;idxs_pit required if outlets=&#39;idxs_pit&#39;&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">idxs_pit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">outlets</span> <span class="o">!=</span> <span class="s2">&quot;idxs_pit&quot;</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;idxs_pit provided but outlets not set to &#39;idxs_pit&#39;&quot;</span><span class="p">)</span>
+
     <span class="n">nodata</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span>
     <span class="n">crs</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span>
-    <span class="k">assert</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span>
-    <span class="k">assert</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="k">assert</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
-    <span class="c1"># burn in river if</span>
-    <span class="k">if</span> <span class="n">gdf_stream</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;uparea&quot;</span> <span class="ow">in</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="n">gdf_stream</span> <span class="o">=</span> <span class="n">gdf_stream</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;uparea&quot;</span><span class="p">)</span>
-        <span class="n">dst_rivupa</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">gdf_stream</span><span class="p">,</span> <span class="n">col_name</span><span class="o">=</span><span class="s2">&quot;uparea&quot;</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="c1"># make sure the rivers have a slope and are below all other elevation cells.</span>
-        <span class="c1"># river elevation = min(elv) - log10(uparea[m2]) from rasterized river uparea.</span>
-        <span class="n">elvmin</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">da_elv</span> <span class="o">!=</span> <span class="n">nodata</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
-        <span class="n">elvriv</span> <span class="o">=</span> <span class="n">elvmin</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dst_rivupa</span> <span class="o">*</span> <span class="mf">1e3</span><span class="p">))</span>
-        <span class="c1"># synthetic elevation with river burned in</span>
-        <span class="n">da_elv</span> <span class="o">=</span> <span class="n">elvriv</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">da_elv</span> <span class="o">!=</span> <span class="n">nodata</span><span class="p">,</span> <span class="n">dst_rivupa</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="n">da_elv</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;N-&gt;S orientation required&quot;</span>
+    <span class="k">assert</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Nodata value required&quot;</span>
+
+    <span class="n">nodata_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">da_elv</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span> <span class="k">else</span> <span class="n">da_elv</span> <span class="o">==</span> <span class="n">nodata</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf_riv</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+        <span class="c1"># checks and pre-processing gdf_riv</span>
+        <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">&quot;uparea&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;uparea&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;uparea column required in gdf_riv&quot;</span><span class="p">)</span>
+            <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;uparea&quot;</span><span class="p">)</span>
+            <span class="c1"># log10(uparea[m2]) as river depth</span>
+            <span class="n">gdf_riv</span><span class="p">[</span><span class="s2">&quot;rivdph&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">gdf_riv</span><span class="p">[</span><span class="s2">&quot;uparea&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="mf">1e3</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">&quot;rivdph&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;rivdph&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;rivdph column required in gdf_riv&quot;</span><span class="p">)</span>
+            <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s2">&quot;rivdph&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">riv_burn_method</span> <span class="o">==</span> <span class="s2">&quot;fixed&quot;</span><span class="p">:</span>
+            <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gdf_riv</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">rivdph</span><span class="o">=</span><span class="n">riv_depth</span><span class="p">)</span>  <span class="c1"># fixed depth</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown riv_burn_method: </span><span class="si">{</span><span class="n">riv_burn_method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># burn in river depth</span>
+        <span class="n">da_rivdph</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">gdf_riv</span><span class="p">,</span> <span class="n">col_name</span><span class="o">=</span><span class="s2">&quot;rivdph&quot;</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">da_elv</span> <span class="o">=</span> <span class="n">da_elv</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">da_rivdph</span><span class="p">)</span>
+        <span class="n">da_elv</span> <span class="o">=</span> <span class="n">da_elv</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">nodata_mask</span><span class="p">,</span> <span class="n">nodata</span><span class="p">)</span>
         <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
         <span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+
     <span class="c1"># derive new flow directions from (synthetic) elevation</span>
     <span class="n">d8</span> <span class="o">=</span> <span class="n">pyflwdir</span><span class="o">.</span><span class="n">dem</span><span class="o">.</span><span class="n">fill_depressions</span><span class="p">(</span>
         <span class="n">da_elv</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
@@ -610,6 +640,7 @@ document.write(`
         <span class="n">idxs_pit</span><span class="o">=</span><span class="n">idxs_pit</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
     <span class="c1"># return xarray data array</span>
     <span class="n">da_flw</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span>
         <span class="n">dims</span><span class="o">=</span><span class="n">da_elv</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
@@ -619,6 +650,7 @@ document.write(`
     <span class="p">)</span>
     <span class="n">da_flw</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="mi">247</span><span class="p">)</span>
     <span class="n">da_flw</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">da_flw</span></div>
 
 
