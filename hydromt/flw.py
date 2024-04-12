@@ -90,7 +90,7 @@ def flwdir_from_da(
 def d8_from_dem(
     da_elv: xr.DataArray,
     max_depth: float = -1.0,
-    outlets: Literal["edge", "min"] = "edge",
+    outlets: Literal["edge", "min", "idxs_pit"] = "edge",
     idxs_pit: Optional[np.ndarray] = None,
     gdf_riv: Optional[gpd.GeoDataFrame] = None,
     riv_burn_method: Literal["fixed", "rivdph", "uparea"] = "fixed",
