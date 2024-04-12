@@ -4,7 +4,8 @@
 import numpy as np
 import pytest
 import xarray as xr
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, GeoSeries
+from geopandas.testing import assert_geoseries_equal
 from pyproj import CRS
 from shapely.geometry import MultiPolygon, Polygon
 
@@ -80,6 +81,15 @@ def test_vector(geoda, geodf):
     gdf1 = geodf.to_crs(3857)
     assert np.all(da1.vector.geometry == gdf1.geometry)
     assert da1.vector.crs == gdf1.crs
+
+
+def test_single_geom_vector(geoda):
+    geom = geoda.isel(index=0).vector.geometry
+    assert isinstance(geom, GeoSeries)
+
+    geom1 = geoda.isel(index=[0]).vector.geometry
+    assert isinstance(geom1, GeoSeries)
+    assert_geoseries_equal(geom1, geom)
 
 
 def test_from_gdf(geoda, geodf):

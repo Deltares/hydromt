@@ -42,14 +42,17 @@ class GeoBase(raster.XGeoBase):
         names, types = [], []
         dvars = self._all_names if geom_name is None else [geom_name]
         for name in dvars:
-            if self._obj[name].ndim == 1 and isinstance(
-                self._obj[name][0].values.item(), BaseGeometry
-            ):
+            ndim = self._obj[name].ndim
+            if ndim > 1:  # skip multi-dim variables
+                continue
+            if ndim == 1:
+                item = self._obj[name][0].values.item()
+            elif ndim == 0:
+                item = self._obj[name].values.item()
+            if isinstance(item, BaseGeometry):
                 names.append(name)
                 types.append("geom")
-            elif self._obj[name].ndim == 1 and isinstance(
-                self._obj[name][0].values.item(), str
-            ):
+            elif isinstance(item, str):
                 try:
                     shapely.wkt.loads(self._obj[name][0].values.item())
                     names.append(name)
@@ -116,7 +119,10 @@ class GeoBase(raster.XGeoBase):
         if geom_name is not None:
             self.set_attrs(geom_name=geom_name)
             self.set_attrs(geom_format=types[names.index(geom_name)])
-            self.set_attrs(index_dim=self._obj[geom_name].dims[0])
+            if self._obj[geom_name].ndim == 1:
+                self.set_attrs(index_dim=self._obj[geom_name].dims[0])
+            else:
+                self.attrs.pop("index_dim", None)
         else:
             self.attrs.pop("geom_name", None)
             self.attrs.pop("geom_format", None)
@@ -216,7 +222,8 @@ class GeoBase(raster.XGeoBase):
     @property
     def index(self):
         """Return the index values."""
-        return self._obj[self.index_dim]
+        if self.index_dim:
+            return self._obj[self.index_dim]
 
     @property
     def size(self):
@@ -250,21 +257,21 @@ class GeoBase(raster.XGeoBase):
             raise ValueError("No valid geometry found in object.")
         if gtype == "geom":
             geoms = GeoSeries(
-                data=self._obj[self.geom_name].values,
-                index=self.index.values,
+                data=np.atleast_1d(self._obj[self.geom_name].values),
+                index=self.index.values if self.index_dim else None,
                 crs=self.crs,
             )
         elif gtype == "xy":
             geoms = GeoSeries.from_xy(
-                x=self._obj[self.x_name].values,
-                y=self._obj[self.y_name].values,
-                index=self.index.values,
+                x=np.atleast_1d(self._obj[self.x_name].values),
+                y=np.atleast_1d(self._obj[self.y_name].values),
+                index=self.index.values if self.index_dim else None,
                 crs=self.crs,
             )
         elif gtype == "wkt":
             geoms = GeoSeries.from_wkt(
-                data=self._obj[self.geom_name].values,
-                index=self.index.values,
+                data=np.atleast_1d(self._obj[self.geom_name].values),
+                index=self.index.values if self.index_dim else None,
                 crs=self.crs,
             )
         geoms.index.name = self.index_dim
