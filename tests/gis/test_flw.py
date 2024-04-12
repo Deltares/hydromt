@@ -29,17 +29,40 @@ def test_from_da(flwda):
 
 def test_from_dem(demda, flwdir):
     flwda1 = flw.d8_from_dem(demda, outlets="min")
-    assert np.all(
-        np.where(flwda1.values.ravel() == 0)[0] == 6
-    )  # single outlet position
-    # with river shape (simplistic example)
+    # single outlet position
+    assert np.all(np.where(flwda1.values.ravel() == 0)[0] == 6)
+    # with river shape; fixed depth
     upgrid = flwdir.upstream_area("cell")
-    gdf_stream = gpd.GeoDataFrame.from_features(
+    gdf_riv = gpd.GeoDataFrame.from_features(
         flwdir.vectorize(uparea=upgrid, mask=upgrid > 5)
     )
-    flwda2 = flw.d8_from_dem(demda, gdf_stream=gdf_stream, outlets="min")
+    flwda2 = flw.d8_from_dem(
+        demda, gdf_riv=gdf_riv, outlets="min", riv_burn_method="fixed", riv_depth=5
+    )
     upg_max = flw.flwdir_from_da(flwda2).upstream_area("cell").max()
     assert upg_max == upgrid.max()
+    # with rivdph column
+    gdf_riv["rivdph"] = 5
+    flwda3 = flw.d8_from_dem(
+        demda, gdf_riv=gdf_riv, outlets="min", riv_burn_method="rivdph"
+    )
+    xr.testing.assert_equal(flwda2, flwda3)
+    # with upstream area
+    flwda4 = flw.d8_from_dem(demda, gdf_riv=gdf_riv, riv_burn_method="uparea")
+    assert np.sum(flwda4 != flwda2) == 21  # 21 cells are different; regression test
+    # errors
+    with pytest.raises(ValueError, match="uparea column required"):
+        flw.d8_from_dem(
+            demda, gdf_riv=gdf_riv.drop(columns="uparea"), riv_burn_method="uparea"
+        )
+    with pytest.raises(ValueError, match="rivdph column required"):
+        flw.d8_from_dem(
+            demda, gdf_riv=gdf_riv.drop(columns="rivdph"), riv_burn_method="rivdph"
+        )
+    with pytest.raises(ValueError, match="Unknown riv_burn_method"):
+        flw.d8_from_dem(demda, gdf_riv=gdf_riv, riv_burn_method="unknown")
+    with pytest.raises(ValueError, match="idxs_pit required"):
+        flw.d8_from_dem(demda, gdf_riv=gdf_riv, outlets="idxs_pit")
 
 
 def test_upscale(hydds, flwdir):
