@@ -3,8 +3,10 @@
 from abc import ABC
 from typing import Any, Callable, ClassVar, Generator, List, Type
 
+from fsspec.implementations.local import LocalFileSystem
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from hydromt._typing import FS
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.metadata_resolver.resolver_plugin import RESOLVERS
 from hydromt.plugins import PLUGINS
@@ -17,10 +19,9 @@ class BaseDriver(BaseModel, ABC):
     """
 
     name: ClassVar[str]
-    metadata_resolver: MetaDataResolver = Field(
-        default_factory=RESOLVERS.get("convention")
-    )
+    metadata_resolver: MetaDataResolver = Field(default_factory=RESOLVERS["convention"])
     model_config = ConfigDict(extra="allow")
+    filesystem: FS = Field(default=LocalFileSystem())
 
     @field_validator("metadata_resolver", mode="before")
     @classmethod
@@ -28,16 +29,16 @@ class BaseDriver(BaseModel, ABC):
         if isinstance(v, str):
             if v not in RESOLVERS:
                 raise ValueError(f"unknown MetaDataResolver: '{v}'.")
-            return RESOLVERS.get(v)()
+            return RESOLVERS[v]()
         elif isinstance(v, dict):
             try:
                 name: str = v.pop("name")
                 if name not in RESOLVERS:
                     raise ValueError(f"unknown MetaDataResolver: '{name}'.")
-                return RESOLVERS.get(name).model_validate(v)
+                return RESOLVERS[name].model_validate(v)
             except KeyError:
                 # return default when name is missing
-                return cls.model_fields.get("metadata_resolver").default_factory(**v)
+                return cls.model_fields["metadata_resolver"].default_factory(**v)
 
         elif v is None:  # let default factory handle it
             return None

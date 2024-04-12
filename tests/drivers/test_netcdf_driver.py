@@ -6,6 +6,7 @@ from xarray import open_mfdataset
 
 from hydromt.drivers import NetcdfDriver
 from hydromt.drivers.preprocessing import round_latlon
+from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 
 class TestNetcdfDriver:
@@ -14,14 +15,18 @@ class TestNetcdfDriver:
             "hydromt.drivers.netcdf_driver.xr.open_mfdataset", spec=open_mfdataset
         )
         mock_xr_open.return_value = xr.Dataset()
-        uris: str = "dir_with_netcdfs/{variable}.netcdf"
-        res: xr.Dataset = NetcdfDriver().read(
-            uris, preprocess="round_latlon", variables=["var1", "var2"]
+
+        class FakeMetadataResolver(MetaDataResolver):
+            def resolve(self, uri: str, *args, **kwargs):
+                return [uri]
+
+        uri: str = "file.netcdf"
+        res: xr.Dataset = NetcdfDriver(metadata_resolver=FakeMetadataResolver()).read(
+            uri,
+            preprocess="round_latlon",
+            variables=["var1", "var2"],
         )
         call_args = mock_xr_open.call_args
-        assert call_args[0][0] == [
-            "dir_with_netcdfs/var1.netcdf",
-            "dir_with_netcdfs/var2.netcdf",
-        ]  # first arg
+        assert call_args[0][0] == [uri]  # first arg
         assert call_args[1].get("preprocess") == round_latlon
         assert res.sizes == {}  # empty dataframe

@@ -150,6 +150,58 @@ with their equivalent functions
 | catalog['name'] = data   | catalog.set_source('name',data)      |
 +--------------------------+--------------------------------------+
 
+Add `Driver`, `URIResolver` and `DataAdapter` representations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+With the addition of new classes responsible for different stages of the data
+reading phase, the data catalog is updated accordingly:
+
+.. code-block:: yaml
+	mysource:
+		crs: 4326
+		data_type: RasterDataset
+		uri: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
+		driver:
+			name: netcdf
+			filesystem: local
+			metadata_resolver: convention
+			chunks:
+				latitude: 250
+				longitude: 240
+				time: 30
+			combine: by_coords
+			...
+		data_adapter:
+			meta:
+				category: meteo
+				notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
+				...
+			rename:
+				d2m: temp_dew
+				msl: press_msl
+				...
+			unit_add:
+				temp: -273.15
+				temp_dew: -273.15
+				...
+			unit_mult:
+				kin: 0.000277778
+				kout: 0.000277778
+				...
+
+Where there are a few changes from the previous versions:
+- `path` is renamed to `uri`
+- `driver` is it's own class and can be specified:
+	- by string, implying default arguments
+	- using a YAML object, with a mandatory `name` plus kwargs.
+- `metadata_resolver` hangs under driver and can be specified:
+	- by string, implying default arguments
+	- using a YAML object, with a mandatory `name` plus kwargs.
+- `filesystem` is moved to driver, and can be specified:
+	- by string, implying default arguments
+	- using a YAML object, with a mandatory `protocol` plus kwargs.
+- `unit_add`, `unit_mult`, `rename`, `attrs`, `meta` are moved to `data_adapter`
+
 Model
 -----
 

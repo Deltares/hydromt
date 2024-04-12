@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from logging import Logger, getLogger
 from typing import Any, Dict, List, Optional
 
+from fsspec import AbstractFileSystem
 from pydantic import BaseModel, Field
 
 from hydromt._typing import Bbox, Geom, NoDataStrategy, Predicate, TimeRange
@@ -22,6 +23,7 @@ class MetaDataResolver(BaseModel, ABC):
     def resolve(
         self,
         uri: str,
+        fs: AbstractFileSystem,
         *,
         timerange: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
