@@ -116,10 +116,7 @@ class GeoBase(raster.XGeoBase):
         if geom_name is not None:
             self.set_attrs(geom_name=geom_name)
             self.set_attrs(geom_format=types[names.index(geom_name)])
-            if self._obj[geom_name].ndim == 1:
-                self.set_attrs(index_dim=self._obj[geom_name].dims[0])
-            else:
-                self.attrs.pop("index_dim", None)
+            self.set_attrs(index_dim=self._obj[geom_name].dims[0])
         else:
             self.attrs.pop("geom_name", None)
             self.attrs.pop("geom_format", None)
@@ -259,21 +256,21 @@ class GeoBase(raster.XGeoBase):
             raise ValueError("No valid geometry found in object.")
         if gtype == "geom":
             geoms = GeoSeries(
-                data=np.atleast_1d(self._obj[self.geom_name].values),
-                index=self.index.values if self.index_dim else None,
+                data=self._obj[self.geom_name].values,
+                index=self.index.values,
                 crs=self.crs,
             )
         elif gtype == "xy":
             geoms = GeoSeries.from_xy(
-                x=np.atleast_1d(self._obj[self.x_name].values),
-                y=np.atleast_1d(self._obj[self.y_name].values),
-                index=self.index.values if self.index_dim else None,
+                x=self._obj[self.x_name].values,
+                y=self._obj[self.y_name].values,
+                index=self.index.values,
                 crs=self.crs,
             )
         elif gtype == "wkt":
             geoms = GeoSeries.from_wkt(
-                data=np.atleast_1d(self._obj[self.geom_name].values),
-                index=self.index.values if self.index_dim else None,
+                data=self._obj[self.geom_name].values,
+                index=self.index.values,
                 crs=self.crs,
             )
         geoms.index.name = self.index_dim
@@ -598,6 +595,10 @@ class GeoBase(raster.XGeoBase):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
+        if self.geometry is None:
+            raise ValueError(
+                "No geometry data found. Make sure the data has a 1D geometry variable."
+            )
         if isinstance(reducer, str):
             reducer = getattr(np, reducer)
         obj = self._obj
@@ -609,8 +610,6 @@ class GeoBase(raster.XGeoBase):
                 if obj.name is None:
                     obj.name = "data"
                 obj = obj.to_dataset()
-        if obj.vector.geomety is None:
-            raise ValueError("No geometry found in object.")
         gdf = obj.vector.geometry.to_frame("geometry")
         snames = ["y_name", "x_name", "index_dim", "geom_name"]
         sdims = [obj.vector.attrs.get(n) for n in snames if n in obj.vector.attrs]
