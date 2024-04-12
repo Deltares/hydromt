@@ -22,7 +22,7 @@ logger: Logger = getLogger(__name__)
 class ConventionResolver(MetaDataResolver):
     """MetaDataResolver using HydroMT naming conventions."""
 
-    _uri_placeholders = frozenset({"year", "month", "variable", "zoom_level", "name"})
+    _uri_placeholders = frozenset({"year", "month", "variable", "name"})
 
     def _expand_uri_placeholders(
         self,
@@ -121,7 +121,6 @@ class ConventionResolver(MetaDataResolver):
                 "year": t[0].year,
                 "month": t[0].month,
                 "variable": t[1],
-                "zoom_level": zoom_level,
             },
             product(dates, variables),
         )
