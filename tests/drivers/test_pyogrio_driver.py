@@ -72,7 +72,7 @@ class TestPyogrioDriver:
         with pytest.raises(FileNotFoundError):
             driver.read("no_data.geojson")
 
-    def test_read_multiple_uris(self, driver: PyogrioDriver):
+    def test_read_multiple_uris(self):
         # Create Resolver that returns multiple uris
         class FakeResolver(MetaDataResolver):
             def resolve(self, uri: str, *args, **kwargs):
