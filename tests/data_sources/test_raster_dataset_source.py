@@ -114,7 +114,7 @@ class TestRasterDatasetSource:
         mock_driver = MockDriver()
 
         source = RasterDatasetSource(
-            name="test", uri="points.geojson", driver=mock_driver, crs=4326
+            name="test", uri="raster.nc", driver=mock_driver, crs=4326
         )
         new_source = source.to_file("test")
         assert "local" in new_source.driver.filesystem.protocol
@@ -125,7 +125,7 @@ class TestRasterDatasetSource:
     def test_to_file_override(self, MockDriver: Type[RasterDatasetDriver]):
         driver1 = MockDriver()
         source = RasterDatasetSource(
-            name="test", uri="points.geojson", driver=driver1, crs=4326
+            name="test", uri="raster.nc", driver=driver1, crs=4326
         )
         driver2 = MockDriver(filesystem="memory")
         new_source = source.to_file("test", driver_override=driver2)

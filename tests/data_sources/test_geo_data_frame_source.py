@@ -2,6 +2,7 @@ from datetime import datetime
 from os.path import basename
 from pathlib import Path
 from typing import Type, cast
+from uuid import uuid4
 
 import geopandas as gpd
 import numpy as np
@@ -30,7 +31,7 @@ class TestGeoDataFrameSource:
 
     @pytest.fixture(scope="class")
     def example_geojson(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.geojson")
+        uri = str(tmp_dir / uuid4() / "test.geojson")
         geodf.to_file(uri, driver="GeoJSON")
         return uri
 

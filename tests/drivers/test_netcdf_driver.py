@@ -1,6 +1,7 @@
 """Tests the netcdf driver."""
 
 from pathlib import Path
+from uuid import uuid4
 
 import numpy as np
 import xarray as xr
@@ -35,7 +36,7 @@ class TestNetcdfDriver:
         assert res.sizes == {}  # empty dataframe
 
     def test_write(self, rasterds: xr.Dataset, tmp_dir: Path):
-        netcdf_path = tmp_dir / "file.nc"
+        netcdf_path = tmp_dir / uuid4() / "file.nc"
         driver = NetcdfDriver()
         driver.write(netcdf_path, rasterds)
         assert np.all(driver.read(str(netcdf_path)) == rasterds)
