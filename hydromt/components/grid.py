@@ -14,12 +14,10 @@ from shapely.geometry import box
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
-from hydromt.components.spatial import SpatialModelComponent, _parse_region
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis import raster
-from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
-from hydromt.workflows.basin_mask import get_basin_geometry
 from hydromt.workflows.grid import (
     grid_from_constant,
     grid_from_geodataframe,
@@ -53,8 +51,8 @@ class GridComponent(SpatialModelComponent):
         model: Model
             HydroMT model instance
         """
-        self._data: Optional[xr.Dataset] = None
         super().__init__(model=model)
+        self._data: Optional[xr.Dataset] = None
 
     def set(
         self,
@@ -74,6 +72,7 @@ class GridComponent(SpatialModelComponent):
             and ignored if data is a Dataset
         """
         self._initialize_grid()
+        assert self._data is not None
         # NOTE: variables in a dataset are not longer renamed as used to be the case in
         # set_staticmaps
         name_required = isinstance(data, np.ndarray) or (
@@ -153,8 +152,9 @@ class GridComponent(SpatialModelComponent):
     @hydromt_step
     def read(
         self,
-        fn: str = "grid/grid.nc",
+        filename: str = "grid/grid.nc",
         mask_and_scale: bool = False,
+        region_filename: Optional[str] = None,
         **kwargs,
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
@@ -175,12 +175,14 @@ class GridComponent(SpatialModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize_grid(skip_read=True)
+        # TODO: Send kwargs to read_region()
+        self.read_region(filename=region_filename, **kwargs)
 
-        # Load grid data in r+ mode to allow overwritting netcdf files
+        # Load grid data in r+ mode to allow overwriting netcdf files
         if self._root.is_reading_mode() and self._root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
-            fn,
+            filename,
             self._root,
             logger=self._logger,
             single_var_as_array=False,
@@ -197,13 +199,13 @@ class GridComponent(SpatialModelComponent):
         res: Optional[float] = None,
         crs: Optional[int] = None,
         rotated: bool = False,
-        hydrography_fn: Optional[str] = None,
-        basin_index_fn: Optional[str] = None,
+        hydrography_fn: str = SpatialModelComponent.DEFAULT_HYDROGRAPHY_FILENAME,
+        basin_index_fn: str = SpatialModelComponent.DEFAULT_BASIN_INDEX_FILENAME,
         add_mask: bool = True,
         align: bool = True,
         dec_origin: int = 0,
         dec_rotation: int = 3,
-    ) -> xr.DataArray:
+    ) -> None:
         """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
         A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
@@ -259,34 +261,15 @@ class GridComponent(SpatialModelComponent):
             Generated grid mask.
         """
         self._logger.info("Preparing 2D grid.")
+        geom = self.create_region(
+            region=region, hydrography_fn=hydrography_fn, basin_index_fn=basin_index_fn
+        )
 
         kind = next(iter(region))  # first key of region
-        if kind in ["bbox", "geom", "basin", "subbasin", "interbasin"]:
-            # Do not parse_region for grid as we want to allow for more (file) formats
-            # see ticket #813 for the skip
-            kind, region = _parse_region(  # noqa: F821
-                region, data_catalog=self._data_catalog, logger=self._logger
-            )
-        elif kind != "grid":
-            raise ValueError(
-                f"Region for grid must be of kind [grid, bbox, geom, basin, subbasin,"
-                f" interbasin], kind {kind} not understood."
-            )
-
         # Derive xcoords, ycoords and geom for the different kind options
         if kind in ["bbox", "geom"]:
             if not isinstance(res, (int, float)):
                 raise ValueError("res argument required for kind 'bbox', 'geom'")
-            if kind == "bbox":
-                bbox = region["bbox"]
-                geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-            elif kind == "geom":
-                geom = region["geom"]
-                if geom.crs is None:
-                    raise ValueError('Model region "geom" has no CRS')
-            if crs is not None:
-                crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
-                geom = geom.to_crs(crs)
             # Generate grid based on res for region bbox
             # TODO add warning on res value if crs is projected or not?
             if not rotated:
@@ -321,23 +304,12 @@ class GridComponent(SpatialModelComponent):
                     * Affine.rotation(rot)
                     * Affine.scale(res, res)
                 )
-
         elif kind in ["basin", "subbasin", "interbasin"]:
-            # retrieve global hydrography data (lazy!)
-            ds_hyd = self._data_catalog.get_rasterdataset(hydrography_fn)
-            if "bounds" not in region:
-                region.update(basin_index=self._data_catalog.get_source(basin_index_fn))
-            # get basin geometry
-            geom, xy = get_basin_geometry(
-                ds=ds_hyd,
-                kind=kind,
-                logger=self._logger,
-                **region,
-            )
-            # get ds_hyd again but clipped to geom, one variable is enough
+            # get ds_hyd but clipped to geom, one variable is enough
             da_hyd = self._data_catalog.get_rasterdataset(
-                hydrography_fn, geom=geom, variables=["flwdir"]
+                hydrography_fn, geom=self.region, variables=["flwdir"]
             )
+            assert da_hyd is not None
             if not isinstance(res, (int, float)):
                 self._logger.info(
                     "res argument not defined, using resolution of "
@@ -348,17 +320,11 @@ class GridComponent(SpatialModelComponent):
             # only coords will be used
             # TODO add warning on res value if crs is projected or not?
             if res != da_hyd.raster.res and crs != da_hyd.raster.crs:
-                da_hyd = da_hyd.raster.reproject(
-                    dst_crs=crs,
-                    dst_res=res,
-                    align=align,
-                )
+                da_hyd = da_hyd.raster.reproject(dst_crs=crs, dst_res=res, align=align)
+                assert da_hyd is not None
             # Get xycoords, geom
             xcoords = da_hyd.raster.xcoords.values
             ycoords = da_hyd.raster.ycoords.values
-            if geom.crs != da_hyd.raster.crs:
-                crs = da_hyd.raster.crs
-                geom = geom.to_crs(crs)
         elif kind == "grid":
             # Support more formats for grid input (netcdf, zarr, io.open_raster)
             fn = region[kind]
@@ -369,13 +335,11 @@ class GridComponent(SpatialModelComponent):
             # Get xycoords, geom
             xcoords = da_like.raster.xcoords.values
             ycoords = da_like.raster.ycoords.values
-            geom = da_like.raster.box
             if crs is not None or res is not None:
                 self._logger.warning(
                     "For region kind 'grid', the gris crs/res are used and not"
                     f" user-defined crs {crs} or res {res}"
                 )
-            crs = da_like.raster.crs
 
         # Instantiate grid object
         # Generate grid using hydromt full method
@@ -411,10 +375,7 @@ class GridComponent(SpatialModelComponent):
             grid = grid.drop_vars("mask")
 
         # Add region and grid to model
-        self._model.set_geoms(geom, "region")
         self.set(grid)
-
-        return grid
 
     @property
     def res(self) -> Optional[Tuple[float, float]]:
@@ -708,7 +669,7 @@ class GridComponent(SpatialModelComponent):
         mask_name: Optional[str] = "mask",
         rename: Optional[Dict] = None,
         all_touched: Optional[bool] = True,
-    ) -> List[str]:
+    ) -> Optional[List[str]]:
         """HYDROMT CORE METHOD: Add data variable(s) to grid component by rasterizing the data from ``vector_fn``.
 
         Several type of rasterization are possible:
@@ -756,6 +717,7 @@ class GridComponent(SpatialModelComponent):
         gdf = self._data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
         )
+        assert gdf is not None
         if gdf.empty:
             self._logger.warning(
                 f"No shapes of {vector_fn} found within region,"
@@ -781,3 +743,25 @@ class GridComponent(SpatialModelComponent):
         self.set(ds)
 
         return list(ds.data_vars.keys())
+
+    def _parse_region(
+        self,
+        region: dict,
+        *,
+        hydrography_fn: str,
+        basin_index_fn: str,
+        crs: Optional[int],
+    ) -> gpd.GeoDataFrame:
+        kwargs = region.copy()
+        kind = next(iter(kwargs))  # first key of region
+        if kind == "grid":
+            value0 = kwargs.pop(kind)
+            ds = self._data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)
+            assert ds is not None
+            return ds.raster.box
+        return super()._parse_region(
+            region,
+            hydrography_fn=hydrography_fn,
+            basin_index_fn=basin_index_fn,
+            crs=crs,
+        )

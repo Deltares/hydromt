@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
+from pytest_mock import MockerFixture
 
 from hydromt.components.grid import GridComponent
 from hydromt.data_catalog import DataCatalog
@@ -71,17 +72,23 @@ def test_write(mock_model, tmpdir, caplog):
             grid_component.write()
 
 
-def test_read(tmpdir, mock_model, hydds):
+def test_read_in_write_mode(tmpdir, mock_model):
     # Test for raising IOError when model is in writing mode
     mock_model.root = ModelRoot(path=tmpdir, mode="w")
     grid_component = GridComponent(model=mock_model)
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_component.read()
+
+
+def test_read(tmpdir, mock_model, hydds, geodf, mocker: MockerFixture):
     mock_model.root = ModelRoot(path=tmpdir, mode="r+")
     grid_component = GridComponent(model=mock_model)
-    with patch("hydromt.components.grid.read_nc", return_value={"grid": hydds}):
-        grid_component.read()
-        assert grid_component.data == hydds
+
+    mocker.patch("hydromt.components.spatial.gpd.read_file", return_value=geodf)
+    mocker.patch("hydromt.components.grid.read_nc", return_value={"grid": hydds})
+    grid_component.read()
+
+    assert grid_component.data == hydds
 
 
 def test_create_grid_from_bbox_rotated(mock_model):
@@ -96,9 +103,7 @@ def test_create_grid_from_bbox_rotated(mock_model):
     assert "xc" in grid_component.data.coords
     assert grid_component.data.raster.y_dim == "y"
     assert np.isclose(grid_component.data.raster.res[0], 0.05)
-    # Check set_geoms call
-    geom = grid_component._model.method_calls[0][1][0]
-    assert isinstance(geom, gpd.GeoDataFrame)
+    assert isinstance(grid_component.region, gpd.GeoDataFrame)
 
 
 def test_create_grid_from_bbox(mock_model):
@@ -107,22 +112,19 @@ def test_create_grid_from_bbox(mock_model):
     grid_component.create(
         region={"bbox": bbox},
         res=0.05,
-        add_mask=False,
+        add_mask=True,
         align=True,
     )
-    assert "mask" not in grid_component.data
     assert grid_component.data.raster.dims == ("y", "x")
     assert grid_component.data.raster.shape == (7, 16)
     assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
-    # Check set_geoms call
-    geom = grid_component._model.method_calls[0][1][0]
-    assert isinstance(geom, gpd.GeoDataFrame)
+    assert isinstance(grid_component.region, gpd.GeoDataFrame)
 
 
 def test_create_raise_errors(mock_model):
     grid_component = GridComponent(mock_model)
     # Wrong region kind
-    with pytest.raises(ValueError, match="Region for grid must be of kind"):
+    with pytest.raises(ValueError, match="select from"):
         grid_component.create(region={"vector_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]
