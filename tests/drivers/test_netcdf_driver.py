@@ -36,7 +36,7 @@ class TestNetcdfDriver:
         assert res.sizes == {}  # empty dataframe
 
     def test_write(self, rasterds: xr.Dataset, tmp_dir: Path):
-        netcdf_path = tmp_dir / uuid4() / "file.nc"
+        netcdf_path = tmp_dir / f"{uuid4().hex}.nc"
         driver = NetcdfDriver()
         driver.write(netcdf_path, rasterds)
         assert np.all(driver.read(str(netcdf_path)) == rasterds)

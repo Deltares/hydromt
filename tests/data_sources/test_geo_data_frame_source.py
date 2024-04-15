@@ -31,7 +31,7 @@ class TestGeoDataFrameSource:
 
     @pytest.fixture(scope="class")
     def example_geojson(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / uuid4() / "test.geojson")
+        uri = str(tmp_dir / f"{uuid4().hex}.geojson")
         geodf.to_file(uri, driver="GeoJSON")
         return uri
 
