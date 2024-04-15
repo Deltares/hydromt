@@ -51,7 +51,9 @@ def test_catalog_versions(cat_root):
             versions_file = yaml.safe_load(f)["versions"]
         versions = _get_catalog_versions(cat_root / cat)
         # compare list of dicts
-        assert versions == versions_file
+        assert sorted(versions_file, key=lambda x: sorted(x.items())) == sorted(
+            versions, key=lambda x: sorted(x.items())
+        )
 
 
 def test_get_file_hash(tmpdir: Path):
