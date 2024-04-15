@@ -353,7 +353,7 @@ class RasterDatasetAdapter(DataAdapter):
     def _resolve_paths(
         self,
         time_tuple: Optional[TimeRange] = None,
-        variables: Optional[list] = None,
+        variables: Optional[List] = None,
         zoom_level: Optional[int] = 0,
         geom: Optional[Geom] = None,
         bbox: Optional[Bbox] = None,
@@ -377,7 +377,7 @@ class RasterDatasetAdapter(DataAdapter):
         bbox: Optional[Bbox],
         cache_root: Optional[StrPath],
         zoom_level: Optional[int] = None,
-        variables: Optional[list] = None,
+        variables: Optional[List] = None,
         logger: Logger = logger,
     ):
         kwargs = self.driver_kwargs.copy()
@@ -477,7 +477,7 @@ class RasterDatasetAdapter(DataAdapter):
     @staticmethod
     def _slice_data(
         ds: Data,
-        variables: Optional[list] = None,
+        variables: Optional[List] = None,
         geom: Optional[Geom] = None,
         bbox: Optional[Bbox] = None,
         buffer: GeomBuffer = 0,
