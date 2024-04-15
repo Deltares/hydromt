@@ -73,11 +73,21 @@ def test_rasterdataset(rioda, tmpdir, data_catalog):
     fn_tif = str(tmpdir.join("test.tif"))
     rioda_utm = rioda.raster.reproject(dst_crs="utm")
     rioda_utm.raster.to_raster(fn_tif)
+    fn_nc = str(tmpdir.join("test.nc"))
+    rioda_utm.to_netcdf(fn_nc)
+    data_catalog = DataCatalog()
+
     da1 = data_catalog.get_rasterdataset(fn_tif, bbox=rioda.raster.bounds)
+    assert da1.name == "test"  # name is taken from file name
     assert np.all(da1 == rioda_utm)
-    geom = rioda.raster.box
-    da1 = data_catalog.get_rasterdataset("test.tif", geom=geom)
+    assert "test.tif" in data_catalog.sources
+
+    da1 = data_catalog.get_rasterdataset("test.tif", geom=rioda.raster.box)
     assert np.all(da1 == rioda_utm)
+
+    ds1 = data_catalog.get_rasterdataset(fn_tif, single_var_as_array=False)
+    assert isinstance(ds1, xr.Dataset)  # test single_var_as_array=False
+
     with pytest.raises(FileNotFoundError):
         data_catalog.get_rasterdataset("no_file.tif")
     with pytest.raises(NoDataException):
@@ -89,8 +99,12 @@ def test_rasterdataset(rioda, tmpdir, data_catalog):
         bbox=[12.5, 12.6, 12.7, 12.8],
         handle_nodata=NoDataStrategy.IGNORE,
     )
-
     assert da1 is None
+
+    da1 = data_catalog.get_rasterdataset(fn_tif, variables=["temp"])
+    assert da1.name == "temp"  # tif is renamed to variable name
+    with pytest.raises(NoDataException):  # nc variables are not renamed
+        da1 = data_catalog.get_rasterdataset(fn_nc, variables=["temp"])
 
 
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
@@ -157,7 +171,7 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir, data_catalog):
             "crs": 4326,
             "data_type": "RasterDataset",
             "driver": "raster",
-            "path": f"{str(tmpdir)}/test_zl{{zoom_level}}.tif",
+            "path": f"{str(tmpdir)}/test_zl{{zoom_level:d}}.tif",  # test with str format for zoom level
             "zoom_levels": {0: 0.1, 1: 0.3},
         }
     }
