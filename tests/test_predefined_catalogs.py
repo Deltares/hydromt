@@ -1,9 +1,14 @@
+import os
 from pathlib import Path
 
 import pytest
 import yaml
 
-from hydromt.predefined_catalogs import _get_catalog_eps, _get_catalog_versions
+from hydromt.predefined_catalogs import (
+    _get_catalog_eps,
+    _get_catalog_versions,
+    _get_file_hash,
+)
 
 
 @pytest.fixture()
@@ -47,3 +52,13 @@ def test_catalog_versions(cat_root):
         versions = _get_catalog_versions(cat_root / cat)
         # compare list of dicts
         assert versions == versions_file
+
+
+def test_get_file_hash(tmpdir: Path):
+    file_path = Path(os.path.join(tmpdir, "data_catalog.yml"))
+    test_dict = {"test": "test"}
+    with open(file_path, "w") as yaml_file:
+        yaml.dump(test_dict, yaml_file)
+    file_hash = _get_file_hash(file_path)
+
+    assert file_hash == "d27213d2ae2b24e8d1be0806469c564c"

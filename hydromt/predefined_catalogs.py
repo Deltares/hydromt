@@ -39,9 +39,9 @@ def _get_catalog_eps(logger=logger) -> Dict:
 def _get_file_hash(file_path: Path) -> str:
     """Get the md5 hash of a file."""
     hash_func = hashlib.md5()
-    with open(file_path, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_func.update(chunk)
+    with open(file_path, "rt") as f:
+        for line in f.readline():
+            hash_func.update(line.encode("utf-8"))
     return hash_func.hexdigest()
 
 
