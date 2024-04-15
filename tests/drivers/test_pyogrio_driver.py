@@ -99,3 +99,9 @@ class TestPyogrioDriver:
         assert gdf.shape == (1, 4)
         with pytest.raises(ValueError, match="Both 'bbox' and 'mask' are provided."):
             driver.read(uri, bbox=bbox, mask=gpd.GeoSeries(box(*bbox)), buffer=10000)
+
+    def test_write(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
+        df_path = tmp_dir / "temp.gpkg"
+        driver = PyogrioDriver()
+        driver.write(geodf, df_path)
+        assert np.all(driver.read(str(df_path)) == geodf)

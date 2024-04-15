@@ -1,5 +1,8 @@
 """Tests the netcdf driver."""
 
+from pathlib import Path
+
+import numpy as np
 import xarray as xr
 from pytest_mock import MockerFixture
 from xarray import open_mfdataset
@@ -30,3 +33,9 @@ class TestNetcdfDriver:
         assert call_args[0][0] == [uri]  # first arg
         assert call_args[1].get("preprocess") == round_latlon
         assert res.sizes == {}  # empty dataframe
+
+    def test_write(self, rasterds: xr.Dataset, tmp_dir: Path):
+        netcdf_path = tmp_dir / "file.nc"
+        driver = NetcdfDriver()
+        driver.write(netcdf_path, rasterds)
+        assert np.all(driver.read(str(netcdf_path)) == rasterds)

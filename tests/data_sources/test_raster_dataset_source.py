@@ -1,9 +1,11 @@
 from pathlib import Path
+from typing import Type
 
 import pytest
 import xarray as xr
 from pydantic import ValidationError
 
+from hydromt._typing import StrPath
 from hydromt.data_adapter import RasterDatasetAdapter
 from hydromt.data_source import RasterDatasetSource
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
@@ -94,3 +96,40 @@ class TestRasterDatasetSource:
             uri=str(tmp_dir / "rasterds.zarr"),
         )
         assert rasterds == source.read_data()
+
+    @pytest.fixture()
+    def MockDriver(self, rasterds: xr.Dataset):
+        class MockRasterDatasetDriver(RasterDatasetDriver):
+            name = "mock_geodf_to_file"
+
+            def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+                pass
+
+            def read(self, uri: str, **kwargs) -> xr.Dataset:
+                return rasterds
+
+        return MockRasterDatasetDriver
+
+    def test_to_file(self, MockDriver: Type[RasterDatasetDriver]):
+        mock_driver = MockDriver()
+
+        source = RasterDatasetSource(
+            name="test", uri="points.geojson", driver=mock_driver, crs=4326
+        )
+        new_source = source.to_file("test")
+        assert "local" in new_source.driver.filesystem.protocol
+        # make sure we are not changing the state
+        assert id(new_source) != id(source)
+        assert id(mock_driver) != id(new_source.driver)
+
+    def test_to_file_override(self, MockDriver: Type[RasterDatasetDriver]):
+        driver1 = MockDriver()
+        source = RasterDatasetSource(
+            name="test", uri="points.geojson", driver=driver1, crs=4326
+        )
+        driver2 = MockDriver(filesystem="memory")
+        new_source = source.to_file("test", driver_override=driver2)
+        assert new_source.driver.filesystem.protocol == "memory"
+        # make sure we are not changing the state
+        assert id(new_source) != id(source)
+        assert id(driver2) == id(new_source.driver)

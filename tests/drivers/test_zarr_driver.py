@@ -3,6 +3,7 @@ from typing import Tuple
 
 import numpy as np
 import pytest
+import xarray as xr
 import zarr
 
 from hydromt.drivers.zarr_driver import ZarrDriver
@@ -45,3 +46,9 @@ class TestZarrDriver:
             )
             == example_zarr_file[0]
         )
+
+    def test_zarr_write(self, rasterds: xr.Dataset, tmp_dir: Path):
+        zarr_path: Path = tmp_dir / "raster.zarr"
+        driver = ZarrDriver()
+        driver.write(zarr_path, rasterds)
+        assert np.all(driver.read(str(zarr_path)) == rasterds)

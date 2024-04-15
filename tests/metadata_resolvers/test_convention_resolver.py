@@ -46,7 +46,7 @@ class TestConventionResolver:
             resolver.resolve(
                 uri,
                 test_filesystem,
-                timerange=("2021-03-01", "2021-05-01"),
+                time_range=("2021-03-01", "2021-05-01"),
                 variables=["precip"],
             )
         )
