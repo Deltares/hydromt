@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """DataCatalog module for HydroMT."""
+
 from __future__ import annotations
 
 import copy
@@ -59,7 +60,6 @@ __all__ = [
 
 
 class DataCatalog(object):
-
     """Base class for the data catalog object."""
 
     _version = "v0"  # version of the data catalog
@@ -615,7 +615,7 @@ class DataCatalog(object):
 
     def from_artifacts(
         self, name: str = "artifact_data", version: str = "latest"
-    ) -> DataCatalog:
+    ) -> None:
         """Parse artifacts.
 
         Deprecated method. Use
@@ -638,11 +638,9 @@ class DataCatalog(object):
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.from_predefined_catalogs(name, version)
+        self.from_predefined_catalogs(name, version)
 
-    def from_predefined_catalogs(
-        self, name: str, version: str = "latest"
-    ) -> DataCatalog:
+    def from_predefined_catalogs(self, name: str, version: str = "latest") -> None:
         """Add data sources from a predefined data catalog.
 
         Parameters
@@ -652,10 +650,6 @@ class DataCatalog(object):
         version : str, optional
             Catlog release version. By default it takes the latest known release.
 
-        Returns
-        -------
-        DataCatalog
-            DataCatalog object with parsed predefined catalog added.
         """
         if "=" in name:
             name, version = name.split("=")[0], name.split("=")[-1]
@@ -727,7 +721,7 @@ class DataCatalog(object):
         archive_fn: Union[Path, str],
         version: Optional[str] = None,
         name: Optional[str] = None,
-    ) -> DataCatalog:
+    ) -> str:
         """Cache a data archive.
 
         Parameters
@@ -741,8 +735,9 @@ class DataCatalog(object):
 
         Returns
         -------
-        DataCatalog
-            DataCatalog object with parsed data archive added.
+        str
+            Path to the datacatalog of the cached data archive
+
         """
         name = basename(archive_fn).split(".")[0] if name is None else name
         root = join(self._cache_dir, name)

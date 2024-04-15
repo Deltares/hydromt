@@ -1,5 +1,5 @@
 name: gcs_cmip6_data
 versions:
 - version: v0.1.0
-  hash: ec99378d21d4f2353d8036b466210344
+  hash: 6105347ebb9825ac754615ca55ff3b0c
   path: v0.1.0/data_catalog.yml
