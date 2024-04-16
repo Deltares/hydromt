@@ -64,3 +64,13 @@ def test_create_region_geom_from_points_fails(geodf, mocker: MockerFixture):
     component = FakeSpatialComponent(model)
     with pytest.raises(ValueError, match=r"Region value.*"):
         component.create_region(region={"geom": geodf})
+
+
+def test_create_referenced_component():
+    model = Model(region_component="region")
+    region_component = FakeSpatialComponent(model)
+    reference_component = FakeSpatialComponent(model, region_component="region")
+    model.add_component("region", region_component)
+    model.add_component("region2", reference_component)
+    model.region.create_region(region={"bbox": [-1.0, -1.0, 1.0, 1.0]})
+    assert reference_component.region is region_component.region

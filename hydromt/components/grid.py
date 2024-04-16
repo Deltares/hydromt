@@ -44,7 +44,12 @@ class GridComponent(SpatialModelComponent):
 
     DEFAULT_FILENAME = "grid/grid.nc"
 
-    def __init__(self, model: "Model", filename: StrPath = DEFAULT_FILENAME):
+    def __init__(
+        self,
+        model: "Model",
+        filename: StrPath = DEFAULT_FILENAME,
+        region_component: Optional[str] = None,
+    ):
         """Initialize a GridComponent.
 
         Parameters
@@ -52,7 +57,7 @@ class GridComponent(SpatialModelComponent):
         model: Model
             HydroMT model instance
         """
-        super().__init__(model=model)
+        super().__init__(model=model, region_component=region_component)
         self._data: Optional[xr.Dataset] = None
         self._filename = filename
 
@@ -110,6 +115,7 @@ class GridComponent(SpatialModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
+        region_filename: Optional[str] = None,
         **kwargs,
     ) -> Optional[DeferedFileClose]:
         """Write model grid data to netcdf file at <root>/<fn>.
@@ -133,6 +139,7 @@ class GridComponent(SpatialModelComponent):
             Additional keyword arguments to be passed to the `write_nc` method.
         """
         self._root._assert_write_mode()
+        self.write_region(region_filename, **kwargs)
         if len(self.data) == 0:
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
@@ -179,8 +186,7 @@ class GridComponent(SpatialModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize_grid(skip_read=True)
-        # TODO: Send kwargs to read_region()
-        self.read_region(filename=region_filename, **kwargs)
+        self.read_region(region_filename, **kwargs)
 
         # Load grid data in r+ mode to allow overwriting netcdf files
         if self._root.is_reading_mode() and self._root.is_writing_mode():

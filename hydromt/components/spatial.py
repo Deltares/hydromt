@@ -40,11 +40,13 @@ class SpatialModelComponent(ModelComponent, ABC):
     def __init__(
         self,
         model: "Model",
+        region_component: Optional[str] = None,
         region_filename: StrPath = DEFAULT_REGION_FILENAME,
     ) -> None:
         super().__init__(model)
         self.__filename: StrPath = region_filename
         self.__data: Optional[GeoDataFrame] = None
+        self._region_component = region_component
 
     def create_region(
         self,
@@ -133,6 +135,10 @@ class SpatialModelComponent(ModelComponent, ABC):
 
             * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
         """
+        region_from_reference = self._get_region_from_reference()
+        if region_from_reference is not None:
+            return region_from_reference
+
         geom = self.parse_region(
             region,
             basin_index_fn=basin_index_fn,
@@ -165,6 +171,10 @@ class SpatialModelComponent(ModelComponent, ABC):
     @property
     def region(self) -> Optional[GeoDataFrame]:
         """Provide access to the underlying GeoDataFrame data of the model region."""
+        region_from_reference = self._get_region_from_reference()
+        if region_from_reference is not None:
+            return region_from_reference
+
         if self.__data is None and self._root.is_reading_mode():
             self.read_region()
         return self.__data
@@ -186,19 +196,35 @@ class SpatialModelComponent(ModelComponent, ABC):
         This function should be called from within the `read` function of the component inheriting from this class.
         """
         self._root._assert_read_mode()
-        filename = filename if filename is not None else self.__filename
+        if self._region_component is not None:
+            self._logger.info(
+                "Region is a reference to another component. Skipping reading..."
+            )
+            return
+
+        filename = filename or self.__filename
         # cannot read geom files for purely in memory models
         self._logger.debug(f"Reading model file {filename}.")
         self.set_region(gpd.read_file(join(self._root.path, filename), **read_kwargs))
 
     def write_region(
-        self, filename: Optional[StrPath] = None, to_wgs84=False, **write_kwargs
+        self,
+        filename: Optional[StrPath] = None,
+        *,
+        to_wgs84=False,
+        **write_kwargs,
     ):
         """Write the model region to a file.
 
         This function should be called from within the `write` function of the component inheriting from this class.
         """
         self._root._assert_write_mode()
+        if self._region_component is not None:
+            self._logger.info(
+                "Region is a reference to another component. Skipping writing..."
+            )
+            return
+
         filename = filename or self.__filename
         write_path = join(self._root.path, filename)
 
@@ -362,8 +388,8 @@ class SpatialModelComponent(ModelComponent, ABC):
 
         try:
             gpd.testing.assert_geodataframe_equal(
-                self.__data,
-                other_region.__data,
+                self.region,
+                other_region.region,
                 check_like=True,
                 check_less_precise=True,
             )
@@ -371,6 +397,20 @@ class SpatialModelComponent(ModelComponent, ABC):
             errors["data"] = str(e)
 
         return len(errors) == 0, errors
+
+    def _get_region_from_reference(self) -> Optional[gpd.GeoDataFrame]:
+        if self._region_component is not None:
+            region_component = getattr(self._model, self._region_component, None)
+            if region_component is None:
+                raise ValueError(
+                    f"Unable to find the referenced region component: '{self._region_component}'"
+                )
+            if region_component.region is None:
+                raise ValueError(
+                    f"Unable to get region from the referenced region component: '{self._region_component}'"
+                )
+            return region_component.region
+        return None
 
 
 # TODO: Remove when migrating MeshComponent
