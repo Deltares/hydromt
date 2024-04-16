@@ -2,7 +2,7 @@ from os.path import join
 from pathlib import Path
 
 import pytest
-from xarray import open_dataset
+from xarray import DataArray, Dataset, open_dataset
 
 from hydromt.components.dataset import DatasetComponent
 from hydromt.models import Model
@@ -30,6 +30,26 @@ def test_model_dataset_sets_correctly(obsda, tmpdir: Path):
         assert obsda.equals(component.data[i])
 
     assert list(component.data.keys()) == list(map(str, range(5)))
+
+
+def test_check_data(demda):
+    data_dict = DatasetComponent._harmonise_data_names(demda.copy(), "elevtn")
+    assert isinstance(data_dict["elevtn"], DataArray)
+    assert data_dict["elevtn"].name == "elevtn"
+    with pytest.raises(ValueError, match="Name required for DataArray"):
+        DatasetComponent._harmonise_data_names(demda)
+    demda.name = "dem"
+    demds = demda.to_dataset()
+    data_dict = DatasetComponent._harmonise_data_names(demds, "elevtn", False)
+    assert isinstance(data_dict["elevtn"], Dataset)
+    data_dict = DatasetComponent._harmonise_data_names(demds, split_dataset=True)
+    assert isinstance(data_dict["dem"], DataArray)
+    with pytest.raises(ValueError, match="Name required for Dataset"):
+        DatasetComponent._harmonise_data_names(demds, split_dataset=False)
+
+    # testing wrong type therefore type ignore
+    with pytest.raises(ValueError, match='Data type "dict" not recognized'):
+        DatasetComponent._harmonise_data_names({"wrong": "type"})  # type: ignore
 
 
 def test_model_dataset_reads_and_writes_correctly(obsda, tmpdir: Path):
