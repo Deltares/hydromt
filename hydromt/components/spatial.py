@@ -305,6 +305,10 @@ class SpatialModelComponent(ModelComponent, ABC):
             if geom.crs is None:
                 raise ValueError('Model region "geom" has no CRS')
 
+        if crs is not None and geom is not None:
+            crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+            geom = geom.to_crs(crs)
+
         # TODO: This won't be called when subclassed. Should this move to _create_region?
         kwargs_str = dict()
         for k, v in kwargs.items():
@@ -314,10 +318,6 @@ class SpatialModelComponent(ModelComponent, ABC):
                 v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
             kwargs_str.update({k: v})
         self._logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
-
-        if crs is not None and geom is not None:
-            crs = gis_utils.parse_crs(crs, bbox=self.bounds)
-            geom = geom.to_crs(crs)
 
         return geom
 

@@ -1,6 +1,5 @@
 """Testing for the validation of region specifications."""
 
-
 from pathlib import Path
 
 import pytest

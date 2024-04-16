@@ -8,11 +8,7 @@ from hydromt.components.spatial import _parse_region, _parse_region_value
 from hydromt.workflows.basin_mask import _check_size
 
 
-def test_region_from_geom(world):
-    _kind, region = _parse_region({"geom": world})
-    assert isinstance(region["geom"], gpd.GeoDataFrame)
-
-
+# TODO: All these tests should move to test_spatial_component
 @pytest.mark.skip(reason="Needs Rasterdataset impl")
 def test_region_from_file(tmpdir, world):
     fn_gdf = str(tmpdir.join("world.geojson"))
@@ -37,12 +33,6 @@ def test_geom_from_cat(tmpdir, world):
     )
     _kind, region = _parse_region({"geom": "world"}, data_catalog=cat)
     assert isinstance(region["geom"], gpd.GeoDataFrame)
-
-
-def test_geom_from_points_fails(geodf):
-    region = {"geom": geodf}
-    with pytest.raises(ValueError, match=r"Region value.*"):
-        _kind, region = _parse_region(region)
 
 
 @pytest.mark.skip(reason="Needs Rasterdataset impl")

@@ -16,6 +16,7 @@ from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis import raster
+from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.workflows.grid import (
@@ -758,7 +759,12 @@ class GridComponent(SpatialModelComponent):
             value0 = kwargs.pop(kind)
             ds = self._data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)
             assert ds is not None
+            if crs is not None and ds is not None:
+                crs = gis_utils.parse_crs(crs, bbox=ds.total_bounds)
+                ds = ds.to_crs(crs)
+            assert ds is not None
             return ds.raster.box
+
         return super()._parse_region(
             region,
             hydrography_fn=hydrography_fn,
