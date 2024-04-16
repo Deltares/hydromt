@@ -6,9 +6,11 @@ from pytest_mock import MockerFixture
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.config import ConfigComponent
+from hydromt.components.geoms import GeomsComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.tables import TablesComponent
+from hydromt.components.vector import VectorComponent
 from hydromt.models.model import Model
 from hydromt.plugins import PLUGINS
 
@@ -16,9 +18,11 @@ from hydromt.plugins import PLUGINS
 def test_core_component_plugins():
     components = PLUGINS.component_plugins
     assert components == {
+        "ConfigComponent": ConfigComponent,
+        "GeomsComponent": GeomsComponent,
         "GridComponent": GridComponent,
         "ModelComponent": ModelComponent,
-        "ConfigComponent": ConfigComponent,
+        "VectorComponent": VectorComponent,
         "TablesComponent": TablesComponent,
         "SpatialModelComponent": SpatialModelComponent,
     }
@@ -32,11 +36,16 @@ def test_core_model_plugins():
 def test_summary():
     component_summary = PLUGINS.component_summary()
     model_summary = PLUGINS.model_summary()
+    driver_summary = PLUGINS.driver_summary()
     assert "Component plugins:" in component_summary
     assert "Model plugins:" in model_summary
     assert "GridComponent" in component_summary
     assert "ModelComponent" in component_summary
     assert "Model" in model_summary
+    assert "Driver Plugins:" in driver_summary
+    assert "PyogrioDriver" in driver_summary
+    assert "RasterDatasetDriver" not in driver_summary  # No ABCs in Plugins
+    assert "harmonize_dims" not in driver_summary  # only drivers in Plugins
 
 
 def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str]):
@@ -69,9 +78,11 @@ def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str])
 @pytest.fixture()
 def _reset_plugins():
     PLUGINS._component_plugins = None
+    PLUGINS._driver_plugins = None
     PLUGINS._model_plugins = None
     yield
     PLUGINS._component_plugins = None
+    PLUGINS._driver_plugins = None
     PLUGINS._model_plugins = None
 
 

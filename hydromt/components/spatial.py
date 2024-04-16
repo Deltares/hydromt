@@ -5,7 +5,7 @@ from logging import getLogger
 from os import makedirs
 from os.path import basename, exists, isdir, isfile, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -320,6 +320,36 @@ class SpatialModelComponent(ModelComponent, ABC):
         self._logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
 
         return geom
+
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_region = cast(SpatialModelComponent, other)
+
+        if self.kind != other_region.kind:
+            errors["kind"] = f"kind {self.kind} != {other_region.kind}"
+
+        try:
+            gpd.testing.assert_geodataframe_equal(
+                self.data, other_region.data, check_like=True, check_less_precise=True
+            )
+        except AssertionError as e:
+            errors["data"] = str(e)
+
+        return len(errors) == 0, errors
 
 
 # TODO: Remove when migrating MeshComponent

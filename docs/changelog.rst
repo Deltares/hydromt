@@ -12,11 +12,13 @@ V1
 Added
 -----
 - Added Driver class for customizable io
+- Added entrypoints for Driver Plugins as "hydromt.drivers"
 - Added MetaDataResolver class for customizable metadata discovery
 - Added DataSource class to represent and validate DataCatalog entries.
 - Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
 - A Github action now checks whether the migration guide is updated (#829)
 - Added a `ConfigComponent` to write configurations for kernels/simulations. (#863)
+- Added a `GeomsComponent` to manage geo-spatial geometry data of a model. (#867)
 
 Changed
 -------
@@ -31,6 +33,7 @@ Removed
 - support for dictionary like features on the DataCatalog have been removed. (#790)
 - Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
 - `staticmaps` and `staticgeoms` attributes on the `Model` object have been removed. (#845)
+- Code refering to the unimplemented Network Model type has been removed (#871)
 
 
 Unreleased
@@ -39,11 +42,16 @@ Unreleased
 Changed
 -------
 - Development environment is now set up via pixi instead of mamba / conda. See the documentation for more information on how to install.
+- Use the native data CRS when determining zoom levels over the data catalog crs. (#851)
+- Improved `flw.d8_from_dem` method with different options to use river vector data to aid the flow direction derivation. (#305)
 
 Fixed
 -----
 - Bug in `raster.transform` with lazy coordinates. (#801)
-
+- Bug in `workflows.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
+- Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
+- Bug in `raster.clip_bbox` when bbox doesn't overlap with raster. (#860)
+- Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 
 v0.9.4 (2024-02-26)
 ===================

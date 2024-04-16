@@ -7,7 +7,6 @@ import geopandas as gpd
 import numpy as np
 import pytest
 from pydantic import ValidationError
-from pyogrio.errors import DataSourceError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
@@ -16,8 +15,8 @@ from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_source.geodataframe import GeoDataFrameSource
-from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
-from hydromt.driver.pyogrio_driver import PyogrioDriver
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.pyogrio_driver import PyogrioDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 
@@ -148,7 +147,7 @@ class TestGeoDataFrameSource:
             data_adapter=GeoDataFrameAdapter(),
             driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
         )
-        with pytest.raises(DataSourceError):
+        with pytest.raises(FileNotFoundError):
             source.read_data()
 
     def test_instantiate_directly(

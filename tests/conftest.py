@@ -2,7 +2,7 @@ from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Generator, Optional
+from typing import Any, Generator, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -13,10 +13,12 @@ import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
 
+from hydromt.components.config import ConfigComponent
+from hydromt.components.vector import VectorComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
-from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.models.model import Model
@@ -325,20 +327,52 @@ def model(demda, world, obsda):
     return mod
 
 
-# @pytest.fixture()
-# def vector_model(ts, geodf):
-#     mod = VectorModel()
-#     mod.setup_config(**{"header": {"setting": "value"}})
-#     da = xr.DataArray(
-#         ts,
-#         dims=["index", "time"],
-#         coords={"index": ts.index, "time": ts.columns},
-#         name="zs",
-#     )
-#     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
-#     da.vector.set_crs(geodf.crs)
-#     mod.set_vector(da)
-#     return mod
+def _create_vector_model(
+    *,
+    use_default_filename: bool = True,
+    use_default_geometry_filename: bool = True,
+    ts,
+    geodf,
+) -> Model:
+    components: dict[str, Any] = {
+        "vector": {"type": VectorComponent.__name__},
+        "config": {"type": ConfigComponent.__name__},
+    }
+    if not use_default_filename:
+        components["vector"]["filename"] = None
+    if not use_default_geometry_filename:
+        components["vector"]["geometry_filename"] = None
+
+    mod = Model(components=components)
+    mod.get_component("config", ConfigComponent).set("header.setting", "value")
+    da = xr.DataArray(
+        ts,
+        dims=["index", "time"],
+        coords={"index": ts.index, "time": ts.columns},
+        name="zs",
+    )
+    da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
+    da.vector.set_crs(geodf.crs)
+    mod.get_component("vector", VectorComponent).set(da)
+    return mod
+
+
+@pytest.fixture()
+def vector_model(ts, geodf):
+    return _create_vector_model(
+        ts=ts,
+        geodf=geodf,
+    )
+
+
+@pytest.fixture()
+def vector_model_no_defaults(ts, geodf):
+    return _create_vector_model(
+        use_default_filename=False,
+        use_default_geometry_filename=False,
+        ts=ts,
+        geodf=geodf,
+    )
 
 
 # @pytest.fixture()
@@ -379,6 +413,8 @@ def mock_geodf_driver(
     geodf: gpd.GeoDataFrame, mock_resolver: MetaDataResolver
 ) -> GeoDataFrameDriver:
     class MockGeoDataFrameDriver(GeoDataFrameDriver):
+        name = "mock_geodf_driver"
+
         def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
             return geodf
 
@@ -390,6 +426,8 @@ def mock_raster_ds_driver(
     rasterds: xr.Dataset, mock_resolver: MetaDataResolver
 ) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
+        name = "mock_raster_ds_driver"
+
         def read(self, *args, **kwargs) -> xr.Dataset:
             return rasterds
 

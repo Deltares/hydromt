@@ -66,7 +66,7 @@ io = [
 extra = [
   "matplotlib",    # plotting; required for slippy tiles
   "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
-  "xugrid>=0.6.5", # xarray wrapper for mesh processing
+  "xugrid>=0.9.0", # xarray wrapper for mesh processing
 ]
 dev = [
   "black",       # linting
@@ -110,6 +110,9 @@ hydromt = "hydromt.cli.main:main"
 
 [project.entry-points."hydromt.components"]
 core = "hydromt.components"
+
+[project.entry-points."hydromt.drivers"]
+core = "hydromt.drivers"
 
 [project.entry-points."hydromt.models"]
 core = "hydromt.models"

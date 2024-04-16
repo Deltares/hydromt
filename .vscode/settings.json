@@ -21,11 +21,16 @@
     "files.insertFinalNewline": true,
     "cSpell.words": [
         "GDAL",
+        "geodataframe",
+        "geoms",
         "hydromt",
+        "ndarray",
         "pixi",
         "pydantic",
         "pygeos",
         "SFINCS",
+        "xarray",
         "zarr"
-    ]
+    ],
+    "autoDocstring.docstringFormat": "numpy"
 }

@@ -1,6 +1,6 @@
 import xarray as xr
 
-from hydromt.driver.preprocessing import (
+from hydromt.drivers.preprocessing import (
     round_latlon,
 )
 from hydromt.gis.raster import full_from_transform

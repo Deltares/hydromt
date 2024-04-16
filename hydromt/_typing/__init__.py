@@ -6,6 +6,7 @@ from .error import (
     NoDataStrategy,
     _exec_nodata_strat,
 )
+from .fsspec_types import FS
 from .model_mode import ModelMode
 from .type_def import (
     Bbox,
@@ -37,6 +38,7 @@ __all__ = [
     "StrPath",
     "DeferedFileClose",
     "ExportConfigDict",
+    "FS",
     "GeoDataframeSource",
     "GeoDatasetSource",
     "ModeLike",

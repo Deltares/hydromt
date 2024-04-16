@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from hydromt.data_adapter import RasterDatasetAdapter
 from hydromt.data_source import RasterDatasetSource
-from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 
 @pytest.fixture()
