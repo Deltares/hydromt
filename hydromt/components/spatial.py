@@ -133,7 +133,7 @@ class SpatialModelComponent(ModelComponent, ABC):
 
             * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
         """
-        geom = self._parse_region(
+        geom = self.parse_region(
             region,
             basin_index_fn=basin_index_fn,
             hydrography_fn=hydrography_fn,
@@ -180,8 +180,8 @@ class SpatialModelComponent(ModelComponent, ABC):
         self,
         filename: Optional[StrPath] = None,
         **read_kwargs,
-    ):
-        """Read the model region from a file on disk.
+    ) -> None:
+        """Read the model region from a file on disk. Sets it on the region attribute.
 
         This function should be called from within the `read` function of the component inheriting from this class.
         """
@@ -224,7 +224,7 @@ class SpatialModelComponent(ModelComponent, ABC):
 
             gdf.to_file(write_path, **write_kwargs)
 
-    def _parse_region(
+    def parse_region(
         self,
         region: dict,
         *,
@@ -232,6 +232,27 @@ class SpatialModelComponent(ModelComponent, ABC):
         basin_index_fn: str,
         crs: Optional[int],
     ) -> gpd.GeoDataFrame:
+        """Parse a region dictionary and return a GeoDataFrame.
+
+        This function can be overridden by subclasses to provide custom region parsing.
+
+        Parameters
+        ----------
+        region : dict
+            The region description to be parsed.
+            See `create_region` for more information.
+        hydrography_fn : str
+            The hydrography filename.
+        basin_index_fn : str
+            The basin index filename.
+        crs : Optional[int]
+            The target crs to apply to the region after parsing.
+
+        Returns
+        -------
+        gpd.GeoDataFrame
+            The region created from the parsed region dictionary.
+        """
         kwargs = region.copy()
         # NOTE: the order is important to prioritize the arguments
         options = {
@@ -339,12 +360,12 @@ class SpatialModelComponent(ModelComponent, ABC):
             return eq, errors
         other_region = cast(SpatialModelComponent, other)
 
-        if self.kind != other_region.kind:
-            errors["kind"] = f"kind {self.kind} != {other_region.kind}"
-
         try:
             gpd.testing.assert_geodataframe_equal(
-                self.data, other_region.data, check_like=True, check_less_precise=True
+                self.__data,
+                other_region.__data,
+                check_like=True,
+                check_less_precise=True,
             )
         except AssertionError as e:
             errors["data"] = str(e)

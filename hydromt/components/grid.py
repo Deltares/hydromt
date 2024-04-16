@@ -13,7 +13,7 @@ from shapely.geometry import box
 
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
-from hydromt._typing.type_def import DeferedFileClose
+from hydromt._typing.type_def import DeferedFileClose, StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis import raster
@@ -42,10 +42,9 @@ class GridComponent(SpatialModelComponent):
     hydromt.gis.raster.RasterDataset type which is an extension of xarray.Dataset for regular grid.
     """
 
-    def __init__(
-        self,
-        model: "Model",
-    ):
+    DEFAULT_FILENAME = "grid/grid.nc"
+
+    def __init__(self, model: "Model", filename: StrPath = DEFAULT_FILENAME):
         """Initialize a GridComponent.
 
         Parameters
@@ -55,6 +54,7 @@ class GridComponent(SpatialModelComponent):
         """
         super().__init__(model=model)
         self._data: Optional[xr.Dataset] = None
+        self._filename = filename
 
     def set(
         self,
@@ -105,7 +105,8 @@ class GridComponent(SpatialModelComponent):
     @hydromt_step
     def write(
         self,
-        fn: str = "grid/grid.nc",
+        filename: Optional[str] = None,
+        *,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
@@ -117,7 +118,7 @@ class GridComponent(SpatialModelComponent):
 
         Parameters
         ----------
-        fn : str, optional
+        filename : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         gdal_compliant : bool, optional
             If True, write grid data in a way that is compatible with GDAL,
@@ -142,7 +143,7 @@ class GridComponent(SpatialModelComponent):
             # write_nc requires dict - use dummy 'grid' key
             write_nc(  # Can return DeferedFileClose object
                 {"grid": self.data},
-                fn,
+                filename or str(self._filename),
                 temp_data_dir=self._model._TMP_DATA_DIR,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
@@ -154,7 +155,8 @@ class GridComponent(SpatialModelComponent):
     @hydromt_step
     def read(
         self,
-        filename: str = "grid/grid.nc",
+        filename: Optional[str] = None,
+        *,
         mask_and_scale: bool = False,
         region_filename: Optional[str] = None,
         **kwargs,
@@ -165,7 +167,7 @@ class GridComponent(SpatialModelComponent):
 
         Parameters
         ----------
-        fn : str, optional
+        filename : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         mask_and_scale : bool, optional
             If True, replace array values equal to _FillValue with NA and scale values
@@ -184,7 +186,7 @@ class GridComponent(SpatialModelComponent):
         if self._root.is_reading_mode() and self._root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
-            filename,
+            filename or self._filename,
             self._root,
             logger=self._logger,
             single_var_as_array=False,
@@ -309,7 +311,7 @@ class GridComponent(SpatialModelComponent):
         elif kind in ["basin", "subbasin", "interbasin"]:
             # get ds_hyd but clipped to geom, one variable is enough
             da_hyd = self._data_catalog.get_rasterdataset(
-                hydrography_fn, geom=self.region, variables=["flwdir"]
+                hydrography_fn, geom=geom, variables=["flwdir"]
             )
             assert da_hyd is not None
             if not isinstance(res, (int, float)):
@@ -770,7 +772,7 @@ class GridComponent(SpatialModelComponent):
 
         return len(errors) == 0, errors
 
-    def _parse_region(
+    def parse_region(
         self,
         region: dict,
         *,
@@ -778,6 +780,11 @@ class GridComponent(SpatialModelComponent):
         basin_index_fn: str,
         crs: Optional[int],
     ) -> gpd.GeoDataFrame:
+        """Parse the region dict into a GeoDataFrame.
+
+        Overrides the base functionality to also support "grid".
+        Default options are still available from the base functionality.
+        """
         kwargs = region.copy()
         kind = next(iter(kwargs))  # first key of region
         if kind == "grid":
@@ -790,7 +797,7 @@ class GridComponent(SpatialModelComponent):
             assert ds is not None
             return ds.raster.box
 
-        return super()._parse_region(
+        return super().parse_region(
             region,
             hydrography_fn=hydrography_fn,
             basin_index_fn=basin_index_fn,
