@@ -422,6 +422,42 @@ Attributes
    ModelComponent.logger
    ModelComponent.model_root
 
+SpatialModelComponent
+=====================
+
+
+.. autosummary::
+   :toctree: _generated
+
+   SpatialModelComponent
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   SpatialModelComponent.model
+   SpatialModelComponent.data_catalog
+   SpatialModelComponent.logger
+   SpatialModelComponent.model_root
+   SpatialModelComponent.crs
+   SpatialModelComponent.bounds
+   SpatialModelComponent.region
+
+Plugin developer methods
+------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   SpatialModelComponent.create_region
+   SpatialModelComponent.set_region
+   SpatialModelComponent.write_region
+   SpatialModelComponent.read_region
+   SpatialModelComponent.parse_region
+   SpatialModelComponent.test_equal
+
 
 GridComponent
 =========

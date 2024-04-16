@@ -91,11 +91,11 @@ An example of a fictional Wflow YAML file would be:
 			res: 0.008333
 			hydrography_fn: merit_hydro
 		- grid.add_data_from_geodataframe:
-				vector_fn: administrative_areas
-				variables: "id_level1"
+			vector_fn: administrative_areas
+			variables: "id_level1"
 		- grid.add_data_from_geodataframe:
-				vector_fn: administrative_areas
-				variables: "id_level3"
+			vector_fn: administrative_areas
+			variables: "id_level3"
 		- setup_reservoirs:
 			reservoirs_fn: hydro_reservoirs
 			min_area: 1.0
@@ -293,13 +293,13 @@ Once a component has been added, any component (or other object or scope that ha
 with it as you please.
 
 In the core of HydroMT, the available components are:
-+-----------------------+-----------------+-----------------------------------------------------------------+
-| v0.x Model Attribute  | Component       | Description                                                     |
-+=======================+=================+=================================================================+
-| model.tables          | TablesComponent  | Component for managing non-geospatial data in pandas DataFrames  |
-| model.grid            | GridComponent   | Component for managing regular gridded data in single hydromt RasterDataset    |
-| model.geoms('region') | RegionComponent | Component for managing the area of interest for the model in a geopandas GeoDataFrame.    |
-+-----------------------+-----------------+-----------------------------------------------------------------+
++-----------------------+-----------------------+-------------------------------------------------------------------------------------------+
+| v0.x Model Attribute  | Component             | Description                                                                               |
++=======================+=======================+===========================================================================================+
+| model.tables          | TablesComponent       | Component for managing non-geospatial data in pandas DataFrames                           |
+| model.grid            | GridComponent         | Component for managing regular gridded data in single hydromt RasterDataset               |
+| model.geoms('region') | SpatialModelComponent | Component for managing the area of interest for the model in a geopandas GeoDataFrame.    |
++-----------------------+-----------------------+-------------------------------------------------------------------------------------------+
 
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
@@ -347,44 +347,43 @@ Making the model region its own component
 The model region is a very integral part for the functioning of HydroMT. Additionally
 there was a lot of logic to handle the different ways of specifying a region
 through the code. To simplify this, highlight the importance of the model region,
-make this part of the code easier to customise and consolidate a lot of functionality
+make this part of the code easier to customize, and consolidate a lot of functionality
 for easier maintenance, we decided to bring all this functionality together in
-the `ModelRegionComponent` class. This is a required component for a HydroMT model,
-and should contain all functionality necessary to deal with it.
+the `SpatialModelComponent` class. Some components inherit from the base component to provide a `region` attribute.
 
 
 **Changes required**
 
-The Model Region is no longer part of the `geoms` data, which means that you will
-need a separate write function in your config file. You can use `region.write` for this.
-Additionally the default path the region is written to is no longer
+The Model Region is no longer part of the `geoms` data.
+The default path the region is written to is no longer
 `/path/to/root/geoms/region.geojson` but is now `/path/to/root/region.geojson`.
-This behaviour can be modified both from the config file and the python API.
+This behavior can be modified both from the config file and the python API.
 Adjust your data and file calls as appropriate.
 
 Another change to mention is that the region methods ``parse_region`` and
-``parse_region_value`` are no longer located in ``workflows.basin_mask`` but in
-``model.components.region``. The methods stays however the same, only the import changes.
+``parse_region_value`` are no longer located in ``workflows.basin_mask`` but in `model.components.spatial`.
+These functions are only relevant for components that inherit from `SpatialModelComponent`.
 
-As alluded to above, since region is no longer part of the `geoms` family, it has
-received its own object with appropriate functions to use. These are `region.create`,
-`region.read`, `region.write` and `region.set`. These work as expected and similar to
-the other components. (which will be described more in detail in this migration
-guide later.) For convenience a table with the previous function calls that were
-removed and their new equivalent is provided below:
-
+In HydroMT core, we let `GridComponent` inherit from `SpatialModelComponent`.
+One can call `model.grid.create`, which will in turn call `grid.create_region`.
+So there is no need to call `model.grid.create_region` anymore in your yaml or in your scripts.
+Just make sure to pass a region as argument to `model.grid.create`.
 
 +--------------------------+---------------------------+
 | v0.x                     | v1                        |
 +==========================+===========================+
-| model.setup_region(dict) | model.region.create(dict) |
+| model.setup_region(dict) | model.grid.create(dict)   |
 +--------------------------+---------------------------+
-| model.write_geoms()      | model.region.write()      |
+| model.write_geoms()      | model.grid.write()        |
 +--------------------------+---------------------------+
-| model.read_geoms()       | model.region.read()       |
+| model.read_geoms()       | model.grid.read()         |
 +--------------------------+---------------------------+
-| model.set_region(...)    | model.region.set(...)     |
+| model.set_region(...)    | model.grid.set_region(...)|
 +--------------------------+---------------------------+
+
+Calling `GridComponent.set_region` doesn't really do much at the moment, since
+`GridComponent.region` overwrites the functionality with a derived region coming from the grid itself.
+Other components might provide a `SpatialModelComponent.set_region` function that works.
 
 GridComponent
 ^^^^^^^^^^^^^
