@@ -193,13 +193,6 @@ def test_initialize_grid(mock_model, tmpdir):
     assert grid_component.read.called
 
 
-def test_set_crs(mock_model, demda):
-    grid_component = GridComponent(mock_model)
-    grid_component._data = demda
-    grid_component.set_crs(crs=4326)
-    assert grid_component.data.raster.crs == 4326
-
-
 def test_add_data_from_constant(mock_model, demda):
     grid_component = GridComponent(mock_model)
     demda.name = "demda"

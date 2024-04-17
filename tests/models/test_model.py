@@ -734,16 +734,10 @@ def test_meshmodel_setup(griduda, world):
     assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
 
 
-def test_initialize_empty_model_fails_on_region():
-    m = Model()
-    with pytest.raises(KeyError):
-        _ = m.region
-
-
 def test_initialize_with_region_component(mocker: MockerFixture):
     (region,) = _patch_plugin_components(mocker, SpatialModelComponent)
     m = Model(components={"region": {"type": SpatialModelComponent.__name__}})
-    assert m.region is region
+    assert m.region is region.region
 
 
 def test_initialize_model_with_grid_component():
@@ -869,7 +863,7 @@ def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
         mode="r",
         components={"region": {"type": SpatialModelComponent.__name__}},
     )
-    assert region is m.region
+    assert region.region is m.region
 
     m.update(model_out=str(tmpdir / "out"))
 

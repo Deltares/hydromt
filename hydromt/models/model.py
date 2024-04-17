@@ -22,6 +22,7 @@ from typing import (
     cast,
 )
 
+import geopandas as gdp
 import pandas as pd
 import xarray as xr
 from pyproj import CRS
@@ -76,7 +77,6 @@ class Model(object, metaclass=ABCMeta):
         root: Optional[str] = None,
         mode: str = "w",
         data_libs: Optional[Union[List, str]] = None,
-        target_model_crs: Union[str, int] = 4326,
         logger=_logger,
         region_component: Optional[str] = None,
         **artifact_keys,
@@ -98,7 +98,6 @@ class Model(object, metaclass=ABCMeta):
         """
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
-        self.target_crs = CRS.from_user_input(target_model_crs)
 
         data_libs = data_libs or []
 
@@ -186,11 +185,20 @@ class Model(object, metaclass=ABCMeta):
         return self._components[name]
 
     @property
-    def region(self) -> SpatialModelComponent:
+    def region(self) -> Optional[gdp.GeoDataFrame]:
         """Return the model's region component."""
-        return cast(
-            SpatialModelComponent, self._components[self._region_component_name]
+        return (
+            cast(
+                SpatialModelComponent, self._components[self._region_component_name]
+            ).region
+            if self._region_component_name in self._components
+            else None
         )
+
+    @property
+    def crs(self) -> CRS:
+        """Returns coordinate reference system embedded in region."""
+        return self.region.crs if self.region is not None else None
 
     @_classproperty
     def api(cls) -> Dict:
@@ -331,7 +339,7 @@ class Model(object, metaclass=ABCMeta):
             self.root.set(model_out, mode=mode)
 
         # check if model has a region
-        if self.region.region is None:
+        if self.region is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
         # loop over methods from config file
@@ -1113,11 +1121,6 @@ class Model(object, metaclass=ABCMeta):
                 (ds,) = ds.data_vars.values()
             ncs.update({name: ds})
         return ncs
-
-    @property
-    def crs(self) -> CRS:
-        """Returns coordinate reference system embedded in region."""
-        return self.target_crs
 
 
 def _check_data(

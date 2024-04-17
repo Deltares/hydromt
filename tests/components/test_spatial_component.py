@@ -72,5 +72,5 @@ def test_create_referenced_component():
     reference_component = FakeSpatialComponent(model, region_component="region")
     model.add_component("region", region_component)
     model.add_component("region2", reference_component)
-    model.region.create_region(region={"bbox": [-1.0, -1.0, 1.0, 1.0]})
+    region_component.create_region(region={"bbox": [-1.0, -1.0, 1.0, 1.0]})
     assert reference_component.region is region_component.region

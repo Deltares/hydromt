@@ -295,7 +295,7 @@ class SpatialModelComponent(ModelComponent, ABC):
         if kind in PLUGINS.model_plugins:
             model_class = PLUGINS.model_plugins[kind]
             other_model = model_class(root=value0, mode="r", logger=self._logger)
-            geom = other_model.region.region
+            geom = other_model.region
         # TODO: Move to MeshComponent
         elif kind == "mesh":
             if _compat.HAS_XUGRID:
@@ -400,7 +400,9 @@ class SpatialModelComponent(ModelComponent, ABC):
 
     def _get_region_from_reference(self) -> Optional[gpd.GeoDataFrame]:
         if self._region_component is not None:
-            region_component = getattr(self._model, self._region_component, None)
+            region_component = self._model.get_component(
+                self._region_component, SpatialModelComponent
+            )
             if region_component is None:
                 raise ValueError(
                     f"Unable to find the referenced region component: '{self._region_component}'"

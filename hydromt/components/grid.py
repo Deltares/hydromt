@@ -17,7 +17,6 @@ from hydromt._typing.type_def import DeferedFileClose, StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis import raster
-from hydromt.gis import utils as gis_utils
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.workflows.grid import (
@@ -186,7 +185,6 @@ class GridComponent(SpatialModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize_grid(skip_read=True)
-        self.read_region(region_filename, **kwargs)
 
         # Load grid data in r+ mode to allow overwriting netcdf files
         if self._root.is_reading_mode() and self._root.is_writing_mode():
@@ -460,11 +458,6 @@ class GridComponent(SpatialModelComponent):
             self._data = xr.Dataset()
             if self._root.is_reading_mode() and not skip_read:
                 self.read()
-
-    def set_crs(self, crs: CRS) -> None:
-        """Set coordinate reference system of the model grid."""
-        if len(self.data) > 0:
-            self.data.raster.set_crs(crs)
 
     @hydromt_step
     def add_data_from_constant(
@@ -797,10 +790,11 @@ class GridComponent(SpatialModelComponent):
             value0 = kwargs.pop(kind)
             ds = self._data_catalog.get_rasterdataset(value0, driver_kwargs=kwargs)
             assert ds is not None
-            if crs is not None and ds is not None:
-                crs = gis_utils.parse_crs(crs, bbox=ds.total_bounds)
-                ds = ds.to_crs(crs)
-            assert ds is not None
+            if crs is not None:
+                self._logger.warning(
+                    "For region kind 'grid', the grid's crs is used and not"
+                    f" user-defined crs '{crs}'"
+                )
             return ds.raster.box
 
         return super().parse_region(
