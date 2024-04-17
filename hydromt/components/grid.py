@@ -754,7 +754,7 @@ class GridComponent(SpatialModelComponent):
 
         return list(ds.data_vars.keys())
 
-    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
+    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
         """Test if two components are equal.
 
         Parameters
@@ -764,7 +764,7 @@ class GridComponent(SpatialModelComponent):
 
         Returns
         -------
-        tuple[bool, dict[str, str]]
+        Tuple[bool, Dict[str, str]]
             True if the components are equal, and a dict with the associated errors per property checked.
         """
         eq, errors = super().test_equal(other)

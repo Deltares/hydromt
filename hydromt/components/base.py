@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Dict, cast
 from weakref import ReferenceType, ref
 
 from hydromt.data_catalog import DataCatalog
@@ -48,7 +48,7 @@ class ModelComponent(ABC):
         """Return the root of the model this component is associated with."""
         return self._model.root
 
-    def test_equal(self, other: "ModelComponent") -> tuple[bool, dict[str, str]]:
+    def test_equal(self, other: "ModelComponent") -> tuple[bool, Dict[str, str]]:
         """Test if two components are equal.
 
         Inherit this method in the subclass to test for equality on data.
@@ -61,10 +61,10 @@ class ModelComponent(ABC):
 
         Returns
         -------
-        tuple[bool, dict[str, str]]
+        tuple[bool, Dict[str, str]]
             True if the components are equal, and a dict with the associated errors per property checked.
         """
-        errors: dict[str, str] = {}
+        errors: Dict[str, str] = {}
         if not isinstance(other, self.__class__):
             errors["__class__"] = f"other does not inherit from {self.__class__}."
         return len(errors) == 0, errors

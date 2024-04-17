@@ -437,10 +437,10 @@ Attributes
 .. autosummary::
    :toctree: _generated
 
-   SpatialModelComponent.model
-   SpatialModelComponent.data_catalog
-   SpatialModelComponent.logger
-   SpatialModelComponent.model_root
+   SpatialModelComponent._model
+   SpatialModelComponent._data_catalog
+   SpatialModelComponent._logger
+   SpatialModelComponent._model_root
    SpatialModelComponent.crs
    SpatialModelComponent.bounds
    SpatialModelComponent.region

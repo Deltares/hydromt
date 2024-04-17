@@ -2,7 +2,7 @@ from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Generator, Optional
+from typing import Any, Dict, Generator, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -334,7 +334,7 @@ def _create_vector_model(
     ts,
     geodf,
 ) -> Model:
-    components: dict[str, Any] = {
+    components: Dict[str, Any] = {
         "vector": {"type": VectorComponent.__name__},
         "config": {"type": ConfigComponent.__name__},
     }

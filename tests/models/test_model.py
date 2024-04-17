@@ -4,7 +4,7 @@
 from os import listdir
 from os.path import abspath, dirname, isfile, join
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 from unittest.mock import Mock
 
 import geopandas as gpd
@@ -30,7 +30,7 @@ DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 def _patch_plugin_components(
     mocker: MockerFixture, *component_classes: type
-) -> list[Mock]:
+) -> List[Mock]:
     """Set up PLUGINS with mocked classes.
 
     Returns a list of mocked instances of the classes.

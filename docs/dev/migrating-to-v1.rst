@@ -321,7 +321,7 @@ If you want to allow your plugin user to modify the root and update or add new c
     class ExampleEditModel(Model):
         def __init__(
             self,
-            components: Optional[dict[str, dict[str, Any]]] = None,
+            components: Optional[Dict[str, Dict[str, Any]]] = None,
             root: Optional[str] = None,
         ):
             # Recursively update the components with any defaults that are missing in the components provided by the user.

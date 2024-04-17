@@ -273,7 +273,7 @@ class ConfigComponent(ModelComponent):
 
         Returns
         -------
-        tuple[bool, dict[str, str]]
+        tuple[bool, Dict[str, str]]
             True if the components are equal, and a dict with the associated errors per property checked.
         """
         eq, errors = super().test_equal(other)

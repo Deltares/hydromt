@@ -72,7 +72,7 @@ class Model(object, metaclass=ABCMeta):
     def __init__(
         self,
         *,
-        components: Optional[dict[str, dict[str, Any]]] = None,
+        components: Optional[Dict[str, Dict[str, Any]]] = None,
         root: Optional[str] = None,
         mode: str = "w",
         data_libs: Optional[Union[List, str]] = None,
@@ -118,10 +118,10 @@ class Model(object, metaclass=ABCMeta):
         # file system
         self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
 
-        self._components: dict[str, ModelComponent] = {}
+        self._components: Dict[str, ModelComponent] = {}
         self._add_components(components)
 
-        self._defered_file_closes: list[DeferedFileClose] = []
+        self._defered_file_closes: List[DeferedFileClose] = []
 
         model_metadata = cast(
             Dict[str, str], PLUGINS.model_metadata[self.__class__.__name__]
@@ -162,7 +162,7 @@ class Model(object, metaclass=ABCMeta):
                 return ""
             return has_region_components[0][0]
 
-    def _add_components(self, components: dict[str, dict[str, Any]]) -> None:
+    def _add_components(self, components: Dict[str, Dict[str, Any]]) -> None:
         """Add all components that are specified in the config file."""
         for name, options in components.items():
             type_name = options.pop("type")
@@ -209,7 +209,7 @@ class Model(object, metaclass=ABCMeta):
         self,
         *,
         write: Optional[bool] = True,
-        steps: list[dict[str, dict[str, Any]]],
+        steps: List[Dict[str, Dict[str, Any]]],
     ):
         r"""Single method to build a model from scratch based on settings in `steps`.
 
@@ -227,7 +227,7 @@ class Model(object, metaclass=ABCMeta):
         ----------
         write: bool, optional
             Write complete model after executing all methods in opt, by default True.
-        steps: Optional[list[dict[str, dict[str, Any]]]]
+        steps: Optional[List[Dict[str, Dict[str, Any]]]]
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
             This is a list of nested dictionary where the first-level keys are the names
@@ -274,7 +274,7 @@ class Model(object, metaclass=ABCMeta):
         *,
         model_out: Optional[StrPath] = None,
         write: Optional[bool] = True,
-        steps: Optional[list[dict[str, dict[str, Any]]]] = None,
+        steps: Optional[List[Dict[str, Dict[str, Any]]]] = None,
         forceful_overwrite: bool = False,
     ):
         r"""Single method to update a model based the settings in `steps`.
@@ -295,7 +295,7 @@ class Model(object, metaclass=ABCMeta):
             current model schematization if these exist. By default None.
         write: bool, optional
             Write the updated model schematization to disk. By default True.
-        steps: Optional[list[dict[str, dict[str, Any]]]]
+        steps: Optional[List[Dict[str, Dict[str, Any]]]]
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
             This is a list of nested dictionary where the first-level keys are the names
@@ -387,7 +387,7 @@ class Model(object, metaclass=ABCMeta):
             c.read()
 
     @staticmethod
-    def _options_contain_write(steps: list[dict[str, dict[str, Any]]]) -> bool:
+    def _options_contain_write(steps: List[Dict[str, Dict[str, Any]]]) -> bool:
         return any(
             next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps
         )
@@ -437,7 +437,7 @@ class Model(object, metaclass=ABCMeta):
 
             cat.to_yml(path, root=root)
 
-    def test_equal(self, other: "Model") -> tuple[bool, dict[str, str]]:
+    def test_equal(self, other: "Model") -> tuple[bool, Dict[str, str]]:
         """Test if two models are equal, based on their components.
 
         Parameters
@@ -447,7 +447,7 @@ class Model(object, metaclass=ABCMeta):
 
         Returns
         -------
-        tuple[bool, dict[str, str]]
+        Tuple[bool, Dict[str, str]]
             True if equal, dictionary with errors per model component which is not equal.
         """
         if not isinstance(other, self.__class__):
@@ -461,7 +461,7 @@ class Model(object, metaclass=ABCMeta):
                 "components": f"Components do not match: {components} != {components_other}"
             }
 
-        errors: dict[str, str] = {}
+        errors: Dict[str, str] = {}
         is_equal = True
         for name, c in self._components.items():
             component_equal, component_errors = c.test_equal(other._components[name])
