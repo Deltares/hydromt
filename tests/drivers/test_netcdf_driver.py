@@ -35,8 +35,8 @@ class TestNetcdfDriver:
         assert call_args[1].get("preprocess") == round_latlon
         assert res.sizes == {}  # empty dataframe
 
-    def test_write(self, rasterds: xr.Dataset, tmp_dir: Path):
-        netcdf_path = tmp_dir / f"{uuid4().hex}.nc"
+    def test_write(self, rasterds: xr.Dataset, tmp_path: Path):
+        netcdf_path = tmp_path / f"{uuid4().hex}.nc"
         driver = NetcdfDriver()
         driver.write(netcdf_path, rasterds)
         assert np.all(driver.read(str(netcdf_path)) == rasterds)
