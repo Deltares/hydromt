@@ -620,10 +620,19 @@ class MeshComponent(ModelComponent):
                         self._data = xu.UgridDataset(grids)
             # Check again mesh_names, could have changed if overwrite_grid=True
             if grid_name in self.mesh_names:
+                grids = [
+                    self.mesh_datasets[g].ugrid.to_dataset(optional_attributes=True)
+                    for g in self.mesh_names
+                ]
+                grids = xr.merge(objects=grids)
                 for dvar in data.data_vars:
                     if dvar in self._data:
                         self._logger.warning(f"Replacing mesh parameter: {dvar}")
-                    self._data[dvar] = data[dvar]
+                    # The xugrid check on grid equal does not work properly compared to
+                    # our _grid_is_equal method. Add to xarray Dataset and convert back
+                    grids[dvar] = data.ugrid.to_dataset()[dvar]
+                    # self._data[dvar] = data[dvar]
+                self._data = xu.UgridDataset(grids)
             else:
                 # We are potentially adding a new grid without any data variables
                 self._data = xu.UgridDataset(

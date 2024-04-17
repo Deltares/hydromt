@@ -224,6 +224,7 @@ def test_model_mesh_read_plus(tmpdir: Path):
     m2.mesh.set(data=data, grid_name="elevation_mesh")
     assert "elevation_v2" in m2.mesh.data.data_vars
     assert "elevation" in m2.mesh.data.data_vars
+    assert m2.mesh.crs.to_epsg() == 28992
 
 
 def test_properties(mock_model):
