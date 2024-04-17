@@ -293,13 +293,13 @@ Once a component has been added, any component (or other object or scope that ha
 with it as you please.
 
 In the core of HydroMT, the available components are:
-+-----------------------+-----------------------+-------------------------------------------------------------------------------------------+
-| v0.x Model Attribute  | Component             | Description                                                                               |
-+=======================+=======================+===========================================================================================+
-| model.tables          | TablesComponent       | Component for managing non-geospatial data in pandas DataFrames                           |
-| model.grid            | GridComponent         | Component for managing regular gridded data in single hydromt RasterDataset               |
-| model.geoms('region') | SpatialModelComponent | Component for managing the area of interest for the model in a geopandas GeoDataFrame.    |
-+-----------------------+-----------------------+-------------------------------------------------------------------------------------------+
++-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
+| v0.x Model Attribute  | Component                                         | Description                                                                            |
++=======================+===================================================+========================================================================================+
+| model.tables          | TablesComponent                                   | Component for managing non-geospatial data in pandas DataFrames                        |
+| model.grid            | GridComponent                                     | Component for managing regular gridded data in single hydromt RasterDataset            |
+| model.geoms('region') | Components inheriting from SpatialModelComponent  | Component for managing the area of interest for the model in a geopandas GeoDataFrame. |
++-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
 
  A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
@@ -307,9 +307,10 @@ The `Model.__init__` function can be used to add default components by plugins l
 
 .. code-block:: python
 
-    class ExampleModel(Model):
-	    def __init__(self):
-		    self.root: ModelRoot = ModelRoot(".")
+	class ExampleModel(Model):
+		def __init__(self):
+			self.root: ModelRoot = ModelRoot(".")
+			self.add_component("grid", GridComponent(self))
 
 
 
@@ -349,8 +350,7 @@ there was a lot of logic to handle the different ways of specifying a region
 through the code. To simplify this, highlight the importance of the model region,
 make this part of the code easier to customize, and consolidate a lot of functionality
 for easier maintenance, we decided to bring all this functionality together in
-the `SpatialModelComponent` class. Some components inherit from the base component to provide a `region` attribute.
-
+the `SpatialModelComponent` class. Some components inherit from this base component to provide a `region` attribute.
 
 **Changes required**
 
@@ -369,6 +369,14 @@ One can call `model.grid.create`, which will in turn call `grid.create_region`.
 So there is no need to call `model.grid.create_region` anymore in your yaml or in your scripts.
 Just make sure to pass a region as argument to `model.grid.create`.
 
+The `Model` contains a property for `region`. That property only works if there is a `SpatialModelComponent` in the model.
+If there is only one `SpatialModelComponent`, that component is automatically detected as the `region`.
+If there are more than one, the `region_component` can be specified in the `global` section of the yaml file.
+If there are no `SpatialModelComponent`s in the model, the `region` property will error.
+
+The command line interface no longer supports a `--region` argument.
+Instead, the region should be specified in the yaml file on the relevant component.
+
 +--------------------------+---------------------------+
 | v0.x                     | v1                        |
 +==========================+===========================+
@@ -378,12 +386,8 @@ Just make sure to pass a region as argument to `model.grid.create`.
 +--------------------------+---------------------------+
 | model.read_geoms()       | model.grid.read()         |
 +--------------------------+---------------------------+
-| model.set_region(...)    | model.grid.set_region(...)|
+| model.set_region(...)    | -                         |
 +--------------------------+---------------------------+
-
-Calling `GridComponent.set_region` doesn't really do much at the moment, since
-`GridComponent.region` overwrites the functionality with a derived region coming from the grid itself.
-Other components might provide a `SpatialModelComponent.set_region` function that works.
 
 GridComponent
 ^^^^^^^^^^^^^
