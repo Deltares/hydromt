@@ -148,7 +148,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         zoom_level: Optional[int] = None,
         align: Optional[bool] = None,
         variables: Optional[Variables] = None,
-        time_tuple: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         cache_root: Optional[StrPath] = None,
@@ -176,7 +176,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 bbox,
                 buffer,
                 align,
-                time_tuple,
+                time_range,
                 logger=logger,
             )
             if has_no_data(ds):

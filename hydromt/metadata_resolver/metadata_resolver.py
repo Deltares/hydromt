@@ -25,7 +25,7 @@ class MetaDataResolver(BaseModel, ABC):
         uri: str,
         fs: AbstractFileSystem,
         *,
-        timerange: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0.0,

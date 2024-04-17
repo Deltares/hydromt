@@ -1,7 +1,8 @@
 from datetime import datetime
 from os.path import basename
 from pathlib import Path
-from typing import cast
+from typing import Type, cast
+from uuid import uuid4
 
 import geopandas as gpd
 import numpy as np
@@ -11,6 +12,7 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
+from hydromt._typing import StrPath
 from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
@@ -29,7 +31,7 @@ class TestGeoDataFrameSource:
 
     @pytest.fixture(scope="class")
     def example_geojson(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.geojson")
+        uri = str(tmp_dir / f"{uuid4().hex}.geojson")
         geodf.to_file(uri, driver="GeoJSON")
         return uri
 
@@ -177,11 +179,44 @@ class TestGeoDataFrameSource:
             driver={"name": "pyogrio"},
         )
 
+    @pytest.fixture(scope="class")
+    def MockDriver(self, geodf: gpd.GeoDataFrame):
+        class MockGeoDataFrameDriver(GeoDataFrameDriver):
+            name = "mock_geodf_to_file"
+
+            def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
+                pass
+
+            def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
+                return geodf
+
+        return MockGeoDataFrameDriver
+
+    def test_to_file(self, MockDriver: Type[GeoDataFrameSource]):
+        mock_driver = MockDriver()
+
+        source = GeoDataFrameSource(
+            name="test", uri="points.geojson", driver=mock_driver
+        )
+        new_source = source.to_file("test")
+        assert "local" in new_source.driver.filesystem.protocol
+        # make sure we are not changing the state
+        assert id(new_source) != id(source)
+        assert id(mock_driver) != id(new_source.driver)
+
+    def test_to_file_override(self, MockDriver: Type[GeoDataFrameDriver]):
+        driver1 = MockDriver()
+        source = GeoDataFrameSource(name="test", uri="points.geojson", driver=driver1)
+        driver2 = MockDriver(filesystem="memory")
+        new_source = source.to_file("test", driver_override=driver2)
+        assert new_source.driver.filesystem.protocol == "memory"
+        # make sure we are not changing the state
+        assert id(new_source) != id(source)
+        assert id(driver2) == id(new_source.driver)
+
     @pytest.mark.skip("Missing driver: 'raster'")
     def test_geodataframe_unit_attrs(self, artifact_data: DataCatalog):
-        source = artifact_data.get_source(
-            "gadm_level1"
-        )  # TODO: fails because we have not implemented RasterDataset
+        source = artifact_data.get_source("gadm_level1")
         source.attrs = {"NAME_0": {"long_name": "Country names"}}
         gdf = GeoDataFrameAdapter(source=source).get_data("gadm_level1")
         assert gdf["NAME_0"].attrs["long_name"] == "Country names"
