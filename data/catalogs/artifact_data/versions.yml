@@ -1,5 +1,14 @@
 name: artifact_data
 versions:
+- version: v0.0.6
+  hash: 777ec0b791b5df8961c1492ff2228e08
+  path: v0.0.6/data_catalog.yml
+- version: v0.0.7
+  hash: 777ec0b791b5df8961c1492ff2228e08
+  path: v0.0.7/data_catalog.yml
 - version: v0.0.8
   hash: 777ec0b791b5df8961c1492ff2228e08
   path: v0.0.8/data_catalog.yml
+- version: v0.0.9
+  hash: 777ec0b791b5df8961c1492ff2228e08
+  path: v0.0.9/data_catalog.yml
