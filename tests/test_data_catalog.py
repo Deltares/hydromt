@@ -9,6 +9,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
+import requests
 import xarray as xr
 
 from hydromt.data_adapter import (
@@ -21,6 +22,7 @@ from hydromt.data_catalog import (
     DataCatalog,
     _denormalise_data_dict,
     _parse_data_source_dict,
+    _yml_from_uri_or_path,
 )
 from hydromt.gis_utils import to_geographic_bbox
 from hydromt.nodata import NoDataStrategy
@@ -107,9 +109,10 @@ def test_parser():
         _parse_data_source_dict("test", {})
     with pytest.raises(ValueError, match="Data type error unknown"):
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
-    with pytest.raises(
-        ValueError, match="alias test not found in data_dict"
-    ), pytest.deprecated_call():
+    with (
+        pytest.raises(ValueError, match="alias test not found in data_dict"),
+        pytest.deprecated_call(),
+    ):
         _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
@@ -261,9 +264,10 @@ def test_data_catalog(tmpdir, data_catalog):
     with pytest.deprecated_call():
         data_catalog.from_artifacts("deltares_data")
     assert len(data_catalog._sources) > 0
-    with pytest.raises(
-        RuntimeError, match="Unknown version requested"
-    ), pytest.deprecated_call():
+    with (
+        pytest.raises(RuntimeError, match="Unknown version requested"),
+        pytest.deprecated_call(),
+    ):
         data_catalog = DataCatalog(deltares_data="unknown_version")
 
     # test hydromt version in meta data
@@ -652,3 +656,13 @@ def test_from_stac():
     assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetAdapter
     assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameAdapter
     # assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == GeoDatasetAdapter
+
+
+def test_yml_from_uri_path():
+    uri = "https://google.com/nothinghere"
+    with pytest.raises(requests.HTTPError):
+        _yml_from_uri_or_path(uri)
+    uri = "https://raw.githubusercontent.com/Deltares/hydromt/main/.pre-commit-config.yaml"
+    yml = _yml_from_uri_or_path(uri)
+    assert isinstance(yml, dict)
+    assert len(yml) > 0

@@ -667,6 +667,7 @@ class DataCatalog(object):
             for v in cat_versions["versions"]
             if v["version"].startswith(self._version)
         ]
+
         if len(valid_versions) == 0:
             raise RuntimeError(
                 f"No compatible catalog version could be found for {name}."
@@ -1832,8 +1833,7 @@ def _parse_data_source_dict(
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
     if _uri_validator(str(uri_or_path)):
         with requests.get(uri_or_path, stream=True) as r:
-            if r.status_code != 200:
-                raise IOError(f"URL {r.content}: {uri_or_path}")
+            r.raise_for_status()
             yml = yaml.load(r.text, Loader=yaml.FullLoader)
     else:
         with open(uri_or_path, "r") as stream:
