@@ -3,10 +3,11 @@
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import ClassVar, Dict, Literal, Optional, cast
+from typing import Any, ClassVar, Dict, Literal, Optional, cast
 
 import pandas as pd
 import xarray as xr
+from fsspec import filesystem
 from pydantic import Field
 from pyproj import CRS
 from pyproj.exceptions import CRSError
@@ -15,10 +16,18 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt._typing import Bbox, ErrorHandleMethod, Geom, TimeRange, TotalBounds
+from hydromt._typing import (
+    Bbox,
+    ErrorHandleMethod,
+    Geom,
+    NoDataStrategy,
+    StrPath,
+    TimeRange,
+    TotalBounds,
+)
 from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
 from hydromt.data_source.data_source import DataSource
-from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 logger: Logger = getLogger(__name__)
 
@@ -38,15 +47,13 @@ class RasterDatasetSource(DataSource):
         mask: Optional[Geom] = None,
         buffer: float = 0,
         predicate: str = "intersects",
-        timerange: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         zoom_level: int = 0,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Optional[Logger] = None,
     ) -> xr.Dataset:
         """
         Read data from this source.
-
-        Data is returned piecewise as a generator, so that users of this class can
-        filter the data before taking it all into memory.
 
         Args:
         """
@@ -57,9 +64,9 @@ class RasterDatasetSource(DataSource):
             mask=mask,
             buffer=buffer,
             crs=self.crs,
-            predicate=predicate,
-            timerange=timerange,
+            time_range=time_range,
             zoom_level=zoom_level,
+            handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
             ds,
@@ -67,10 +74,60 @@ class RasterDatasetSource(DataSource):
             mask=mask,
             buffer=buffer,
             crs=self.crs,
-            predicate=predicate,
-            timerange=timerange,
+            time_range=time_range,
             zoom_level=zoom_level,
         )
+
+    def to_file(
+        self,
+        file_path: StrPath,
+        *,
+        driver_override: Optional[RasterDatasetDriver] = None,
+        bbox: Optional[Bbox] = None,
+        mask: Optional[Geom] = None,
+        buffer: float = 0.0,
+        time_range: Optional[TimeRange] = None,
+        predicate: str = "intersects",
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
+        **kwargs,
+    ) -> "RasterDatasetSource":
+        """
+        Write the RasterDatasetSource to a local file.
+
+        args:
+        """
+        ds: Optional[xr.Dataset] = self.read_data(
+            bbox=bbox,
+            mask=mask,
+            buffer=buffer,
+            time_range=time_range,
+            predicate=predicate,
+            handle_nodata=handle_nodata,
+            logger=logger,
+        )
+        if ds is None:  # handle_nodata == ignore
+            return None
+
+        # update driver based on local path
+        update: Dict[str, Any] = {"uri": file_path}
+
+        if driver_override:
+            driver: RasterDatasetDriver = driver_override
+        else:
+            # use local filesystem
+            driver: RasterDatasetDriver = self.driver.model_copy(
+                update={"filesystem": filesystem("local")}
+            )
+        update.update({"driver": driver})
+
+        driver.write(
+            file_path,
+            ds,
+            **kwargs,
+        )
+
+        return self.model_copy(update=update)
 
     def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.

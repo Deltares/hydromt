@@ -7,10 +7,10 @@ from typing import Callable, List, Optional
 import xarray as xr
 from pyproj import CRS
 
-from hydromt._typing import Bbox, Geom
+from hydromt._typing import Bbox, Geom, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
-from hydromt.driver.preprocessing import PREPROCESSORS
-from hydromt.driver.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.preprocessing import PREPROCESSORS
+from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 
 class ZarrDriver(RasterDatasetDriver):
@@ -27,6 +27,7 @@ class ZarrDriver(RasterDatasetDriver):
         buffer: float = 0,
         crs: Optional[CRS] = None,
         variables: Optional[List[str]] = None,
+        time_range: Optional[TimeRange] = None,
         predicate: str = "intersects",
         zoom_level: int = 0,
         logger: Optional[Logger] = None,
@@ -41,11 +42,14 @@ class ZarrDriver(RasterDatasetDriver):
         """
         uris = self.metadata_resolver.resolve(
             uri,
+            self.filesystem,
             bbox=bbox,
-            geom=mask,
+            mask=mask,
             buffer=buffer,
             predicate=predicate,
             variables=variables,
+            time_range=time_range,
+            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
             **kwargs,
         )
@@ -61,3 +65,11 @@ class ZarrDriver(RasterDatasetDriver):
         return xr.merge(
             [preprocessor(opn(_uri)) if preprocessor else opn(_uri) for _uri in uris]
         )
+
+    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+        """
+        Write the RasterDataset to a local file using zarr.
+
+        args:
+        """
+        ds.to_zarr(path, **kwargs)

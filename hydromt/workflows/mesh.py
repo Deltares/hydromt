@@ -256,7 +256,7 @@ def mesh2d_from_rasterdataset(
     # Get one variable name in ds to simplify to da
     var = [v for v in ds.data_vars][0]
     uda = xu.UgridDataArray.from_structured(
-        ds[var].rename({ds.raster.x_dim: "x", ds.raster.y_dim: "y"})
+        ds[var], x=ds.raster.xcoords.name, y=ds.raster.ycoords.name
     )
     uda.ugrid.set_crs(ds.raster.crs)
 

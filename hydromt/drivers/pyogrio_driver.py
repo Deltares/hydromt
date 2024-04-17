@@ -4,13 +4,13 @@ from logging import Logger, getLogger
 from typing import List, Optional
 
 import geopandas as gpd
-from pyogrio import read_dataframe, read_info
+from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
 from shapely.geometry.base import BaseGeometry
 
-from hydromt._typing import Bbox, Geom, GpdShapeGeom
+from hydromt._typing import Bbox, Geom, GpdShapeGeom, StrPath
 from hydromt._typing.error import NoDataStrategy
-from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.gis import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
@@ -43,6 +43,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         """
         uris = self.metadata_resolver.resolve(
             uri,
+            self.filesystem,
             bbox=bbox,
             mask=mask,
             buffer=buffer,
@@ -60,6 +61,19 @@ class PyogrioDriver(GeoDataFrameDriver):
             mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
         bbox_reader = bbox_from_file_and_filters(_uri, bbox, mask, crs)
         return read_dataframe(_uri, bbox=bbox_reader)
+
+    def write(
+        self,
+        gdf: gpd.GeoDataFrame,
+        path: StrPath,
+        **kwargs,
+    ) -> None:
+        """
+        Write out a GeoDataFrame to file using pyogrio.
+
+        args:
+        """
+        write_dataframe(gdf, path, **kwargs)
 
 
 def bbox_from_file_and_filters(

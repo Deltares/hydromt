@@ -7,9 +7,9 @@ from typing import List, Optional
 import geopandas as gpd
 from pyproj import CRS
 
-from hydromt._typing import Bbox, Geom
+from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
-from hydromt.driver import BaseDriver
+from hydromt.drivers import BaseDriver
 
 logger: Logger = getLogger(__name__)
 
@@ -39,3 +39,21 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         args:
         """
         ...
+
+    def write(
+        self,
+        path: StrPath,
+        gdf: gpd.GeoDataFrame,
+        **kwargs,
+    ) -> None:
+        """
+        Write out a GeoDataFrame to file.
+
+        Not all drivers should have a write function, so this method is not
+        abstract.
+
+        args:
+        """
+        raise NotImplementedError(
+            f"Writing using driver '{self.name}' is not supported."
+        )

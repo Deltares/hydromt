@@ -1,7 +1,7 @@
 """Grid Component."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -14,6 +14,7 @@ from shapely.geometry import box
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
+from hydromt.components import GeomsComponent
 from hydromt.components.base import ModelComponent
 from hydromt.components.region import _parse_region
 from hydromt.gis import raster
@@ -412,7 +413,7 @@ class GridComponent(ModelComponent):
             grid = grid.drop_vars("mask")
 
         # Add region and grid to model
-        self._model.set_geoms(geom, "region")
+        self._model.get_component("geom", GeomsComponent).set(geom, "region")
         self.set(grid)
 
         return grid
@@ -781,3 +782,27 @@ class GridComponent(ModelComponent):
         self.set(ds)
 
         return list(ds.data_vars.keys())
+
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_grid = cast(GridComponent, other)
+        try:
+            xr.testing.assert_allclose(self.data, other_grid.data)
+        except AssertionError as e:
+            errors["data"] = str(e)
+
+        return len(errors) == 0, errors

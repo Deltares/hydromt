@@ -28,8 +28,8 @@ def _time_tuple_from_str(
     return (t0, t1)
 
 
-def _timerange_validate(tr: tuple[datetime, datetime]) -> tuple[datetime, datetime]:
-    assert tr[0] >= tr[1], f"timerange t0: '{tr[0]}' should be less than t1: '{tr[1]}'"
+def _time_range_validate(tr: tuple[datetime, datetime]) -> tuple[datetime, datetime]:
+    assert tr[0] >= tr[1], f"time range t0: '{tr[0]}' should be less than t1: '{tr[1]}'"
     return tr
 
 
@@ -48,9 +48,6 @@ def _validate_bbox(
 DataType = Literal[
     "DataFrame", "DataSet", "GeoDataFrame", "GeoDataSet", "RasterDataset"
 ]
-GeoDataframeSource = Union[str, Path]
-GeoDatasetSource = Union[str, Path]
-RasterDatasetSource = Union[str, Path]
 Bbox = Annotated[Tuple[float, float, float, float], _validate_bbox]
 
 StrPath = Union[str, Path]
@@ -59,13 +56,12 @@ GeoDatasetSource = StrPath
 RasterDatasetSource = StrPath
 DatasetSource = StrPath
 
-Bbox = Tuple[float, float, float, float]
 Crs = int
 TotalBounds = Tuple[Bbox, Crs]
 TimeRange = Annotated[
     Tuple[datetime, datetime],
     BeforeValidator(_time_tuple_from_str),
-    AfterValidator(_timerange_validate),
+    AfterValidator(_time_range_validate),
 ]
 Number = Union[int, float]
 SourceSpecDict = TypedDict(

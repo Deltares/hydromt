@@ -148,7 +148,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         zoom_level: Optional[int] = None,
         align: Optional[bool] = None,
         variables: Optional[Variables] = None,
-        time_tuple: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         cache_root: Optional[StrPath] = None,
@@ -176,7 +176,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 bbox,
                 buffer,
                 align,
-                time_tuple,
+                time_range,
                 logger=logger,
             )
             if has_no_data(ds):
@@ -425,7 +425,7 @@ class RasterDatasetAdapter(DataAdapterBase):
     # TODO: uses rasterio and is specific to driver. Should be moved to driver
     def _get_zoom_levels_and_crs(
         self, fn: Optional[StrPath] = None, logger=logger
-    ) -> Tuple[int, int]:
+    ) -> Tuple[Optional[dict], Optional[int]]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         if self.source.zoom_levels is not None and self.source.crs is not None:
             return self.zoom_levels, self.source.crs
@@ -447,6 +447,10 @@ class RasterDatasetAdapter(DataAdapterBase):
                     zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
         except RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
+        crs = crs if crs is not None else self.crs
+        if crs is None:
+            logger.warning("No CRS detected. Hence no zoom levels can be determined.")
+            return None, None
         self.zoom_levels = zoom_levels
         if self.source.crs is None:
             self.source.crs = crs
@@ -528,7 +532,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 fdst = conversions.get(dst_crs_unit, 1)
                 dst_res = src_res * fsrc / fdst
             # find nearest zoom level
-            res = list(zls_dict.values())[0] / 2
+            res = list(zls_dict.values())[0] / 2  # org res is half of first overview
             zls = list(zls_dict.keys())
             smaller = [x < (dst_res + res * 0.01) for x in zls_dict.values()]
             zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
@@ -536,7 +540,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             raise ValueError("No CRS defined, hence no zoom level can be determined.")
         else:
             raise TypeError(f"zoom_level not understood: {type(zoom_level)}")
-        logger.debug(f"Using zoom level {zl} ({dst_res:.2f})")
+        logger.debug(f"Using zoom level {zl} (res: {zls_dict[zl]:.6f})")
         return zl
 
     @staticmethod

@@ -8,6 +8,7 @@ from typing import (
     Dict,
     Optional,
     Union,
+    cast,
 )
 
 import pandas as pd
@@ -141,3 +142,28 @@ class TablesComponent(ModelComponent):
         return pd.concat(
             [df.assign(table_origin=name) for name, df in self.data.items()], axis=0
         )
+
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_tables = cast(TablesComponent, other)
+        for name, df in self.data.items():
+            if name not in other_tables.data:
+                errors[name] = "Table not found in other component."
+            elif not df.equals(other_tables.data[name]):
+                errors[name] = "Table content is not equal."
+
+        return len(errors) == 0, errors

@@ -1,8 +1,9 @@
 """Implementation of the vector workloads."""
+
 from __future__ import annotations
 
 import logging
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -20,7 +21,6 @@ GDAL_VERSION = gdal_version()
 
 
 class GeoBase(raster.XGeoBase):
-
     """Base accessor class for geo data."""
 
     def __init__(self, xarray_obj):
@@ -37,7 +37,9 @@ class GeoBase(raster.XGeoBase):
             names = names + [n for n in self._obj.data_vars]
         return names
 
-    def _get_geom_names_types(self, geom_name: str = None) -> tuple[list, list]:
+    def _get_geom_names_types(
+        self, geom_name: Optional[str] = None
+    ) -> tuple[list, list]:
         """Discover coordinates with wkt/geom type data the dataset/array."""
         names, types = [], []
         dvars = self._all_names if geom_name is None else [geom_name]
@@ -124,11 +126,11 @@ class GeoBase(raster.XGeoBase):
 
     def set_spatial_dims(
         self,
-        geom_name: str = None,
-        x_name: str = None,
-        y_name: str = None,
-        index_dim: str = None,
-        geom_format: str = None,
+        geom_name: Optional[str] = None,
+        x_name: Optional[str] = None,
+        y_name: Optional[str] = None,
+        index_dim: Optional[str] = None,
+        geom_format: Optional[str] = None,
     ) -> None:
         """Set the spatial and index dimensions of the object.
 
@@ -156,20 +158,22 @@ class GeoBase(raster.XGeoBase):
             raise ValueError("No geometry data found.")
 
     @property
-    def geom_format(self) -> str:
+    def geom_format(self) -> Optional[str]:
         """Name of geometry coordinate; only for 'wkt' and 'geom' formats."""
         if self.get_attrs("geom_format") not in self._obj.dims:
             self.set_spatial_dims()
         if "geom_format" in self.attrs:
             return self.attrs["geom_format"]
+        return None
 
     @property
-    def geom_name(self) -> str:
+    def geom_name(self) -> Optional[str]:
         """Name of geometry coordinate; only for 'wkt' and 'geom' formats."""
         if self.get_attrs("geom_name") not in self._obj.dims:
             self.set_spatial_dims()
         if "geom_name" in self.attrs:
             return self.attrs["geom_name"]
+        return None
 
     @property
     def geom_type(self) -> str:
@@ -274,10 +278,10 @@ class GeoBase(raster.XGeoBase):
     def update_geometry(
         self,
         geometry: GeoSeries = None,
-        geom_format: str = None,
-        x_name: str = None,
-        y_name: str = None,
-        geom_name: str = None,
+        geom_format: Optional[str] = None,
+        x_name: Optional[str] = None,
+        y_name: Optional[str] = None,
+        geom_name: Optional[str] = None,
         replace: bool = True,
     ):
         """Update the geometry in the Dataset/Array with a new geometry.
@@ -435,7 +439,9 @@ class GeoBase(raster.XGeoBase):
         )
         return obj
 
-    def to_geom(self, geom_name: str = None) -> Union[xr.DataArray, xr.Dataset]:
+    def to_geom(
+        self, geom_name: Optional[str] = None
+    ) -> Union[xr.DataArray, xr.Dataset]:
         """Convert Dataset/ DataArray with xy or wkt geometries to shapely Geometries.
 
         Parameters
@@ -652,7 +658,6 @@ class GeoBase(raster.XGeoBase):
 
 @xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
-
     """Accessor class for vector based geo data arrays."""
 
     def __init__(self, xarray_obj):
@@ -681,16 +686,16 @@ class GeoDataArray(GeoBase):
             logger.warning("No numerical nodata value found, skipping set_nodata")
             self._obj.attrs.pop("_FillValue", None)
 
-    # Constructers
+    # Constructors
     # i.e. from other datatypes or files
     @staticmethod
     def from_gdf(
         gdf: gpd.GeoDataFrame,
         data: Any,
-        coords: dict = None,
-        dims: tuple = None,
-        name: str = None,
-        index_dim: str = None,
+        coords: Optional[dict] = None,
+        dims: Optional[tuple] = None,
+        name: Optional[str] = None,
+        index_dim: Optional[str] = None,
         keep_cols: bool = True,
         merge_index: str = "gdf",
     ) -> xr.DataArray:
@@ -784,10 +789,10 @@ class GeoDataArray(GeoBase):
     def from_netcdf(
         path: Union[str, xr.DataArray],
         parse_geom: bool = True,
-        geom_name: str = None,
-        x_name: str = None,
-        y_name: str = None,
-        crs: int = None,
+        geom_name: Optional[str] = None,
+        x_name: Optional[str] = None,
+        y_name: Optional[str] = None,
+        crs: Optional[int] = None,
         **kwargs,
     ) -> xr.DataArray:
         """Read netcdf file or convert xr.DataArray as GeoDataArray.
@@ -825,8 +830,7 @@ class GeoDataArray(GeoBase):
 
 @xr.register_dataset_accessor("vector")
 class GeoDataset(GeoBase):
-
-    """Implementation for a vectorased geo dataset."""
+    """Implementation for a vectorized geo dataset."""
 
     def __init__(self, xarray_obj):
         """Initialise the object."""
@@ -836,20 +840,20 @@ class GeoDataset(GeoBase):
     # Will probably be deleted in the future but now needed for compatibility
     @property
     def vars(self):
-        """list: Returns non-coordinate varibles."""
+        """list: Returns non-coordinate variables."""
         return list(self._obj.data_vars.keys())
 
     # Internal conversion and selection methods
     # i.e. produces xarray.Dataset/ xarray.DataArray
 
-    # Constructers
+    # Constructors
     # i.e. from other datatypes or files
     @staticmethod
     def from_gdf(
         gdf: gpd.GeoDataFrame,
-        data_vars: dict = None,
-        coords: dict = None,
-        index_dim: str = None,
+        data_vars: Union[dict, xr.DataArray, xr.Dataset, None] = None,
+        coords: Optional[dict] = None,
+        index_dim: Optional[str] = None,
         keep_cols: bool = True,
         cols_as_data_vars: bool = False,
         merge_index: str = "gdf",
@@ -860,12 +864,12 @@ class GeoDataset(GeoBase):
         ---------
         gdf: geopandas GeoDataFrame
             Spatial coordinates. The index should match the df index and the geometry
-            columun may only contain Point geometries. Additional columns are also
+            column may only contain Point geometries. Additional columns are also
             parsed to the xarray DataArray coordinates.
         data_vars: dict-like, DataArray or Dataset
             A mapping from variable names to `xarray.DataArray` objects.
             See `xarray.Dataset` for all options.
-            Aditionally it accepts `xarray.DataArray` with name property and
+            Additionally it accepts `xarray.DataArray` with name property and
             `xarray.Dataset`.
         coords: sequence or dict of array_like, optional
             Coordinates (tick labels) to use for indexing along each dimension.

@@ -3,9 +3,10 @@
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import ClassVar, List, Literal, Optional
+from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import geopandas as gpd
+from fsspec import filesystem
 from pydantic import Field
 from pyproj import CRS
 from pyproj.exceptions import CRSError
@@ -14,9 +15,16 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt._typing import Bbox, ErrorHandleMethod, Geom, NoDataStrategy, TotalBounds
+from hydromt._typing import (
+    Bbox,
+    ErrorHandleMethod,
+    Geom,
+    NoDataStrategy,
+    StrPath,
+    TotalBounds,
+)
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.driver.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 
 from .data_source import DataSource
 
@@ -69,6 +77,57 @@ class GeoDataFrameSource(DataSource):
             handle_nodata=handle_nodata,
             logger=logger,
         )
+
+    def to_file(
+        self,
+        file_path: StrPath,
+        *,
+        driver_override: Optional[GeoDataFrameDriver] = None,
+        bbox: Optional[Bbox] = None,
+        mask: Optional[Geom] = None,
+        buffer: float = 0.0,
+        variables: Optional[List[str]] = None,
+        predicate: str = "intersects",
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        logger: Logger = logger,
+        **kwargs,
+    ) -> "GeoDataFrameSource":
+        """
+        Write the GeoDataFrameSource to a local file.
+
+        args:
+        """
+        gdf: Optional[gpd.GeoDataFrame] = self.read_data(
+            bbox=bbox,
+            mask=mask,
+            buffer=buffer,
+            variables=variables,
+            predicate=predicate,
+            handle_nodata=handle_nodata,
+            logger=logger,
+        )
+        if gdf is None:  # handle_nodata == ignore
+            return None
+
+        # update source and its driver based on local path
+        update: Dict[str, Any] = {"uri": file_path}
+
+        if driver_override:
+            driver: GeoDataFrameDriver = driver_override
+        else:
+            # use local filesystem
+            driver: GeoDataFrameDriver = self.driver.model_copy(
+                update={"filesystem": filesystem("local")}
+            )
+        update.update({"driver": driver})
+
+        driver.write(
+            file_path,
+            gdf,
+            **kwargs,
+        )
+
+        return self.model_copy(update=update)
 
     def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.

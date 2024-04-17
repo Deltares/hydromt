@@ -66,7 +66,7 @@ io = [
 extra = [
   "matplotlib",    # plotting; required for slippy tiles
   "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
-  "xugrid>=0.6.5", # xarray wrapper for mesh processing
+  "xugrid>=0.9.0", # xarray wrapper for mesh processing
 ]
 dev = [
   "black",       # linting
@@ -111,6 +111,9 @@ hydromt = "hydromt.cli.main:main"
 [project.entry-points."hydromt.components"]
 core = "hydromt.components"
 
+[project.entry-points."hydromt.drivers"]
+core = "hydromt.drivers"
+
 [project.entry-points."hydromt.models"]
 core = "hydromt.models"
 
@@ -151,3 +154,6 @@ filterwarnings = [
   # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
   "ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
 ]
+
+[tool.mypy]
+ignore_missing_imports = true

@@ -47,3 +47,24 @@ class ModelComponent(ABC):
     def _root(self) -> "ModelRoot":
         """Return the root of the model this component is associated with."""
         return self._model.root
+
+    def test_equal(self, other: "ModelComponent") -> tuple[bool, dict[str, str]]:
+        """Test if two components are equal.
+
+        Inherit this method in the subclass to test for equality on data.
+        Don't forget to call super().test_equal(other) in the subclass.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        errors: dict[str, str] = {}
+        if not isinstance(other, self.__class__):
+            errors["__class__"] = f"other does not inherit from {self.__class__}."
+        return len(errors) == 0, errors

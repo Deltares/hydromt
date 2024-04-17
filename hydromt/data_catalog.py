@@ -265,7 +265,7 @@ class DataCatalog(object):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        s = self.get_source(source, provider, version)
+        s: DataSource = self.get_source(source, provider, version)
         try:
             return s.get_bbox(detect=detect)  # type: ignore
         except TypeError as e:
