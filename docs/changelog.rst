@@ -23,6 +23,7 @@ Fixed
 - Bug in `raster.clip_bbox` when bbox doesn't overlap with raster. (#860)
 - Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 - Fixed incorrect renaming of single variable raster datasets (#883)
+- Provide better error message for 0D geometry arrays in GeoDataset (#885)
 
 v0.9.4 (2024-02-26)
 ===================
