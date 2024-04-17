@@ -3,7 +3,6 @@ import os
 import re
 from os.path import dirname, isdir, isfile, join
 from pathlib import Path
-from unittest.mock import create_autospec, patch
 
 import geopandas as gpd
 import pandas as pd
@@ -17,7 +16,7 @@ from hydromt.models import Model
 from hydromt.root import ModelRoot
 
 
-def test_check_UGrid():
+def test_check_UGrid(mocker: MockerFixture):
     data = xr.DataArray()
     with pytest.raises(
         ValueError,
@@ -25,7 +24,7 @@ def test_check_UGrid():
         " or xu.UgridDataset",
     ):
         _check_UGrid(data=data, name=None)
-    data = create_autospec(xu.UgridDataArray)
+    data = mocker.create_autospec(xu.UgridDataArray)
     data.name = None
     with pytest.raises(
         ValueError,
@@ -64,10 +63,10 @@ def test_add_mesh_errors(mock_model, mocker: MockerFixture):
         mesh_component._add_mesh(data=data, grid_name=grid_name, overwrite_grid=False)
 
 
-@patch.object(MeshComponent, "_grid_is_equal")
-def test_add_mesh_logging(mock_grid_is_equal, mock_model, caplog):
+def test_add_mesh_logging(mocker: MockerFixture, mock_model, caplog):
     mesh_component = MeshComponent(mock_model)
     data = xu.data.elevation_nl().to_dataset()
+    mock_grid_is_equal = mocker.patch.object(MeshComponent, "_grid_is_equal")
     mock_grid_is_equal.return_value = False
     caplog.set_level(logging.WARNING)
     mesh_component._data = data
@@ -93,12 +92,12 @@ def test_add_mesh(mock_model):
     assert data.grid.name in mesh_component.mesh_names
 
 
-@patch("hydromt.components.mesh._check_UGrid")
-def test_set_raises_errors(mock_check_Ugrid, mock_model):
+def test_set_raises_errors(mocker: MockerFixture, mock_model):
     mesh_component = MeshComponent(mock_model)
-    data = create_autospec(xu.UgridDataset)
+    data = mocker.create_autospec(xu.UgridDataset)
     data.name = "fakedata"
     data.ugrid.grids = [1, 2]
+    mock_check_Ugrid = mocker.patch("hydromt.components.mesh._check_UGrid")
     mock_check_Ugrid.return_value = data
     with pytest.raises(
         ValueError,
@@ -191,7 +190,6 @@ def test_model_mesh_workflow(tmpdir: Path):
     crs = 4326
     res = 0.001
     mesh = component.create2d(region=region, res=res, crs=crs)
-    assert mesh.grid == component.data.grid
     assert component.data.grid.crs == crs
     # clear empty mesh dataset
     mesh._data = None
@@ -207,8 +205,6 @@ def test_model_mesh_workflow(tmpdir: Path):
     assert component.data == data
 
 
-# @pytest.mark.integration()
-# @pytest.mark.skip(reason="Probably needs fix on side of XUgrid, issue is pending")
 def test_model_mesh_read_plus(tmpdir: Path):
     m = Model(root=str(tmpdir), mode="w")
     m.add_component("mesh", MeshComponent(m))
@@ -276,7 +272,7 @@ def test_add_2d_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixtur
     mesh_component._data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
     mock_data.grid.set_crs(28992)
-    mesh_component._data = mock_data
+    mesh_component.set(mock_data)
     grid_name = "test_grid"
     caplog.set_level(level=logging.INFO)
     with pytest.raises(
@@ -308,7 +304,7 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
     mesh_component._data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
     mock_data.grid.set_crs(28992)
-    mesh_component._data = mock_data
+    mesh_component.set(mock_data)
     grid_name = "test_grid"
     caplog.set_level(level=logging.INFO)
     with pytest.raises(

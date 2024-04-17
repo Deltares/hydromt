@@ -154,10 +154,9 @@ class MeshComponent(ModelComponent):
         if len(files) > 0:
             ds = xr.merge(files)
             if ds.rio.crs is not None:  # parse crs
-                ds_crs = ds.raster.crs
+                crs = ds.raster.crs
                 ds = ds.drop_vars(GEO_MAP_COORD, errors="ignore")
                 uds = xu.UgridDataset(ds)
-                uds.ugrid.set_crs(ds_crs)
             else:
                 if not crs:
                     raise ValueError(
@@ -165,10 +164,16 @@ class MeshComponent(ModelComponent):
                     )
                 else:
                     uds = xu.UgridDataset(ds)
-                    uds.ugrid.set_crs(crs)
                     self._logger.info(
                         "no crs is found in the file, assigning from user input."
                     )
+            # Reading ugrid data adds nNodes coordinates to grid and makes it not
+            # possisble to test two equal grids for equality
+            if f"{uds.grid.name}_nNodes" in uds.grid.to_dataset():
+                uds = xu.UgridDataset(
+                    uds.ugrid.to_dataset().drop_vars(f"{uds.grid.name}_nNodes")
+                )
+            uds.ugrid.set_crs(crs)
 
             self._data = uds
 
@@ -579,6 +584,10 @@ class MeshComponent(ModelComponent):
             # Check on crs
             if not data.ugrid.grid.crs:
                 raise ValueError("Data should have CRS.")
+            crs = data.ugrid.grid.crs  # Save crs
+            # Needed for grid equality checking when adding new data
+            data = xu.UgridDataset(data.ugrid.to_dataset())
+            data.grid.set_crs(crs)
             self._data = data
             return None
         else:
