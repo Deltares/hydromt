@@ -32,7 +32,7 @@ def test_model_dataset_sets_correctly(obsda, tmpdir: Path):
     assert list(component.data.keys()) == list(map(str, range(5)))
 
 
-def test_check_data(demda):
+def test_harmonise_data_names(demda):
     data_dict = DatasetComponent._harmonise_data_names(demda.copy(), "elevtn")
     assert isinstance(data_dict["elevtn"], DataArray)
     assert data_dict["elevtn"].name == "elevtn"

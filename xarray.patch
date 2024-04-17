@@ -1,0 +1,1435 @@
+diff --git a/hydromt/_typing/type_def.py b/hydromt/_typing/type_def.py
+index 74e899a3..23ce607b 100644
+--- a/hydromt/_typing/type_def.py
++++ b/hydromt/_typing/type_def.py
+@@ -70,7 +70,12 @@ SourceSpecDict = TypedDict(
+ 
+ DeferedFileClose = TypedDict(
+     "DeferedFileClose",
+-    {"ds": Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
++    {
++        "ds": Union[Dataset, DataArray],
++        "org_fn": str,
++        "tmp_fn": str,
++        "close_attempts": int,
++    },
+ )
+ XArrayDict = Dict[str, Union[DataArray, Dataset]]
+ 
+diff --git a/hydromt/components/dataset.py b/hydromt/components/dataset.py
+new file mode 100644
+index 00000000..9395b506
+--- /dev/null
++++ b/hydromt/components/dataset.py
+@@ -0,0 +1,242 @@
++"""Xarrays component."""
++
++import os
++from glob import glob
++from os.path import dirname, isdir
++from pathlib import Path
++from shutil import move
++from tempfile import TemporaryDirectory
++from typing import (
++    TYPE_CHECKING,
++    List,
++    Mapping,
++    Optional,
++    Union,
++    cast,
++)
++
++from pandas import DataFrame
++from xarray import DataArray, Dataset, open_dataset
++
++from hydromt._typing.type_def import DeferedFileClose, XArrayDict
++from hydromt.components.base import ModelComponent
++from hydromt.gis.raster import GEO_MAP_COORD
++from hydromt.hydromt_step import hydromt_step
++from hydromt.io.readers import read_nc
++from hydromt.metadata_resolver import ConventionResolver
++
++if TYPE_CHECKING:
++    from hydromt.models.model import Model
++
++_DEFAULT_DATASET_FILENAME = "{name}.nc"
++
++
++class DatasetComponent(ModelComponent):
++    """A component to manage colections of Xarray objects.
++
++    It contains a dictionary of xarray DataArray or DataSet objects.
++    """
++
++    def __init__(self, model: "Model", filename: str = _DEFAULT_DATASET_FILENAME):
++        """Initialize a GeomComponent.
++
++        Parameters
++        ----------
++        model: Model
++            HydroMT model instance
++        filename: str
++            The path to use for reading and writing of component data by default.
++            by default "geoms/{name}.geojson" ie one file per geodataframe in the data dictionnary.
++        """
++        self._data: Optional[XArrayDict] = None
++        self._filename = filename
++        self._tmp_data_dir = None
++        self._defered_file_closes = []
++        super().__init__(model=model)
++
++    @property
++    def data(self) -> XArrayDict:
++        """Model data in the form of xarray objects.
++
++        Return dict of xarray.Dataset or xarray.DataArray objects
++        """
++        if self._data is None:
++            self._initialize()
++
++        assert self._data is not None
++        return self._data
++
++    def _initialize(self, skip_read=False) -> None:
++        """Initialize geoms."""
++        if self._data is None:
++            self._data = dict()
++            if self._root.is_reading_mode() and not skip_read:
++                self.read()
++
++    def set(
++        self, data: Union[Dataset, DataArray], name: str, split_dataset: bool = True
++    ):
++        """Add data to the xrarray component.
++
++        Arguments
++        ---------
++        data: xarray.Dataset or xarray.DataArray
++            New xarray object to add
++        name: str
++            name of the xaray.
++        """
++        self._initialize()
++        if isinstance(data, DataFrame):
++            data = data.to_xarray()
++        assert self._data is not None
++        ds = cast(Union[DataArray, Dataset], data)
++        data_dict = DatasetComponent._harmonise_data_names(ds, name, split_dataset)
++        for name, d in data_dict.items():
++            if name in self._data:
++                self._logger.warning(f"Replacing xarray: {name}")
++            self._data[name] = d
++
++    @hydromt_step
++    def read(
++        self, filename: Optional[str] = None, single_var_as_array: bool = True, **kwargs
++    ) -> None:
++        r"""Read model geometries files at <root>/<filename>.
++
++        key-word arguments are passed to :py:func:`geopandas.read_file`
++
++        Parameters
++        ----------
++        filename : str, optional
++            filename relative to model root. should contain a {name} placeholder
++            which will be used to determine the names/keys of the geometries.
++            if None, the path that was provided at init will be used.
++        **kwargs:
++            Additional keyword arguments that are passed to the
++            `geopandas.read_file` function.
++        """
++        self._root._assert_read_mode()
++        self._initialize(skip_read=True)
++        if "chunks" not in kwargs:  # read lazy by default
++            kwargs.update(chunks="auto")
++        f = filename or self._filename
++        read_path = self._root.path / f
++        ncs = read_nc(read_path, single_var_as_array=single_var_as_array, **kwargs)
++        for name, ds in ncs.items():
++            self.set(data=ds, name=name)
++
++    @hydromt_step
++    def write(
++        self,
++        filename: Optional[str] = None,
++        gdal_compliant: bool = False,
++        rename_dims: bool = False,
++        force_sn: bool = False,
++        **kwargs,
++    ) -> None:
++        """Write dictionary of xarray.Dataset and/or xarray.DataArray to netcdf files.
++
++        Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
++        files, using :py:meth:`~hydromt.raster.gdal_compliant`.
++        The function will first try to directly write to file. In case of
++        PermissionError, it will first write a temporary file and add to the
++        self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
++        will be done by calling the self._cleanup function.
++
++        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
++
++        Parameters
++        ----------
++        nc_dict: dict
++            Dictionary of xarray.Dataset and/or xarray.DataArray to write
++        fn: str
++            filename relative to model root and should contain a {name} placeholder
++        gdal_compliant: bool, optional
++            If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
++            format using :py:meth:`~hydromt.raster.gdal_compliant`
++        rename_dims: bool, optional
++            If True, rename x_dim and y_dim to standard names depending on the CRS
++            (x/y for projected and lat/lon for geographic). Only used if
++            ``gdal_compliant`` is set to True. By default, False.
++        force_sn: bool, optional
++            If True, forces the dataset to have South -> North orientation. Only used
++            if ``gdal_compliant`` is set to True. By default, False.
++        **kwargs:
++            Additional keyword arguments that are passed to the `to_netcdf`
++            function.
++        """
++        self._root._assert_write_mode()
++
++        if len(self.data) == 0:
++            self._logger.debug("No data found, skiping writing.")
++            return
++
++    def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
++        """Try to close all defered file handles.
++
++        Try to overwrite the destination file with the temporary one until either the
++        maximum number of tries is reached or until it succeeds. The forced cleanup
++        also attempts to close the original file handle, which could cause trouble
++        if the user will try to read from the same file handle after this function
++        is called.
++
++        Parameters
++        ----------
++        forceful_overwrite: bool
++            Attempt to force closing defered file handles before writing to them.
++        max_close_attempts: int
++            Number of times to try and overwrite the original file, before giving up.
++
++        """
++        failed_closes = []
++        while len(self._defered_file_closes) > 0:
++            close_handle = self._defered_file_closes.pop()
++            if close_handle["close_attempts"] > max_close_attempts:
++                # already tried to close this to many times so give up
++                self._logger.error(
++                    f"Max write attempts to file {close_handle['org_fn']}"
++                    " exceeded. Skipping..."
++                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
++                )
++                continue
++
++            if forceful_overwrite:
++                close_handle["ds"].close()
++            try:
++                move(close_handle["tmp_fn"], close_handle["org_fn"])
++            except PermissionError:
++                self._logger.error(
++                    f"Could not write to destination file {close_handle['org_fn']} "
++                    "because the following error was raised: {e}"
++                )
++                close_handle["close_attempts"] += 1
++                self._defered_file_closes.append(close_handle)
++                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
++
++        return list(set(failed_closes))
++
++    @staticmethod
++    def _harmonise_data_names(
++        data: Union[DataArray, Dataset],
++        name: Optional[str] = None,
++        split_dataset: bool = True,
++    ) -> Mapping[str, Union[Dataset, DataArray]]:
++        harmonised_dict = {}
++        if isinstance(data, DataArray):
++            # NOTE name can be different from data.name !
++            if data.name is None and name is not None:
++                data.name = name
++            elif name is None and data.name is not None:
++                name = str(data.name)
++            else:
++                raise ValueError("Name required for DataArray.")
++            harmonised_dict = {name: data}
++        elif isinstance(data, Dataset):  # return dict for consistency
++            if split_dataset:
++                harmonised_dict = {str(name): data[name] for name in data.data_vars}
++            elif name is None:
++                raise ValueError("Name required for Dataset.")
++            else:
++                harmonised_dict = {str(name): data}
++        else:
++            raise ValueError(f'Data type "{type(data).__name__}" not recognized')
++        return harmonised_dict
+diff --git a/hydromt/data_catalog.py b/hydromt/data_catalog.py
+index 55496523..d1892cda 100644
+--- a/hydromt/data_catalog.py
++++ b/hydromt/data_catalog.py
+@@ -1633,7 +1633,9 @@ class DataCatalog(object):
+ 
+     def get_dataframe(
+         self,
+-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
++        data_like: Union[
++            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, pd.DataFrame
++        ],
+         variables: Optional[list] = None,
+         time_tuple: Optional[Tuple] = None,
+         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+diff --git a/hydromt/io/readers.py b/hydromt/io/readers.py
+index e81c4fcd..2ead4921 100644
+--- a/hydromt/io/readers.py
++++ b/hydromt/io/readers.py
+@@ -1,13 +1,21 @@
+ """Implementations for all of the necessary IO reading for HydroMT."""
+ 
+-import glob
+ import io as pyio
+ import logging
+ from ast import literal_eval
+-from logging import Logger
++from glob import glob
+ from os.path import abspath, basename, dirname, isfile, join, splitext
+ from pathlib import Path
+-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
++from typing import (
++    TYPE_CHECKING,
++    Any,
++    Dict,
++    List,
++    Literal,
++    Optional,
++    Tuple,
++    Union,
++)
+ 
+ import dask
+ import geopandas as gpd
+@@ -21,14 +29,16 @@ from requests import get as fetch
+ from shapely.geometry import Polygon, box
+ from shapely.geometry.base import GEOMETRY_TYPES
+ from tomli import load as load_toml
++from xarray import open_dataset
+ from yaml import safe_load as load_yaml
+ 
+ from hydromt import gis
+-from hydromt._typing.type_def import StrPath
++from hydromt._typing.type_def import StrPath, XArrayDict
+ from hydromt.data_adapter.caching import _uri_validator
+ from hydromt.gis import merge, raster, vector
+ from hydromt.gis.raster import GEO_MAP_COORD
+ from hydromt.io.path import make_config_paths_abs
++from hydromt.metadata_resolver import ConventionResolver
+ 
+ if TYPE_CHECKING:
+     from hydromt._validators.model_config import HydromtModelStep
+@@ -169,7 +179,7 @@ def open_mfraster(
+     if isinstance(paths, str):
+         if "*" in paths:
+             prefix, postfix = basename(paths).split(".")[0].split("*")
+-        paths = [fn for fn in glob.glob(paths) if not fn.endswith(".xml")]
++        paths = [fn for fn in glob(paths) if not fn.endswith(".xml")]
+     else:
+         paths = [str(p) if isinstance(p, Path) else p for p in paths]
+     if len(paths) == 0:
+@@ -861,68 +871,6 @@ def parse_values(
+     return cfdict
+ 
+ 
+-def read_nc(
+-    fn: StrPath,
+-    root,
+-    logger: Logger,
+-    mask_and_scale: bool = False,
+-    single_var_as_array: bool = True,
+-    load: bool = False,
+-    **kwargs,
+-) -> Dict[str, xr.Dataset]:
+-    """Read netcdf files at <root>/<fn> and return as dict of xarray.Dataset.
+-
+-    NOTE: Unless `single_var_as_array` is set to False a single-variable data source
+-    will be returned as :py:class:`xarray.DataArray` rather than
+-    :py:class:`xarray.Dataset`.
+-    key-word arguments are passed to :py:func:`xarray.open_dataset`.
+-
+-    Parameters
+-    ----------
+-    fn : str
+-        filename relative to model root, may contain wildcards
+-    mask_and_scale : bool, optional
+-        If True, replace array values equal to _FillValue with NA and scale values
+-        according to the formula original_values * scale_factor + add_offset, where
+-        _FillValue, scale_factor and add_offset are taken from variable attributes
+-        (if they exist).
+-    single_var_as_array : bool, optional
+-        If True, return a DataArray if the dataset consists of a single variable.
+-        If False, always return a Dataset. By default True.
+-    load : bool, optional
+-        If True, the data is loaded into memory. By default False.
+-    **kwargs:
+-        Additional keyword arguments that are passed to the `xr.open_dataset`
+-        function.
+-
+-    Returns
+-    -------
+-    Dict[str, xr.Dataset]
+-        dict of xarray.Dataset
+-    """
+-    ncs = dict()
+-    fns = glob.glob(join(root, fn))
+-    if "chunks" not in kwargs:  # read lazy by default
+-        kwargs.update(chunks="auto")
+-    for fn in fns:
+-        name = splitext(basename(fn))[0]
+-        logger.debug(f"Reading model file {name}.")
+-        # Load data to allow overwritting in r+ mode
+-        if load:
+-            ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
+-            ds.close()
+-        else:
+-            ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
+-        # set geo coord if present as coordinate of dataset
+-        if GEO_MAP_COORD in ds.data_vars:
+-            ds = ds.set_coords(GEO_MAP_COORD)
+-        # single-variable Dataset to DataArray
+-        if single_var_as_array and len(ds.data_vars) == 1:
+-            (ds,) = ds.data_vars.values()
+-        ncs.update({name: ds})
+-    return ncs
+-
+-
+ def read_yaml(path: StrPath) -> Dict[str, Any]:
+     """Read yaml file and return as dict."""
+     with open(path, "rb") as stream:
+@@ -943,6 +891,25 @@ def read_toml(path: StrPath) -> Dict[str, Any]:
+     return data
+ 
+ 
++def read_nc(read_path: Path, single_var_as_array: bool = True, **kwargs) -> XArrayDict:
++    fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(str(read_path))
++    fns = glob(fn_glob)
++    out = {}
++    for fn in fns:
++        name = ".".join(regex.match(fn).groups())  # type: ignore
++        ds = open_dataset(read_path, **kwargs)
++        # set geo coord if present as coordinate of dataset
++        if GEO_MAP_COORD in ds.data_vars:
++            ds = ds.set_coords(GEO_MAP_COORD)
++        # single-variable Dataset to DataArray
++        if single_var_as_array and len(ds.data_vars) == 1:
++            (ds,) = ds.data_vars.values()
++
++        out[name] = ds
++
++    return out
++
++
+ def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
+     if _uri_validator(str(uri_or_path)):
+         with fetch(str(uri_or_path), stream=True) as r:
+diff --git a/hydromt/io/writers.py b/hydromt/io/writers.py
+index c837d7d7..f0ac11bc 100644
+--- a/hydromt/io/writers.py
++++ b/hydromt/io/writers.py
+@@ -49,6 +49,51 @@ def write_xy(fn, gdf, fmt="%.4f"):
+         np.savetxt(f, xy, fmt=fmt)
+ 
+ 
++def write_ncs():
++    for name, ds in self.data.items():
++        if not isinstance(ds, (Dataset, DataArray)):
++            self._logger.error(
++                f"{name} object of type {type(ds).__name__} not recognized"
++            )
++            continue
++        elif len(ds) == 0:
++            self._logger.error(f"{name} is empty. Skipping writing...")
++            continue
++        else:
++            ds = cast(Union[Dataset, DataArray], ds)
++
++        nc_filename = filename or self._filename
++        write_path = Path(self._root.path) / nc_filename.format(name=name)
++        write_folder = dirname(write_path)
++
++        self._logger.debug(f"Writing file {write_path}")
++
++        if not isdir(write_folder):
++            os.makedirs(write_folder, exist_ok=True)
++
++        if gdal_compliant:
++            ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
++        try:
++            ds.to_netcdf(write_path, **kwargs)
++        except PermissionError:
++            self._logger.warning(
++                f"Could not write to file {write_path}, defering write"
++            )
++            if self._tmp_data_dir is None:
++                self._tmp_data_dir = TemporaryDirectory()
++
++            tmp_fn = self._tmp_data_dir / f"{nc_filename}.tmp"
++            ds.to_netcdf(tmp_fn, **kwargs)
++            self._defered_file_closes.append(
++                DeferedFileClose(
++                    ds=ds,
++                    org_fn=str(write_path),
++                    tmp_fn=tmp_fn,
++                    close_attempts=1,
++                )
++            )
++
++
+ def netcdf_writer(
+     obj: Union[xr.Dataset, xr.DataArray],
+     data_root: Union[str, Path],
+@@ -123,7 +168,7 @@ def write_nc(
+     fn: str,
+     root,
+     logger: Logger,
+-    temp_data_dir: StrPath = None,
++    temp_data_dir: Optional[StrPath] = None,
+     gdal_compliant: bool = False,
+     rename_dims: bool = False,
+     force_sn: bool = False,
+diff --git a/hydromt/models/model.py b/hydromt/models/model.py
+index 7a00eb2b..31d6672f 100644
+--- a/hydromt/models/model.py
++++ b/hydromt/models/model.py
+@@ -1,16 +1,12 @@
+ # -*- coding: utf-8 -*-
+ """General and basic API for models in HydroMT."""
+ 
+-import glob
+ import logging
+ import os
+-import shutil
+ import typing
+ from abc import ABCMeta
+ from inspect import _empty, signature
+-from os.path import basename, dirname, isabs, isdir, isfile, join
+-from pathlib import Path
+-from tempfile import TemporaryDirectory
++from os.path import isabs, isfile, join
+ from typing import (
+     Any,
+     Dict,
+@@ -22,13 +18,10 @@ from typing import (
+     cast,
+ )
+ 
+-import pandas as pd
+-import xarray as xr
+ from pyproj import CRS
+ 
+ from hydromt import hydromt_step
+-from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
+-from hydromt._utils import _classproperty
++from hydromt._typing import StrPath
+ from hydromt._utils.rgetattr import rgetattr
+ from hydromt._utils.steps_validator import validate_steps
+ from hydromt.components import (
+@@ -36,7 +29,6 @@ from hydromt.components import (
+     ModelRegionComponent,
+ )
+ from hydromt.data_catalog import DataCatalog
+-from hydromt.gis.raster import GEO_MAP_COORD
+ from hydromt.plugins import PLUGINS
+ from hydromt.root import ModelRoot
+ from hydromt.utils.deep_merge import deep_merge
+@@ -54,21 +46,7 @@ class Model(object, metaclass=ABCMeta):
+     Inherit from this class to pre-define mandatory components in the model.
+     """
+ 
+-    _DATADIR = ""  # path to the model data folder
+-    _NAME: str = "modelname"
+-    _MAPS = {"<general_hydromt_name>": "<model_name>"}
+-    _FOLDERS = [""]
+-    _TMP_DATA_DIR = None
+-    # supported model version should be filled by the plugins
+-    # e.g. _MODEL_VERSION = ">=1.0, <1.1"
+-    _MODEL_VERSION = None
+-
+-    _API = {
+-        "maps": XArrayDict,
+-        "forcing": XArrayDict,
+-        "results": XArrayDict,
+-        "states": XArrayDict,
+-    }
++    _NAME = "Core"
+ 
+     def __init__(
+         self,
+@@ -78,6 +56,8 @@ class Model(object, metaclass=ABCMeta):
+         data_libs: Optional[Union[List, str]] = None,
+         target_model_crs: Union[str, int] = 4326,
+         logger=_logger,
++        model_name: Optional[str] = "modelname",
++        model_version: Optional[str] = None,
+         **artifact_keys,
+     ):
+         r"""Initialize a model.
+@@ -95,6 +75,8 @@ class Model(object, metaclass=ABCMeta):
+         logger:
+             The logger to be used.
+         """
++        self.model_name = model_name
++        self.model_version = model_version
+         # Recursively update the options with any defaults that are missing in the configuration.
+         components = components or {}
+         components = deep_merge(
+@@ -112,20 +94,12 @@ class Model(object, metaclass=ABCMeta):
+             data_libs=data_libs, logger=self.logger, **artifact_keys
+         )
+ 
+-        self._maps: Optional[XArrayDict] = None
+-
+-        self._forcing: Optional[XArrayDict] = None
+-        self._states: Optional[XArrayDict] = None
+-        self._results: Optional[XArrayDict] = None
+-
+         # file system
+         self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
+ 
+         self._components: Dict[str, ModelComponent] = {}
+         self._add_components(components)
+ 
+-        self._defered_file_closes = []
+-
+         model_metadata = cast(
+             Dict[str, str], PLUGINS.model_metadata[self.__class__.__name__]
+         )
+@@ -161,19 +135,6 @@ class Model(object, metaclass=ABCMeta):
+         """Return the model region component."""
+         return self.get_component("region", ModelRegionComponent)
+ 
+-    @_classproperty
+-    def api(cls) -> Dict:
+-        """Return all model components and their data types."""
+-        _api = cls._API.copy()
+-
+-        # reversed is so that child attributes take priority
+-        # this does mean that it becomes imporant in which order you
+-        # inherit from your base classes.
+-        for base_cls in reversed(cls.__mro__):
+-            if hasattr(base_cls, "_API"):
+-                _api.update(getattr(base_cls, "_API", {}))
+-        return _api
+-
+     def build(
+         self,
+         *,
+@@ -448,715 +409,12 @@ class Model(object, metaclass=ABCMeta):
+ 
+             cat.to_yml(path, root=root)
+ 
+-    def test_equal(self, other: "Model") -> tuple[bool, dict[str, str]]:
+-        """Test if two models are equal, based on their components.
+-
+-        Parameters
+-        ----------
+-        other : Model
+-            The model to compare against.
+-
+-        Returns
+-        -------
+-        tuple[bool, dict[str, str]]
+-            True if equal, dictionary with errors per model component which is not equal.
+-        """
+-        if not isinstance(other, self.__class__):
+-            return False, {
+-                "__class__": f"f{other.__class__} does not inherit from {self.__class__}."
+-            }
+-        components = list(self._components.keys())
+-        components_other = list(other._components.keys())
+-        if components != components_other:
+-            return False, {
+-                "components": f"Components do not match: {components} != {components_other}"
+-            }
+-
+-        errors: dict[str, str] = {}
+-        is_equal = True
+-        for name, c in self._components.items():
+-            component_equal, component_errors = c.test_equal(other._components[name])
+-            is_equal &= component_equal
+-            errors.update(**component_errors)
+-        return is_equal, errors
+-
+-    # map files setup methods
+-    def setup_maps_from_rasterdataset(
+-        self,
+-        raster_fn: Union[str, Path, xr.Dataset],
+-        variables: Optional[List] = None,
+-        fill_method: Optional[str] = None,
+-        name: Optional[str] = None,
+-        reproject_method: Optional[str] = None,
+-        split_dataset: Optional[bool] = True,
+-        rename: Optional[Dict] = None,
+-    ) -> List[str]:
+-        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to maps object.
+-
+-        If raster is a dataset, all variables will be added unless ``variables``
+-        list is specified.
+-
+-        Adds model layers:
+-
+-        * **raster.name** maps: data from raster_fn
+-
+-        Parameters
+-        ----------
+-        raster_fn: str, Path, xr.Dataset
+-            Data catalog key, path to raster file or raster xarray data object.
+-        variables: list, optional
+-            List of variables to add to maps from raster_fn. By default all.
+-        fill_method : str, optional
+-            If specified, fills nodata values using fill_nodata method.
+-            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+-        name: str, optional
+-            Name of new dataset in self.maps dictionnary,
+-            only in case split_dataset=False.
+-        reproject_method: str, optional
+-            See rasterio.warp.reproject for existing methods, by default the data is
+-            not reprojected (None).
+-        split_dataset: bool, optional
+-            If data is a xarray.Dataset split it into several xarray.DataArrays.
+-        rename: dict, optional
+-            Dictionary to rename variable names in raster_fn before adding to maps
+-            {'name_in_raster_fn': 'name_in_maps'}. By default empty.
+-
+-        Returns
+-        -------
+-        list
+-            Names of added model map layers
+-        """
+-        rename = rename or {}
+-        self.logger.info(f"Preparing maps data from raster source {raster_fn}")
+-        # Read raster data and select variables
+-        ds = self.data_catalog.get_rasterdataset(
+-            raster_fn,
+-            geom=self.region,
+-            buffer=2,
+-            variables=variables,
+-            single_var_as_array=False,
+-        )
+-        # Fill nodata
+-        if fill_method is not None:
+-            ds = ds.raster.interpolate_na(method=fill_method)
+-        # Reprojection
+-        if ds.rio.crs != self.crs and reproject_method is not None:
+-            ds = ds.raster.reproject(dst_crs=self.crs, method=reproject_method)
+-        # Rename and add to maps
+-        self.set_maps(ds.rename(rename), name=name, split_dataset=split_dataset)
+-
+-        return list(ds.data_vars.keys())
+-
+-    def setup_maps_from_raster_reclass(
+-        self,
+-        raster_fn: Union[str, Path, xr.DataArray],
+-        reclass_table_fn: Union[str, Path, pd.DataFrame],
+-        reclass_variables: List,
+-        variable: Optional[str] = None,
+-        fill_method: Optional[str] = None,
+-        reproject_method: Optional[str] = None,
+-        name: Optional[str] = None,
+-        split_dataset: Optional[bool] = True,
+-        rename: Optional[Dict] = None,
+-        **kwargs,
+-    ) -> List[str]:
+-        r"""HYDROMT CORE METHOD: Add data variable(s) to maps object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+-
+-        This is done by reclassifying the data in
+-        ``raster_fn`` based on ``reclass_table_fn``.
+-
+-        Adds model layers:
+-
+-        * **reclass_variables** maps: reclassified raster data
+-
+-        Parameters
+-        ----------
+-        raster_fn: str, Path, xr.DataArray
+-            Data catalog key, path to raster file or raster xarray data object.
+-            Should be a DataArray. Else use `variable` argument for selection.
+-        reclass_table_fn: str, Path, pd.DataFrame
+-            Data catalog key, path to tabular data file or tabular pandas dataframe
+-            object for the reclassification table of `raster_fn`.
+-        reclass_variables: list
+-            List of reclass_variables from reclass_table_fn table to add to maps. Index
+-            column should match values in `raster_fn`.
+-        variable: str, optional
+-            Name of raster dataset variable to use. This is only required when reading
+-            datasets with multiple variables. By default None.
+-        fill_method : str, optional
+-            If specified, fills nodata values in `raster_fn` using fill_nodata method
+-            before reclassifying. Available methods are {'linear', 'nearest',
+-            'cubic', 'rio_idw'}.
+-        reproject_method: str, optional
+-            See rasterio.warp.reproject for existing methods, by default the data is
+-            not reprojected (None).
+-        name: str, optional
+-            Name of new maps variable, only in case split_dataset=False.
+-        split_dataset: bool, optional
+-            If data is a xarray.Dataset split it into several xarray.DataArrays.
+-        rename: dict, optional
+-            Dictionary to rename variable names in reclass_variables before adding to
+-            grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+-        \**kwargs:
+-            Additional keyword arguments that are passed to the
+-            `data_catalog.get_rasterdataset` function.
+-
+-        Returns
+-        -------
+-        list
+-            Names of added model map layers
+-        """  # noqa: E501
+-        rename = rename or {}
+-        self.logger.info(
+-            f"Preparing map data by reclassifying the data in {raster_fn} based"
+-            f" on {reclass_table_fn}"
+-        )
+-        # Read raster data and remapping table
+-        da = self.data_catalog.get_rasterdataset(
+-            raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
+-        )
+-        if not isinstance(da, xr.DataArray):
+-            raise ValueError(
+-                f"raster_fn {raster_fn} should be a single variable. "
+-                "Please select one using the 'variable' argument"
+-            )
+-        df_vars = self.data_catalog.get_dataframe(
+-            reclass_table_fn, variables=reclass_variables
+-        )
+-        # Fill nodata
+-        if fill_method is not None:
+-            da = da.raster.interpolate_na(method=fill_method)
+-        # Mapping function
+-        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
+-        # Reprojection
+-        if ds_vars.rio.crs != self.crs and reproject_method is not None:
+-            ds_vars = ds_vars.raster.reproject(dst_crs=self.crs)
+-        # Add to maps
+-        self.set_maps(ds_vars.rename(rename), name=name, split_dataset=split_dataset)
+-
+-        return list(ds_vars.data_vars.keys())
+-
+-    # model map
+-    @property
+-    def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
+-        """Model maps. Returns dict of xarray.DataArray or xarray.Dataset."""
+-        if self._maps is None:
+-            self._initialize_maps()
+-        return self._maps
+-
+-    def _initialize_maps(self, skip_read=False) -> None:
+-        """Initialize maps."""
+-        if self._maps is None:
+-            self._maps = dict()
+-            if self.root.is_reading_mode() and not skip_read:
+-                self.read_maps()
+-
+-    def set_maps(
+-        self,
+-        data: Union[xr.DataArray, xr.Dataset],
+-        name: Optional[str] = None,
+-        split_dataset: Optional[bool] = True,
+-    ) -> None:
+-        """Add raster data to the maps component.
+-
+-        Dataset can either be added as is (default) or split into several
+-        DataArrays using the split_dataset argument.
+-
+-        Arguments
+-        ---------
+-        data: xarray.Dataset or xarray.DataArray
+-            New forcing data to add
+-        name: str, optional
+-            Variable name, only in case data is of type DataArray or if a Dataset is
+-            added as is (split_dataset=False).
+-        split_dataset: bool, optional
+-            If data is a xarray.Dataset split it into several xarray.DataArrays.
+-        """
+-        self._initialize_maps()
+-        data_dict = _check_data(data, name, split_dataset)
+-        for name in data_dict:
+-            if name in self._maps:
+-                self.logger.warning(f"Replacing result: {name}")
+-            self._maps[name] = data_dict[name]
+-
+-    def read_maps(self, fn: str = "maps/*.nc", **kwargs) -> None:
+-        r"""Read model map at <root>/<fn> and add to maps component.
+-
+-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
+-
+-        Parameters
+-        ----------
+-        fn : str, optional
+-            filename relative to model root, may contain wildcards,
+-            by default ``maps/\*.nc``
+-        kwargs:
+-            Additional keyword arguments that are passed to the
+-            `read_nc` function.
+-        """
+-        self.root._assert_read_mode()
+-        self._initialize_maps(skip_read=True)
+-        ncs = self.read_nc(fn, **kwargs)
+-        for name, ds in ncs.items():
+-            self.set_maps(ds, name=name)
+-
+-    def write_maps(self, fn="maps/{name}.nc", **kwargs) -> None:
+-        r"""Write maps to netcdf file at <root>/<fn>.
+-
+-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
+-
+-        Parameters
+-        ----------
+-        fn : str, optional
+-            filename relative to model root and should contain a {name} placeholder,
+-            by default 'maps/{name}.nc'
+-        \**kwargs:
+-            Additional keyword arguments that are passed to the
+-            `write_nc` function.
+-        """
+-        self.root._assert_write_mode()
+-        if len(self.maps) == 0:
+-            self.logger.debug("No maps data found, skip writing.")
+-        else:
+-            self.write_nc(self.maps, fn, **kwargs)
+-
+-    # model geometry files
+-    # model forcing files
+-    @property
+-    def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
+-        """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset."""
+-        if self._forcing is None:
+-            self._initialize_forcing()
+-        return self._forcing
+-
+-    def _initialize_forcing(self, skip_read=False) -> None:
+-        """Initialize forcing."""
+-        if self._forcing is None:
+-            self._forcing = dict()
+-            if self.root.is_reading_mode() and not skip_read:
+-                self.read_forcing()
+-
+-    def set_forcing(
+-        self,
+-        data: Union[xr.DataArray, xr.Dataset, pd.DataFrame],
+-        name: Optional[str] = None,
+-        split_dataset: Optional[bool] = True,
+-    ):
+-        """Add data to forcing attribute.
+-
+-        Data can be xarray.DataArray, xarray.Dataset or pandas.DataFrame.
+-        If pandas.DataFrame, indices should be the DataFrame index and the columns
+-        the variable names. the DataFrame will then be converted to xr.Dataset using
+-        :py:meth:`pandas.DataFrame.to_xarray` method.
+-
+-        Arguments
+-        ---------
+-        data: xarray.Dataset or xarray.DataArray or pd.DataFrame
+-            New forcing data to add
+-        name: str, optional
+-            Results name, required if data is xarray.Dataset is and split_dataset=False.
+-        split_dataset: bool, optional
+-            If True (default), split a Dataset to store each variable as a DataArray.
+-        """
+-        self._initialize_forcing()
+-        if isinstance(data, pd.DataFrame):
+-            data = data.to_xarray()
+-        data_dict = _check_data(data, name, split_dataset)
+-        for name in data_dict:
+-            if name in self._forcing:
+-                self.logger.warning(f"Replacing forcing: {name}")
+-            self._forcing[name] = data_dict[name]
+-
+-    def read_forcing(self, fn: str = "forcing/*.nc", **kwargs) -> None:
+-        """Read forcing at <root>/<fn> and add to forcing property.
+-
+-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
+-
+-        Parameters
+-        ----------
+-        fn : str, optional
+-            filename relative to model root, may contain wildcards,
+-            by default forcing/.nc
+-        kwargs:
+-            Additional keyword arguments that are passed to the `read_nc`
+-            function.
+-        """
+-        self._initialize_forcing(skip_read=True)
+-        ncs = self.read_nc(fn, **kwargs)
+-        for name, ds in ncs.items():
+-            self.set_forcing(ds, name=name)
+-
+-    def write_forcing(self, fn="forcing/{name}.nc", **kwargs) -> None:
+-        """Write forcing to netcdf file at <root>/<fn>.
+-
+-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
+-
+-        Parameters
+-        ----------
+-        fn : str, optional
+-            filename relative to model root and should contain a {name} placeholder,
+-            by default 'forcing/{name}.nc'
+-        kwargs:
+-            Additional keyword arguments that are passed to the `write_nc`
+-            function.
+-        """
+-        self.root._assert_read_mode()
+-        if len(self.forcing) == 0:
+-            self.logger.debug("No forcing data found, skip writing.")
+-        else:
+-            self.write_nc(self.forcing, fn, **kwargs)
+-
+-    # model state files
+-    @property
+-    def states(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
+-        """Model states. Returns dict of xarray.DataArray or xarray.Dataset."""
+-        if self._states is None:
+-            self._initialize_states()
+-        return self._states
+-
+-    def _initialize_states(self, skip_read=False) -> None:
+-        """Initialize states."""
+-        if self._states is None:
+-            self._states = dict()
+-            if self.root.is_reading_mode() and not skip_read:
+-                self.read_states()
+-
+-    def set_states(
+-        self,
+-        data: Union[xr.DataArray, xr.Dataset],
+-        name: Optional[str] = None,
+-        split_dataset: Optional[bool] = True,
+-    ):
+-        """Add data to states attribute.
+-
+-        Arguments
+-        ---------
+-        data: xarray.Dataset or xarray.DataArray
+-            New forcing data to add
+-        name: str, optional
+-            Results name, required if data is xarray.Dataset and split_dataset=False.
+-        split_dataset: bool, optional
+-            If True (default), split a Dataset to store each variable as a DataArray.
+-        """
+-        self._initialize_states()
+-        data_dict = _check_data(data, name, split_dataset)
+-        for name in data_dict:
+-            if name in self._states:
+-                self.logger.warning(f"Replacing state: {name}")
+-            self._states[name] = data_dict[name]
+-
+-    def read_states(self, fn: str = "states/*.nc", **kwargs) -> None:
+-        r"""Read states at <root>/<fn> and add to states property.
+-
+-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
+-
+-        Parameters
+-        ----------
+-        fn : str, optional
+-            filename relative to model root, may contain wildcards,
+-            by default states/\*.nc
+-        kwargs:
+-            Additional keyword arguments that are passed to the `read_nc`
+-            function.
+-        """
+-        self.root._assert_read_mode()
+-        self._initialize_states(skip_read=True)
+-        ncs = self.read_nc(fn, **kwargs)
+-        for name, ds in ncs.items():
+-            self.set_states(ds, name=name, split_dataset=True)
+-
+-    def write_states(self, fn="states/{name}.nc", **kwargs) -> None:
+-        """Write states to netcdf file at <root>/<fn>.
+-
+-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
+-
+-        Parameters
+-        ----------
+-        fn : str, optional
+-            filename relative to model root and should contain a {name} placeholder,
+-            by default 'states/{name}.nc'
+-        **kwargs:
+-            Additional keyword arguments that are passed to the `write_nc`
+-            function.
+-        """
+-        self.root._assert_write_mode()
+-        if len(self.states) == 0:
+-            self.logger.debug("No states data found, skip writing.")
+-        else:
+-            self.write_nc(self.states, fn, **kwargs)
+-
+-    # model results files; NOTE we don't have a write_results method
+-    # (that's up to the model kernel)
+-    @property
+-    def results(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
+-        """Model results. Returns dict of xarray.DataArray or xarray.Dataset."""
+-        if self._results is None:
+-            self._initialize_results()
+-        return self._results
+-
+-    def _initialize_results(self, skip_read=False) -> None:
+-        """Initialize results."""
+-        if self._results is None:
+-            self._results = dict()
+-            if self.root.is_reading_mode() and not skip_read:
+-                self.read_results()
+-
+-    def set_results(
+-        self,
+-        data: Union[xr.DataArray, xr.Dataset],
+-        name: Optional[str] = None,
+-        split_dataset: Optional[bool] = False,
+-    ):
+-        """Add data to results attribute.
+-
+-        Dataset can either be added as is (default) or split into several
+-        DataArrays using the split_dataset argument.
+-
+-        Arguments
+-        ---------
+-        data: xarray.Dataset or xarray.DataArray
+-            New forcing data to add
+-        name: str, optional
+-            Results name, required if data is xarray.Dataset and split_dataset=False.
+-        split_dataset: bool, optional
+-            If True (False by default), split a Dataset to store each variable
+-            as a DataArray.
+-        """
+-        self._initialize_results()
+-        data_dict = _check_data(data, name, split_dataset)
+-        for name in data_dict:
+-            if name in self._results:
+-                self.logger.warning(f"Replacing result: {name}")
+-            self._results[name] = data_dict[name]
+-
+-    def read_results(self, fn: str = "results/*.nc", **kwargs) -> None:
+-        """Read results at <root>/<fn> and add to results property.
+-
+-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
+-
+-        Parameters
+-        ----------
+-        fn : str, optional
+-            filename relative to model root, may contain wildcards,
+-            by default ``results/*.nc``
+-        kwargs:
+-            Additional keyword arguments that are passed to the `read_nc`
+-            function.
+-        """
+-        self.root._assert_read_mode()
+-        self._initialize_results(skip_read=True)
+-        ncs = self.read_nc(fn, **kwargs)
+-        for name, ds in ncs.items():
+-            self.set_results(ds, name=name)
+-
+-    # general reader & writer
+-    def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
+-        """Try to close all defered file handles.
+-
+-        Try to overwrite the destination file with the temporary one until either the
+-        maximum number of tries is reached or until it succeeds. The forced cleanup
+-        also attempts to close the original file handle, which could cause trouble
+-        if the user will try to read from the same file handle after this function
+-        is called.
+-
+-        Parameters
+-        ----------
+-        forceful_overwrite: bool
+-            Attempt to force closing defered file handles before writing to them.
+-        max_close_attempts: int
+-            Number of times to try and overwrite the original file, before giving up.
+-
+-        """
+-        failed_closes = []
+-        while len(self._defered_file_closes) > 0:
+-            close_handle = self._defered_file_closes.pop()
+-            if close_handle["close_attempts"] > max_close_attempts:
+-                # already tried to close this to many times so give up
+-                self.logger.error(
+-                    f"Max write attempts to file {close_handle['org_fn']}"
+-                    " exceeded. Skipping..."
+-                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
+-                )
+-                continue
+-
+-            if forceful_overwrite:
+-                close_handle["ds"].close()
+-            try:
+-                shutil.move(close_handle["tmp_fn"], close_handle["org_fn"])
+-            except PermissionError:
+-                self.logger.error(
+-                    f"Could not write to destination file {close_handle['org_fn']} "
+-                    "because the following error was raised: {e}"
+-                )
+-                close_handle["close_attempts"] += 1
+-                self._defered_file_closes.append(close_handle)
+-                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
+-
+-        return list(set(failed_closes))
+-
+-    def write_nc(
+-        self,
+-        nc_dict: XArrayDict,
+-        fn: str,
+-        gdal_compliant: bool = False,
+-        rename_dims: bool = False,
+-        force_sn: bool = False,
+-        **kwargs,
+-    ) -> None:
+-        """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
+-
+-        Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
+-        files, using :py:meth:`~hydromt.raster.gdal_compliant`.
+-        The function will first try to directly write to file. In case of
+-        PermissionError, it will first write a temporary file and add to the
+-        self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
+-        will be done by calling the self._cleanup function.
+-
+-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
+-
+-        Parameters
+-        ----------
+-        nc_dict: dict
+-            Dictionary of xarray.Dataset and/or xarray.DataArray to write
+-        fn: str
+-            filename relative to model root and should contain a {name} placeholder
+-        gdal_compliant: bool, optional
+-            If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
+-            format using :py:meth:`~hydromt.raster.gdal_compliant`
+-        rename_dims: bool, optional
+-            If True, rename x_dim and y_dim to standard names depending on the CRS
+-            (x/y for projected and lat/lon for geographic). Only used if
+-            ``gdal_compliant`` is set to True. By default, False.
+-        force_sn: bool, optional
+-            If True, forces the dataset to have South -> North orientation. Only used
+-            if ``gdal_compliant`` is set to True. By default, False.
+-        **kwargs:
+-            Additional keyword arguments that are passed to the `to_netcdf`
+-            function.
+-        """
+-        for name, ds in nc_dict.items():
+-            if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
+-                self.logger.error(
+-                    f"{name} object of type {type(ds).__name__} not recognized"
+-                )
+-                continue
+-            self.logger.debug(f"Writing file {fn.format(name=name)}")
+-            _fn = join(self.root.path, fn.format(name=name))
+-            if not isdir(dirname(_fn)):
+-                os.makedirs(dirname(_fn))
+-            if gdal_compliant:
+-                ds = ds.raster.gdal_compliant(
+-                    rename_dims=rename_dims, force_sn=force_sn
+-                )
+-            try:
+-                ds.to_netcdf(_fn, **kwargs)
+-            except PermissionError:
+-                _logger.warning(f"Could not write to file {_fn}, defering write")
+-                if self._TMP_DATA_DIR is None:
+-                    self._TMP_DATA_DIR = TemporaryDirectory()
+-
+-                tmp_fn = join(str(self._TMP_DATA_DIR), f"{_fn}.tmp")
+-                ds.to_netcdf(tmp_fn, **kwargs)
+-                self._defered_file_closes.append(
+-                    DeferedFileClose(
+-                        ds=ds,
+-                        org_fn=join(str(self._TMP_DATA_DIR), _fn),
+-                        tmp_fn=tmp_fn,
+-                        close_attempts=1,
+-                    )
+-                )
+-
+-    def read_nc(
+-        self,
+-        fn: StrPath,
+-        mask_and_scale: bool = False,
+-        single_var_as_array: bool = True,
+-        load: bool = False,
+-        **kwargs,
+-    ) -> Dict[str, xr.Dataset]:
+-        """Read netcdf files at <root>/<fn> and return as dict of xarray.Dataset.
+-
+-        NOTE: Unless `single_var_as_array` is set to False a single-variable data source
+-        will be returned as :py:class:`xarray.DataArray` rather than
+-        :py:class:`xarray.Dataset`.
+-        key-word arguments are passed to :py:func:`xarray.open_dataset`.
+-
+-        Parameters
+-        ----------
+-        fn : str
+-            filename relative to model root, may contain wildcards
+-        mask_and_scale : bool, optional
+-            If True, replace array values equal to _FillValue with NA and scale values
+-            according to the formula original_values * scale_factor + add_offset, where
+-            _FillValue, scale_factor and add_offset are taken from variable attributes
+-            (if they exist).
+-        single_var_as_array : bool, optional
+-            If True, return a DataArray if the dataset consists of a single variable.
+-            If False, always return a Dataset. By default True.
+-        load : bool, optional
+-            If True, the data is loaded into memory. By default False.
+-        **kwargs:
+-            Additional keyword arguments that are passed to the `xr.open_dataset`
+-            function.
+-
+-        Returns
+-        -------
+-        Dict[str, xr.Dataset]
+-            dict of xarray.Dataset
+-        """
+-        ncs = dict()
+-        fns = glob.glob(join(self.root.path, fn))
+-        if "chunks" not in kwargs:  # read lazy by default
+-            kwargs.update(chunks="auto")
+-        for fn in fns:
+-            name = basename(fn).split(".")[0]
+-            self.logger.debug(f"Reading model file {name}.")
+-            # Load data to allow overwritting in r+ mode
+-            if load:
+-                ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
+-                ds.close()
+-            else:
+-                ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
+-            # set geo coord if present as coordinate of dataset
+-            if GEO_MAP_COORD in ds.data_vars:
+-                ds = ds.set_coords(GEO_MAP_COORD)
+-            # single-variable Dataset to DataArray
+-            if single_var_as_array and len(ds.data_vars) == 1:
+-                (ds,) = ds.data_vars.values()
+-            ncs.update({name: ds})
+-        return ncs
+-
+     @property
+     def crs(self) -> CRS:
+         """Returns coordinate reference system embedded in region."""
+         return self.target_crs
+ 
+ 
+-def _check_data(
+-    data: Union[xr.DataArray, xr.Dataset],
+-    name: Optional[str] = None,
+-    split_dataset=True,
+-) -> Dict:
+-    if isinstance(data, xr.DataArray):
+-        # NOTE name can be different from data.name !
+-        if data.name is None and name is not None:
+-            data.name = name
+-        elif name is None and data.name is not None:
+-            name = data.name
+-        elif data.name is None and name is None:
+-            raise ValueError("Name required for DataArray.")
+-        data = {name: data}
+-    elif isinstance(data, xr.Dataset):  # return dict for consistency
+-        if split_dataset:
+-            data = {name: data[name] for name in data.data_vars}
+-        elif name is None:
+-            raise ValueError("Name required for Dataset.")
+-        else:
+-            data = {name: data}
+-    else:
+-        raise ValueError(f'Data type "{type(data).__name__}" not recognized')
+-    return data
+-
+-
+ def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
+     """Check if obj match typing or class (dtype)."""
+     args = typing.get_args(dtype)
+diff --git a/tests/components/test_dataset_component.py b/tests/components/test_dataset_component.py
+new file mode 100644
+index 00000000..3ab810f4
+--- /dev/null
++++ b/tests/components/test_dataset_component.py
+@@ -0,0 +1,77 @@
++from os.path import join
++from pathlib import Path
++from typing import cast
++
++import pytest
++from xarray import open_dataset
++
++from hydromt.components.dataset import DatasetComponent
++from hydromt.models import Model
++
++
++def test_model_dataset_key_error(tmpdir: Path):
++    m = Model(root=str(tmpdir), mode="r+")
++    m.add_component("test_dataset", DatasetComponent(m))
++    component = m.get_component("test_dataset", DatasetComponent)
++
++    with pytest.raises(KeyError):
++        component.data["1"]
++
++
++def test_model_dataset_sets_correctly(obsda, tmpdir: Path):
++    m = Model(root=str(tmpdir), mode="r+")
++    m.add_component("test_dataset", DatasetComponent(m))
++    component = m.get_component("test_dataset", DatasetComponent)
++
++    # make a couple copies of the da for testing
++    das = {str(i): obsda.copy() for i in range(5)}
++
++    for i, d in das.items():
++        component.set(data=d, name=i)
++        assert obsda.equals(component.data[i])
++
++    assert list(component.data.keys()) == list(map(str, range(5)))
++
++
++def test_model_dataset_reads_and_writes_correctly(obsda, tmpdir: Path):
++    model = Model(root=str(tmpdir), mode="w")
++    model.add_component("test_dataset", DatasetComponent(model))
++    component = model.get_component("test_dataset", DatasetComponent)
++
++    component.set(data=obsda, name="data")
++
++    model.write()
++    clean_model = Model(root=str(tmpdir), mode="r")
++    clean_model.add_component("test_dataset", DatasetComponent(model))
++    clean_model.read()
++
++    clean_component = clean_model.get_component("test_dataset", DatasetComponent)
++
++    # we'll know that these types will always be the same, which mypy doesn't know
++    assert component.data["data"].equals(clean_component.data["data"])  # type: ignore
++
++
++def test_model_read_dataset(obsda, tmpdir):
++    write_path = Path(tmpdir) / "forcing.nc"
++    obsda.to_file(write_path)
++
++    model = Model(root=tmpdir, mode="r")
++    model.add_component("forcing", DatasetComponent(model))
++
++    dataset_component = model.get_component("forcing", DatasetComponent)
++
++    component_data = dataset_component.data["forcing"]
++    assert obsda.equals(component_data)
++
++
++def test_model_write_dataset_with_target_crs(obsda, tmpdir):
++    model = Model(root=str(tmpdir), mode="w", target_model_crs=3857)
++    model.add_component("forcing", DatasetComponent(model))
++    dataset_component = model.get_component("forcing", DatasetComponent)
++
++    write_path = join(tmpdir, "test_geom.geojson")
++    dataset_component.set(obsda, "test_dataset")
++    dataset_component.write()
++    read_dataset = open_dataset(write_path)
++
++    assert read_dataset.crs.to_epsg() == 3857
+diff --git a/tests/models/test_model.py b/tests/models/test_model.py
+index 9d543ce6..3a990920 100644
+--- a/tests/models/test_model.py
++++ b/tests/models/test_model.py
+@@ -22,7 +22,6 @@ from hydromt.components.region import ModelRegionComponent
+ from hydromt.components.vector import VectorComponent
+ from hydromt.data_catalog import DataCatalog
+ from hydromt.models import Model
+-from hydromt.models.model import _check_data
+ from hydromt.plugins import PLUGINS
+ 
+ DATADIR = join(dirname(abspath(__file__)), "..", "data")

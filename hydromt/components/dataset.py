@@ -112,8 +112,8 @@ class DatasetComponent(ModelComponent):
         if "chunks" not in kwargs:  # read lazy by default
             kwargs.update(chunks="auto")
         f = filename or self._filename
-        read_path = self._root.path / f
-        ncs = read_nc(read_path, single_var_as_array=single_var_as_array, **kwargs)
+        read_path =  / f
+        ncs = read_nc(read_path, root=self._root.path, single_var_as_array=single_var_as_array, **kwargs)
         for name, ds in ncs.items():
             self.set(data=ds, name=name)
 
