@@ -49,6 +49,7 @@ class GridComponent(SpatialModelComponent):
         model: "Model",
         filename: StrPath = DEFAULT_FILENAME,
         region_component: Optional[str] = None,
+        region_filename: StrPath = SpatialModelComponent.DEFAULT_REGION_FILENAME,
     ):
         """Initialize a GridComponent.
 
@@ -57,7 +58,9 @@ class GridComponent(SpatialModelComponent):
         model: Model
             HydroMT model instance
         """
-        super().__init__(model=model, region_component=region_component)
+        super().__init__(
+            model=model, region_component=region_component, filename=region_filename
+        )
         self._data: Optional[xr.Dataset] = None
         self._filename = filename
 
@@ -135,6 +138,9 @@ class GridComponent(SpatialModelComponent):
         force_sn: bool, optional
             If True and gdal_compliant, forces the dataset to have
             South -> North orientation.
+        region_options : dict, optional
+            Options to pass to the write_region method.
+            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
         **kwargs : dict
             Additional keyword arguments to be passed to the `write_nc` method.
         """

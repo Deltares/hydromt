@@ -4,7 +4,7 @@ from logging import Logger, getLogger
 from os import makedirs
 from os.path import basename, exists, join
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, cast
 
 import geopandas as gpd
 import xarray as xr
@@ -235,7 +235,7 @@ def write_region(
         logger.info("No region data found. skipping writing...")
     else:
         logger.info(f"writing region data to {write_path}")
-        gdf = region.copy()
+        gdf = cast(gpd.GeoDataFrame, region.copy())
 
         if to_wgs84 and (
             write_kwargs.get("driver") == "GeoJSON"

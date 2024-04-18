@@ -19,11 +19,14 @@ if TYPE_CHECKING:
 class SpatialModelComponent(ModelComponent, ABC):
     """Define the model region."""
 
+    DEFAULT_REGION_FILENAME = "region.geojson"
+
     def __init__(
         self,
         model: "Model",
+        *,
         region_component: Optional[str] = None,
-        filename: str = "region.geojson",
+        filename: StrPath = DEFAULT_REGION_FILENAME,
     ) -> None:
         super().__init__(model)
         self._region_component = region_component
