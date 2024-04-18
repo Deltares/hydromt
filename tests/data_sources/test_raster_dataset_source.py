@@ -105,7 +105,7 @@ class TestRasterDatasetSource:
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, **kwargs) -> xr.Dataset:
+            def read_data(self, uri: str, **kwargs) -> xr.Dataset:
                 return rasterds
 
         return MockRasterDatasetDriver

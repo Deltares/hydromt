@@ -25,6 +25,7 @@ from hydromt._typing import (
 )
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.gis.utils import parse_geom_bbox_buffer
 
 from .data_source import DataSource
 
@@ -55,11 +56,11 @@ class GeoDataFrameSource(DataSource):
     ) -> gpd.GeoDataFrame:
         """Use the driver and data adapter to read and harmonize the data."""
         self._used = True
+        if bbox is not None or (mask is not None and buffer > 0):
+            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
         gdf: gpd.GeoDataFrame = self.driver.read(
             self.uri,
-            bbox=bbox,
-            geom=mask,
-            buffer=buffer,
+            mask=mask,
             crs=self.crs,
             predicate=predicate,
             variables=variables,
@@ -68,9 +69,7 @@ class GeoDataFrameSource(DataSource):
         )
         return self.data_adapter.transform(
             gdf,
-            bbox=bbox,
             mask=mask,
-            buffer=buffer,
             crs=self.crs,
             predicate=predicate,
             variables=variables,

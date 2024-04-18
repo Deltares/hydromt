@@ -7,7 +7,7 @@ from typing import List, Optional
 import geopandas as gpd
 from pyproj import CRS
 
-from hydromt._typing import Bbox, Geom, StrPath
+from hydromt._typing import Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers import BaseDriver
 
@@ -17,14 +17,11 @@ logger: Logger = getLogger(__name__)
 class GeoDataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
 
-    @abstractmethod
     def read(
         self,
         uri: str,
         *,
-        bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0.0,
         crs: Optional[CRS] = None,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
@@ -38,6 +35,38 @@ class GeoDataFrameDriver(BaseDriver, ABC):
 
         args:
         """
+        uris = self.metadata_resolver.resolve(
+            uri,
+            self.filesystem,
+            mask=mask,
+            variables=variables,
+            handle_nodata=handle_nodata,
+            **kwargs,
+        )
+        gdf = self.read_data(
+            uris,
+            mask=mask,
+            crs=crs,
+            predicate=predicate,
+            logger=logger,
+            handle_nodata=handle_nodata,
+            **kwargs,
+        )
+        return gdf
+
+    @abstractmethod
+    def read_data(
+        self,
+        uris: List[str],
+        *,
+        mask: Optional[Geom] = None,
+        crs: Optional[CRS] = None,
+        predicate: str = "intersects",
+        logger: Logger = logger,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        **kwargs,
+    ) -> gpd.GeoDataFrame:
+        """Read in any compatible data source to a geopandas `GeoDataFrame`."""
         ...
 
     def write(

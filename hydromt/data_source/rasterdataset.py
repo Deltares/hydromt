@@ -3,7 +3,7 @@
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, Literal, Optional, cast
+from typing import Any, ClassVar, Dict, List, Literal, Optional, cast
 
 import pandas as pd
 import xarray as xr
@@ -24,10 +24,12 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     TotalBounds,
+    ZoomLevel,
 )
 from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
 from hydromt.data_source.data_source import DataSource
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
+from hydromt.gis.utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 
@@ -46,11 +48,11 @@ class RasterDatasetSource(DataSource):
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0,
-        predicate: str = "intersects",
+        variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: int = 0,
+        zoom_level: Optional[ZoomLevel] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Optional[Logger] = None,
+        logger: Logger = logger,
     ) -> xr.Dataset:
         """
         Read data from this source.
@@ -58,13 +60,14 @@ class RasterDatasetSource(DataSource):
         Args:
         """
         self._used = True
+        if bbox is not None or (mask is not None and buffer > 0):
+            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
         ds: xr.Dataset = self.driver.read(
             self.uri,
-            bbox=bbox,
             mask=mask,
-            buffer=buffer,
             crs=self.crs,
             time_range=time_range,
+            variables=variables,
             zoom_level=zoom_level,
             handle_nodata=handle_nodata,
         )
@@ -87,7 +90,7 @@ class RasterDatasetSource(DataSource):
         mask: Optional[Geom] = None,
         buffer: float = 0.0,
         time_range: Optional[TimeRange] = None,
-        predicate: str = "intersects",
+        zoom_level: Optional[ZoomLevel] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
@@ -102,7 +105,7 @@ class RasterDatasetSource(DataSource):
             mask=mask,
             buffer=buffer,
             time_range=time_range,
-            predicate=predicate,
+            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
             logger=logger,
         )

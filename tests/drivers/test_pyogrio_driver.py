@@ -91,14 +91,9 @@ class TestPyogrioDriver:
     ):
         uri = request.getfixturevalue(uri)
         bbox: Bbox = (-60, -34.5600, -55, -30)
-        gdf: gpd.GeoDataFrame = driver.read(
-            uri, bbox=(-60, -34.5600, -55, -30), buffer=10000
-        )
+        mask = gpd.GeoSeries(box(*bbox), crs=4326).to_crs(3857).buffer(10000)
+        gdf = driver.read(uri, mask=mask)
         assert gdf.shape == (1, 4)
-        gdf = driver.read(uri, mask=gpd.GeoSeries(box(*bbox)), buffer=10000)
-        assert gdf.shape == (1, 4)
-        with pytest.raises(ValueError, match="Both 'bbox' and 'mask' are provided."):
-            driver.read(uri, bbox=bbox, mask=gpd.GeoSeries(box(*bbox)), buffer=10000)
 
     def test_write(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
         df_path = tmp_dir / "temp.gpkg"

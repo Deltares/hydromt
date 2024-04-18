@@ -187,7 +187,7 @@ class TestGeoDataFrameSource:
             def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
+            def read_data(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
                 return geodf
 
         return MockGeoDataFrameDriver
