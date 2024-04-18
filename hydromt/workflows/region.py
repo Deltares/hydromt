@@ -138,23 +138,23 @@ def parse_region(
         kwargs = dict(geom=other_model.region)
         kind = "geom"
     elif kind == "mesh":
-        if _compat.HAS_XUGRID:
-            if isinstance(value0, (str, Path)) and isfile(value0):
-                kwarg = dict(mesh=xu.open_dataset(value0))
-            elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
-                kwarg = dict(mesh=value0)
-            elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
-                kwarg = dict(
-                    mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
-                )
-            else:
-                raise ValueError(
-                    f"Unrecognized type {type(value0)}."
-                    "Should be a path, data catalog key or xugrid object."
-                )
-            kwargs.update(kwarg)
-        else:
+        if not _compat.HAS_XUGRID:
             raise ImportError("xugrid is required to read mesh files.")
+
+        if isinstance(value0, (str, Path)) and isfile(value0):
+            kwarg = dict(mesh=xu.open_dataset(value0))
+        elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
+            kwarg = dict(mesh=value0)
+        elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
+            kwarg = dict(
+                mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
+            )
+        else:
+            raise ValueError(
+                f"Unrecognized type {type(value0)}."
+                "Should be a path, data catalog key or xugrid object."
+            )
+        kwargs.update(kwarg)
     elif kind not in options:
         k_lst = '", "'.join(list(options.keys()))
         raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')

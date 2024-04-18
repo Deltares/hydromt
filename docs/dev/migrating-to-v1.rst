@@ -293,15 +293,20 @@ Once a component has been added, any component (or other object or scope that ha
 with it as you please.
 
 In the core of HydroMT, the available components are:
+
 +-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
 | v0.x Model Attribute  | Component                                         | Description                                                                            |
 +=======================+===================================================+========================================================================================+
 | model.tables          | TablesComponent                                   | Component for managing non-geospatial data in pandas DataFrames                        |
++-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
 | model.grid            | GridComponent                                     | Component for managing regular gridded data in single hydromt RasterDataset            |
++-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
 | model.geoms('region') | Components inheriting from SpatialModelComponent  | Component for managing the area of interest for the model in a geopandas GeoDataFrame. |
 +-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
+| model.mesh            | MeshComponent                                     | Component for managing unstructured grids as a hydromt RasterDataset                   |
++-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
 
- A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
+A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
 The `Model.__init__` function can be used to add default components by plugins like so:
 
@@ -412,15 +417,15 @@ has not been changed compared to the GridModel.
 +------------------------------+-------------------------------------------+
 | v0.x                         | v1                                        |
 +==============================+===========================================+
-| model.set_grid(...)          | model.grid_component.set(...)             |
+| model.set_grid(...)          | model.grid.set(...)             		   |
 +------------------------------+-------------------------------------------+
-| model.read_grid(...)         | model.grid_component.read(...)            |
+| model.read_grid(...)         | model.grid.read(...)            		   |
 +------------------------------+-------------------------------------------+
-| model.write_grid(...)        | model.grid_component.write(...)           |
+| model.write_grid(...)        | model.grid.write(...)            		   |
 +------------------------------+-------------------------------------------+
-| model.setup_grid(...)        | model.grid_component.create(...)          |
+| model.setup_grid(...)        | model.grid.create(...)          		   |
 +------------------------------+-------------------------------------------+
-| model.setup_grid_from_*(...) | model.grid_component.add_data_from_*(...) |
+| model.setup_grid_from_*(...) | model.grid.add_data_from_*(...) 		   |
 +------------------------------+-------------------------------------------+
 
 VectorComponent
@@ -464,7 +469,7 @@ Or you can set it up in the yml file by using the `components` part.
 +------------------------------+-------------------------------------------+
 
 TablesComponent
-^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
@@ -487,6 +492,14 @@ in `join(Model._DATADIR, Model._NAME, Model._CONF)`. To create a config from a t
 th new `config.create` method, which is similar to how other components work. Each plugin can still define a default config file
 template without subclassing the `ConfigComponent` by providing a `default_template_filename` when initializing their
 `ConfigComponent`.
+
+
+MeshComponent
+^^^^^^^^^^^^^
+
+The MeshModel has just like the `GridModel` been replaced with its implementation
+of the `ModelComponent`: `MeshComponent`. The restructering of `MeshModel` follows the same pattern
+as the `GridComponent`.
 
 
 Plugins

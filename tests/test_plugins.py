@@ -8,6 +8,7 @@ from hydromt.components.base import ModelComponent
 from hydromt.components.config import ConfigComponent
 from hydromt.components.geoms import GeomsComponent
 from hydromt.components.grid import GridComponent
+from hydromt.components.mesh import MeshComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.tables import TablesComponent
 from hydromt.components.vector import VectorComponent
@@ -24,6 +25,7 @@ def test_core_component_plugins():
         "ModelComponent": ModelComponent,
         "VectorComponent": VectorComponent,
         "TablesComponent": TablesComponent,
+        "MeshComponent": MeshComponent,
         "SpatialModelComponent": SpatialModelComponent,
     }
 
