@@ -94,7 +94,7 @@ updates
 -------
 
 - create new branch on github
-- make changes and bump the version in the global meta section using `calendar versioning <https://calver.org/>`
+- make changes and bump the version in the global meta section using semantic versioning
 - test your yml file (Can the added/changed data sources be read through HydroMT?)
 - create pull request
 - add new version to hydromt\data\predefined_catalogs.yml

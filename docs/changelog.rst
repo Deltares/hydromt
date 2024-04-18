@@ -14,6 +14,7 @@ Changed
 - Development environment is now set up via pixi instead of mamba / conda. See the documentation for more information on how to install.
 - Use the native data CRS when determining zoom levels over the data catalog crs. (#851)
 - Improved `flw.d8_from_dem` method with different options to use river vector data to aid the flow direction derivation. (#305)
+- DataCatalog.predefined_catalogs retrieves predefined_catalogs specified in predefined_catalogs.py. There is no need for setting the predefined_catalogs anymore. (#844)
 
 Fixed
 -----
