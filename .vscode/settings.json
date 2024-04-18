@@ -23,6 +23,7 @@
         "GDAL",
         "geodataframe",
         "geoms",
+        "geopandas",
         "hydromt",
         "ndarray",
         "pixi",

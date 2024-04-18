@@ -32,9 +32,7 @@ from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 from hydromt._utils import _classproperty
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
-from hydromt.components import (
-    ModelComponent,
-)
+from hydromt.components import ModelComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis.raster import GEO_MAP_COORD

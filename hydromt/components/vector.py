@@ -3,7 +3,7 @@
 
 import os
 from os.path import basename, dirname, isfile, join
-from typing import Optional, Union, cast
+from typing import TYPE_CHECKING, Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -16,7 +16,9 @@ from hydromt.components.base import ModelComponent
 from hydromt.gis.vector import GeoDataset
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
-from hydromt.models.model import Model
+
+if TYPE_CHECKING:
+    from hydromt.models.model import Model
 
 __all__ = ["VectorComponent"]
 
@@ -26,7 +28,7 @@ class VectorComponent(ModelComponent):
 
     def __init__(
         self,
-        model: Model,
+        model: "Model",
         *,
         filename: Optional[str] = "vector/vector.nc",
         geometry_filename: Optional[str] = "vector/vector.geojson",
