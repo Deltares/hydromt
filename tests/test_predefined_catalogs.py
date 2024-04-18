@@ -1,8 +1,11 @@
+import logging
 import os
 from pathlib import Path
 
 import pytest
 import yaml
+from importlib_metadata import EntryPoint
+from pytest_mock import MockerFixture
 
 from hydromt.predefined_catalogs import (
     _get_catalog_eps,
@@ -16,10 +19,27 @@ def cat_root():
     return Path(__file__).parent.parent / "data/catalogs"
 
 
-def test_eps():
+def test_eps(mocker: MockerFixture, caplog):
+    caplog.set_level(level=logging.WARNING)
+    mock_entry_points = mocker.patch("hydromt.predefined_catalogs.entry_points")
+    mock_ep1 = EntryPoint(
+        name="mock_data",
+        value="hydromt_wflow.data_catalog",
+        group="datacatalogs",
+    )
+    mock_ep2 = EntryPoint(
+        name="deltares_data", value="hydromt.catalogs", group="datacatalogs"
+    )
+    mock_eps = [mock_ep1, mock_ep2]
+    mock_entry_points.return_value = mock_eps
     # TODO mock actual entrypoints
     eps = _get_catalog_eps()
     assert "artifact_data" in eps
+    assert mock_ep1.name in eps
+    assert (
+        f"Duplicated catalog plugin '{mock_ep2.name}'; skipping {mock_ep2.module}.{mock_ep2.value}"
+        in caplog.text
+    )
 
 
 def test_get_versions(tmpdir):
