@@ -6,7 +6,7 @@ from typing import Callable, List, Optional
 import xarray as xr
 from pyproj import CRS
 
-from hydromt._typing import Bbox, Geom
+from hydromt._typing import Bbox, Geom, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers.preprocessing import PREPROCESSORS
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
@@ -26,6 +26,7 @@ class NetcdfDriver(RasterDatasetDriver):
         buffer: float = 0,
         crs: Optional[CRS] = None,
         variables: Optional[List[str]] = None,
+        time_range: Optional[TimeRange] = None,
         predicate: str = "intersects",
         zoom_level: int = 0,
         logger: Optional[Logger] = None,
@@ -49,9 +50,23 @@ class NetcdfDriver(RasterDatasetDriver):
             buffer=buffer,
             predicate=predicate,
             variables=variables,
+            time_range=time_range,
             zoom_level=zoom_level,
             handle_nodata=handle_nodata,
             **kwargs,
         )
 
         return xr.open_mfdataset(uris, decode_coords="all", **kwargs)
+
+    def write(
+        self,
+        path: StrPath,
+        ds: xr.Dataset,
+        **kwargs,
+    ):
+        """
+        Write a dataset to netcdf.
+
+        args:
+        """
+        ds.to_netcdf(path, **kwargs)

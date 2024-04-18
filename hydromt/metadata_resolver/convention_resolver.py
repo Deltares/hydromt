@@ -70,10 +70,10 @@ class ConventionResolver(MetaDataResolver):
     def _get_dates(
         self,
         keys: List[str],
-        timerange: TimeRange,
+        time_range: TimeRange,
     ) -> pd.PeriodIndex:
         dt: pd.Timedelta = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
-        t_range: pd.DatetimeIndex = pd.to_datetime(list(timerange)) - dt
+        t_range: pd.DatetimeIndex = pd.to_datetime(list(time_range)) - dt
         freq: str = "M" if "month" in keys else "a"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
@@ -94,7 +94,7 @@ class ConventionResolver(MetaDataResolver):
         uri: str,
         fs: AbstractFileSystem,
         *,
-        timerange: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         bbox: Optional[Bbox] = None,
         # TODO: align? https://github.com/Deltares/hydromt/issues/874
         mask: Optional[Geom] = None,
@@ -107,9 +107,11 @@ class ConventionResolver(MetaDataResolver):
         **kwargs,
     ) -> List[str]:
         """Resolve the placeholders in the URI."""
-        uri_expanded, keys, _ = self._expand_uri_placeholders(uri, timerange, variables)
-        if timerange:
-            dates = self._get_dates(keys, timerange)
+        uri_expanded, keys, _ = self._expand_uri_placeholders(
+            uri, time_range, variables
+        )
+        if time_range:
+            dates = self._get_dates(keys, time_range)
         else:
             dates = pd.PeriodIndex(["2023-01-01"], freq="d")  # fill any valid value
         if variables:

@@ -1,3 +1,4 @@
+import logging
 from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
@@ -12,6 +13,7 @@ import pytest
 import xarray as xr
 import xugrid as xu
 from dask import config as dask_config
+from pytest_mock import MockerFixture
 
 from hydromt.components.config import ConfigComponent
 from hydromt.components.region import ModelRegionComponent
@@ -23,6 +25,7 @@ from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.gis import raster, utils, vector
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.models.model import Model
+from hydromt.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
@@ -441,3 +444,18 @@ def artifact_data():
     datacatalog = DataCatalog()
     datacatalog.from_predefined_catalogs("artifact_data")
     return datacatalog
+
+
+@pytest.fixture()
+def mock_model(tmpdir, mocker: MockerFixture):
+    logger = logging.getLogger(__name__)
+    logger.propagate = True
+    model = mocker.create_autospec(Model)
+    model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
+    model.root.path.return_value = tmpdir
+    model.data_catalog = mocker.create_autospec(DataCatalog)
+    model.region = mocker.create_autospec(
+        ModelRegionComponent(model=model), instance=True
+    )
+    model.logger = logger
+    return model

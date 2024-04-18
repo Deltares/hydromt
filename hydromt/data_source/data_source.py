@@ -63,8 +63,6 @@ class DataSource(BaseModel, ABC):
         )
         return summ
 
-    # TODO: def to_file(self, **query_params) https://github.com/Deltares/hydromt/issues/840
-
     @model_validator(mode="before")
     @classmethod
     def _push_down_data_adapter_args(cls, data: Any):
