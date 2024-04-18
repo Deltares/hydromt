@@ -40,7 +40,7 @@ def _get_file_hash(file_path: Path) -> str:
     """Get the md5 hash of a file."""
     hash_func = hashlib.md5()
     with open(file_path, "rt") as f:
-        for line in f.readline():
+        for line in f.readlines():
             hash_func.update(line.encode("utf-8"))
     return hash_func.hexdigest()
 

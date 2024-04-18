@@ -1,5 +1,5 @@
 name: aws_data
 versions:
 - version: v0.1.0
-  hash: 6105347ebb9825ac754615ca55ff3b0c
+  hash: d7ebfbe188c15ff938a17337e8332391
   path: v0.1.0/data_catalog.yml

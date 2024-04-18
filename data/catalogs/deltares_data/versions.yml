@@ -1,8 +1,8 @@
 name: deltares_data
 versions:
-- version: v0.5.0
-  hash: 6105347ebb9825ac754615ca55ff3b0c
-  path: v0.5.0/data_catalog.yml
 - version: v0.6.0
-  hash: 6105347ebb9825ac754615ca55ff3b0c
+  hash: 9848c51464d025caa6dda6201228f17f
   path: v0.6.0/data_catalog.yml
+- version: v0.5.0
+  hash: db9153c6410e2dd3b70c652d858468b5
+  path: v0.5.0/data_catalog.yml
