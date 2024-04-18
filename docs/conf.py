@@ -132,7 +132,6 @@ categories = [
     "other",
 ]
 data_cat = hydromt.DataCatalog()
-data_cat.set_predefined_catalogs(r"../data/predefined_catalogs.yml")
 predefined_catalogs = data_cat.predefined_catalogs
 for name in predefined_catalogs:
     try:
