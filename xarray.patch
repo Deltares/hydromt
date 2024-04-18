@@ -3,7 +3,7 @@ index 74e899a3..23ce607b 100644
 --- a/hydromt/_typing/type_def.py
 +++ b/hydromt/_typing/type_def.py
 @@ -70,7 +70,12 @@ SourceSpecDict = TypedDict(
- 
+
  DeferedFileClose = TypedDict(
      "DeferedFileClose",
 -    {"ds": Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
@@ -15,7 +15,7 @@ index 74e899a3..23ce607b 100644
 +    },
  )
  XArrayDict = Dict[str, Union[DataArray, Dataset]]
- 
+
 diff --git a/hydromt/components/dataset.py b/hydromt/components/dataset.py
 new file mode 100644
 index 00000000..9395b506
@@ -269,7 +269,7 @@ index 55496523..d1892cda 100644
 --- a/hydromt/data_catalog.py
 +++ b/hydromt/data_catalog.py
 @@ -1633,7 +1633,9 @@ class DataCatalog(object):
- 
+
      def get_dataframe(
          self,
 -        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
@@ -285,7 +285,7 @@ index e81c4fcd..2ead4921 100644
 +++ b/hydromt/io/readers.py
 @@ -1,13 +1,21 @@
  """Implementations for all of the necessary IO reading for HydroMT."""
- 
+
 -import glob
  import io as pyio
  import logging
@@ -305,7 +305,7 @@ index e81c4fcd..2ead4921 100644
 +    Tuple,
 +    Union,
 +)
- 
+
  import dask
  import geopandas as gpd
 @@ -21,14 +29,16 @@ from requests import get as fetch
@@ -314,7 +314,7 @@ index e81c4fcd..2ead4921 100644
  from tomli import load as load_toml
 +from xarray import open_dataset
  from yaml import safe_load as load_yaml
- 
+
  from hydromt import gis
 -from hydromt._typing.type_def import StrPath
 +from hydromt._typing.type_def import StrPath, XArrayDict
@@ -323,7 +323,7 @@ index e81c4fcd..2ead4921 100644
  from hydromt.gis.raster import GEO_MAP_COORD
  from hydromt.io.path import make_config_paths_abs
 +from hydromt.metadata_resolver import ConventionResolver
- 
+
  if TYPE_CHECKING:
      from hydromt._validators.model_config import HydromtModelStep
 @@ -169,7 +179,7 @@ def open_mfraster(
@@ -337,8 +337,8 @@ index e81c4fcd..2ead4921 100644
      if len(paths) == 0:
 @@ -861,68 +871,6 @@ def parse_values(
      return cfdict
- 
- 
+
+
 -def read_nc(
 -    fn: StrPath,
 -    root,
@@ -406,8 +406,8 @@ index e81c4fcd..2ead4921 100644
      with open(path, "rb") as stream:
 @@ -943,6 +891,25 @@ def read_toml(path: StrPath) -> Dict[str, Any]:
      return data
- 
- 
+
+
 +def read_nc(read_path: Path, single_var_as_array: bool = True, **kwargs) -> XArrayDict:
 +    fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(str(read_path))
 +    fns = glob(fn_glob)
@@ -436,8 +436,8 @@ index c837d7d7..f0ac11bc 100644
 +++ b/hydromt/io/writers.py
 @@ -49,6 +49,51 @@ def write_xy(fn, gdf, fmt="%.4f"):
          np.savetxt(f, xy, fmt=fmt)
- 
- 
+
+
 +def write_ncs():
 +    for name, ds in self.data.items():
 +        if not isinstance(ds, (Dataset, DataArray)):
@@ -502,7 +502,7 @@ index 7a00eb2b..31d6672f 100644
 @@ -1,16 +1,12 @@
  # -*- coding: utf-8 -*-
  """General and basic API for models in HydroMT."""
- 
+
 -import glob
  import logging
  import os
@@ -520,11 +520,11 @@ index 7a00eb2b..31d6672f 100644
 @@ -22,13 +18,10 @@ from typing import (
      cast,
  )
- 
+
 -import pandas as pd
 -import xarray as xr
  from pyproj import CRS
- 
+
  from hydromt import hydromt_step
 -from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
 -from hydromt._utils import _classproperty
@@ -543,7 +543,7 @@ index 7a00eb2b..31d6672f 100644
 @@ -54,21 +46,7 @@ class Model(object, metaclass=ABCMeta):
      Inherit from this class to pre-define mandatory components in the model.
      """
- 
+
 -    _DATADIR = ""  # path to the model data folder
 -    _NAME: str = "modelname"
 -    _MAPS = {"<general_hydromt_name>": "<model_name>"}
@@ -560,7 +560,7 @@ index 7a00eb2b..31d6672f 100644
 -        "states": XArrayDict,
 -    }
 +    _NAME = "Core"
- 
+
      def __init__(
          self,
 @@ -78,6 +56,8 @@ class Model(object, metaclass=ABCMeta):
@@ -584,7 +584,7 @@ index 7a00eb2b..31d6672f 100644
 @@ -112,20 +94,12 @@ class Model(object, metaclass=ABCMeta):
              data_libs=data_libs, logger=self.logger, **artifact_keys
          )
- 
+
 -        self._maps: Optional[XArrayDict] = None
 -
 -        self._forcing: Optional[XArrayDict] = None
@@ -593,10 +593,10 @@ index 7a00eb2b..31d6672f 100644
 -
          # file system
          self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
- 
+
          self._components: Dict[str, ModelComponent] = {}
          self._add_components(components)
- 
+
 -        self._defered_file_closes = []
 -
          model_metadata = cast(
@@ -605,7 +605,7 @@ index 7a00eb2b..31d6672f 100644
 @@ -161,19 +135,6 @@ class Model(object, metaclass=ABCMeta):
          """Return the model region component."""
          return self.get_component("region", ModelRegionComponent)
- 
+
 -    @_classproperty
 -    def api(cls) -> Dict:
 -        """Return all model components and their data types."""
@@ -623,9 +623,9 @@ index 7a00eb2b..31d6672f 100644
          self,
          *,
 @@ -448,715 +409,12 @@ class Model(object, metaclass=ABCMeta):
- 
+
              cat.to_yml(path, root=root)
- 
+
 -    def test_equal(self, other: "Model") -> tuple[bool, dict[str, str]]:
 -        """Test if two models are equal, based on their components.
 -
@@ -1307,8 +1307,8 @@ index 7a00eb2b..31d6672f 100644
      def crs(self) -> CRS:
          """Returns coordinate reference system embedded in region."""
          return self.target_crs
- 
- 
+
+
 -def _check_data(
 -    data: Union[xr.DataArray, xr.Dataset],
 -    name: Optional[str] = None,
@@ -1431,5 +1431,5 @@ index 9d543ce6..3a990920 100644
  from hydromt.models import Model
 -from hydromt.models.model import _check_data
  from hydromt.plugins import PLUGINS
- 
+
  DATADIR = join(dirname(abspath(__file__)), "..", "data")
