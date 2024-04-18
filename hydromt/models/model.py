@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT."""
 
-import glob
 import logging
 import os
-import shutil
 import typing
 from abc import ABCMeta
 from inspect import _empty, signature
-from os.path import basename, dirname, isabs, isdir, isfile, join
+from os.path import isabs, isfile, join
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import (
     Any,
     Dict,
@@ -27,16 +24,15 @@ import xarray as xr
 from pyproj import CRS
 
 from hydromt import hydromt_step
-from hydromt._typing import DeferedFileClose, StrPath, XArrayDict
-from hydromt._utils import _classproperty
+from hydromt._typing import StrPath
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
 from hydromt.components import (
     ModelComponent,
     ModelRegionComponent,
 )
+from hydromt.components.dataset import DatasetComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
 from hydromt.utils.deep_merge import deep_merge
@@ -54,21 +50,10 @@ class Model(object, metaclass=ABCMeta):
     Inherit from this class to pre-define mandatory components in the model.
     """
 
-    _DATADIR = ""  # path to the model data folder
     _NAME: str = "modelname"
-    _MAPS = {"<general_hydromt_name>": "<model_name>"}
-    _FOLDERS = [""]
-    _TMP_DATA_DIR = None
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
     _MODEL_VERSION = None
-
-    _API = {
-        "maps": XArrayDict,
-        "forcing": XArrayDict,
-        "results": XArrayDict,
-        "states": XArrayDict,
-    }
 
     def __init__(
         self,
@@ -112,12 +97,6 @@ class Model(object, metaclass=ABCMeta):
             data_libs=data_libs, logger=self.logger, **artifact_keys
         )
 
-        self._maps: Optional[XArrayDict] = None
-
-        self._forcing: Optional[XArrayDict] = None
-        self._states: Optional[XArrayDict] = None
-        self._results: Optional[XArrayDict] = None
-
         # file system
         self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
 
@@ -160,19 +139,6 @@ class Model(object, metaclass=ABCMeta):
     def region(self) -> ModelRegionComponent:
         """Return the model region component."""
         return self.get_component("region", ModelRegionComponent)
-
-    @_classproperty
-    def api(cls) -> Dict:
-        """Return all model components and their data types."""
-        _api = cls._API.copy()
-
-        # reversed is so that child attributes take priority
-        # this does mean that it becomes imporant in which order you
-        # inherit from your base classes.
-        for base_cls in reversed(cls.__mro__):
-            if hasattr(base_cls, "_API"):
-                _api.update(getattr(base_cls, "_API", {}))
-        return _api
 
     def build(
         self,
@@ -333,7 +299,9 @@ class Model(object, metaclass=ABCMeta):
         if write and not self._options_contain_write(steps):
             self.write()
 
-        self._cleanup(forceful_overwrite=forceful_overwrite)
+        for comp in self._components.values():
+            if isinstance(comp, DatasetComponent):
+                comp._cleanup(forceful_overwrite=forceful_overwrite)
 
     @hydromt_step
     def write(self, components: Optional[List[str]] = None) -> None:
@@ -636,525 +604,10 @@ class Model(object, metaclass=ABCMeta):
 
         return list(ds_vars.data_vars.keys())
 
-    # model map
-    @property
-    def maps(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model maps. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if self._maps is None:
-            self._initialize_maps()
-        return self._maps
-
-    def _initialize_maps(self, skip_read=False) -> None:
-        """Initialize maps."""
-        if self._maps is None:
-            self._maps = dict()
-            if self.root.is_reading_mode() and not skip_read:
-                self.read_maps()
-
-    def set_maps(
-        self,
-        data: Union[xr.DataArray, xr.Dataset],
-        name: Optional[str] = None,
-        split_dataset: Optional[bool] = True,
-    ) -> None:
-        """Add raster data to the maps component.
-
-        Dataset can either be added as is (default) or split into several
-        DataArrays using the split_dataset argument.
-
-        Arguments
-        ---------
-        data: xarray.Dataset or xarray.DataArray
-            New forcing data to add
-        name: str, optional
-            Variable name, only in case data is of type DataArray or if a Dataset is
-            added as is (split_dataset=False).
-        split_dataset: bool, optional
-            If data is a xarray.Dataset split it into several xarray.DataArrays.
-        """
-        self._initialize_maps()
-        data_dict = _check_data(data, name, split_dataset)
-        for name in data_dict:
-            if name in self._maps:
-                self.logger.warning(f"Replacing result: {name}")
-            self._maps[name] = data_dict[name]
-
-    def read_maps(self, fn: str = "maps/*.nc", **kwargs) -> None:
-        r"""Read model map at <root>/<fn> and add to maps component.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, may contain wildcards,
-            by default ``maps/\*.nc``
-        kwargs:
-            Additional keyword arguments that are passed to the
-            `read_nc` function.
-        """
-        self.root._assert_read_mode()
-        self._initialize_maps(skip_read=True)
-        ncs = self.read_nc(fn, **kwargs)
-        for name, ds in ncs.items():
-            self.set_maps(ds, name=name)
-
-    def write_maps(self, fn="maps/{name}.nc", **kwargs) -> None:
-        r"""Write maps to netcdf file at <root>/<fn>.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root and should contain a {name} placeholder,
-            by default 'maps/{name}.nc'
-        \**kwargs:
-            Additional keyword arguments that are passed to the
-            `write_nc` function.
-        """
-        self.root._assert_write_mode()
-        if len(self.maps) == 0:
-            self.logger.debug("No maps data found, skip writing.")
-        else:
-            self.write_nc(self.maps, fn, **kwargs)
-
-    # model geometry files
-    # model forcing files
-    @property
-    def forcing(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model forcing. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if self._forcing is None:
-            self._initialize_forcing()
-        return self._forcing
-
-    def _initialize_forcing(self, skip_read=False) -> None:
-        """Initialize forcing."""
-        if self._forcing is None:
-            self._forcing = dict()
-            if self.root.is_reading_mode() and not skip_read:
-                self.read_forcing()
-
-    def set_forcing(
-        self,
-        data: Union[xr.DataArray, xr.Dataset, pd.DataFrame],
-        name: Optional[str] = None,
-        split_dataset: Optional[bool] = True,
-    ):
-        """Add data to forcing attribute.
-
-        Data can be xarray.DataArray, xarray.Dataset or pandas.DataFrame.
-        If pandas.DataFrame, indices should be the DataFrame index and the columns
-        the variable names. the DataFrame will then be converted to xr.Dataset using
-        :py:meth:`pandas.DataFrame.to_xarray` method.
-
-        Arguments
-        ---------
-        data: xarray.Dataset or xarray.DataArray or pd.DataFrame
-            New forcing data to add
-        name: str, optional
-            Results name, required if data is xarray.Dataset is and split_dataset=False.
-        split_dataset: bool, optional
-            If True (default), split a Dataset to store each variable as a DataArray.
-        """
-        self._initialize_forcing()
-        if isinstance(data, pd.DataFrame):
-            data = data.to_xarray()
-        data_dict = _check_data(data, name, split_dataset)
-        for name in data_dict:
-            if name in self._forcing:
-                self.logger.warning(f"Replacing forcing: {name}")
-            self._forcing[name] = data_dict[name]
-
-    def read_forcing(self, fn: str = "forcing/*.nc", **kwargs) -> None:
-        """Read forcing at <root>/<fn> and add to forcing property.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, may contain wildcards,
-            by default forcing/.nc
-        kwargs:
-            Additional keyword arguments that are passed to the `read_nc`
-            function.
-        """
-        self._initialize_forcing(skip_read=True)
-        ncs = self.read_nc(fn, **kwargs)
-        for name, ds in ncs.items():
-            self.set_forcing(ds, name=name)
-
-    def write_forcing(self, fn="forcing/{name}.nc", **kwargs) -> None:
-        """Write forcing to netcdf file at <root>/<fn>.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root and should contain a {name} placeholder,
-            by default 'forcing/{name}.nc'
-        kwargs:
-            Additional keyword arguments that are passed to the `write_nc`
-            function.
-        """
-        self.root._assert_read_mode()
-        if len(self.forcing) == 0:
-            self.logger.debug("No forcing data found, skip writing.")
-        else:
-            self.write_nc(self.forcing, fn, **kwargs)
-
-    # model state files
-    @property
-    def states(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model states. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if self._states is None:
-            self._initialize_states()
-        return self._states
-
-    def _initialize_states(self, skip_read=False) -> None:
-        """Initialize states."""
-        if self._states is None:
-            self._states = dict()
-            if self.root.is_reading_mode() and not skip_read:
-                self.read_states()
-
-    def set_states(
-        self,
-        data: Union[xr.DataArray, xr.Dataset],
-        name: Optional[str] = None,
-        split_dataset: Optional[bool] = True,
-    ):
-        """Add data to states attribute.
-
-        Arguments
-        ---------
-        data: xarray.Dataset or xarray.DataArray
-            New forcing data to add
-        name: str, optional
-            Results name, required if data is xarray.Dataset and split_dataset=False.
-        split_dataset: bool, optional
-            If True (default), split a Dataset to store each variable as a DataArray.
-        """
-        self._initialize_states()
-        data_dict = _check_data(data, name, split_dataset)
-        for name in data_dict:
-            if name in self._states:
-                self.logger.warning(f"Replacing state: {name}")
-            self._states[name] = data_dict[name]
-
-    def read_states(self, fn: str = "states/*.nc", **kwargs) -> None:
-        r"""Read states at <root>/<fn> and add to states property.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, may contain wildcards,
-            by default states/\*.nc
-        kwargs:
-            Additional keyword arguments that are passed to the `read_nc`
-            function.
-        """
-        self.root._assert_read_mode()
-        self._initialize_states(skip_read=True)
-        ncs = self.read_nc(fn, **kwargs)
-        for name, ds in ncs.items():
-            self.set_states(ds, name=name, split_dataset=True)
-
-    def write_states(self, fn="states/{name}.nc", **kwargs) -> None:
-        """Write states to netcdf file at <root>/<fn>.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root and should contain a {name} placeholder,
-            by default 'states/{name}.nc'
-        **kwargs:
-            Additional keyword arguments that are passed to the `write_nc`
-            function.
-        """
-        self.root._assert_write_mode()
-        if len(self.states) == 0:
-            self.logger.debug("No states data found, skip writing.")
-        else:
-            self.write_nc(self.states, fn, **kwargs)
-
-    # model results files; NOTE we don't have a write_results method
-    # (that's up to the model kernel)
-    @property
-    def results(self) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
-        """Model results. Returns dict of xarray.DataArray or xarray.Dataset."""
-        if self._results is None:
-            self._initialize_results()
-        return self._results
-
-    def _initialize_results(self, skip_read=False) -> None:
-        """Initialize results."""
-        if self._results is None:
-            self._results = dict()
-            if self.root.is_reading_mode() and not skip_read:
-                self.read_results()
-
-    def set_results(
-        self,
-        data: Union[xr.DataArray, xr.Dataset],
-        name: Optional[str] = None,
-        split_dataset: Optional[bool] = False,
-    ):
-        """Add data to results attribute.
-
-        Dataset can either be added as is (default) or split into several
-        DataArrays using the split_dataset argument.
-
-        Arguments
-        ---------
-        data: xarray.Dataset or xarray.DataArray
-            New forcing data to add
-        name: str, optional
-            Results name, required if data is xarray.Dataset and split_dataset=False.
-        split_dataset: bool, optional
-            If True (False by default), split a Dataset to store each variable
-            as a DataArray.
-        """
-        self._initialize_results()
-        data_dict = _check_data(data, name, split_dataset)
-        for name in data_dict:
-            if name in self._results:
-                self.logger.warning(f"Replacing result: {name}")
-            self._results[name] = data_dict[name]
-
-    def read_results(self, fn: str = "results/*.nc", **kwargs) -> None:
-        """Read results at <root>/<fn> and add to results property.
-
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
-
-        Parameters
-        ----------
-        fn : str, optional
-            filename relative to model root, may contain wildcards,
-            by default ``results/*.nc``
-        kwargs:
-            Additional keyword arguments that are passed to the `read_nc`
-            function.
-        """
-        self.root._assert_read_mode()
-        self._initialize_results(skip_read=True)
-        ncs = self.read_nc(fn, **kwargs)
-        for name, ds in ncs.items():
-            self.set_results(ds, name=name)
-
-    # general reader & writer
-    def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
-        """Try to close all defered file handles.
-
-        Try to overwrite the destination file with the temporary one until either the
-        maximum number of tries is reached or until it succeeds. The forced cleanup
-        also attempts to close the original file handle, which could cause trouble
-        if the user will try to read from the same file handle after this function
-        is called.
-
-        Parameters
-        ----------
-        forceful_overwrite: bool
-            Attempt to force closing defered file handles before writing to them.
-        max_close_attempts: int
-            Number of times to try and overwrite the original file, before giving up.
-
-        """
-        failed_closes = []
-        while len(self._defered_file_closes) > 0:
-            close_handle = self._defered_file_closes.pop()
-            if close_handle["close_attempts"] > max_close_attempts:
-                # already tried to close this to many times so give up
-                self.logger.error(
-                    f"Max write attempts to file {close_handle['org_fn']}"
-                    " exceeded. Skipping..."
-                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
-                )
-                continue
-
-            if forceful_overwrite:
-                close_handle["ds"].close()
-            try:
-                shutil.move(close_handle["tmp_fn"], close_handle["org_fn"])
-            except PermissionError:
-                self.logger.error(
-                    f"Could not write to destination file {close_handle['org_fn']} "
-                    "because the following error was raised: {e}"
-                )
-                close_handle["close_attempts"] += 1
-                self._defered_file_closes.append(close_handle)
-                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
-
-        return list(set(failed_closes))
-
-    def write_nc(
-        self,
-        nc_dict: XArrayDict,
-        fn: str,
-        gdal_compliant: bool = False,
-        rename_dims: bool = False,
-        force_sn: bool = False,
-        **kwargs,
-    ) -> None:
-        """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
-
-        Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
-        files, using :py:meth:`~hydromt.raster.gdal_compliant`.
-        The function will first try to directly write to file. In case of
-        PermissionError, it will first write a temporary file and add to the
-        self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
-        will be done by calling the self._cleanup function.
-
-        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
-
-        Parameters
-        ----------
-        nc_dict: dict
-            Dictionary of xarray.Dataset and/or xarray.DataArray to write
-        fn: str
-            filename relative to model root and should contain a {name} placeholder
-        gdal_compliant: bool, optional
-            If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
-            format using :py:meth:`~hydromt.raster.gdal_compliant`
-        rename_dims: bool, optional
-            If True, rename x_dim and y_dim to standard names depending on the CRS
-            (x/y for projected and lat/lon for geographic). Only used if
-            ``gdal_compliant`` is set to True. By default, False.
-        force_sn: bool, optional
-            If True, forces the dataset to have South -> North orientation. Only used
-            if ``gdal_compliant`` is set to True. By default, False.
-        **kwargs:
-            Additional keyword arguments that are passed to the `to_netcdf`
-            function.
-        """
-        for name, ds in nc_dict.items():
-            if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
-                self.logger.error(
-                    f"{name} object of type {type(ds).__name__} not recognized"
-                )
-                continue
-            self.logger.debug(f"Writing file {fn.format(name=name)}")
-            _fn = join(self.root.path, fn.format(name=name))
-            if not isdir(dirname(_fn)):
-                os.makedirs(dirname(_fn))
-            if gdal_compliant:
-                ds = ds.raster.gdal_compliant(
-                    rename_dims=rename_dims, force_sn=force_sn
-                )
-            try:
-                ds.to_netcdf(_fn, **kwargs)
-            except PermissionError:
-                _logger.warning(f"Could not write to file {_fn}, defering write")
-                if self._TMP_DATA_DIR is None:
-                    self._TMP_DATA_DIR = TemporaryDirectory()
-
-                tmp_fn = join(str(self._TMP_DATA_DIR), f"{_fn}.tmp")
-                ds.to_netcdf(tmp_fn, **kwargs)
-                self._defered_file_closes.append(
-                    DeferedFileClose(
-                        ds=ds,
-                        org_fn=join(str(self._TMP_DATA_DIR), _fn),
-                        tmp_fn=tmp_fn,
-                        close_attempts=1,
-                    )
-                )
-
-    def read_nc(
-        self,
-        fn: StrPath,
-        mask_and_scale: bool = False,
-        single_var_as_array: bool = True,
-        load: bool = False,
-        **kwargs,
-    ) -> Dict[str, xr.Dataset]:
-        """Read netcdf files at <root>/<fn> and return as dict of xarray.Dataset.
-
-        NOTE: Unless `single_var_as_array` is set to False a single-variable data source
-        will be returned as :py:class:`xarray.DataArray` rather than
-        :py:class:`xarray.Dataset`.
-        key-word arguments are passed to :py:func:`xarray.open_dataset`.
-
-        Parameters
-        ----------
-        fn : str
-            filename relative to model root, may contain wildcards
-        mask_and_scale : bool, optional
-            If True, replace array values equal to _FillValue with NA and scale values
-            according to the formula original_values * scale_factor + add_offset, where
-            _FillValue, scale_factor and add_offset are taken from variable attributes
-            (if they exist).
-        single_var_as_array : bool, optional
-            If True, return a DataArray if the dataset consists of a single variable.
-            If False, always return a Dataset. By default True.
-        load : bool, optional
-            If True, the data is loaded into memory. By default False.
-        **kwargs:
-            Additional keyword arguments that are passed to the `xr.open_dataset`
-            function.
-
-        Returns
-        -------
-        Dict[str, xr.Dataset]
-            dict of xarray.Dataset
-        """
-        ncs = dict()
-        fns = glob.glob(join(self.root.path, fn))
-        if "chunks" not in kwargs:  # read lazy by default
-            kwargs.update(chunks="auto")
-        for fn in fns:
-            name = basename(fn).split(".")[0]
-            self.logger.debug(f"Reading model file {name}.")
-            # Load data to allow overwritting in r+ mode
-            if load:
-                ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
-                ds.close()
-            else:
-                ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
-            # set geo coord if present as coordinate of dataset
-            if GEO_MAP_COORD in ds.data_vars:
-                ds = ds.set_coords(GEO_MAP_COORD)
-            # single-variable Dataset to DataArray
-            if single_var_as_array and len(ds.data_vars) == 1:
-                (ds,) = ds.data_vars.values()
-            ncs.update({name: ds})
-        return ncs
-
     @property
     def crs(self) -> CRS:
         """Returns coordinate reference system embedded in region."""
         return self.target_crs
-
-
-def _check_data(
-    data: Union[xr.DataArray, xr.Dataset],
-    name: Optional[str] = None,
-    split_dataset=True,
-) -> Dict:
-    if isinstance(data, xr.DataArray):
-        # NOTE name can be different from data.name !
-        if data.name is None and name is not None:
-            data.name = name
-        elif name is None and data.name is not None:
-            name = data.name
-        elif data.name is None and name is None:
-            raise ValueError("Name required for DataArray.")
-        data = {name: data}
-    elif isinstance(data, xr.Dataset):  # return dict for consistency
-        if split_dataset:
-            data = {name: data[name] for name in data.data_vars}
-        elif name is None:
-            raise ValueError("Name required for Dataset.")
-        else:
-            data = {name: data}
-    else:
-        raise ValueError(f'Data type "{type(data).__name__}" not recognized')
-    return data
 
 
 def _assert_isinstance(obj: Any, dtype: Any, name: str = ""):
