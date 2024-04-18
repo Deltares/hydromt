@@ -28,6 +28,7 @@ from hydromt.data_adapter.caching import _uri_validator
 from hydromt.gis import merge, raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.path import make_config_paths_abs
+from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
@@ -902,11 +903,12 @@ def read_nc(
     ncs = dict()
     path_template = root / filename_template
 
-    path_glob = glob(str(path_template))
-    if "chunks" not in kwargs:  # read lazy by default
-        kwargs.update(chunks="auto")
+    path_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
+        str(path_template)
+    )
+    path_glob = glob(path_glob)
     for path in path_glob:
-        name = splitext(basename(path))[0]
+        name = ".".join(regex.match(path).groups())  # type: ignore
         # Load data to allow overwritting in r+ mode
         if load:
             ds = xr.open_dataset(path, mask_and_scale=mask_and_scale, **kwargs).load()

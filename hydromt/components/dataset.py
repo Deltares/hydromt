@@ -4,10 +4,8 @@ from shutil import move
 from typing import (
     TYPE_CHECKING,
     List,
-    Mapping,
     Optional,
     Union,
-    cast,
 )
 
 from pandas import DataFrame
@@ -83,9 +81,12 @@ class DatasetComponent(ModelComponent):
         if isinstance(data, DataFrame):
             data = data.to_xarray()
         assert self._data is not None
-        ds = cast(Union[DataArray, Dataset], data)
-        data_dict = DatasetComponent._harmonise_data_names(ds, name, split_dataset)
-        for name, d in data_dict.items():
+        if split_dataset and isinstance(data, Dataset):
+            ds = {str(name): data[name] for name in data.data_vars}
+        else:
+            ds = {name: data}
+
+        for name, d in ds.items():
             if name in self._data:
                 self._logger.warning(f"Replacing xarray: {name}")
             self._data[name] = d
@@ -221,30 +222,3 @@ class DatasetComponent(ModelComponent):
                 failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
 
         return list(set(failed_closes))
-
-    @staticmethod
-    def _harmonise_data_names(
-        data: Union[DataArray, Dataset],
-        name: Optional[str] = None,
-        split_dataset: bool = True,
-    ) -> Mapping[str, Union[Dataset, DataArray]]:
-        harmonised_dict = {}
-        if isinstance(data, DataArray):
-            # NOTE name can be different from data.name !
-            if data.name is None and name is not None:
-                data.name = name
-            elif name is None and data.name is not None:
-                name = str(data.name)
-            else:
-                raise ValueError("Name required for DataArray.")
-            harmonised_dict = {name: data}
-        elif isinstance(data, Dataset):  # return dict for consistency
-            if split_dataset:
-                harmonised_dict = {str(name): data[name] for name in data.data_vars}
-            elif name is None:
-                raise ValueError("Name required for Dataset.")
-            else:
-                harmonised_dict = {str(name): data}
-        else:
-            raise ValueError(f'Data type "{type(data).__name__}" not recognized')
-        return harmonised_dict

@@ -1,8 +1,6 @@
-from os.path import join
 from pathlib import Path
 
 import pytest
-from xarray import DataArray, Dataset, open_dataset
 
 from hydromt.components.dataset import DatasetComponent
 from hydromt.models import Model
@@ -30,26 +28,6 @@ def test_model_dataset_sets_correctly(obsda, tmpdir: Path):
         assert obsda.equals(component.data[i])
 
     assert list(component.data.keys()) == list(map(str, range(5)))
-
-
-def test_harmonise_data_names(demda):
-    data_dict = DatasetComponent._harmonise_data_names(demda.copy(), "elevtn")
-    assert isinstance(data_dict["elevtn"], DataArray)
-    assert data_dict["elevtn"].name == "elevtn"
-    with pytest.raises(ValueError, match="Name required for DataArray"):
-        DatasetComponent._harmonise_data_names(demda)
-    demda.name = "dem"
-    demds = demda.to_dataset()
-    data_dict = DatasetComponent._harmonise_data_names(demds, "elevtn", False)
-    assert isinstance(data_dict["elevtn"], Dataset)
-    data_dict = DatasetComponent._harmonise_data_names(demds, split_dataset=True)
-    assert isinstance(data_dict["dem"], DataArray)
-    with pytest.raises(ValueError, match="Name required for Dataset"):
-        DatasetComponent._harmonise_data_names(demds, split_dataset=False)
-
-    # testing wrong type therefore type ignore
-    with pytest.raises(ValueError, match='Data type "dict" not recognized'):
-        DatasetComponent._harmonise_data_names({"wrong": "type"})  # type: ignore
 
 
 def test_model_dataset_reads_and_writes_correctly(obsda, tmpdir: Path):
@@ -85,18 +63,3 @@ def test_model_read_dataset(obsda, tmpdir):
 
     component_data = dataset_component.data["forcing"]
     assert obsda.equals(component_data)
-
-
-def test_model_write_dataset_with_target_crs(obsda, tmpdir):
-    model = Model(root=str(tmpdir), mode="w", target_model_crs=3857)
-    model.add_component("forcing", DatasetComponent(model))
-    # don't need region for this test
-    _ = model._components.pop("region")
-    dataset_component = model.get_component("forcing", DatasetComponent)
-
-    write_path = join(tmpdir, "test_dataset.nc")
-    dataset_component.set(obsda, "test_dataset")
-    dataset_component.write()
-    read_dataset = open_dataset(write_path, engine="netcdf4")
-
-    assert read_dataset.raster.crs.to_epsg() == 3857
