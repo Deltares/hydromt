@@ -53,15 +53,19 @@ def test_harmonise_data_names(demda):
 
 
 def test_model_dataset_reads_and_writes_correctly(obsda, tmpdir: Path):
-    model = Model(root=str(tmpdir), mode="w")
+    model = Model(root=str(tmpdir), mode="w+")
     model.add_component("test_dataset", DatasetComponent(model))
     component = model.get_component("test_dataset", DatasetComponent)
 
     component.set(data=obsda, name="data")
 
+    # don't need region for this test
+    _ = model._components.pop("region")
     model.write()
     clean_model = Model(root=str(tmpdir), mode="r")
-    clean_model.add_component("test_dataset", DatasetComponent(model))
+    # don't need region for this test
+    _ = clean_model._components.pop("region")
+    clean_model.add_component("test_dataset", DatasetComponent(clean_model))
     clean_model.read()
 
     clean_component = clean_model.get_component("test_dataset", DatasetComponent)
@@ -72,7 +76,7 @@ def test_model_dataset_reads_and_writes_correctly(obsda, tmpdir: Path):
 
 def test_model_read_dataset(obsda, tmpdir):
     write_path = Path(tmpdir) / "forcing.nc"
-    obsda.to_file(write_path)
+    obsda.to_netcdf(write_path, engine="netcdf4")
 
     model = Model(root=tmpdir, mode="r")
     model.add_component("forcing", DatasetComponent(model))
@@ -86,11 +90,13 @@ def test_model_read_dataset(obsda, tmpdir):
 def test_model_write_dataset_with_target_crs(obsda, tmpdir):
     model = Model(root=str(tmpdir), mode="w", target_model_crs=3857)
     model.add_component("forcing", DatasetComponent(model))
+    # don't need region for this test
+    _ = model._components.pop("region")
     dataset_component = model.get_component("forcing", DatasetComponent)
 
-    write_path = join(tmpdir, "test_geom.geojson")
+    write_path = join(tmpdir, "test_dataset.nc")
     dataset_component.set(obsda, "test_dataset")
     dataset_component.write()
-    read_dataset = open_dataset(write_path)
+    read_dataset = open_dataset(write_path, engine="netcdf4")
 
-    assert read_dataset.crs.to_epsg() == 3857
+    assert read_dataset.raster.crs.to_epsg() == 3857

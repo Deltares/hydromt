@@ -17,6 +17,7 @@ from hydromt._typing.type_def import XArrayDict
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
 from hydromt.io.readers import read_nc
+from hydromt.io.writers import write_nc
 
 if TYPE_CHECKING:
     from hydromt.models.model import Model
@@ -109,11 +110,14 @@ class DatasetComponent(ModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize(skip_read=True)
-        if "chunks" not in kwargs:  # read lazy by default
-            kwargs.update(chunks="auto")
-        f = filename or self._filename
-        read_path =  / f
-        ncs = read_nc(read_path, root=self._root.path, single_var_as_array=single_var_as_array, **kwargs)
+        kwargs = {**{"engine": "netcdf4"}, **kwargs}
+        filename_template = filename or self._filename
+        ncs = read_nc(
+            filename_template,
+            root=self._root.path,
+            single_var_as_array=single_var_as_array,
+            **kwargs,
+        )
         for name, ds in ncs.items():
             self.set(data=ds, name=name)
 
@@ -162,6 +166,17 @@ class DatasetComponent(ModelComponent):
         if len(self.data) == 0:
             self._logger.debug("No data found, skiping writing.")
             return
+
+        kwargs = {**{"engine": "netcdf4"}, **kwargs}
+        write_nc(
+            self.data,
+            filename_template=filename or self._filename,
+            root=self._root.path,
+            gdal_compliant=gdal_compliant,
+            rename_dims=rename_dims,
+            force_sn=force_sn,
+            **kwargs,
+        )
 
     def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
         """Try to close all defered file handles.

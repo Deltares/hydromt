@@ -70,7 +70,12 @@ SourceSpecDict = TypedDict(
 
 DeferedFileClose = TypedDict(
     "DeferedFileClose",
-    {"ds": Dataset, "org_fn": str, "tmp_fn": str, "close_attempts": int},
+    {
+        "ds": Union[Dataset, DataArray],
+        "org_fn": str,
+        "tmp_fn": str,
+        "close_attempts": int,
+    },
 )
 XArrayDict = Dict[str, Union[DataArray, Dataset]]
 
