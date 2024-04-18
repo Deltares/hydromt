@@ -76,7 +76,6 @@ Add data sources
    data_catalog.DataCatalog.from_archive
    data_catalog.DataCatalog.from_yml
    data_catalog.DataCatalog.from_dict
-   data_catalog.DataCatalog.set_predefined_catalogs
 
 .. _api_data_catalog_get:
 
