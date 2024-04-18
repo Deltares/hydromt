@@ -30,11 +30,11 @@ logger = getLogger(__name__)
 def parse_region(
     region: dict,
     *,
+    crs: Optional[int],
     logger: Logger = logger,
     hydrography_fn: Optional[str] = None,
     basin_index_fn: Optional[str] = None,
     data_catalog: Optional[DataCatalog] = None,
-    crs: Optional[int] = None,
 ) -> gpd.GeoDataFrame:
     """Parse a region and return the GeoDataFrame.
 

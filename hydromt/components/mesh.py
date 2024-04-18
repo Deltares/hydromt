@@ -3,7 +3,7 @@
 import os
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -14,6 +14,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import hydromt_step
+from hydromt._typing.type_def import StrPath
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
@@ -39,7 +40,7 @@ class MeshComponent(SpatialModelComponent):
         self,
         model: "Model",
         *,
-        filename: str = _DEFAULT_MESH_FILENAME,
+        filename: StrPath = _DEFAULT_MESH_FILENAME,
         region_filename: str = SpatialModelComponent.DEFAULT_REGION_FILENAME,
         region_component: Optional[str] = None,
     ):
@@ -96,7 +97,7 @@ class MeshComponent(SpatialModelComponent):
         self,
         fn: Optional[str] = None,
         *,
-        region_options: Optional[Dict[str, Any]] = None,
+        region_options: Optional[Dict] = None,
         write_optional_ugrid_attributes: bool = False,
         **kwargs,
     ) -> None:
@@ -115,15 +116,16 @@ class MeshComponent(SpatialModelComponent):
             Additional keyword arguments to be passed to the
             `xarray.Dataset.to_netcdf` method.
         """
-        if len(self.data) < 1:
-            self._logger.debug("No mesh data found, skip writing.")
-            return
         self._root._assert_write_mode()
         region_options = region_options or {}
         self.write_region(**region_options)
 
+        if len(self.data) < 1:
+            self._logger.debug("No mesh data found, skip writing.")
+            return
+
         # filename
-        fn = fn or self._filename
+        fn = fn or str(self._filename)
         _fn = join(self._root.path, fn)
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn), exist_ok=True)
@@ -138,7 +140,11 @@ class MeshComponent(SpatialModelComponent):
 
     @hydromt_step
     def read(
-        self, fn: Optional[str] = None, crs: Optional[Union[CRS, int]] = None, **kwargs
+        self,
+        fn: Optional[str] = None,
+        *,
+        crs: Optional[Union[CRS, int]] = None,
+        **kwargs,
     ) -> None:
         """Read model mesh data at <root>/<fn> and add to mesh property.
 
@@ -157,7 +163,8 @@ class MeshComponent(SpatialModelComponent):
         """
         self._root._assert_read_mode()
         self._initialize(skip_read=True)
-        fn = fn or self._filename
+
+        fn = fn or str(self._filename)
         files = read_nc(
             fn,
             root=self._root.path,
@@ -194,6 +201,7 @@ class MeshComponent(SpatialModelComponent):
     @hydromt_step
     def create2d(
         self,
+        *,
         region: dict,
         res: Optional[float] = None,
         crs: Optional[int] = None,
@@ -245,12 +253,7 @@ class MeshComponent(SpatialModelComponent):
         self._logger.info("Preparing 2D mesh.")
 
         # Create mesh2d
-        mesh2d = create_mesh2d(
-            region=region,
-            res=res,
-            crs=crs,
-            logger=self._logger,
-        )
+        mesh2d = create_mesh2d(region=region, res=res, crs=crs, logger=self._logger)
         # Add mesh2d to self
         self.set(mesh2d, grid_name=grid_name)
 

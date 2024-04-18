@@ -122,7 +122,7 @@ def test_create_raise_errors(mock_model):
     with pytest.raises(
         ValueError, match="res argument required for kind 'bbox', 'geom'"
     ):
-        grid_component.create({"bbox": bbox})
+        grid_component.create(region={"bbox": bbox})
 
 
 @pytest.mark.skip(reason="needs working artifact data")

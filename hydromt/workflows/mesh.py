@@ -76,7 +76,7 @@ def create_mesh2d(
             "Region for mesh must be of kind [bbox, geom, mesh], "
             f"kind {kind} not understood."
         )
-    geom = parse_region(region, logger=logger)
+    geom = parse_region(region, logger=logger, crs=crs)
     if kind != "mesh":
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")

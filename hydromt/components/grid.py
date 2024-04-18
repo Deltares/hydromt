@@ -47,17 +47,11 @@ class GridComponent(SpatialModelComponent):
     def __init__(
         self,
         model: "Model",
+        *,
         filename: StrPath = DEFAULT_FILENAME,
         region_component: Optional[str] = None,
         region_filename: StrPath = SpatialModelComponent.DEFAULT_REGION_FILENAME,
     ):
-        """Initialize a GridComponent.
-
-        Parameters
-        ----------
-        model: Model
-            HydroMT model instance
-        """
         super().__init__(
             model=model, region_component=region_component, filename=region_filename
         )
@@ -154,22 +148,25 @@ class GridComponent(SpatialModelComponent):
                 strategy=NoDataStrategy.IGNORE,
                 logger=self._logger,
             )
-        else:
-            # write_nc requires dict - use dummy 'grid' key
-            write_nc(  # Can return DeferedFileClose object
-                {"grid": self.data},
-                filename or str(self._filename),
-                temp_data_dir=self._model._TMP_DATA_DIR,
-                gdal_compliant=gdal_compliant,
-                rename_dims=rename_dims,
-                force_sn=force_sn,
-                **kwargs,
-            )
-        return None
+            return None
+        # write_nc requires dict - use dummy 'grid' key
+        return write_nc(  # Can return DeferedFileClose object
+            {"grid": self.data},
+            filename or str(self._filename),
+            temp_data_dir=self._model._TMP_DATA_DIR,
+            gdal_compliant=gdal_compliant,
+            rename_dims=rename_dims,
+            force_sn=force_sn,
+            **kwargs,
+        )
 
     @hydromt_step
     def read(
-        self, filename: Optional[str] = None, *, mask_and_scale: bool = False, **kwargs
+        self,
+        filename: Optional[str] = None,
+        *,
+        mask_and_scale: bool = False,
+        **kwargs,
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
 
@@ -207,6 +204,7 @@ class GridComponent(SpatialModelComponent):
     @hydromt_step
     def create(
         self,
+        *,
         region: dict,
         res: Optional[float] = None,
         crs: Optional[int] = None,
@@ -279,6 +277,7 @@ class GridComponent(SpatialModelComponent):
             hydrography_fn=hydrography_fn,
             basin_index_fn=basin_index_fn,
             data_catalog=self._data_catalog,
+            crs=crs,
         )
 
         kind = next(iter(region))  # first key of region
@@ -446,7 +445,7 @@ class GridComponent(SpatialModelComponent):
     def _region_data(self) -> Optional[gpd.GeoDataFrame]:
         """Returns the geometry of the model area of interest."""
         if len(self.data) > 0:
-            crs: Union[int, CRS] = self.crs
+            crs: Optional[Union[int, CRS]] = self.crs
             if crs is not None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)

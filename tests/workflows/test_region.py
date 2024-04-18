@@ -11,7 +11,7 @@ from hydromt.workflows.region import _parse_region_value, parse_region
 
 
 def test_region_from_geom(world):
-    region = parse_region({"geom": world})
+    region = parse_region({"geom": world}, crs=None)
     assert world is region
 
 
@@ -44,7 +44,7 @@ def test_geom_from_cat(tmpdir, world):
 def test_geom_from_points_fails(geodf):
     region = {"geom": geodf}
     with pytest.raises(ValueError, match=r"Region value.*"):
-        region = parse_region(region)
+        region = parse_region(region=region, crs=None)
 
 
 @pytest.mark.skip(reason="Needs Rasterdataset impl")
@@ -145,7 +145,7 @@ def test_region_from_model(tmpdir, world, mocker: MockerFixture):
     plugins = mocker.patch("hydromt.workflows.region.PLUGINS")
     plugins.model_plugins = {"Model": mocker.Mock(return_value=model)}
     region = {Model.__name__: tmpdir}
-    region = parse_region(region)
+    region = parse_region(region=region, crs=None)
     assert region is world
 
 
