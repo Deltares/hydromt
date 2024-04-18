@@ -30,7 +30,7 @@ def test_get_versions(tmpdir):
     versions = _get_catalog_versions(root)
     assert len(versions) == 1
     assert versions[0].get("version") == "v0.1.0"
-    assert versions[0].get("hash") == "777ec0b791b5df8961c1492ff2228e08"
+    assert versions[0].get("hash") == "923400dbeca21737ed158490678e8b82"
 
 
 def test_get_versions_artifacts(cat_root):
