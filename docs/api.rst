@@ -451,11 +451,8 @@ Plugin developer methods
 .. autosummary::
    :toctree: _generated
 
-   SpatialModelComponent.create_region
-   SpatialModelComponent.set_region
+   SpatialModelComponent._region_data
    SpatialModelComponent.write_region
-   SpatialModelComponent.read_region
-   SpatialModelComponent.parse_region
    SpatialModelComponent.test_equal
 
 
