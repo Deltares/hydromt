@@ -19,6 +19,7 @@ Added
 - A Github action now checks whether the migration guide is updated (#829)
 - Added a `ConfigComponent` to write configurations for kernels/simulations. (#863)
 - Added a `GeomsComponent` to manage geo-spatial geometry data of a model. (#867)
+- Added a `DatasetComponent` to manage multidimensional data of a model. (#894)
 
 Changed
 -------
