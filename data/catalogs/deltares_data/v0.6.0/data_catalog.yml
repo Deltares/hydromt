@@ -347,6 +347,34 @@ eobs_v25.0e:
   unit_add:
     time: 86400
 
+eobs_v29.0e:
+  crs: 4326
+  data_type: RasterDataset
+  driver: netcdf
+  kwargs:
+    chunks:
+      latitude: 100
+      longitude: 100
+      time: 100
+    combine: by_coords
+    parallel: true
+    preprocess: round_latlon
+  meta:
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_version: 29.0e
+  path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
+  rename:
+    pp: press_msl
+    qq: kin
+    rr: precip
+    tg: temp
+  unit_add:
+    time: 86400
+
 eobs_orography_v20.0e:
   crs: 4326
   data_type: RasterDataset
@@ -441,6 +469,25 @@ eobs_orography_v25.0e:
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_version: 25.0e
   path: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
+  rename:
+    elevation: elevtn
+
+eobs_orography_v29.0e:
+  crs: 4326
+  data_type: RasterDataset
+  driver: netcdf
+  kwargs:
+    chunks:
+      latitude: 100
+      longitude: 100
+  meta:
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_version: 29.0e
+  path: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
   rename:
     elevation: elevtn
 
