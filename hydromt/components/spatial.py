@@ -30,7 +30,7 @@ class SpatialModelComponent(ModelComponent, ABC):
     ) -> None:
         super().__init__(model)
         self._region_component = region_component
-        self.__filename = filename
+        self._region_filename = filename
 
     @property
     def bounds(self) -> Optional[np.ndarray]:
@@ -83,7 +83,7 @@ class SpatialModelComponent(ModelComponent, ABC):
 
         write_region(
             self.region,
-            filename=filename or self.__filename,
+            filename=filename or self._region_filename,
             to_wgs84=to_wgs84,
             logger=self._logger,
             root=self._root,
