@@ -194,7 +194,7 @@ class Model(object, metaclass=ABCMeta):
         )
 
     @property
-    def crs(self) -> CRS:
+    def crs(self) -> Optional[CRS]:
         """Returns coordinate reference system embedded in region."""
         return self.region.crs if self.region is not None else None
 
