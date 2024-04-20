@@ -93,10 +93,10 @@ def test_get_versions_artifacts():
 def test_catalog_versions(cat_root, tmpdir):
     # assert all subdirs are catalogs and have a versions.yml file
     catalogs = [d for d in cat_root.iterdir() if d.is_dir()]
-    for cat in catalogs:
-        registry_file = cat / "registry.txt"
+    for cat_dir in catalogs:
+        registry_file = cat_dir / "registry.txt"
         assert registry_file.exists()
-        tmp_registry_file = Path(tmpdir) / f"{cat}_registry.txt"
-        create_registry_file(cat, tmp_registry_file)
+        tmp_registry_file = Path(tmpdir) / f"{cat_dir.name}_registry.txt"
+        create_registry_file(cat_dir, tmp_registry_file)
         # check if both registry files (incl hashes) are the same
         assert registry_file.read_text() == tmp_registry_file.read_text()
