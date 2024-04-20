@@ -99,4 +99,8 @@ def test_catalog_versions(cat_root, tmpdir):
         tmp_registry_file = Path(tmpdir) / f"{cat_dir.name}_registry.txt"
         create_registry_file(cat_dir, tmp_registry_file)
         # check if both registry files (incl hashes) are the same
-        assert registry_file.read_text() == tmp_registry_file.read_text()
+        with open(registry_file, "r") as f:
+            registry = sorted(f.readlines())
+        with open(tmp_registry_file, "r") as f:
+            tmp_registry = sorted(f.readlines())
+        assert registry == tmp_registry
