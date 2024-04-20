@@ -221,12 +221,8 @@ def test_versioned_catalogs(data_catalog):
     data_catalog.from_predefined_catalogs("deltares_data", "v0.5.0")
     assert len(data_catalog.sources) > 0
 
-    with pytest.raises(RuntimeError, match="Unknown version requested "):
+    with pytest.raises(ValueError, match="Version v1993.7 not found "):
         _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
-
-    data_catalog._version = "v99999"
-    with pytest.raises(RuntimeError, match="No compatible catalog version"):
-        data_catalog.from_predefined_catalogs("deltares_data")
 
 
 def test_data_catalog(tmpdir, data_catalog):
@@ -261,11 +257,10 @@ def test_data_catalog(tmpdir, data_catalog):
     with pytest.deprecated_call():
         data_catalog = DataCatalog(deltares_data=False)
     assert len(data_catalog._sources) == 0
-    with pytest.deprecated_call():
-        data_catalog.from_artifacts("deltares_data")
+    data_catalog.from_predefined_catalogs("deltares_data")
     assert len(data_catalog._sources) > 0
     with (
-        pytest.raises(RuntimeError, match="Unknown version requested"),
+        pytest.raises(ValueError, match="Version unknown_version not found"),
         pytest.deprecated_call(),
     ):
         data_catalog = DataCatalog(deltares_data="unknown_version")
@@ -274,21 +269,6 @@ def test_data_catalog(tmpdir, data_catalog):
     fn_yml = join(tmpdir, "test.yml")
     data_catalog = DataCatalog()
     data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
-
-
-def test_from_archive(tmpdir, data_catalog):
-    # change cache to tmpdir
-    data_catalog._cache_dir = str(tmpdir.join(".hydromt_data"))
-    uri = r"https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.8/data.tar.gz"
-    data_catalog.from_archive(uri)
-    assert len(data_catalog.iter_sources()) > 0
-    source0 = data_catalog.get_source(
-        next(iter([source_name for source_name, _ in data_catalog.iter_sources()]))
-    )
-    assert ".hydromt_data" in str(source0.path)
-    # failed to download
-    with pytest.raises(ConnectionError, match="Data download failed"):
-        data_catalog.from_archive("https://asdf.com/asdf.zip")
 
 
 def test_used_sources(tmpdir):
@@ -317,7 +297,7 @@ def test_from_yml_with_archive(data_catalog):
     data_catalog1 = DataCatalog(yml_dst_fn)
     sources = list(data_catalog1.sources.keys())
     source = data_catalog1.get_source(sources[0])
-    assert yml_dst_fn.parent == Path(source.path).parent
+    assert yml_dst_fn.parent == Path(source.path).parent.parent
 
 
 def test_from_predefined_catalogs(data_catalog):
@@ -570,10 +550,6 @@ def test_deprecation_warnings(data_catalog):
     with pytest.deprecated_call():
         # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
         DataCatalog(artifact_data="v0.0.8")
-    with pytest.deprecated_call():
-        cat = DataCatalog()
-        # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.6')
-        cat.from_artifacts("artifact_data", version="v0.0.8")
     with pytest.deprecated_call():
         fn = data_catalog["chelsa"].path
         # should be driver_kwargs=dict(chunks={'x': 100, 'y': 100})

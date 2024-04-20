@@ -11,6 +11,8 @@ import xarray as xr
 from dask import config as dask_config
 from shapely.geometry import box
 
+from hydromt.predefined_catalog import PREDEFINED_CATALOGS
+
 dask_config.set(scheduler="single-threaded")
 
 import hydromt._compat as compat
@@ -39,8 +41,11 @@ DATADIR = join(dirname(abspath(__file__)), "data")
 def _local_catalog_eps(monkeypatch) -> dict:
     """Set entrypoints to local predefined catalogs."""
     cat_root = Path(__file__).parent.parent / "data" / "catalogs"
-    eps = {f.parent.name: f for f in cat_root.glob("*/versions.yml")}
-    monkeypatch.setattr("hydromt.predefined_catalogs.LOCAL_EPS", eps)
+    for name, cls in PREDEFINED_CATALOGS.items():
+        monkeypatch.setattr(
+            f"hydromt.predefined_catalog.{cls.__name__}.base_url",
+            str(cat_root / name),
+        )
 
 
 @pytest.fixture()

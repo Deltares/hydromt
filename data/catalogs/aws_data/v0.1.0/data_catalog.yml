@@ -1,6 +1,7 @@
 ---
 meta:
   version: v0.1.0
+  name: aws_data
 
 esa_worldcover_2020_v100:
   crs: 4326

@@ -1,86 +1,102 @@
-import logging
-import os
 from pathlib import Path
 
 import pytest
-import yaml
-from importlib_metadata import EntryPoint
-from pytest_mock import MockerFixture
 
-from hydromt.predefined_catalogs import (
-    _get_catalog_eps,
-    _get_catalog_versions,
-    _get_file_hash,
+from hydromt.predefined_catalog import (
+    ArtifactDataCatalog,
+    PredefinedCatalog,
+    create_registry_file,
 )
 
 
 @pytest.fixture()
-def cat_root():
+def cat_root() -> Path:
     return Path(__file__).parent.parent / "data/catalogs"
 
 
-def test_eps(mocker: MockerFixture, caplog):
-    caplog.set_level(level=logging.WARNING)
-    mock_entry_points = mocker.patch("hydromt.predefined_catalogs.entry_points")
-    mock_ep1 = EntryPoint(
-        name="mock_data",
-        value="hydromt_wflow.data_catalog",
-        group="datacatalogs",
-    )
-    mock_ep2 = EntryPoint(
-        name="deltares_data", value="hydromt.catalogs", group="datacatalogs"
-    )
-    mock_eps = [mock_ep1, mock_ep2]
-    mock_entry_points.return_value = mock_eps
-    # TODO mock actual entrypoints
-    eps = _get_catalog_eps()
-    assert "artifact_data" in eps
-    assert mock_ep1.name in eps
+@pytest.fixture()
+def tmp_catalog_files(tmpdir):
+    _base_url = Path(tmpdir) / "test_catalog"
+    for version in ["v0.1.0", "v0.2.0", "v1.0.0"]:
+        catalog_path = _base_url / version / "data_catalog.yml"
+        catalog_path.parent.mkdir(parents=True, exist_ok=True)
+        catalog_path.write_text("meta:\n  version: " + version)
+    return _base_url
+
+
+@pytest.fixture()
+def tmp_catalog_class(tmp_catalog_files) -> type[PredefinedCatalog]:
+    _base_url = tmp_catalog_files
+
+    # write registry file
+    create_registry_file(_base_url)
+
+    class TestCatalog(PredefinedCatalog):
+        name = "test_catalog"
+        base_url = str(_base_url)
+
+    return TestCatalog
+
+
+def test_predefined_catalog(tmp_catalog_class, tmpdir):
+    catalog = tmp_catalog_class(format_version="v0", cache_dir=Path(tmpdir) / "cache")
+    assert catalog.name == "test_catalog"
+    assert catalog._format_version == "v0"
+    assert catalog._pooch is None
+    assert catalog._versions is None
     assert (
-        f"Duplicated catalog plugin '{mock_ep2.name}'; skipping {mock_ep2.module}.{mock_ep2.value}"
-        in caplog.text
+        catalog.get_catalog_file("v0.1.0")
+        == catalog._cache_dir / "test_catalog" / "v0.1.0" / "data_catalog.yml"
     )
+    assert (
+        catalog.get_catalog_file()
+        == catalog._cache_dir / "test_catalog" / "v0.2.0" / "data_catalog.yml"
+    )
+    assert catalog.versions == ["v0.1.0", "v0.2.0"]
+
+    # remove source and cached registry file and check if one is created based on
+    # the cached catalog files
+    registry_path = catalog._cache_dir / "test_catalog" / "registry.txt"
+    registry_path.unlink()
+    Path(tmp_catalog_class.base_url, "registry.txt").unlink()
+    catalog._load_registry_file(overwrite=True)
+    assert registry_path.exists()
+
+    with pytest.raises(ValueError, match="Version v0.0.0 not found"):
+        catalog.get_catalog_file("v0.0.0")
 
 
-def test_get_versions(tmpdir):
-    # create a dummy catalog file
-    root = tmpdir.mkdir("dummy_data")
-    cat_path = root.join("data_catalog.yml")
-    cat_path.write("meta:\n  version: v0.1.0")
-    versions = _get_catalog_versions(root)
-    assert len(versions) == 1
-    assert versions[0].get("version") == "v0.1.0"
-    assert versions[0].get("hash") == "923400dbeca21737ed158490678e8b82"
+def test_create_registry_file(tmpdir, tmp_catalog_files):
+    # test create registry file
+    root = tmp_catalog_files
+    create_registry_file(root)
+    registry_path = root / "registry.txt"
+    assert registry_path.exists()
+
+    # no catalog files
+    with pytest.raises(FileNotFoundError):
+        create_registry_file(Path(tmpdir, "not_existing"))
+
+    # create a dummy catalog file with version folder
+    cat_path = root / "data_catalog.yml"
+    cat_path.write_text("meta:\n  version: v0.1.0")
+    with pytest.raises(ValueError, match="No valid version found"):
+        create_registry_file(root)
 
 
-def test_get_versions_artifacts(cat_root):
-    versions = _get_catalog_versions(cat_root / "artifact_data")
+def test_get_versions_artifacts():
+    versions = ArtifactDataCatalog().versions
     assert len(versions) > 0
-    assert any(v["version"] == "v0.0.8" for v in versions)
-    version = [v for v in versions if v["version"] == "v0.0.8"][0]
-    assert all([key in version for key in ["version", "hash", "path"]])
+    assert "v0.0.8" in versions
 
 
-def test_catalog_versions(cat_root):
+def test_catalog_versions(cat_root, tmpdir):
     # assert all subdirs are catalogs and have a versions.yml file
     catalogs = [d for d in cat_root.iterdir() if d.is_dir()]
     for cat in catalogs:
-        version_yml = cat / "versions.yml"
-        assert version_yml.exists()
-        with open(version_yml, "r") as f:
-            versions_file = yaml.safe_load(f)["versions"]
-        versions = _get_catalog_versions(cat_root / cat)
-        # compare list of dicts
-        assert sorted(versions_file, key=lambda x: sorted(x.items())) == sorted(
-            versions, key=lambda x: sorted(x.items())
-        )
-
-
-def test_get_file_hash(tmpdir: Path):
-    file_path = Path(os.path.join(tmpdir, "data_catalog.yml"))
-    test_dict = {"test": "test", "test2": "test2"}
-    with open(file_path, "w") as yaml_file:
-        yaml.dump(test_dict, yaml_file)
-    file_hash = _get_file_hash(file_path)
-
-    assert file_hash == "a878508f6a7278785cbd5108fb4acfce"
+        registry_file = cat / "registry.txt"
+        assert registry_file.exists()
+        tmp_registry_file = Path(tmpdir) / f"{cat}_registry.txt"
+        create_registry_file(cat, tmp_registry_file)
+        # check if both registry files (incl hashes) are the same
+        assert registry_file.read_text() == tmp_registry_file.read_text()
