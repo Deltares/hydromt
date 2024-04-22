@@ -8,7 +8,6 @@ from re import error as regex_error
 from string import Formatter
 from typing import Any, Dict, Iterable, List, Optional, Pattern, Set, Tuple
 
-import numpy as np
 import pandas as pd
 from fsspec import AbstractFileSystem
 
@@ -28,7 +27,7 @@ class ConventionResolver(MetaDataResolver):
         self,
         uri: str,
         time_tuple: Optional[Tuple[str, str]] = None,
-        variables: Optional[Set[str]] = None,
+        variables: Optional[List[str]] = None,
     ) -> Tuple[str, List[str], Pattern[str]]:
         """Expand known placeholders in the URI."""
         keys: list[str] = []
@@ -72,17 +71,10 @@ class ConventionResolver(MetaDataResolver):
         keys: List[str],
         time_range: TimeRange,
     ) -> pd.PeriodIndex:
-        dt: pd.Timedelta = pd.to_timedelta(self.unit_add.get("time", 0), unit="s")
-        t_range: pd.DatetimeIndex = pd.to_datetime(list(time_range)) - dt
+        t_range: pd.DatetimeIndex = pd.to_datetime(list(time_range))
         freq: str = "M" if "month" in keys else "a"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
-
-    def _get_variables(self, variables: List[str]) -> List[str]:
-        variables: list[str] = np.atleast_1d(variables).tolist()
-        inverse_rename_mapping: dict[str, str] = {v: k for k, v in self.rename.items()}
-        vrs: dict[str] = [inverse_rename_mapping.get(var, var) for var in variables]
-        return vrs
 
     def _resolve_wildcards(
         self, uris: Iterable[str], fs: AbstractFileSystem
@@ -108,10 +100,8 @@ class ConventionResolver(MetaDataResolver):
         if time_range:
             dates = self._get_dates(keys, time_range)
         else:
-            dates = pd.PeriodIndex(["2023-01-01"], freq="d")  # fill any valid value
-        if variables:
-            variables = self._get_variables(variables)
-        else:
+            dates = pd.PeriodIndex(["1970-01-01"], freq="d")  # fill any valid value
+        if not variables:
             variables = [""]  # fill any valid value
         fmts: Iterable[Dict[str, Any]] = map(
             lambda t: {
