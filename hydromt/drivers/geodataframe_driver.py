@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import geopandas as gpd
 from pyproj import CRS
@@ -35,6 +35,8 @@ class GeoDataFrameDriver(BaseDriver, ABC):
 
         args:
         """
+        # Merge static kwargs from the catalog with dynamic kwargs from the query.
+        driver_kwargs: Dict[str, Any] = self.options | kwargs
         uris = self.metadata_resolver.resolve(
             uri,
             self.filesystem,
@@ -50,7 +52,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             predicate=predicate,
             logger=logger,
             handle_nodata=handle_nodata,
-            **kwargs,
+            **driver_kwargs,
         )
         return gdf
 

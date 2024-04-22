@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import xarray as xr
 
@@ -29,6 +29,8 @@ class RasterDatasetDriver(BaseDriver, ABC):
         **kwargs,
     ) -> xr.Dataset:
         """Read in any compatible data source to an xarray Dataset."""
+        # Merge static kwargs from the catalog with dynamic kwargs from the query.
+        driver_kwargs: Dict[str, Any] = self.options | kwargs
         uris = self.metadata_resolver.resolve(
             uri,
             self.filesystem,
@@ -46,7 +48,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
             zoom_level=zoom_level,
             logger=logger,
             handle_nodata=handle_nodata,
-            **kwargs,
+            **driver_kwargs,
         )
 
     @abstractmethod
