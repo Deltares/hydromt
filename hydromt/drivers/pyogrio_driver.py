@@ -11,7 +11,6 @@ from shapely.geometry.base import BaseGeometry
 from hydromt._typing import Bbox, Geom, GpdShapeGeom, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
-from hydromt.gis import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 
@@ -21,19 +20,15 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     name = "pyogrio"
 
-    def read(
+    def read_data(
         self,
-        uri: str,
+        uris: List[str],
         *,
-        bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0,
         crs: Optional[CRS] = None,
-        variables: Optional[List[str]] = None,
         predicate: str = "intersects",
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
         logger: Logger = logger,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
     ) -> gpd.GeoDataFrame:
         """
@@ -41,26 +36,15 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
-        uris = self.metadata_resolver.resolve(
-            uri,
-            self.filesystem,
-            bbox=bbox,
-            mask=mask,
-            buffer=buffer,
-            predicate=predicate,
-            variables=variables,
-            handle_nodata=handle_nodata,
-            **kwargs,
-        )
         if len(uris) != 1:
             raise ValueError("Length of uris for Pyogrio Driver must be 1.")
         _uri = uris[0]
-        if bbox is not None:  # buffer bbox
-            bbox: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
-        if mask is not None:  # buffer mask
-            mask: Geom = parse_geom_bbox_buffer(mask, bbox, buffer, crs)
-        bbox_reader = bbox_from_file_and_filters(_uri, bbox, mask, crs)
-        return read_dataframe(_uri, bbox=bbox_reader)
+        if mask is not None:
+            bbox = bbox_from_file_and_filters(_uri, mask=mask, crs=crs)
+        else:
+            bbox = None
+        # TODO: add **self.options, see see https://github.com/Deltares/hydromt/issues/899
+        return read_dataframe(_uri, bbox=bbox)
 
     def write(
         self,
@@ -78,49 +62,37 @@ class PyogrioDriver(GeoDataFrameDriver):
 
 def bbox_from_file_and_filters(
     uri: str,
-    bbox: Optional[GpdShapeGeom] = None,
-    mask: Optional[GpdShapeGeom] = None,
+    mask: GpdShapeGeom,
     crs: Optional[CRS] = None,
 ) -> Optional[Bbox]:
     """Create a bbox from the file metadata and filter options.
 
     Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.
-    This function takes the possible bbox filter, mask filter and crs of the input data
+    This function takes the mask filter and crs of the input data
     and returns a bbox in the same crs as the data based on the input filters.
-    As pyogrio currently does not support filtering using a mask, the mask is converted
-    to a bbox and the bbox is returned so that the data has some geospatial filtering.
 
     Parameters
     ----------
     uri: str,
         URI of the data.
-    bbox: GeoDataFrame | GeoSeries | BaseGeometry
-        bounding box to filter the data while reading.
     mask: GeoDataFrame | GeoSeries | BaseGeometry
         mask to filter the data while reading.
-    crs: pyproj.CRS
-        coordinate reference system of the bounding box or geometry. If already set,
+    crs: pyproj.CRS | None
+        coordinate reference system of the file. If already set,
         this argument is ignored.
     """
-    if bbox is not None and mask is not None:
-        raise ValueError(
-            "Both 'bbox' and 'mask' are provided. Please provide only one."
-        )
-    if bbox is None and mask is None:
-        return None
+    if issubclass(type(mask), BaseGeometry):
+        mask = gpd.GeoSeries(mask, crs=crs)
+
+    source_crs = None
     if source_crs_str := read_info(uri).get("crs"):
-        source_crs = CRS(source_crs_str)
+        source_crs = CRS.from_user_input(source_crs_str)
     elif crs:
-        source_crs = crs
-    else:  # assume WGS84
-        source_crs = CRS("EPSG:4326")
+        source_crs = CRS.from_user_input(crs)
+    else:
+        raise ValueError("CRS must be set either in the file or as an argument.")
 
-    if mask is not None:
-        bbox = mask
+    if source_crs is not None and source_crs != mask.crs:
+        mask = mask.to_crs(source_crs)
 
-    # convert bbox to geom with input crs (assume WGS84 if not provided)
-    crs = crs if crs is not None else CRS.from_user_input(4326)
-    if issubclass(type(bbox), BaseGeometry):
-        bbox = gpd.GeoSeries(bbox, crs=crs)
-    bbox = bbox if bbox.crs is not None else bbox.set_crs(crs)
-    return tuple(bbox.to_crs(source_crs).total_bounds)
+    return tuple(mask.total_bounds)

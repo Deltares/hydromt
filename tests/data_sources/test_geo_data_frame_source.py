@@ -1,7 +1,7 @@
 from datetime import datetime
 from os.path import basename
 from pathlib import Path
-from typing import Type, cast
+from typing import List, Type, cast
 from uuid import uuid4
 
 import geopandas as gpd
@@ -188,6 +188,9 @@ class TestGeoDataFrameSource:
                 pass
 
             def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
+                return self.read_data([uri], **kwargs)
+
+            def read_data(self, uris: List[str], **kwargs) -> gpd.GeoDataFrame:
                 return geodf
 
         return MockGeoDataFrameDriver

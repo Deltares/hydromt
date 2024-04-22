@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from fsspec import AbstractFileSystem
 
-from hydromt._typing import Bbox, Geom, NoDataStrategy, Predicate, TimeRange
+from hydromt._typing import Geom, NoDataStrategy, TimeRange
 
 from .metadata_resolver import MetaDataResolver
 
@@ -95,13 +95,8 @@ class ConventionResolver(MetaDataResolver):
         fs: AbstractFileSystem,
         *,
         time_range: Optional[TimeRange] = None,
-        bbox: Optional[Bbox] = None,
-        # TODO: align? https://github.com/Deltares/hydromt/issues/874
         mask: Optional[Geom] = None,
-        buffer: float = 0.0,
-        predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
-        zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,

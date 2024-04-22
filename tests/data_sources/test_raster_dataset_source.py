@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Type
+from typing import List, Type
 
 import pytest
 import xarray as xr
@@ -106,6 +106,9 @@ class TestRasterDatasetSource:
                 pass
 
             def read(self, uri: str, **kwargs) -> xr.Dataset:
+                return self.read_data([uri], **kwargs)
+
+            def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
                 return rasterds
 
         return MockRasterDatasetDriver

@@ -1202,7 +1202,6 @@ class DataCatalog(object):
         zoom_level: Optional[Union[int, tuple]] = None,
         buffer: Union[float, int] = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,
         single_var_as_array: Optional[bool] = True,
@@ -1213,7 +1212,7 @@ class DataCatalog(object):
         """Return a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
-        with optional additional `buffer` and `align` arguments.
+        with optional additional `buffer` argument.
         To slice the data to the time period of interest, provide the `time_tuple`
         argument. To return only the dataset variables of interest provide the
         `variables` argument.
@@ -1243,8 +1242,6 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         handle_nodata: NoDataStrategy, optional
             What to do if no data can be found.
-        align : float, optional
-            Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
             Names of RasterDataset variables to return. By default all dataset variables
             are returned.
@@ -1291,7 +1288,6 @@ class DataCatalog(object):
                 geom,
                 bbox,
                 buffer,
-                align,
                 time_tuple,
                 logger=self.logger,
             )
@@ -1313,7 +1309,6 @@ class DataCatalog(object):
             geom=geom,
             buffer=buffer,
             zoom_level=zoom_level,
-            align=align,
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
@@ -1339,7 +1334,7 @@ class DataCatalog(object):
         """Return a clipped and unified GeoDataFrame (vector).
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
-        with optional additional `buffer` and `align` arguments.
+        with optional additional `buffer` argument.
         To return only the dataframe columns of interest provide the
         `variables` argument.
 
@@ -1365,8 +1360,6 @@ class DataCatalog(object):
             the predicate function against each item. Requires bbox or mask.
             By default 'intersects' options are:
             {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
-        align : float, optional
-            Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
             Names of GeoDataFrame columns to return. By default all columns are
             returned.
@@ -1449,7 +1442,7 @@ class DataCatalog(object):
         """Return a clipped, sliced and unified GeoDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
-        with optional additional `buffer` and `align` arguments.
+        with optional additional `buffer` argument.
         To slice the data to the time period of interest, provide the
         `time_tuple` argument. To return only the dataset variables
         of interest provide the `variables` argument.
