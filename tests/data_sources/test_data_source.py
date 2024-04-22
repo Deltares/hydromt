@@ -23,14 +23,14 @@ class TestDataSource:
                 "driver": mock_geodf_driver,
                 "data_adapter": mock_geodataframe_adapter,
                 "uri": "test_uri",
-                "metadata": {"source_url": "www.example.com"},
+                "metadata": {"url": "www.example.com"},
             }
         )
         summ: Dict[str, Any] = submodel.summary()
         assert summ["data_type"] == "GeoDataFrame"
         assert summ["uri"] == f"{root}test_uri"
         assert summ["driver"] == "MockGeoDataFrameDriver"
-        assert summ["source_url"] == "www.example.com"
+        assert summ["url"] == "www.example.com"
 
 
 class TestGetNestedVar:

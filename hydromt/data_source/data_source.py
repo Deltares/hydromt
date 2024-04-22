@@ -34,6 +34,8 @@ class SourceMetadata(BaseModel):
     check the data and enrich the metadata for HydroMT.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     crs: Union[int, str, None] = None
     extent: Dict[str, Any] = Field(default_factory=dict)
     nodata: Union[dict, float, int, None] = None
