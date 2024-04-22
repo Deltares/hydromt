@@ -1,5 +1,6 @@
 """Implementation of the predefined data catalogs entry points."""
 
+import hashlib
 import logging
 import shutil
 from pathlib import Path
@@ -43,7 +44,7 @@ def create_registry_file(root: Path, registry_path: Optional[Path] = None) -> No
         key = path.relative_to(root).as_posix()
         if not _valid_key(key):
             raise ValueError(f"No valid version found in {key}")
-        hash = pooch.file_hash(path)
+        hash = _get_file_hash(path)
         registry[key] = hash
 
     if not registry:
@@ -246,3 +247,11 @@ PREDEFINED_CATALOGS = {
     "aws_data": AWSDataCatalog,
     "gcs_cmip6_data": GCSCMIP6DataCatalog,
 }
+
+
+def _get_file_hash(file_path: str):
+    hash_func = hashlib.sha256()
+    with open(file_path, "rt") as f:
+        for line in f.readlines():
+            hash_func.update(line.encode("utf-8"))
+    return hash_func.hexdigest()
