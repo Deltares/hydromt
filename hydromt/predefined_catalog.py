@@ -3,7 +3,7 @@
 import logging
 import shutil
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import Callable, ClassVar, Optional
 
 import packaging.version
 import pooch
@@ -85,11 +85,9 @@ class PredefinedCatalog(object):
         self._versions: Optional[list[str]] = None
 
     @property
-    def registry(self) -> pooch.Pooch:
+    def registry(self) -> dict:
         """Return the registry."""
-        if len(self._registry) == 0:
-            self._registry = self.get_registry()
-        return self.pooch
+        return self.pooch.registry
 
     @property
     def pooch(self) -> pooch.Pooch:
@@ -117,7 +115,7 @@ class PredefinedCatalog(object):
         """Set valid catalog versions."""
         # parse versions from registry, assume registry key is <version>/data_catalog.yml
         # keep only versions that match the format_version
-        keys = self.pooch.registry.keys()
+        keys = self.registry.keys()
         _versions = [
             v.split("/")[0] for v in keys if _valid_key(v, self._format_version)
         ]
@@ -128,11 +126,11 @@ class PredefinedCatalog(object):
         self._versions = sorted(_versions, key=packaging.version.parse)
         return self._versions
 
-    def _load_registry_file(self, overwrite: bool = False) -> Path:
+    def _load_registry_file(self, overwrite: bool = False) -> None:
         """Create a catalog from a yaml file."""
         if self._pooch is None:
             self._create_pooch()
-        if self._pooch.registry and not overwrite:
+        if self.registry and not overwrite:
             return
         registry_path = Path(self._cache_dir / self.name / "registry.txt")
         if registry_path.exists():
@@ -149,7 +147,7 @@ class PredefinedCatalog(object):
             raise FileNotFoundError(
                 f"No cached file found. Failed to retrieve {self.name} versions file"
             )
-        self._pooch.load_registry(registry_path)
+        self.pooch.load_registry(registry_path)
 
     def get_catalog_file(self, version: Optional[str] = None) -> Optional[Path]:
         """Get the cached catalog file path for a specific version.
@@ -176,9 +174,10 @@ class PredefinedCatalog(object):
         return Path(path) if path else None
 
     @property
-    def _downloader(self) -> Optional[callable]:
+    def _downloader(self) -> Optional[Callable]:
         if not _uri_validator(self.base_url):
             return _copy_file
+        return None
 
 
 def _valid_key(v: str, format_version: Optional[str] = None) -> bool:
