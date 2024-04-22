@@ -1,8 +1,8 @@
 """Implementation of the predefined data catalogs entry points."""
 
-import hashlib
 import logging
 import shutil
+import sys
 from pathlib import Path
 from typing import Callable, ClassVar, Optional
 
@@ -44,7 +44,9 @@ def create_registry_file(root: Path, registry_path: Optional[Path] = None) -> No
         key = path.relative_to(root).as_posix()
         if not _valid_key(key):
             raise ValueError(f"No valid version found in {key}")
-        hash = _get_file_hash(path)
+        if sys.platform == "win32":
+            _replace_line_endings(path)
+        hash = pooch.file_hash(path)
         registry[key] = hash
 
     if not registry:
@@ -249,9 +251,11 @@ PREDEFINED_CATALOGS = {
 }
 
 
-def _get_file_hash(file_path: str):
-    hash_func = hashlib.sha256()
-    with open(file_path, "rt") as f:
-        for line in f.readlines():
-            hash_func.update(line.encode("utf-8"))
-    return hash_func.hexdigest()
+def _replace_line_endings(file_path: Path):
+    WINDOWS_LINE_ENDING = b"\r\n"
+    UNIX_LINE_ENDING = b"\n"
+    with open(file_path, "rb") as open_file:
+        content = open_file.read()
+    content = content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+    with open(file_path, "wb") as open_file:
+        open_file.write(content)
