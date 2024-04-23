@@ -635,11 +635,11 @@ class GridComponent(SpatialModelComponent):
         gdf = self._data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
         )
-        assert gdf is not None
-        if gdf.empty:
-            self._logger.warning(
-                f"No shapes of {vector_fn} found within region,"
-                " skipping setup_grid_from_vector."
+        if gdf is None or gdf.empty:
+            _exec_nodata_strat(
+                f"No shapes of {vector_fn} found within region, skipping {self.add_data_from_geodataframe.__name__}.",
+                NoDataStrategy.IGNORE,
+                self._logger,
             )
             return None
         # Data resampling

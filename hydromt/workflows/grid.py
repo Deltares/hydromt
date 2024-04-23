@@ -10,6 +10,7 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import Polygon
 
+from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster
 from hydromt.gis.raster import full
@@ -85,6 +86,12 @@ def grid_from_region(
         da_hyd = data_catalog.get_rasterdataset(
             hydrography_fn, geom=geom, variables=["flwdir"]
         )
+        if da_hyd is None:
+            _exec_nodata_strat(
+                f"No data available in hydrography_fn '{hydrography_fn}' on variable 'flwdir'",
+                NoDataStrategy.RAISE,
+                logger,
+            )
         assert da_hyd is not None
         if not isinstance(res, (int, float)):
             logger.info(
