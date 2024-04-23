@@ -48,7 +48,8 @@ class DataSource(BaseModel, ABC):
     root: Optional[str] = Field(default=None)
     version: Optional[str] = Field(default=None)
     provider: Optional[str] = Field(default=None)
-    crs: Optional[int] = Field(default=None)
+    # TODO: move crs, extent and data_adapter.nodata to metadata class https://github.com/Deltares/hydromt/issues/901
+    crs: Optional[Union[int, str]] = Field(default=None)  # 4326 or 'EPSG:4326'
     extent: Dict[str, Any] = Field(default_factory=dict)
 
     def summary(self) -> Dict[str, Any]:

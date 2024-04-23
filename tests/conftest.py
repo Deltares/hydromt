@@ -420,7 +420,7 @@ def mock_geodf_driver(
     class MockGeoDataFrameDriver(GeoDataFrameDriver):
         name = "mock_geodf_driver"
 
-        def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
+        def read_data(self, *args, **kwargs) -> gpd.GeoDataFrame:
             return geodf
 
     return MockGeoDataFrameDriver(metadata_resolver=mock_resolver)
@@ -433,7 +433,7 @@ def mock_raster_ds_driver(
     class MockRasterDatasetDriver(RasterDatasetDriver):
         name = "mock_raster_ds_driver"
 
-        def read(self, *args, **kwargs) -> xr.Dataset:
+        def read_data(self, *args, **kwargs) -> xr.Dataset:
             return rasterds
 
     return MockRasterDatasetDriver(metadata_resolver=mock_resolver)

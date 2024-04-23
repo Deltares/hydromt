@@ -20,8 +20,12 @@ class BaseDriver(BaseModel, ABC):
 
     name: ClassVar[str]
     metadata_resolver: MetaDataResolver = Field(default_factory=RESOLVERS["convention"])
-    model_config = ConfigDict(extra="allow")
     filesystem: FS = Field(default=LocalFileSystem())
+    # TODO use options and remove ConfigDict(extra="allow"), see https://github.com/Deltares/hydromt/issues/899
+    # options: Dict[str, Any] = Field(default_factory=dict)
+
+    # Allow extra fields in the BaseDriver
+    model_config = ConfigDict(extra="allow")
 
     @field_validator("metadata_resolver", mode="before")
     @classmethod

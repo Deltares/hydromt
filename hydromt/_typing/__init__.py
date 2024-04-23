@@ -30,6 +30,7 @@ from .type_def import (
     TotalBounds,
     Variables,
     XArrayDict,
+    ZoomLevel,
 )
 
 __all__ = [
@@ -60,4 +61,5 @@ __all__ = [
     "DataType",
     "GeomBuffer",
     "Predicate",
+    "ZoomLevel",
 ]
