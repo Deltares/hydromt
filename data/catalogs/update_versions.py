@@ -1,4 +1,5 @@
 """Script to update the registry.txt file for each predefined catalog."""
+
 from pathlib import Path
 
 from hydromt.predefined_catalog import create_registry_file

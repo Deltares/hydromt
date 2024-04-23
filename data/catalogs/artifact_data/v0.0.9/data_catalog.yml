@@ -2,7 +2,6 @@ meta:
   version: v0.0.9
   root: https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.9/data.tar.gz
   name: artifact_data
-  sha256: 32de5b95c171628547f303d7f65d53cbb1b9da9af4834717c8efff93fe55aad4
 
 chelsa:
   crs: 4326
