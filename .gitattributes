@@ -1,3 +1,4 @@
+data text eol=lf
+
 # GitHub syntax highlighting
-* text eol=lf
 pixi.lock linguist-language=YAML
