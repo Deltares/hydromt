@@ -65,7 +65,6 @@ class RasterDatasetSource(DataSource):
         ds: xr.Dataset = self.driver.read(
             self.uri,
             mask=mask,
-            crs=self.crs,
             time_range=time_range,
             variables=variables,
             zoom_level=zoom_level,

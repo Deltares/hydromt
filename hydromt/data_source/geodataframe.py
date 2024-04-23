@@ -61,7 +61,6 @@ class GeoDataFrameSource(DataSource):
         gdf: gpd.GeoDataFrame = self.driver.read(
             self.uri,
             mask=mask,
-            crs=self.crs,
             predicate=predicate,
             variables=variables,
             handle_nodata=handle_nodata,

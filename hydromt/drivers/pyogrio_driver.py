@@ -6,9 +6,8 @@ from typing import List, Optional
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
-from shapely.geometry.base import BaseGeometry
 
-from hydromt._typing import Bbox, Geom, GpdShapeGeom, StrPath
+from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 
@@ -39,7 +38,7 @@ class PyogrioDriver(GeoDataFrameDriver):
             raise ValueError("Length of uris for Pyogrio Driver must be 1.")
         _uri = uris[0]
         if mask is not None:
-            bbox = bbox_from_file_and_filters(_uri, mask=mask, crs=crs)
+            bbox = bbox_from_file_and_filters(_uri, mask=mask)
         else:
             bbox = None
         return read_dataframe(_uri, bbox=bbox, **self.options)
@@ -60,12 +59,11 @@ class PyogrioDriver(GeoDataFrameDriver):
 
 def bbox_from_file_and_filters(
     uri: str,
-    mask: GpdShapeGeom,
-    crs: Optional[CRS] = None,
+    mask: Optional[Geom],
 ) -> Optional[Bbox]:
     """Create a bbox from the file metadata and filter options.
 
-    Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.
+    Pyogrio's mask or bbox arguments require a mask or bbox in the same CRS as the data.
     This function takes the mask filter and crs of the input data
     and returns a bbox in the same crs as the data based on the input filters.
 
@@ -75,22 +73,18 @@ def bbox_from_file_and_filters(
         URI of the data.
     mask: GeoDataFrame | GeoSeries | BaseGeometry
         mask to filter the data while reading.
-    crs: pyproj.CRS | None
-        coordinate reference system of the file. If already set,
-        this argument is ignored.
     """
-    if issubclass(type(mask), BaseGeometry):
-        mask = gpd.GeoSeries(mask, crs=crs)
-
     source_crs = None
     if source_crs_str := read_info(uri).get("crs"):
         source_crs = CRS.from_user_input(source_crs_str)
-    elif crs:
-        source_crs = CRS.from_user_input(crs)
-    else:
-        raise ValueError("CRS must be set either in the file or as an argument.")
 
-    if source_crs is not None and source_crs != mask.crs:
-        mask = mask.to_crs(source_crs)
+    if mask is not None:
+        if not source_crs:
+            logger.warning(
+                f"Reading from uri: '{uri}' without CRS definition. Filtering with crs:"
+                f" {mask.crs}, cannot compare crs."
+            )
+        elif mask.crs != source_crs:
+            mask = mask.to_crs(source_crs)
 
     return tuple(mask.total_bounds)
