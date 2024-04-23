@@ -95,6 +95,9 @@ updates
 
 - create new branch on github
 - make changes and bump the version in the global meta section using semantic versioning
+- create a new folder with the version as its name of the respective predefined data catalogs
+- add the data_catalog.yml to this folder
+- run update_versions.py, this will create a registry file with the versions and hashes of the data catalogs, also the line endings are replaced (CRLF -> LF) if you are updating from windows.
 - test your yml file (Can the added/changed data sources be read through HydroMT?)
 - create pull request
 - add new version to hydromt\data\predefined_catalogs.yml
