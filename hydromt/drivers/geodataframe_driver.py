@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import geopandas as gpd
 from pyproj import CRS
@@ -28,7 +28,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read in any compatible data source to a geopandas `GeoDataFrame`.
@@ -36,14 +35,12 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         args:
         """
         # Merge static kwargs from the catalog with dynamic kwargs from the query.
-        driver_kwargs: Dict[str, Any] = self.options | kwargs
         uris = self.metadata_resolver.resolve(
             uri,
             self.filesystem,
             mask=mask,
             variables=variables,
             handle_nodata=handle_nodata,
-            **kwargs,
         )
         gdf = self.read_data(
             uris,
@@ -52,7 +49,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             predicate=predicate,
             logger=logger,
             handle_nodata=handle_nodata,
-            **driver_kwargs,
         )
         return gdf
 
@@ -66,7 +62,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         predicate: str = "intersects",
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
     ) -> gpd.GeoDataFrame:
         """Read in any compatible data source to a geopandas `GeoDataFrame`."""
         ...

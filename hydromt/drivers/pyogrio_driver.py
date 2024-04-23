@@ -29,7 +29,6 @@ class PyogrioDriver(GeoDataFrameDriver):
         predicate: str = "intersects",
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
@@ -43,8 +42,7 @@ class PyogrioDriver(GeoDataFrameDriver):
             bbox = bbox_from_file_and_filters(_uri, mask=mask, crs=crs)
         else:
             bbox = None
-        # TODO: add **self.options, see see https://github.com/Deltares/hydromt/issues/899
-        return read_dataframe(_uri, bbox=bbox)
+        return read_dataframe(_uri, bbox=bbox, **self.options)
 
     def write(
         self,

@@ -1,5 +1,6 @@
 """RasterDatasetDriver for zarr data."""
 
+from copy import copy
 from functools import partial
 from logging import Logger
 from typing import Callable, List, Optional
@@ -27,21 +28,21 @@ class ZarrDriver(RasterDatasetDriver):
         logger: Optional[Logger] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-        **kwargs,
     ) -> xr.Dataset:
         """
         Read zarr data to an xarray DataSet.
 
         Args:
         """
+        options = copy(self.options)
         preprocessor: Optional[Callable] = None
-        preprocessor_name: Optional[str] = kwargs.get("preprocess")
+        preprocessor_name: Optional[str] = options.pop("preprocess", None)
         if preprocessor_name:
             preprocessor = PREPROCESSORS.get(preprocessor_name)
             if not preprocessor:
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
-        opn: Callable = partial(xr.open_zarr, **kwargs)
+        opn: Callable = partial(xr.open_zarr, **options)
 
         return xr.merge(
             [preprocessor(opn(_uri)) if preprocessor else opn(_uri) for _uri in uris]

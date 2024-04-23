@@ -1,5 +1,6 @@
 """Module for the netcdf driver."""
 
+from copy import copy
 from logging import Logger
 from typing import Callable, List, Optional
 
@@ -25,18 +26,19 @@ class NetcdfDriver(RasterDatasetDriver):
         zoom_level: Optional[ZoomLevel] = None,
         logger: Optional[Logger] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
     ) -> xr.Dataset:
         """Read netcdf data."""
+        options = copy(self.options)
         preprocessor: Optional[Callable] = None
-        preprocessor_name: Optional[str] = kwargs.get("preprocess")
+        preprocessor_name: Optional[str] = options.pop("preprocess", None)
         if preprocessor_name:
             preprocessor = PREPROCESSORS.get(preprocessor_name)
             if not preprocessor:
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
-        # TODO: add **self.options, see https://github.com/Deltares/hydromt/issues/899
-        return xr.open_mfdataset(uris, decode_coords="all", preprocess=preprocessor)
+        return xr.open_mfdataset(
+            uris, decode_coords="all", preprocess=preprocessor, **options
+        )
 
     def write(
         self,
