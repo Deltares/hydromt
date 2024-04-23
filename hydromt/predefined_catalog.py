@@ -45,6 +45,7 @@ def create_registry_file(root: Path, registry_path: Optional[Path] = None) -> No
         if not _valid_key(key):
             raise ValueError(f"No valid version found in {key}")
         if sys.platform == "win32":
+            # The line endings need to be replaced when operating from windows in order to maintain equality of hashes
             _replace_line_endings(path)
         hash = pooch.file_hash(path)
         registry[key] = hash
