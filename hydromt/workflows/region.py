@@ -7,22 +7,19 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Union, cast
 
 import geopandas as gpd
+import numpy as np
 import xarray as xr
+import xugrid as xu
 from genericpath import isdir, isfile
 from pyproj import CRS
 from shapely import box
 
-from hydromt import _compat
 from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import utils as gis_utils
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
 from hydromt.workflows.basin_mask import get_basin_geometry
-
-if _compat.HAS_XUGRID:
-    import xugrid as xu
-import numpy as np
 
 logger = getLogger(__name__)
 
@@ -138,9 +135,6 @@ def parse_region(
         kwargs = dict(geom=other_model.region)
         kind = "geom"
     elif kind == "mesh":
-        if not _compat.HAS_XUGRID:
-            raise ImportError("xugrid is required to read mesh files.")
-
         if isinstance(value0, (str, Path)) and isfile(value0):
             kwarg = dict(mesh=xu.open_dataset(value0))
         elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):

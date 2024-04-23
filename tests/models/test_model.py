@@ -60,25 +60,6 @@ def test_api_attrs():
     assert dm.api["grid"] == xr.Dataset
 
 
-# test both with and without xugrid
-# @pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
-# def test_global_models(mocker, has_xugrid):
-#     _MODELS = ModelCatalog()
-#     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
-#     keys = list(plugins.LOCAL_EPS.keys())
-#     if not hydromt._compat.HAS_XUGRID:
-#         keys.remove("mesh_model")
-#     # set first local model as plugin for testing
-#     _MODELS._plugins.append(keys[0])
-#     assert isinstance(_MODELS[keys[0]], EntryPoint)
-#     assert issubclass(_MODELS.load(keys[0]), Model)
-#     assert keys[0] in _MODELS.__str__()
-#     assert all([k in _MODELS for k in keys])  # eps
-#     assert all([k in _MODELS.cls for k in keys])
-#     with pytest.raises(ValueError, match="Unknown model"):
-#         _MODELS["unknown"]
-
-
 def test_check_data(demda):
     data_dict = _check_data(demda.copy(), "elevtn")
     assert isinstance(data_dict["elevtn"], xr.DataArray)
