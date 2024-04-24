@@ -2,10 +2,10 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from fsspec import AbstractFileSystem
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict
 
 from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
 
@@ -15,9 +15,7 @@ logger: Logger = getLogger(__name__)
 class MetaDataResolver(BaseModel, ABC):
     """Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
 
-    unit_add: Dict[str, Any] = Field(default_factory=dict)
-    unit_mult: Dict[str, Any] = Field(default_factory=dict)
-    rename: Dict[str, str] = Field(default_factory=dict)
+    model_config = ConfigDict(extra="forbid")
 
     @abstractmethod
     def resolve(

@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from logging import Logger, getLogger
 from os.path import join
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -32,6 +32,9 @@ from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import has_no_data
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
+
+if TYPE_CHECKING:
+    from hydromt.data_source.data_source import SourceMetadata
 
 logger = getLogger(__name__)
 
@@ -140,11 +143,11 @@ class RasterDatasetAdapter(DataAdapterBase):
     def transform(
         self,
         ds: xr.Dataset,
+        metadata: SourceMetadata,
         *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: GeomBuffer = 0,
-        crs: Optional[CRS] = None,
         zoom_level: Optional[int] = None,
         align: Optional[bool] = None,
         variables: Optional[Variables] = None,
@@ -165,8 +168,8 @@ class RasterDatasetAdapter(DataAdapterBase):
             # rename variables and parse data and attrs
             ds = self._rename_vars(ds)
             ds = self._validate_spatial_dims(ds)
-            ds = self._set_crs(ds, crs, logger)
-            ds = self._set_nodata(ds)
+            ds = self._set_crs(ds, metadata.crs, logger)
+            ds = self._set_nodata(ds, metadata)
             ds = self._shift_time(ds, logger)
             # slice data
             ds = RasterDatasetAdapter._slice_data(
@@ -184,7 +187,7 @@ class RasterDatasetAdapter(DataAdapterBase):
 
             # uniformize data
             ds = self._apply_unit_conversions(ds, logger)
-            ds = self._set_metadata(ds)
+            ds = self._set_metadata(ds, metadata)
             # return array if single var and single_var_as_array
             return self._single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
@@ -398,28 +401,29 @@ class RasterDatasetAdapter(DataAdapterBase):
 
         return ds
 
-    def _set_nodata(self, ds):
+    def _set_nodata(self, ds, metadata: SourceMetadata):
         """Parse and apply nodata values from the data catalog."""
         # set nodata value
-        if self.nodata is not None:
-            if not isinstance(self.nodata, dict):
+        if nodata := metadata.nodata is not None:
+            if not isinstance(nodata, dict):
                 no_data_values: Dict[str, Any] = {
                     k: self.nodata for k in ds.data_vars.keys()
                 }
             else:
-                no_data_values: Dict[str, Any] = self.nodata
+                no_data_values: Dict[str, Any] = nodata
             for k in ds.data_vars:
                 mv = no_data_values.get(k, None)
                 if mv is not None and ds[k].raster.nodata is None:
                     ds[k].raster.set_nodata(mv)
         return ds
 
-    def _set_metadata(self, ds):
+    def _set_metadata(self, ds, metadata: SourceMetadata):
         # unit attributes
-        for k in self.attrs:
-            ds[k].attrs.update(self.attrs[k])
+        attrs = metadata.attrs
+        for k in attrs:
+            ds[k].attrs.update(attrs[k])
         # set meta data
-        ds.attrs.update(self.meta)
+        ds.attrs.update(metadata.model_dump(exclude=["attrs"]))
         return ds
 
     # TODO: uses rasterio and is specific to driver. Should be moved to driver

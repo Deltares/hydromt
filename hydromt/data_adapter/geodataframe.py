@@ -1,7 +1,7 @@
 """The GeoDataFrame adapter performs transformations on GeoDataFrames."""
 
 from logging import Logger, getLogger
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -16,6 +16,9 @@ from hydromt.gis import parse_geom_bbox_buffer, utils
 
 from .data_adapter_base import DataAdapterBase
 
+if TYPE_CHECKING:
+    from hydromt.data_source.data_source import SourceMetadata
+
 logger: Logger = getLogger(__name__)
 
 
@@ -25,11 +28,11 @@ class GeoDataFrameAdapter(DataAdapterBase):
     def transform(
         self,
         gdf: gpd.GeoDataFrame,
+        metadata: "SourceMetadata",
         *,
         bbox: Optional[List[float]] = None,
         mask: Optional[gpd.GeoDataFrame] = None,
         buffer: float = 0.0,
-        crs: Optional[CRS] = None,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -38,15 +41,15 @@ class GeoDataFrameAdapter(DataAdapterBase):
         """Read transform data to HydroMT standards."""
         # rename variables and parse crs & nodata
         gdf = self._rename_vars(gdf)
-        gdf = self._set_crs(gdf, crs, logger=logger)
-        gdf = self._set_nodata(gdf)
+        gdf = self._set_crs(gdf, metadata.crs, logger=logger)
+        gdf = self._set_nodata(gdf, metadata)
         # slice
         gdf = GeoDataFrameAdapter._slice_data(
             gdf,
             variables,
             mask,
             bbox,
-            crs,
+            metadata.crs,
             buffer,
             predicate,
             handle_nodata,
@@ -54,7 +57,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         )
         # uniformize
         gdf = self._apply_unit_conversions(gdf, logger=logger)
-        gdf = self._set_metadata(gdf)
+        gdf = self._set_metadata(gdf, metadata)
         return gdf
 
     def _rename_vars(self, gdf: gpd.GeoDataFrame):
@@ -137,11 +140,11 @@ class GeoDataFrameAdapter(DataAdapterBase):
             gdf = gdf.iloc[idxs]
         return gdf
 
-    def _set_nodata(self, gdf: gpd.GeoDataFrame):
+    def _set_nodata(self, gdf: gpd.GeoDataFrame, metadata: "SourceMetadata"):
         """Parse and apply nodata values from the data catalog."""
         cols: Iterable[str] = gdf.select_dtypes([np.number]).columns
         no_data_value: Union[Dict[str, Any], str, None]
-        if no_data_value := self.nodata is not None and len(cols) > 0:
+        if no_data_value := metadata.nodata is not None and len(cols) > 0:
             if not isinstance(no_data_value, dict):
                 no_data_dict: Dict[str, Any] = {c: no_data_value for c in cols}
             else:
@@ -165,13 +168,13 @@ class GeoDataFrameAdapter(DataAdapterBase):
             gdf[name] = gdf[name] * m + a
         return gdf
 
-    def _set_metadata(self, gdf: gpd.GeoDataFrame):
+    def _set_metadata(self, gdf: gpd.GeoDataFrame, metadata: "SourceMetadata"):
         # set meta data
-        gdf.attrs.update(self.meta)
+        gdf.attrs.update(metadata)
 
         # set column attributes
-        for col in self.attrs:
+        for col in metadata.attrs:
             if col in gdf.columns:
-                gdf[col].attrs.update(**self.attrs[col])
+                gdf[col].attrs.update(**metadata.attrs[col])
 
         return gdf

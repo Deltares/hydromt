@@ -166,9 +166,7 @@ class TestGeoDataFrameSource:
         GeoDataFrameSource(
             name="test",
             uri="points.geojson",
-            driver=PyogrioDriver(
-                metadata_resolver={"name": "convention", "unit_add": {"geoattr": 1.0}}
-            ),
+            driver=PyogrioDriver(metadata_resolver={"name": "convention"}),
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
 

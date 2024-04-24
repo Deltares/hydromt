@@ -89,7 +89,6 @@ def test_parser():
     root = "c:/root" if os.name == "nt" else "/c/root"
     # simple; abs path
     source = {
-        "data_adapter": {"name": "GeoDataFrame"},
         "driver": {"name": "pyogrio"},
         "data_type": "GeoDataFrame",
         "uri": f"{root}/to/data.gpkg",
@@ -117,7 +116,6 @@ def test_parser():
     # alias
     dd = {
         "test": {
-            "data_adapter": {"name": "GeoDataFrame"},
             "driver": {"name": "pyogrio"},
             "data_type": "GeoDataFrame",
             "uri": "path/to/data.gpkg",
@@ -137,7 +135,6 @@ def test_parser():
     # placeholder
     dd = {
         "test_{p1}_{p2}": {
-            "data_adapter": {"name": "GeoDataFrame"},
             "driver": {"name": "pyogrio"},
             "data_type": "GeoDataFrame",
             "uri": "data_{p2}.gpkg",
@@ -153,7 +150,6 @@ def test_parser():
     # variants
     dd = {
         "test": {
-            "data_adapter": {"name": "GeoDataFrame"},
             "driver": {"name": "pyogrio"},
             "data_type": "GeoDataFrame",
             "variants": [

@@ -62,20 +62,26 @@ class RasterDatasetSource(DataSource):
         self._used = True
         if bbox is not None or (mask is not None and buffer > 0):
             mask = parse_geom_bbox_buffer(mask, bbox, buffer)
+
+        # Transform time_range and variables to match the data source
+        tr = self.data_adapter.to_source_timerange(time_range)
+        vrs = self.data_adapter.to_source_variables(variables)
+
         ds: xr.Dataset = self.driver.read(
             self.uri,
             mask=mask,
-            time_range=time_range,
-            variables=variables,
+            time_range=tr,
+            variables=vrs,
             zoom_level=zoom_level,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
             ds,
+            self.metadata,
             bbox=bbox,
             mask=mask,
             buffer=buffer,
-            crs=self.crs,
+            variables=variables,
             time_range=time_range,
             zoom_level=zoom_level,
         )

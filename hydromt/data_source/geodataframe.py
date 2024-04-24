@@ -68,8 +68,8 @@ class GeoDataFrameSource(DataSource):
         )
         return self.data_adapter.transform(
             gdf,
+            self.metadata,
             mask=mask,
-            crs=self.crs,
             predicate=predicate,
             variables=variables,
             handle_nodata=handle_nodata,
