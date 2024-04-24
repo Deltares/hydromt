@@ -42,7 +42,7 @@ class PyogrioDriver(GeoDataFrameDriver):
             raise ValueError("Length of uris for Pyogrio Driver must be 1.")
         _uri = uris[0]
         if mask is not None:
-            bbox = bbox_from_file_and_filters(_uri, mask=mask)
+            bbox = bbox_from_file_and_mask(_uri, mask=mask)
         else:
             bbox = None
         return read_dataframe(_uri, bbox=bbox, **self.options)
@@ -61,11 +61,11 @@ class PyogrioDriver(GeoDataFrameDriver):
         write_dataframe(gdf, path, **kwargs)
 
 
-def bbox_from_file_and_filters(
+def bbox_from_file_and_mask(
     uri: str,
-    mask: Optional[Geom],
+    mask: Geom,
 ) -> Optional[Bbox]:
-    """Create a bbox from the file metadata and filter options.
+    """Create a bbox from the file metadata and mask given.
 
     Pyogrio's mask or bbox arguments require a mask or bbox in the same CRS as the data.
     This function takes the mask filter and crs of the input data
@@ -82,13 +82,12 @@ def bbox_from_file_and_filters(
     if source_crs_str := read_info(uri).get("crs"):
         source_crs = CRS.from_user_input(source_crs_str)
 
-    if mask is not None:
-        if not source_crs:
-            logger.warning(
-                f"Reading from uri: '{uri}' without CRS definition. Filtering with crs:"
-                f" {mask.crs}, cannot compare crs."
-            )
-        elif mask.crs != source_crs:
-            mask = mask.to_crs(source_crs)
+    if not source_crs:
+        logger.warning(
+            f"Reading from uri: '{uri}' without CRS definition. Filtering with crs:"
+            f" {mask.crs}, cannot compare crs."
+        )
+    elif mask.crs != source_crs:
+        mask = mask.to_crs(source_crs)
 
     return tuple(mask.total_bounds)
