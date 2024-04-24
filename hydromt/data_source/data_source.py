@@ -87,25 +87,6 @@ class DataSource(BaseModel, ABC):
         )
         return summ
 
-    # @model_validator(mode="before")
-    # @classmethod
-    # def _push_down_data_adapter_args(cls, data: Any):
-    #     """Copy unit_add, unit_mult and rename to metadata_resolver.
-
-    #     The metadata resolver should query the data with the right variables and
-    #     the correct time variables, and this needs these arguments when used in
-    #     conjunction with the DataAdapter. The DataSource is responsable to keep these
-    #     up-to-date.
-    #     """
-    #     if isinstance(data, dict) or isinstance(data, BaseModel):
-    #         for da_arg in ["unit_add", "unit_mult", "rename"]:
-    #             value: Any = get_nested_var(["data_adapter", da_arg], data, {})
-    #             try:
-    #                 set_nested_var(["driver", "metadata_resolver", da_arg], data, value)
-    #             except ValueError:
-    #                 pass  # let pydantic handle errors when set_nested_var cannot set.
-    #     return data
-
     @model_validator(mode="before")
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:
