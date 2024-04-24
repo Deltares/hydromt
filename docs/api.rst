@@ -160,6 +160,7 @@ General
    :toctree: _generated
 
    drivers.base_driver.BaseDriver
+   drivers.base_driver.read
 
 RasterDataset
 -------------
@@ -167,6 +168,7 @@ RasterDataset
 .. autosummary::
    :toctree: _generated
    drivers.rasterdataset_driver.RasterDatasetDriver
+   drivers.rasterdataset_driver.RasterDatasetDriver.read
    drivers.rasterdataset_driver.RasterDatasetDriver.read_data
 
 ZarrDriver
@@ -175,13 +177,14 @@ ZarrDriver
 .. autosummary::
    :toctree: _generated
    drivers.zarr_driver.ZarrDriver
+   drivers.zarr_driver.ZarrDriver.read
    drivers.zarr_driver.ZarrDriver.read_data
 
 NetcdfDriver
 .. autosummary::
    :toctree: _generated
    drivers.netcdf_driver.NetcdfDriver
-   drivers.netcdf_driver.NetcdfDriver.read_data
+   drivers.netcdf_driver.NetcdfDriver.read
 
 GeoDataFrame
 ------------
@@ -189,6 +192,7 @@ GeoDataFrame
 .. autosummary::
    :toctree: _generated
    drivers.geodataframe_driver.GeoDataFrameDriver
+   drivers.geodataframe_driver.GeoDataFrameDriver.read
    drivers.geodataframe_driver.GeoDataFrameDriver.read_data
 
 PyogrioDriver
@@ -197,7 +201,7 @@ PyogrioDriver
 .. autosummary::
    :toctree: _generated
    drivers.pyogrio_driver.PyogrioDriver
-   drivers.pyogrio_driver.PyogrioDriver.read_data
+   drivers.pyogrio_driver.PyogrioDriver.read
 
 DataAdapter
 ===========

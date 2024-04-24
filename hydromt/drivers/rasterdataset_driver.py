@@ -26,9 +26,15 @@ class RasterDatasetDriver(BaseDriver, ABC):
         logger: Optional[Logger] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-        **kwargs,
     ) -> xr.Dataset:
-        """Read in any compatible data source to an xarray Dataset."""
+        """
+        Read in any compatible data source to an xarray Dataset.
+
+        args:
+            mask: Optional[Geom]. Mask for features to match the predicate, preferably
+                in the same CRS.
+        """
+        # Merge static kwargs from the catalog with dynamic kwargs from the query.
         uris = self.metadata_resolver.resolve(
             uri,
             self.filesystem,
@@ -37,7 +43,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
             variables=variables,
             zoom_level=zoom_level,
             handle_nodata=handle_nodata,
-            **kwargs,
         )
         return self.read_data(
             uris,
@@ -46,7 +51,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
             zoom_level=zoom_level,
             logger=logger,
             handle_nodata=handle_nodata,
-            **kwargs,
         )
 
     @abstractmethod

@@ -5,7 +5,6 @@ from logging import Logger, getLogger
 from typing import List, Optional
 
 import geopandas as gpd
-from pyproj import CRS
 
 from hydromt._typing import Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
@@ -22,35 +21,33 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         uri: str,
         *,
         mask: Optional[Geom] = None,
-        crs: Optional[CRS] = None,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read in any compatible data source to a geopandas `GeoDataFrame`.
 
         args:
+            mask: Optional[Geom]. Mask for features to match the predicate, preferably
+                in the same CRS.
         """
+        # Merge static kwargs from the catalog with dynamic kwargs from the query.
         uris = self.metadata_resolver.resolve(
             uri,
             self.filesystem,
             mask=mask,
             variables=variables,
             handle_nodata=handle_nodata,
-            **kwargs,
         )
         gdf = self.read_data(
             uris,
             mask=mask,
-            crs=crs,
             predicate=predicate,
             logger=logger,
             handle_nodata=handle_nodata,
-            **kwargs,
         )
         return gdf
 
@@ -60,11 +57,9 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         uris: List[str],
         *,
         mask: Optional[Geom] = None,
-        crs: Optional[CRS] = None,
         predicate: str = "intersects",
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
     ) -> gpd.GeoDataFrame:
         """Read in any compatible data source to a geopandas `GeoDataFrame`."""
         ...
