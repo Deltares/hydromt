@@ -319,6 +319,6 @@ def test_add_data_from_geodataframe(
     )
     assert (
         f"No shapes of {vector_fn} found within region,"
-        " skipping setup_grid_from_vector."
+        " skipping add_data_from_geodataframe."
     ) in caplog.text
     assert result is None
