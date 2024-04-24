@@ -47,8 +47,8 @@ class TestZarrDriver:
             == example_zarr_file[0]
         )
 
-    def test_zarr_write(self, rasterds: xr.Dataset, tmp_dir: Path):
+    def test_zarr_write(self, raster_ds: xr.Dataset, tmp_dir: Path):
         zarr_path: Path = tmp_dir / "raster.zarr"
         driver = ZarrDriver()
-        driver.write(zarr_path, rasterds)
-        assert np.all(driver.read(str(zarr_path)) == rasterds)
+        driver.write(zarr_path, raster_ds)
+        assert np.all(driver.read(str(zarr_path)) == raster_ds)

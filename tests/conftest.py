@@ -261,7 +261,7 @@ def obsda():
 
 
 @pytest.fixture()
-def rasterds():
+def raster_ds():
     temp = 15 + 8 * np.random.randn(2, 2, 3)
     precip = 10 * np.random.rand(2, 2, 3)
     lon = [[-99.83, -99.32], [-99.79, -99.23]]
@@ -429,13 +429,13 @@ def mock_geodf_driver(
 
 @pytest.fixture()
 def mock_raster_ds_driver(
-    rasterds: xr.Dataset, mock_resolver: MetaDataResolver
+    raster_ds: xr.Dataset, mock_resolver: MetaDataResolver
 ) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
         name = "mock_raster_ds_driver"
 
         def read_data(self, *args, **kwargs) -> xr.Dataset:
-            return rasterds
+            return raster_ds
 
     return MockRasterDatasetDriver(metadata_resolver=mock_resolver)
 

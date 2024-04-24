@@ -42,8 +42,8 @@ class TestNetcdfDriver:
             driver.options.get("preprocess") == "round_latlon"
         )  # test does not consume property
 
-    def test_write(self, rasterds: xr.Dataset, tmp_path: Path):
+    def test_write(self, raster_ds: xr.Dataset, tmp_path: Path):
         netcdf_path = tmp_path / f"{uuid4().hex}.nc"
         driver = NetcdfDriver()
-        driver.write(netcdf_path, rasterds)
-        assert np.all(driver.read(str(netcdf_path)) == rasterds)
+        driver.write(netcdf_path, raster_ds)
+        assert np.all(driver.read(str(netcdf_path)) == raster_ds)

@@ -9,9 +9,9 @@ from hydromt.data_source import SourceMetadata
 
 class TestRasterDatasetAdapter:
     @pytest.fixture()
-    def example_raster_ds(self, rasterds: xr.Dataset):
-        rasterds.raster.set_crs(4326)
-        return rasterds
+    def example_raster_ds(self, raster_ds: xr.Dataset):
+        raster_ds.raster.set_crs(4326)
+        return raster_ds
 
     def test_get_data_bbox(self, example_raster_ds: xr.Dataset):
         adapter = RasterDatasetAdapter()

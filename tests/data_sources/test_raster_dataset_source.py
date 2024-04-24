@@ -83,7 +83,7 @@ class TestRasterDatasetSource:
 
     def test_read_data(
         self,
-        rasterds: xr.Dataset,
+        raster_ds: xr.Dataset,
         mock_raster_ds_driver: RasterDatasetDriver,
         mock_raster_ds_adapter: RasterDatasetAdapter,
         tmp_dir: Path,
@@ -95,10 +95,10 @@ class TestRasterDatasetSource:
             data_adapter=mock_raster_ds_adapter,
             uri=str(tmp_dir / "rasterds.zarr"),
         )
-        assert rasterds == source.read_data()
+        assert raster_ds == source.read_data()
 
     @pytest.fixture()
-    def MockDriver(self, rasterds: xr.Dataset):
+    def MockDriver(self, raster_ds: xr.Dataset):
         class MockRasterDatasetDriver(RasterDatasetDriver):
             name = "mock_geodf_to_file"
 
@@ -109,7 +109,7 @@ class TestRasterDatasetSource:
                 return self.read_data([uri], **kwargs)
 
             def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
-                return rasterds
+                return raster_ds
 
         return MockRasterDatasetDriver
 
