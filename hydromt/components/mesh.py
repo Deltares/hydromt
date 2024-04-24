@@ -14,7 +14,6 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import hydromt_step
-from hydromt._typing.type_def import StrPath
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
@@ -28,19 +27,19 @@ if TYPE_CHECKING:
     from hydromt.models import Model
 
 
-_DEFAULT_MESH_FILENAME = "mesh/mesh.nc"
-
 __all__ = ["MeshComponent"]
 
 
 class MeshComponent(SpatialModelComponent):
     """ModelComponent class for mesh components."""
 
+    DEFAULT_FILENAME = "mesh/mesh.nc"
+
     def __init__(
         self,
         model: "Model",
         *,
-        filename: StrPath = _DEFAULT_MESH_FILENAME,
+        filename: Optional[str] = None,
         region_filename: str = SpatialModelComponent.DEFAULT_REGION_FILENAME,
         region_component: Optional[str] = None,
     ):
@@ -48,7 +47,7 @@ class MeshComponent(SpatialModelComponent):
             model, region_component=region_component, filename=region_filename
         )
         self._data = None
-        self._filename = filename
+        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
 
     def set(
         self,

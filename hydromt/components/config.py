@@ -15,9 +15,6 @@ if TYPE_CHECKING:
     from hydromt.models import Model
 
 
-_DEFAULT_CONFIG_FILENAME = "config.yaml"
-
-
 class ConfigComponent(ModelComponent):
     """
     A component to write configuration files for model simulations/settings.
@@ -28,11 +25,13 @@ class ConfigComponent(ModelComponent):
     settings.
     """
 
+    DEFAULT_FILENAME = "config.yaml"
+
     def __init__(
         self,
         model: "Model",
         *,
-        filename: str = _DEFAULT_CONFIG_FILENAME,
+        filename: Optional[str] = None,
         default_template_filename: Optional[str] = None,
     ):
         """Initialize a ConfigComponent.
@@ -52,7 +51,7 @@ class ConfigComponent(ModelComponent):
             default configuration template. By default None.
         """
         self._data: Optional[Dict[str, Any]] = None
-        self._filename: str = filename
+        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
         self._default_template_filename: Optional[str] = default_template_filename
 
         super().__init__(model=model)

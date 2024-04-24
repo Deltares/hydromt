@@ -22,8 +22,6 @@ from hydromt.metadata_resolver import ConventionResolver
 if TYPE_CHECKING:
     from hydromt.models.model import Model
 
-_DEFAULT_GEOMS_FILENAME = "geoms/{name}.geojson"
-
 
 class GeomsComponent(ModelComponent):
     """A component to manage geo-spatial geometries.
@@ -31,7 +29,9 @@ class GeomsComponent(ModelComponent):
     It contains a dictionary of geopandas GeoDataFrames.
     """
 
-    def __init__(self, model: "Model", filename: str = _DEFAULT_GEOMS_FILENAME):
+    DEFAULT_FILENAME = "geoms/{name}.geojson"
+
+    def __init__(self, model: "Model", filename: Optional[str] = None):
         """Initialize a GeomComponent.
 
         Parameters
@@ -43,7 +43,7 @@ class GeomsComponent(ModelComponent):
             by default "geoms/{name}.geojson" ie one file per geodataframe in the data dictionnary.
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
-        self._filename = filename
+        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
         super().__init__(model=model)
 
     @property

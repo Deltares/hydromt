@@ -47,7 +47,7 @@ class GridComponent(SpatialModelComponent):
         self,
         model: "Model",
         *,
-        filename: StrPath = DEFAULT_FILENAME,
+        filename: Optional[str] = None,
         region_component: Optional[str] = None,
         region_filename: StrPath = SpatialModelComponent.DEFAULT_REGION_FILENAME,
     ):
@@ -55,7 +55,7 @@ class GridComponent(SpatialModelComponent):
             model=model, region_component=region_component, filename=region_filename
         )
         self._data: Optional[xr.Dataset] = None
-        self._filename = filename
+        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
 
     def set(
         self,

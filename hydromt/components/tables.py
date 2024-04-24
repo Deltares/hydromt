@@ -21,8 +21,6 @@ if TYPE_CHECKING:
 
 __all__ = ["TablesComponent"]
 
-_DEFAULT_TABLE_FILENAME = "tables/{name}.csv"
-
 
 class TablesComponent(ModelComponent):
     """TablesComponent contains data as a dictionnary of pandas.DataFrame.
@@ -30,7 +28,9 @@ class TablesComponent(ModelComponent):
     It is well suited to represent non-geospatial tabular model data.
     """
 
-    def __init__(self, model: "Model", filename: str = _DEFAULT_TABLE_FILENAME):
+    DEFAULT_FILENAME = "tables/{name}.csv"
+
+    def __init__(self, model: "Model", filename: Optional[str] = None):
         """Initialize a TablesComponent.
 
         Parameters
@@ -44,7 +44,7 @@ class TablesComponent(ModelComponent):
             relative or absolute.
         """
         self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
-        self._filename = filename
+        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
         super().__init__(model=model)
 
     @property

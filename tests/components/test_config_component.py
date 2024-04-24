@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from hydromt.components.config import _DEFAULT_CONFIG_FILENAME, ConfigComponent
+from hydromt.components.config import ConfigComponent
 from hydromt.io.path import make_config_paths_abs, make_config_paths_relative
 from hydromt.io.readers import configread, read_yaml
 from hydromt.io.writers import write_yaml
@@ -46,14 +46,14 @@ def test_rejects_non_yaml_format(tmpdir):
 
 
 def test_config_create_always_reads(tmpdir):
-    config_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
+    config_path = join(tmpdir, ConfigComponent.DEFAULT_FILENAME)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
     config_component: ConfigComponent = ConfigComponent(
         model,
-        filename=_DEFAULT_CONFIG_FILENAME,
+        filename=ConfigComponent.DEFAULT_FILENAME,
         default_template_filename=config_path,
     )
     model.add_component("config", config_component)
@@ -63,14 +63,14 @@ def test_config_create_always_reads(tmpdir):
 
 
 def test_config_does_not_read_at_lazy_init(tmpdir):
-    config_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
+    config_path = join(tmpdir, ConfigComponent.DEFAULT_FILENAME)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
     config_component: ConfigComponent = ConfigComponent(
         model,
-        filename=_DEFAULT_CONFIG_FILENAME,
+        filename=ConfigComponent.DEFAULT_FILENAME,
         default_template_filename=config_path,
     )
     model.add_component("config", config_component)
@@ -138,7 +138,7 @@ def test_write_config(tmpdir):
     model.add_component("config", config_component)
     config_component = model.get_component("config", ConfigComponent)
     config_component.set("global.name", "test")
-    write_path = join(tmpdir, _DEFAULT_CONFIG_FILENAME)
+    write_path = join(tmpdir, ConfigComponent.DEFAULT_FILENAME)
     assert not isfile(write_path)
     config_component.write()
     assert isfile(write_path)
