@@ -9,6 +9,7 @@ from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
+from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 
 logger: Logger = getLogger(__name__)
@@ -34,6 +35,9 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
+        warn_on_unused_kwargs(
+            self.__class__.__name__, {"crs": crs, "predicate": predicate}, logger
+        )
         if len(uris) != 1:
             raise ValueError("Length of uris for Pyogrio Driver must be 1.")
         _uri = uris[0]

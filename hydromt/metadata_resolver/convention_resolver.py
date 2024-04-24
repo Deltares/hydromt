@@ -13,7 +13,7 @@ import pandas as pd
 from fsspec import AbstractFileSystem
 
 from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
-from hydromt.utils.unused_kwargs import warn_on_unused_kwargs
+from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 
 from .metadata_resolver import MetaDataResolver
 

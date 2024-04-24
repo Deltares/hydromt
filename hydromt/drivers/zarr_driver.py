@@ -9,6 +9,7 @@ import xarray as xr
 
 from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
+from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
@@ -34,6 +35,11 @@ class ZarrDriver(RasterDatasetDriver):
 
         Args:
         """
+        warn_on_unused_kwargs(
+            self.__class__.__name__,
+            {"mask": mask, "time_range": time_range, "zoom_level": zoom_level},
+            logger,
+        )
         options = copy(self.options)
         preprocessor: Optional[Callable] = None
         preprocessor_name: Optional[str] = options.pop("preprocess", None)
