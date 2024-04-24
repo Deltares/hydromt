@@ -171,12 +171,12 @@ reading phase, the data catalog is updated accordingly:
 			name: netcdf
 			filesystem: local
 			metadata_resolver: convention
-			chunks:
-				latitude: 250
-				longitude: 240
-				time: 30
-			combine: by_coords
-			...
+			options:
+				chunks:
+					latitude: 250
+					longitude: 240
+					time: 30
+				combine: by_coords
 		data_adapter:
 			rename:
 				d2m: temp_dew

@@ -1,10 +1,10 @@
 """Base class for different drivers."""
 
-from abc import ABC
-from typing import Any, Callable, ClassVar, Generator, List, Type
+from abc import ABC, abstractmethod
+from typing import Any, Callable, ClassVar, Dict, Generator, List, Type
 
 from fsspec.implementations.local import LocalFileSystem
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from hydromt._typing import FS
 from hydromt.metadata_resolver import MetaDataResolver
@@ -21,11 +21,7 @@ class BaseDriver(BaseModel, ABC):
     name: ClassVar[str]
     metadata_resolver: MetaDataResolver = Field(default_factory=RESOLVERS["convention"])
     filesystem: FS = Field(default=LocalFileSystem())
-    # TODO use options and remove ConfigDict(extra="allow"), see https://github.com/Deltares/hydromt/issues/899
-    # options: Dict[str, Any] = Field(default_factory=dict)
-
-    # Allow extra fields in the BaseDriver
-    model_config = ConfigDict(extra="allow")
+    options: Dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("metadata_resolver", mode="before")
     @classmethod
@@ -110,3 +106,13 @@ class BaseDriver(BaseModel, ABC):
         # continue looking for possible types in subclasses
         for subclass in cls.__subclasses__():
             yield from subclass._find_all_possible_types()
+
+    # Args and kwargs will be refined by HydroMT subclasses.
+    @abstractmethod
+    def read(self, uri: str, *args, **kwargs):
+        """
+        Discover and read in data.
+
+        args:
+            uri: str identifying the data source.
+        """

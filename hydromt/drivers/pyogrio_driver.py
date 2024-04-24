@@ -6,10 +6,10 @@ from typing import List, Optional
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
-from shapely.geometry.base import BaseGeometry
 
-from hydromt._typing import Bbox, Geom, GpdShapeGeom, StrPath
+from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
+from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 
 logger: Logger = getLogger(__name__)
@@ -29,22 +29,23 @@ class PyogrioDriver(GeoDataFrameDriver):
         predicate: str = "intersects",
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
 
         args:
         """
+        warn_on_unused_kwargs(
+            self.__class__.__name__, {"crs": crs, "predicate": predicate}, logger
+        )
         if len(uris) != 1:
             raise ValueError("Length of uris for Pyogrio Driver must be 1.")
         _uri = uris[0]
         if mask is not None:
-            bbox = bbox_from_file_and_filters(_uri, mask=mask, crs=crs)
+            bbox = bbox_from_file_and_mask(_uri, mask=mask)
         else:
             bbox = None
-        # TODO: add **self.options, see see https://github.com/Deltares/hydromt/issues/899
-        return read_dataframe(_uri, bbox=bbox)
+        return read_dataframe(_uri, bbox=bbox, **self.options)
 
     def write(
         self,
@@ -60,14 +61,13 @@ class PyogrioDriver(GeoDataFrameDriver):
         write_dataframe(gdf, path, **kwargs)
 
 
-def bbox_from_file_and_filters(
+def bbox_from_file_and_mask(
     uri: str,
-    mask: GpdShapeGeom,
-    crs: Optional[CRS] = None,
+    mask: Geom,
 ) -> Optional[Bbox]:
-    """Create a bbox from the file metadata and filter options.
+    """Create a bbox from the file metadata and mask given.
 
-    Pyogrio does not accept a mask, and requires a bbox in the same CRS as the data.
+    Pyogrio's mask or bbox arguments require a mask or bbox in the same CRS as the data.
     This function takes the mask filter and crs of the input data
     and returns a bbox in the same crs as the data based on the input filters.
 
@@ -77,22 +77,17 @@ def bbox_from_file_and_filters(
         URI of the data.
     mask: GeoDataFrame | GeoSeries | BaseGeometry
         mask to filter the data while reading.
-    crs: pyproj.CRS | None
-        coordinate reference system of the file. If already set,
-        this argument is ignored.
     """
-    if issubclass(type(mask), BaseGeometry):
-        mask = gpd.GeoSeries(mask, crs=crs)
-
     source_crs = None
     if source_crs_str := read_info(uri).get("crs"):
         source_crs = CRS.from_user_input(source_crs_str)
-    elif crs:
-        source_crs = CRS.from_user_input(crs)
-    else:
-        raise ValueError("CRS must be set either in the file or as an argument.")
 
-    if source_crs is not None and source_crs != mask.crs:
+    if not source_crs:
+        logger.warning(
+            f"Reading from uri: '{uri}' without CRS definition. Filtering with crs:"
+            f" {mask.crs}, cannot compare crs."
+        )
+    elif mask.crs != source_crs:
         mask = mask.to_crs(source_crs)
 
     return tuple(mask.total_bounds)
