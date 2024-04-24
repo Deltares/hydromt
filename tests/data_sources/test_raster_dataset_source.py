@@ -7,14 +7,14 @@ from pydantic import ValidationError
 
 from hydromt._typing import StrPath
 from hydromt.data_adapter import RasterDatasetAdapter
-from hydromt.data_source import RasterDatasetSource
+from hydromt.data_source import RasterDatasetSource, SourceMetadata
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
 
 @pytest.fixture()
 def mock_raster_ds_adapter():
     class MockRasterDataSetAdapter(RasterDatasetAdapter):
-        def transform(self, ds: xr.Dataset, **kwargs):
+        def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
             return ds
 
     return MockRasterDataSetAdapter()
@@ -117,7 +117,10 @@ class TestRasterDatasetSource:
         mock_driver = MockDriver()
 
         source = RasterDatasetSource(
-            name="test", uri="raster.nc", driver=mock_driver, crs=4326
+            name="test",
+            uri="raster.nc",
+            driver=mock_driver,
+            metadata=SourceMetadata(crs=4326),
         )
         new_source = source.to_file("test")
         assert "local" in new_source.driver.filesystem.protocol
@@ -128,7 +131,10 @@ class TestRasterDatasetSource:
     def test_to_file_override(self, MockDriver: Type[RasterDatasetDriver]):
         driver1 = MockDriver()
         source = RasterDatasetSource(
-            name="test", uri="raster.nc", driver=driver1, crs=4326
+            name="test",
+            uri="raster.nc",
+            driver=driver1,
+            metadata=SourceMetadata(crs=4326),
         )
         driver2 = MockDriver(filesystem="memory")
         new_source = source.to_file("test", driver_override=driver2)

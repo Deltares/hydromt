@@ -161,6 +161,12 @@ reading phase, the data catalog is updated accordingly:
 		crs: 4326
 		data_type: RasterDataset
 		uri: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
+		metadata:
+			category: meteo
+			notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
+			crs: 4326
+			nodata: -9999
+			...
 		driver:
 			name: netcdf
 			filesystem: local
@@ -172,10 +178,6 @@ reading phase, the data catalog is updated accordingly:
 			combine: by_coords
 			...
 		data_adapter:
-			meta:
-				category: meteo
-				notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
-				...
 			rename:
 				d2m: temp_dew
 				msl: press_msl

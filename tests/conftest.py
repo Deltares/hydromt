@@ -19,6 +19,7 @@ from hydromt.components.config import ConfigComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
+from hydromt.data_source import SourceMetadata
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 from hydromt.gis import raster, utils, vector
@@ -404,7 +405,7 @@ def mock_resolver() -> MetaDataResolver:
 def mock_geodataframe_adapter():
     class MockGeoDataFrameAdapter(GeoDataFrameAdapter):
         def transform(
-            self, gdf: gpd.GeoDataFrame, **kwargs
+            self, gdf: gpd.GeoDataFrame, metadata: SourceMetadata, **kwargs
         ) -> Optional[gpd.GeoDataFrame]:
             return gdf
 

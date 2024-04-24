@@ -12,29 +12,25 @@ class TestDataSource:
     def test_summary(
         self,
         mock_geodf_driver: GeoDataFrameDriver,
+        mock_geodataframe_adapter: GeoDataFrameAdapter,
         root: str,
     ):
-        class MockGeoDataFrameAdapter(GeoDataFrameAdapter):
-            def transform(self, ds, **kwargs):
-                return None
-
-        mock_gdf_adapter = MockGeoDataFrameAdapter(meta={"custom_meta": "test"})
-
         submodel: DataSource = GeoDataFrameSource.model_validate(
             {
                 "root": root,
                 "name": "geojsonfile",
                 "data_type": "GeoDataFrame",
                 "driver": mock_geodf_driver,
-                "data_adapter": mock_gdf_adapter,
+                "data_adapter": mock_geodataframe_adapter,
                 "uri": "test_uri",
+                "metadata": {"url": "www.example.com"},
             }
         )
         summ: Dict[str, Any] = submodel.summary()
         assert summ["data_type"] == "GeoDataFrame"
         assert summ["uri"] == f"{root}test_uri"
         assert summ["driver"] == "MockGeoDataFrameDriver"
-        assert summ["custom_meta"] == "test"
+        assert summ["url"] == "www.example.com"
 
 
 class TestGetNestedVar:
@@ -58,9 +54,7 @@ class TestGetNestedVar:
                 "uri": "test_uri",
             }
         )
-        assert get_nested_var(["driver", "metadata_resolver", "unit_add"], submodel), {
-            "var1": 1
-        }
+        assert get_nested_var(["data_adapter", "unit_add"], submodel), {"var1": 1}
 
 
 class TestSetNestedVar:
