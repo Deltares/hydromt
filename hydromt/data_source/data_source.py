@@ -25,6 +25,31 @@ logger: Logger = getLogger(__name__)
 T = TypeVar("T")
 
 
+class SourceMetadata(BaseModel):
+    """
+    Metadata for data source.
+
+    This refers to data that is used to enrich the data format the source is in.
+    SourceMetaData is not used to reproject or fill nodata values, it is used to
+    check the data and enrich the metadata for HydroMT.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    crs: Union[int, str, None] = None
+    extent: Dict[str, Any] = Field(default_factory=dict)
+    nodata: Union[dict, float, int, None] = None
+    attrs: Dict[str, Any] = Field(default_factory=dict)
+    category: Optional[str] = None
+    paper_doi: Optional[str] = None
+    paper_ref: Optional[str] = None
+    author: Optional[str] = None
+    license: Optional[str] = None
+    url: Optional[str] = None
+    version: Optional[str] = None
+    notes: Optional[str] = None
+
+
 class DataSource(BaseModel, ABC):
     """
     A DataSource is a parsed section of a DataCatalog.
@@ -48,9 +73,7 @@ class DataSource(BaseModel, ABC):
     root: Optional[str] = Field(default=None)
     version: Optional[str] = Field(default=None)
     provider: Optional[str] = Field(default=None)
-    # TODO: move crs, extent and data_adapter.nodata to metadata class https://github.com/Deltares/hydromt/issues/901
-    crs: Optional[Union[int, str]] = Field(default=None)  # 4326 or 'EPSG:4326'
-    extent: Dict[str, Any] = Field(default_factory=dict)
+    metadata: SourceMetadata = Field(default_factory=SourceMetadata)
 
     def summary(self) -> Dict[str, Any]:
         """Return a summary of the DataSource."""
@@ -59,29 +82,10 @@ class DataSource(BaseModel, ABC):
             {
                 "data_type": self.__class__.data_type,
                 "driver": self.driver.__repr_name__(),
-                **self.data_adapter.meta,
+                **self.metadata.model_dump(exclude_unset=True),
             }
         )
         return summ
-
-    @model_validator(mode="before")
-    @classmethod
-    def _push_down_data_adapter_args(cls, data: Any):
-        """Copy unit_add, unit_mult and rename to metadata_resolver.
-
-        The metadata resolver should query the data with the right variables and
-        the correct time variables, and this needs these arguments when used in
-        conjunction with the DataAdapter. The DataSource is responsable to keep these
-        up-to-date.
-        """
-        if isinstance(data, dict) or isinstance(data, BaseModel):
-            for da_arg in ["unit_add", "unit_mult", "rename"]:
-                value: Any = get_nested_var(["data_adapter", da_arg], data, {})
-                try:
-                    set_nested_var(["driver", "metadata_resolver", da_arg], data, value)
-                except ValueError:
-                    pass  # let pydantic handle errors when set_nested_var cannot set.
-        return data
 
     @model_validator(mode="before")
     @classmethod

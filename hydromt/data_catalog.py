@@ -47,7 +47,6 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile
 from hydromt.data_source import DataSource, create_source
-from hydromt.data_source.data_source import get_nested_var, set_nested_var
 from hydromt.io.readers import _yml_from_uri_or_path
 
 logger = logging.getLogger(__name__)
@@ -1734,11 +1733,11 @@ def _parse_data_source_dict(
         source.update({"root": str(root)})
 
     # source meta data
-    meta = get_nested_var(["data_adapter", "meta"], source, {})
+    meta: Dict[str, str] = source.get("metadata", {})
     if "category" not in meta and category is not None:
         meta.update(category=category)
 
-    set_nested_var(["data_adapter", "meta"], source, meta)
+    source["metadata"] = meta
 
     # driver arguments
     # driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
