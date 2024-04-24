@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 from fsspec import AbstractFileSystem
 from pydantic import BaseModel, Field
 
-from hydromt._typing import Bbox, Geom, NoDataStrategy, Predicate, TimeRange
+from hydromt._typing import Geom, NoDataStrategy, TimeRange
 
 logger: Logger = getLogger(__name__)
 
@@ -26,12 +26,8 @@ class MetaDataResolver(BaseModel, ABC):
         fs: AbstractFileSystem,
         *,
         time_range: Optional[TimeRange] = None,
-        bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0.0,
-        predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
-        zoom_level: int = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Optional[Logger] = logger,
         **kwargs,

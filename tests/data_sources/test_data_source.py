@@ -44,7 +44,7 @@ class TestGetNestedVar:
         class FakeGeoDfDriver(GeoDataFrameDriver):
             name = "test_reads_nested"
 
-            def read(self, **kwargs):
+            def read_data(self, **kwargs):
                 pass
 
         mock_geodf_driver = FakeGeoDfDriver(metadata_resolver={"name": "convention"})

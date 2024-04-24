@@ -210,7 +210,7 @@ def parse_geom_bbox_buffer(
     bbox: Optional[Bbox] = None,
     buffer: float = 0.0,
     crs: Optional[CRS] = None,
-):
+) -> Geom:
     """Parse geom or bbox to a (buffered) geometry.
 
     Arguments
