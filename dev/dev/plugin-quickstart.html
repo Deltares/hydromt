@@ -1,0 +1,1188 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Starting your own HydroMT Plugin &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=36754332"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'dev/plugin-quickstart';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.5';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Plugins" href="../plugins.html" />
+    <link rel="prev" title="Contributors" href="team.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/intro.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../user_guide/intro.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="intro.html">
+                        Dev guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../plugins.html">
+                        Plugins
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Developer’s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="team.html">Contributors</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Starting your own HydroMT Plugin</a></li>
+
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="intro.html" class="nav-link">Dev guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Starting...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="starting-your-own-hydromt-plugin">
+<span id="plugin-quickstart"></span><h1>Starting your own HydroMT Plugin<a class="headerlink" href="#starting-your-own-hydromt-plugin" title="Link to this heading">#</a></h1>
+<p>You’ve discovered HydroMT and would like to use it for your own model and wonder how to get started about it?
+This page gives you some tips and tricks on how to use HydroMT for your own model and start your own plugin. Before reading this,
+you should already know a little about HydroMT, so please check out at least the <a class="reference internal" href="../user_guide/intro.html#intro-user-guide"><span class="std std-ref">User guide</span></a> and the <a class="reference internal" href="../user_guide/model_overview.html#model-main"><span class="std std-ref">Overview models</span></a>
+section.</p>
+<section id="plugin-or-no-plugin">
+<h2>Plugin or no plugin ?<a class="headerlink" href="#plugin-or-no-plugin" title="Link to this heading">#</a></h2>
+<p>While HydroMT provides several general model classes that can readily be used, it can also be
+tailored to specific model software through a plugin infrastructure. These plugins have the same
+interface, but with model-specific file readers, writers and workflows.</p>
+<p>Before getting started <strong>you should ask yourself these questions</strong>:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Does my model have model-specific file formats which are different from the HydroMT defaults?</p></li>
+<li><p>Does my model require complex data processing workflows that are not covered (and will not be covered) by the generic model classes?</p></li>
+<li><p>Will there be a lot of users for my model?</p></li>
+</ol>
+</div></blockquote>
+<p>And depending on the answers, you can decide to start your own plugin yes or no. Answering <em>yes</em> to any of the previous
+questions could be a potential reason for starting your own plugin. Below are a couple of advantages and drawbacks of making your own plugin:</p>
+<p><em>Advantages</em></p>
+<ul class="simple">
+<li><p>HydroMT outputs are in the correct file format so my freshly built model is ready to run.</p></li>
+<li><p>All required input data can be prepared by HydroMT, even using specific or complex processing methods/workflows.</p></li>
+<li><p>Templates and easy to use/understand functions are more easily available.</p></li>
+<li><p>Maintained and central place for model specific functions/workflows (eg reading/writing in correct format etc.)</p></li>
+</ul>
+<p><em>Drawbacks</em></p>
+<ul class="simple">
+<li><p>Need to create and develop a plugin repository.</p></li>
+<li><p>Need to support and maintain the plugin repository (if open-source, which we encourage).</p></li>
+</ul>
+<p>To help you decide some more in-depth explanation is also provided below.</p>
+<p>As mentioned user guide, HydroMT interacts with models using the <code class="docutils literal notranslate"><span class="pre">Model</span></code> API class and also provides several sub-model classes:
+<code class="docutils literal notranslate"><span class="pre">GridModel</span></code>, <code class="docutils literal notranslate"><span class="pre">MeshModel</span></code>, <code class="docutils literal notranslate"><span class="pre">VectorModel</span></code>, <code class="docutils literal notranslate"><span class="pre">NetworkModel</span></code> which will be described in more detail below. Using
+these sub-model classes, you might be able to already prepare most and if not all of
+the data you need to build your own model. Do note however that these generic classes can only write model data in netcdf,
+geojson (or other formats supported by geopandas), and configurations in either yaml, toml or ini file format. So
+in case your model needs different file formats, you will need to convert or write the output files in different formats.</p>
+<p>Another advantage of writing your own plugin is that other users from the same model can easily build instances of that model
+re-using the plugin. So for example, converting from netcdf to model specific file format, using pre-defined HydroMT building
+configuration templates or parameter default values. It might also be more instinctive and guided for your model building methods.</p>
+<p>For example, let’s say that your model is a <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> for which you need to prepare a <em>landuse</em>
+classification map. The resampling for this map should be done using <em>mode</em> to avoid creating new imaginary land use classes.
+This could happen for example if you would use e.g., <em>average</em>.
+In addition to the classification map you also need two landuse parameters roughness <em>N</em> and infiltration <em>inf</em>.
+Using HydroMT generic methods, for your user, the build configuration file would look like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">setup_grid_from_rasterdataset</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">raster_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vito</span>
+<span class="w">  </span><span class="nt">fill_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nearest</span>
+<span class="w">  </span><span class="nt">reproject_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mode</span>
+<span class="w">  </span><span class="nt">rename</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">vito</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">landuse</span>
+
+<span class="nt">setup_grid_from_raster_reclass</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">raster_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vito</span>
+<span class="w">  </span><span class="nt">reclass_table_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vito_reclass</span>
+<span class="w">  </span><span class="nt">reclass_variables</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manning</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">infiltration</span>
+<span class="w">  </span><span class="nt">reproject_method</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">average</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">average</span>
+<span class="w">  </span><span class="nt">rename</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">manning</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">N</span>
+<span class="w">    </span><span class="nt">infiltration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inf</span>
+</pre></div>
+</div>
+<p>While in your plugin, you could make it easier for your user by creating simplified function(s) re-using or wrapping the core
+methods. There is an example in the <a class="reference internal" href="#plugin-setup"><span class="std std-ref">setup methods section</span></a> on how the python code of the function would
+look like, but for the user, the same step could then look like:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">setup_landuse</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">landuse_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vito</span>
+<span class="w">  </span><span class="nt">reclass_table_fn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vito_reclass</span>
+</pre></div>
+</div>
+<p>Finally, with the generic methods and sub-model classes of HydroMT, we try to support a certain range of data processing
+methods. If you find that there is no method available for your case, you can always open a feature request issue
+and if we think your proposed method can be re-used by others, it could be added to the core. However, for some data
+processing workloads, this will not be the case. This could be a very strong reason for you to write your own plugin.</p>
+</section>
+<section id="create-your-own-plugin-repository">
+<span id="plugin-create"></span><h2>Create your own plugin repository<a class="headerlink" href="#create-your-own-plugin-repository" title="Link to this heading">#</a></h2>
+<p>HydroMT makes it pretty easy to create your own plugin. We are quite flexible on how you would like to organise and maintain
+your plugin. Below you can find the minimum requirements to register your own new model plugin for HydroMT.</p>
+<p>In case, you want to start creating your own package, we have also prepared a cookiecutter template
+to help you set up a project for your plugin including minimal testing and documentation by just filling out a couple of
+questions :) . This template along with instructions are available at: <a class="reference external" href="https://github.com/Deltares/hydromt-plugin-template">hydromt-plugin-template</a>.</p>
+<section id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">#</a></h3>
+<p>All you really need to do to make a new HydroMT plugin is to
+create a new HydroMT <code class="docutils literal notranslate"><span class="pre">Model</span></code> class (e.g. <em>WflowModel</em>) in a python package and register it properly. Currently HydroMT uses the
+<cite>entrypoints</cite> package to advertise its, well, entrypoints. Entrypoints are how you can tell HydroMT core about your plugin. They
+can be defined within your package setup definition file (typically your pyproject.toml for pypi packages). As an example we can look
+at the current <code class="docutils literal notranslate"><span class="pre">hydromt_wflow</span></code> model. Specifically it’s this line in the pyproject.toml:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[project.entry-points.</span><span class="s2">&quot;hydromt.models&quot;</span><span class="k">]</span>
+<span class="n">wflow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;hydromt_wflow.wflow:WflowModel&quot;</span>
+</pre></div>
+</div>
+<p>This snippet will tell HydroMT core three things:</p>
+<ol class="arabic simple">
+<li><p>the class <code class="docutils literal notranslate"><span class="pre">WflowModel</span></code> defines a HydroMT <code class="docutils literal notranslate"><span class="pre">Model</span></code> compatible class.</p></li>
+<li><p>it is located in the file hydromt_wflow//wflow.py</p></li>
+<li><p>it implements the new plugin class <code class="docutils literal notranslate"><span class="pre">WflowModel</span></code>, with can be accessed from the HydroMT CLI with short name <cite>wflow</cite></p></li>
+</ol>
+<p>Now, how do you define the new plugin <code class="docutils literal notranslate"><span class="pre">Model</span></code> class? To make sure that your model is compatible with HydroMT core,
+you can use one of the following classes as a base for your model:
+* <code class="docutils literal notranslate"><span class="pre">Model</span></code> is the most generic class of HydroMT core which is used as a base for all other model classed.
+* <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> for regular gridded or distributed models,
+* <code class="docutils literal notranslate"><span class="pre">MeshModel</span></code> for unstructured grid(s) models,
+* <code class="docutils literal notranslate"><span class="pre">VectorModel</span></code> for lumped or semi-distributed (vector) models
+* <code class="docutils literal notranslate"><span class="pre">NetworkModel</span></code> for network models.</p>
+<p>This allows you to use the HydroMT model class methods as well as create any functionality on top of that. To define
+your new model class, e.g. <em>WflowModel</em>, you should make sure that in the python script that is referenced by the
+entry-point. And that’s it! If everything has gone well, you should be able to access your code through HydroMT now!</p>
+</section>
+<section id="using-the-cookiecutter-template">
+<h3>Using the cookiecutter template<a class="headerlink" href="#using-the-cookiecutter-template" title="Link to this heading">#</a></h3>
+<p>To make it easier to get started we have provided a <a class="reference external" href="https://github.com/cookiecutter/cookiecutter">cookiecutter</a> template to help you get started.
+The template itself is located at <a class="github reference external" href="https://github.com/Deltares/hydromt-plugin-template">Deltares/hydromt-plugin-template</a>.</p>
+<dl class="simple">
+<dt>This cookiecutter template contains:</dt><dd><ul class="simple">
+<li><p>classic HydroMT folder structure (see below).</p></li>
+<li><p>minimum definition of a new HydroMT plugin sub-model class and entrypoint registry.</p></li>
+<li><p>working pyproject.toml to install and publish your plugin python package.</p></li>
+<li><p>working minimum tests including GitHub workflow.</p></li>
+<li><p>working minimum documentation including GitHub workflow.</p></li>
+<li><p>code formatting workflow.</p></li>
+<li><p>templates for GitHub Issues and Pull Requests.</p></li>
+</ul>
+</dd>
+</dl>
+<p>So almost everything to get a working new python package for your HydroMT plugin! All you need is to define your model specific HydroMT functions
+and well, if you wish to make it open for other users, choose an appropriate license.</p>
+<p>To use it you must first install cookiecutter itself like so:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>cookiecutter
+</pre></div>
+</div>
+<p>After that navigate to the folder in your terminal where you want to create the project. After doing that, all you need to do is run the
+following command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cookiecutter<span class="w"> </span>https://github.com/Deltares/hydromt-plugin-template
+</pre></div>
+</div>
+<p>You will be asked some questions and the template will be generated for you!
+In those questions, suggestions will be shown to guide you, just replace the word <em>plugin</em> in the suggestions by your own plugin or model name
+(eg <em>mymodel</em>) and the host GitHub organisation or user from <em>Deltares</em> to your own GitHub name or organisation (eg <em>savente93</em>).</p>
+<p>Here are some detailed information about what each question implies:</p>
+<ul class="simple">
+<li><p><strong>project_name</strong>: The name of your GitHub project (this will be used as the title of your GitHub repository/README). Eg <em>HydroMT MyModel</em></p></li>
+<li><p><strong>project_slug</strong>: The slug of your project (this will be used as the name of the pypi/conda package). Eg <em>hydromt_mymodel</em></p></li>
+<li><p><strong>project_url</strong>: The url of your project (this will be used as the url of the github repository). Eg <em>https://github.com/savente93/hydromt_mymodel</em></p></li>
+<li><p><strong>docs_url</strong>: The url of the documentation of your project (this will be used as the url of the documentation). Eg <em>https://savente93.github.io/hydromt_mymodel</em></p></li>
+<li><p><strong>model_classname</strong>: The name of the new HydroMT Model subclass that you are creating. Eg <em>MyModelModel</em></p></li>
+<li><p><strong>model_type</strong>: Type of HydroMT model corresponding to your model, one of [<code class="docutils literal notranslate"><span class="pre">Model</span></code>, <code class="docutils literal notranslate"><span class="pre">GridModel</span></code>, <code class="docutils literal notranslate"><span class="pre">MeshModel</span></code>, <code class="docutils literal notranslate"><span class="pre">VectorModel</span></code>, <code class="docutils literal notranslate"><span class="pre">NetworkModel</span></code>]. Eg <em>GridModel</em></p></li>
+<li><p><strong>model_shortname</strong>: The short name of your model. This will be used as the HydroMT Command Line name of your plugin and as the name of the main python file of
+your project (which will contain the definition of your new Model class). Eg <em>mymodel</em></p></li>
+<li><p><strong>project_tagline</strong>: A short tagline (short description phrase) for your project. Eg <em>A HydroMT plugin for MyModel models.</em></p></li>
+<li><p><strong>project_version</strong>: The version of your project. Eg <em>0.1.0</em></p></li>
+</ul>
+<p>Let’s say you just created the plugin called <cite>hydromt_mymodel</cite> before you can start using it you’ll need to initialise git within it like so:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>hydromt_mymodel
+<span class="gp">$ </span>git<span class="w"> </span>init
+</pre></div>
+</div>
+<p>If your project has dependencies, you can add them in the pyproject.toml under the <cite>dependencies</cite> array.</p>
+<p>Now, assuming that you’ve made a repository in your personal GitHub repository (eg user savente93) you just need to add it as a remote in the
+repository and push it (for an organisation, you will need specific rights to do this).</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>origin<span class="w"> </span>https://github.com/savente93/hydromt_mymodel
+<span class="gp">$ </span>git<span class="w"> </span>push
+</pre></div>
+</div>
+<p>After this you can open up the github repository website, and you should see your generated project. You are now ready to start developing your own
+plugin! Well done, and good luck!</p>
+</section>
+<section id="typical-hydromt-repository-structure">
+<span id="plugin-components"></span><h3>Typical HydroMT repository structure<a class="headerlink" href="#typical-hydromt-repository-structure" title="Link to this heading">#</a></h3>
+<p>With HydroMT and some of its plugins, we usually use a classic folder structure and file organisation. It not mandatory to follow this structure
+But if you choose to, a classic folder structure and files for a HydroMT plugin (eg mymodel) looks like this:</p>
+<ul class="simple">
+<li><p><strong>docs</strong>: folder containing your documentation pages.</p></li>
+<li><p><strong>examples</strong>: folder containing example models, templates for building/updating models, jupyter notebooks.</p></li>
+<li><p><strong>tests</strong>: folder containing your test scripts.</p></li>
+<li><p><em>pyproject.toml</em>: your build-system requirements for your python package (used by pypi and conda).</p></li>
+<li><p><em>README.md</em>: your landing documentation page for your repository.</p></li>
+<li><p><em>LICENSE</em>: license file for your repository.</p></li>
+<li><p><strong>hydromt_mymodel</strong>: folder containing the functions for your plugin.</p>
+<ul>
+<li><p><em>__init__.py</em>: init python script used when importing the <em>hydromt_mymodel</em> package in a python script.</p></li>
+<li><p><em>mymodel.py</em>: your main script where you will your plugin <cite>Model</cite> class (<em>MyModelModel</em>) and main functions (read/write/setup).</p></li>
+<li><p><strong>workflows</strong>: folder containing python scripts for data processing functions.</p></li>
+<li><p><strong>data</strong>: folder containing model building templates and default values or data for your plugin. For example, it is usually
+easier to update an existing template configuration file of your model rather than building it from scratch. You can store such
+a template in that folder. If your model has default values for some parameters, you can also store them here, ideally with a
+model data catalog to read the corresponding files.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="model-class-and-components">
+<h2>Model class and components<a class="headerlink" href="#model-class-and-components" title="Link to this heading">#</a></h2>
+<p>The main goal of your plugin is to be able to build and update model instances for your own
+software. As a reminder, the figure below illustrates the process of model building in HydroMT:</p>
+<figure class="align-center" id="id1">
+<img alt="../_images/model_building_process.png" src="../_images/model_building_process.png" />
+<figcaption>
+<p><span class="caption-text">Model building process in HydroMT.</span><a class="headerlink" href="#id1" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+<p>In this section, we will detail the bottom part of the schematic above ie how to initialise your HydroMT Model class for your plugin, the main properties
+and setup methods and how to work with its model components. The top part of the schematic (data preparation) is taken care of by the core of HydroMT.</p>
+<section id="initialisation">
+<h3>Initialisation<a class="headerlink" href="#initialisation" title="Link to this heading">#</a></h3>
+<p>In the <a class="reference internal" href="#plugin-create"><span class="std std-ref">create plugin section</span></a>, we already saw which HydroMT <code class="docutils literal notranslate"><span class="pre">Model</span></code> class to choose for your plugin. Here we will focus on additional
+properties and the initialisation of your new Model subclass.</p>
+<p>To fully initialise your new subclass (eg <em>MyModelModel</em>), you need to initialise a couple of high level properties and in some cases, you may wish to modify
+the default initialisation function of you parent class (the HydroMT core class you choose, <code class="docutils literal notranslate"><span class="pre">Model</span></code> or <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> etc.).</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>In python, a child class (eg <em>MyModelModel(Model)</em>), inherits all methods and properties of the parent class (<code class="docutils literal notranslate"><span class="pre">Model</span></code>). If you wish to completely overwrite one
+of the parent methods (eg <code class="docutils literal notranslate"><span class="pre">setup_region</span></code>), you can just redefine the function in the child class using the name (<code class="docutils literal notranslate"><span class="pre">setup_region</span></code>). You can also decide to
+re-use the parent function and for example add some extra steps, change the default values or the docstring of the function. For this, you can redefine the
+function in the child class, and within the redefined function, call the parent one use <em>super()</em> python class attribute (<em>super().setup_region</em>). You will see
+an example below for the initialisation function <code class="docutils literal notranslate"><span class="pre">__init__</span></code> .</p>
+</div>
+</section>
+<section id="model-components">
+<h3>Model components<a class="headerlink" href="#model-components" title="Link to this heading">#</a></h3>
+<p>A reminder from the <a class="reference internal" href="../user_guide/model_overview.html#model-interface"><span class="std std-ref">Model guide</span></a>:</p>
+<blockquote>
+<div><p>HydroMT defines any model through the model-agnostic Model API based on several <em>general</em> components and <em>computational</em> unit components.
+Each component represents a specific model data type and is parsed to a specific Python data object.
+The general components are <strong>maps</strong> (raster data), <strong>geoms</strong> (vector data), <strong>forcing</strong>, <strong>results</strong>, <strong>states</strong>, and <strong>config</strong>
+(the model simulation configuration). These are available to all model classes and plugins.
+The computational components are different for different types of models: i.e. <strong>grid</strong> for distributed or grid models,
+<strong>vector</strong> for lumped or semi-distributed models, <strong>mesh</strong> for mesh or unstructured grid models, and <strong>network</strong> for
+network models (to be developed).</p>
+</div></blockquote>
+<p>So typically, when you want to add data to your model (DEM, precipitation, parameters etc.), you add data to one of the
+specific Model components. To add data to a component, the <code class="docutils literal notranslate"><span class="pre">set_&lt;component&gt;</span></code> methods should be used and each of the components can be
+read and written using the specific <code class="docutils literal notranslate"><span class="pre">read_&lt;component&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">write_&lt;component&gt;</span></code> methods.</p>
+<p>A table that lists the base model components common to all model classes can be found at
+<a class="reference internal" href="../user_guide/model_overview.html#model-main"><span class="std std-ref">The Model Overview Page</span></a>
+All base model attributes and methods can be found in the <a class="reference internal" href="../api.html#model-api"><span class="std std-ref">API reference</span></a></p>
+</section>
+<section id="reading-writing-model-components">
+<h3>Reading &amp; Writing model components<a class="headerlink" href="#reading-writing-model-components" title="Link to this heading">#</a></h3>
+<p>Because the way that models consume data is often model software specific, the main part of writing a plugin is writing the
+Input/Output (IO) methods to prepare data exactly as your model expects them, in the correct format. To do this you’ll
+be overwriting most <code class="docutils literal notranslate"><span class="pre">read_&lt;component&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">write_&lt;component&gt;</span></code> methods in your model class. That will ensure that the
+data comes in and goes out exactly as you want.</p>
+<p>In the default HydroMT CORE read and write methods, xarray objects are written as netcdf files, <code class="docutils literal notranslate"><span class="pre">geoms</span></code> as GeoJSON files by
+default but any geopandas driver is allowed. <code class="docutils literal notranslate"><span class="pre">config</span></code> can be either a TOML or YAML file. So again, you could decide to
+completely overwrite the parent read and write methods or change the defaults.</p>
+<p>Eg if your geoms should be written in GeoPackage format rather than GeoJSON and in a geometry folder in your model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">write_geoms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot; Write model geometries to a GeoPackage file at &lt;root&gt;/geometry/&lt;name&gt;.gpkg &quot;&quot;&quot;</span>
+
+  <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">write_geoms</span><span class="p">(</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="s2">&quot;geometry/</span><span class="si">{name}</span><span class="s2">.gpkg&quot;</span><span class="p">,</span>
+    <span class="n">driver</span> <span class="o">=</span> <span class="s1">&#39;GPKG&#39;</span>
+  <span class="p">)</span>
+</pre></div>
+</div>
+<p>If you are writing your own read/write functions, some good practice steps of the function:</p>
+<ol class="arabic simple">
+<li><p>For writing, check first if the object you are writing is not empty, if so, you can simply skip the rest. Example:</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No geoms data found, skip writing.&quot;</span><span class="p">)</span>
+  <span class="k">return</span>
+</pre></div>
+</div>
+<p>2. For reading or writing, check that you have the right permission. For example, in build mode (‘w’ or ‘w+’),
+the model should be empty, so you should not be able to read existing model files. In some cases, python
+users may only want to read a model using HydroMT to visualise or plot data. As a protection, the model
+can then be opened in read only mode (‘r’) and HydroMT should not be able to overwrite any data. HydroMT
+<cite>Model</cite> class has two properties you can use to check for this:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>self._assert_read_mode()</cite> if a model can be read</p></li>
+<li><p><cite>self._assert_write_mode()</cite> if a model can be written</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>For reading, initialise the model component with, e.g. for geoms <cite>self._initialize_geom(skip_read=True)</cite>. This will
+initialise the component with an empty object, but ensure that the component is not read twice.</p></li>
+<li><p>If needed, transform and write the component to the right format and file(s).</p></li>
+<li><p>Don’t hesitate to put some logger information for your user.</p></li>
+</ol>
+</section>
+<section id="set-model-components">
+<h3>Set model components<a class="headerlink" href="#set-model-components" title="Link to this heading">#</a></h3>
+<p>As mentioned previously, to add data to one of the model component (e.g. a DEM raster data to maps), the <code class="docutils literal notranslate"><span class="pre">set_&lt;component&gt;</span></code>
+methods should be used. In the background, some checks are performed to make sure that the data is in the right format
+and, if in appending mode, existing layers of the model component are read first. You should not have to change the
+<code class="docutils literal notranslate"><span class="pre">set_&lt;component&gt;</span></code> methods.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the background, the actual data is stored not directly in the &lt;component&gt; attribute itself but in a private
+attribute (eg <code class="docutils literal notranslate"><span class="pre">_maps</span></code> for <code class="docutils literal notranslate"><span class="pre">maps</span></code>). The public component, (eg <code class="docutils literal notranslate"><span class="pre">maps</span></code>), actually just fetched the data
+from the private attribute <code class="docutils literal notranslate"><span class="pre">_maps</span></code>, but makes sure that in read mode it reads existing layers of the component first.
+It is highly recommended, in your plugin to always use the public model component (eg <code class="docutils literal notranslate"><span class="pre">maps</span></code>).</p>
+</div>
+</section>
+<section id="additional-model-properties">
+<h3>Additional Model properties<a class="headerlink" href="#additional-model-properties" title="Link to this heading">#</a></h3>
+<p>You can have a look at the <a class="reference internal" href="../api.html#model-api"><span class="std std-ref">Model API documentation</span></a> to find out all other properties of the <code class="docutils literal notranslate"><span class="pre">Model</span></code> class and
+the other subclasses. Apart from the components here are a couple of useful properties to use when developing your plugin:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../_generated/hydromt.Model.root.html#hydromt.Model.root" title="hydromt.Model.root"><code class="xref py py-attr docutils literal notranslate"><span class="pre">root</span></code></a>: path to the root folder of the model instance you are working with.</p></li>
+<li><p><a class="reference internal" href="../_generated/hydromt.Model.crs.html#hydromt.Model.crs" title="hydromt.Model.crs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">crs</span></code></a>: the reference coordinate system (pyproj.CRS) of the model.</p></li>
+<li><p><a class="reference internal" href="../_generated/hydromt.Model.region.html#hydromt.Model.region" title="hydromt.Model.region"><code class="xref py py-attr docutils literal notranslate"><span class="pre">region</span></code></a>: the region (GeoDataFrame) of your model, stored in <a class="reference internal" href="../_generated/hydromt.Model.geoms.html#hydromt.Model.geoms" title="hydromt.Model.geoms"><code class="xref py py-attr docutils literal notranslate"><span class="pre">geoms</span></code></a>.</p></li>
+<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">data_catalog</span></code>: the current data catalog you can use to add data to your model.</p></li>
+<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">logger</span></code>: the HydroMT logger object for your model instance.</p></li>
+<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">_read</span></code>: flag if the model is in read mode (‘r’ or ‘r+’ when initialising).</p></li>
+<li><p><code class="xref py py-attr docutils literal notranslate"><span class="pre">_write</span></code>: flag if the model is in write mode (‘w’ or ‘w+’ when initialising).</p></li>
+</ul>
+<p>Some submodel classes can have additional attributes based on their additional components, so check out the <a class="reference internal" href="../api.html#model-api"><span class="std std-ref">API reference</span></a>.</p>
+</section>
+<section id="setup-basic-model-objects">
+<span id="plugin-setup"></span><h3>Setup basic model objects<a class="headerlink" href="#setup-basic-model-objects" title="Link to this heading">#</a></h3>
+<p>When building a model from scratch, the first thing you should do is take inventory of what your <cite>setup_*</cite> functions
+(e.g. <cite>setup_grid</cite>, <cite>setup_mesh</cite>, etc.) need. They typically (though not always) take the region of interest as an
+argument so that is usually a good place to start. This consists of the region in the world your model is located in,
+if needed its CRS and its computational unit (grid, mesh, response_unit etc.). This is usually typically set by a first
+base or region setup method which typically parses the region argument of the HydroMT CLI. The idea is that after this
+function has been called, the user should already be able to have the minimum model properties or files in order to
+be able to call HydroMT to <code class="docutils literal notranslate"><span class="pre">update</span></code> the model to add additional data (<code class="docutils literal notranslate"><span class="pre">build</span></code> is not required anymore).</p>
+<p>For example, this is what the <code class="docutils literal notranslate"><span class="pre">setup_region</span></code> from <code class="docutils literal notranslate"><span class="pre">Model</span></code> does by adding <code class="docutils literal notranslate"><span class="pre">region</span></code> to <code class="docutils literal notranslate"><span class="pre">geoms</span></code>, or <code class="docutils literal notranslate"><span class="pre">setup_grid</span></code>
+from <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> which generates a regular grid based on the region argument, a CRS and a resolution.
+You can re-use the core methods or decide to define your own.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Order of the setup methods</strong>: Typically, building a model starts with defining the computational units (grid, mesh, vector etc.).
+Afterwards data layers are added to model components and there might be dependencies between the different layers. For example,
+a method to define river dimensions should probably be called after a method which defines the river cells on the grid or mesh itself.
+However, there is no real check on the order in which setup methods are called apart from checks that you can build-in that certain
+layers are already present with clear error messages. Clear documentation will help your user too.
+For Command Line Interface users, the functions in the hydromt configuration  yaml file will be executed in the order they appear in the file.
+Python Interface users can call the setup functions in any order they want from a script.</p>
+</div>
+</section>
+<section id="setup-methods">
+<h3>Setup methods<a class="headerlink" href="#setup-methods" title="Link to this heading">#</a></h3>
+<p>In general, a HydroMT <code class="docutils literal notranslate"><span class="pre">setup_&lt;&gt;</span></code> method does 4 things:</p>
+<blockquote>
+<div><p>1. read and parse the data using the <code class="docutils literal notranslate"><span class="pre">DataCatalog</span></code> and corresponding <code class="docutils literal notranslate"><span class="pre">DataAdapter.get_data</span></code> method (
+<code class="docutils literal notranslate"><span class="pre">get_rasterdataset</span></code> for RasterDataset, <code class="docutils literal notranslate"><span class="pre">get_GeoDataset</span></code> for GeoDataset, <code class="docutils literal notranslate"><span class="pre">get_geodataframe</span></code> for GeoDataFrame and
+<code class="docutils literal notranslate"><span class="pre">get_dataframe</span></code> for DataFrame).</p>
+<ol class="arabic simple" start="2">
+<li><p>process that data in some way, optionally by calling an external workflow function.</p></li>
+<li><p>Optionally, rename or update attributes from HydroMT variable conventions (name, unit) to the specific model conventions.</p></li>
+<li><p>add the data to the corresponding HydroMT model components.</p></li>
+</ol>
+</div></blockquote>
+<p>Below is a simplified example of what a setup function would look like for a hypothetical landuse grid from a raster
+input data using an external workflow from hydromt core is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">setup_landuse</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span>
+      <span class="n">landuse</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
+  <span class="p">):</span>
+<span class="w">      </span><span class="sd">&quot;&quot;&quot;Add landuse data variable to grid.</span>
+
+<span class="sd">      Adds model layers:</span>
+
+<span class="sd">      * **landuse_class** grid: data from landuse</span>
+
+<span class="sd">      Parameters</span>
+<span class="sd">      ----------</span>
+<span class="sd">      landuse: str, Path, xr.DataArray</span>
+<span class="sd">          Data catalog key, path to raster file or raster xarray data object.</span>
+<span class="sd">          If a path to a raster file is provided it will be added</span>
+<span class="sd">          to the data_catalog with its name based on the file basename without</span>
+<span class="sd">          extension.</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Preparing landuse data from raster source </span><span class="si">{</span><span class="n">landuse</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+      <span class="c1"># 1. Read landuse raster data</span>
+      <span class="n">da_landuse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span>
+          <span class="n">landuse</span><span class="p">,</span>
+          <span class="n">geom</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">region</span><span class="p">,</span>
+          <span class="n">buffer</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+          <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;landuse&quot;</span><span class="p">],</span>
+      <span class="p">)</span>
+      <span class="c1"># 2. Do some transformation or processing</span>
+      <span class="n">ds_out</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">workflows</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">grid_from_rasterdataset</span><span class="p">(</span>
+          <span class="n">grid_like</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
+          <span class="n">ds</span><span class="o">=</span><span class="n">da_landuse</span><span class="p">,</span>
+          <span class="n">fill_method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+          <span class="n">reproject_method</span><span class="o">=</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span>
+      <span class="p">)</span>
+      <span class="c1"># 3. Rename or transform from HydroMT to model conventions</span>
+      <span class="n">rmdict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;landuse&quot;</span><span class="p">:</span> <span class="s2">&quot;landuse_class&quot;</span><span class="p">}</span>
+      <span class="c1"># Or using a properly initialised _GRIDS</span>
+      <span class="c1"># rmdict = {k: v for k, v in self._GRIDS.items() if k in ds_out.data_vars}</span>
+      <span class="n">ds_out</span> <span class="o">=</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">rmdict</span><span class="p">)</span>
+      <span class="c1"># 4. Add to grid</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">set_grid</span><span class="p">(</span><span class="n">ds_out</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Input data type of the setup method</strong>: Typically a setup function tries to go from one type of dataset
+(landuse raster) to a HydroMT model component (landuse map in <code class="docutils literal notranslate"><span class="pre">maps</span></code>). So it’s good to make clear for your user in
+the setup function docstrings which type of input data this function can work with. You could decide to support
+several data types in one setup function but be aware that the GIS processing functions like resampling, reprojection can
+be quite different for a raster or a vector for example. So you could decide to create two setup functions that
+prepare the same data but from different type of input data (eg <em>setup_landuse_from_raster</em> and <em>setup_landuse_from_vector</em>).</p>
+</div>
+</section>
+<section id="workflows">
+<h3>Workflows<a class="headerlink" href="#workflows" title="Link to this heading">#</a></h3>
+<p>Because the python script defining your plugin Model class can get quite long and it makes unit testing easier,
+we encourage you to use or define external data processing functions. In HydroMT these are usually called workflows.
+These workflows are usually stored in separate python scripts that you can decide to store in a workflow subfolder.</p>
+<p>A couple of tips if you want to define workflows:</p>
+<ul class="simple">
+<li><p>check out the <a class="reference internal" href="../api.html#workflows-api"><span class="std std-ref">workflows available</span></a> in HydroMT core</p></li>
+<li><p>avoid passing the HydroMT model class to your workflow function, but pass the required arguments directly (eg crs = self.crs,
+data = self.grid). Ideally the workflows work from common python objects like xarray or geopandas rather than with the <code class="docutils literal notranslate"><span class="pre">Model</span></code> class.</p></li>
+<li><p>if you want to do some GIS processing on <code class="docutils literal notranslate"><span class="pre">RasterDataset</span></code> or <code class="docutils literal notranslate"><span class="pre">GeoDataset</span></code>, HydroMT defines a lot of useful methods. Check out the
+<a class="reference internal" href="../api.html#raster-api"><span class="std std-ref">Raster methods API doc</span></a> for RasterDataset and <a class="reference internal" href="../api.html#geodataset-api"><span class="std std-ref">GeoDataset methods API doc</span></a>. For <code class="docutils literal notranslate"><span class="pre">GeoDataFrame</span></code>,
+the <a class="reference external" href="https://geopandas.org/en/stable/index.html">geopandas</a> library should have most of what you need (and for <code class="docutils literal notranslate"><span class="pre">UgridDataset</span></code> or mesh,
+the <a class="reference external" href="https://deltares.github.io/xugrid/">xugrid</a> library). For computing or deriving other variables from an input dataset, HydroMT
+contains also a couple of useful workflows for example <code class="docutils literal notranslate"><span class="pre">flwdir</span></code> for flow direction methods, <code class="docutils literal notranslate"><span class="pre">basin_mask</span></code> to derive basin shape, or
+<code class="docutils literal notranslate"><span class="pre">stats</span></code> to derive general, efficiency or extreme value statistics from data.</p></li>
+</ul>
+</section>
+</section>
+<section id="good-practices">
+<h2>Good practices<a class="headerlink" href="#good-practices" title="Link to this heading">#</a></h2>
+<p>On top of code development for your plugin, you can also find some good practices for your plugin repository in the <a class="reference internal" href="contributing.html#contributing"><span class="std std-ref">Developer guide</span></a>.
+Here are some last tips:</p>
+<ul class="simple">
+<li><p><strong>Documentation</strong>: for other people to use or contribute to your plugin, good documentation is really key. We really encourage you to write
+docstrings for your function (HydroMT uses the NumPy style) as they can directly serve and be imported in your online documentation. So no
+need for duplicates. Type hints are also encouraged to know what type of arguments each function is expecting. Finally, for the <code class="docutils literal notranslate"><span class="pre">setup_&lt;&gt;</span></code>
+function, it is good to mention if your input data should have required or optional variables (including names and units) to help out your user.</p></li>
+<li><p><strong>Examples</strong>: if you can, it is nice to include some example models or build configuration template files with your repository. Jupyter Notebook
+can also easily be included in GitHub documentation.</p></li>
+<li><p><strong>Testing</strong>: you should also test the functions you develop for your plugin. We use pytest in HydroMT for this. You can test by developing
+unit test for your functions, or build a model and compare to a previously built one (eg in the examples folder). The <code class="docutils literal notranslate"><span class="pre">Model</span></code> API includes a
+couple of functions  that can help you with testing so you can check them out: <code class="xref py py-func docutils literal notranslate"><span class="pre">_test_model_api()</span></code>, <code class="xref py py-func docutils literal notranslate"><span class="pre">_test_equal()</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="advanced-topics">
+<h1>Advanced Topics<a class="headerlink" href="#advanced-topics" title="Link to this heading">#</a></h1>
+<section id="mixing-model-sub-classes">
+<h2>Mixing model sub-classes<a class="headerlink" href="#mixing-model-sub-classes" title="Link to this heading">#</a></h2>
+<p>If you want to mix functionalities from different sub-model classes, e.g. your model contains both regular grids and semi-distributed units, most model classes also
+provide <code class="docutils literal notranslate"><span class="pre">Mixin</span></code> variants that you can use to mix and match a bit more modularly. This is actually how the generic sub-classes are defined,
+as a mix of the main HydroMT <code class="docutils literal notranslate"><span class="pre">Model</span></code> class and the <code class="docutils literal notranslate"><span class="pre">Mixin</span></code> of the additional new component defining then:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">GridModel</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">GridMixin</span><span class="p">):</span>
+</pre></div>
+</div>
+</div></blockquote>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Choosing the right HydroMT Model or submodel class for your plugin depends on your main model characteristics. Each sub-model class implements
+a new HydroMT Model component, <code class="docutils literal notranslate"><span class="pre">grid</span></code> for <code class="docutils literal notranslate"><span class="pre">GridModel</span></code> or <code class="docutils literal notranslate"><span class="pre">mesh</span></code> for <code class="docutils literal notranslate"><span class="pre">MeshModel</span></code> and adds the accompanying setup, read and write methods.
+So choosing the one or the other, or adding a Mixin depends on what type of model or input data structure you need to prepare. Note that if your
+Model class is defined as (1) <em>PluginModel(GridModel)</em> or (2) <em>PluginModel(Model, GridMixin)</em>, in both cases the <code class="docutils literal notranslate"><span class="pre">grid</span></code> object and relative methods
+are available. The main difference is the dominant object for your model in case of (2) will be <code class="docutils literal notranslate"><span class="pre">grid</span></code> and in case of (1) the <code class="docutils literal notranslate"><span class="pre">region</span></code>,
+i.e. when looking for example for the model CRS property, in case of (1) the crs will be grid.crs and in case of (2) region.crs. Also, in
+update mode, in case of (2), no additional data can be added to your model if the grid object is not yet defined (ie your model grid extent and
+resolution does not yet exist).</p>
+</div>
+<section id="adding-a-new-property-or-component">
+<h3>Adding a new property or component<a class="headerlink" href="#adding-a-new-property-or-component" title="Link to this heading">#</a></h3>
+<p>If you wish to add additional properties or attributes to your plugin Model subclass, you can either decide to add simple
+attributes directly in the initialisation function <code class="docutils literal notranslate"><span class="pre">__init__</span></code> or define specific properties. Example for a shortcut to the basin
+vector in the geoms object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">basins</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Returns a basin(s) geometry as a geopandas.GeoDataFrame.&quot;&quot;&quot;</span>
+  <span class="c1"># Check in geoms</span>
+  <span class="k">if</span> <span class="s2">&quot;basins&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">geoms</span><span class="p">:</span>
+    <span class="n">gdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geoms</span><span class="p">[</span><span class="s2">&quot;basins&quot;</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+          <span class="sa">f</span><span class="s2">&quot;Basin map </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_MAPS</span><span class="p">[</span><span class="s1">&#39;basins&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> not found in maps or geoms.&quot;</span>
+      <span class="p">)</span>
+      <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">gdf</span>
+</pre></div>
+</div>
+<p>In most cases, we hope that the components defined in HydroMT <cite>Model</cite> classes (<code class="docutils literal notranslate"><span class="pre">config</span></code>, <code class="docutils literal notranslate"><span class="pre">geoms</span></code>, <code class="docutils literal notranslate"><span class="pre">maps</span></code>, <code class="docutils literal notranslate"><span class="pre">forcing</span></code>, <code class="docutils literal notranslate"><span class="pre">states</span></code>,
+<code class="docutils literal notranslate"><span class="pre">results</span></code>) and its generic subclasses (<code class="docutils literal notranslate"><span class="pre">grid</span></code>, <code class="docutils literal notranslate"><span class="pre">mesh</span></code>, <code class="docutils literal notranslate"><span class="pre">vector</span></code>) should allow you to store any data required by your
+model in a proper way. If it is not the case, you can always define your own new model components by respecting the following steps
+(example if your model has a lot of 2D non-geospatial tabular data that could nicely be stored as pandas.DataFrame objects, <em>tables</em>):</p>
+<ol class="arabic simple">
+<li><p>Initialise your new component placeholder in the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function, if possible with None.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">_tables</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Define the component itself as a new property, that looks for the placeholder and tries reading if empty in read mode.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">tables</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a dictionary of pandas.DataFrame tabular files.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_tables</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Define a reading and a writing method for your new component.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">read_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Read table files at &lt;root&gt; and parse to dict of dataframes&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># start fresh in read-only mode</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Reading model table files.&quot;</span><span class="p">)</span>
+  <span class="n">fns</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;*.csv&quot;</span><span class="p">))</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">fns</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">tbl</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">set_tables</span><span class="p">(</span><span class="n">tbl</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">write_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Write tables at &lt;root&gt;.&quot;&quot;&quot;</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_assert_write_mode</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Writing table files.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">:</span>
+      <span class="n">fn_out</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fn_out</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>Define a set function in order to add or update data in your component.</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">set_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Add table &lt;pandas.DataFrame&gt; to model.&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;df type not recognized, should be pandas.DataFrame or pandas.Series.&quot;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot overwrite table </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in read-only mode&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overwriting table: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_tables</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="team.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Contributors</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../plugins.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Plugins</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Starting your own HydroMT Plugin</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#plugin-or-no-plugin">Plugin or no plugin ?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-your-own-plugin-repository">Create your own plugin repository</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#requirements">Requirements</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-cookiecutter-template">Using the cookiecutter template</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#typical-hydromt-repository-structure">Typical HydroMT repository structure</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-class-and-components">Model class and components</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initialisation">Initialisation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-components">Model components</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-writing-model-components">Reading &amp; Writing model components</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#set-model-components">Set model components</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#additional-model-properties">Additional Model properties</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setup-basic-model-objects">Setup basic model objects</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setup-methods">Setup methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#workflows">Workflows</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#good-practices">Good practices</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-topics">Advanced Topics</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mixing-model-sub-classes">Mixing model sub-classes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-a-new-property-or-component">Adding a new property or component</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/dev/plugin-quickstart.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/dev/plugin-quickstart.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
