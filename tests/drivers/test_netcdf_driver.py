@@ -25,15 +25,22 @@ class TestNetcdfDriver:
                 return [uri]
 
         uri: str = "file.netcdf"
-        res: xr.Dataset = NetcdfDriver(metadata_resolver=FakeMetadataResolver()).read(
+        driver = NetcdfDriver(
+            metadata_resolver=FakeMetadataResolver(),
+            options={"preprocess": "round_latlon"},
+        )
+        res: xr.Dataset = driver.read(
             uri,
-            preprocess="round_latlon",
             variables=["var1", "var2"],
         )
         call_args = mock_xr_open.call_args
         assert call_args[0][0] == [uri]  # first arg
         assert call_args[1].get("preprocess") == round_latlon
         assert res.sizes == {}  # empty dataframe
+
+        assert (
+            driver.options.get("preprocess") == "round_latlon"
+        )  # test does not consume property
 
     def test_write(self, rasterds: xr.Dataset, tmp_path: Path):
         netcdf_path = tmp_path / f"{uuid4().hex}.nc"
