@@ -94,9 +94,10 @@ updates
 -------
 
 - create new branch on github
-- make changes and bump the version in the global meta section using semantic versioning
-- create a new folder with the version as its name of the respective predefined data catalogs
-- add the data_catalog.yml to this folder
-- run update_versions.py, this will create a registry file with the versions and hashes of the data catalogs, also the line endings are replaced (CRLF -> LF) if you are updating from windows.
+- make a new folder with the name of the version you are going to create
+- copy the latest data catalog into the new folder.
+- DO NOT modify old catalogs
+- bump the version in the global meta section using semantic versioning
+- run update_versions.py, this will create a registry file with the versions and hashes of the data catalogs. It is very important that the files have Linux style line endings (LF) as opposed to windows style line endings (CRLF) to keep hashes consistent. If this is not done, pooch will not be able to find the catalogs. This is done automatically for you (CRLF -> LF) if you are updating from windows.
 - test your yml file (Can the added/changed data sources be read through HydroMT?)
 - create pull request
