@@ -376,10 +376,3 @@ def mesh_model(griduda):
     mod.setup_config(**{"header": {"setting": "value"}})
     mod.set_mesh(griduda, "elevtn")
     return mod
-
-
-# @pytest.fixture()
-# def artifact_data():
-#     datacatalog = DataCatalog()
-#     datacatalog.from_predefined_catalogs("artifact_data")
-#     return datacatalog
