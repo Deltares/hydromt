@@ -95,3 +95,43 @@ class TestRasterXarrayDriver:
         driver = RasterDatasetXarrayDriver()
         driver.write(zarr_path, rasterds)
         assert np.all(driver.read(str(zarr_path)) == rasterds)
+
+    def test_calls_zarr_with_zarr_ext(
+        self, rasterds: xr.Dataset, tmp_dir: Path, mocker: MockerFixture
+    ):
+        mock_xr_open: mocker.MagicMock = mocker.patch(
+            "hydromt.drivers.raster_xarray_driver.xr.open_mfdataset",
+            spec=open_mfdataset,
+        )
+        mock_xr_open.return_value = xr.Dataset()
+
+        class FakeMetadataResolver(MetaDataResolver):
+            def resolve(self, uri: str, *args, **kwargs):
+                return [uri]
+
+        uri: str = "file.netcdf"
+        driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
+        _ = driver.read(
+            uri,
+        )
+        assert mock_xr_open.call_count == 1
+
+    def test_calls_nc_func_with_nc_ext(
+        self, rasterds: xr.Dataset, tmp_dir: Path, mocker: MockerFixture
+    ):
+        mock_xr_open: mocker.MagicMock = mocker.patch(
+            "hydromt.drivers.raster_xarray_driver.xr.open_mfdataset",
+            spec=open_mfdataset,
+        )
+        mock_xr_open.return_value = xr.Dataset()
+
+        class FakeMetadataResolver(MetaDataResolver):
+            def resolve(self, uri: str, *args, **kwargs):
+                return [uri]
+
+        uri: str = "file.netcdf"
+        driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
+        _ = driver.read(
+            uri,
+        )
+        assert mock_xr_open.call_count == 1
