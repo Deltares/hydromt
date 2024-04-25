@@ -1,6 +1,5 @@
 from copy import copy
 
-import numpy as np
 import pandas as pd
 
 from hydromt.data_adapter.dataframe import DataFrameAdapter
@@ -12,15 +11,15 @@ class TestDataFrameAdapter:
         adapter = DataFrameAdapter()
         metadata = SourceMetadata()
         res = adapter.transform(df, metadata)
-        assert np.all(res == df)
+        pd.testing.assert_frame_equal(res, df)
 
     def test_transform_variables(self, df: pd.DataFrame):
         adapter = DataFrameAdapter(unit_add={"latitude": 1, "longitude": -1})
         metadata = SourceMetadata()
         df_copy = copy(df)
         res = adapter.transform(df, metadata)
-        assert np.all(res["longitude"] == df_copy["longitude"] - 1)
-        assert np.all(res["latitude"] == df_copy["latitude"] + 1)
+        pd.testing.assert_series_equal(res["longitude"], df_copy["longitude"] - 1)
+        pd.testing.assert_series_equal(res["latitude"], df_copy["latitude"] + 1)
 
     def test_transform_meta(self, df: pd.DataFrame):
         adapter = DataFrameAdapter()
