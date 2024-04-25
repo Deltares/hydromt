@@ -15,8 +15,9 @@ from hydromt.validators.data_catalog import (
 )
 
 
-def test_deltares_data_catalog(latest_dd_version_uri):
-    yml_dict = _yml_from_uri_or_path(latest_dd_version_uri)
+def test_deltares_data_catalog():
+    p = "data/catalogs/deltares_data.yml"
+    yml_dict = _yml_from_uri_or_path(p)
     # whould raise error if something goes wrong
     _ = DataCatalogValidator.from_dict(yml_dict)
 
