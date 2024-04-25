@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from hydromt.components.dataset import DatasetsComponent
+from hydromt.components.datasets import DatasetsComponent
 from hydromt.models import Model
 
 
