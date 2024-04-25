@@ -1,3 +1,5 @@
+from os import makedirs
+from os.path import dirname
 from pathlib import Path
 
 import pytest
@@ -53,7 +55,8 @@ def test_model_dataset_reads_and_writes_correctly(obsda, tmpdir: Path):
 
 
 def test_model_read_dataset(obsda, tmpdir):
-    write_path = Path(tmpdir) / "forcing.nc"
+    write_path = Path(tmpdir) / "datasets/forcing.nc"
+    makedirs(dirname(write_path), exist_ok=True)
     obsda.to_netcdf(write_path, engine="netcdf4")
 
     model = Model(root=tmpdir, mode="r")
