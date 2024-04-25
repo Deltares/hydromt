@@ -47,8 +47,8 @@ def create_registry_file(root: Path, registry_path: Optional[Path] = None) -> No
         if sys.platform == "win32":
             # The line endings need to be replaced when operating from windows in order to maintain equality of hashes
             _replace_line_endings(path)
-        hash = pooch.file_hash(path)
-        registry[key] = hash
+        file_hash = pooch.file_hash(path)
+        registry[key] = file_hash
 
     if not registry:
         raise FileNotFoundError(f"No data_catalog.yml files found in {root}")
@@ -168,9 +168,8 @@ class PredefinedCatalog(object):
         """
         if version is None or version == "latest":  # get latest version
             version = self.versions[-1]
-        elif isinstance(version, str):
-            if version not in self.versions:
-                raise ValueError(f"Version {version} not found in {self.name} catalog")
+        if version not in self.versions:
+            raise ValueError(f"Version {version} not found in {self.name} catalog")
         # get the catalog file
         key = f"{version}/data_catalog.yml"
         # fetch the file (download if not cached)

@@ -69,7 +69,7 @@ def test_resolve_path(tmpdir):
         source._resolve_paths(variables=["waves"])
 
 
-def test_rasterdataset(rioda, tmpdir, data_catalog):
+def test_rasterdataset(rioda, tmpdir):
     fn_tif = str(tmpdir.join("test.tif"))
     rioda_utm = rioda.raster.reproject(dst_crs="utm")
     rioda_utm.raster.to_raster(fn_tif)
