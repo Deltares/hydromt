@@ -532,6 +532,8 @@ General methods
    DatasetsComponent.set
    DatasetsComponent.write
    DatasetsComponent.read
+   DatasetsComponent.add_raster_data_from_raster_reclass
+   DatasetsComponent.add_raster_data_from_rasterdataset
 
 GeomsComponent
 ==============
