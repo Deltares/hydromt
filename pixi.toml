@@ -196,7 +196,7 @@ s3fs = "*"
 [feature.extra.dependencies]
 matplotlib = "*"
 pyet = "*"
-xugrid = ">=0.6.5"
+xugrid = ">=0.9.0"
 
 [feature.dev.dependencies]
 black = "*"
@@ -230,14 +230,14 @@ notebook = "*"
 
 [environments]
 default = { features = [
-  "py311",
+  "py39",
   "io",
   "extra",
   "dev",
   "test",
   "doc",
   "examples",
-], solve-group = "py311" }
+], solve-group = "py39" }
 full-py311 = { features = [
   "py311",
   "io",

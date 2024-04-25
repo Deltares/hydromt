@@ -300,6 +300,10 @@ eobs:
       source_temporal_extent:
         start: '1950-01-02'
         end: '2022-01-01'
+  - version: 29.0e
+    path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
+    meta:
+      processing_script: meteo/eobs/scripts/v29.0e_fix_qq_dims_and_match_extent.py
   rename:
     pp: press_msl
     qq: kin
@@ -338,8 +342,11 @@ eobs_orography:
     path: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
   - version: 25.0e
     path: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
+  - version: 29.0e
+    path: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
   rename:
     elevation: elevtn
+
 
 era5:
   crs: 4326
