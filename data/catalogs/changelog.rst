@@ -12,7 +12,7 @@ a version.yml. This file describes the different versions and relative paths of
 the data catalogs present in the folders.
 
 - predefined_catalogs.yml is deprecated
-- data catalog versions are associated with the SHA-256 hash of the files. 
+- data catalog versions are associated with the SHA-256 hash of the files.
 - deltares_data versioning is now in semantic style
 
 Added
