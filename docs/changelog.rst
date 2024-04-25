@@ -35,6 +35,7 @@ Removed
 - Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
 - `staticmaps` and `staticgeoms` attributes on the `Model` object have been removed. (#845)
 - Code refering to the unimplemented Network Model type has been removed (#871)
+- Removed `_API`, `.api` property, `test_api` and other `Model` level conventions as they are now handled by the components. (#894)
 
 
 Unreleased
