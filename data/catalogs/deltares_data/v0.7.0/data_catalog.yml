@@ -1,7 +1,7 @@
 ---
 meta:
   root: p:/wflow_global/hydromt
-  version: 2024.2
+  version: v0.7.0
   hydromt_version: '>=0.9, <1.0'
 
 
