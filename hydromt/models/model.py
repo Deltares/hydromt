@@ -24,11 +24,7 @@ from hydromt import hydromt_step
 from hydromt._typing import StrPath
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
-from hydromt.components import (
-    ModelComponent,
-    ModelRegionComponent,
-)
-from hydromt.components.datasets import DatasetsComponent
+from hydromt.components import DatasetsComponent, ModelComponent, ModelRegionComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot

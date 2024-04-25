@@ -81,7 +81,7 @@ class DatasetsComponent(ModelComponent):
         data: xarray.Dataset or xarray.DataArray
             New xarray object to add
         name: str
-            name of the xaray.
+            name of the xarray.
         """
         self._initialize()
         if isinstance(data, DataFrame):
