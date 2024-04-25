@@ -1,7 +1,8 @@
 ---
 meta:
-  version: v0.1.0
-  name: aws_data
+  version: 2024.1.30
+  hydromt_version: '>=0.9, <1.0'
+
 
 esa_worldcover_2020_v100:
   crs: 4326
