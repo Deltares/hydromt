@@ -100,7 +100,7 @@ class TestRasterXarrayDriver:
         self, rasterds: xr.Dataset, tmp_dir: Path, mocker: MockerFixture
     ):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.raster_xarray_driver.xr.open_mfdataset",
+            "hydromt.drivers.raster_xarray_driver.xr.open_zarr",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -109,7 +109,7 @@ class TestRasterXarrayDriver:
             def resolve(self, uri: str, *args, **kwargs):
                 return [uri]
 
-        uri: str = "file.netcdf"
+        uri: str = "file.zarr"
         driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
         _ = driver.read(
             uri,
