@@ -1,7 +1,7 @@
 ---
 meta:
-  version: 2024.1.30
-  hydromt_version: '>=0.8.1, <1.0'
+  version: v0.1.0
+  name: gcs_cmip6_data
 
 cmip6_{model}_historical_{member}_{timestep}:
   crs: 4326
@@ -21,9 +21,32 @@ cmip6_{model}_historical_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: [IPSL/IPSL-CM6A-LR, SNU/SAM0-UNICON, NCAR/CESM2, NCAR/CESM2-WACCM, INM/INM-CM4-8, INM/INM-CM5-0, NOAA-GFDL/GFDL-ESM4, NCC/NorESM2-LM, NIMS-KMA/KACE-1-0-G,
-      CAS/FGOALS-f3-L, CSIRO-ARCCSS/ACCESS-CM2, NCC/NorESM2-MM, CSIRO/ACCESS-ESM1-5, NCAR/CESM2-WACCM-FV2, NCAR/CESM2-FV2, CMCC/CMCC-CM2-SR5, AS-RCEC/TaiESM1,
-      NCC/NorCPM1, IPSL/IPSL-CM5A2-INCA, CMCC/CMCC-CM2-HR4, CMCC/CMCC-ESM2, IPSL/IPSL-CM6A-LR-INCA, E3SM-Project/E3SM-1-0]
+    model:
+      [
+        IPSL/IPSL-CM6A-LR,
+        SNU/SAM0-UNICON,
+        NCAR/CESM2,
+        NCAR/CESM2-WACCM,
+        INM/INM-CM4-8,
+        INM/INM-CM5-0,
+        NOAA-GFDL/GFDL-ESM4,
+        NCC/NorESM2-LM,
+        NIMS-KMA/KACE-1-0-G,
+        CAS/FGOALS-f3-L,
+        CSIRO-ARCCSS/ACCESS-CM2,
+        NCC/NorESM2-MM,
+        CSIRO/ACCESS-ESM1-5,
+        NCAR/CESM2-WACCM-FV2,
+        NCAR/CESM2-FV2,
+        CMCC/CMCC-CM2-SR5,
+        AS-RCEC/TaiESM1,
+        NCC/NorCPM1,
+        IPSL/IPSL-CM5A2-INCA,
+        CMCC/CMCC-CM2-HR4,
+        CMCC/CMCC-ESM2,
+        IPSL/IPSL-CM6A-LR-INCA,
+        E3SM-Project/E3SM-1-0,
+      ]
     #    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR', 'BCC/BCC-ESM1', 'CCCma/CanESM5', 'MRI/MRI-ESM2-0',
     #    'HAMMOZ-Consortium/MPI-ESM-1-2-HAM', 'MPI-M/MPI-ESM1-2-LR', 'MPI-M/MPI-ESM1-2-HR', 'NUIST/NESM3',
     #    'CAS/FGOALS-g3', 'MIROC/MIROC6', 'KIOST/KIOST-ESM', 'CCCR-IITM/IITM-ESM', 'AWI/AWI-ESM-1-1-LR',
@@ -97,8 +120,18 @@ cmip6_{model}_ssp126_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: [NOAA-GFDL/GFDL-ESM4, INM/INM-CM4-8, INM/INM-CM5-0, IPSL/IPSL-CM6A-LR, NIMS-KMA/KACE-1-0-G, NCC/NorESM2-MM, CMCC/CMCC-CM2-SR5, IPSL/IPSL-CM5A2-INCA,
-      CMCC/CMCC-ESM2]
+    model:
+      [
+        NOAA-GFDL/GFDL-ESM4,
+        INM/INM-CM4-8,
+        INM/INM-CM5-0,
+        IPSL/IPSL-CM6A-LR,
+        NIMS-KMA/KACE-1-0-G,
+        NCC/NorESM2-MM,
+        CMCC/CMCC-CM2-SR5,
+        IPSL/IPSL-CM5A2-INCA,
+        CMCC/CMCC-ESM2,
+      ]
     #    model: ['BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','DKRZ/MPI-ESM1-2-HR','MPI-M/MPI-ESM1-2-LR',
     #    'NUIST/NESM3', 'MIROC/MIROC6','MRI/MRI-ESM2-0','KIOST/KIOST-ESM','EC-Earth-Consortium/EC-Earth3-Veg',
     #    'EC-Earth-Consortium/EC-Earth3','CCCR-IITM/IITM-ESM','EC-Earth-Consortium/EC-Earth3-Veg-LR',
@@ -135,8 +168,21 @@ cmip6_{model}_ssp245_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: [NOAA-GFDL/GFDL-ESM4, IPSL/IPSL-CM6A-LR, INM/INM-CM4-8, INM/INM-CM5-0, NCAR/CESM2-WACCM, NCC/NorESM2-LM, CSIRO-ARCCSS/ACCESS-CM2, NCC/NorESM2-MM,
-      NIMS-KMA/KACE-1-0-G, CMCC/CMCC-CM2-SR5, CMCC/CMCC-ESM2, AS-RCEC/TaiESM1]
+    model:
+      [
+        NOAA-GFDL/GFDL-ESM4,
+        IPSL/IPSL-CM6A-LR,
+        INM/INM-CM4-8,
+        INM/INM-CM5-0,
+        NCAR/CESM2-WACCM,
+        NCC/NorESM2-LM,
+        CSIRO-ARCCSS/ACCESS-CM2,
+        NCC/NorESM2-MM,
+        NIMS-KMA/KACE-1-0-G,
+        CMCC/CMCC-CM2-SR5,
+        CMCC/CMCC-ESM2,
+        AS-RCEC/TaiESM1,
+      ]
     #    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR','CCCma/CanESM5','EC-Earth-Consortium/EC-Earth3-Veg',
     #    'EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-Veg-LR','EC-Earth-Consortium/EC-Earth3-CC',
     #    'AWI/AWI-CM-1-1-MR','MRI/MRI-ESM2-0','MPI-M/MPI-ESM1-2-LR','DKRZ/MPI-ESM1-2-HR','NUIST/NESM3',
@@ -173,8 +219,21 @@ cmip6_{model}_ssp370_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: [NOAA-GFDL/GFDL-ESM4, IPSL/IPSL-CM6A-LR, INM/INM-CM4-8, INM/INM-CM5-0, NCAR/CESM2-WACCM, CSIRO-ARCCSS/ACCESS-CM2, NCC/NorESM2-MM, NCC/NorESM2-LM,
-      NIMS-KMA/KACE-1-0-G, CMCC/CMCC-CM2-SR5, IPSL/IPSL-CM5A2-INCA, CMCC/CMCC-ESM2]
+    model:
+      [
+        NOAA-GFDL/GFDL-ESM4,
+        IPSL/IPSL-CM6A-LR,
+        INM/INM-CM4-8,
+        INM/INM-CM5-0,
+        NCAR/CESM2-WACCM,
+        CSIRO-ARCCSS/ACCESS-CM2,
+        NCC/NorESM2-MM,
+        NCC/NorESM2-LM,
+        NIMS-KMA/KACE-1-0-G,
+        CMCC/CMCC-CM2-SR5,
+        IPSL/IPSL-CM5A2-INCA,
+        CMCC/CMCC-ESM2,
+      ]
     #    model: ['BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','BCC/BCC-ESM1','DKRZ/MPI-ESM1-2-HR',
     #    EC-Earth-Consortium/EC-Earth3-Veg','EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-AerChem',
     #    'EC-Earth-Consortium/EC-Earth3-Veg-LR','MRI/MRI-ESM2-0','MPI-M/MPI-ESM1-2-LR','HAMMOZ-Consortium/MPI-ESM-1-2-HAM',
@@ -279,8 +338,18 @@ cmip6_{model}_ssp585_{member}_{timestep}:
     source_url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
     source_version: 1.3.1
   placeholders:
-    model: [NOAA-GFDL/GFDL-ESM4, INM/INM-CM4-8, INM/INM-CM5-0, NIMS-KMA/KACE-1-0-G, NCC/NorESM2-MM, NCC/NorESM2-LM, CMCC/CMCC-CM2-SR5, AS-RCEC/TaiESM1,
-      CMCC/CMCC-ESM2]
+    model:
+      [
+        NOAA-GFDL/GFDL-ESM4,
+        INM/INM-CM4-8,
+        INM/INM-CM5-0,
+        NIMS-KMA/KACE-1-0-G,
+        NCC/NorESM2-MM,
+        NCC/NorESM2-LM,
+        CMCC/CMCC-CM2-SR5,
+        AS-RCEC/TaiESM1,
+        CMCC/CMCC-ESM2,
+      ]
     #    model: ['NOAA-GFDL/GFDL-CM4','BCC/BCC-CSM2-MR','CCCma/CanESM5','AWI/AWI-CM-1-1-MR','MPI-M/MPI-ESM1-2-LR',
     #    'DKRZ/MPI-ESM1-2-HR','MIROC/MIROC6','MRI/MRI-ESM2-0','EC-Earth-Consortium/EC-Earth3-Veg',
     #    'EC-Earth-Consortium/EC-Earth3','EC-Earth-Consortium/EC-Earth3-Veg-LR','EC-Earth-Consortium/EC-Earth3-CC',
