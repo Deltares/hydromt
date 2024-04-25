@@ -28,7 +28,7 @@ from hydromt.components import (
     ModelComponent,
     ModelRegionComponent,
 )
-from hydromt.components.dataset import DatasetComponent
+from hydromt.components.datasets import DatasetsComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
@@ -297,7 +297,7 @@ class Model(object, metaclass=ABCMeta):
             self.write()
 
         for comp in self._components.values():
-            if isinstance(comp, DatasetComponent):
+            if isinstance(comp, DatasetsComponent):
                 comp._cleanup(forceful_overwrite=forceful_overwrite)
 
     @hydromt_step

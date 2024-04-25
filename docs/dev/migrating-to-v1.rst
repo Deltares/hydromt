@@ -482,10 +482,10 @@ GeomsComponent
 
 The previous `Model.geoms` is now replaced by a `GeomsComponent` that can be used to store several geospatial geometry based data into a dictionary of geopandas GeoDataFrames. The `GeomsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
-DatasetComponent
+DatasetsComponent
 ^^^^^^^^^^^^^^
 
-The previous `Model` attributes `forcing`, `states`, `results` and `maps` are now replaced by a `DatasetComponent` that can be used to store several xarray datasets into a dictionary. The `DatasetComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+The previous `Model` attributes `forcing`, `states`, `results` and `maps` are now replaced by a `DatasetsComponent` that can be used to store several xarray datasets into a dictionary. The `DatasetsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
 ConfigComponent
 ^^^^^^^^^^^^^^^

@@ -501,13 +501,13 @@ General methods
    TablesComponent.write
    TablesComponent.read
 
-DatasetComponent
+DatasetsComponent
 ==============
 
 .. autosummary::
    :toctree: _generated
 
-    DatasetComponent
+    DatasetsComponent
 
 
 Components and attributes
@@ -516,11 +516,11 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   DatasetComponent._model
-   DatasetComponent._data_catalog
-   DatasetComponent._logger
-   DatasetComponent._root
-   DatasetComponent.data
+   DatasetsComponent._model
+   DatasetsComponent._data_catalog
+   DatasetsComponent._logger
+   DatasetsComponent._root
+   DatasetsComponent.data
 
 
 General methods
@@ -529,9 +529,9 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   DatasetComponent.set
-   DatasetComponent.write
-   DatasetComponent.read
+   DatasetsComponent.set
+   DatasetsComponent.write
+   DatasetsComponent.read
 
 GeomsComponent
 ==============

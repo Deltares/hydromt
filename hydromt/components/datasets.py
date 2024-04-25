@@ -26,14 +26,14 @@ if TYPE_CHECKING:
 _DEFAULT_DATASET_FILENAME = "{name}.nc"
 
 
-class DatasetComponent(ModelComponent):
-    """A component to manage collections of Xarray objects.
+class DatasetsComponent(ModelComponent):
+    """A component to manage colections of Xarray objects.
 
     It contains a dictionary of xarray DataArray or DataSet objects.
     """
 
     def __init__(self, model: "Model", filename: str = _DEFAULT_DATASET_FILENAME):
-        """Initialize a DatasetComponent.
+        """Initialize a GeomComponent.
 
         Parameters
         ----------
@@ -241,8 +241,7 @@ class DatasetComponent(ModelComponent):
 
         return list(set(failed_closes))
 
-    @hydromt_step
-    def add_raster_data_from_rasterdataset(
+    def add_data_from_rasterdataset(
         self,
         raster_fn: Union[str, Path, Dataset],
         variables: Optional[List] = None,
@@ -312,8 +311,7 @@ class DatasetComponent(ModelComponent):
 
         return list(ds.data_vars.keys())
 
-    @hydromt_step
-    def add_raster_data_from_raster_reclass(
+    def add_data_from_raster_reclass(
         self,
         raster_fn: Union[str, Path, DataArray],
         reclass_table_fn: Union[str, Path, DataFrame],
