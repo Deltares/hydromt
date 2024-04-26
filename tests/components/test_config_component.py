@@ -119,11 +119,8 @@ def test_make_rel_abs(tmpdir, test_config_dict):
 
 def test_set_config(tmpdir):
     model = Model(root=tmpdir)
-    config_component: ConfigComponent = ConfigComponent(
-        model,
-    )
+    config_component = ConfigComponent(model)
     model.add_component("config", config_component)
-    config_component = model.get_component("config", ConfigComponent)
     config_component.set("global.name", "test")
     assert config_component._data is not None
     assert "name" in config_component._data["global"]
@@ -132,11 +129,8 @@ def test_set_config(tmpdir):
 
 def test_write_config(tmpdir):
     model = Model(root=tmpdir)
-    config_component: ConfigComponent = ConfigComponent(
-        model,
-    )
+    config_component = ConfigComponent(model)
     model.add_component("config", config_component)
-    config_component = model.get_component("config", ConfigComponent)
     config_component.set("global.name", "test")
     write_path = join(tmpdir, ConfigComponent.DEFAULT_FILENAME)
     assert not isfile(write_path)
@@ -148,11 +142,8 @@ def test_write_config(tmpdir):
 
 def test_get_config_abs_path(tmpdir):
     model = Model(root=tmpdir)
-    config_component: ConfigComponent = ConfigComponent(
-        model,
-    )
+    config_component = ConfigComponent(model)
     model.add_component("config", config_component)
-    config_component = model.get_component("config", ConfigComponent)
     abs_path = str(tmpdir.join("test.file"))
     config_component.set("global.file", "test.file")
     assert str(config_component.get_value("global.file")) == "test.file"

@@ -4,7 +4,7 @@
 from os import listdir
 from os.path import abspath, dirname, isfile, join
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, cast
 from unittest.mock import Mock
 
 import geopandas as gpd
@@ -515,7 +515,7 @@ def test_vectormodel(vector_model, tmpdir):
 def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
     # test set vector
     testds = vector_model_no_defaults.vector.data.copy()
-    vector_component = vector_model_no_defaults.get_component("vector", VectorComponent)
+    vector_component = cast(VectorComponent, vector_model_no_defaults.vector)
     # np.ndarray
     with pytest.raises(ValueError, match="Unable to set"):
         vector_component.set(testds["zs"].values)
@@ -758,7 +758,7 @@ def test_add_component_wrong_name(mocker: MockerFixture):
 def test_get_component_non_existent():
     m = Model()
     with pytest.raises(KeyError):
-        m.get_component("foo", ModelComponent)
+        m.get_component("foo")
 
 
 def test_read_calls_components(mocker: MockerFixture):

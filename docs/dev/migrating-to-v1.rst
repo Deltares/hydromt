@@ -291,8 +291,7 @@ Components can be added to a `Model` object by using the `model.add_component` f
 are added, they are uninitialized (i.e. empty). You can populate them by calling functions such as `create` or `read` from the yaml interface or any other means through the interactive Python API.
 
 Once a component has been added, any component (or other object or scope that has access to the model class) can retrieve necessary components by using the
-`model.get_component` function which takes the name of the desired component and the TYPE of the component you wish to retrieve. At this point you can do
-with it as you please.
+`model.get_component` function which takes the name of the desired component you wish to retrieve. At this point you can do with it as you please.
 
 In the core of HydroMT, the available components are:
 
@@ -352,12 +351,39 @@ Making the model region its own component
 
 **Rationale**
 
-The model region is a very integral part for the functioning of HydroMT. Additionally
-there was a lot of logic to handle the different ways of specifying a region
-through the code. To simplify this, highlight the importance of the model region,
-make this part of the code easier to customize, and consolidate a lot of functionality
-for easier maintenance, we decided to bring all this functionality together in
-the `SpatialModelComponent` class. Some components inherit from this base component to provide a `region` attribute.
+The model region is a very integral part for the functioning of HydroMT.
+Additionally there was a lot of logic to handle the different ways of specifying a region through the code.
+To simplify this, highlight the importance of the model region,
+make this part of the code easier to customize, and consolidate a lot of functionality for easier maintenance,
+we decided to bring all this functionality together in the `SpatialModelComponent` class.
+Some components inherit from this base component in order to provide a `region`, `crs`, and `bounds` attribute.
+`SpatialModelComponent` is always able to provide a region by another referenced component,
+and if there is no referenced component, it will try to retrieve the region based on the data in the subclass.
+It is up to the implementor of the subclass to provide the correct GeoDataFrame.
+
+The `Model` contains a property for `region`. That property only works if there is a `SpatialModelComponent` in the model.
+If there is only one `SpatialModelComponent`, that component is automatically detected as the `region`.
+If there are more than one, the `region_component` can be specified in the `global` section of the yaml file.
+If there are no `SpatialModelComponent`s in the model, the `region` property will error.
+You can specify this in the configuration as follows:
+
+.. code-block:: yaml
+
+	global:
+		region_component: region
+		components:
+			region:
+				type: GridComponent
+
+The alternative is to specify the region component reference in python, which is useful for plugin developers:
+
+.. code-block:: python
+
+	class ExampleModel(Model):
+		def __init__(self):
+			super().__init__(region_component="grid2d", components={"grid2d": {"type"})
+
+
 
 **Changes required**
 
@@ -368,18 +394,14 @@ This behavior can be modified both from the config file and the python API.
 Adjust your data and file calls as appropriate.
 
 Another change to mention is that the region methods ``parse_region`` and
-``parse_region_value`` are no longer located in ``workflows.basin_mask`` but in `model.components.spatial`.
+``parse_region_value`` are no longer located in ``workflows.basin_mask`` but in `workflows.region`.
 These functions are only relevant for components that inherit from `SpatialModelComponent`.
+See `GridComponent` on how to use these functions.
 
 In HydroMT core, we let `GridComponent` inherit from `SpatialModelComponent`.
-One can call `model.grid.create`, which will in turn call `grid.create_region`.
+One can call `model.grid.create`, which will in turn call `create_region`.
 So there is no need to call `model.grid.create_region` anymore in your yaml or in your scripts.
 Just make sure to pass a region as argument to `model.grid.create`.
-
-The `Model` contains a property for `region`. That property only works if there is a `SpatialModelComponent` in the model.
-If there is only one `SpatialModelComponent`, that component is automatically detected as the `region`.
-If there are more than one, the `region_component` can be specified in the `global` section of the yaml file.
-If there are no `SpatialModelComponent`s in the model, the `region` property will error.
 
 The command line interface no longer supports a `--region` argument.
 Instead, the region should be specified in the yaml file on the relevant component.

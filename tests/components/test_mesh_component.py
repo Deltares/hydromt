@@ -3,6 +3,7 @@ import os
 import re
 from os.path import dirname, isdir, isfile, join
 from pathlib import Path
+from typing import cast
 
 import geopandas as gpd
 import pandas as pd
@@ -109,7 +110,7 @@ def test_set_raises_errors(mocker: MockerFixture, mock_model):
 def test_model_mesh_sets_correctly(tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
     m.add_component("mesh", MeshComponent(m))
-    component = m.get_component("mesh", MeshComponent)
+    component = cast(MeshComponent, m.mesh)
     uds = xu.data.elevation_nl().to_dataset()
     uds.grid.crs = 28992
     component.set(data=uds)
@@ -183,7 +184,7 @@ def test_read(mock_model, caplog, tmpdir, griduda):
 def test_model_mesh_workflow(tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
     m.add_component("mesh", MeshComponent(m))
-    component = m.get_component("mesh", MeshComponent)
+    component = cast(MeshComponent, m.mesh)
     region = {
         "bbox": [11.949099, 45.9722, 12.004855, 45.998441]
     }  # small area in Piave basin
@@ -210,17 +211,18 @@ def test_model_mesh_read_plus(tmpdir: Path):
     m.add_component("mesh", MeshComponent(m))
     data = xu.data.elevation_nl().to_dataset()
     data.grid.crs = 28992
-    m.mesh.set(data=data, grid_name="elevation_mesh")
+    cast(MeshComponent, m.mesh).set(data=data, grid_name="elevation_mesh")
     m.write()
     m2 = Model(root=str(tmpdir), mode="r+")
     m2.add_component("mesh", MeshComponent(m2))
     data = xu.data.elevation_nl().to_dataset()
     data.grid.crs = 28992
     data = data.rename({"elevation": "elevation_v2"})
-    m2.mesh.set(data=data, grid_name="elevation_mesh")
-    assert "elevation_v2" in m2.mesh.data.data_vars
-    assert "elevation" in m2.mesh.data.data_vars
-    assert m2.mesh.crs.to_epsg() == 28992
+    mesh2_component = cast(MeshComponent, m2.mesh)
+    mesh2_component.set(data=data, grid_name="elevation_mesh")
+    assert "elevation_v2" in mesh2_component.data.data_vars
+    assert "elevation" in mesh2_component.data.data_vars
+    assert mesh2_component.crs.to_epsg() == 28992
 
 
 def test_properties(mock_model):

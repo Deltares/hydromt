@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, cast
 
 import geopandas as gpd
+from pytest_mock import MockerFixture
 
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.models.model import Model
@@ -28,11 +29,19 @@ class FakeSpatialComponent(SpatialModelComponent):
         return self._gdf
 
 
-def test_get_region_with_reference(world):
-    model = Model()
-    component = FakeSpatialComponent(model, region_component="other")
-    referenced = FakeSpatialComponent(model, gdf=world)
-    model.add_component("other", referenced)
-    model.add_component("region", component)
+def test_get_region_with_reference(world, mocker: MockerFixture):
+    mocker.patch("hydromt.models.model.PLUGINS")
 
-    assert component.region is world
+    class FakeModel(Model):
+        def __init__(self):
+            super().__init__(
+                region_component="other",
+                components={
+                    "other": FakeSpatialComponent(self, gdf=world),
+                    "component": FakeSpatialComponent(self, region_component="other"),
+                },
+            )
+
+    model = FakeModel()
+    assert model.region is world
+    assert cast(SpatialModelComponent, model.component).region is world

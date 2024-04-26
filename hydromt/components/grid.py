@@ -155,6 +155,7 @@ class GridComponent(SpatialModelComponent):
             temp_data_dir=self.model._TMP_DATA_DIR,
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
+            logger=self.logger,
             force_sn=force_sn,
             **kwargs,
         )
@@ -204,7 +205,7 @@ class GridComponent(SpatialModelComponent):
     def create(
         self,
         *,
-        region: dict,
+        region: Optional[dict] = None,
         res: Optional[float] = None,
         crs: Optional[int] = None,
         rotated: bool = False,
@@ -271,14 +272,38 @@ class GridComponent(SpatialModelComponent):
         """
         self.logger.info("Preparing 2D grid.")
 
-        geom = parse_region(
-            region,
-            logger=self.logger,
-            hydrography_fn=hydrography_fn,
-            basin_index_fn=basin_index_fn,
-            data_catalog=self.data_catalog,
-            crs=crs,
+        if self._region_component is not None and region is not None:
+            raise ValueError(
+                "Cannot create a grid if a region component is set and region is provided."
+            )
+
+        if region is None:
+            _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, self.logger)
+
+        assert region is not None
+        geom = (
+            cast(
+                SpatialModelComponent, self.model.get_component(self._region_component)
+            ).region
+            if self._region_component is not None
+            else parse_region(
+                region,
+                logger=self.logger,
+                hydrography_fn=hydrography_fn,
+                basin_index_fn=basin_index_fn,
+                data_catalog=self.data_catalog,
+                crs=crs,
+            )
         )
+
+        if geom is None:
+            _exec_nodata_strat(
+                msg="No region found for creating grid",
+                strategy=NoDataStrategy.RAISE,
+                logger=self.logger,
+            )
+        assert geom is not None
+
         grid = grid_from_region(
             next(iter(region)),
             geom,

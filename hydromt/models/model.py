@@ -16,7 +16,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -71,7 +70,7 @@ class Model(object, metaclass=ABCMeta):
     def __init__(
         self,
         *,
-        components: Optional[Dict[str, Dict[str, Any]]] = None,
+        components: Optional[Dict[str, Any]] = None,
         root: Optional[str] = None,
         mode: str = "w",
         data_libs: Optional[Union[List, str]] = None,
@@ -159,12 +158,19 @@ class Model(object, metaclass=ABCMeta):
                 return ""
             return has_region_components[0][0]
 
-    def _add_components(self, components: Dict[str, Dict[str, Any]]) -> None:
+    def _add_components(self, components: Dict[str, Any]) -> None:
         """Add all components that are specified in the config file."""
-        for name, options in components.items():
-            type_name = options.pop("type")
-            component_type = PLUGINS.component_plugins[type_name]
-            self.add_component(name, component_type(self, **options))
+        for name, value in components.items():
+            if isinstance(value, ModelComponent):
+                self.add_component(name, value)
+            elif isinstance(value, dict):
+                type_name = value.pop("type")
+                component_type = PLUGINS.component_plugins[type_name]
+                self.add_component(name, component_type(self, **value))
+            else:
+                raise ValueError(
+                    "Error in components argument. Type is not a ModelComponent or dict."
+                )
 
     def add_component(self, name: str, component: ModelComponent) -> None:
         """Add a component to the model. Will raise an error if the component already exists."""
@@ -174,13 +180,13 @@ class Model(object, metaclass=ABCMeta):
             raise ValueError(f"Component name {name} is not a valid identifier.")
         self._components[name] = component
 
-    def get_component(self, name: str, _: Type[T]) -> T:
+    def get_component(self, name: str) -> ModelComponent:
         """Get a component from the model. Will raise an error if the component does not exist."""
-        return cast(T, self._components[name])
+        return self._components[name]
 
     def __getattr__(self, name: str) -> ModelComponent:
         """Get a component from the model. Will raise an error if the component does not exist."""
-        return self._components[name]
+        return self.get_component(name)
 
     @property
     def region(self) -> Optional[gdp.GeoDataFrame]:

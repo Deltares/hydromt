@@ -3,7 +3,7 @@ from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Generator, Optional
+from typing import Any, Dict, Generator, Optional, cast
 
 import geopandas as gpd
 import numpy as np
@@ -348,7 +348,7 @@ def _create_vector_model(
         components["vector"]["geometry_filename"] = None
 
     mod = Model(components=components)
-    mod.get_component("config", ConfigComponent).set("header.setting", "value")
+    cast(ConfigComponent, mod.config).set("header.setting", "value")
     da = xr.DataArray(
         ts,
         dims=["index", "time"],
@@ -357,7 +357,7 @@ def _create_vector_model(
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     da.vector.set_crs(geodf.crs)
-    mod.get_component("vector", VectorComponent).set(da)
+    cast(VectorComponent, mod.vector).set(da)
     return mod
 
 

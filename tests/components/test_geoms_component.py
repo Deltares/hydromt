@@ -18,9 +18,8 @@ def test_model_set_geoms(tmpdir):
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
 
     model = Model(root=str(tmpdir), mode="w")
-    model.add_component("geom", GeomsComponent(model))
-
-    geom_component = model.get_component("geom", GeomsComponent)
+    geom_component = GeomsComponent(model, region_component="foo")
+    model.add_component("geom", geom_component)
 
     geom_component.set(geom, "geom_wgs84")
 
@@ -37,9 +36,9 @@ def test_model_read_geoms(tmpdir):
     geom.to_file(write_path)
 
     model = Model(root=tmpdir, mode="r")
-    model.add_component("geom", GeomsComponent(model))
+    model.add_component("geom", GeomsComponent(model, region_component="foo"))
 
-    geom_component = model.get_component("geom", GeomsComponent)
+    geom_component = cast(GeomsComponent, model.geom)
 
     component_data = geom_component.data["test_geom"]
     assert geom.equals(component_data)
@@ -52,11 +51,24 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir, mocker: MockerFixture):
     geom_4326 = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
     geom_3857 = cast(gpd.GeoDataFrame, geom_4326.copy().to_crs(3857))
 
-    model = Model(root=str(tmpdir), mode="w", region_component="region")
-    model.add_component("test_geom", GeomsComponent(model, region_component="region"))
-    model.add_component("region", region_component)
+    # Patch where meta_data is retrieved.
+    mocker.patch("hydromt.models.model.PLUGINS")
 
-    geom_component = model.get_component("test_geom", GeomsComponent)
+    class FakeModel(Model):
+        def __init__(self):
+            super().__init__(
+                root=str(tmpdir),
+                mode="w",
+                region_component="region",
+                components={
+                    "region": region_component,
+                    "test_geom": GeomsComponent(self, region_component="region"),
+                },
+            )
+
+    model = FakeModel()
+
+    geom_component = cast(GeomsComponent, model.test_geom)
     geom_component.set(geom_4326, "test_geom")
 
     assert geom_component.data["test_geom"].equals(geom_3857)
@@ -71,8 +83,8 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir, mocker: MockerFixture):
 
 def test_model_write_geoms(tmpdir):
     model = Model(root=str(tmpdir), mode="w")
-    model.add_component("geom", GeomsComponent(model))
-    geom_component = model.get_component("geom", GeomsComponent)
+    geom_component = GeomsComponent(model, region_component="foo")
+    model.add_component("geom", geom_component)
 
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)

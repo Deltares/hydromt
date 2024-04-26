@@ -122,9 +122,8 @@ class SpatialModelComponent(ModelComponent, ABC):
 
     def _get_region_from_reference(self) -> Optional[gpd.GeoDataFrame]:
         if self._region_component is not None:
-            region_component = self.model.get_component(
-                self._region_component,
-                SpatialModelComponent,  # type: ignore # Only used for casting, not to create anything
+            region_component = cast(
+                SpatialModelComponent, self.model.get_component(self._region_component)
             )
             if region_component is None:
                 raise ValueError(
