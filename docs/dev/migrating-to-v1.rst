@@ -482,6 +482,11 @@ GeomsComponent
 
 The previous `Model.geoms` is now replaced by a `GeomsComponent` that can be used to store several geospatial geometry based data into a dictionary of geopandas GeoDataFrames. The `GeomsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
 
+DatasetsComponent
+^^^^^^^^^^^^^^
+
+The previous `Model` attributes `forcing`, `states`, `results` and `maps` are now replaced by a `DatasetsComponent` that can be used to store several xarray datasets into a dictionary. The `DatasetsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+
 ConfigComponent
 ^^^^^^^^^^^^^^^
 
@@ -505,6 +510,26 @@ The MeshModel has just like the `GridModel` been replaced with its implementatio
 of the `ModelComponent`: `MeshComponent`. The restructering of `MeshModel` follows the same pattern
 as the `GridComponent`.
 
+
+Removed Model attributes
+------------------------
+
+Below you will find a summary of the functionalities, features, attributes and other things that were removed from the `Model` class for v1 and how you can access their new equivalents.
+
+- **api**: The `api` property and its associated attributes such as `_API` were previously provided to the plugins to enable additional validation. These have been superseded by the component architecture and have therefore been removed. Except in the case of equality checking (which will be covered separately below) plugins do not need to access any replacement functionality. All the type checking that was previously handled by the `api` property is now performed by the component architecture itself. If you use components as instructed they will take care of the rest for you.
+- **_MAPS/_CONF/_GEOMS/etc.**: As most aspects are now handled by the components, their model level attributes such as `_CONF` or `_MAPS` have been removed. The same functionality/ convention can still be used by setting these in the components. For example, if you want to tell HydroMT that the default config for your plugin/model is called `my_plugin_default_config.yaml` you can do so by setting the `filename` attribute of the `ConfigComponent` at init like so:
+
+.. code-block:: python
+
+	class MyModel(Model):
+	...
+	def __init__(self):
+		...
+		config_component = ConfigComponent(self, filename="my_plugin_default_config.yaml")
+		self.add_component("config", config_component)
+
+	When done correctly the behaviour should be the same as in v0.x in this regard.
+- **_FOLDERS**: Since the components are now responsible for creating their folders when writing, we no longer have a `_FOLDERS` attribute and the `Model` will no longer create the folders during model init. This was done to provide more flexibility in which folders need to be created and which do not need to be. Components should make sure that they create the necessary folders themselves during writing.
 
 Plugins
 -------

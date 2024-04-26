@@ -1,10 +1,9 @@
 """Implementations for all of the necessary IO reading for HydroMT."""
 
-import glob
 import io as pyio
 import logging
 from ast import literal_eval
-from logging import Logger
+from glob import glob
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
@@ -29,6 +28,7 @@ from hydromt.data_adapter.caching import _uri_validator
 from hydromt.gis import merge, raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.path import make_config_paths_abs
+from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
@@ -169,7 +169,7 @@ def open_mfraster(
     if isinstance(paths, str):
         if "*" in paths:
             prefix, postfix = basename(paths).split(".")[0].split("*")
-        paths = [fn for fn in glob.glob(paths) if not fn.endswith(".xml")]
+        paths = [fn for fn in glob(paths) if not fn.endswith(".xml")]
     else:
         paths = [str(p) if isinstance(p, Path) else p for p in paths]
     if len(paths) == 0:
@@ -862,9 +862,9 @@ def parse_values(
 
 
 def read_nc(
-    fn: StrPath,
-    root,
-    logger: Logger,
+    filename_template: StrPath,
+    root: Path,
+    logger: logging.Logger = logger,
     mask_and_scale: bool = False,
     single_var_as_array: bool = True,
     load: bool = False,
@@ -901,18 +901,20 @@ def read_nc(
         dict of xarray.Dataset
     """
     ncs = dict()
-    fns = glob.glob(join(root, fn))
-    if "chunks" not in kwargs:  # read lazy by default
-        kwargs.update(chunks="auto")
-    for fn in fns:
-        name = splitext(basename(fn))[0]
-        logger.debug(f"Reading model file {name}.")
+    path_template = root / filename_template
+
+    path_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
+        str(path_template)
+    )
+    path_glob = glob(path_glob)
+    for path in path_glob:
+        name = ".".join(regex.match(path).groups())  # type: ignore
         # Load data to allow overwritting in r+ mode
         if load:
-            ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs).load()
+            ds = xr.open_dataset(path, mask_and_scale=mask_and_scale, **kwargs).load()
             ds.close()
         else:
-            ds = xr.open_dataset(fn, mask_and_scale=mask_and_scale, **kwargs)
+            ds = xr.open_dataset(path, mask_and_scale=mask_and_scale, **kwargs)
         # set geo coord if present as coordinate of dataset
         if GEO_MAP_COORD in ds.data_vars:
             ds = ds.set_coords(GEO_MAP_COORD)

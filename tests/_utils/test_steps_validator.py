@@ -96,9 +96,9 @@ def test_validate_steps_blacklisted_function():
     model = Model()
     model.add_component("foo", FooComponent(model))
     with pytest.raises(
-        AttributeError, match="Method read_nc is not allowed to be called on model."
+        AttributeError, match="Method build is not allowed to be called on model."
     ):
-        validate_steps(model, [{"read_nc": None}])
+        validate_steps(model, [{"build": None}])
 
 
 def test_validate_steps_correct_with_defaults():
