@@ -315,29 +315,34 @@ The `Model.__init__` function can be used to add default components by plugins l
 
 	class ExampleModel(Model):
 		def __init__(self):
-			self.root: ModelRoot = ModelRoot(".")
+			super().__init__(...)
 			self.add_component("grid", GridComponent(self))
 
+	# or
+
+	class ExampleModel(Model):
+		def __init__(self):
+			super().__init__(..., components={"grid": GridComponent(self}))
 
 
 If you want to allow your plugin user to modify the root and update or add new component during instantiation then you can use:
 
 .. code-block:: python
 
-    class ExampleEditModel(Model):
-        def __init__(
-            self,
-            components: Optional[Dict[str, Dict[str, Any]]] = None,
-            root: Optional[str] = None,
-        ):
-            # Recursively update the components with any defaults that are missing in the components provided by the user.
-            components = components or {}
-            default_components = {
-                "grid": {"type": GridComponent},
-            }
-            components = hydromt.utils.deep_merge.deep_merge(
-                default_components, components
-            )
+	class ExampleEditModel(Model):
+		def __init__(
+			self,
+			components: Optional[Dict[str, Any]] = None,
+			root: Optional[str] = None,
+		):
+			# Recursively update the components with any defaults that are missing in the components provided by the user.
+			components = components or {}
+			default_components = {
+				"grid": {"type": "GridComponent"},
+			}
+			components = hydromt.utils.deep_merge.deep_merge(
+				default_components, components
+			)
 
 			# Now instantiate the Model
 			super().__init__(
@@ -381,7 +386,7 @@ The alternative is to specify the region component reference in python, which is
 
 	class ExampleModel(Model):
 		def __init__(self):
-			super().__init__(region_component="grid2d", components={"grid2d": {"type"})
+			super().__init__(region_component="grid2d", components={"grid2d": {"type": "GridComponent"}})
 
 
 
@@ -400,8 +405,6 @@ See `GridComponent` on how to use these functions.
 
 In HydroMT core, we let `GridComponent` inherit from `SpatialModelComponent`.
 One can call `model.grid.create`, which will in turn call `create_region`.
-So there is no need to call `model.grid.create_region` anymore in your yaml or in your scripts.
-Just make sure to pass a region as argument to `model.grid.create`.
 
 The command line interface no longer supports a `--region` argument.
 Instead, the region should be specified in the yaml file on the relevant component.
@@ -417,6 +420,19 @@ Instead, the region should be specified in the yaml file on the relevant compone
 +--------------------------+---------------------------+
 | model.set_region(...)    | -                         |
 +--------------------------+---------------------------+
+
+.. code-block:: yaml
+
+	# Example of specifying the region component via grid.create
+	global:
+		region_component: grid
+		components:
+			grid:
+				type: GridComponent
+	steps:
+		- grid.create:
+			region:
+				basin: [6.16, 51.84]
 
 GridComponent
 ^^^^^^^^^^^^^
@@ -441,15 +457,15 @@ has not been changed compared to the GridModel.
 +------------------------------+-------------------------------------------+
 | v0.x                         | v1                                        |
 +==============================+===========================================+
-| model.set_grid(...)          | model.grid.set(...)             		   |
+| model.set_grid(...)          | model.grid.set(...)                       |
 +------------------------------+-------------------------------------------+
-| model.read_grid(...)         | model.grid.read(...)            		   |
+| model.read_grid(...)         | model.grid.read(...)                      |
 +------------------------------+-------------------------------------------+
-| model.write_grid(...)        | model.grid.write(...)            		   |
+| model.write_grid(...)        | model.grid.write(...)                     |
 +------------------------------+-------------------------------------------+
-| model.setup_grid(...)        | model.grid.create(...)          		   |
+| model.setup_grid(...)        | model.grid.create(...)                    |
 +------------------------------+-------------------------------------------+
-| model.setup_grid_from_*(...) | model.grid.add_data_from_*(...) 		   |
+| model.setup_grid_from_*(...) | model.grid.add_data_from_*(...)           |
 +------------------------------+-------------------------------------------+
 
 VectorComponent
@@ -545,8 +561,8 @@ Each of these parts have entry points at their relevant submodules. For example,
 	[project.entry-points."hydromt.models"]
 	core = "hydromt.models"
 
-    [project.entry-points."hydromt.drivers"]
-    core = "hydromt.drivers"
+	[project.entry-points."hydromt.drivers"]
+	core = "hydromt.drivers"
 
 To have post v1 core recognize there are a few new requirements:
 1. There must be a dedicated separate submodule (i.e. a folder with a `__init__.py` file that you can import from) for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
