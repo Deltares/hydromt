@@ -99,8 +99,8 @@ class GridComponent(SpatialModelComponent):
         else:
             for dvar in data.data_vars:
                 if dvar in self._data:
-                    if self._root.is_reading_mode():
-                        self._logger.warning(f"Replacing grid map: {dvar}")
+                    if self.root.is_reading_mode():
+                        self.logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
     @hydromt_step
@@ -137,7 +137,7 @@ class GridComponent(SpatialModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `write_nc` method.
         """
-        self._root._assert_write_mode()
+        self.root._assert_write_mode()
         region_options = region_options or {}
         self.write_region(**region_options)
 
@@ -145,14 +145,14 @@ class GridComponent(SpatialModelComponent):
             _exec_nodata_strat(
                 msg="No grid data found, skip writing.",
                 strategy=NoDataStrategy.IGNORE,
-                logger=self._logger,
+                logger=self.logger,
             )
             return None
         # write_nc requires dict - use dummy 'grid' key
         return write_nc(  # Can return DeferedFileClose object
             {"grid": self.data},
             filename or str(self._filename),
-            temp_data_dir=self._model._TMP_DATA_DIR,
+            temp_data_dir=self.model._TMP_DATA_DIR,
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
             force_sn=force_sn,
@@ -183,16 +183,16 @@ class GridComponent(SpatialModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._root._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_grid(skip_read=True)
 
         # Load grid data in r+ mode to allow overwriting netcdf files
-        if self._root.is_reading_mode() and self._root.is_writing_mode():
+        if self.root.is_reading_mode() and self.root.is_writing_mode():
             kwargs["load"] = True
         loaded_nc_files = read_nc(
             filename or self._filename,
-            self._root,
-            logger=self._logger,
+            self.root,
+            logger=self.logger,
             single_var_as_array=False,
             mask_and_scale=mask_and_scale,
             **kwargs,
@@ -269,21 +269,21 @@ class GridComponent(SpatialModelComponent):
         grid : xr.DataArray
             Generated grid mask.
         """
-        self._logger.info("Preparing 2D grid.")
+        self.logger.info("Preparing 2D grid.")
 
         geom = parse_region(
             region,
-            logger=self._logger,
+            logger=self.logger,
             hydrography_fn=hydrography_fn,
             basin_index_fn=basin_index_fn,
-            data_catalog=self._data_catalog,
+            data_catalog=self.data_catalog,
             crs=crs,
         )
         grid = grid_from_region(
             next(iter(region)),
             geom,
-            logger=self._logger,
-            data_catalog=self._data_catalog,
+            logger=self.logger,
+            data_catalog=self.data_catalog,
             hydrography_fn=hydrography_fn,
             crs=crs,
             res=res,
@@ -304,7 +304,7 @@ class GridComponent(SpatialModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving resolution",
             strategy=NoDataStrategy.IGNORE,
-            logger=self._logger,
+            logger=self.logger,
         )
         return None
 
@@ -316,7 +316,7 @@ class GridComponent(SpatialModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving transform",
             strategy=NoDataStrategy.IGNORE,
-            logger=self._logger,
+            logger=self.logger,
         )
         return None
 
@@ -328,7 +328,7 @@ class GridComponent(SpatialModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving crs",
             strategy=NoDataStrategy.IGNORE,
-            logger=self._logger,
+            logger=self.logger,
         )
         return None
 
@@ -340,7 +340,7 @@ class GridComponent(SpatialModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving bounds",
             strategy=NoDataStrategy.IGNORE,
-            logger=self._logger,
+            logger=self.logger,
         )
         return None
 
@@ -355,7 +355,7 @@ class GridComponent(SpatialModelComponent):
         _exec_nodata_strat(
             msg="No grid data found for deriving region",
             strategy=NoDataStrategy.IGNORE,
-            logger=self._logger,
+            logger=self.logger,
         )
         return None
 
@@ -371,7 +371,7 @@ class GridComponent(SpatialModelComponent):
         """Initialize grid object."""
         if self._data is None:
             self._data = xr.Dataset()
-            if self._root.is_reading_mode() and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     @hydromt_step
@@ -464,9 +464,9 @@ class GridComponent(SpatialModelComponent):
             Names of added model map layers
         """
         rename = rename or {}
-        self._logger.info(f"Preparing grid data from raster source {raster_fn}")
+        self.logger.info(f"Preparing grid data from raster source {raster_fn}")
         # Read raster data and select variables
-        ds = self._data_catalog.get_rasterdataset(
+        ds = self.data_catalog.get_rasterdataset(
             raster_fn,
             geom=self.region,
             buffer=2,
@@ -545,12 +545,12 @@ class GridComponent(SpatialModelComponent):
             Names of added model grid layers
         """  # noqa: E501
         rename = rename or dict()
-        self._logger.info(
+        self.logger.info(
             f"Preparing grid data by reclassifying the data in {raster_fn} based "
             f"on {reclass_table_fn}"
         )
         # Read raster data and remapping table
-        da = self._data_catalog.get_rasterdataset(
+        da = self.data_catalog.get_rasterdataset(
             raster_fn, geom=self.region, buffer=2, variables=variable, **kwargs
         )
         if not isinstance(da, xr.DataArray):
@@ -558,7 +558,7 @@ class GridComponent(SpatialModelComponent):
                 f"raster_fn {raster_fn} should be a single variable. "
                 "Please select one using the 'variable' argument"
             )
-        df_vars = self._data_catalog.get_dataframe(
+        df_vars = self.data_catalog.get_dataframe(
             reclass_table_fn, variables=reclass_variables
         )
         # Data resampling
@@ -631,15 +631,15 @@ class GridComponent(SpatialModelComponent):
             Names of added model grid layers
         """  # noqa: E501
         rename = rename or dict()
-        self._logger.info(f"Preparing grid data from vector '{vector_fn}'.")
-        gdf = self._data_catalog.get_geodataframe(
+        self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
+        gdf = self.data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
         )
         if gdf is None or gdf.empty:
             _exec_nodata_strat(
                 f"No shapes of {vector_fn} found within region, skipping {self.add_data_from_geodataframe.__name__}.",
                 NoDataStrategy.IGNORE,
-                self._logger,
+                self.logger,
             )
             return None
         # Data resampling

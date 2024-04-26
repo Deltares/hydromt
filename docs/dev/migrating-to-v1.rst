@@ -255,8 +255,8 @@ Finally, you can provide additional functionality by providing the following opt
 
 Additionally we encourage some best practices to be aware of when implementing a components:
 
-- Make sure that your component calles `super().__init__(model=model)` in the `__init__` function of your component. This will make sure that references such as `self._logger` and `self._root` are registered properly so you can access them.
-- Your component should take some variation of a `default_filename` agument in its `__init__` function that is either required or provides a default that is not `None`. This should be saved as an attribute and be used for reading and writing when the user does not provide a different path as an argument to the read or write functions. This allows developers, plugin developers and users alike to both provide sensible defaults as well as the opportunity to override them when necessary.
+- Make sure that your component calls `super().__init__(model=model)` in the `__init__` function of your component. This will make sure that references such as `self.logger` and `self.root` are registered properly so you can access them.
+- Your component should take some variation of a `default_filename` argument in its `__init__` function that is either required or provides a default that is not `None`. This should be saved as an attribute and be used for reading and writing when the user does not provide a different path as an argument to the read or write functions. This allows developers, plugin developers and users alike to both provide sensible defaults as well as the opportunity to override them when necessary.
 
 
 It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:

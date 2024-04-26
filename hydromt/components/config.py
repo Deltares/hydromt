@@ -70,7 +70,7 @@ class ConfigComponent(ModelComponent):
         """Initialize the model config."""
         if self._data is None:
             self._data = dict()
-            if self._root.is_reading_mode() and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     @hydromt_step
@@ -79,15 +79,15 @@ class ConfigComponent(ModelComponent):
         path: Optional[str] = None,
     ) -> None:
         """Write model config at <root>/{path}."""
-        self._root._assert_write_mode()
+        self.root._assert_write_mode()
         if self.data:
             p = path or self._filename
 
-            write_path = join(self._root.path, p)
-            self._logger.info(f"Writing model config to {write_path}.")
+            write_path = join(self.root.path, p)
+            self.logger.info(f"Writing model config to {write_path}.")
             makedirs(dirname(write_path), exist_ok=True)
 
-            write_data = make_config_paths_relative(self.data, self._root.path)
+            write_data = make_config_paths_relative(self.data, self.root.path)
             ext = splitext(p)[-1]
             if ext in [".yml", ".yaml"]:
                 write_yaml(write_path, write_data)
@@ -97,7 +97,7 @@ class ConfigComponent(ModelComponent):
                 raise ValueError(f"Unknown file extension: {ext}")
 
         else:
-            self._logger.debug("Model config has no data, skip writing.")
+            self.logger.debug("Model config has no data, skip writing.")
 
     @hydromt_step
     def read(self, path: Optional[str] = None) -> None:
@@ -105,11 +105,11 @@ class ConfigComponent(ModelComponent):
         self._initialize(skip_read=True)
         # if path is abs, join will just return path
         p = path or self._filename
-        read_path = join(self._root.path, p)
+        read_path = join(self.root.path, p)
         if isfile(read_path):
-            self._logger.info(f"Reading model config file from {read_path}.")
+            self.logger.info(f"Reading model config file from {read_path}.")
         else:
-            self._logger.warning(
+            self.logger.warning(
                 f"No default model config was found at {read_path}. "
                 "It wil be initialized as empty dictionary"
             )
@@ -204,7 +204,7 @@ class ConfigComponent(ModelComponent):
         if abs_path and isinstance(value, (str, Path)):
             value = Path(value)
             if not isabs(value):
-                value = Path(abspath(join(self._root.path, value)))
+                value = Path(abspath(join(self.root.path, value)))
 
         return value
 
@@ -254,7 +254,7 @@ class ConfigComponent(ModelComponent):
 
         template = Path(template)
         # Here directly overwrite config with template
-        self._logger.info(f"Creating model config from {prefix} template: {template}")
+        self.logger.info(f"Creating model config from {prefix} template: {template}")
         if template.suffix in [".yml", ".yaml"]:
             self._data = read_yaml(template)
         elif template.suffix == ".toml":
@@ -306,6 +306,6 @@ class ConfigComponent(ModelComponent):
             {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
         """
         if len(data) > 0:
-            self._logger.debug("Setting model config options.")
+            self.logger.debug("Setting model config options.")
         for k, v in data.items():
             self.set(k, v)

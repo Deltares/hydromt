@@ -74,9 +74,9 @@ class SpatialModelComponent(ModelComponent, ABC):
 
         This function should be called from within the `write` function of the component inheriting from this class.
         """
-        self._root._assert_write_mode()
+        self.root._assert_write_mode()
         if self._region_component is not None:
-            self._logger.info(
+            self.logger.info(
                 "Region is a reference to another component. Skipping writing..."
             )
             return
@@ -85,8 +85,8 @@ class SpatialModelComponent(ModelComponent, ABC):
             self.region,
             filename=filename or self._region_filename,
             to_wgs84=to_wgs84,
-            logger=self._logger,
-            root=self._root,
+            logger=self.logger,
+            root=self.root,
             **write_kwargs,
         )
 
@@ -122,7 +122,7 @@ class SpatialModelComponent(ModelComponent, ABC):
 
     def _get_region_from_reference(self) -> Optional[gpd.GeoDataFrame]:
         if self._region_component is not None:
-            region_component = self._model.get_component(
+            region_component = self.model.get_component(
                 self._region_component,
                 SpatialModelComponent,  # type: ignore # Only used for casting, not to create anything
             )

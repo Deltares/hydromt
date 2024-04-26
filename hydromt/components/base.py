@@ -29,24 +29,24 @@ class ModelComponent(ABC):
         ...
 
     @property
-    def _model(self) -> "Model":
+    def model(self) -> "Model":
         """Return the model object this component is associated with."""
         return cast("Model", self.__model_ref())
 
     @property
-    def _data_catalog(self) -> DataCatalog:
+    def data_catalog(self) -> DataCatalog:
         """Return the data catalog of the model this component is associated with."""
-        return self._model.data_catalog
+        return self.model.data_catalog
 
     @property
-    def _logger(self) -> Logger:
+    def logger(self) -> Logger:
         """Return the logger of the model this component is associated with."""
-        return self._model.logger
+        return self.model.logger
 
     @property
-    def _root(self) -> "ModelRoot":
+    def root(self) -> "ModelRoot":
         """Return the root of the model this component is associated with."""
-        return self._model.root
+        return self.model.root
 
     def test_equal(self, other: "ModelComponent") -> tuple[bool, Dict[str, str]]:
         """Test if two components are equal.

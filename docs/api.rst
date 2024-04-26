@@ -325,7 +325,7 @@ Model attributes
    :toctree: _generated
 
    Model.crs
-   Model.model_root
+   Model.root
    Model.region
    Model.api
 
@@ -424,7 +424,7 @@ Attributes
    ModelComponent.model
    ModelComponent.data_catalog
    ModelComponent.logger
-   ModelComponent.model_root
+   ModelComponent.root
 
 SpatialModelComponent
 =====================
@@ -441,10 +441,10 @@ Attributes
 .. autosummary::
    :toctree: _generated
 
-   SpatialModelComponent._model
-   SpatialModelComponent._data_catalog
-   SpatialModelComponent._logger
-   SpatialModelComponent._model_root
+   SpatialModelComponent.model
+   SpatialModelComponent.data_catalog
+   SpatialModelComponent.logger
+   SpatialModelComponent.root
    SpatialModelComponent.crs
    SpatialModelComponent.bounds
    SpatialModelComponent.region
@@ -478,7 +478,7 @@ Components and attributes
    GridComponent.model
    GridComponent.data_catalog
    GridComponent.logger
-   GridComponent.model_root
+   GridComponent.root
    GridComponent.res
    GridComponent.transform
    GridComponent.crs
@@ -525,10 +525,10 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   TablesComponent._model
-   TablesComponent._data_catalog
-   TablesComponent._logger
-   TablesComponent._root
+   TablesComponent.model
+   TablesComponent.data_catalog
+   TablesComponent.logger
+   TablesComponent.root
    TablesComponent.data
 
 
@@ -557,10 +557,10 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   GeomsComponent._model
-   GeomsComponent._data_catalog
-   GeomsComponent._logger
-   GeomsComponent._root
+   GeomsComponent.model
+   GeomsComponent.data_catalog
+   GeomsComponent.logger
+   GeomsComponent.root
    GeomsComponent.data
 
 
@@ -588,10 +588,10 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   MeshComponent._model
-   MeshComponent._data_catalog
-   MeshComponent._logger
-   MeshComponent._root
+   MeshComponent.model
+   MeshComponent.data_catalog
+   MeshComponent.logger
+   MeshComponent.root
    MeshComponent.data
    MeshComponent.crs
    MeshComponent.bounds
@@ -640,10 +640,10 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   ConfigComponent._model
-   ConfigComponent._data_catalog
-   ConfigComponent._logger
-   ConfigComponent._root
+   ConfigComponent.model
+   ConfigComponent.data_catalog
+   ConfigComponent.logger
+   ConfigComponent.root
    ConfigComponent.data
 
 
@@ -690,10 +690,10 @@ Components and attributes
    VectorComponent.geometry
    VectorComponent.index_dim
    VectorComponent.crs
-   VectorComponent._model
-   VectorComponent._data_catalog
-   VectorComponent._logger
-   VectorComponent._root
+   VectorComponent.model
+   VectorComponent.data_catalog
+   VectorComponent.logger
+   VectorComponent.root
 
 
 General methods

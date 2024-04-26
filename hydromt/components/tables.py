@@ -60,33 +60,33 @@ class TablesComponent(ModelComponent):
         """Initialize the model tables."""
         if self._data is None:
             self._data = dict()
-            if self._root.is_reading_mode() and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     @hydromt_step
     def write(self, filename: Optional[str] = None, **kwargs) -> None:
         """Write tables at provided or default filepath if none is provided."""
-        self._root._assert_write_mode()
+        self.root._assert_write_mode()
         fn = filename or self._filename
         if len(self.data) > 0:
-            self._model.logger.info("Writing table files.")
+            self.model.logger.info("Writing table files.")
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
             for name in self.data:
-                fn_out = join(self._root.path, fn.format(name=name))
+                fn_out = join(self.root.path, fn.format(name=name))
                 os.makedirs(dirname(fn_out), exist_ok=True)
                 self.data[name].to_csv(fn_out, **local_kwargs)
         else:
-            self._model.logger.debug("No tables found, skip writing.")
+            self.model.logger.debug("No tables found, skip writing.")
 
     @hydromt_step
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
         """Read tables at provided or default filepath if none is provided."""
-        self._root._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
-        self._model.logger.info("Reading model table files.")
+        self.model.logger.info("Reading model table files.")
         fn = filename or self._filename
-        filenames = glob.glob(join(self._root.path, fn.format(name="*")))
+        filenames = glob.glob(join(self.root.path, fn.format(name="*")))
         if len(filenames) > 0:
             for fn in filenames:
                 name = basename(fn).split(".")[0]
@@ -129,10 +129,10 @@ class TablesComponent(ModelComponent):
                     "table type not recognized, should be pandas DataFrame or Series."
                 )
             if df_name in self._data:
-                if not self._root.is_writing_mode():
+                if not self.root.is_writing_mode():
                     raise IOError(f"Cannot overwrite table {df_name} in read-only mode")
-                elif self._root.is_reading_mode():
-                    self._logger.warning(f"Overwriting table: {df_name}")
+                elif self.root.is_reading_mode():
+                    self.logger.warning(f"Overwriting table: {df_name}")
 
             self._data[str(df_name)] = df
 

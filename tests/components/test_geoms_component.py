@@ -53,7 +53,7 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir, mocker: MockerFixture):
     geom_3857 = cast(gpd.GeoDataFrame, geom_4326.copy().to_crs(3857))
 
     model = Model(root=str(tmpdir), mode="w", region_component="region")
-    model.add_component("test_geom", GeomsComponent(model))
+    model.add_component("test_geom", GeomsComponent(model, region_component="region"))
     model.add_component("region", region_component)
 
     geom_component = model.get_component("test_geom", GeomsComponent)

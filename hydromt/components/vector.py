@@ -67,7 +67,7 @@ class VectorComponent(ModelComponent):
     def _initialize(self, skip_read=False) -> None:
         if self._data is None:
             self._data = xr.Dataset()
-            if self._root.is_reading_mode() and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     def set(
@@ -133,7 +133,7 @@ class VectorComponent(ModelComponent):
                 raise ValueError("Cannot instantiate vector without geometry in data")
             else:
                 if overwrite_geom:
-                    self._logger.warning("Overwriting vector object with data")
+                    self.logger.warning("Overwriting vector object with data")
                 self._data = data
         # 2. self.vector has a geometry
         else:
@@ -148,7 +148,7 @@ class VectorComponent(ModelComponent):
             # add data (with check on index)
             for dvar in data.data_vars:
                 if dvar in self._data:
-                    self._logger.warning(f"Replacing vector variable: {dvar}")
+                    self.logger.warning(f"Replacing vector variable: {dvar}")
                 # check on index coordinate before merging
                 dims = data[dvar].dims
                 if np.array_equal(
@@ -195,7 +195,7 @@ class VectorComponent(ModelComponent):
             Additional keyword arguments that are passed to the `read_nc`
             function.
         """
-        self._root._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize(skip_read=True)
         filename = filename or self._filename
         geometry_filename = geometry_filename or self._geometry_filename
@@ -212,16 +212,16 @@ class VectorComponent(ModelComponent):
                 kwargs["chunks"] = None
             ds = xr.merge(
                 read_nc(
-                    filename, root=self._root.path, logger=self._logger, **kwargs
+                    filename, root=self.root.path, logger=self.logger, **kwargs
                 ).values()
             )
             # check if ds is empty (default filename has a value)
             if len(ds.sizes) == 0:
                 filename = None
         if geometry_filename is not None and isfile(
-            join(self._root.path, geometry_filename)
+            join(self.root.path, geometry_filename)
         ):
-            gdf = gpd.read_file(join(self._root.path, geometry_filename))
+            gdf = gpd.read_file(join(self.root.path, geometry_filename))
             # geom + netcdf data
             if filename is not None:
                 ds = GeoDataset.from_gdf(gdf, data_vars=ds)
@@ -232,7 +232,7 @@ class VectorComponent(ModelComponent):
         elif filename is not None:
             ds = GeoDataset.from_netcdf(ds)
         else:
-            self._logger.info("No vector data found, skip reading.")
+            self.logger.info("No vector data found, skip reading.")
             return
 
         self.set(data=ds)
@@ -283,9 +283,9 @@ class VectorComponent(ModelComponent):
         """
         ds = self.data
         if len(ds) == 0:
-            self._logger.debug("No vector data found, skip writing.")
+            self.logger.debug("No vector data found, skip writing.")
             return
-        self._root._assert_write_mode()
+        self.root._assert_write_mode()
         filename = filename or self._filename
         geometry_filename = geometry_filename or self._geometry_filename
 
@@ -307,10 +307,10 @@ class VectorComponent(ModelComponent):
                 # check 1D variables with matching index_dim
                 if len(dims) > 1 or dims[0] != ds.vector.index_dim:
                     filename = join(
-                        dirname(join(self._root.path, geometry_filename)),
+                        dirname(join(self.root.path, geometry_filename)),
                         f"{basename(geometry_filename).split('.')[0]}.nc",
                     )
-                    self._logger.warning(
+                    self.logger.warning(
                         "2D data found in vector,"
                         f"will write data to {filename} instead."
                     )
@@ -319,7 +319,7 @@ class VectorComponent(ModelComponent):
         # write to netcdf only
         if geometry_filename is None:
             assert filename is not None
-            os.makedirs(dirname(join(self._root.path, filename)), exist_ok=True)
+            os.makedirs(dirname(join(self.root.path, filename)), exist_ok=True)
             # cannot call directly ds.vector.to_netcdf
             # because of possible PermissionError
             if ogr_compliant:
@@ -331,31 +331,27 @@ class VectorComponent(ModelComponent):
                 {"vector": ds},
                 filename,
                 engine="netcdf4",
-                root=self._root.path,
-                logger=self._logger,
+                root=self.root.path,
+                logger=self.logger,
                 **kwargs,
             )
         # write to geojson only
         elif filename is None:
-            os.makedirs(
-                dirname(join(self._root.path, geometry_filename)), exist_ok=True
-            )
+            os.makedirs(dirname(join(self.root.path, geometry_filename)), exist_ok=True)
             gdf = ds.vector.to_gdf(**kwargs)
-            gdf.to_file(join(self._root.path, geometry_filename))
+            gdf.to_file(join(self.root.path, geometry_filename))
         # write data to netcdf and geometry to geojson
         else:
-            os.makedirs(
-                dirname(join(self._root.path, geometry_filename)), exist_ok=True
-            )
+            os.makedirs(dirname(join(self.root.path, geometry_filename)), exist_ok=True)
             # write geometry
             gdf = ds.vector.geometry.to_frame("geometry")
-            gdf.to_file(join(self._root.path, geometry_filename))
+            gdf.to_file(join(self.root.path, geometry_filename))
             # write_nc requires dict - use dummy key
             write_nc(
                 {"vector": ds.drop_vars("geometry")},
                 filename,
-                root=self._root.path,
-                logger=self._logger,
+                root=self.root.path,
+                logger=self.logger,
                 **kwargs,
             )
 
@@ -379,7 +375,7 @@ class VectorComponent(ModelComponent):
         """Returns coordinate reference system embedded in the vector."""
         if self.data.vector.crs is not None:
             return self.data.vector.crs
-        self._logger.warning("No CRS found in vector data.")
+        self.logger.warning("No CRS found in vector data.")
         return None
 
     def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:

@@ -15,7 +15,7 @@ from typing import (
 import geopandas as gpd
 from geopandas import GeoDataFrame, GeoSeries
 
-from hydromt.components.base import ModelComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.hydromt_step import hydromt_step
 from hydromt.metadata_resolver import ConventionResolver
 
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from hydromt.models.model import Model
 
 
-class GeomsComponent(ModelComponent):
+class GeomsComponent(SpatialModelComponent):
     """A component to manage geo-spatial geometries.
 
     It contains a dictionary of geopandas GeoDataFrames.
@@ -31,7 +31,13 @@ class GeomsComponent(ModelComponent):
 
     DEFAULT_FILENAME = "geoms/{name}.geojson"
 
-    def __init__(self, model: "Model", filename: Optional[str] = None):
+    def __init__(
+        self,
+        model: "Model",
+        *,
+        region_component: str,
+        filename: Optional[str] = None,
+    ):
         """Initialize a GeomComponent.
 
         Parameters
@@ -40,11 +46,11 @@ class GeomsComponent(ModelComponent):
             HydroMT model instance
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "geoms/{name}.geojson" ie one file per geodataframe in the data dictionnary.
+            by default "geoms/{name}.geojson" ie one file per geodataframe in the data dictionary.
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
-        super().__init__(model=model)
+        super().__init__(model=model, region_component=region_component)
 
     @property
     def data(self) -> Dict[str, Union[GeoDataFrame, GeoSeries]]:
@@ -62,8 +68,13 @@ class GeomsComponent(ModelComponent):
         """Initialize geoms."""
         if self._data is None:
             self._data = dict()
-            if self._root.is_reading_mode() and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read()
+
+    def _region_data(self) -> Optional[GeoDataFrame]:
+        raise AttributeError(
+            "region cannot be found in geoms component. Meaning that the region_component is not set or could not be found in the model."
+        )
 
     def set(self, geom: Union[GeoDataFrame, GeoSeries], name: str):
         """Add data to the geom component.
@@ -78,13 +89,13 @@ class GeomsComponent(ModelComponent):
         self._initialize()
         assert self._data is not None
         if name in self._data:
-            self._logger.warning(f"Replacing geom: {name}")
+            self.logger.warning(f"Replacing geom: {name}")
 
         if isinstance(geom, GeoSeries):
             geom = cast(GeoDataFrame, geom.to_frame())
 
         # Verify if a geom is set to model crs and if not sets geom to model crs
-        model_crs = self._model.crs
+        model_crs = self.model.crs
         if model_crs and model_crs != geom.crs:
             geom.to_crs(model_crs.to_epsg(), inplace=True)
         self._data[name] = geom
@@ -105,10 +116,10 @@ class GeomsComponent(ModelComponent):
             Additional keyword arguments that are passed to the
             `geopandas.read_file` function.
         """
-        self._root._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize(skip_read=True)
         f = filename or self._filename
-        read_path = self._root.path / f
+        read_path = self.root.path / f
         fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
             str(read_path)
         )
@@ -116,7 +127,7 @@ class GeomsComponent(ModelComponent):
         for fn in fns:
             name = ".".join(regex.match(fn).groups())  # type: ignore
             geom = cast(GeoDataFrame, gpd.read_file(fn, **kwargs))
-            self._logger.debug(f"Reading model file {name} at {fn}.")
+            self.logger.debug(f"Reading model file {name} at {fn}.")
 
             self.set(geom=geom, name=name)
 
@@ -143,27 +154,27 @@ class GeomsComponent(ModelComponent):
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
-        self._root._assert_write_mode()
+        self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            self._logger.debug("No geoms data found, skip writing.")
+            self.logger.debug("No geoms data found, skip writing.")
             return
 
         for name, gdf in self.data.items():
             if len(gdf) == 0:
-                self._logger.warning(f"{name} is empty. Skipping...")
+                self.logger.warning(f"{name} is empty. Skipping...")
                 continue
 
             geom_filename = filename or self._filename
 
             write_path = Path(
                 join(
-                    self._root.path,
+                    self.root.path,
                     geom_filename.format(name=name),
                 )
             )
 
-            self._logger.debug(f"Writing file {write_path}")
+            self.logger.debug(f"Writing file {write_path}")
 
             write_folder = dirname(write_path)
             if not isdir(write_folder):
