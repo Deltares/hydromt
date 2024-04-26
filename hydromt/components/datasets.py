@@ -27,7 +27,7 @@ _DEFAULT_DATASET_FILENAME = "datasets/{name}.nc"
 
 
 class DatasetsComponent(ModelComponent):
-    """A component to manage colections of Xarray objects.
+    """A component to manage collections of Xarray objects.
 
     It contains a dictionary of xarray DataArray or DataSet objects.
     """
@@ -74,7 +74,7 @@ class DatasetsComponent(ModelComponent):
         name: Optional[str] = None,
         split_dataset: bool = False,
     ):
-        """Add data to the xrarray component.
+        """Add data to the xarray component.
 
         Arguments
         ---------
@@ -122,7 +122,7 @@ class DatasetsComponent(ModelComponent):
         ----------
         filename : str, optional
             filename relative to model root. should contain a {name} placeholder
-            which will be used to determine the names/keys of the geometries.
+            which will be used to determine the names/keys of the datasets.
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
@@ -253,9 +253,9 @@ class DatasetsComponent(ModelComponent):
         split_dataset: bool = True,
         rename: Optional[Dict[str, str]] = None,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_filename`` to dataset object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_filename`` to datasets component.
 
-        If raster is a dataset, all variables will be added unless ``variables``
+        If raster is a xarray dataset, all variables will be added unless ``variables``
         list is specified.
 
         Adds model layers:
@@ -327,7 +327,7 @@ class DatasetsComponent(ModelComponent):
         rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
-        r"""HYDROMT CORE METHOD: Add data variable(s) to dataset object by reclassifying the data in ``raster_filename`` based on ``reclass_table_filename``.
+        r"""HYDROMT CORE METHOD: Add data variable(s) to datasets component by reclassifying the data in ``raster_filename`` based on ``reclass_table_filename``.
 
         This is done by reclassifying the data in
         ``raster_filename`` based on ``reclass_table_filename``.
