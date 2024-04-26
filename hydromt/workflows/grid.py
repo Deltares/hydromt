@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 
-def grid_from_region(
+def create_grid_from_region(
     kind: str,
     geom: gpd.GeoDataFrame,
     *,

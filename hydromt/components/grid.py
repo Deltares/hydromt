@@ -19,11 +19,11 @@ from hydromt.components.spatial import SpatialModelComponent
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.workflows.grid import (
+    create_grid_from_region,
     grid_from_constant,
     grid_from_geodataframe,
     grid_from_raster_reclass,
     grid_from_rasterdataset,
-    grid_from_region,
 )
 from hydromt.workflows.region import parse_region
 
@@ -304,7 +304,7 @@ class GridComponent(SpatialModelComponent):
             )
         assert geom is not None
 
-        grid = grid_from_region(
+        grid = create_grid_from_region(
             next(iter(region)),
             geom,
             logger=self.logger,
