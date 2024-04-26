@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, cast
 
 import geopandas as gpd
-import numpy as np
 from geopandas import GeoDataFrame
 from pyproj import CRS
 
@@ -33,7 +32,7 @@ class SpatialModelComponent(ModelComponent, ABC):
         self._region_filename = filename or self.__class__.DEFAULT_REGION_FILENAME
 
     @property
-    def bounds(self) -> Optional[np.ndarray]:
+    def bounds(self) -> Optional[Tuple[float, float, float, float]]:
         """Return the total bounds of the model region."""
         return self.region.total_bounds if self.region is not None else None
 

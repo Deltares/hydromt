@@ -3,13 +3,12 @@
 import os
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import pandas as pd
 import xarray as xr
 import xugrid as xu
-from numpy import ndarray
 from pyproj import CRS
 from shapely.geometry import box
 
@@ -290,7 +289,7 @@ class MeshComponent(SpatialModelComponent):
         return None
 
     @property
-    def bounds(self) -> Optional[ndarray]:
+    def bounds(self) -> Optional[Tuple[float, float, float, float]]:
         """Returns model mesh bounds."""
         if len(self.data) > 0:
             return self.data.ugrid.bounds

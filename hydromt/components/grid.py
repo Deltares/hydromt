@@ -358,7 +358,7 @@ class GridComponent(SpatialModelComponent):
         return None
 
     @property
-    def bounds(self) -> Optional[np.ndarray]:
+    def bounds(self) -> Optional[Tuple[float, float, float, float]]:
         """Returns the bounding box of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.bounds
