@@ -49,7 +49,7 @@ class GridComponent(SpatialModelComponent):
         *,
         filename: Optional[str] = None,
         region_component: Optional[str] = None,
-        region_filename: StrPath = SpatialModelComponent.DEFAULT_REGION_FILENAME,
+        region_filename: Optional[StrPath] = None,
     ):
         super().__init__(
             model=model, region_component=region_component, filename=region_filename

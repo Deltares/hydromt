@@ -26,11 +26,11 @@ class SpatialModelComponent(ModelComponent, ABC):
         model: "Model",
         *,
         region_component: Optional[str] = None,
-        filename: StrPath = DEFAULT_REGION_FILENAME,
+        filename: Optional[StrPath] = None,
     ) -> None:
         super().__init__(model)
         self._region_component = region_component
-        self._region_filename = filename
+        self._region_filename = filename or self.__class__.DEFAULT_REGION_FILENAME
 
     @property
     def bounds(self) -> Optional[np.ndarray]:
