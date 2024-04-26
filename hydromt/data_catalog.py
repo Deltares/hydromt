@@ -1625,7 +1625,7 @@ class DataCatalog(object):
 
     def get_dataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[str, SourceSpecDict, Path, pd.DataFrame],
         variables: Optional[list] = None,
         time_tuple: Optional[Tuple] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
