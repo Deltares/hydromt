@@ -47,7 +47,7 @@ def create_grid_from_region(
     if kind in ["bbox", "geom"]:
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")
-        input_crs = CRS.from_user_input(crs)
+        input_crs = CRS.from_user_input(crs) if crs is not None else geom.crs
         if input_crs.is_geographic and res > 1:
             logger.warning(
                 f"The expected CRS {crs} is geographic and resolution is {res} degree ie more than 111*111 km2. Check if this is correct."
@@ -109,7 +109,7 @@ def create_grid_from_region(
             res = da_hyd.raster.res
         # Reproject da_hyd based on crs and grid and align, method is not important
         # only coords will be used
-        input_crs = CRS.from_user_input(crs)
+        input_crs = CRS.from_user_input(crs) if crs is not None else da_hyd.raster.crs
         if input_crs.is_geographic and res > 1:
             logger.warning(
                 f"The expected CRS {crs} is geographic and resolution is {res} degree ie more than 111*111 km2. Check if this is correct."
