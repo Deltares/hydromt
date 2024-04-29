@@ -124,10 +124,21 @@ GeoDataFrame
 .. autosummary::
    :toctree: _generated
 
+   data_source.geodataframe.GeoDataFrameSource
    data_source.geodataframe.GeoDataFrameSource.get_data
    data_source.geodataframe.GeoDataFrameSource.to_stac_catalog
    data_source.geodataframe.GeoDataFrameSource.get_bbox
    data_source.geodataframe.GeoDataFrameSource.detect_bbox
+
+DataFrame
+---------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.dataframe.DataFrameSource
+   data_source.dataframe.DataFrameSource.get_data
+   data_source.dataframe.DataFrameSource.to_stac_catalog
 
 MetaDataResolver
 ================
@@ -160,7 +171,6 @@ General
    :toctree: _generated
 
    drivers.base_driver.BaseDriver
-   drivers.base_driver.read
 
 RasterDataset
 -------------
@@ -170,6 +180,7 @@ RasterDataset
    drivers.rasterdataset_driver.RasterDatasetDriver
    drivers.rasterdataset_driver.RasterDatasetDriver.read
    drivers.rasterdataset_driver.RasterDatasetDriver.read_data
+   drivers.rasterdataset_driver.RasterDatasetDriver.write
 
 RasterDatasetXarryDriver
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -177,6 +188,7 @@ RasterDatasetXarryDriver
    :toctree: _generated
    drivers.raster_xarray_driver.RastterDatasetXarryDriver
    drivers.raster_xarray_driver.RastterDatasetXarryDriver.read
+   drivers.raster_xarray_driver.RastterDatasetXarryDriver.write
 
 GeoDataFrame
 ------------
@@ -186,6 +198,7 @@ GeoDataFrame
    drivers.geodataframe_driver.GeoDataFrameDriver
    drivers.geodataframe_driver.GeoDataFrameDriver.read
    drivers.geodataframe_driver.GeoDataFrameDriver.read_data
+   drivers.geodataframe_driver.GeoDataFrameDriver.write
 
 PyogrioDriver
 ^^^^^^^^^^^^^
@@ -194,6 +207,26 @@ PyogrioDriver
    :toctree: _generated
    drivers.pyogrio_driver.PyogrioDriver
    drivers.pyogrio_driver.PyogrioDriver.read
+   drivers.pyogrio_driver.PyogrioDriver.write
+
+DataFrame
+---------
+
+.. autosummary::
+   :toctree: _generated
+   drivers.dataframe_driver.DataFrameDriver
+   drivers.dataframe_driver.DataFrameDriver.read
+   drivers.dataframe_driver.DataFrameDriver.read_data
+   drivers.dataframe_driver.DataFrameDriver.write
+
+PandasDriver
+^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+   drivers.pandas_driver.PandasDriver
+   drivers.pandas_driver.PandasDriver.read_data
+   drivers.pandas_driver.PandasDriver.write
 
 DataAdapter
 ===========
@@ -205,8 +238,6 @@ General
    :toctree: _generated
 
    data_adapter.DataAdapter
-   data_adapter.DataAdapter.summary
-   data_adapter.DataAdapter.to_dict
 
 RasterDataset
 -------------
@@ -216,7 +247,6 @@ RasterDataset
 
    data_adapter.RasterDatasetAdapter
    data_adapter.RasterDatasetAdapter.transform
-   data_adapter.RasterDatasetAdapter.to_stac_catalog
 
 GeoDataset
 ----------
@@ -242,8 +272,7 @@ GeoDataFrame
    :toctree: _generated
 
    data_adapter.GeoDataFrameAdapter
-   data_adapter.GeoDataFrameAdapter.get_data
-   data_adapter.GeoDataFrameAdapter.to_stac_catalog
+   data_adapter.GeoDataFrameAdapter.transform
 
 DataFrame
 ---------
@@ -251,12 +280,8 @@ DataFrame
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataFrameAdapter
-   data_adapter.DataFrameAdapter.summary
-   data_adapter.DataFrameAdapter.get_data
-   data_adapter.DataFrameAdapter.to_dict
-   data_adapter.DataFrameAdapter.to_file
-   data_adapter.DataFrameAdapter.to_stac_catalog
+   data_adapter.dataframe.DataFrameAdapter
+   data_adapter.dataframe.DataFrameAdapter.transform
 
 Dataset
 -------
