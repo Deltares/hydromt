@@ -1,10 +1,8 @@
 """parse a region from a dict. See parse_region for information on usage."""
 
 from logging import Logger, getLogger
-from os import makedirs
-from os.path import basename, exists, join
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -14,11 +12,9 @@ from genericpath import isdir, isfile
 from pyproj import CRS
 from shapely import box
 
-from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import utils as gis_utils
 from hydromt.plugins import PLUGINS
-from hydromt.root import ModelRoot
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 logger = getLogger(__name__)
@@ -203,41 +199,6 @@ def parse_region(
     logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
 
     return geom
-
-
-def write_region(
-    region: gpd.GeoDataFrame,
-    *,
-    filename: StrPath,
-    logger: Logger = logger,
-    root: ModelRoot,
-    to_wgs84=False,
-    **write_kwargs,
-):
-    """Write the model region to a file."""
-    write_path = join(root.path, filename)
-
-    if exists(write_path) and not root.is_override_mode():
-        raise OSError(
-            f"Model dir already exists and cannot be overwritten: {write_path}"
-        )
-    base_name = basename(write_path)
-    if not exists(base_name):
-        makedirs(base_name, exist_ok=True)
-
-    if region is None:
-        logger.info("No region data found. skipping writing...")
-    else:
-        logger.info(f"writing region data to {write_path}")
-        gdf = cast(gpd.GeoDataFrame, region.copy())
-
-        if to_wgs84 and (
-            write_kwargs.get("driver") == "GeoJSON"
-            or str(filename).lower().endswith(".geojson")
-        ):
-            gdf = gdf.to_crs(4326)
-
-        gdf.to_file(write_path, **write_kwargs)
 
 
 def _update_crs(

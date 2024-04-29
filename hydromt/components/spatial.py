@@ -9,7 +9,7 @@ from pyproj import CRS
 
 from hydromt._typing.type_def import StrPath
 from hydromt.components.base import ModelComponent
-from hydromt.workflows.region import write_region
+from hydromt.io.writers import write_region
 
 if TYPE_CHECKING:
     from hydromt.models import Model
@@ -54,7 +54,7 @@ class SpatialModelComponent(ModelComponent, ABC):
         This function will be called by the `region` property if no reference component is set.
         """
         raise NotImplementedError(
-            "Property _data_region must be implemented in subclass."
+            "Property _region_data must be implemented in subclass."
         )
 
     @property
@@ -72,6 +72,15 @@ class SpatialModelComponent(ModelComponent, ABC):
         """Write the model region to file.
 
         This function should be called from within the `write` function of the component inheriting from this class.
+
+        Parameters
+        ----------
+        filename : str, optional
+            The filename to write the region to. If None, the filename provided at initialization is used.
+        to_wgs84 : bool, optional
+            If True, the region is reprojected to WGS84 before writing.
+        **write_kwargs:
+            Additional keyword arguments passed to the `geopandas.GeoDataFrame.to_file` function.
         """
         self.root._assert_write_mode()
         if self._region_component is not None:

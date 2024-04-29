@@ -3,17 +3,20 @@
 import logging
 import os
 from logging import Logger
-from os.path import dirname, isdir, join
+from os import makedirs
+from os.path import basename, dirname, exists, isdir, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
+import geopandas as gpd
 import numpy as np
 import xarray as xr
 from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
 from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
+from hydromt.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 
@@ -190,3 +193,35 @@ def write_nc(
                 close_attempts=1,
             )
     return None
+
+
+def write_region(
+    region: gpd.GeoDataFrame,
+    *,
+    filename: StrPath,
+    logger: Logger = logger,
+    root: ModelRoot,
+    to_wgs84=False,
+    **write_kwargs,
+):
+    """Write the model region to a file."""
+    write_path = join(root.path, filename)
+
+    if exists(write_path) and not root.is_override_mode():
+        raise OSError(
+            f"Model dir already exists and cannot be overwritten: {write_path}"
+        )
+    base_name = basename(write_path)
+    if not exists(base_name):
+        makedirs(base_name, exist_ok=True)
+
+    logger.info(f"writing region data to {write_path}")
+    gdf = cast(gpd.GeoDataFrame, region.copy())
+
+    if to_wgs84 and (
+        write_kwargs.get("driver") == "GeoJSON"
+        or str(filename).lower().endswith(".geojson")
+    ):
+        gdf = gdf.to_crs(4326)
+
+    gdf.to_file(write_path, **write_kwargs)
