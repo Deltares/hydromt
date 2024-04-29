@@ -100,7 +100,7 @@ class TestRasterDatasetSource:
     @pytest.fixture()
     def MockDriver(self, raster_ds: xr.Dataset):
         class MockRasterDatasetDriver(RasterDatasetDriver):
-            name = "mock_geodf_to_file"
+            name = "mock_rasterds_to_file"
 
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass

@@ -4,6 +4,7 @@ from .base_driver import BaseDriver
 from .dataframe_driver import DataFrameDriver
 from .geodataframe_driver import GeoDataFrameDriver
 from .netcdf_driver import NetcdfDriver
+from .pandas_driver import PandasDriver
 from .preprocessing import (
     harmonise_dims,
     remove_duplicates,
@@ -19,6 +20,7 @@ __all__ = [
     "DataFrameDriver",
     "GeoDataFrameDriver",
     "NetcdfDriver",
+    "PandasDriver",
     "PyogrioDriver",
     "RasterDatasetDriver",
     "ZarrDriver",

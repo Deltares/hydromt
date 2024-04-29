@@ -31,7 +31,7 @@ class DataFrameSource(DataSource):
     Reads and validates DataCatalog entries.
     """
 
-    data_type: ClassVar[Literal["GeoDataFrame"]] = "GeoDataFrame"
+    data_type: ClassVar[Literal["GeoDataFrame"]] = "DataFrame"
     driver: DataFrameDriver
     data_adapter: DataFrameAdapter = Field(default_factory=DataFrameAdapter)
 
@@ -59,7 +59,6 @@ class DataFrameSource(DataSource):
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
 
     def to_file(
@@ -121,12 +120,12 @@ class DataFrameSource(DataSource):
         ----------
         - on_error (str, optional): The error handling strategy.
           Options are: "raise" to raise an error on failure, "skip" to skip the
-          dataset on failure, and "coerce" (default) to set default values on failure.
+          dataframe on failure, and "coerce" (default) to set default values on failure.
 
         Returns
         -------
-        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
-          if the dataset was skipped.
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataframe, or
+          None if the dataset was skipped.
         """
         if on_error == ErrorHandleMethod.SKIP:
             logger.warning(
@@ -153,6 +152,6 @@ class DataFrameSource(DataSource):
             return stac_catalog
         else:
             raise NotImplementedError(
-                "DataframeAdapter does not support full stac conversion as it lacks"
+                "DataFrameSource does not support full stac conversion as it lacks"
                 " spatio-temporal dimensions"
             )
