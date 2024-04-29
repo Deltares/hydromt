@@ -2,7 +2,6 @@
 
 from .base_driver import BaseDriver
 from .geodataframe_driver import GeoDataFrameDriver
-from .netcdf_driver import NetcdfDriver
 from .preprocessing import (
     harmonise_dims,
     remove_duplicates,
@@ -10,16 +9,15 @@ from .preprocessing import (
     to_datetimeindex,
 )
 from .pyogrio_driver import PyogrioDriver
+from .raster_xarray_driver import RasterDatasetXarrayDriver
 from .rasterdataset_driver import RasterDatasetDriver
-from .zarr_driver import ZarrDriver
 
 __all__ = [
     "BaseDriver",
     "GeoDataFrameDriver",
-    "NetcdfDriver",
     "PyogrioDriver",
     "RasterDatasetDriver",
-    "ZarrDriver",
+    "RasterDatasetXarrayDriver",
     "harmonise_dims",
     "remove_duplicates",
     "round_latlon",

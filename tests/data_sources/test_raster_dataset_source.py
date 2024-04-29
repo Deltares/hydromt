@@ -69,7 +69,7 @@ class TestRasterDatasetSource:
             name="test",
             uri="points.zarr",
             zoom_levels={1: 10},
-            driver={"name": "zarr", "metadata_resolver": "convention"},
+            driver={"name": "raster_xarray", "metadata_resolver": "convention"},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
         assert isinstance(datasource, RasterDatasetSource)
@@ -78,7 +78,7 @@ class TestRasterDatasetSource:
         RasterDatasetSource(
             name="test",
             uri="points.zarr",
-            driver={"name": "zarr"},
+            driver={"name": "raster_xarray"},
         )
 
     def test_read_data(

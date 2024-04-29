@@ -171,20 +171,12 @@ RasterDataset
    drivers.rasterdataset_driver.RasterDatasetDriver.read
    drivers.rasterdataset_driver.RasterDatasetDriver.read_data
 
-ZarrDriver
-^^^^^^^^^^
-
+RasterDatasetXarryDriver
+^^^^^^^^^^^^^^^^^^^^^^^^
 .. autosummary::
    :toctree: _generated
-   drivers.zarr_driver.ZarrDriver
-   drivers.zarr_driver.ZarrDriver.read
-   drivers.zarr_driver.ZarrDriver.read_data
-
-NetcdfDriver
-.. autosummary::
-   :toctree: _generated
-   drivers.netcdf_driver.NetcdfDriver
-   drivers.netcdf_driver.NetcdfDriver.read
+   drivers.raster_xarray_driver.RastterDatasetXarryDriver
+   drivers.raster_xarray_driver.RastterDatasetXarryDriver.read
 
 GeoDataFrame
 ------------
