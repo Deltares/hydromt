@@ -3,6 +3,7 @@
 from .base_driver import BaseDriver
 from .dataframe_driver import DataFrameDriver
 from .geodataframe_driver import GeoDataFrameDriver
+from .pandas_driver import PandasDriver
 from .preprocessing import (
     harmonise_dims,
     remove_duplicates,
