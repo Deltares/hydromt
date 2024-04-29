@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from affine import Affine
+from pyproj import CRS
 from shapely.geometry import Polygon
 
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
@@ -42,11 +43,20 @@ def create_grid_from_region(
     dec_rotation: int = 3,
 ) -> xr.Dataset:
     # Derive xcoords, ycoords and geom for the different kind options
+    # Generate grid based on res for region bbox
     if kind in ["bbox", "geom"]:
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")
-        # Generate grid based on res for region bbox
-        # TODO add warning on res value if crs is projected or not?
+        input_crs = CRS.from_user_input(crs)
+        if input_crs.is_geographic and res > 1:
+            logger.warning(
+                f"The expected CRS {crs} is geographic and resolution is {res} degree ie more than 111*111 km2. Check if this is correct."
+            )
+        if input_crs.is_projected and res < 1:
+            logger.warning(
+                f"The expected CRS {crs} is projected and resolution is {res} meter only. Check if this is correct."
+            )
+
         if not rotated:
             xmin, ymin, xmax, ymax = geom.total_bounds
             res = abs(res)
@@ -83,9 +93,7 @@ def create_grid_from_region(
         # get ds_hyd but clipped to geom, one variable is enough
         assert hydrography_fn is not None
         assert data_catalog is not None
-        da_hyd = data_catalog.get_rasterdataset(
-            hydrography_fn, geom=geom, variables=["flwdir"]
-        )
+        da_hyd = data_catalog.get_rasterdataset(hydrography_fn, geom=geom)
         if da_hyd is None:
             _exec_nodata_strat(
                 f"No data available in hydrography_fn '{hydrography_fn}' on variable 'flwdir'",
@@ -101,7 +109,16 @@ def create_grid_from_region(
             res = da_hyd.raster.res
         # Reproject da_hyd based on crs and grid and align, method is not important
         # only coords will be used
-        # TODO add warning on res value if crs is projected or not?
+        input_crs = CRS.from_user_input(crs)
+        if input_crs.is_geographic and res > 1:
+            logger.warning(
+                f"The expected CRS {crs} is geographic and resolution is {res} degree ie more than 111*111 km2. Check if this is correct."
+            )
+        if input_crs.is_projected and res < 1:
+            logger.warning(
+                f"The expected CRS {crs} is projected and resolution is {res} meter only. Check if this is correct."
+            )
+
         if res != da_hyd.raster.res and crs != da_hyd.raster.crs:
             da_hyd = da_hyd.raster.reproject(dst_crs=crs, dst_res=res, align=align)
             assert da_hyd is not None
