@@ -284,7 +284,7 @@ def test_add_2d_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixtur
         ),
     ):
         mesh_component.add_2d_data_from_rasterdataset(
-            raster_fn="mock_raster", grid_name=grid_name
+            raster_filename="mock_raster", grid_name=grid_name
         )
 
     mock_mesh2d_from_rasterdataset = mocker.patch(
@@ -293,7 +293,7 @@ def test_add_2d_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixtur
     mock_mesh2d_from_rasterdataset.return_value = mock_data
 
     data_vars = mesh_component.add_2d_data_from_rasterdataset(
-        raster_fn="vito", grid_name="mesh2d", resampling_method="mode"
+        raster_filename="vito", grid_name="mesh2d", resampling_method="mode"
     )
     assert "Preparing mesh data from raster source vito" in caplog.text
     assert all([var in mock_data.data_vars.keys() for var in data_vars])
@@ -316,9 +316,9 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
         ),
     ):
         mesh_component.add_2d_data_from_raster_reclass(
-            raster_fn="mock_raster",
+            raster_filename="mock_raster",
             grid_name=grid_name,
-            reclass_table_fn="mock_reclass_table",
+            reclass_table_filename="mock_reclass_table",
             reclass_variables=["landuse", "roughness_manning"],
         )
     raster_fn = "mock_raster"
@@ -328,8 +328,8 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
         "Please select one using the 'variable' argument",
     ):
         mesh_component.add_2d_data_from_raster_reclass(
-            raster_fn=raster_fn,
-            reclass_table_fn="reclass_table",
+            raster_filename=raster_fn,
+            reclass_table_filename="reclass_table",
             grid_name="mesh2d",
             reclass_variables=["landuse", "roughness_manning"],
         )
@@ -342,10 +342,10 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
 
     mock_mesh2d_from_rasterdataset.return_value = mock_data
     data_vars = mesh_component.add_2d_data_from_raster_reclass(
-        raster_fn="vito",
+        raster_filename="vito",
         grid_name="mesh2d",
         resampling_method="mode",
-        reclass_table_fn="vito_mapping",
+        reclass_table_filename="vito_mapping",
         reclass_variables=["landuse", "roughness_manning"],
     )
     assert (

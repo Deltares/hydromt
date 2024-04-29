@@ -93,23 +93,27 @@ class MeshComponent(SpatialModelComponent):
     @hydromt_step
     def write(
         self,
-        fn: Optional[str] = None,
+        filename: Optional[str] = None,
         *,
         region_options: Optional[Dict] = None,
         write_optional_ugrid_attributes: bool = False,
         **kwargs,
     ) -> None:
-        """Write model grid data to a netCDF file at <root>/<fn>.
+        """Write model grid data to a netCDF file at <root>/<filename>.
 
         Keyword arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`.
 
         Parameters
         ----------
-        fn : str, optional
+        filename : str, optional
             Filename relative to the model root directory, by default 'grid/grid.nc'.
         write_optional_ugrid_attributes : bool, optional
             If True, write optional ugrid attributes to the netCDF file, by default
             True.
+        region_options : dict, optional
+            Options to pass to the write_region method.
+            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
+            If `filename` is not provided, `SpatialModelComponent.DEFAULT_REGION_FILENAME` will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the
             `xarray.Dataset.to_netcdf` method.
@@ -123,34 +127,34 @@ class MeshComponent(SpatialModelComponent):
             return
 
         # filename
-        fn = fn or str(self._filename)
-        _fn = join(self.root.path, fn)
-        if not isdir(dirname(_fn)):
-            os.makedirs(dirname(_fn), exist_ok=True)
-        self.logger.debug(f"Writing file {fn}")
+        filename = filename or str(self._filename)
+        _filename = join(self.root.path, filename)
+        if not isdir(dirname(_filename)):
+            os.makedirs(dirname(_filename), exist_ok=True)
+        self.logger.debug(f"Writing file {filename}")
         ds_out = self.data.ugrid.to_dataset(
             optional_attributes=write_optional_ugrid_attributes,
         )
         if self.crs is not None:
             # save crs to spatial_ref coordinate
             ds_out = ds_out.rio.write_crs(self.crs)
-        ds_out.to_netcdf(_fn, **kwargs)
+        ds_out.to_netcdf(_filename, **kwargs)
 
     @hydromt_step
     def read(
         self,
-        fn: Optional[str] = None,
+        filename: Optional[str] = None,
         *,
         crs: Optional[Union[CRS, int]] = None,
         **kwargs,
     ) -> None:
-        """Read model mesh data at <root>/<fn> and add to mesh property.
+        """Read model mesh data at <root>/<filename> and add to mesh property.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
-        fn : str, optional
+        filename : str, optional
             filename relative to model root, by default 'mesh/mesh.nc'
         crs : CRS or int, optional
             Coordinate Reference System (CRS) object or EPSG code representing the
@@ -162,9 +166,9 @@ class MeshComponent(SpatialModelComponent):
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
 
-        fn = fn or str(self._filename)
+        filename = filename or str(self._filename)
         files = read_nc(
-            fn,
+            filename,
             root=self.root.path,
             single_var_as_array=False,
             logger=self.logger,
@@ -208,7 +212,7 @@ class MeshComponent(SpatialModelComponent):
         """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
 
         Grids are read according to UGRID conventions. An 2D unstructured mesh
-        will be created as 2D rectangular grid from a geometry (geom_fn) or bbox.
+        will be created as 2D rectangular grid from a geometry (geom_filename) or bbox.
         If an existing 2D mesh is given, then no new mesh will be generated but an extent
         can be extracted using the `bounds` argument of region.
 
@@ -409,7 +413,7 @@ class MeshComponent(SpatialModelComponent):
     @hydromt_step
     def add_2d_data_from_rasterdataset(
         self,
-        raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
+        raster_filename: Union[str, Path, xr.DataArray, xr.Dataset],
         *,
         grid_name: Optional[str] = "mesh2d",
         variables: Optional[list] = None,
@@ -417,7 +421,7 @@ class MeshComponent(SpatialModelComponent):
         resampling_method: Optional[Union[str, List]] = "centroid",
         rename: Optional[Dict] = None,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to 2D ``grid_name`` in mesh object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_filename`` to 2D ``grid_name`` in mesh object.
 
         Raster data is interpolated to the mesh ``grid_name`` using the ``resampling_method``.
         If raster is a dataset, all variables will be added unless ``variables`` list
@@ -425,16 +429,16 @@ class MeshComponent(SpatialModelComponent):
 
         Adds model layers:
 
-        * **raster.name** mesh: data from raster_fn
+        * **raster.name** mesh: data from raster_filename
 
         Parameters
         ----------
-        raster_fn: str, Path, xr.DataArray, xr.Dataset
+        raster_filename: str, Path, xr.DataArray, xr.Dataset
             Data catalog key, path to raster file or raster xarray data object.
         grid_name: str, optional
             Name of the mesh grid to add the data to. By default 'mesh2d'.
         variables: list, optional
-            List of variables to add to mesh from raster_fn. By default all.
+            List of variables to add to mesh from raster_filename. By default all.
         fill_method : str, optional
             If specified, fills no data values using fill_nodata method.
             Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
@@ -447,22 +451,22 @@ class MeshComponent(SpatialModelComponent):
             :py:meth:`xugrid.OverlapRegridder` method.
             Can provide a list corresponding to ``variables``.
         rename: dict, optional
-            Dictionary to rename variable names in raster_fn before adding to mesh
-            {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
+            Dictionary to rename variable names in raster_filename before adding to mesh
+            {'name_in_raster_filename': 'name_in_mesh'}. By default empty.
 
         Returns
         -------
         list
             List of variables added to mesh.
         """  # noqa: E501
-        self.logger.info(f"Preparing mesh data from raster source {raster_fn}")
+        self.logger.info(f"Preparing mesh data from raster source {raster_filename}")
         # Check if grid name in self.mesh
         if grid_name not in self.mesh_names:
             raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
         # Read raster data and select variables
         bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
         ds = self.data_catalog.get_rasterdataset(
-            raster_fn,
+            raster_filename,
             bbox=bounds,
             buffer=2,
             variables=variables,
@@ -486,8 +490,8 @@ class MeshComponent(SpatialModelComponent):
     @hydromt_step
     def add_2d_data_from_raster_reclass(
         self,
-        raster_fn: Union[str, Path, xr.DataArray],
-        reclass_table_fn: Union[str, Path, pd.DataFrame],
+        raster_filename: Union[str, Path, xr.DataArray],
+        reclass_table_filename: Union[str, Path, pd.DataFrame],
         reclass_variables: list,
         grid_name: Optional[str] = "mesh2d",
         variable: Optional[str] = None,
@@ -496,7 +500,7 @@ class MeshComponent(SpatialModelComponent):
         rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to 2D ``grid_name`` in mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to 2D ``grid_name`` in mesh object by reclassifying the data in ``raster_filename`` based on ``reclass_table_filename``.
 
         The reclassified raster data
         are subsequently interpolated to the mesh using `resampling_method`.
@@ -508,22 +512,22 @@ class MeshComponent(SpatialModelComponent):
 
         Parameters
         ----------
-        raster_fn : str, Path, xr.DataArray
+        raster_filename : str, Path, xr.DataArray
             Data catalog key, path to the raster file, or raster xarray data object.
             Should be a DataArray. If not, use the `variable` argument for selection.
-        reclass_table_fn : str, Path, pd.DataFrame
+        reclass_table_filename : str, Path, pd.DataFrame
             Data catalog key, path to the tabular data file, or tabular pandas dataframe
-            object for the reclassification table of `raster_fn`.
+            object for the reclassification table of `raster_filename`.
         reclass_variables : list
-            List of reclass_variables from the reclass_table_fn table to add to the
-            mesh. The index column should match values in raster_fn.
+            List of reclass_variables from the reclass_table_filename table to add to the
+            mesh. The index column should match values in raster_filename.
         grid_name : str, optional
             Name of the mesh grid to add the data to. By default 'mesh2d'.
         variable : str, optional
             Name of the raster dataset variable to use. This is only required when
             reading datasets with multiple variables. By default, None.
         fill_method : str, optional
-            If specified, fills nodata values in `raster_fn` using the `fill_method`
+            If specified, fills nodata values in `raster_filename` using the `fill_method`
             method before reclassifying. Available methods are
             {'linear', 'nearest', 'cubic', 'rio_idw'}.
         resampling_method : str or list, optional
@@ -550,11 +554,11 @@ class MeshComponent(SpatialModelComponent):
         Raises
         ------
         ValueError
-            If `raster_fn` is not a single variable raster.
+            If `raster_filename` is not a single variable raster.
         """  # noqa: E501
         self.logger.info(
-            f"Preparing mesh data by reclassifying the data in {raster_fn} "
-            f"based on {reclass_table_fn}."
+            f"Preparing mesh data by reclassifying the data in {raster_filename} "
+            f"based on {reclass_table_filename}."
         )
         # Check if grid name in self.mesh
         if grid_name not in self.mesh_names:
@@ -562,7 +566,7 @@ class MeshComponent(SpatialModelComponent):
         # Read raster data and mapping table
         bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
         da = self.data_catalog.get_rasterdataset(
-            raster_fn,
+            raster_filename,
             bbox=bounds,
             buffer=2,
             variables=variable,
@@ -570,11 +574,11 @@ class MeshComponent(SpatialModelComponent):
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
-                f"raster_fn {raster_fn} should be a single variable raster. "
+                f"raster_filename {raster_filename} should be a single variable raster. "
                 "Please select one using the 'variable' argument"
             )
         df_vars = self.data_catalog.get_dataframe(
-            reclass_table_fn, variables=reclass_variables
+            reclass_table_filename, variables=reclass_variables
         )
 
         uds_sample = mesh2d_from_raster_reclass(
