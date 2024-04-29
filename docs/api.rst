@@ -171,20 +171,12 @@ RasterDataset
    drivers.rasterdataset_driver.RasterDatasetDriver.read
    drivers.rasterdataset_driver.RasterDatasetDriver.read_data
 
-ZarrDriver
-^^^^^^^^^^
-
+RasterDatasetXarryDriver
+^^^^^^^^^^^^^^^^^^^^^^^^
 .. autosummary::
    :toctree: _generated
-   drivers.zarr_driver.ZarrDriver
-   drivers.zarr_driver.ZarrDriver.read
-   drivers.zarr_driver.ZarrDriver.read_data
-
-NetcdfDriver
-.. autosummary::
-   :toctree: _generated
-   drivers.netcdf_driver.NetcdfDriver
-   drivers.netcdf_driver.NetcdfDriver.read
+   drivers.raster_xarray_driver.RastterDatasetXarryDriver
+   drivers.raster_xarray_driver.RastterDatasetXarryDriver.read
 
 GeoDataFrame
 ------------
@@ -328,54 +320,6 @@ Model attributes
    Model.model_root
    Model.region
    Model.api
-
-Model default components
-------------------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.maps
-   Model.geoms
-   Model.forcing
-   Model.states
-   Model.results
-
-General methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.set_maps
-   Model.read_maps
-   Model.write_maps
-
-   Model.set_geoms
-   Model.read_geoms
-   Model.write_geoms
-
-   Model.set_forcing
-   Model.read_forcing
-   Model.write_forcing
-
-   Model.set_states
-   Model.read_states
-   Model.write_states
-
-   Model.set_results
-   Model.read_results
-
-.. _setup_methods:
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.setup_maps_from_rasterdataset
-   Model.setup_maps_from_raster_reclass
 
 ModelRoot
 =========
@@ -548,6 +492,40 @@ General methods
    TablesComponent.set
    TablesComponent.write
    TablesComponent.read
+
+DatasetsComponent
+==============
+
+.. autosummary::
+   :toctree: _generated
+
+    DatasetsComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent._model
+   DatasetsComponent._data_catalog
+   DatasetsComponent._logger
+   DatasetsComponent._root
+   DatasetsComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent.set
+   DatasetsComponent.write
+   DatasetsComponent.read
+   DatasetsComponent.add_raster_data_from_raster_reclass
+   DatasetsComponent.add_raster_data_from_rasterdataset
 
 GeomsComponent
 ==============
