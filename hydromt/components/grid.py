@@ -134,6 +134,7 @@ class GridComponent(SpatialModelComponent):
         region_options : dict, optional
             Options to pass to the write_region method.
             Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
+            If `filename` is not provided, `SpatialModelComponent.DEFAULT_REGION_FILENAME` will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the `write_nc` method.
         """
@@ -348,14 +349,21 @@ class GridComponent(SpatialModelComponent):
     @property
     def crs(self) -> Optional[CRS]:
         """Returns coordinate reference system embedded in the model grid."""
-        if self.data.raster.crs is not None:
-            return CRS(self.data.raster.crs)
-        _exec_nodata_strat(
-            msg="No grid data found for deriving crs",
-            strategy=NoDataStrategy.IGNORE,
-            logger=self.logger,
-        )
-        return None
+        if self.data.raster is None:
+            _exec_nodata_strat(
+                msg="No grid data found for deriving crs",
+                strategy=NoDataStrategy.IGNORE,
+                logger=self.logger,
+            )
+            return None
+        if self.data.raster.crs is None:
+            _exec_nodata_strat(
+                msg="No crs found in grid data",
+                strategy=NoDataStrategy.IGNORE,
+                logger=self.logger,
+            )
+            return None
+        return CRS(self.data.raster.crs)
 
     @property
     def bounds(self) -> Optional[Tuple[float, float, float, float]]:
