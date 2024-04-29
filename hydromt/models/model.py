@@ -78,20 +78,37 @@ class Model(object, metaclass=ABCMeta):
         region_component: Optional[str] = None,
         **artifact_keys,
     ):
-        r"""Initialize a model.
+        """Initialize a model.
 
         Parameters
         ----------
+        components: Dict[str, Any], optional
+            Dictionary of components to add to the model, by default None
+            Every entry in this dictionary contains the name of the component as key,
+            and the component object as value, or a dictionary with options passed to the component initializers.
+            If a component is a dictionary, the key 'type' should be provided with the name of the component type.
+            .. code-block:: python
+                {
+                    "grid": {
+                        "type": "GridComponent",
+                        "filename": "path/to/grid.nc"
+                    }
+                }
         root : str, optional
             Model root, by default None
         mode : {'r','r+','w'}, optional
             read/append/write mode, by default "w"
         data_libs : List[str], optional
             List of data catalog configuration files, by default None
-        \**artifact_keys:
-            Additional keyword arguments to be passed down.
         logger:
             The logger to be used.
+        region_component : str, optional
+            The name of the region component in the components dictionary.
+            If None, the model will can automatically determine the region component if there is only one `SpatialModelComponent`.
+            Otherwise it will raise an error.
+            If there are no `SpatialModelComponent` it will raise a warning that `region` functionality will not work.
+        **artifact_keys:
+            Additional keyword arguments to be passed down.
         """
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
