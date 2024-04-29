@@ -69,9 +69,11 @@ class TestPandasDriver:
         driver: PandasDriver,
     ):
         uri = request.getfixturevalue(uri)
-        df: pd.DataFrame = driver.read(uri).sort_values("id")
-        assert np.all(df == df)
-        # assert np.all(df.reset_index(drop=True) == df)  # fgb scrambles order
+        new_df: pd.DataFrame = driver.read(uri).sort_values("id")
+        unnamed_col_name = "Unnamed: 0"  # some ui methods struggle with this.
+        if unnamed_col_name in new_df.columns:
+            new_df.drop(unnamed_col_name, axis=1, inplace=True)
+        pd.testing.assert_frame_equal(df, new_df)
 
     def test_read_nodata(self, driver: PandasDriver):
         with pytest.raises(FileNotFoundError):
