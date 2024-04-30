@@ -27,8 +27,8 @@ from hydromt._typing import (
     ZoomLevel,
 )
 from hydromt.data_adapter.geodataset import GeoDatasetAdapter
+from hydromt.data_source.geodataset import GeoDatasetSource
 from hydromt.data_source.data_source import DataSource
-from hydromt.drivers.geodataframe_driver import GeoDatasetDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
