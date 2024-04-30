@@ -79,6 +79,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
             )
         return gdf
 
+    @staticmethod
     def _slice_data(
         gdf: gpd.GeoDataFrame,
         variables: Optional[Union[str, List[str]]] = None,

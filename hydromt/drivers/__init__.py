@@ -1,7 +1,9 @@
 """Drivers responsible for reading and writing data."""
 
 from .base_driver import BaseDriver
+from .dataframe_driver import DataFrameDriver
 from .geodataframe_driver import GeoDataFrameDriver
+from .pandas_driver import PandasDriver
 from .preprocessing import (
     harmonise_dims,
     remove_duplicates,
@@ -14,7 +16,9 @@ from .rasterdataset_driver import RasterDatasetDriver
 
 __all__ = [
     "BaseDriver",
+    "DataFrameDriver",
     "GeoDataFrameDriver",
+    "PandasDriver",
     "PyogrioDriver",
     "RasterDatasetDriver",
     "RasterDatasetXarrayDriver",
