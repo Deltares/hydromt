@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from logging import Logger, getLogger
 from os.path import join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -29,7 +29,7 @@ from hydromt._typing import (
     _exec_nodata_strat,
 )
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
-from hydromt.data_adapter.utils import has_no_data
+from hydromt.data_adapter.utils import _single_var_as_array, has_no_data
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
 
@@ -189,7 +189,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             ds = self._apply_unit_conversions(ds, logger)
             ds = self._set_metadata(ds, metadata)
             # return array if single var and single_var_as_array
-            return self._single_var_as_array(ds, single_var_as_array, variables)
+            return _single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
             _exec_nodata_strat(
                 "No data was read from source",
@@ -546,19 +546,3 @@ class RasterDatasetAdapter(DataAdapterBase):
             raise TypeError(f"zoom_level not understood: {type(zoom_level)}")
         logger.debug(f"Using zoom level {zl} (res: {zls_dict[zl]:.6f})")
         return zl
-
-    @staticmethod
-    def _single_var_as_array(
-        ds: Data, single_var_as_array: bool, variable_name: Optional[List[str]] = None
-    ) -> Data:
-        # return data array if single variable dataset
-        dvars = list(ds.data_vars.keys())
-        if single_var_as_array and len(dvars) == 1:
-            da = ds[dvars[0]]
-            if isinstance(variable_name, list) and len(variable_name) == 1:
-                da.name = variable_name[0]
-            elif isinstance(variable_name, str):
-                da.name = variable_name
-            return da
-        else:
-            return ds

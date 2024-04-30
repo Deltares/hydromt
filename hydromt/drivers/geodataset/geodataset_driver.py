@@ -1,14 +1,17 @@
 """Driver for RasterDatasets."""
 
 from abc import ABC, abstractmethod
-from logging import Logger
+from logging import Logger, getLogger
 from typing import List, Optional
 
 import xarray as xr
 
 from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate, Variables
 from hydromt.drivers import BaseDriver
+
+logger = getLogger(__name__)
 
 
 class GeoDatasetDriver(BaseDriver, ABC):
@@ -18,11 +21,14 @@ class GeoDatasetDriver(BaseDriver, ABC):
         self,
         uri: str,
         *,
-        mask: Optional[Geom] = None,
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
-        logger: Optional[Logger] = None,
+        bbox: Optional[Bbox] = None,
+        geom: Optional[Geom] = None,
+        buffer: GeomBuffer = 0,
+        predicate: Predicate = "intersects",
+        variables: Optional[Variables] = None,
+        time_tuple: Optional[TimeRange] = None,
+        single_var_as_array: bool = True,
+        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -37,17 +43,10 @@ class GeoDatasetDriver(BaseDriver, ABC):
         uris = self.metadata_resolver.resolve(
             uri,
             self.filesystem,
-            mask=mask,
-            time_range=time_range,
-            variables=variables,
-            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
         )
         return self.read_data(
             uris,
-            mask=mask,
-            time_range=time_range,
-            zoom_level=zoom_level,
             logger=logger,
             handle_nodata=handle_nodata,
         )

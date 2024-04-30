@@ -13,7 +13,7 @@ from hydromt.drivers import GeoDatasetDriver
 
 @pytest.fixture()
 def mock_raster_ds_adapter():
-    class MockGeoDataSetAdapter(GeoDatasetSource):
+    class MockGeoDataSetAdapter(GeoDatasetAdapter):
         def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
             return ds
 
@@ -27,7 +27,7 @@ class TestGeoDatasetSource:
                 name="name",
                 uri="uri",
                 data_adapter=mock_raster_ds_adapter,
-                driver="does not exist",
+                driver="does not exist",  # type: ignore
             )
 
         assert e_info.value.error_count() == 1
@@ -66,7 +66,6 @@ class TestGeoDatasetSource:
         datasource = GeoDatasetSource(
             name="test",
             uri="points.zarr",
-            zoom_levels={1: 10},
             driver={"name": "zarr", "metadata_resolver": "convention"},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )

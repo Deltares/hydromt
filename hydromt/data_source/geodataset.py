@@ -260,7 +260,7 @@ class GeoDatasetSource(DataSource):
         on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> Optional[StacCatalog]:
         """
-        Convert a rasterdataset into a STAC Catalog representation.
+        Convert a geodataset into a STAC Catalog representation.
 
         The collection will contain an asset for each of the associated files.
 
@@ -268,13 +268,14 @@ class GeoDatasetSource(DataSource):
         Parameters
         ----------
         - on_error (str, optional): The error handling strategy.
-          Options are: "raise" to raise an error on failure, "skip" to skip the
-          dataset on failure, and "coerce" (default) to set default values on failure.
+          Options are: "raise" to raise an error on failure, "skip" to skip
+          the dataset on failure, and "coerce" (default) to set default
+          values on failure.
 
         Returns
         -------
-        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
-          if the dataset was skipped.
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
+          None if the dataset was skipped.
         """
         try:
             bbox, crs = self.get_bbox(detect=True)
@@ -282,16 +283,10 @@ class GeoDatasetSource(DataSource):
             start_dt, end_dt = self.get_time_range(detect=True)
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
-            props = {**self.data_adapter.meta, "crs": crs}
-            ext = splitext(self.uri)[-1]
-            if ext == ".nc" or ext == ".vrt":
+            props = {**self.meta, "crs": crs}
+            ext = splitext(self.path)[-1]
+            if ext in [".nc", ".vrt"]:
                 media_type = MediaType.HDF5
-            elif ext == ".tiff":
-                media_type = MediaType.TIFF
-            elif ext == ".cog":
-                media_type = MediaType.COG
-            elif ext == ".png":
-                media_type = MediaType.PNG
             else:
                 raise RuntimeError(
                     f"Unknown extention: {ext} cannot determine media type"
@@ -305,31 +300,29 @@ class GeoDatasetSource(DataSource):
                 return
             elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.data_adapter.meta
+                props = self.meta
                 start_dt = datetime(1, 1, 1)
                 end_dt = datetime(1, 1, 1)
                 media_type = MediaType.JSON
             else:
                 raise e
 
-        else:
-            # else makes type checkers a bit happier
-            stac_catalog = StacCatalog(
-                self.name,
-                description=self.name,
-            )
-            stac_item = StacItem(
-                self.name,
-                geometry=None,
-                bbox=list(bbox),
-                properties=props,
-                datetime=None,
-                start_datetime=start_dt,
-                end_datetime=end_dt,
-            )
-            stac_asset = StacAsset(str(self.uri), media_type=media_type)
-            base_name = basename(self.uri)
-            stac_item.add_asset(base_name, stac_asset)
+        stac_catalog = StacCatalog(
+            self.name,
+            description=self.name,
+        )
+        stac_item = StacItem(
+            self.name,
+            geometry=None,
+            bbox=bbox,
+            properties=props,
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        stac_asset = StacAsset(str(self.path), media_type=media_type)
+        base_name = basename(self.path)
+        stac_item.add_asset(base_name, stac_asset)
 
-            stac_catalog.add_item(stac_item)
-            return stac_catalog
+        stac_catalog.add_item(stac_item)
+        return stac_catalog

@@ -12,7 +12,6 @@ import numpy as np
 import xarray as xr
 from shapely.geometry import box
 
-from hydromt.data_adapter import GeoDataFrameAdapter
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
 
 logger = logging.getLogger(__name__)
@@ -121,7 +120,7 @@ def get_basin_geometry(
     # TODO understand pfafstetter codes
     gdf_bas = None
     if basin_index is not None:
-        if isinstance(basin_index, GeoDataFrameAdapter):
+        if isinstance(basin_index, "GeoDataFrameAdapter"):
             kwargs = dict(variables=["basid"])
             if geom is not None:
                 kwargs.update(geom=geom)

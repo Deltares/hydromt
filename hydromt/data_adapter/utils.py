@@ -1,9 +1,7 @@
 """Utility functions for data adapters."""
-import os
+
 from logging import Logger
-from os.path import isdir, join
-from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -11,75 +9,7 @@ import pandas as pd
 import xarray as xr
 
 from hydromt._typing import Data
-
-
-def netcdf_writer(
-    obj: Union[xr.Dataset, xr.DataArray],
-    data_root: Union[str, Path],
-    data_name: str,
-    variables: Optional[List[str]] = None,
-    encoder: str = "zlib",
-) -> str:
-    """Utiliy function for writing a xarray dataset/data array to a netcdf file.
-
-    Parameters
-    ----------
-    obj : xr.Dataset | xr.DataArray
-        Dataset.
-    data_root : str | Path
-        root to write the data to.
-    data_name : str
-        filename to write to.
-    variables : Optional[List[str]]
-        list of dataset variables to write, by default None
-
-    Returns
-    -------
-    fn_out: str
-        Absolute path to output file
-    """
-    dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.data_vars
-    if variables is None:
-        encoding = {k: {encoder: True} for k in dvars}
-        fn_out = join(data_root, f"{data_name}.nc")
-        obj.to_netcdf(fn_out, encoding=encoding)
-    else:  # save per variable
-        if not isdir(join(data_root, data_name)):
-            os.makedirs(join(data_root, data_name))
-        for var in dvars:
-            fn_out = join(data_root, data_name, f"{var}.nc")
-            obj[var].to_netcdf(fn_out, encoding={var: {encoder: True}})
-        fn_out = join(data_root, data_name, "{variable}.nc")
-    return fn_out
-
-
-def zarr_writer(
-    obj: Union[xr.Dataset, xr.DataArray],
-    data_root: Union[str, Path],
-    data_name: str,
-    **kwargs,
-) -> str:
-    """Utiliy function for writing a xarray dataset/data array to a netcdf file.
-
-    Parameters
-    ----------
-    obj : xr.Dataset | xr.DataArray
-        Dataset.
-    data_root : str | Path
-        root to write the data to.
-    data_name : str
-        filename to write to.
-
-    Returns
-    -------
-    fn_out: str
-        Absolute path to output file
-    """
-    fn_out = join(data_root, f"{data_name}.zarr")
-    if isinstance(obj, xr.DataArray):
-        obj = obj.to_dataset()
-    obj.to_zarr(fn_out, **kwargs)
-    return fn_out
+from hydromt._typing.type_def import Variables
 
 
 def shift_dataset_time(
@@ -124,3 +54,25 @@ def has_no_data(
         return all([v.size == 0 for v in data.data_vars.values()])
     else:
         return len(data) == 0
+
+
+def _single_var_as_array(
+    maybe_ds: Optional[xr.Dataset],
+    single_var_as_array: bool,
+    variable_name: Optional[Variables] = None,
+) -> Optional[xr.Dataset]:
+    if maybe_ds is None:
+        return None
+    else:
+        ds = maybe_ds
+    # return data array if single variable dataset
+    dvars = list(ds.data_vars.keys())
+    if single_var_as_array and len(dvars) == 1:
+        da = ds[dvars[0]]
+        if isinstance(variable_name, list) and len(variable_name) == 1:
+            da.name = variable_name[0]
+        elif isinstance(variable_name, str):
+            da.name = variable_name
+        return da
+    else:
+        return ds
