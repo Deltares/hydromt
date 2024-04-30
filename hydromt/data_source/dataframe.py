@@ -31,7 +31,8 @@ class DataFrameSource(DataSource):
     Reads and validates DataCatalog entries.
     """
 
-    data_type: ClassVar[Literal["GeoDataFrame"]] = "DataFrame"
+
+    data_type: ClassVar[Literal["DataFrame"]] = "DataFrame"
     driver: DataFrameDriver
     data_adapter: DataFrameAdapter = Field(default_factory=DataFrameAdapter)
 
