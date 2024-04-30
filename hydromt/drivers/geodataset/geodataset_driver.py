@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import xarray as xr
 
-from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
+from hydromt._typing import Geom, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate, Variables
 from hydromt.drivers import BaseDriver
@@ -25,13 +25,13 @@ class GeoDatasetDriver(BaseDriver, ABC):
         geom: Optional[Geom] = None,
         buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
-        variables: Optional[Variables] = None,
-        time_tuple: Optional[TimeRange] = None,
+        variables: Optional[List[str]] = None,
+        time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> xr.Dataset:
+    ) -> Optional[xr.Dataset]:
         """
         Read in any compatible data source to an xarray Dataset.
 
@@ -42,11 +42,21 @@ class GeoDatasetDriver(BaseDriver, ABC):
         # Merge static kwargs from the catalog with dynamic kwargs from the query.
         uris = self.metadata_resolver.resolve(
             uri,
-            self.filesystem,
+            fs=self.filesystem,
+            time_range=time_range,
+            mask=geom,
+            variables=variables,
             handle_nodata=handle_nodata,
         )
         return self.read_data(
             uris,
+            bbox=bbox,
+            goem=geom,
+            buffer=buffer,
+            predicate=predicate,
+            variables=variables,
+            time_range=time_range,
+            single_var_as_array=single_var_as_array,
             logger=logger,
             handle_nodata=handle_nodata,
         )
@@ -56,13 +66,17 @@ class GeoDatasetDriver(BaseDriver, ABC):
         self,
         uris: List[str],
         *,
-        mask: Optional[Geom] = None,
+        bbox: Optional[Bbox] = None,
+        geom: Optional[Geom] = None,
+        buffer: GeomBuffer = 0,
+        predicate: Predicate = "intersects",
+        variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        single_var_as_array: bool = True,
         logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
-    ) -> xr.Dataset:
+    ) -> Optional[xr.Dataset]:
         """
         Read in any compatible data source to an xarray Dataset.
 

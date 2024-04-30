@@ -24,8 +24,8 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     TotalBounds,
-    ZoomLevel,
 )
+from hydromt._typing.type_def import GeomBuffer, Predicate
 from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_source.data_source import DataSource
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
@@ -45,11 +45,12 @@ class GeoDatasetSource(DataSource):
         self,
         *,
         bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
-        buffer: float = 0,
+        geom: Optional[Geom] = None,
+        buffer: GeomBuffer = 0,
+        predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ) -> xr.Dataset:
@@ -59,8 +60,8 @@ class GeoDatasetSource(DataSource):
         Args:
         """
         self._used = True
-        if bbox is not None or (mask is not None and buffer > 0):
-            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
+        if bbox is not None or (geom is not None and buffer > 0):
+            mask = parse_geom_bbox_buffer(geom, bbox, buffer)
 
         # Transform time_range and variables to match the data source
         tr = self.data_adapter.to_source_timerange(time_range)
@@ -68,21 +69,17 @@ class GeoDatasetSource(DataSource):
 
         ds: xr.Dataset = self.driver.read(
             self.uri,
-            mask=mask,
             time_range=tr,
             variables=vrs,
-            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
             ds,
             self.metadata,
             bbox=bbox,
-            mask=mask,
             buffer=buffer,
             variables=variables,
             time_range=time_range,
-            zoom_level=zoom_level,
         )
 
     def to_file(
@@ -91,14 +88,16 @@ class GeoDatasetSource(DataSource):
         *,
         driver_override: Optional[GeoDatasetDriver] = None,
         bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
-        buffer: float = 0.0,
+        geom: Optional[Geom] = None,
+        buffer: GeomBuffer = 0,
+        predicate: Predicate = "intersects",
+        variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
-    ) -> "GeoDatasetSource":
+    ) -> Optional["GeoDatasetSource"]:
         """
         Write the GeoDatasetSource to a local file.
 
@@ -106,10 +105,12 @@ class GeoDatasetSource(DataSource):
         """
         ds: Optional[xr.Dataset] = self.read_data(
             bbox=bbox,
-            mask=mask,
+            geom=geom,
+            predicate=predicate,
+            variables=variables,
+            single_var_as_array=single_var_as_array,
             buffer=buffer,
             time_range=time_range,
-            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
             logger=logger,
         )

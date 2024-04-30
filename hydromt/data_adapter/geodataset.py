@@ -9,7 +9,6 @@ import xarray as xr
 
 from hydromt._typing import (
     Bbox,
-    GeoDatasetSource,
     Geom,
     GeomBuffer,
     NoDataStrategy,
@@ -21,7 +20,11 @@ from hydromt._typing import (
 from hydromt._typing.type_def import Number
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import (
+    _rename_vars,
+    _set_metadata,
+    _set_nodata,
     _single_var_as_array,
+    _slice_temporal_dimension,
     has_no_data,
     shift_dataset_time,
 )
@@ -31,9 +34,10 @@ from hydromt.io import netcdf_writer, zarr_writer
 
 if TYPE_CHECKING:
     from hydromt.data_source.data_source import SourceMetadata
+
 logger = getLogger(__name__)
 
-__all__ = ["GeoDatasetAdapter", "GeoDatasetSource"]
+__all__ = ["GeoDatasetAdapter"]
 
 
 class GeoDatasetAdapter(DataAdapterBase):
@@ -126,7 +130,7 @@ class GeoDatasetAdapter(DataAdapterBase):
 
     def transform(
         self,
-        ds: xr.Dataset,
+        maybe_ds: Optional[xr.Dataset],
         metadata: "SourceMetadata",
         *,
         bbox: Optional[Bbox] = None,
@@ -144,17 +148,21 @@ class GeoDatasetAdapter(DataAdapterBase):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-        ds = GeoDatasetAdapter._rename_vars(ds, self.rename)
-        ds = GeoDatasetAdapter._validate_spatial_coords(ds)
-        ds = GeoDatasetAdapter._set_crs(ds, crs=metadata.crs, logger=logger)
-        ds = GeoDatasetAdapter._set_nodata(ds, metadata)
-        ds = shift_dataset_time(dt=self.unit_add.get("time", 0), ds=ds, logger=logger)
-        ds = GeoDatasetAdapter._apply_unit_conversion(
-            ds, unit_mult=self.unit_mult, unit_add=self.unit_add, logger=logger
+        if maybe_ds is None:
+            return None
+        maybe_ds = _rename_vars(maybe_ds, self.rename)
+        maybe_ds = GeoDatasetAdapter._validate_spatial_coords(maybe_ds)
+        maybe_ds = GeoDatasetAdapter._set_crs(maybe_ds, crs=metadata.crs, logger=logger)
+        maybe_ds = _set_nodata(maybe_ds, metadata)
+        maybe_ds = shift_dataset_time(
+            dt=self.unit_add.get("time", 0), ds=maybe_ds, logger=logger
         )
-        ds = GeoDatasetAdapter._set_metadata(ds, metadata=metadata)
+        maybe_ds = GeoDatasetAdapter._apply_unit_conversion(
+            maybe_ds, unit_mult=self.unit_mult, unit_add=self.unit_add, logger=logger
+        )
+        maybe_ds = _set_metadata(maybe_ds, metadata=metadata)
         maybe_ds = GeoDatasetAdapter._slice_data(
-            ds,
+            maybe_ds,
             variables=variables,
             geom=geom,
             bbox=bbox,
@@ -179,15 +187,7 @@ class GeoDatasetAdapter(DataAdapterBase):
             coords = [item for item in coords if item is not None]
             ds = ds.set_coords(coords)
         except ValueError:
-            raise ValueError(
-                f"GeoDataset: No spatial geometry dimension found in data {ds.name}"
-            )
-        return ds
-
-    @staticmethod
-    def _rename_vars(ds: xr.Dataset, rename: Dict[str, str]) -> xr.Dataset:
-        rm = {k: v for k, v in rename.items() if k in ds}
-        ds = ds.rename(rm)
+            raise ValueError("GeoDataset: No spatial geometry dimension found")
         return ds
 
     @staticmethod
@@ -198,12 +198,10 @@ class GeoDatasetAdapter(DataAdapterBase):
         if ds.vector.crs is None and crs is not None:
             ds.vector.set_crs(crs)
         elif ds.vector.crs is None:
-            raise ValueError(
-                f"GeoDataset {ds.name}: CRS not defined in data catalog or data."
-            )
+            raise ValueError("GeoDataset: CRS not defined in data catalog or data.")
         elif crs is not None and ds.vector.crs != pyproj.CRS.from_user_input(crs):
             logger.warning(
-                f"GeoDataset {ds.name}: CRS from data catalog does not match CRS of"
+                "GeoDataset: CRS from data catalog does not match CRS of"
                 " data. The original CRS will be used. Please check your data catalog."
             )
         return ds
@@ -263,9 +261,7 @@ class GeoDatasetAdapter(DataAdapterBase):
                 ds = ds[variables]
         maybe_ds: Optional[xr.Dataset] = ds
         if time_range is not None:
-            maybe_ds = GeoDatasetAdapter._slice_temporal_dimension(
-                ds, time_range, logger=logger
-            )
+            maybe_ds = _slice_temporal_dimension(ds, time_range, logger=logger)
         if geom is not None or bbox is not None:
             maybe_ds = GeoDatasetAdapter._slice_spatial_dimension(
                 maybe_ds,
@@ -301,53 +297,6 @@ class GeoDatasetAdapter(DataAdapterBase):
                 return None
             else:
                 return ds
-
-    @staticmethod
-    def _slice_temporal_dimension(
-        ds: Optional[xr.Dataset],
-        time_tuple: Optional[TimeRange],
-        logger: Logger = logger,
-    ) -> Optional[xr.Dataset]:
-        if ds is None:
-            return None
-        else:
-            if (
-                "time" in ds.dims
-                and ds["time"].size > 1
-                and np.issubdtype(ds["time"].dtype, np.datetime64)
-            ):
-                logger.debug(f"Slicing time dim {time_tuple}")
-                ds = ds.sel(time=slice(*time_tuple))
-            if has_no_data(ds):
-                return None
-            else:
-                return ds
-
-    @staticmethod
-    def _set_metadata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
-        if metadata.attrs:
-            if isinstance(ds, xr.DataArray):
-                name = cast(str, ds.name)
-                ds.attrs.update(metadata.attrs[name])
-            else:
-                for k in metadata.attrs:
-                    ds[k].attrs.update(metadata.attrs[k])
-
-        ds.attrs.update(metadata)
-        return ds
-
-    @staticmethod
-    def _set_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
-        if metadata.nodata is not None:
-            if not isinstance(metadata.nodata, dict):
-                nodata = {k: metadata.nodata for k in ds.data_vars.keys()}
-            else:
-                nodata = metadata.nodata
-            for k in ds.data_vars:
-                mv = nodata.get(k, None)
-                if mv is not None and ds[k].vector.nodata is None:
-                    ds[k].vector.set_nodata(mv)
-        return ds
 
     @staticmethod
     def _apply_unit_conversion(

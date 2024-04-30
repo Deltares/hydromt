@@ -1,7 +1,7 @@
 """Utility functions for data adapters."""
 
-from logging import Logger
-from typing import Optional, Union
+from logging import Logger, getLogger
+from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -9,7 +9,12 @@ import pandas as pd
 import xarray as xr
 
 from hydromt._typing import Data
-from hydromt._typing.type_def import Variables
+from hydromt._typing.type_def import TimeRange, Variables
+
+if TYPE_CHECKING:
+    from hydromt.data_source.data_source import SourceMetadata
+
+logger = getLogger(__name__)
 
 
 def shift_dataset_time(
@@ -76,3 +81,60 @@ def _single_var_as_array(
         return da
     else:
         return ds
+
+
+def _set_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
+    if metadata.nodata is not None:
+        if not isinstance(metadata.nodata, dict):
+            nodata = {k: metadata.nodata for k in ds.data_vars.keys()}
+        else:
+            nodata = metadata.nodata
+        for k in ds.data_vars:
+            mv = nodata.get(k, None)
+            if hasattr(ds[k], "vector"):
+                if mv is not None and ds[k].vector.nodata is None:
+                    ds[k].vector.set_nodata(mv)
+            if hasattr(ds[k], "raster"):
+                if mv is not None and ds[k].raster.nodata is None:
+                    ds[k].raster.set_nodata(mv)
+    return ds
+
+
+def _slice_temporal_dimension(
+    ds: Optional[xr.Dataset],
+    time_range: Optional[TimeRange],
+    logger: Logger = logger,
+) -> Optional[xr.Dataset]:
+    if ds is None:
+        return None
+    else:
+        if (
+            "time" in ds.dims
+            and ds["time"].size > 1
+            and np.issubdtype(ds["time"].dtype, np.datetime64)
+        ):
+            logger.debug(f"Slicing time dim {time_range}")
+            ds = ds.sel(time=slice(*time_range))
+        if has_no_data(ds):
+            return None
+        else:
+            return ds
+
+
+def _set_metadata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
+    if metadata.attrs:
+        if isinstance(ds, xr.DataArray):
+            name = cast(str, ds.name)
+            ds.attrs.update(metadata.attrs[name])
+        else:
+            for k in metadata.attrs:
+                ds[k].attrs.update(metadata.attrs[k])
+
+    ds.attrs.update(metadata)
+    return ds
+
+
+def _rename_vars(ds: xr.Dataset, rename: Dict[str, str]) -> xr.Dataset:
+    rm = {k: v for k, v in rename.items() if k in ds}
+    ds = ds.rename(rm)
+    return ds

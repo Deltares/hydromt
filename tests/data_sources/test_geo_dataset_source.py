@@ -38,14 +38,14 @@ class TestGeoDatasetSource:
 
     def test_model_validate(
         self,
-        mock_raster_ds_driver: GeoDatasetDriver,
-        mock_raster_ds_adapter: GeoDatasetAdapter,
+        mock_geo_ds_driver: GeoDatasetDriver,
+        mock_geo_ds_adapter: GeoDatasetAdapter,
     ):
         GeoDatasetSource.model_validate(
             {
                 "name": "zarrfile",
-                "driver": mock_raster_ds_driver,
-                "data_adapter": mock_raster_ds_adapter,
+                "driver": mock_geo_ds_driver,
+                "data_adapter": mock_geo_ds_adapter,
                 "uri": "test_uri",
             }
         )
@@ -54,8 +54,8 @@ class TestGeoDatasetSource:
                 {
                     "name": "geojsonfile",
                     "data_type": "DifferentDataType",
-                    "driver": mock_raster_ds_driver,
-                    "data_adapter": mock_raster_ds_adapter,
+                    "driver": mock_geo_ds_driver,
+                    "data_adapter": mock_geo_ds_adapter,
                     "uri": "test_uri",
                 }
             )
@@ -66,7 +66,7 @@ class TestGeoDatasetSource:
         datasource = GeoDatasetSource(
             name="test",
             uri="points.zarr",
-            driver={"name": "zarr", "metadata_resolver": "convention"},
+            driver={"name": "geods_vector", "metadata_resolver": "convention"},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
         assert isinstance(datasource, GeoDatasetSource)
@@ -75,7 +75,7 @@ class TestGeoDatasetSource:
         GeoDatasetSource(
             name="test",
             uri="points.zarr",
-            driver={"name": "zarr"},
+            driver={"name": "geods_vector"},
         )
 
     def test_read_data(
