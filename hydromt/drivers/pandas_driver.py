@@ -71,8 +71,8 @@ class PandasDriver(DataFrameDriver):
         if isinstance(path, str):
             extension: str = path.split(".")[-1]
         elif isinstance(path, Path):
-           # suffix includes the '.' which we don't want
-           extension: str = path.suffix[1:]
+            # suffix includes the '.' which we don't want
+            extension: str = path.suffix[1:]
         else:
             raise ValueError(f"unknown pathlike: {path}")
 
