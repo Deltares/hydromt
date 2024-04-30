@@ -10,10 +10,10 @@ from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
-from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.raster.rasterdataset_driver import RasterDatasetDriver
 
 
-class NetcdfDriver(RasterDatasetDriver):
+class RasterNetcdfDriver(RasterDatasetDriver):
     """Driver for netcdf files."""
 
     name = "netcdf"

@@ -8,8 +8,7 @@ import xarray as xr
 
 from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
-
-from .base_driver import BaseDriver
+from hydromt.drivers.base_driver import BaseDriver
 
 
 class RasterDatasetDriver(BaseDriver, ABC):

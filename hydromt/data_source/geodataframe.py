@@ -24,7 +24,7 @@ from hydromt._typing import (
     TotalBounds,
 )
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers import GeoDataFrameDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 
 from .data_source import DataSource

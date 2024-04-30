@@ -6,11 +6,11 @@ import pytest
 import xarray as xr
 import zarr
 
-from hydromt.drivers.zarr_driver import ZarrDriver
+from hydromt.drivers import RasterZarrDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 
-class TestZarrDriver:
+class TestRasterZarrDriver:
     @pytest.fixture()
     def example_zarr_file(self, tmp_dir: Path) -> Tuple[zarr.Array, Path]:
         tmp_path: Path = tmp_dir / "0s.zarr"
@@ -41,7 +41,7 @@ class TestZarrDriver:
 
     def test_zarr_read(self, example_zarr_file: zarr.Array):
         assert (
-            ZarrDriver(metadata_resolver=ConventionResolver()).read(
+            RasterZarrDriver(metadata_resolver=ConventionResolver()).read(
                 str(example_zarr_file[1])
             )
             == example_zarr_file[0]
@@ -49,6 +49,6 @@ class TestZarrDriver:
 
     def test_zarr_write(self, rasterds: xr.Dataset, tmp_dir: Path):
         zarr_path: Path = tmp_dir / "raster.zarr"
-        driver = ZarrDriver()
+        driver = RasterZarrDriver()
         driver.write(zarr_path, rasterds)
         assert np.all(driver.read(str(zarr_path)) == rasterds)

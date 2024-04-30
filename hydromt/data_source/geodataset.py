@@ -26,21 +26,20 @@ from hydromt._typing import (
     TotalBounds,
     ZoomLevel,
 )
-from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
+from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_source.data_source import DataSource
-from hydromt.drivers import RasterDatasetDriver
+from hydromt.drivers.geodataframe_driver import GeoDatasetDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 
 
-class RasterDatasetSource(DataSource):
-    """DataSource class for the RasterDataset type."""
+class GeoDatasetSource(DataSource):
+    """DataSource class for the GeoDatasetSource type."""
 
-    data_type: ClassVar[Literal["RasterDataset"]] = "RasterDataset"
-    driver: RasterDatasetDriver
-    data_adapter: RasterDatasetAdapter = Field(default_factory=RasterDatasetAdapter)
-    zoom_levels: Optional[Dict[int, float]] = None
+    data_type: ClassVar[Literal["GeoDataset"]] = "GeoDataset"
+    driver: GeoDatasetSource
+    data_adapter: GeoDatasetAdapter = Field(default_factory=GeoDatasetAdapter)
 
     def read_data(
         self,

@@ -10,7 +10,7 @@ from pyproj import CRS
 from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers.geodataframe.geodataframe_driver import GeoDataFrameDriver
 
 logger: Logger = getLogger(__name__)
 

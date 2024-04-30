@@ -8,7 +8,7 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from xarray import open_mfdataset
 
-from hydromt.drivers import NetcdfDriver
+from hydromt.drivers import RasterNetcdfDriver
 from hydromt.drivers.preprocessing import round_latlon
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
@@ -16,7 +16,8 @@ from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 class TestNetcdfDriver:
     def test_calls_preprocess(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.netcdf_driver.xr.open_mfdataset", spec=open_mfdataset
+            "hydromt.drivers.raster.netcdf_driver.xr.open_mfdataset",
+            spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
 
@@ -25,7 +26,7 @@ class TestNetcdfDriver:
                 return [uri]
 
         uri: str = "file.netcdf"
-        driver = NetcdfDriver(
+        driver = RasterNetcdfDriver(
             metadata_resolver=FakeMetadataResolver(),
             options={"preprocess": "round_latlon"},
         )
@@ -44,6 +45,6 @@ class TestNetcdfDriver:
 
     def test_write(self, rasterds: xr.Dataset, tmp_path: Path):
         netcdf_path = tmp_path / f"{uuid4().hex}.nc"
-        driver = NetcdfDriver()
+        driver = RasterNetcdfDriver()
         driver.write(netcdf_path, rasterds)
         assert np.all(driver.read(str(netcdf_path)) == rasterds)
