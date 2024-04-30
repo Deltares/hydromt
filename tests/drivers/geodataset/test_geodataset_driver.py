@@ -2,13 +2,13 @@ from typing import Type
 
 import pytest
 
-from hydromt.drivers import RasterDatasetDriver
+from hydromt.drivers import GeoDatasetDriver
 
 
-class TestRasterDatasetDriver:
+class TestGeoDatasetDriver:
     @pytest.fixture(scope="class")
-    def CustomDriver(self) -> Type[RasterDatasetDriver]:
-        class NewlyImplementedDriver(RasterDatasetDriver):
+    def CustomDriver(self) -> Type[GeoDatasetDriver]:
+        class NewlyImplementedDriver(GeoDatasetDriver):
             name = "test_base_driver_options"
 
             def read_data(self, *args, **kwargs):
@@ -16,10 +16,10 @@ class TestRasterDatasetDriver:
 
         return NewlyImplementedDriver
 
-    def test_options(self, CustomDriver: Type[RasterDatasetDriver]):
+    def test_options(self, CustomDriver: Type[GeoDatasetDriver]):
         driver = CustomDriver.model_validate({"options": {"prefix": "my"}})
         assert "my_data" == driver.read_data()
 
-    def test_options_overrides(self, CustomDriver: Type[RasterDatasetDriver]):
+    def test_options_overrides(self, CustomDriver: Type[GeoDatasetDriver]):
         driver = CustomDriver.model_validate({"options": {"prefix": "your"}})
         assert "your_data" == driver.read_data(prefix="your")

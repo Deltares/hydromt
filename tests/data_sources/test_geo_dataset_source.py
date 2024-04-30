@@ -6,24 +6,24 @@ import xarray as xr
 from pydantic import ValidationError
 
 from hydromt._typing import StrPath
-from hydromt.data_adapter import RasterDatasetAdapter
-from hydromt.data_source import RasterDatasetSource, SourceMetadata
-from hydromt.drivers import RasterDatasetDriver
+from hydromt.data_adapter import GeoDatasetAdapter
+from hydromt.data_source import GeoDatasetSource, SourceMetadata
+from hydromt.drivers import GeoDatasetDriver
 
 
 @pytest.fixture()
 def mock_raster_ds_adapter():
-    class MockRasterDataSetAdapter(RasterDatasetAdapter):
+    class MockGeoDataSetAdapter(GeoDatasetSource):
         def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
             return ds
 
-    return MockRasterDataSetAdapter()
+    return MockGeoDataSetAdapter()
 
 
-class TestRasterDatasetSource:
-    def test_validators(self, mock_raster_ds_adapter: RasterDatasetAdapter):
+class TestGeoDatasetSource:
+    def test_validators(self, mock_raster_ds_adapter: GeoDatasetAdapter):
         with pytest.raises(ValidationError) as e_info:
-            RasterDatasetSource(
+            GeoDatasetSource(
                 name="name",
                 uri="uri",
                 data_adapter=mock_raster_ds_adapter,
@@ -38,10 +38,10 @@ class TestRasterDatasetSource:
 
     def test_model_validate(
         self,
-        mock_raster_ds_driver: RasterDatasetDriver,
-        mock_raster_ds_adapter: RasterDatasetAdapter,
+        mock_raster_ds_driver: GeoDatasetDriver,
+        mock_raster_ds_adapter: GeoDatasetAdapter,
     ):
-        RasterDatasetSource.model_validate(
+        GeoDatasetSource.model_validate(
             {
                 "name": "zarrfile",
                 "driver": mock_raster_ds_driver,
@@ -49,10 +49,8 @@ class TestRasterDatasetSource:
                 "uri": "test_uri",
             }
         )
-        with pytest.raises(
-            ValidationError, match="'data_type' must be 'RasterDataset'."
-        ):
-            RasterDatasetSource.model_validate(
+        with pytest.raises(ValidationError, match="'data_type' must be 'GeoDataset'."):
+            GeoDatasetSource.model_validate(
                 {
                     "name": "geojsonfile",
                     "data_type": "DifferentDataType",
@@ -65,17 +63,17 @@ class TestRasterDatasetSource:
     def test_instantiate_directly(
         self,
     ):
-        datasource = RasterDatasetSource(
+        datasource = GeoDatasetSource(
             name="test",
             uri="points.zarr",
             zoom_levels={1: 10},
             driver={"name": "zarr", "metadata_resolver": "convention"},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
-        assert isinstance(datasource, RasterDatasetSource)
+        assert isinstance(datasource, GeoDatasetSource)
 
     def test_instantiate_directly_minimal_kwargs(self):
-        RasterDatasetSource(
+        GeoDatasetSource(
             name="test",
             uri="points.zarr",
             driver={"name": "zarr"},
@@ -84,11 +82,11 @@ class TestRasterDatasetSource:
     def test_read_data(
         self,
         rasterds: xr.Dataset,
-        mock_raster_ds_driver: RasterDatasetDriver,
-        mock_raster_ds_adapter: RasterDatasetAdapter,
+        mock_raster_ds_driver: GeoDatasetDriver,
+        mock_raster_ds_adapter: GeoDatasetAdapter,
         tmp_dir: Path,
     ):
-        source = RasterDatasetSource(
+        source = GeoDatasetSource(
             root=".",
             name="example_rasterds",
             driver=mock_raster_ds_driver,
@@ -99,7 +97,7 @@ class TestRasterDatasetSource:
 
     @pytest.fixture()
     def MockDriver(self, rasterds: xr.Dataset):
-        class MockRasterDatasetDriver(RasterDatasetDriver):
+        class MockGeoDatasetDriver(GeoDatasetDriver):
             name = "mock_geodf_to_file"
 
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
@@ -111,12 +109,12 @@ class TestRasterDatasetSource:
             def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
                 return rasterds
 
-        return MockRasterDatasetDriver
+        return MockGeoDatasetDriver
 
-    def test_to_file(self, MockDriver: Type[RasterDatasetDriver]):
+    def test_to_file(self, MockDriver: Type[GeoDatasetDriver]):
         mock_driver = MockDriver()
 
-        source = RasterDatasetSource(
+        source = GeoDatasetSource(
             name="test",
             uri="raster.nc",
             driver=mock_driver,
@@ -128,9 +126,9 @@ class TestRasterDatasetSource:
         assert id(new_source) != id(source)
         assert id(mock_driver) != id(new_source.driver)
 
-    def test_to_file_override(self, MockDriver: Type[RasterDatasetDriver]):
+    def test_to_file_override(self, MockDriver: Type[GeoDatasetDriver]):
         driver1 = MockDriver()
-        source = RasterDatasetSource(
+        source = GeoDatasetSource(
             name="test",
             uri="raster.nc",
             driver=driver1,

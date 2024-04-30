@@ -3,6 +3,7 @@
 from .base_driver import BaseDriver
 from .geodataframe.geodataframe_driver import GeoDataFrameDriver
 from .geodataframe.pyogrio_driver import PyogrioDriver
+from .geodataset import GeoDatasetDriver
 from .preprocessing import (
     harmonise_dims,
     remove_duplicates,
@@ -15,6 +16,7 @@ from .raster.zarr_driver import RasterZarrDriver
 
 __all__ = [
     "BaseDriver",
+    "GeoDatasetDriver",
     "GeoDataFrameDriver",
     "PyogrioDriver",
     "RasterDatasetDriver",

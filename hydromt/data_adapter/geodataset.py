@@ -1,4 +1,5 @@
 """Implementation for the geodataset DataAdapter."""
+
 import warnings
 from datetime import datetime
 from logging import Logger, getLogger
@@ -32,7 +33,7 @@ from hydromt._typing import (
     Variables,
     _exec_nodata_strat,
 )
-from hydromt.data_adapter import DataAdapter
+from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import has_no_data, shift_dataset_time
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -43,8 +44,7 @@ logger = getLogger(__name__)
 __all__ = ["GeoDatasetAdapter", "GeoDatasetSource"]
 
 
-class GeoDatasetAdapter(DataAdapter):
-
+class GeoDatasetAdapter(DataAdapterBase):
     """DatasetAdapter for GeoDatasets."""
 
     _DEFAULT_DRIVER = "vector"

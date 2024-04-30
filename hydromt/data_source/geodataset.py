@@ -27,8 +27,8 @@ from hydromt._typing import (
     ZoomLevel,
 )
 from hydromt.data_adapter.geodataset import GeoDatasetAdapter
-from hydromt.data_source.geodataset import GeoDatasetSource
 from hydromt.data_source.data_source import DataSource
+from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
@@ -38,7 +38,7 @@ class GeoDatasetSource(DataSource):
     """DataSource class for the GeoDatasetSource type."""
 
     data_type: ClassVar[Literal["GeoDataset"]] = "GeoDataset"
-    driver: GeoDatasetSource
+    driver: GeoDatasetDriver
     data_adapter: GeoDatasetAdapter = Field(default_factory=GeoDatasetAdapter)
 
     def read_data(
@@ -89,7 +89,7 @@ class GeoDatasetSource(DataSource):
         self,
         file_path: StrPath,
         *,
-        driver_override: Optional[RasterDatasetDriver] = None,
+        driver_override: Optional[GeoDatasetDriver] = None,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
         buffer: float = 0.0,
@@ -98,9 +98,9 @@ class GeoDatasetSource(DataSource):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
-    ) -> "RasterDatasetSource":
+    ) -> "GeoDatasetSource":
         """
-        Write the RasterDatasetSource to a local file.
+        Write the GeoDatasetSource to a local file.
 
         args:
         """
@@ -120,10 +120,10 @@ class GeoDatasetSource(DataSource):
         update: Dict[str, Any] = {"uri": file_path}
 
         if driver_override:
-            driver: RasterDatasetDriver = driver_override
+            driver: GeoDatasetDriver = driver_override
         else:
             # use local filesystem
-            driver: RasterDatasetDriver = self.driver.model_copy(
+            driver: GeoDatasetDriver = self.driver.model_copy(
                 update={"filesystem": filesystem("local")}
             )
         update.update({"driver": driver})
