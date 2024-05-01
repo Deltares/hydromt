@@ -69,7 +69,7 @@ class TestRasterDatasetSource:
             name="test",
             uri="points.zarr",
             zoom_levels={1: 10},
-            driver={"name": "zarr", "metadata_resolver": "convention"},
+            driver={"name": "raster_xarray", "metadata_resolver": "convention"},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
         assert isinstance(datasource, RasterDatasetSource)
@@ -78,12 +78,12 @@ class TestRasterDatasetSource:
         RasterDatasetSource(
             name="test",
             uri="points.zarr",
-            driver={"name": "zarr"},
+            driver={"name": "raster_xarray"},
         )
 
     def test_read_data(
         self,
-        rasterds: xr.Dataset,
+        raster_ds: xr.Dataset,
         mock_raster_ds_driver: RasterDatasetDriver,
         mock_raster_ds_adapter: RasterDatasetAdapter,
         tmp_dir: Path,
@@ -95,12 +95,12 @@ class TestRasterDatasetSource:
             data_adapter=mock_raster_ds_adapter,
             uri=str(tmp_dir / "rasterds.zarr"),
         )
-        assert rasterds == source.read_data()
+        assert raster_ds == source.read_data()
 
     @pytest.fixture()
-    def MockDriver(self, rasterds: xr.Dataset):
+    def MockDriver(self, raster_ds: xr.Dataset):
         class MockRasterDatasetDriver(RasterDatasetDriver):
-            name = "mock_geodf_to_file"
+            name = "mock_rasterds_to_file"
 
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
@@ -109,7 +109,7 @@ class TestRasterDatasetSource:
                 return self.read_data([uri], **kwargs)
 
             def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
-                return rasterds
+                return raster_ds
 
         return MockRasterDatasetDriver
 

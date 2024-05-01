@@ -38,8 +38,11 @@ class PyogrioDriver(GeoDataFrameDriver):
         warn_on_unused_kwargs(
             self.__class__.__name__, {"crs": crs, "predicate": predicate}, logger
         )
-        if len(uris) != 1:
-            raise ValueError("Length of uris for Pyogrio Driver must be 1.")
+        if len(uris) > 1:
+            raise ValueError(
+                "DataFrame: Reading multiple files with the "
+                f"{self.__class__.__name__} driver is not supported."
+            )
         _uri = uris[0]
         if mask is not None:
             bbox = bbox_from_file_and_mask(_uri, mask=mask)

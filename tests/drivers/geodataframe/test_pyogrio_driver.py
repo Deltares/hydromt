@@ -81,7 +81,7 @@ class TestPyogrioDriver:
         driver: PyogrioDriver = PyogrioDriver(
             metadata_resolver=FakeResolver(),
         )
-        with pytest.raises(ValueError, match="must be 1"):
+        with pytest.raises(ValueError, match="not supported"):
             driver.read("uri_{variable}", variables=["more", "than", "one"])
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
