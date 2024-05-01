@@ -416,7 +416,7 @@ def mock_geodataframe_adapter():
 
 
 @pytest.fixture()
-def mock_geodataset_adapter():
+def mock_geo_ds_adapter():
     class MockGeoDatasetAdapter(GeoDatasetAdapter):
         def transform(self, ds, metadata: SourceMetadata, **kwargs):
             return ds
@@ -454,13 +454,13 @@ def mock_raster_ds_driver(
 def mock_geo_ds_driver(
     demda: xr.Dataset, mock_resolver: MetaDataResolver
 ) -> GeoDatasetDriver:
-    class MockRasterDatasetDriver(GeoDatasetDriver):
+    class MockGeoDatasetDriver(GeoDatasetDriver):
         name = "mock_geo_ds_driver"
 
         def read_data(self, *args, **kwargs) -> xr.Dataset:
             return geoda
 
-    return MockRasterDatasetDriver(metadata_resolver=mock_resolver)
+    return MockGeoDatasetDriver(metadata_resolver=mock_resolver)
 
 
 @pytest.fixture()

@@ -13,6 +13,7 @@ from .preprocessing import (
 from .raster.netcdf_driver import RasterNetcdfDriver
 from .raster.rasterdataset_driver import RasterDatasetDriver
 from .raster.zarr_driver import RasterZarrDriver
+from .geodataset.vector_driver import GeoDatasetVectorDriver
 
 __all__ = [
     "BaseDriver",
@@ -22,6 +23,7 @@ __all__ = [
     "RasterDatasetDriver",
     "RasterNetcdfDriver",
     "RasterZarrDriver",
+    "GeoDatasetVectorDriver",
     "harmonise_dims",
     "remove_duplicates",
     "round_latlon",

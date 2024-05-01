@@ -66,7 +66,7 @@ class TestGeoDatasetSource:
         datasource = GeoDatasetSource(
             name="test",
             uri="points.zarr",
-            driver={"name": "geods_vector", "metadata_resolver": "convention"},
+            driver={"name": "vector", "metadata_resolver": "convention"},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
         assert isinstance(datasource, GeoDatasetSource)
@@ -75,29 +75,29 @@ class TestGeoDatasetSource:
         GeoDatasetSource(
             name="test",
             uri="points.zarr",
-            driver={"name": "geods_vector"},
+            driver={"name": "vector"},
         )
 
     def test_read_data(
         self,
         rasterds: xr.Dataset,
-        mock_raster_ds_driver: GeoDatasetDriver,
-        mock_raster_ds_adapter: GeoDatasetAdapter,
+        mock_geo_ds_driver: GeoDatasetDriver,
+        mock_geo_ds_adapter: GeoDatasetAdapter,
         tmp_dir: Path,
     ):
         source = GeoDatasetSource(
             root=".",
-            name="example_rasterds",
-            driver=mock_raster_ds_driver,
-            data_adapter=mock_raster_ds_adapter,
-            uri=str(tmp_dir / "rasterds.zarr"),
+            name="example_geods.zarr",
+            driver=mock_geo_ds_driver,
+            data_adapter=mock_geo_ds_adapter,
+            uri=str(tmp_dir / "demda.zarr"),
         )
         assert rasterds == source.read_data()
 
     @pytest.fixture()
     def MockDriver(self, rasterds: xr.Dataset):
         class MockGeoDatasetDriver(GeoDatasetDriver):
-            name = "mock_geodf_to_file"
+            name = "mock_geods_to_file"
 
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass

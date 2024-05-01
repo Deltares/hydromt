@@ -17,7 +17,7 @@ from hydromt.drivers.preprocessing import PREPROCESSORS
 class GeoDatasetVectorDriver(GeoDatasetDriver):
     """VectorGeodatasetDriver for vector data."""
 
-    name = "geods_vector"
+    name = "vector"
 
     def read_data(
         self,
