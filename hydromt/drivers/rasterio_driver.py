@@ -3,7 +3,6 @@ from logging import Logger, getLogger
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import numpy as np
 import rasterio
 import xarray as xr
 from pyproj import CRS
@@ -11,6 +10,7 @@ from pyproj import CRS
 from hydromt import io
 from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
+from hydromt.config import SETTINGS
 from hydromt.data_adapter.caching import cache_vrt_tiles
 from hydromt.drivers import RasterDatasetDriver
 from hydromt.gis.utils import cellres
@@ -36,10 +36,14 @@ class RasterioDriver(RasterDatasetDriver):
         kwargs: Dict[str, Any] = {}
 
         # get source-specific options
-        cache_root: str = str(self.options.get("cache_root"))
+        cache_root: str = str(
+            self.options.get("cache_root"),
+        )
 
         if cache_root is not None and all([uri.endswith(".vrt") for uri in uris]):
-            cache_dir = Path(cache_root) / self.catalog_name / self.name
+            cache_dir = Path(cache_root) / self.options.get(
+                "cache_dir", SETTINGS.cache_dir
+            )
             fns_cached = []
             for uri in uris:
                 fn1 = cache_vrt_tiles(
@@ -48,8 +52,9 @@ class RasterioDriver(RasterDatasetDriver):
                 fns_cached.append(fn1)
             fns = fns_cached
 
-        if np.issubdtype(type(self.nodata), np.number):
-            kwargs.update(nodata=self.nodata)
+        # NoData part should be done in DataAdapter.
+        # if np.issubdtype(type(self.nodata), np.number):
+        #     kwargs.update(nodata=self.nodata)
         if zoom_level is not None and "{zoom_level}" not in uri:
             zls_dict, crs = self._get_zoom_levels_and_crs(fns[0], logger=logger)
             zoom_level = self._parse_zoom_level(
