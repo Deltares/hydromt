@@ -63,7 +63,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
         zoom_level: Optional[ZoomLevel] = None,
         logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
     ) -> xr.Dataset:
         """
         Read in any compatible data source to an xarray Dataset.

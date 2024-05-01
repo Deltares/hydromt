@@ -50,7 +50,7 @@ __all__ = [
 
 def open_raster(
     filename, mask_nodata=False, chunks=None, nodata=None, logger=logger, **kwargs
-):
+) -> xr.DataArray:
     """Open a gdal-readable file with rasterio based on.
 
     :py:meth:`rioxarray.open_rasterio`, but return squeezed DataArray.
@@ -114,7 +114,7 @@ def open_mfraster(
     mosaic=False,
     mosaic_kwargs=None,
     **kwargs,
-):
+) -> xr.Dataset:
     """Open multiple gdal-readable files as single Dataset with geospatial attributes.
 
     Each raster is turned into a DataArray with its name inferred from the filename.
