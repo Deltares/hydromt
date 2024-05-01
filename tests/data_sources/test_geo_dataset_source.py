@@ -80,7 +80,7 @@ class TestGeoDatasetSource:
 
     def test_read_data(
         self,
-        rasterds: xr.Dataset,
+        geoda: xr.Dataset,
         mock_geo_ds_driver: GeoDatasetDriver,
         mock_geo_ds_adapter: GeoDatasetAdapter,
         tmp_dir: Path,
@@ -90,12 +90,12 @@ class TestGeoDatasetSource:
             name="example_geods.zarr",
             driver=mock_geo_ds_driver,
             data_adapter=mock_geo_ds_adapter,
-            uri=str(tmp_dir / "demda.zarr"),
+            uri=str(tmp_dir / "geoda.zarr"),
         )
-        assert rasterds == source.read_data()
+        assert source.read_data().equals(geoda)
 
     @pytest.fixture()
-    def MockDriver(self, rasterds: xr.Dataset):
+    def MockDriver(self, geoda: xr.Dataset):
         class MockGeoDatasetDriver(GeoDatasetDriver):
             name = "mock_geods_to_file"
 
@@ -106,7 +106,7 @@ class TestGeoDatasetSource:
                 return self.read_data([uri], **kwargs)
 
             def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
-                return rasterds
+                return geoda
 
         return MockGeoDatasetDriver
 
