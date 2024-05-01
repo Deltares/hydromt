@@ -9,9 +9,11 @@ import xarray as xr
 
 from hydromt._typing import StrPath
 from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.type_def import Bbox, Geom, GeomBuffer, Predicate, TimeRange
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.drivers.preprocessing import PREPROCESSORS
+from hydromt.io import open_geodataset
 
 
 class GeoDatasetVectorDriver(GeoDatasetDriver):
@@ -23,6 +25,13 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         self,
         uris: List[str],
         *,
+        bbox: Optional[Bbox] = None,
+        geom: Optional[Geom] = None,
+        buffer: GeomBuffer = 0,
+        predicate: Predicate = "intersects",
+        variables: Optional[List[str]] = None,
+        time_range: Optional[TimeRange] = None,
+        single_var_as_array: bool = True,
         logger: Optional[Logger] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -47,6 +56,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
 
         opn: Callable = partial(xr.open_zarr, **options)
 
+        ds = open_geodataset(fn_locs=fns[0], crs=self.crs, **kwargs)
         return xr.merge(
             [preprocessor(opn(_uri)) if preprocessor else opn(_uri) for _uri in uris]
         )
