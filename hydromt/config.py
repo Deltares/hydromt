@@ -10,7 +10,7 @@ from hydromt._typing import Pathdantic
 class Settings(BaseSettings):
     """Runtime Settings for HydroMT."""
 
-    cache_dir: Pathdantic = Field(default_factory=Path.home)
+    cache_root: Pathdantic = Field(default=Path.home() / ".hydromt")
 
 
 SETTINGS = Settings()

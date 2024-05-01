@@ -16,7 +16,7 @@ from pydantic import (
 )
 
 from hydromt._typing import DataType
-from hydromt.data_adapter.caching import _uri_validator
+from hydromt._utils.uris import is_valid_url
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.drivers import BaseDriver
 
@@ -101,7 +101,7 @@ class DataSource(BaseModel, ABC):
     @model_validator(mode="after")
     def _validate_uri(self) -> str:
         """In case of a local path, add the root before it."""
-        if not _uri_validator(self.uri):
+        if not is_valid_url(self.uri):
             self.uri = _abs_path(self.root, self.uri)
         return self
 

@@ -24,7 +24,7 @@ from yaml import safe_load as load_yaml
 
 from hydromt import gis
 from hydromt._typing.type_def import StrPath
-from hydromt.data_adapter.caching import _uri_validator
+from hydromt._utils.uris import is_valid_url
 from hydromt.gis import merge, raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.path import make_config_paths_abs
@@ -946,7 +946,7 @@ def read_toml(path: StrPath) -> Dict[str, Any]:
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
-    if _uri_validator(str(uri_or_path)):
+    if is_valid_url(str(uri_or_path)):
         with fetch(str(uri_or_path), stream=True) as r:
             if r.status_code != 200:
                 raise IOError(f"URL {r.content}: {uri_or_path}")

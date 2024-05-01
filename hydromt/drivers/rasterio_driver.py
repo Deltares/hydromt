@@ -10,6 +10,7 @@ from pyproj import CRS
 from hydromt import io
 from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
+from hydromt._utils.uris import strip_scheme
 from hydromt.config import SETTINGS
 from hydromt.data_adapter.caching import cache_vrt_tiles
 from hydromt.drivers import RasterDatasetDriver
@@ -37,33 +38,36 @@ class RasterioDriver(RasterDatasetDriver):
 
         # get source-specific options
         cache_root: str = str(
-            self.options.get("cache_root"),
+            self.options.get("cache_root", SETTINGS.cache_root),
         )
 
         if cache_root is not None and all([uri.endswith(".vrt") for uri in uris]):
             cache_dir = Path(cache_root) / self.options.get(
-                "cache_dir", SETTINGS.cache_dir
+                "cache_dir",
+                Path(
+                    strip_scheme(uris[0])
+                ).stem,  # default to first uri without extension
             )
-            fns_cached = []
+            uris_cached = []
             for uri in uris:
-                fn1 = cache_vrt_tiles(
+                cached_uri: str = cache_vrt_tiles(
                     uri, geom=mask, cache_dir=cache_dir, logger=logger
                 )
-                fns_cached.append(fn1)
-            fns = fns_cached
+                uris_cached.append(cached_uri)
+            uris = uris_cached
 
         # NoData part should be done in DataAdapter.
         # if np.issubdtype(type(self.nodata), np.number):
         #     kwargs.update(nodata=self.nodata)
         if zoom_level is not None and "{zoom_level}" not in uri:
-            zls_dict, crs = self._get_zoom_levels_and_crs(fns[0], logger=logger)
+            zls_dict, crs = self._get_zoom_levels_and_crs(uris[0], logger=logger)
             zoom_level = self._parse_zoom_level(
                 zoom_level, mask, zls_dict, crs, logger=logger
             )
             if isinstance(zoom_level, int) and zoom_level > 0:
                 # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
                 kwargs.update(overview_level=zoom_level - 1)
-        ds = io.open_mfraster(fns, logger=logger, **kwargs)
+        ds = io.open_mfraster(uris, logger=logger, **kwargs)
         return ds
 
     def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
