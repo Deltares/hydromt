@@ -117,7 +117,7 @@ class TestGeoDatasetSource:
 
         source = GeoDatasetSource(
             name="test",
-            uri="raster.nc",
+            uri="geoda.zarr",
             driver=mock_driver,
             metadata=SourceMetadata(crs=4326),
         )
@@ -131,7 +131,7 @@ class TestGeoDatasetSource:
         driver1 = MockDriver()
         source = GeoDatasetSource(
             name="test",
-            uri="raster.nc",
+            uri="geoda.zarr",
             driver=driver1,
             metadata=SourceMetadata(crs=4326),
         )

@@ -3,7 +3,7 @@
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, cast
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
 
 import pandas as pd
 import xarray as xr
@@ -29,7 +29,6 @@ from hydromt._typing.type_def import GeomBuffer, Predicate
 from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_source.data_source import DataSource
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
-from hydromt.gis.utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 
@@ -60,19 +59,19 @@ class GeoDatasetSource(DataSource):
         Args:
         """
         self._used = True
-        if bbox is not None or (geom is not None and buffer > 0):
-            mask = parse_geom_bbox_buffer(geom, bbox, buffer)
 
         # Transform time_range and variables to match the data source
         tr = self.data_adapter.to_source_timerange(time_range)
         vrs = self.data_adapter.to_source_variables(variables)
 
-        ds: xr.Dataset = self.driver.read(
+        ds: Union[xr.Dataset, xr.DataArray] = self.driver.read(
             self.uri,
             time_range=tr,
             variables=vrs,
             handle_nodata=handle_nodata,
         )
+        if isinstance(ds, xr.DataArray):
+            ds = ds.to_dataset()
         return self.data_adapter.transform(
             ds,
             self.metadata,
