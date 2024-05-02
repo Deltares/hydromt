@@ -5,6 +5,7 @@ from logging import Logger, getLogger
 from typing import List, Optional
 
 import xarray as xr
+from geopandas import GeoDataFrame
 
 from hydromt._typing import Geom, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
@@ -31,7 +32,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> Optional[xr.Dataset]:
+    ) -> Optional[GeoDataFrame]:
         """
         Read in any compatible data source to an xarray Dataset.
 
@@ -51,7 +52,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         return self.read_data(
             uris,
             bbox=bbox,
-            goem=geom,
+            geom=geom,
             buffer=buffer,
             predicate=predicate,
             variables=variables,
@@ -76,7 +77,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
-    ) -> Optional[xr.Dataset]:
+    ) -> Optional[GeoDataFrame]:
         """
         Read in any compatible data source to an xarray Dataset.
 
