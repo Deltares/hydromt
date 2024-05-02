@@ -3,6 +3,7 @@
 
 import os
 from os.path import isfile, join
+from pathlib import Path
 
 import dask
 import geopandas as gpd
@@ -584,6 +585,30 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
     test_bounds = [2.13, -2.13, 3.2, -1.07]
     _test_r = open_raster(join(path, "dummy_xyz", "0", "2", "1.tif"))
     assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
+
+
+def test_to_raster(rioda: xr.DataArray, tmp_dir: Path):
+    uri_tif = str(tmp_dir / "test.tif")
+    rioda.raster.to_raster(uri_tif)
+    assert Path(uri_tif).is_file()
+
+
+def test_to_raster_raises_on_invalid_kwargs(rioda: xr.DataArray, tmp_dir: Path):
+    with pytest.raises(ValueError, match="will be set based on the DataArray"):
+        rioda.raster.to_raster(str(tmp_dir / "test2.tif"), count=3)
+
+
+def test_to_mapstack_raises_on_invalid_driver(rioda: xr.DataArray, tmp_dir: Path):
+    with pytest.raises(ValueError, match="Extension unknown for driver"):
+        rioda.to_dataset().raster.to_mapstack(root=str(tmp_dir), driver="unknown")
+
+
+def test_to_mapstack(rioda: xr.DataArray, tmp_dir: Path):
+    ds = rioda.to_dataset()
+    prefix = "_test_"
+    ds.raster.to_mapstack(str(tmp_dir), prefix=prefix, mask=True, driver="GTiff")
+    for name in ds.raster.vars:
+        assert (tmp_dir / f"{prefix}{name}.tif").is_file()
 
 
 def test_to_slippy_tiles(tmpdir, rioda_large):
