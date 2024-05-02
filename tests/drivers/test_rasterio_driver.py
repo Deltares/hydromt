@@ -8,8 +8,36 @@ import pytest
 import rasterio
 import xarray as xr
 
-from hydromt.drivers.rasterio_driver import open_mfraster, open_raster
+from hydromt.config import SETTINGS
+from hydromt.drivers.rasterio_driver import RasterioDriver, open_mfraster, open_raster
 from hydromt.gis.raster import full_from_transform
+
+
+class TestRasterioDriver:
+    @pytest.fixture()
+    def _test_settings(self, tmp_dir: Path):
+        SETTINGS.cache_root = tmp_dir / "TestRasterioDriver"
+        yield
+        SETTINGS.cache_root = SETTINGS.model_fields["cache_root"].default
+
+    @pytest.fixture()
+    def vrt_tiled_raster_ds(self, tmp_dir: Path, rioda_large: xr.DataArray) -> str:
+        # write vrt data
+        name = "test_vrt_tiled_raster_ds"
+        root = tmp_dir / name
+        rioda_large.raster.to_xyz_tiles(
+            root=root,
+            tile_size=256,
+            zoom_levels=[0],
+        )
+        return str(root)
+
+    @pytest.mark.usefixtures("_test_settings")
+    def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
+        cache_dir: str = "tests_caches_tifs_from_vrt"
+        driver = RasterioDriver(options={"cache_dir": cache_dir})
+        driver.read(uri=str(Path(vrt_tiled_raster_ds) / "*.vrt"))
+        assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
 
 class TestOpenMFRaster:
