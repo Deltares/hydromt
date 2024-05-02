@@ -156,7 +156,7 @@ def test_properties(caplog, demda, mock_model):
     transform = grid_component.transform
     assert "No grid data found for deriving transform" in caplog.text
     crs = grid_component.crs
-    assert "No grid data found for deriving crs" in caplog.text
+    assert "No grid data found for deriving resolution" in caplog.text
     bounds = grid_component.bounds
     assert "No grid data found for deriving bounds" in caplog.text
     region = grid_component.region

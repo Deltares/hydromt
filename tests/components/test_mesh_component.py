@@ -147,7 +147,7 @@ def test_write(mock_model, caplog, tmpdir):
     mock_model.root = ModelRoot(path=tmpdir, mode="w")
     fn = "mesh/fake_mesh.nc"
     mesh_component._data.grid.crs = 28992
-    mesh_component.write(fn=fn)
+    mesh_component.write(filename=fn)
     file_dir = join(mesh_component.root.path, dirname(fn))
     file_path = join(tmpdir, fn)
     assert isdir(file_dir)
@@ -173,9 +173,9 @@ def test_read(mock_model, caplog, tmpdir, griduda):
     with pytest.raises(
         ValueError, match="no crs is found in the file nor passed to the reader."
     ):
-        mesh_component.read(fn=fn)
+        mesh_component.read(filename=fn)
     caplog.set_level(level=logging.INFO)
-    mesh_component.read(fn=fn, crs=4326)
+    mesh_component.read(filename=fn, crs=4326)
     assert "no crs is found in the file, assigning from user input." in caplog.text
     assert mesh_component._data.ugrid.crs == 4326
 
@@ -324,7 +324,7 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
     raster_fn = "mock_raster"
     with pytest.raises(
         ValueError,
-        match=f"raster_fn {raster_fn} should be a single variable raster. "
+        match=f"raster_filename {raster_fn} should be a single variable raster. "
         "Please select one using the 'variable' argument",
     ):
         mesh_component.add_2d_data_from_raster_reclass(

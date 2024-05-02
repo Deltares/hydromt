@@ -148,10 +148,7 @@ class Model(object, metaclass=ABCMeta):
     def _determine_region_component(self, region_component: Optional[str]) -> str:
         if region_component is not None:
             if region_component not in self._components:
-                self.logger.warning(
-                    f"Component {region_component} not found in components."
-                    "You can add it afterwards with add_component."
-                )
+                raise KeyError(f"Component {region_component} not found in components.")
             elif not isinstance(
                 self._components.get(region_component, None), SpatialModelComponent
             ):

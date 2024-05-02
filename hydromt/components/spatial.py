@@ -89,6 +89,10 @@ class SpatialModelComponent(ModelComponent, ABC):
             )
             return
 
+        if self.region is None:
+            self.logger.debug("No region data available to write.")
+            return
+
         write_region(
             self.region,
             filename=filename or self._region_filename,
