@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import xarray as xr
 
-from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
+from hydromt._typing import Geom, StrPath, TimeRange, Variables, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
 
 from .base_driver import BaseDriver
@@ -20,7 +20,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         uri: str,
         *,
         mask: Optional[Geom] = None,
-        variables: Optional[List[str]] = None,
+        variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
         logger: Optional[Logger] = None,
@@ -48,6 +48,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
             uris,
             mask=mask,
             time_range=time_range,
+            variables=variables,
             zoom_level=zoom_level,
             logger=logger,
             handle_nodata=handle_nodata,
@@ -59,6 +60,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         uris: List[str],
         *,
         mask: Optional[Geom] = None,
+        variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
         logger: Logger,

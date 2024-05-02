@@ -12,8 +12,9 @@ import rioxarray
 import xarray as xr
 from pyproj import CRS
 
-from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
+from hydromt._typing import Geom, StrPath, TimeRange, Variables, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
+from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt._utils.uris import strip_scheme
 from hydromt.config import SETTINGS
 from hydromt.data_adapter.caching import cache_vrt_tiles
@@ -33,12 +34,16 @@ class RasterioDriver(RasterDatasetDriver):
         *,
         mask: Optional[Geom] = None,
         time_range: Optional[TimeRange] = None,
+        variables: Optional[Variables] = None,
         zoom_level: Optional[ZoomLevel] = None,
         logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:
         """Read data using rasterio."""
         # build up kwargs for open_raster
+        warn_on_unused_kwargs(
+            self.__class__.__name__, {"time_range": time_range}, logger=logger
+        )
         kwargs: Dict[str, Any] = {}
 
         # get source-specific options
@@ -73,6 +78,9 @@ class RasterioDriver(RasterDatasetDriver):
                 # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
                 kwargs.update(overview_level=zoom_level - 1)
         ds = open_mfraster(uris, logger=logger, **kwargs)
+        # rename ds with single band if single variable is requested
+        if variables is not None and len(variables) == 1 and len(ds.data_vars) == 1:
+            ds = ds.rename({list(ds.data_vars.keys())[0]: list(variables)[0]})
         return ds
 
     def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:

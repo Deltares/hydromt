@@ -267,19 +267,20 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds : xarray.Dataset
             The sliced RasterDataset.
         """
-        if isinstance(ds, xr.DataArray):
+        if isinstance(ds, xr.DataArray):  # xr.DataArray has no variables
             if ds.name is None:
                 # dummy name, required to create dataset
                 # renamed to variable in _single_var_as_array
                 ds.name = "data"
             ds = ds.to_dataset()
-        elif variables is not None:
-            variables = np.atleast_1d(variables).tolist()
-            if len(variables) > 1 or len(ds.data_vars) > 1:
-                mvars = [var not in ds.data_vars for var in variables]
-                if any(mvars):
-                    raise ValueError(f"RasterDataset: variables not found {mvars}")
-                ds = ds[variables]
+        elif variables is not None:  # xr.Dataset has variables
+            # cast variables to list
+            variables = list([variables]) if isinstance(variables, str) else variables
+            mvars = [var for var in variables if var not in ds.data_vars]
+            if len(mvars) > 0:
+                raise NoDataException(f"Variables {mvars} not found in data.")
+            ds = ds[variables]
+
         if time_tuple is not None:
             ds = RasterDatasetAdapter._slice_temporal_dimension(
                 ds,

@@ -14,8 +14,8 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import LineString, Point, box
 
+from hydromt.drivers.rasterio_driver import open_raster
 from hydromt.gis import raster, utils
-from hydromt.io import open_raster
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported
