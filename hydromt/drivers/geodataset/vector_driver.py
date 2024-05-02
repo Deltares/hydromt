@@ -47,6 +47,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                 "buffer": buffer,
                 "predicate": predicate,
                 "variables": variables,
+                "time_range": time_range,
                 "single_var_as_array": single_var_as_array,
             },
             logger,
@@ -67,9 +68,14 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
             if not preprocessor:
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
-        return open_geodataset(
+        data = open_geodataset(
             fn_locs=uri, bbox=bbox, geom=geom, logger=logger, **options
         )
+
+        if preprocessor is None:
+            return data
+        else:
+            return preprocessor(data)
 
     def write(self):
         """Not implemented."""

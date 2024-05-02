@@ -2,13 +2,13 @@
 
 from pathlib import Path
 from typing import Optional
+from unittest.mock import MagicMock
 
 import pytest
-from geopandas import GeoDataFrame
 from pytest_mock import MockerFixture
+from xarray import Dataset
 
 from hydromt.drivers import GeoDatasetVectorDriver
-from hydromt.drivers.preprocessing import round_latlon
 from hydromt.gis import vector
 from hydromt.io.readers import open_geodataset
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
@@ -21,7 +21,15 @@ class TestGeoDatasetVectorDriver:
             "hydromt.drivers.geodataset.vector_driver.open_geodataset",
             spec=open_geodataset,
         )
-        mock_geods_open.return_value = GeoDataFrame()
+        mock_geods_open.return_value = Dataset()
+
+        mock_preprocess: mocker.MagicMock = mocker.patch(
+            "hydromt.drivers.geodataset.vector_driver.PREPROCESSORS",
+            spec=dict,
+        )
+
+        mocked_function = MagicMock(return_value=Dataset())
+        mock_preprocess.get.return_value = mocked_function
 
         class FakeMetadataResolver(MetaDataResolver):
             def resolve(self, uri: str, *args, **kwargs):
@@ -30,9 +38,9 @@ class TestGeoDatasetVectorDriver:
         uri: str = "file.geojson"
         driver = GeoDatasetVectorDriver(
             metadata_resolver=FakeMetadataResolver(),
-            options={"preprocess": "round_latlon"},
+            options={"preprocess": "remove_duplicates"},
         )
-        res: Optional[GeoDataFrame] = driver.read(
+        res: Optional[Dataset] = driver.read(
             uri,
             variables=["var1"],
         )
@@ -40,12 +48,7 @@ class TestGeoDatasetVectorDriver:
         call_args = mock_geods_open.call_args
 
         assert call_args[1]["fn_locs"] == uri  # first arg
-        assert call_args[1].get("preprocess") == round_latlon
-        assert res.sizes == {}  # empty dataframe
-
-        assert (
-            driver.options.get("preprocess") == "round_latlon"
-        )  # test does not consume property
+        assert mocked_function.call_count == 1
 
     def test_write_raises(self):
         driver = GeoDatasetVectorDriver()
@@ -64,6 +67,7 @@ class TestGeoDatasetVectorDriver:
             str(example_vector_geods)
         )
         ds = vector.GeoDataset.from_gdf(geodf)
+        assert res is not None
         assert ds.equals(res)
 
     def test_calls_open_geodataset(self, mocker: MockerFixture):
@@ -71,7 +75,7 @@ class TestGeoDatasetVectorDriver:
             "hydromt.drivers.geodataset.vector_driver.open_geodataset",
             spec=open_geodataset,
         )
-        mock_geods_open.return_value = GeoDataFrame()
+        mock_geods_open.return_value = Dataset()
 
         class FakeMetadataResolver(MetaDataResolver):
             def resolve(self, uri: str, *args, **kwargs):
