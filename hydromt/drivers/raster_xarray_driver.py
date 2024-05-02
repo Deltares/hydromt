@@ -2,7 +2,7 @@
 
 from copy import copy
 from functools import partial
-from logging import Logger
+from logging import Logger, getLogger
 from os.path import splitext
 from typing import Callable, List, Optional
 
@@ -14,6 +14,8 @@ from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
 from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
 
+logger: Logger = getLogger(__name__)
+
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
     """RasterDatasetXarrayDriver."""
@@ -24,7 +26,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         self,
         uris: List[str],
         *,
-        logger: Logger,
+        logger: Logger = logger,
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,

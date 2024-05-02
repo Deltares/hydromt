@@ -28,6 +28,8 @@ logger: Logger = getLogger(__name__)
 class RasterioDriver(RasterDatasetDriver):
     """Driver using rasterio for RasterDataset."""
 
+    name = "raster"
+
     def read_data(
         self,
         uris: List[str],

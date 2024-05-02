@@ -1,7 +1,7 @@
 """Driver for RasterDatasets."""
 
 from abc import ABC, abstractmethod
-from logging import Logger
+from logging import Logger, getLogger
 from typing import List, Optional
 
 import xarray as xr
@@ -10,6 +10,8 @@ from hydromt._typing import Geom, StrPath, TimeRange, Variables, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
 
 from .base_driver import BaseDriver
+
+logger: Logger = getLogger(__name__)
 
 
 class RasterDatasetDriver(BaseDriver, ABC):
@@ -23,7 +25,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
-        logger: Optional[Logger] = None,
+        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
