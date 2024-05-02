@@ -4,6 +4,7 @@ import io as pyio
 import logging
 from ast import literal_eval
 from glob import glob
+from logging import Logger
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
@@ -13,6 +14,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pyproj
+import rasterio
 import rioxarray
 import xarray as xr
 from pyogrio import read_dataframe
@@ -32,6 +34,7 @@ from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -49,7 +52,12 @@ __all__ = [
 
 
 def open_raster(
-    filename, mask_nodata=False, chunks=None, nodata=None, logger=logger, **kwargs
+    uri: Union[StrPath, pyio.IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
+    mask_nodata: bool = False,
+    chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
+    nodata: Optional[Union[float, int]] = None,
+    logger: Logger = logger,
+    **kwargs,
 ) -> xr.DataArray:
     """Open a gdal-readable file with rasterio based on.
 
@@ -83,19 +91,20 @@ def open_raster(
     kwargs.update(masked=mask_nodata, default_name="data", chunks=chunks)
     if not mask_nodata:  # if mask_and_scale by default True in xarray ?
         kwargs.update(mask_and_scale=False)
-    if isinstance(filename, pyio.IOBase):  # file-like does not handle chunks
+    if isinstance(uri, pyio.IOBase):  # file-like does not handle chunks
         logger.warning("Removing chunks to read and load remote data.")
         kwargs.pop("chunks")
     # keep only 2D DataArray
-    da = rioxarray.open_rasterio(filename, **kwargs).squeeze(drop=True)
+    da = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
     # set missing _FillValue
-    if mask_nodata:
-        da.raster.set_nodata(np.nan)
-    elif da.raster.nodata is None:
-        if nodata is not None:
-            da.raster.set_nodata(nodata)
-        else:
-            logger.warning(f"nodata value missing for {filename}")
+    # TODO: do this is in data adapter
+    # if mask_nodata:
+    #     da.raster.set_nodata(np.nan)
+    # elif da.raster.nodata is None:
+    #     if nodata is not None:
+    #         da.raster.set_nodata(nodata)
+    #     else:
+    #         logger.warning(f"nodata value missing for {uri}")
     # there is no option for scaling but not masking ...
     scale_factor = da.attrs.pop("scale_factor", 1)
     add_offset = da.attrs.pop("add_offset", 0)
@@ -107,12 +116,12 @@ def open_raster(
 
 
 def open_mfraster(
-    paths,
-    chunks=None,
-    concat=False,
-    concat_dim="dim0",
-    mosaic=False,
-    mosaic_kwargs=None,
+    uris: Union[str, List[StrPath]],
+    chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
+    concat: bool = False,
+    concat_dim: str = "dim0",
+    mosaic: bool = False,
+    mosaic_kwargs: Optional[Dict[str, Any]] = None,
     **kwargs,
 ) -> xr.Dataset:
     """Open multiple gdal-readable files as single Dataset with geospatial attributes.
@@ -127,7 +136,7 @@ def open_mfraster(
 
     Arguments
     ---------
-    paths: str, list of str/Path/file-like
+    uris: str, list of str/Path/file-like
         Paths to the rasterio/gdal files.
         Paths can be provided as list of paths or a path pattern string which is
         interpreted according to the rules used by the Unix shell. The variable name
@@ -166,25 +175,25 @@ def open_mfraster(
     if concat and mosaic:
         raise ValueError("Only one of 'mosaic' or 'concat' can be True.")
     prefix, postfix = "", ""
-    if isinstance(paths, str):
-        if "*" in paths:
-            prefix, postfix = basename(paths).split(".")[0].split("*")
-        paths = [fn for fn in glob(paths) if not fn.endswith(".xml")]
+    if isinstance(uris, str):
+        if "*" in uris:
+            prefix, postfix = basename(uris).split(".")[0].split("*")
+        uris = [fn for fn in glob(uris) if not fn.endswith(".xml")]
     else:
-        paths = [str(p) if isinstance(p, Path) else p for p in paths]
-    if len(paths) == 0:
+        uris = [str(p) if isinstance(p, Path) else p for p in uris]
+    if len(uris) == 0:
         raise OSError("no files to open")
 
     da_lst, index_lst, fn_attrs = [], [], []
-    for i, fn in enumerate(paths):
+    for i, uri in enumerate(uris):
         # read file
-        da = open_raster(fn, chunks=chunks, **kwargs)
+        da = open_raster(uri, chunks=chunks, **kwargs)
 
         # get name, attrs and index (if concat)
-        if hasattr(fn, "path"):  # file-like
-            bname = basename(fn.path)
+        if hasattr(uri, "path"):  # file-like
+            bname = basename(uri.path)
         else:
-            bname = basename(fn)
+            bname = basename(uri)
         if concat:
             # name based on basename until postfix or _
             vname = bname.split(".")[0].replace(postfix, "").split("_")[0]
