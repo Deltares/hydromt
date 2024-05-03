@@ -153,7 +153,6 @@ class GridComponent(SpatialModelComponent):
         return write_nc(  # Can return DeferedFileClose object
             {"grid": self.data},
             filename or str(self._filename),
-            temp_data_dir=self.model._TMP_DATA_DIR,
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
             logger=self.logger,

@@ -45,7 +45,6 @@ class DatasetsComponent(ModelComponent):
         """
         self._data: Optional[XArrayDict] = None
         self._filename = filename
-        self._tmp_data_dir = None
         self._defered_file_closes = []
         super().__init__(model=model)
 
@@ -193,6 +192,7 @@ class DatasetsComponent(ModelComponent):
             filename_template=filename or self._filename,
             root=self.root.path,
             gdal_compliant=gdal_compliant,
+            logger=self.logger,
             rename_dims=rename_dims,
             force_sn=force_sn,
             **kwargs,
