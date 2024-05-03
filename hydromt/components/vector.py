@@ -10,6 +10,7 @@ import numpy as np
 import xarray as xr
 from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
+from shapely.geometry import box
 
 from hydromt import hydromt_step
 from hydromt.components.base import ModelComponent
@@ -68,9 +69,10 @@ class VectorComponent(SpatialModelComponent):
 
     @property
     def _region_data(self) -> Optional[gpd.GeoDataFrame]:
-        raise AttributeError(
-            "region cannot be found in vector component. Meaning that the region_component is not set or could not be found in the model."
-        )
+        if len(self.data.vector) == 0:
+            return None
+        gdf = self.geometry.to_frame("geometry")
+        return gpd.GeoDataFrame(geometry=[box(*gdf.total_bounds)], crs=gdf.crs)
 
     def _initialize(self, skip_read=False) -> None:
         if self._data is None:
