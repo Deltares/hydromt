@@ -1,6 +1,7 @@
 """parse a region from a dict. See parse_region for information on usage."""
 
 from logging import Logger, getLogger
+from os.path import isdir, isfile
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
@@ -8,7 +9,6 @@ import geopandas as gpd
 import numpy as np
 import xarray as xr
 import xugrid as xu
-from genericpath import isdir, isfile
 from pyproj import CRS
 from shapely import box
 
