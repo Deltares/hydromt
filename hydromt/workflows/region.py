@@ -202,9 +202,9 @@ def parse_region(
 
 
 def _update_crs(
-    geom: Optional[gpd.GeoDataFrame], crs: Optional[Union[CRS, int]]
+    geom: gpd.GeoDataFrame, crs: Optional[Union[CRS, int]]
 ) -> Optional[gpd.GeoDataFrame]:
-    if crs is not None and geom is not None:
+    if crs is not None:
         crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
         return geom.to_crs(crs)
     return geom

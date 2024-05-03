@@ -16,7 +16,6 @@ from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
 from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
-from hydromt.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 
@@ -199,17 +198,13 @@ def write_region(
     *,
     filename: StrPath,
     logger: Logger = logger,
-    root: ModelRoot,
+    root_path: StrPath,
     to_wgs84=False,
     **write_kwargs,
 ):
     """Write the model region to a file."""
-    write_path = join(root.path, filename)
+    write_path = join(root_path, filename)
 
-    if exists(write_path) and not root.is_override_mode():
-        raise OSError(
-            f"Model dir already exists and cannot be overwritten: {write_path}"
-        )
     base_name = basename(write_path)
     if not exists(base_name):
         makedirs(base_name, exist_ok=True)
