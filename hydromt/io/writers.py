@@ -123,13 +123,13 @@ def zarr_writer(
 
 def write_nc(
     nc_dict: XArrayDict,
-    fn: str,
-    root,
-    logger: Logger,
-    temp_data_dir: StrPath = None,
+    filename_template: str,
+    root: Path,
+    *,
     gdal_compliant: bool = False,
     rename_dims: bool = False,
     force_sn: bool = False,
+    logger: Logger = logger,
     **kwargs,
 ) -> Optional[DeferedFileClose]:
     """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
@@ -170,8 +170,8 @@ def write_nc(
         if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
             logger.error(f"{name} object of type {type(ds).__name__} not recognized")
             continue
-        logger.debug(f"Writing file {fn.format(name=name)}")
-        _fn = join(root, fn.format(name=name))
+        logger.debug(f"Writing file {filename_template.format(name=name)}")
+        _fn = join(root, filename_template.format(name=name))
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
         if gdal_compliant:
@@ -180,8 +180,7 @@ def write_nc(
             ds.to_netcdf(_fn, **kwargs)
         except PermissionError:
             logger.warning(f"Could not write to file {_fn}, defering write")
-            if temp_data_dir is None:
-                temp_data_dir = TemporaryDirectory()
+            temp_data_dir = TemporaryDirectory()
 
             tmp_fn = join(str(temp_data_dir), f"{_fn}.tmp")
             ds.to_netcdf(tmp_fn, **kwargs)

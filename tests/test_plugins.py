@@ -6,6 +6,7 @@ from pytest_mock import MockerFixture
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.config import ConfigComponent
+from hydromt.components.datasets import DatasetsComponent
 from hydromt.components.geoms import GeomsComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.mesh import MeshComponent
@@ -27,6 +28,7 @@ def test_core_component_plugins():
         "TablesComponent": TablesComponent,
         "MeshComponent": MeshComponent,
         "SpatialModelComponent": SpatialModelComponent,
+        "DatasetsComponent": DatasetsComponent,
     }
 
 

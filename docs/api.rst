@@ -124,10 +124,21 @@ GeoDataFrame
 .. autosummary::
    :toctree: _generated
 
+   data_source.geodataframe.GeoDataFrameSource
    data_source.geodataframe.GeoDataFrameSource.get_data
    data_source.geodataframe.GeoDataFrameSource.to_stac_catalog
    data_source.geodataframe.GeoDataFrameSource.get_bbox
    data_source.geodataframe.GeoDataFrameSource.detect_bbox
+
+DataFrame
+---------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.dataframe.DataFrameSource
+   data_source.dataframe.DataFrameSource.get_data
+   data_source.dataframe.DataFrameSource.to_stac_catalog
 
 MetaDataResolver
 ================
@@ -160,7 +171,6 @@ General
    :toctree: _generated
 
    drivers.base_driver.BaseDriver
-   drivers.base_driver.read
 
 RasterDataset
 -------------
@@ -170,21 +180,15 @@ RasterDataset
    drivers.rasterdataset_driver.RasterDatasetDriver
    drivers.rasterdataset_driver.RasterDatasetDriver.read
    drivers.rasterdataset_driver.RasterDatasetDriver.read_data
+   drivers.rasterdataset_driver.RasterDatasetDriver.write
 
-ZarrDriver
-^^^^^^^^^^
-
+RasterDatasetXarryDriver
+^^^^^^^^^^^^^^^^^^^^^^^^
 .. autosummary::
    :toctree: _generated
-   drivers.zarr_driver.ZarrDriver
-   drivers.zarr_driver.ZarrDriver.read
-   drivers.zarr_driver.ZarrDriver.read_data
-
-NetcdfDriver
-.. autosummary::
-   :toctree: _generated
-   drivers.netcdf_driver.NetcdfDriver
-   drivers.netcdf_driver.NetcdfDriver.read
+   drivers.raster_xarray_driver.RastterDatasetXarryDriver
+   drivers.raster_xarray_driver.RastterDatasetXarryDriver.read
+   drivers.raster_xarray_driver.RastterDatasetXarryDriver.write
 
 GeoDataFrame
 ------------
@@ -194,6 +198,7 @@ GeoDataFrame
    drivers.geodataframe_driver.GeoDataFrameDriver
    drivers.geodataframe_driver.GeoDataFrameDriver.read
    drivers.geodataframe_driver.GeoDataFrameDriver.read_data
+   drivers.geodataframe_driver.GeoDataFrameDriver.write
 
 PyogrioDriver
 ^^^^^^^^^^^^^
@@ -202,6 +207,26 @@ PyogrioDriver
    :toctree: _generated
    drivers.pyogrio_driver.PyogrioDriver
    drivers.pyogrio_driver.PyogrioDriver.read
+   drivers.pyogrio_driver.PyogrioDriver.write
+
+DataFrame
+---------
+
+.. autosummary::
+   :toctree: _generated
+   drivers.dataframe_driver.DataFrameDriver
+   drivers.dataframe_driver.DataFrameDriver.read
+   drivers.dataframe_driver.DataFrameDriver.read_data
+   drivers.dataframe_driver.DataFrameDriver.write
+
+PandasDriver
+^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+   drivers.pandas_driver.PandasDriver
+   drivers.pandas_driver.PandasDriver.read_data
+   drivers.pandas_driver.PandasDriver.write
 
 DataAdapter
 ===========
@@ -213,8 +238,6 @@ General
    :toctree: _generated
 
    data_adapter.DataAdapter
-   data_adapter.DataAdapter.summary
-   data_adapter.DataAdapter.to_dict
 
 RasterDataset
 -------------
@@ -224,7 +247,6 @@ RasterDataset
 
    data_adapter.RasterDatasetAdapter
    data_adapter.RasterDatasetAdapter.transform
-   data_adapter.RasterDatasetAdapter.to_stac_catalog
 
 GeoDataset
 ----------
@@ -250,8 +272,7 @@ GeoDataFrame
    :toctree: _generated
 
    data_adapter.GeoDataFrameAdapter
-   data_adapter.GeoDataFrameAdapter.get_data
-   data_adapter.GeoDataFrameAdapter.to_stac_catalog
+   data_adapter.GeoDataFrameAdapter.transform
 
 DataFrame
 ---------
@@ -259,12 +280,8 @@ DataFrame
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataFrameAdapter
-   data_adapter.DataFrameAdapter.summary
-   data_adapter.DataFrameAdapter.get_data
-   data_adapter.DataFrameAdapter.to_dict
-   data_adapter.DataFrameAdapter.to_file
-   data_adapter.DataFrameAdapter.to_stac_catalog
+   data_adapter.dataframe.DataFrameAdapter
+   data_adapter.dataframe.DataFrameAdapter.transform
 
 Dataset
 -------
@@ -328,54 +345,6 @@ Model attributes
    Model.root
    Model.region
    Model.api
-
-Model default components
-------------------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.maps
-   Model.geoms
-   Model.forcing
-   Model.states
-   Model.results
-
-General methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.set_maps
-   Model.read_maps
-   Model.write_maps
-
-   Model.set_geoms
-   Model.read_geoms
-   Model.write_geoms
-
-   Model.set_forcing
-   Model.read_forcing
-   Model.write_forcing
-
-   Model.set_states
-   Model.read_states
-   Model.write_states
-
-   Model.set_results
-   Model.read_results
-
-.. _setup_methods:
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.setup_maps_from_rasterdataset
-   Model.setup_maps_from_raster_reclass
 
 ModelRoot
 =========
@@ -541,6 +510,40 @@ General methods
    TablesComponent.set
    TablesComponent.write
    TablesComponent.read
+
+DatasetsComponent
+==============
+
+.. autosummary::
+   :toctree: _generated
+
+    DatasetsComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent._model
+   DatasetsComponent._data_catalog
+   DatasetsComponent._logger
+   DatasetsComponent._root
+   DatasetsComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent.set
+   DatasetsComponent.write
+   DatasetsComponent.read
+   DatasetsComponent.add_raster_data_from_raster_reclass
+   DatasetsComponent.add_raster_data_from_rasterdataset
 
 GeomsComponent
 ==============

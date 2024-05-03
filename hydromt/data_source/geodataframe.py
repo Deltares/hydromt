@@ -1,4 +1,4 @@
-"""Generic DataSource for GeoDataFrames."""
+"""DataSource class for the GeoDataFrame type."""
 
 from datetime import datetime
 from logging import Logger, getLogger

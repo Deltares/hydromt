@@ -22,7 +22,6 @@ from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
-from hydromt.models.model import _check_data
 from hydromt.plugins import PLUGINS
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
@@ -58,24 +57,6 @@ def test_api_attrs():
     assert dm.api["region"] == gpd.GeoDataFrame
     assert "grid" in dm.api
     assert dm.api["grid"] == xr.Dataset
-
-
-def test_check_data(demda):
-    data_dict = _check_data(demda.copy(), "elevtn")
-    assert isinstance(data_dict["elevtn"], xr.DataArray)
-    assert data_dict["elevtn"].name == "elevtn"
-    with pytest.raises(ValueError, match="Name required for DataArray"):
-        _check_data(demda)
-    demda.name = "dem"
-    demds = demda.to_dataset()
-    data_dict = _check_data(demds, "elevtn", False)
-    assert isinstance(data_dict["elevtn"], xr.Dataset)
-    data_dict = _check_data(demds, split_dataset=True)
-    assert isinstance(data_dict["dem"], xr.DataArray)
-    with pytest.raises(ValueError, match="Name required for Dataset"):
-        _check_data(demds, split_dataset=False)
-    with pytest.raises(ValueError, match='Data type "dict" not recognized'):
-        _check_data({"wrong": "type"})
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
