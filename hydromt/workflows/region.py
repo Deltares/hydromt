@@ -162,9 +162,9 @@ def parse_region(
         # retrieve global hydrography data (lazy!)
         assert data_catalog is not None
         assert hydrography_fn is not None
-        assert basin_index_fn is not None
         ds_org = data_catalog.get_rasterdataset(hydrography_fn)
         if "bounds" not in kwargs:
+            assert basin_index_fn is not None
             kwargs.update(basin_index=data_catalog.get_source(basin_index_fn))
         # get basin geometry
         geom, _ = get_basin_geometry(ds=ds_org, kind=kind, logger=logger, **kwargs)
