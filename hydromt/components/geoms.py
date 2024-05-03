@@ -71,6 +71,7 @@ class GeomsComponent(SpatialModelComponent):
             if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
+    @property
     def _region_data(self) -> Optional[GeoDataFrame]:
         raise AttributeError(
             "region cannot be found in geoms component. Meaning that the region_component is not set or could not be found in the model."

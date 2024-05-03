@@ -494,16 +494,21 @@ def test_gridmodel_setup(tmpdir):
     mod.write(components=["geoms", "grid"])
 
 
-def test_vectormodel(vector_model, tmpdir):
+def test_vectormodel(vector_model, tmpdir, mocker: MockerFixture, geodf):
     # write model
     vector_model.root.set(str(tmpdir), mode="w")
     vector_model.write()
     # read model
+    region_component = mocker.Mock(spec_set=SpatialModelComponent)
+    region_component.test_equal.return_value = (True, {})
+    region_component.region = geodf
     model1 = Model(
         root=str(tmpdir),
         mode="r",
+        region_component="area",
         components={
-            "vector": {"type": VectorComponent.__name__},
+            "area": region_component,
+            "vector": {"type": VectorComponent.__name__, "region_component": "area"},
             "config": {"type": ConfigComponent.__name__},
         },
     )

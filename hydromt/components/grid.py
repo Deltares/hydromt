@@ -193,7 +193,7 @@ class GridComponent(SpatialModelComponent):
             kwargs["load"] = True
         loaded_nc_files = read_nc(
             filename or self._filename,
-            self.root,
+            self.root.path,
             logger=self.logger,
             single_var_as_array=False,
             mask_and_scale=mask_and_scale,

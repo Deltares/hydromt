@@ -13,6 +13,7 @@ from pyproj import CRS
 
 from hydromt import hydromt_step
 from hydromt.components.base import ModelComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.vector import GeoDataset
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 __all__ = ["VectorComponent"]
 
 
-class VectorComponent(ModelComponent):
+class VectorComponent(SpatialModelComponent):
     """Component to handle vector data in a model."""
 
     def __init__(
@@ -32,6 +33,7 @@ class VectorComponent(ModelComponent):
         *,
         filename: Optional[str] = "vector/vector.nc",
         geometry_filename: Optional[str] = "vector/vector.geojson",
+        region_component: Optional[str] = None,
     ) -> None:
         """Initialize a vector component.
 
@@ -48,7 +50,7 @@ class VectorComponent(ModelComponent):
             If set to None, and the write/read function geometry_filename is also None, then vector will be read from/written to the netcdf file only.
             See read and write functions for more details.
         """
-        super().__init__(model)
+        super().__init__(model, region_component=region_component)
         self._data: Optional[xr.Dataset] = None
         self._filename = filename
         self._geometry_filename = geometry_filename
@@ -63,6 +65,12 @@ class VectorComponent(ModelComponent):
             self._initialize()
         assert self._data is not None
         return self._data
+
+    @property
+    def _region_data(self) -> Optional[gpd.GeoDataFrame]:
+        raise AttributeError(
+            "region cannot be found in vector component. Meaning that the region_component is not set or could not be found in the model."
+        )
 
     def _initialize(self, skip_read=False) -> None:
         if self._data is None:

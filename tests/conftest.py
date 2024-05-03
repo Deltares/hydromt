@@ -16,6 +16,7 @@ from dask import config as dask_config
 from pytest_mock import MockerFixture
 
 from hydromt.components.config import ConfigComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
@@ -337,9 +338,14 @@ def _create_vector_model(
     use_default_geometry_filename: bool = True,
     ts,
     geodf,
+    mocker: MockerFixture,
 ) -> Model:
+    region_component = mocker.Mock(spec_set=SpatialModelComponent)
+    region_component.test_equal.return_value = (True, {})
+    region_component.region = geodf
     components: Dict[str, Any] = {
-        "vector": {"type": VectorComponent.__name__},
+        "area": region_component,
+        "vector": {"type": VectorComponent.__name__, "region_component": "area"},
         "config": {"type": ConfigComponent.__name__},
     }
     if not use_default_filename:
@@ -347,8 +353,10 @@ def _create_vector_model(
     if not use_default_geometry_filename:
         components["vector"]["geometry_filename"] = None
 
-    mod = Model(components=components)
+    mod = Model(components=components, region_component="area")
     cast(ConfigComponent, mod.config).set("header.setting", "value")
+
+    # fill VectorComponent
     da = xr.DataArray(
         ts,
         dims=["index", "time"],
@@ -362,20 +370,18 @@ def _create_vector_model(
 
 
 @pytest.fixture()
-def vector_model(ts, geodf):
-    return _create_vector_model(
-        ts=ts,
-        geodf=geodf,
-    )
+def vector_model(ts, geodf, mocker: MockerFixture):
+    return _create_vector_model(ts=ts, geodf=geodf, mocker=mocker)
 
 
 @pytest.fixture()
-def vector_model_no_defaults(ts, geodf):
+def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
     return _create_vector_model(
         use_default_filename=False,
         use_default_geometry_filename=False,
         ts=ts,
         geodf=geodf,
+        mocker=mocker,
     )
 
 
