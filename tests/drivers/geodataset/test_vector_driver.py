@@ -70,6 +70,13 @@ class TestGeoDatasetVectorDriver:
         assert res is not None
         assert ds.equals(res)
 
+    def test_raises_on_multiple_uris(self):
+        with pytest.raises(
+            ValueError,
+            match="GeodatasetVectorDriver only supports reading from one URI per source",
+        ):
+            _ = GeoDatasetVectorDriver().read_data(["one.zarr", "two.txt"])
+
     def test_calls_open_geodataset(self, mocker: MockerFixture):
         mock_geods_open: mocker.MagicMock = mocker.patch(
             "hydromt.drivers.geodataset.vector_driver.open_geodataset",
