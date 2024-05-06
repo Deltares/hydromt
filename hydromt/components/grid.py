@@ -221,7 +221,7 @@ class GridComponent(SpatialModelComponent):
         align: bool = True,
         dec_origin: int = 0,
         dec_rotation: int = 3,
-    ) -> None:
+    ) -> xr.DataArray:
         """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
         A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
@@ -343,6 +343,7 @@ class GridComponent(SpatialModelComponent):
 
         grid = self._set_mask_on_grid(grid, geom=geom, add_mask=add_mask)
         self.set(grid)
+        return grid
 
     def _set_mask_on_grid(
         self, grid: xr.DataArray, *, geom: gpd.GeoDataFrame, add_mask: bool
