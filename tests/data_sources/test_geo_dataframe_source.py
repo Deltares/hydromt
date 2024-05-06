@@ -17,8 +17,7 @@ from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_source.geodataframe import GeoDataFrameSource
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
-from hydromt.drivers.pyogrio_driver import PyogrioDriver
+from hydromt.drivers import GeoDataFrameDriver, PyogrioDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 
@@ -193,8 +192,25 @@ class TestGeoDataFrameSource:
 
         return MockGeoDataFrameDriver
 
-    def test_to_file(self, MockDriver: Type[GeoDataFrameSource]):
-        mock_driver = MockDriver()
+    @pytest.fixture(scope="class")
+    def MockWriteableDriver(self, geodf: gpd.GeoDataFrame):
+        class MockWritableGeoDataFrameDriver(GeoDataFrameDriver):
+            name = "mock_geodf_to_file"
+            supports_writing: bool = True
+
+            def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
+                pass
+
+            def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
+                return self.read_data([uri], **kwargs)
+
+            def read_data(self, uris: List[str], **kwargs) -> gpd.GeoDataFrame:
+                return geodf
+
+        return MockWritableGeoDataFrameDriver
+
+    def test_to_file(self, MockWriteableDriver: Type[GeoDataFrameSource]):
+        mock_driver = MockWriteableDriver()
 
         source = GeoDataFrameSource(
             name="test", uri="points.geojson", driver=mock_driver
@@ -205,10 +221,10 @@ class TestGeoDataFrameSource:
         assert id(new_source) != id(source)
         assert id(mock_driver) != id(new_source.driver)
 
-    def test_to_file_override(self, MockDriver: Type[GeoDataFrameDriver]):
-        driver1 = MockDriver()
+    def test_to_file_override(self, MockWriteableDriver: Type[GeoDataFrameDriver]):
+        driver1 = MockWriteableDriver()
         source = GeoDataFrameSource(name="test", uri="points.geojson", driver=driver1)
-        driver2 = MockDriver(filesystem="memory")
+        driver2 = MockWriteableDriver(filesystem="memory")
         new_source = source.to_file("test", driver_override=driver2)
         assert new_source.driver.filesystem.protocol == "memory"
         # make sure we are not changing the state

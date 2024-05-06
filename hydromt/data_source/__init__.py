@@ -5,6 +5,7 @@ from .data_source import DataSource, SourceMetadata  # noqa: I001
 from .dataframe import DataFrameSource
 from .geodataframe import GeoDataFrameSource
 from .rasterdataset import RasterDatasetSource
+from .geodataset import GeoDatasetSource
 
 from .factory import create_source  # noqa: I001
 
@@ -13,6 +14,8 @@ __all__ = [
     "SourceMetadata",
     "DataFrameSource",
     "GeoDataFrameSource",
+    "GeoDatasetSource",
     "RasterDatasetSource",
+    "SourceMetadata",
     "create_source",
 ]

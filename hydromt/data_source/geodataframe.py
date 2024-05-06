@@ -24,7 +24,7 @@ from hydromt._typing import (
     TotalBounds,
 )
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers import GeoDataFrameDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 
 from .data_source import DataSource
@@ -95,6 +95,10 @@ class GeoDataFrameSource(DataSource):
 
         args:
         """
+        if not self.driver.supports_writing:
+            raise RuntimeError(
+                f"driver {self.driver.__class__.__name__} does not support writing. please use a differnt driver "
+            )
         gdf: Optional[gpd.GeoDataFrame] = self.read_data(
             bbox=bbox,
             mask=mask,

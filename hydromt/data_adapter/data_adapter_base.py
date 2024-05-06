@@ -19,8 +19,8 @@ class DataAdapterBase(BaseModel):
 
     def to_source_timerange(
         self,
-        time_range: TimeRange,
-    ) -> TimeRange:
+        time_range: Optional[TimeRange],
+    ) -> Optional[TimeRange]:
         """
         Tranform a DataSource timerange to the source-native timerange.
 
@@ -28,7 +28,9 @@ class DataAdapterBase(BaseModel):
             time_range: TimeRange
                 start and end datetime.
         """
-        if dt := self.unit_add.get("time"):
+        if time_range is None:
+            return None
+        elif dt := self.unit_add.get("time"):
             # subtract from source unit add
             return (time - timedelta(seconds=dt) for time in time_range)
         else:
