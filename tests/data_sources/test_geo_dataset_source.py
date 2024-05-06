@@ -105,7 +105,11 @@ class TestGeoDatasetSource:
                 pass
 
             def read(self, uri: str, **kwargs) -> xr.Dataset:
-                return self.read_data([uri], **kwargs)
+                kinda_ds = self.read_data([uri], **kwargs)
+                if isinstance(kinda_ds, xr.DataArray):
+                    return kinda_ds.to_dataset()
+                else:
+                    return kinda_ds
 
             def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
                 return geoda
@@ -122,7 +126,11 @@ class TestGeoDatasetSource:
                 pass
 
             def read(self, uri: str, **kwargs) -> xr.Dataset:
-                return self.read_data([uri], **kwargs)
+                kinda_ds = self.read_data([uri], **kwargs)
+                if isinstance(kinda_ds, xr.DataArray):
+                    return kinda_ds.to_dataset()
+                else:
+                    return kinda_ds
 
             def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
                 return geoda
