@@ -83,7 +83,7 @@ def _single_var_as_array(
         return ds
 
 
-def _set_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
+def _set_vector_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
     if metadata.nodata is not None:
         if not isinstance(metadata.nodata, dict):
             nodata = {k: metadata.nodata for k in ds.data_vars.keys()}
@@ -91,12 +91,21 @@ def _set_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
             nodata = metadata.nodata
         for k in ds.data_vars:
             mv = nodata.get(k, None)
-            if hasattr(ds[k], "vector"):
-                if mv is not None and ds[k].vector.nodata is None:
-                    ds[k].vector.set_nodata(mv)
-            if hasattr(ds[k], "raster"):
-                if mv is not None and ds[k].raster.nodata is None:
-                    ds[k].raster.set_nodata(mv)
+            if mv is not None and ds[k].vector.nodata is None:
+                ds[k].vector.set_nodata(mv)
+    return ds
+
+
+def _set_raster_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
+    if metadata.nodata is not None:
+        if not isinstance(metadata.nodata, dict):
+            nodata = {k: metadata.nodata for k in ds.data_vars.keys()}
+        else:
+            nodata = metadata.nodata
+        for k in ds.data_vars:
+            mv = nodata.get(k, None)
+            if mv is not None and ds[k].raster.nodata is None:
+                ds[k].raster.set_nodata(mv)
     return ds
 
 

@@ -22,7 +22,7 @@ from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import (
     _rename_vars,
     _set_metadata,
-    _set_nodata,
+    _set_vector_nodata,
     _single_var_as_array,
     _slice_temporal_dimension,
     has_no_data,
@@ -153,7 +153,7 @@ class GeoDatasetAdapter(DataAdapterBase):
         maybe_ds = _rename_vars(maybe_ds, self.rename)
         maybe_ds = GeoDatasetAdapter._validate_spatial_coords(maybe_ds)
         maybe_ds = GeoDatasetAdapter._set_crs(maybe_ds, crs=metadata.crs, logger=logger)
-        maybe_ds = _set_nodata(maybe_ds, metadata)
+        maybe_ds = _set_vector_nodata(maybe_ds, metadata)
         maybe_ds = shift_dataset_time(
             dt=self.unit_add.get("time", 0), ds=maybe_ds, logger=logger
         )

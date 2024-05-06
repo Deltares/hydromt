@@ -31,8 +31,8 @@ from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import (
     _single_var_as_array,
     _slice_temporal_dimension,
-    shift_dataset_time,
     has_no_data,
+    shift_dataset_time,
 )
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD

@@ -1,14 +1,14 @@
-"""Driver for RasterDatasets."""
+"""Driver for handling IO of GeoDatasets."""
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import xarray as xr
 
 from hydromt._typing import Geom, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
-from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate, Variables
+from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate
 from hydromt.drivers import BaseDriver
 
 logger = getLogger(__name__)
@@ -31,7 +31,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> Optional[xr.Dataset]:
+    ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """
         Read in any compatible data source to an xarray Dataset.
 
@@ -70,13 +70,13 @@ class GeoDatasetDriver(BaseDriver, ABC):
         geom: Optional[Geom] = None,
         buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
-        variables: Optional[Variables] = None,
+        variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
-    ) -> Optional[xr.Dataset]:
+    ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """
         Read in any compatible data source to an xarray Dataset.
 
@@ -91,7 +91,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         **kwargs,
     ) -> None:
         """
-        Write out a RasterDataset to file.
+        Write out a GeoDataset to file.
 
         Not all drivers should have a write function, so this method is not
         abstract.

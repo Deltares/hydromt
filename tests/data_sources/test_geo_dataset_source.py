@@ -66,7 +66,7 @@ class TestGeoDatasetSource:
         datasource = GeoDatasetSource(
             name="test",
             uri="points.zarr",
-            driver={"name": "vector", "metadata_resolver": "convention"},
+            driver={"name": "geodataset_vector", "metadata_resolver": "convention"},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
         assert isinstance(datasource, GeoDatasetSource)
@@ -75,7 +75,7 @@ class TestGeoDatasetSource:
         GeoDatasetSource(
             name="test",
             uri="points.zarr",
-            driver={"name": "vector"},
+            driver={"name": "geodataset_vector"},
         )
 
     def test_read_data(

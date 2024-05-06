@@ -1,4 +1,4 @@
-"""DataSource class for the RasterDataset type."""
+"""DataSource class for the GeoDataset type."""
 
 from datetime import datetime
 from logging import Logger, getLogger
@@ -52,7 +52,7 @@ class GeoDatasetSource(DataSource):
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> xr.Dataset:
+    ) -> Optional[xr.Dataset]:
         """
         Read data from this source.
 
@@ -64,7 +64,7 @@ class GeoDatasetSource(DataSource):
         tr = self.data_adapter.to_source_timerange(time_range)
         vrs = self.data_adapter.to_source_variables(variables)
 
-        ds: Union[xr.Dataset, xr.DataArray] = self.driver.read(
+        ds: Optional[Union[xr.Dataset, xr.DataArray]] = self.driver.read(
             self.uri,
             time_range=tr,
             variables=vrs,
@@ -75,10 +75,14 @@ class GeoDatasetSource(DataSource):
         return self.data_adapter.transform(
             ds,
             self.metadata,
+            geom=geom,
+            predicate=predicate,
+            single_var_as_array=single_var_as_array,
             bbox=bbox,
             buffer=buffer,
             variables=variables,
             time_range=time_range,
+            logger=logger,
         )
 
     def to_file(
@@ -140,7 +144,7 @@ class GeoDatasetSource(DataSource):
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_bbox` will be used to detect it.
+        :py:meth:`hydromt.GeoDatasetAdapter.detect_bbox` will be used to detect it.
 
         Parameters
         ----------
@@ -170,7 +174,7 @@ class GeoDatasetSource(DataSource):
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_time_range` will be used
+        :py:meth:`hydromt.GeoDatasetAdapter.detect_time_range` will be used
         to detect it.
 
 
@@ -199,7 +203,7 @@ class GeoDatasetSource(DataSource):
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
-        adapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`. the
+        adapter. also see :py:meth:`hydromt.GeoDatasetAdapter.get_data`. the
         coordinates are in the CRS of the dataset itself, which is also returned
         alongside the coordinates.
 
@@ -208,7 +212,7 @@ class GeoDatasetSource(DataSource):
         ----------
         ds: xr.Dataset, xr.DataArray, Optional
             the dataset to detect the bounding box of.
-            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            If none is provided, :py:meth:`hydromt.GeoDatasetAdapter.get_data`
             will be used to fetch the it before detecting.
 
         Returns
@@ -221,8 +225,8 @@ class GeoDatasetSource(DataSource):
         """
         if ds is None:
             ds = self.read_data()
-        crs = ds.raster.crs.to_epsg()
-        bounds = ds.raster.bounds
+        crs = ds.vector.crs.to_epsg()
+        bounds = ds.vector.bounds
 
         return bounds, crs
 
@@ -233,13 +237,13 @@ class GeoDatasetSource(DataSource):
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched accodring to the settings in the
-        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`.
+        addapter. also see :py:meth:`hydromt.GeoDatasetAdapter.get_data`.
 
         Parameters
         ----------
         ds: xr.Dataset, xr.DataArray, Optional
             the dataset to detect the time range of. It must have a time dimentsion set.
-            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            If none is provided, :py:meth:`hydromt.GeoDatasetAdapter.get_data`
             will be used to fetch the it before detecting.
 
         Returns
@@ -251,8 +255,8 @@ class GeoDatasetSource(DataSource):
         if ds is None:
             ds = self.read_data()
         return (
-            ds[ds.raster.time_dim].min().values,
-            ds[ds.raster.time_dim].max().values,
+            ds[ds.vector.time_dim].min().values,
+            ds[ds.vector.time_dim].max().values,
         )
 
     def to_stac_catalog(

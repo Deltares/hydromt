@@ -1,10 +1,10 @@
-"""RasterDatasetDriver for zarr data."""
+"""GeoDatasetVectorDriver class for reading vector data from table like files such as csv or parquet."""
 
 from copy import copy
 from logging import Logger, getLogger
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Union
 
-from xarray import Dataset
+from xarray import DataArray, Dataset
 
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Bbox, Geom, GeomBuffer, Predicate, TimeRange
@@ -19,7 +19,7 @@ logger = getLogger(__name__)
 class GeoDatasetVectorDriver(GeoDatasetDriver):
     """VectorGeodatasetDriver for vector data."""
 
-    name = "vector"
+    name = "geodataset_vector"
 
     def read_data(
         self,
@@ -35,9 +35,9 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> Dataset:
+    ) -> Union[Dataset, DataArray]:
         """
-        Read zarr data to an xarray DataSet.
+        Read tabular datafiles like csv or parquet into to an xarray DataSet.
 
         Args:
         """
