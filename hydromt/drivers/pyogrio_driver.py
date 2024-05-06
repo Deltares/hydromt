@@ -5,6 +5,7 @@ from typing import List, Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info, write_dataframe
+from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
@@ -33,9 +34,7 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
-        warn_on_unused_kwargs(
-            self.__class__.__name__, {"predicate": predicate}, logger
-        )
+        warn_on_unused_kwargs(self.__class__.__name__, {"predicate": predicate}, logger)
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
