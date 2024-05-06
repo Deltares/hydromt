@@ -139,7 +139,7 @@ class GeoDatasetSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
+    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
