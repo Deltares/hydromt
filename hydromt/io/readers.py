@@ -434,7 +434,7 @@ def open_geodataset(
     geom=None,
     logger=logger,
     **kwargs,
-):
+) -> xr.Dataset:
     """Open and combine geometry location GIS file and timeseries file in a xr.Dataset.
 
     Arguments
@@ -632,12 +632,6 @@ def open_vector(
     gdf : geopandas.GeoDataFrame
         Parsed geometry file
     """
-
-    def _read(f: pyio.IOBase) -> gpd.GeoDataFrame:
-        bbox_reader = gis.bbox_from_file_and_filters(f, bbox, geom, crs)
-        f.seek(0)
-        return gpd.read_file(f, bbox=bbox_reader, mode=mode, **kwargs)
-
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)

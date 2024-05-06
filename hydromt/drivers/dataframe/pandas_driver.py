@@ -1,4 +1,5 @@
 """Driver for DataFrames using the pandas library."""
+
 from logging import Logger, getLogger
 from pathlib import Path
 from typing import List, Optional
@@ -7,7 +8,7 @@ import pandas as pd
 
 from hydromt._typing import NoDataStrategy, StrPath, TimeRange, Variables
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
-from hydromt.drivers import DataFrameDriver
+from hydromt.drivers.dataframe import DataFrameDriver
 
 logger: Logger = getLogger(__name__)
 
@@ -16,6 +17,7 @@ class PandasDriver(DataFrameDriver):
     """Driver for DataFrames using the pandas library."""
 
     name = "pandas"
+    supports_writing: bool = True
 
     def read_data(
         self,

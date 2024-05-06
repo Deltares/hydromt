@@ -20,12 +20,15 @@ Added
 - Added a `ConfigComponent` to write configurations for kernels/simulations. (#863)
 - Added a `GeomsComponent` to manage geo-spatial geometry data of a model. (#867)
 - Added a `DatasetsComponent` to manage multidimensional data of a model. (#894)
+- Added a `GeoDatasetDriver` to read vector data from tabular formats. (#912)
+- Added a `GeoDatasetSource` to handle vector data from tabular formats. (#912)
 
 Changed
 -------
 - The `root` meta key of data catalogs yaml files has become `roots` (#786)
 - The model region is no longer a subset of the `geoms` but rather it's own component class. See the migration guide for more info (#810)
 - The model class has been moved to a component architecture. See the migration guide for more info (#845)
+- Changed the `GeoDatasetAdapter` to transform vector data from tabular formats. (#912)
 
 
 Removed
