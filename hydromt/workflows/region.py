@@ -151,7 +151,7 @@ def parse_region_bbox(region: dict, *, crs: Optional[int] = None) -> gpd.GeoData
     kind = next(iter(region))
     value0 = kwargs.pop(kind)
 
-    _assert_parse_key(kind, expected="bbox")
+    _assert_parse_key(kind, "bbox")
 
     # TODO: Make this very specific to bbox
     kwargs.update(_parse_region_value(value0, data_catalog=None))
