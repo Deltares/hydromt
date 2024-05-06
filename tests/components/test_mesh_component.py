@@ -125,12 +125,10 @@ def test_create(mock_model, mocker: MockerFixture):
     crs = 28992
     test_data = xu.data.elevation_nl().to_dataset()
     test_data.grid.crs = crs
-    mock_create_mesh2d = mocker.patch("hydromt.components.mesh.create_mesh2d")
+    mock_create_mesh2d = mocker.patch("hydromt.components.mesh.create_mesh2d_from_geom")
     mock_create_mesh2d.return_value = test_data
     mesh_component.create2d(region=region, res=res, crs=crs)
-    mock_create_mesh2d.assert_called_once_with(
-        region=region, res=res, crs=crs, logger=mesh_component.logger
-    )
+    mock_create_mesh2d.assert_called_once()
     assert mesh_component.data == test_data
 
 

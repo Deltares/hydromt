@@ -1,7 +1,8 @@
 """Implementation for mesh based workflows."""
 
 import logging
-from typing import Dict, List, Optional, Union
+from logging import Logger
+from typing import Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -13,22 +14,27 @@ from shapely.geometry import box
 
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.workflows.region import parse_region
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
-__all__ = ["create_mesh2d", "mesh2d_from_rasterdataset", "mesh2d_from_raster_reclass"]
+__all__ = [
+    "create_mesh2d_from_mesh",
+    "create_mesh2d_from_geom",
+    "mesh2d_from_rasterdataset",
+    "mesh2d_from_raster_reclass",
+]
 
 
-def create_mesh2d(
-    region: Dict,
-    res: Optional[float] = None,
-    crs: Optional[int] = None,
-    align: bool = True,
-    logger=logger,
+def create_mesh2d_from_mesh(
+    uds: xu.UgridDataset,
+    *,
+    grid_name: Optional[str],
+    crs: Optional[int],
+    logger: Logger = _logger,
+    bounds: Optional[Tuple[float, float, float, float]] = None,
 ) -> xu.UgridDataset:
     """
-    Create an 2D unstructured mesh or reads an existing 2D mesh.
+    Read an existing 2D mesh.
 
     Grids are read according to UGRID conventions. An 2D unstructured mesh
     will be created as 2D rectangular grid from a geometry (geom_fn) or bbox.
@@ -47,136 +53,126 @@ def create_mesh2d(
         Dictionary describing region of interest, bounds can be provided
         for type 'mesh'. In case of 'mesh', if the file includes several
         grids, the specific 2D grid can be selected using the 'grid_name' argument.
-        CRS for 'bbox' and 'bounds' should be 4326; e.g.:
-
-        * {'bbox': [xmin, ymin, xmax, ymax]}
-
-        * {'geom': 'path/to/polygon_geometry'}
 
         * {'mesh': 'path/to/2dmesh_file'}
-
         * {'mesh': 'path/to/2dmesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
-    res: float
-        Resolution used to generate 2D mesh [unit of the CRS], required if region
-        is not based on 'mesh'.
-    crs : EPSG code, int, optional
-        Optional EPSG code of the model or "utm" to let hydromt find the closest
-        projected CRS. If None using the one from region, and else 4326.
+    """
+    grids = dict()
+    for grid in uds.grids:
+        grids[grid.name] = grid
+    # Select specific topology if given
+    if grid_name is not None:
+        if grid_name not in grids:
+            raise ValueError(f"Mesh file does not contain grid {grid_name}.")
+        grid = grids[grid_name]
+    elif len(grids) == 1:
+        grid = next(iter(grids.values()))
+    else:
+        raise ValueError(
+            "Mesh file contains several grids. "
+            "Use grid_name argument of region to select a single one."
+        )
+    # Check if 2d mesh file else throw error
+    if grid.topology_dimension != 2:
+        raise ValueError("Grid in mesh file for create_mesh2d is not 2D.")
+    # Continues with a 2D grid
+    mesh2d = xu.UgridDataset(grid.to_dataset())
+
+    # Check crs and reproject to model crs
+    grid_crs = grid.crs
+    if crs is not None:
+        bbox = None
+        if grid_crs is not None:
+            if grid_crs.to_epsg() == 4326:
+                bbox = mesh2d.ugrid.grid.bounds
+        crs = utils.parse_crs(crs, bbox=bbox)
+    else:
+        crs = CRS.from_user_input(4326)
+    if grid_crs is not None:  # parse crs
+        mesh2d.ugrid.grid.set_crs(grid_crs)
+    else:
+        # Assume model crs
+        logger.warning(
+            "Mesh data from mesh file doesn't have a CRS." f" Assuming crs option {crs}"
+        )
+        mesh2d.ugrid.grid.set_crs(crs)
+    mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
+
+    # If bounds are provided in region, extract mesh for bounds
+    if bounds is not None:
+        bounds_geom = gpd.GeoDataFrame(geometry=[box(*bounds)], crs=4326)
+        xmin, ymin, xmax, ymax = bounds_geom.to_crs(mesh2d.ugrid.grid.crs).total_bounds
+        subset = mesh2d.ugrid.sel(y=slice(ymin, ymax), x=slice(xmin, xmax))
+        # Check if still cells after clipping
+        err = (
+            "MeshDataset: No data within model region."
+            "Check that bounds were given in the correct crs 4326"
+        )
+        subset = subset.ugrid.assign_node_coords()
+        if subset.ugrid.grid.node_x.size == 0 or subset.ugrid.grid.node_y.size == 0:
+            raise IndexError(err)
+        mesh2d = subset
+
+    return mesh2d
+
+
+def create_mesh2d_from_geom(
+    geom: gpd.GeoDataFrame,
+    *,
+    res: float,
+    align: bool,
+    kind: str,
+) -> xu.UgridDataset:
+    """Create a 2D mesh from a geometry.
+
+    Parameters
+    ----------
+    geom : gpd.GeoDataFrame
+        Input geometry to create the mesh from.
+    res : float
+        Resolution used to generate 2D mesh [unit of the CRS]
     align : bool, optional
-        Align the mesh to the resolution, by default True.
+        Align the mesh to the resolution.
+    kind : str
+        Kind of geometry to create the mesh from.
+        Will clip to geom if kind is bbox.
 
     Returns
     -------
     mesh2d : xu.UgridDataset
-        Generated mesh2d.
     """
-    kind = next(iter(region))  # first key of region
-    if kind not in ["bbox", "geom", "mesh"]:
-        raise ValueError(
-            "Region for mesh must be of kind [bbox, geom, mesh], "
-            f"kind {kind} not understood."
-        )
-    geom = parse_region(region, logger=logger, crs=crs)
-    if kind != "mesh":
-        if not isinstance(res, (int, float)):
-            raise ValueError("res argument required for kind 'bbox', 'geom'")
-        # Generate grid based on res for region bbox
-        xmin, ymin, xmax, ymax = geom.total_bounds
-        if align:
-            xmin = round(xmin / res) * res
-            ymin = round(ymin / res) * res
-            xmax = round(xmax / res) * res
-            ymax = round(ymax / res) * res
-        # note we flood the number of faces within bounds
-        ncol = round((xmax - xmin) / res)  # int((xmax - xmin) // res)
-        nrow = round((ymax - ymin) / res)  # int((ymax - ymin) // res)
-        dx, dy = res, -res
-        faces = []
-        for i in range(nrow):
-            top = ymax + i * dy
-            bottom = ymax + (i + 1) * dy
-            for j in range(ncol):
-                left = xmin + j * dx
-                right = xmin + (j + 1) * dx
-                faces.append(box(left, bottom, right, top))
-        grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
-        # If needed clip to geom
-        if kind != "bbox":
-            grid = grid.loc[
-                gpd.sjoin(
-                    grid, geom, how="left", predicate="intersects"
-                ).index_right.notna()
-            ].reset_index()
-        # Create mesh from grid
-        grid.index.name = "mesh2d_nFaces"
-        mesh2d = xu.UgridDataset.from_geodataframe(grid)
-        mesh2d = mesh2d.ugrid.assign_face_coords()
-        mesh2d.ugrid.grid.set_crs(grid.crs)
-
-    else:
-        # Read existing mesh
-        uds = region["mesh"]
-
-        # Select grid and/or check single grid
-        grids = dict()
-        for grid in uds.grids:
-            grids[grid.name] = grid
-        # Select specific topology if given
-        if "grid_name" in region:
-            if region["grid_name"] not in grids:
-                raise ValueError(
-                    f"Mesh file does not contain grid {region['grid_name']}."
-                )
-            grid = grids[region["grid_name"]]
-        elif len(grids) == 1:
-            grid = list(grids.values())[0]
-        else:
-            raise ValueError(
-                "Mesh file contains several grids. "
-                "Use grid_name argument of region to select a single one."
-            )
-        # Chek if 2d mesh file else throw error
-        if grid.topology_dimension != 2:
-            raise ValueError("Grid in mesh file for create_mesh2d is not 2D.")
-        # Continues with a 2D grid
-        mesh2d = xu.UgridDataset(grid.to_dataset())
-
-        # Check crs and reproject to model crs
-        grid_crs = grid.crs
-        if crs is not None:
-            bbox = None
-            if grid_crs is not None:
-                if grid_crs.to_epsg() == 4326:
-                    bbox = mesh2d.ugrid.grid.bounds
-            crs = utils.parse_crs(crs, bbox=bbox)
-        else:
-            crs = CRS.from_user_input(4326)
-        if grid_crs is not None:  # parse crs
-            mesh2d.ugrid.grid.set_crs(grid_crs)
-        else:
-            # Assume model crs
-            logger.warning(
-                "Mesh data from mesh file doesn't have a CRS."
-                f" Assuming crs option {crs}"
-            )
-            mesh2d.ugrid.grid.set_crs(crs)
-        mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
-
-        # If bounds are provided in region, extract mesh for bounds
-        if "bounds" in region:
-            bounds = gpd.GeoDataFrame(geometry=[box(*region["bounds"])], crs=4326)
-            xmin, ymin, xmax, ymax = bounds.to_crs(mesh2d.ugrid.grid.crs).total_bounds
-            subset = mesh2d.ugrid.sel(y=slice(ymin, ymax), x=slice(xmin, xmax))
-            # Check if still cells after clipping
-            err = (
-                "MeshDataset: No data within model region."
-                "Check that bounds were given in the correct crs 4326"
-            )
-            subset = subset.ugrid.assign_node_coords()
-            if subset.ugrid.grid.node_x.size == 0 or subset.ugrid.grid.node_y.size == 0:
-                raise IndexError(err)
-            mesh2d = subset
-
+    # Generate grid based on res for region bbox
+    xmin, ymin, xmax, ymax = geom.total_bounds
+    if align:
+        xmin = round(xmin / res) * res
+        ymin = round(ymin / res) * res
+        xmax = round(xmax / res) * res
+        ymax = round(ymax / res) * res
+    # note we flood the number of faces within bounds
+    ncol = round((xmax - xmin) / res)  # int((xmax - xmin) // res)
+    nrow = round((ymax - ymin) / res)  # int((ymax - ymin) // res)
+    dx, dy = res, -res
+    faces = []
+    for i in range(nrow):
+        top = ymax + i * dy
+        bottom = ymax + (i + 1) * dy
+        for j in range(ncol):
+            left = xmin + j * dx
+            right = xmin + (j + 1) * dx
+            faces.append(box(left, bottom, right, top))
+    grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
+    # If needed clip to geom
+    if kind != "bbox":
+        grid = grid.loc[
+            gpd.sjoin(
+                grid, geom, how="left", predicate="intersects"
+            ).index_right.notna()
+        ].reset_index()
+    # Create mesh from grid
+    grid.index.name = "mesh2d_nFaces"
+    mesh2d = xu.UgridDataset.from_geodataframe(grid)
+    mesh2d = mesh2d.ugrid.assign_face_coords()
+    mesh2d.ugrid.grid.set_crs(grid.crs)
     return mesh2d
 
 
@@ -187,7 +183,7 @@ def mesh2d_from_rasterdataset(
     fill_method: Optional[str] = None,
     resampling_method: Optional[Union[str, List]] = "centroid",
     rename: Optional[Dict] = None,
-    logger: logging.Logger = logger,
+    logger: logging.Logger = _logger,
 ) -> xu.UgridDataset:
     """
     Resamples data in ds to mesh2d.
@@ -302,7 +298,7 @@ def mesh2d_from_raster_reclass(
     fill_method: Optional[str] = None,
     resampling_method: Optional[Union[str, list]] = "centroid",
     rename: Optional[Dict] = None,
-    logger: logging.Logger = logger,
+    logger: logging.Logger = _logger,
 ) -> List[str]:
     """Resample data to ``mesh2d`` grid by reclassifying the data in ``da`` based on ``df_vars``.
 

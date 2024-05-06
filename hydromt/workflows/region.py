@@ -3,7 +3,7 @@
 from logging import Logger, getLogger
 from os.path import isdir, isfile
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -12,48 +12,33 @@ import xugrid as xu
 from pyproj import CRS
 from shapely import box
 
+from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import utils as gis_utils
 from hydromt.plugins import PLUGINS
 from hydromt.workflows.basin_mask import get_basin_geometry
 
-logger = getLogger(__name__)
+if TYPE_CHECKING:
+    from hydromt.models.model import Model
+
+_logger = getLogger(__name__)
 
 
-def parse_region(
+def parse_region_basin(
     region: dict,
     *,
-    crs: Optional[int],
-    logger: Logger = logger,
-    hydrography_fn: Optional[str] = None,
-    basin_index_fn: Optional[str] = None,
-    data_catalog: Optional[DataCatalog] = None,
+    data_catalog: DataCatalog,
+    hydrography_fn: StrPath,
+    basin_index_fn: Optional[StrPath] = None,
+    crs: Optional[Union[CRS]] = None,
+    logger: Logger = _logger,
 ) -> gpd.GeoDataFrame:
-    """Parse a region and return the GeoDataFrame.
+    """Parse a basin /subbasin / interbasin region and return the GeoDataFrame.
 
     Parameters
     ----------
     region : dict
         Dictionary describing region of interest.
-
-        For an exact clip of the region:
-
-        * {'bbox': [xmin, ymin, xmax, ymax]}
-
-        * {'geom': /path/to/polygon_geometry}
-
-        For a region based of another models grid:
-
-        * {'<model_name>': root}
-
-        For a region based on a mesh grid of a mesh file:
-
-        * {'mesh': /path/to/mesh}
-
-        For a grid region:
-
-        * {'grid': /path/to/grid}
-
         Entire basin can be defined based on an ID, one or multiple point location
         (x, y), or a region of interest (bounding box or geometry) for which the
         basin IDs are looked up. The basins withint the area of interest can be further
@@ -93,7 +78,7 @@ def parse_region(
         * {
             'subbasin': [[x1, x2, ..], [y1, y2, ..]],
             '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
-            }
+        }
 
         * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
 
@@ -109,96 +94,164 @@ def parse_region(
         * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
 
         * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
+    data_catalog : DataCatalog
+        DataCatalog object containing the data sources.
+    hydrography_fn : strPath
+        Path of the hydrography raster dataset in the data catalog.
+    basin_index_fn : strPath, optional
+        Path of the basin index raster dataset in the data catalog.
+    crs : CRS, optional
+        Target CRS to transform the geometry to.
+    logger : Logger, optional
+        Logger object.
     """
     kwargs = region.copy()
-    # NOTE: the order is important to prioritize the arguments
-    options = {
-        "basin": ["basid", "geom", "bbox", "xy"],
-        "subbasin": ["geom", "bbox", "xy"],
-        "interbasin": ["geom", "bbox", "xy"],
-        "geom": ["geom"],
-        "bbox": ["bbox"],
-        "mesh": ["UgridDataArray"],
-        "grid": ["raster"],
-    }
-    kind = next(iter(kwargs))  # first key of region
+    kind = next(iter(region))
     value0 = kwargs.pop(kind)
 
-    if kind in PLUGINS.model_plugins:
-        model_class = PLUGINS.model_plugins[kind]
-        other_model = model_class(root=value0, mode="r", logger=logger)
-        value0 = other_model.region
-        kwargs = dict(geom=other_model.region)
-        kind = "geom"
-    elif kind == "mesh":
-        if isinstance(value0, (str, Path)) and isfile(value0):
-            kwarg = dict(mesh=xu.open_dataset(value0))
-        elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
-            kwarg = dict(mesh=value0)
-        elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
-            kwarg = dict(
-                mesh=xu.UgridDataset(value0.to_dataset(optional_attributes=True))
-            )
-        else:
-            raise ValueError(
-                f"Unrecognized type {type(value0)}."
-                "Should be a path, data catalog key or xugrid object."
-            )
-        kwargs.update(kwarg)
-    elif kind not in options:
-        k_lst = '", "'.join(list(options.keys()))
-        raise ValueError(f'Region key "{kind}" not understood, select from "{k_lst}"')
+    # TODO: Make this very specific to basin.
+    kwargs.update(_parse_region_value(value0, data_catalog=data_catalog))
 
-    kwarg = _parse_region_value(value0, data_catalog=data_catalog)
-    if len(kwarg) == 0 or next(iter(kwarg)) not in options[kind]:
-        v_lst = '", "'.join(list(options[kind]))
-        raise ValueError(
-            f'Region value "{value0}" for kind={kind} not understood, '
-            f'provide one of "{v_lst}"'
-        )
-    kwargs.update(kwarg)
+    ds_org = data_catalog.get_rasterdataset(hydrography_fn)
+    if "bounds" not in kwargs:
+        assert basin_index_fn is not None
+        kwargs.update(basin_index=data_catalog.get_source(str(basin_index_fn)))
+    # get basin geometry
+    geom, _ = get_basin_geometry(ds=ds_org, kind=kind, logger=logger, **kwargs)
+    _update_crs(geom, crs)
+    return geom
 
-    if kind in ["basin", "subbasin", "interbasin"]:
-        # retrieve global hydrography data (lazy!)
-        assert data_catalog is not None
-        assert hydrography_fn is not None
-        ds_org = data_catalog.get_rasterdataset(hydrography_fn)
-        if "bounds" not in kwargs:
-            assert basin_index_fn is not None
-            kwargs.update(basin_index=data_catalog.get_source(basin_index_fn))
-        # get basin geometry
-        geom, _ = get_basin_geometry(ds=ds_org, kind=kind, logger=logger, **kwargs)
-        _update_crs(geom, crs)
-    elif kind == "bbox":
-        bbox = kwargs["bbox"]
-        geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-        _update_crs(geom, crs)
-    elif kind == "geom":
-        geom = kwargs["geom"]
-        if geom.crs is None:
-            raise ValueError('Model region "geom" has no CRS')
-        _update_crs(geom, crs)
-    elif kind == "grid":
-        assert data_catalog is not None
-        ds = data_catalog.get_rasterdataset(value0, kwargs=kwargs)
-        assert ds is not None
-        if crs is not None:
-            logger.warning(
-                "For region kind 'grid', the grid's crs is used and not"
-                f" user-defined crs '{crs}'"
-            )
-        geom = ds.raster.box
 
-    kwargs_str = dict()
-    for k, v in kwargs.items():
-        if isinstance(v, gpd.GeoDataFrame):
-            v = f"GeoDataFrame {v.total_bounds} (crs = {v.crs})"
-        elif isinstance(v, xr.DataArray):
-            v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
-        kwargs_str.update({k: v})
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
+def parse_region_bbox(region: dict, *, crs: Optional[int] = None) -> gpd.GeoDataFrame:
+    """Parse a region and return the GeoDataFrame.
+
+    Parameters
+    ----------
+    region : dict
+        Dictionary describing region of interest.
+        For an exact clip of the region:
+    * {'bbox': [xmin, ymin, xmax, ymax]}
+    crs : CRS, optional
+        Target CRS to transform the geometry to.
+    """
+    kwargs = region.copy()
+    kind = next(iter(region))
+    value0 = kwargs.pop(kind)
+
+    # TODO: Make this very specific to bbox
+    kwargs.update(_parse_region_value(value0, data_catalog=None))
+
+    bbox = kwargs["bbox"]
+    geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+    _update_crs(geom, crs)
+    return geom
+
+
+def parse_region_geom(region: dict, *, crs: Optional[int] = None) -> gpd.GeoDataFrame:
+    """Parse a region and return the GeoDataFrame.
+
+    Parameters
+    ----------
+    region : dict
+        Dictionary describing region of interest.
+        For an exact clip of the region:
+        * {'geom': /path/to/polygon_geometry}
+    crs : CRS, optional
+        Target CRS to transform the geometry to.
+    """
+    kwargs = region.copy()
+    kind = next(iter(region))
+    value0 = kwargs.pop(kind)
+
+    # TODO: Make this very specific to geom
+    kwargs.update(_parse_region_value(value0, data_catalog=None))
+
+    geom = kwargs["geom"]
+    if geom.crs is None:
+        raise ValueError('Model region "geom" has no CRS')
+    _update_crs(geom, crs)
 
     return geom
+
+
+def parse_region_grid(
+    region: dict, *, data_catalog: Optional[DataCatalog]
+) -> xr.Dataset:
+    """Parse a region and return the GeoDataFrame.
+
+    Parameters
+    ----------
+    region : dict
+        Dictionary describing region of interest.
+        For a region based on a grid:
+        * {'grid': /path/to/grid}
+    data_catalog : DataCatalog
+        DataCatalog object containing the data sources.
+    """
+    kwargs = region.copy()
+    kind = next(iter(region))
+    value0 = kwargs.pop(kind)
+
+    # TODO: Make this very specific to grid
+    kwargs.update(_parse_region_value(value0, data_catalog=None))
+
+    if isinstance(value0, (xr.DataArray, xr.Dataset)):
+        return value0.to_dataset()
+    else:
+        assert data_catalog is not None
+        # TODO: Pass kwargs?
+        dataset = data_catalog.get_rasterdataset(value0)
+        assert dataset is not None
+        return dataset
+
+
+def parse_region_other_model(region: dict, *, logger: Logger) -> "Model":
+    """Parse a region with a model path and return that whole Model in read mode.
+
+    Parameters
+    ----------
+    region : dict
+        Dictionary describing region of interest.
+        For a region based of another models grid:
+        * {'<model_name>': root}
+    """
+    kwargs = region.copy()
+    kind = next(iter(region))
+    value0 = kwargs.pop(kind)
+
+    model_class = PLUGINS.model_plugins[kind]
+    return model_class(root=value0, mode="r", logger=logger)
+
+
+def parse_region_mesh(region: dict) -> xu.UgridDataset:
+    """Parse a region with a mesh path and return that mesh in read mode.
+
+    Parameters
+    ----------
+    region : dict
+        Dictionary describing region of interest.
+        For a region based of a mesh grid of a mesh file:
+        * {'mesh': /path/to/mesh}
+        * {'mesh': UgridDataArray}
+        * {'mesh': UgridDataset}
+        * {'mesh': Ugrid1d}
+        * {'mesh': Ugrid2d}
+    """
+    kwargs = region.copy()
+    kind = next(iter(region))
+    value0 = kwargs.pop(kind)
+
+    if isinstance(value0, (str, Path)) and isfile(value0):
+        return xu.open_dataset(value0)
+    elif isinstance(value0, (xu.UgridDataset, xu.UgridDataArray)):
+        return value0
+    elif isinstance(value0, (xu.Ugrid1d, xu.Ugrid2d)):
+        return xu.UgridDataset(value0.to_dataset(optional_attributes=True))
+    else:
+        raise ValueError(
+            f"Unrecognized type {type(value0)}."
+            "Should be a path, data catalog key or xugrid object."
+        )
 
 
 def _update_crs(

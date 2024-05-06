@@ -8,17 +8,16 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from affine import Affine
-from pyproj import CRS
 from shapely.geometry import Polygon
 
-from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
-from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster
 from hydromt.gis.raster import full
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "create_non_rotated_grid",
+    "create_rotated_grid_from_geom",
     "grid_from_constant",
     "grid_from_rasterdataset",
     "grid_from_raster_reclass",
@@ -27,147 +26,78 @@ __all__ = [
 ]
 
 
-def create_grid_from_region(
-    kind: str,
-    geom: gpd.GeoDataFrame,
+def create_non_rotated_grid(
+    xcoords: np.typing.ArrayLike,
+    ycoords: np.typing.ArrayLike,
     *,
-    logger: logging.Logger = logger,
-    data_catalog: Optional[DataCatalog] = None,
-    res: Optional[float] = None,
-    crs: Optional[int] = None,
-    rotated: bool = False,
-    hydrography_fn: Optional[str] = None,
-    add_mask: bool = True,
-    align: bool = True,
-    dec_origin: int = 0,
-    dec_rotation: int = 3,
-) -> xr.Dataset:
-    # Derive xcoords, ycoords and geom for the different kind options
-    # Generate grid based on res for region bbox
-    if kind in ["bbox", "geom"]:
-        if not isinstance(res, (int, float)):
-            raise ValueError("res argument required for kind 'bbox', 'geom'")
-        input_crs = CRS.from_user_input(crs) if crs is not None else geom.crs
-        if input_crs.is_geographic and res > 1:
-            logger.warning(
-                f"The expected CRS {crs} is geographic and resolution is {res} degree ie more than 111*111 km2. Check if this is correct."
-            )
-        if input_crs.is_projected and res < 1:
-            logger.warning(
-                f"The expected CRS {crs} is projected and resolution is {res} meter only. Check if this is correct."
-            )
+    crs: int,
+) -> xr.DataArray:
+    """Create a grid that is not rotated based on x and y coordinates.
 
-        if not rotated:
-            xmin, ymin, xmax, ymax = geom.total_bounds
-            res = abs(res)
-            if align:
-                xmin = round(xmin / res) * res
-                ymin = round(ymin / res) * res
-                xmax = round(xmax / res) * res
-                ymax = round(ymax / res) * res
-            xcoords = np.linspace(
-                xmin + res / 2,
-                xmax - res / 2,
-                num=round((xmax - xmin) / res),
-                endpoint=True,
-            )
-            ycoords = np.flip(
-                np.linspace(
-                    ymin + res / 2,
-                    ymax - res / 2,
-                    num=round((ymax - ymin) / res),
-                    endpoint=True,
-                )
-            )
-        else:  # rotated
-            geomu = geom.unary_union
-            x0, y0, mmax, nmax, rot = rotated_grid(
-                geomu, res, dec_origin=dec_origin, dec_rotation=dec_rotation
-            )
-            transform = (
-                Affine.translation(x0, y0)
-                * Affine.rotation(rot)
-                * Affine.scale(res, res)
-            )
-    elif kind in ["basin", "subbasin", "interbasin"]:
-        # get ds_hyd but clipped to geom, one variable is enough
-        assert hydrography_fn is not None
-        assert data_catalog is not None
-        da_hyd = data_catalog.get_rasterdataset(hydrography_fn, geom=geom)
-        if da_hyd is None:
-            _exec_nodata_strat(
-                f"No data available in hydrography_fn '{hydrography_fn}' on variable 'flwdir'",
-                NoDataStrategy.RAISE,
-                logger,
-            )
-        assert da_hyd is not None
-        if not isinstance(res, (int, float)):
-            logger.info(
-                "res argument not defined, using resolution of "
-                f"hydrography_fn {da_hyd.raster.res}"
-            )
-            res = da_hyd.raster.res
-        # Reproject da_hyd based on crs and grid and align, method is not important
-        # only coords will be used
-        input_crs = CRS.from_user_input(crs) if crs is not None else da_hyd.raster.crs
-        if input_crs.is_geographic and res > 1:
-            logger.warning(
-                f"The expected CRS {crs} is geographic and resolution is {res} degree ie more than 111*111 km2. Check if this is correct."
-            )
-        if input_crs.is_projected and res < 1:
-            logger.warning(
-                f"The expected CRS {crs} is projected and resolution is {res} meter only. Check if this is correct."
-            )
+    Parameters
+    ----------
+    xcoords : np.typing.ArrayLike
+        An array of x coordinates.
+    ycoords : np.typing.ArrayLike
+        An array of y coordinates.
+    crs : int
+        The crs that the coordinates are in.
 
-        if res != da_hyd.raster.res and crs != da_hyd.raster.crs:
-            da_hyd = da_hyd.raster.reproject(dst_crs=crs, dst_res=res, align=align)
-            assert da_hyd is not None
-        # Get xycoords, geom
-        xcoords = da_hyd.raster.xcoords.values
-        ycoords = da_hyd.raster.ycoords.values
-    elif kind == "grid":
-        # Get xycoords
-        xcoords = geom.raster.xcoords.values
-        ycoords = geom.raster.ycoords.values
-        if res is not None:
-            logger.warning(
-                "For region kind 'grid', the grid's res is used and not"
-                f" user-defined res {res}"
-            )
+    Returns
+    -------
+    xr.DataArray
+        A grid that is not rotated.
+    """
+    coords = {"x": xcoords, "y": ycoords}
+    return raster.full(
+        coords=coords,
+        nodata=1,
+        dtype=np.uint8,
+        name="mask",
+        attrs={},
+        crs=crs,
+        lazy=False,
+    )
 
-    # Instantiate grid object
-    # Generate grid using hydromt full method
-    if not rotated:
-        coords = {"y": ycoords, "x": xcoords}
-        grid = raster.full(
-            coords=coords,
-            nodata=1,
-            dtype=np.uint8,
-            name="mask",
-            attrs={},
-            crs=geom.crs,
-            lazy=False,
-        )
-    else:
-        grid = raster.full_from_transform(
-            transform,
-            shape=(mmax, nmax),
-            nodata=1,
-            dtype=np.uint8,
-            name="mask",
-            attrs={},
-            crs=geom.crs,
-            lazy=False,
-        )
-    # Create geometry_mask with geom
-    if add_mask:
-        grid = grid.raster.geometry_mask(geom, all_touched=True)
-        grid.name = "mask"
-    # Remove mask variable mask from grid if not add_mask
-    else:
-        grid = grid.to_dataset()
-        grid = grid.drop_vars("mask")
-    return grid
+
+def create_rotated_grid_from_geom(
+    geom: gpd.GeoDataFrame, *, res: float, dec_origin: int, dec_rotation: int
+) -> xr.DataArray:
+    """Create a rotated grid based on a geometry.
+
+    Parameters
+    ----------
+    geom : gpd.GeoDataFrame
+        The geometry to create the grid from.
+    res : float
+        The resolution of the grid.
+    dec_origin : int
+        The number of significant numbers to round the origin points to.
+    dec_rotation : int
+        The number of significant numbers to round the rotation to.
+
+    Returns
+    -------
+    xr.DataArray
+        A rotated grid based on the geometry.
+    """
+    geomu = geom.unary_union
+    x0, y0, mmax, nmax, rot = rotated_grid(
+        geomu, res, dec_origin=dec_origin, dec_rotation=dec_rotation
+    )
+    transform = (
+        Affine.translation(x0, y0) * Affine.rotation(rot) * Affine.scale(res, res)
+    )
+    return raster.full_from_transform(
+        transform,
+        shape=(mmax, nmax),
+        nodata=1,
+        dtype=np.uint8,
+        name="mask",
+        attrs={},
+        crs=geom.crs,
+        lazy=False,
+    )
 
 
 def grid_from_constant(

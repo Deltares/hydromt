@@ -115,7 +115,7 @@ def test_create_grid_from_bbox(mock_model):
 def test_create_raise_errors(mock_model):
     grid_component = GridComponent(mock_model)
     # Wrong region kind
-    with pytest.raises(ValueError, match="select from"):
+    with pytest.raises(ValueError, match="Unsupported region kind"):
         grid_component.create(region={"vector_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]

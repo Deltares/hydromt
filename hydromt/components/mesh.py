@@ -3,7 +3,7 @@
 import os
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import pandas as pd
@@ -13,13 +13,20 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import hydromt_step
+from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
 from hydromt.workflows.mesh import (
-    create_mesh2d,
+    create_mesh2d_from_geom,
+    create_mesh2d_from_mesh,
     mesh2d_from_raster_reclass,
     mesh2d_from_rasterdataset,
+)
+from hydromt.workflows.region import (
+    parse_region_bbox,
+    parse_region_geom,
+    parse_region_mesh,
 )
 
 if TYPE_CHECKING:
@@ -203,11 +210,12 @@ class MeshComponent(SpatialModelComponent):
     @hydromt_step
     def create2d(
         self,
+        region: Optional[dict] = None,
         *,
-        region: dict,
         res: Optional[float] = None,
         crs: Optional[int] = None,
         grid_name: str = "mesh2d",
+        align: bool = True,
     ) -> xu.UgridDataset:
         """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
 
@@ -254,14 +262,59 @@ class MeshComponent(SpatialModelComponent):
         """  # noqa: E501
         self.logger.info("Preparing 2D mesh.")
 
-        # Create mesh2d
-        mesh2d = create_mesh2d(region=region, res=res, crs=crs, logger=self.logger)
-        # Add mesh2d to self
-        self.set(mesh2d, grid_name=grid_name)
+        if self._region_component is not None and region is not None:
+            raise ValueError(
+                "Cannot create a mesh if a region component is set and region is provided."
+            )
+        if region is None and self._region_component is None:
+            _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, self.logger)
 
-        # This setup method returns mesh2d so that it can be wrapped for models
-        # which require more information
+        kind = next(iter(region)) if region is not None else "geom"
+        if kind == "mesh":
+            assert region is not None
+            uds = parse_region_mesh(region)
+            mesh2d = create_mesh2d_from_mesh(
+                uds,
+                grid_name=region.get("grid_name", None),
+                logger=self.logger,
+                crs=crs,
+                bounds=region.get("bounds", None),
+            )
+        elif kind in ["bbox", "geom"]:
+            if not res:
+                raise ValueError(f"res argument required for kind '{kind}'")
+            geom = self._extract_geom_from_region(region, kind, crs=crs)
+            mesh2d = create_mesh2d_from_geom(geom, res=res, align=align, kind=kind)
+        else:
+            raise ValueError(
+                f"Unsupported region kind '{kind}' found in grid creation."
+            )
+
+        self.set(mesh2d, grid_name=grid_name)
         return mesh2d
+
+    def _extract_geom_from_region(
+        self, region: Optional[dict], kind: str, *, crs: Optional[int]
+    ) -> gpd.GeoDataFrame:
+        if self._region_component is not None:
+            if crs is not None:
+                self.logger.warning(
+                    "Ignoring crs argument when creating grid from region component"
+                )
+            return cast(
+                SpatialModelComponent, self.model.get_component(self._region_component)
+            ).region
+        elif kind == "geom":
+            assert region is not None
+            return parse_region_geom(region, crs=crs)
+        elif kind == "bbox":
+            assert region is not None
+            return parse_region_bbox(region, crs=crs)
+        else:
+            raise ValueError(
+                f"Unsupported region kind '{kind}' found in geom grid creation."
+                " This is likely a programming error."
+            )
 
     @property
     def data(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
