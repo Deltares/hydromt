@@ -65,7 +65,7 @@ def _single_var_as_array(
     maybe_ds: Optional[xr.Dataset],
     single_var_as_array: bool,
     variable_name: Optional[Variables] = None,
-) -> Optional[xr.Dataset]:
+) -> Optional[xr.Dataset, xr.DataArray]:
     if maybe_ds is None:
         return None
     else:

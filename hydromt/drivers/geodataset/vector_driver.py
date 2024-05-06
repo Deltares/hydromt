@@ -25,9 +25,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         self,
         uris: List[str],
         *,
-        bbox: Optional[Bbox] = None,
-        geom: Optional[Geom] = None,
-        buffer: GeomBuffer = 0,
+        mask: Optional[Geom] = None,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
@@ -69,7 +67,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
         data = open_geodataset(
-            fn_locs=uri, bbox=bbox, geom=geom, logger=logger, **options
+            fn_locs=uri, bbox=bbox, mask=mask, logger=logger, **options
         )
 
         if preprocessor is None:
