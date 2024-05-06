@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.workflows.basin_mask."""
+
 import logging
 
 import numpy as np
 import pytest
 
 import hydromt
+from hydromt.gis import raster
 from hydromt.workflows.basin_mask import (
+    _check_size,
     get_basin_geometry,
 )
 
@@ -151,3 +154,19 @@ def test_basin(caplog):
             ds,
             kind="interbasin",
         )
+
+
+def test_check_size(caplog):
+    test_raster = raster.full_from_transform(
+        transform=[0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
+        shape=(13000, 13000),
+        nodata=-1,
+        name="test",
+        crs=4326,
+        lazy=True,  # create lazy dask array instead of numpy array
+    )
+    _check_size(test_raster)
+    assert (
+        "Loading very large spatial domain to derive a subbasin. "
+        "Provide initial 'bounds' if this takes too long." in caplog.text
+    )

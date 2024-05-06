@@ -3,7 +3,7 @@
 from logging import Logger, getLogger
 from os.path import isdir, isfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -109,8 +109,21 @@ def parse_region_basin(
     kind = next(iter(region))
     value0 = kwargs.pop(kind)
 
+    _assert_parse_key(kind, "basin", "interbasin", "subbasin")
+
     # TODO: Make this very specific to basin.
     kwargs.update(_parse_region_value(value0, data_catalog=data_catalog))
+
+    expected_keys = (
+        ["basid", "geom", "bbox", "xy"]
+        if kind == "basin"
+        else ["geom", "bbox", "xy"]
+        if kind == "subbasin"
+        else ["geom", "bbox", "xy"]
+    )
+    _assert_parsed_values(
+        key=next(iter(kwargs)), region_value=value0, kind=kind, expected=expected_keys
+    )
 
     ds_org = data_catalog.get_rasterdataset(hydrography_fn)
     if "bounds" not in kwargs:
@@ -138,8 +151,14 @@ def parse_region_bbox(region: dict, *, crs: Optional[int] = None) -> gpd.GeoData
     kind = next(iter(region))
     value0 = kwargs.pop(kind)
 
+    _assert_parse_key(kind, expected="bbox")
+
     # TODO: Make this very specific to bbox
     kwargs.update(_parse_region_value(value0, data_catalog=None))
+
+    _assert_parsed_values(
+        key=next(iter(kwargs)), region_value=value0, kind="bbox", expected=["bbox"]
+    )
 
     bbox = kwargs["bbox"]
     geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
@@ -163,8 +182,14 @@ def parse_region_geom(region: dict, *, crs: Optional[int] = None) -> gpd.GeoData
     kind = next(iter(region))
     value0 = kwargs.pop(kind)
 
+    _assert_parse_key(kind, "geom")
+
     # TODO: Make this very specific to geom
     kwargs.update(_parse_region_value(value0, data_catalog=None))
+
+    _assert_parsed_values(
+        key=next(iter(kwargs)), region_value=value0, kind="geom", expected=["geom"]
+    )
 
     geom = kwargs["geom"]
     if geom.crs is None:
@@ -192,8 +217,7 @@ def parse_region_grid(
     kind = next(iter(region))
     value0 = kwargs.pop(kind)
 
-    # TODO: Make this very specific to grid
-    kwargs.update(_parse_region_value(value0, data_catalog=None))
+    _assert_parse_key(kind, "grid")
 
     if isinstance(value0, (xr.DataArray, xr.Dataset)):
         return value0.to_dataset()
@@ -205,7 +229,7 @@ def parse_region_grid(
         return dataset
 
 
-def parse_region_other_model(region: dict, *, logger: Logger) -> "Model":
+def parse_region_other_model(region: dict, *, logger: Logger = _logger) -> "Model":
     """Parse a region with a model path and return that whole Model in read mode.
 
     Parameters
@@ -218,6 +242,8 @@ def parse_region_other_model(region: dict, *, logger: Logger) -> "Model":
     kwargs = region.copy()
     kind = next(iter(region))
     value0 = kwargs.pop(kind)
+
+    _assert_parse_key(kind, *PLUGINS.model_plugins.keys())
 
     model_class = PLUGINS.model_plugins[kind]
     return model_class(root=value0, mode="r", logger=logger)
@@ -240,6 +266,8 @@ def parse_region_mesh(region: dict) -> xu.UgridDataset:
     kwargs = region.copy()
     kind = next(iter(region))
     value0 = kwargs.pop(kind)
+
+    _assert_parse_key(kind, "mesh")
 
     if isinstance(value0, (str, Path)) and isfile(value0):
         return xu.open_dataset(value0)
@@ -299,3 +327,18 @@ def _parse_region_value(
         )
         kwarg = dict(xy=xy)
     return kwarg
+
+
+def _assert_parse_key(key: str, *expected: str) -> None:
+    if key not in expected:
+        raise KeyError(f"Expected key in '{', '.join(expected)}' but got '{key}'.")
+
+
+def _assert_parsed_values(
+    *, key: str, region_value: Any, kind: str, expected: List[str]
+) -> None:
+    if key not in expected:
+        raise ValueError(
+            f"Region value '{region_value}' for kind={kind} not understood, "
+            f"provide one of {','.join(expected)}"
+        )
