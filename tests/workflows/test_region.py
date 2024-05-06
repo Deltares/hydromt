@@ -1,6 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import pytest
+import xugrid as xu
 from pytest_mock import MockerFixture
 
 from hydromt import DataCatalog
@@ -10,6 +11,7 @@ from hydromt.workflows.region import (
     parse_region_basin,
     parse_region_geom,
     parse_region_grid,
+    parse_region_mesh,
     parse_region_other_model,
 )
 
@@ -177,3 +179,35 @@ def test_region_value_cat():
     root = "./"
     kwarg = _parse_region_value(root, data_catalog=data_catalog)
     assert kwarg.get("root") == root
+
+
+@pytest.mark.skip(reason="Needs Rasterdataset impl")
+def test_region_mesh(griduda):
+    mesh = parse_region_mesh({"mesh": griduda})
+    assert mesh == griduda
+
+
+def test_parse_region_mesh_path(mocker: MockerFixture):
+    ugrid_mock = mocker.Mock(spec_set=xu.UgridDataset)
+    xu_open_dataset_mock = mocker.patch(
+        "hydromt.workflows.region.xu.open_dataset", return_value=ugrid_mock
+    )
+    mocker.patch("hydromt.workflows.region.isfile", return_value=True)
+    mesh = parse_region_mesh({"mesh": "path/to/mesh.nc"})
+    xu_open_dataset_mock.assert_called_once_with("path/to/mesh.nc")
+    assert mesh is ugrid_mock
+
+
+def test_parse_region_mesh_dataset(mocker: MockerFixture):
+    ugrid_mock = mocker.Mock(spec_set=xu.UgridDataset)
+    mesh = parse_region_mesh({"mesh": ugrid_mock})
+    assert mesh is ugrid_mock
+
+    ugrid_mock = mocker.Mock(spec_set=xu.UgridDataArray)
+    mesh = parse_region_mesh({"mesh": ugrid_mock})
+    assert mesh is ugrid_mock
+
+
+def test_parse_region_mesh_wrong_type():
+    with pytest.raises(ValueError, match="Unrecognized type"):
+        parse_region_mesh({"mesh": 123})
