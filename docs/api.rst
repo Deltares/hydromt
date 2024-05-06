@@ -140,6 +140,18 @@ DataFrame
    data_source.dataframe.DataFrameSource.get_data
    data_source.dataframe.DataFrameSource.to_stac_catalog
 
+GeoDataset
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.geodataset.GeoDatasetSource
+   data_source.geodataset.GeoDatasetSource.get_data
+   data_source.geodataset.GeoDatasetSource.to_stac_catalog
+   data_source.geodataset.GeoDatasetSource.get_bbox
+   data_source.geodataset.GeoDatasetSource.detect_bbox
+
 MetaDataResolver
 ================
 
@@ -227,6 +239,16 @@ PandasDriver
    drivers.pandas_driver.PandasDriver
    drivers.pandas_driver.PandasDriver.read_data
    drivers.pandas_driver.PandasDriver.write
+
+GeoDataFrame
+------------
+
+.. autosummary::
+   :toctree: _generated
+   drivers.geodataset_driver.GeoDatasetDriver
+   drivers.geodataset_driver.GeoDatasetDriver.read
+   drivers.geodataset_driver.GeoDatasetDriver.read_data
+   drivers.geodataset_driver.GeoDatasetDriver.write
 
 DataAdapter
 ===========
