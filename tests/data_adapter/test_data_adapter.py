@@ -606,6 +606,7 @@ def test_dataframe_time(df_time, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
+# FIXME: Partially tested in "test_rasterio_driver", just missing the cache=True option.
 def test_cache_vrt(tmpdir, rioda_large):
     # write vrt data
     name = "tiled"
