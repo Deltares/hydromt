@@ -150,7 +150,7 @@ class TestGeoDatasetSource:
         with pytest.raises(
             RuntimeError, match="driver MockGeoDatasetDriver does not support writing"
         ):
-            source.to_file("/tmp/asdf.zarr")
+            source.to_file("/non/existant/asdf.zarr")
 
     def test_to_file(self, MockWritableDriver: Type[GeoDatasetDriver]):
         mock_driver = MockWritableDriver()
