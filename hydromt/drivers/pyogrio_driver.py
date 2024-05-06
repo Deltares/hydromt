@@ -5,7 +5,6 @@ from typing import List, Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info, write_dataframe
-from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
@@ -25,7 +24,6 @@ class PyogrioDriver(GeoDataFrameDriver):
         uris: List[str],
         *,
         mask: Optional[Geom] = None,
-        crs: Optional[CRS] = None,
         predicate: str = "intersects",
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -36,7 +34,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         args:
         """
         warn_on_unused_kwargs(
-            self.__class__.__name__, {"crs": crs, "predicate": predicate}, logger
+            self.__class__.__name__, {"predicate": predicate}, logger
         )
         if len(uris) > 1:
             raise ValueError(
