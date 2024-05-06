@@ -12,7 +12,7 @@ from hydromt.drivers import GeoDatasetDriver
 
 
 @pytest.fixture()
-def mock_raster_ds_adapter():
+def mock_geo_ds_adapter():
     class MockGeoDataSetAdapter(GeoDatasetAdapter):
         def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
             return ds
@@ -21,12 +21,12 @@ def mock_raster_ds_adapter():
 
 
 class TestGeoDatasetSource:
-    def test_validators(self, mock_raster_ds_adapter: GeoDatasetAdapter):
+    def test_validators(self, mock_geo_ds_adapter: GeoDatasetAdapter):
         with pytest.raises(ValidationError) as e_info:
             GeoDatasetSource(
                 name="name",
                 uri="uri",
-                data_adapter=mock_raster_ds_adapter,
+                data_adapter=mock_geo_ds_adapter,
                 driver="does not exist",  # type: ignore
             )
 
@@ -112,8 +112,40 @@ class TestGeoDatasetSource:
 
         return MockGeoDatasetDriver
 
-    def test_to_file(self, MockDriver: Type[GeoDatasetDriver]):
+    @pytest.fixture()
+    def MockWritableDriver(self, geoda: xr.Dataset):
+        class MockWriteableGeoDatasetDriver(GeoDatasetDriver):
+            name = "mock_geods_to_file"
+            supports_writing: bool = True
+
+            def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+                pass
+
+            def read(self, uri: str, **kwargs) -> xr.Dataset:
+                return self.read_data([uri], **kwargs)
+
+            def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
+                return geoda
+
+        return MockWriteableGeoDatasetDriver
+
+    def test_raises_on_write_with_incapable_driver(
+        self, MockDriver: Type[GeoDatasetDriver]
+    ):
         mock_driver = MockDriver()
+        source = GeoDatasetSource(
+            name="test",
+            uri="geoda.zarr",
+            driver=mock_driver,
+            metadata=SourceMetadata(crs=4326),
+        )
+        with pytest.raises(
+            RuntimeError, match="driver MockGeoDatasetDriver does not support writing"
+        ):
+            source.to_file("/tmp/asdf.zarr")
+
+    def test_to_file(self, MockWritableDriver: Type[GeoDatasetDriver]):
+        mock_driver = MockWritableDriver()
 
         source = GeoDatasetSource(
             name="test",
@@ -127,15 +159,15 @@ class TestGeoDatasetSource:
         assert id(new_source) != id(source)
         assert id(mock_driver) != id(new_source.driver)
 
-    def test_to_file_override(self, MockDriver: Type[GeoDatasetDriver]):
-        driver1 = MockDriver()
+    def test_to_file_override(self, MockWritableDriver: Type[GeoDatasetDriver]):
+        driver1 = MockWritableDriver()
         source = GeoDatasetSource(
             name="test",
             uri="geoda.zarr",
             driver=driver1,
             metadata=SourceMetadata(crs=4326),
         )
-        driver2 = MockDriver(filesystem="memory")
+        driver2 = MockWritableDriver(filesystem="memory")
         new_source = source.to_file("test", driver_override=driver2)
         assert new_source.driver.filesystem.protocol == "memory"
         # make sure we are not changing the state

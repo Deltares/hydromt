@@ -113,8 +113,25 @@ class TestRasterDatasetSource:
 
         return MockRasterDatasetDriver
 
-    def test_to_file(self, MockDriver: Type[RasterDatasetDriver]):
-        mock_driver = MockDriver()
+    @pytest.fixture()
+    def MockWritableDriver(self, raster_ds: xr.Dataset):
+        class MockWritableRasterDatasetDriver(RasterDatasetDriver):
+            name = "mock_rasterds_to_file"
+            supports_writing: bool = True
+
+            def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+                pass
+
+            def read(self, uri: str, **kwargs) -> xr.Dataset:
+                return self.read_data([uri], **kwargs)
+
+            def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
+                return raster_ds
+
+        return MockWritableRasterDatasetDriver
+
+    def test_to_file(self, MockWritableDriver: Type[RasterDatasetDriver]):
+        mock_driver = MockWritableDriver()
 
         source = RasterDatasetSource(
             name="test",
@@ -128,15 +145,15 @@ class TestRasterDatasetSource:
         assert id(new_source) != id(source)
         assert id(mock_driver) != id(new_source.driver)
 
-    def test_to_file_override(self, MockDriver: Type[RasterDatasetDriver]):
-        driver1 = MockDriver()
+    def test_to_file_override(self, MockWritableDriver: Type[RasterDatasetDriver]):
+        driver1 = MockWritableDriver()
         source = RasterDatasetSource(
             name="test",
             uri="raster.nc",
             driver=driver1,
             metadata=SourceMetadata(crs=4326),
         )
-        driver2 = MockDriver(filesystem="memory")
+        driver2 = MockWritableDriver(filesystem="memory")
         new_source = source.to_file("test", driver_override=driver2)
         assert new_source.driver.filesystem.protocol == "memory"
         # make sure we are not changing the state

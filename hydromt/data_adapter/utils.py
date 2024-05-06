@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from hydromt._typing import Data
 from hydromt._typing.type_def import TimeRange, Variables
 
 if TYPE_CHECKING:
@@ -18,8 +17,8 @@ logger = getLogger(__name__)
 
 
 def shift_dataset_time(
-    dt: int, ds: Data, logger: Logger, time_unit: str = "s"
-) -> xr.Dataset:
+    dt: int, ds: Optional[xr.Dataset], logger: Logger, time_unit: str = "s"
+) -> Optional[xr.Dataset]:
     """Shifts time of a xarray dataset.
 
     Parameters
@@ -36,6 +35,9 @@ def shift_dataset_time(
     xr.Dataset
         time shifted dataset
     """
+    if ds is None:
+        return None
+
     if (
         dt != 0
         and "time" in ds.dims
@@ -65,7 +67,7 @@ def _single_var_as_array(
     maybe_ds: Optional[xr.Dataset],
     single_var_as_array: bool,
     variable_name: Optional[Variables] = None,
-) -> Optional[xr.Dataset, xr.DataArray]:
+) -> Optional[xr.Dataset]:
     if maybe_ds is None:
         return None
     else:
@@ -83,7 +85,11 @@ def _single_var_as_array(
         return ds
 
 
-def _set_vector_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
+def _set_vector_nodata(
+    ds: Optional[xr.Dataset], metadata: "SourceMetadata"
+) -> Optional[xr.Dataset]:
+    if ds is None:
+        return None
     if metadata.nodata is not None:
         if not isinstance(metadata.nodata, dict):
             nodata = {k: metadata.nodata for k in ds.data_vars.keys()}
@@ -96,7 +102,11 @@ def _set_vector_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset
     return ds
 
 
-def _set_raster_nodata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
+def _set_raster_nodata(
+    ds: Optional[xr.Dataset], metadata: "SourceMetadata"
+) -> Optional[xr.Dataset]:
+    if ds is None:
+        return None
     if metadata.nodata is not None:
         if not isinstance(metadata.nodata, dict):
             nodata = {k: metadata.nodata for k in ds.data_vars.keys()}
@@ -113,6 +123,7 @@ def _slice_temporal_dimension(
     ds: Optional[xr.Dataset],
     time_range: Optional[TimeRange],
     logger: Logger = logger,
+    # TODO: https://github.com/Deltares/hydromt/issues/802
 ) -> Optional[xr.Dataset]:
     if ds is None:
         return None
@@ -130,8 +141,12 @@ def _slice_temporal_dimension(
             return ds
 
 
-def _set_metadata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
-    if metadata.attrs:
+def _set_metadata(
+    ds: Optional[xr.Dataset], metadata: "SourceMetadata"
+) -> Optional[xr.Dataset]:
+    if ds is None:
+        return None
+    elif metadata.attrs:
         if isinstance(ds, xr.DataArray):
             name = cast(str, ds.name)
             ds.attrs.update(metadata.attrs[name])
@@ -143,7 +158,11 @@ def _set_metadata(ds: xr.Dataset, metadata: "SourceMetadata") -> xr.Dataset:
     return ds
 
 
-def _rename_vars(ds: xr.Dataset, rename: Dict[str, str]) -> xr.Dataset:
+def _rename_vars(
+    ds: Optional[xr.Dataset], rename: Dict[str, str]
+) -> Optional[xr.Dataset]:
+    if ds is None:
+        return None
     rm = {k: v for k, v in rename.items() if k in ds}
     ds = ds.rename(rm)
     return ds

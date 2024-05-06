@@ -95,6 +95,10 @@ class GeoDataFrameSource(DataSource):
 
         args:
         """
+        if not self.driver.supports_writing:
+            raise RuntimeError(
+                f"driver {self.driver.__class__.__name__} does not support writing. please use a differnt driver "
+            )
         gdf: Optional[gpd.GeoDataFrame] = self.read_data(
             bbox=bbox,
             mask=mask,

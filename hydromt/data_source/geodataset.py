@@ -29,6 +29,7 @@ from hydromt._typing.type_def import GeomBuffer, Predicate
 from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_source.data_source import DataSource
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.gis.utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 
@@ -43,16 +44,14 @@ class GeoDatasetSource(DataSource):
     def read_data(
         self,
         *,
-        bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> Optional[xr.Dataset]:
+    ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """
         Read data from this source.
 
@@ -64,18 +63,15 @@ class GeoDatasetSource(DataSource):
         tr = self.data_adapter.to_source_timerange(time_range)
         vrs = self.data_adapter.to_source_variables(variables)
 
-        ds: Optional[Union[xr.Dataset, xr.DataArray]] = self.driver.read(
+        ds: Optional[xr.Dataset] = self.driver.read(
             self.uri,
             time_range=tr,
             variables=vrs,
             handle_nodata=handle_nodata,
         )
-        if isinstance(ds, xr.DataArray):
-            ds = ds.to_dataset()
         return self.data_adapter.transform(
             ds,
             self.metadata,
-            geom=geom,
             predicate=predicate,
             single_var_as_array=single_var_as_array,
             mask=mask,
@@ -90,7 +86,7 @@ class GeoDatasetSource(DataSource):
         *,
         driver_override: Optional[GeoDatasetDriver] = None,
         bbox: Optional[Bbox] = None,
-        geom: Optional[Geom] = None,
+        mask: Optional[Geom] = None,
         buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
@@ -105,13 +101,17 @@ class GeoDatasetSource(DataSource):
 
         args:
         """
-        ds: Optional[xr.Dataset] = self.read_data(
-            bbox=bbox,
-            geom=geom,
+        if not self.driver.supports_writing:
+            raise RuntimeError(
+                f"driver {self.driver.__class__.__name__} does not support writing. please use a differnt driver "
+            )
+        if bbox is not None or (mask is not None and buffer > 0):
+            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
+        ds: Optional[Union[xr.Dataset, xr.DataArray]] = self.read_data(
+            mask=mask,
             predicate=predicate,
             variables=variables,
             single_var_as_array=single_var_as_array,
-            buffer=buffer,
             time_range=time_range,
             handle_nodata=handle_nodata,
             logger=logger,

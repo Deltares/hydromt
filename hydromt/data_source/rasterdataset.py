@@ -105,6 +105,17 @@ class RasterDatasetSource(DataSource):
 
         args:
         """
+        if driver_override:
+            driver: RasterDatasetDriver = driver_override
+        else:
+            # use local filesystem
+            driver: RasterDatasetDriver = self.driver.model_copy(
+                update={"filesystem": filesystem("local")}
+            )
+        if not driver.supports_writing:
+            raise RuntimeError(
+                f"driver {driver.__class__.__name__} does not support writing. please use a differnt driver "
+            )
         ds: Optional[xr.Dataset] = self.read_data(
             bbox=bbox,
             mask=mask,
@@ -120,13 +131,6 @@ class RasterDatasetSource(DataSource):
         # update driver based on local path
         update: Dict[str, Any] = {"uri": file_path}
 
-        if driver_override:
-            driver: RasterDatasetDriver = driver_override
-        else:
-            # use local filesystem
-            driver: RasterDatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
-            )
         update.update({"driver": driver})
 
         driver.write(

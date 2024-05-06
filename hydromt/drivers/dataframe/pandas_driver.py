@@ -17,6 +17,7 @@ class PandasDriver(DataFrameDriver):
     """Driver for DataFrames using the pandas library."""
 
     name = "pandas"
+    supports_writing: bool = True
 
     def read_data(
         self,

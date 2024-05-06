@@ -2,12 +2,12 @@
 
 from copy import copy
 from logging import Logger, getLogger
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional
 
 from xarray import DataArray, Dataset
 
 from hydromt._typing.error import NoDataStrategy
-from hydromt._typing.type_def import Bbox, Geom, GeomBuffer, Predicate, TimeRange
+from hydromt._typing.type_def import Geom, Predicate, TimeRange
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.drivers.preprocessing import PREPROCESSORS
@@ -33,7 +33,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> Union[Dataset, DataArray]:
+    ) -> Dataset:
         """
         Read tabular datafiles like csv or parquet into to an xarray DataSet.
 
@@ -42,7 +42,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         warn_on_unused_kwargs(
             self.__class__.__name__,
             {
-                "buffer": buffer,
                 "predicate": predicate,
                 "variables": variables,
                 "time_range": time_range,
@@ -66,14 +65,17 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
             if not preprocessor:
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
-        data = open_geodataset(
-            fn_locs=uri, bbox=bbox, mask=mask, logger=logger, **options
-        )
+        data = open_geodataset(fn_locs=uri, geom=mask, logger=logger, **options)
 
         if preprocessor is None:
-            return data
+            out = data
         else:
-            return preprocessor(data)
+            out = preprocessor(data)
+
+        if isinstance(out, DataArray):
+            return out.to_dataset()
+        else:
+            return out
 
     def write(self):
         """Not implemented."""
