@@ -39,6 +39,20 @@ class TestRasterioDriver:
         driver.read(uri=str(Path(vrt_tiled_raster_ds) / "*.vrt"))
         assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
+    @pytest.fixture()
+    def small_tif(self, tmp_dir: Path, rioda: xr.DataArray) -> str:
+        path = tmp_dir / "small_tif.tif"
+        rioda.raster.to_raster(str(path))
+        return str(path)
+
+    def test_reads(self, small_tif: str, rioda: xr.DataArray):
+        ds: xr.Dataset = RasterioDriver().read(small_tif)
+        xr.testing.assert_equal(rioda, ds["small_tif"])
+
+    def test_renames_single_var(self, small_tif: str):
+        ds: xr.Dataset = RasterioDriver().read_data([small_tif], variables=["test"])
+        assert list(ds.data_vars) == ["test"]
+
 
 class TestOpenMFRaster:
     @pytest.fixture()
