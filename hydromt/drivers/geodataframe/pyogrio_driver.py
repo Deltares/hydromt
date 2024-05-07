@@ -26,7 +26,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         uris: List[str],
         *,
         mask: Optional[Geom] = None,
-        crs: Optional[CRS] = None,
+        variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -37,7 +37,9 @@ class PyogrioDriver(GeoDataFrameDriver):
         args:
         """
         warn_on_unused_kwargs(
-            self.__class__.__name__, {"crs": crs, "predicate": predicate}, logger
+            self.__class__.__name__,
+            {"predicate": predicate},
+            logger,
         )
         if len(uris) > 1:
             raise ValueError(
@@ -49,7 +51,7 @@ class PyogrioDriver(GeoDataFrameDriver):
             bbox = bbox_from_file_and_mask(_uri, mask=mask)
         else:
             bbox = None
-        return read_dataframe(_uri, bbox=bbox, **self.options)
+        return read_dataframe(_uri, bbox=bbox, columns=variables, **self.options)
 
     def write(
         self,

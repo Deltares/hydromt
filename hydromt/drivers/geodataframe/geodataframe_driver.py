@@ -46,6 +46,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             uris,
             mask=mask,
             predicate=predicate,
+            variables=variables,
             logger=logger,
             handle_nodata=handle_nodata,
         )
@@ -58,6 +59,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         *,
         mask: Optional[Geom] = None,
         predicate: str = "intersects",
+        variables: Optional[List[str]] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:

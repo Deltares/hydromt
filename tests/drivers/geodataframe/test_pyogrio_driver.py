@@ -95,6 +95,15 @@ class TestPyogrioDriver:
         gdf = driver.read(uri, mask=mask)
         assert gdf.shape == (1, 4)
 
+    @fixture_uris
+    def test_read_variables(
+        self, uri: str, request: pytest.FixtureRequest, driver: PyogrioDriver
+    ):
+        uri = request.getfixturevalue(uri)
+        variables = ["country"]
+        gdf = driver.read(uri, variables=variables)
+        assert set(gdf.columns) == set(variables + ["geometry"])
+
     def test_write(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
         df_path = tmp_dir / "temp.gpkg"
         driver = PyogrioDriver()
