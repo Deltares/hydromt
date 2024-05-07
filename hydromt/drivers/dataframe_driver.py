@@ -33,8 +33,6 @@ class DataFrameDriver(BaseDriver, ABC):
         Read in any compatible data source to a pandas `DataFrame`.
 
         args:
-            mask: Optional[Geom]. Mask for features to match the predicate, preferably
-                in the same CRS.
         """
         # Merge static kwargs from the catalog with dynamic kwargs from the query.
         uris = self.metadata_resolver.resolve(

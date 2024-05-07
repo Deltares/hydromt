@@ -63,6 +63,18 @@ class TestRasterioDriver:
         )
         assert list(ds.data_vars) == ["test"]
 
+    def test_sets_nodata(self, rioda: xr.DataArray, tmp_dir: Path):
+        # hard-reset nodata value of rioda (cannot use set_nodata to set None)
+        rioda.rio.set_nodata(None, inplace=True)
+        rioda.rio.write_nodata(None, inplace=True)
+        rioda.raster.set_nodata(None)
+        uri: str = str(tmp_dir / "test_sets_nodata.tif")
+        rioda.raster.to_raster(uri)
+        ds: xr.Dataset = RasterioDriver().read(
+            uri, SourceMetadata(nodata=np.float64(42))
+        )
+        assert ds["test_sets_nodata"].raster.nodata == 42
+
 
 class TestOpenMFRaster:
     @pytest.fixture()
