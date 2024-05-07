@@ -9,11 +9,16 @@ import rasterio
 import xarray as xr
 
 from hydromt.config import SETTINGS
+from hydromt.data_source import SourceMetadata
 from hydromt.drivers.rasterio_driver import RasterioDriver, open_mfraster, open_raster
 from hydromt.gis.raster import full_from_transform
 
 
 class TestRasterioDriver:
+    @pytest.fixture()
+    def metadata(self) -> SourceMetadata:
+        return SourceMetadata()
+
     @pytest.fixture()
     def _test_settings(self, tmp_dir: Path):
         SETTINGS.cache_root = tmp_dir / "TestRasterioDriver"
@@ -36,7 +41,10 @@ class TestRasterioDriver:
     def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
         cache_dir: str = "tests_caches_tifs_from_vrt"
         driver = RasterioDriver(options={"cache_dir": cache_dir})
-        driver.read(uri=str(Path(vrt_tiled_raster_ds) / "*.vrt"))
+        driver.read(
+            uri=str(Path(vrt_tiled_raster_ds) / "*.vrt"),
+            metadata=SourceMetadata(nodata=np.int32(0)),
+        )
         assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
     @pytest.fixture()
@@ -45,12 +53,14 @@ class TestRasterioDriver:
         rioda.raster.to_raster(str(path))
         return str(path)
 
-    def test_reads(self, small_tif: str, rioda: xr.DataArray):
-        ds: xr.Dataset = RasterioDriver().read(small_tif)
+    def test_reads(self, small_tif: str, rioda: xr.DataArray, metadata: SourceMetadata):
+        ds: xr.Dataset = RasterioDriver().read(small_tif, metadata)
         xr.testing.assert_equal(rioda, ds["small_tif"])
 
-    def test_renames_single_var(self, small_tif: str):
-        ds: xr.Dataset = RasterioDriver().read_data([small_tif], variables=["test"])
+    def test_renames_single_var(self, small_tif: str, metadata: SourceMetadata):
+        ds: xr.Dataset = RasterioDriver().read_data(
+            [small_tif], metadata, variables=["test"]
+        )
         assert list(ds.data_vars) == ["test"]
 
 

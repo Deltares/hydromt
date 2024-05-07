@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import xarray as xr
 
@@ -10,6 +10,10 @@ from hydromt._typing import Geom, StrPath, TimeRange, Variables, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
 
 from .base_driver import BaseDriver
+
+if TYPE_CHECKING:
+    from hydromt.data_source import SourceMetadata
+
 
 logger: Logger = getLogger(__name__)
 
@@ -20,6 +24,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
     def read(
         self,
         uri: str,
+        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
@@ -48,6 +53,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         )
         return self.read_data(
             uris,
+            metadata,
             mask=mask,
             time_range=time_range,
             variables=variables,
@@ -60,6 +66,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
     def read_data(
         self,
         uris: List[str],
+        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,

@@ -48,6 +48,7 @@ class DataFrameSource(DataSource):
         self._used = True
         gdf: pd.DataFrame = self.driver.read(
             self.uri,
+            self.metadata,
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,

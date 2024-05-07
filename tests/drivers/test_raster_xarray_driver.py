@@ -10,6 +10,7 @@ import zarr
 from pytest_mock import MockerFixture
 from xarray import open_mfdataset
 
+from hydromt.data_source import SourceMetadata
 from hydromt.drivers.preprocessing import round_latlon
 from hydromt.drivers.raster_xarray_driver import RasterDatasetXarrayDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
@@ -17,7 +18,11 @@ from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 
 class TestRasterXarrayDriver:
-    def test_calls_preprocess(self, mocker: MockerFixture):
+    @pytest.fixture()
+    def metadata(self):
+        return SourceMetadata()
+
+    def test_calls_preprocess(self, mocker: MockerFixture, metadata: SourceMetadata):
         mock_xr_open: mocker.MagicMock = mocker.patch(
             "hydromt.drivers.raster_xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
@@ -35,6 +40,7 @@ class TestRasterXarrayDriver:
         )
         res: xr.Dataset = driver.read(
             uri,
+            metadata,
             variables=["var1", "var2"],
         )
         call_args = mock_xr_open.call_args
@@ -46,11 +52,13 @@ class TestRasterXarrayDriver:
             driver.options.get("preprocess") == "round_latlon"
         )  # test does not consume property
 
-    def test_write(self, raster_ds: xr.Dataset, tmp_path: Path):
+    def test_write(
+        self, raster_ds: xr.Dataset, tmp_path: Path, metadata: SourceMetadata
+    ):
         netcdf_path = tmp_path / f"{uuid4().hex}.nc"
         driver = RasterDatasetXarrayDriver()
         driver.write(netcdf_path, raster_ds)
-        assert np.all(driver.read(str(netcdf_path)) == raster_ds)
+        assert np.all(driver.read(str(netcdf_path), metadata) == raster_ds)
 
     @pytest.fixture()
     def example_zarr_file(self, tmp_dir: Path) -> Path:
@@ -81,22 +89,26 @@ class TestRasterXarrayDriver:
         store.close()
         return tmp_path
 
-    def test_zarr_read(self, example_zarr_file: Path):
+    def test_zarr_read(self, example_zarr_file: Path, metadata: SourceMetadata):
         res: xr.Dataset = RasterDatasetXarrayDriver(
             metadata_resolver=ConventionResolver()
-        ).read(str(example_zarr_file))
+        ).read(str(example_zarr_file), metadata)
         assert list(res.data_vars.keys()) == ["variable"]
         assert res["variable"].shape == (10, 10)
         assert list(res.coords.keys()) == ["xc", "yc"]
         assert res["variable"].values[0, 0] == 42
 
-    def test_zarr_write(self, raster_ds: xr.Dataset, tmp_dir: Path):
+    def test_zarr_write(
+        self, raster_ds: xr.Dataset, tmp_dir: Path, metadata: SourceMetadata
+    ):
         zarr_path: Path = tmp_dir / "raster.zarr"
         driver = RasterDatasetXarrayDriver()
         driver.write(zarr_path, raster_ds)
-        assert np.all(driver.read(str(zarr_path)) == raster_ds)
+        assert np.all(driver.read(str(zarr_path), metadata) == raster_ds)
 
-    def test_calls_zarr_with_zarr_ext(self, mocker: MockerFixture):
+    def test_calls_zarr_with_zarr_ext(
+        self, mocker: MockerFixture, metadata: SourceMetadata
+    ):
         mock_xr_open: mocker.MagicMock = mocker.patch(
             "hydromt.drivers.raster_xarray_driver.xr.open_zarr",
             spec=open_mfdataset,
@@ -111,10 +123,13 @@ class TestRasterXarrayDriver:
         driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
         _ = driver.read(
             uri,
+            metadata,
         )
         assert mock_xr_open.call_count == 1
 
-    def test_calls_nc_func_with_nc_ext(self, mocker: MockerFixture):
+    def test_calls_nc_func_with_nc_ext(
+        self, mocker: MockerFixture, metadata: SourceMetadata
+    ):
         mock_xr_open: mocker.MagicMock = mocker.patch(
             "hydromt.drivers.raster_xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
@@ -129,5 +144,6 @@ class TestRasterXarrayDriver:
         driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
         _ = driver.read(
             uri,
+            metadata,
         )
         assert mock_xr_open.call_count == 1

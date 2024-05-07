@@ -4,9 +4,10 @@ from io import IOBase
 from logging import Logger, getLogger
 from os.path import basename
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import dask
+import numpy as np
 import rasterio
 import rioxarray
 import xarray as xr
@@ -20,6 +21,10 @@ from hydromt.data_adapter.caching import cache_vrt_tiles
 from hydromt.drivers import RasterDatasetDriver
 from hydromt.gis.merge import merge
 
+if TYPE_CHECKING:
+    from hydromt.data_source import SourceMetadata
+
+
 logger: Logger = getLogger(__name__)
 
 
@@ -31,6 +36,7 @@ class RasterioDriver(RasterDatasetDriver):
     def read_data(
         self,
         uris: List[str],
+        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         time_range: Optional[TimeRange] = None,
@@ -67,8 +73,8 @@ class RasterioDriver(RasterDatasetDriver):
             uris = uris_cached
 
         # NoData part should be done in DataAdapter.
-        # if np.issubdtype(type(self.nodata), np.number):
-        #     kwargs.update(nodata=self.nodata)
+        if np.issubdtype(type(metadata.nodata), np.number):
+            kwargs.update(nodata=metadata.nodata)
         # TODO: Implement zoom levels in https://github.com/Deltares/hydromt/issues/875
         # if zoom_level is not None and "{zoom_level}" not in uri:
         #     zls_dict, crs = self._get_zoom_levels_and_crs(uris[0], logger=logger)
@@ -93,6 +99,7 @@ def open_raster(
     uri: Union[StrPath, IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
     mask_nodata: bool = False,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
+    nodata: Union[int, float, None] = None,
     logger: Logger = logger,
     **kwargs,
 ) -> xr.DataArray:
@@ -106,6 +113,8 @@ def open_raster(
         Path to the file to open. Or already open rasterio dataset.
     mask_nodata : bool, optional
         set nodata values to np.nan (xarray default nodata value)
+    nodata: int, float, optional
+        Set nodata value if missing
     chunks : int, tuple or dict, optional
         Chunk sizes along each dimension, e.g., ``5``, ``(5, 5)`` or
         ``{'x': 5, 'y': 5}``. If chunks is provided, it used to load the new
@@ -133,13 +142,13 @@ def open_raster(
     da = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
     # set missing _FillValue
     # TODO: Find a way of getting metadata into drivers again?.
-    # if mask_nodata:
-    #     da.raster.set_nodata(np.nan)
-    # elif da.raster.nodata is None:
-    #     if nodata is not None:
-    #         da.raster.set_nodata(nodata)
-    #     else:
-    #         logger.warning(f"nodata value missing for {uri}")
+    if mask_nodata:
+        da.raster.set_nodata(np.nan)
+    elif da.raster.nodata is None:
+        if nodata is not None:
+            da.raster.set_nodata(nodata)
+        else:
+            logger.warning(f"nodata value missing for {uri}")
     # there is no option for scaling but not masking ...
     scale_factor = da.attrs.pop("scale_factor", 1)
     add_offset = da.attrs.pop("add_offset", 0)

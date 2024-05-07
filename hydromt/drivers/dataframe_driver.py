@@ -1,12 +1,16 @@
 """Generic driver for reading and writing DataFrames."""
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import pandas as pd
 
 from hydromt._typing import NoDataStrategy, StrPath, TimeRange, Variables
 from hydromt.drivers import BaseDriver
+
+if TYPE_CHECKING:
+    from hydromt.data_source import SourceMetadata
+
 
 logger: Logger = getLogger(__name__)
 
@@ -17,6 +21,7 @@ class DataFrameDriver(BaseDriver, ABC):
     def read(
         self,
         uri: str,
+        metadata: "SourceMetadata",
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
@@ -41,6 +46,7 @@ class DataFrameDriver(BaseDriver, ABC):
         )
         df = self.read_data(
             uris,
+            metadata,
             logger=logger,
             variables=variables,
             time_range=time_range,
@@ -52,9 +58,10 @@ class DataFrameDriver(BaseDriver, ABC):
     def read_data(
         self,
         uris: List[str],
+        metadata: "SourceMetadata",
         *,
-        variables: Optional[Variables],
-        time_range: Optional[TimeRange],
+        variables: Optional[Variables] = None,
+        time_range: Optional[TimeRange] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:

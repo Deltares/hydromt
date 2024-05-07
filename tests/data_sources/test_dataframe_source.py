@@ -28,7 +28,7 @@ def MockDataFrameDriver(df: pd.DataFrame) -> Type[DataFrameDriver]:
         def write(self, path: StrPath, df: pd.DataFrame, **kwargs) -> None:
             pass
 
-        def read(self, uri: str, **kwargs) -> pd.DataFrame:
+        def read(self, uri: str, metadata: SourceMetadata, **kwargs) -> pd.DataFrame:
             return self.read_data([uri], **kwargs)
 
         def read_data(self, uris: List[str], **kwargs) -> pd.DataFrame:

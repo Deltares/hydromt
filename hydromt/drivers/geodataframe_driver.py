@@ -2,13 +2,17 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 import geopandas as gpd
 
 from hydromt._typing import Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers import BaseDriver
+
+if TYPE_CHECKING:
+    from hydromt.data_source import SourceMetadata
+
 
 logger: Logger = getLogger(__name__)
 
@@ -19,6 +23,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
     def read(
         self,
         uri: str,
+        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
@@ -44,6 +49,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         )
         gdf = self.read_data(
             uris,
+            metadata,
             mask=mask,
             predicate=predicate,
             logger=logger,
@@ -55,6 +61,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
     def read_data(
         self,
         uris: List[str],
+        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         predicate: str = "intersects",

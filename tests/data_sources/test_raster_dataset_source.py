@@ -105,7 +105,7 @@ class TestRasterDatasetSource:
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, **kwargs) -> xr.Dataset:
+            def read(self, uri: str, metadata: SourceMetadata, **kwargs) -> xr.Dataset:
                 return self.read_data([uri], **kwargs)
 
             def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:

@@ -16,6 +16,7 @@ from hydromt._typing import StrPath
 from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
+from hydromt.data_source import SourceMetadata
 from hydromt.data_source.geodataframe import GeoDataFrameSource
 from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
 from hydromt.drivers.pyogrio_driver import PyogrioDriver
@@ -185,10 +186,14 @@ class TestGeoDataFrameSource:
             def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
-                return self.read_data([uri], **kwargs)
+            def read(
+                self, uri: str, metadata: SourceMetadata, **kwargs
+            ) -> gpd.GeoDataFrame:
+                return self.read_data([uri], metadata, **kwargs)
 
-            def read_data(self, uris: List[str], **kwargs) -> gpd.GeoDataFrame:
+            def read_data(
+                self, uris: List[str], metadata: SourceMetadata, **kwargs
+            ) -> gpd.GeoDataFrame:
                 return geodf
 
         return MockGeoDataFrameDriver
