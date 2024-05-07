@@ -167,7 +167,7 @@ def merge(
         )
 
     # creat output array
-    nodata = da0.raster.nodata  # TODO: Driver also needs NoData, now what?
+    nodata = da0.raster.nodata
     isnan = np.isnan(nodata)
     dtype = da0.dtype
     da_out = full_from_transform(

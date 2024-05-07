@@ -427,7 +427,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds.attrs.update(metadata.model_dump(exclude=["attrs"]))
         return ds
 
-    # TODO: uses rasterio and is specific to driver. Should be moved to driver
+    # TODO: https://github.com/Deltares/hydromt/issues/875
+    # uses rasterio and is specific to driver. Should be moved to driver
     def _get_zoom_levels_and_crs(
         self, fn: Optional[StrPath] = None, logger=logger
     ) -> Tuple[Optional[dict], Optional[int]]:
