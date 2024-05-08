@@ -24,8 +24,8 @@ class TestRasterioDriver:
         return SourceMetadata()
 
     @pytest.fixture()
-    def _test_settings(self, tmp_path: Path):  # yielding tmp_dir errors on windows
-        SETTINGS.cache_root = tmp_path / "TestRasterioDriver"
+    def _test_settings(self, tmp_dir: Path):
+        SETTINGS.cache_root = tmp_dir / "TestRasterioDriver"
         yield
         SETTINGS.cache_root = SETTINGS.model_fields["cache_root"].default
 
@@ -83,7 +83,7 @@ class TestRasterioDriver:
 class TestOpenMFRaster:
     @pytest.fixture()
     def raster_file(self, tmp_dir: Path, rioda: xr.DataArray) -> str:
-        uri_tif = str(tmp_dir / "test.tif")
+        uri_tif = str(tmp_dir / "test_open_mfraster.tif")
         rioda.raster.to_raster(uri_tif, crs=3857, tags={"name": "test"})
         return uri_tif
 
@@ -163,8 +163,9 @@ class TestOpenMFRaster:
         dvars2 = open_mfraster(paths, mask_nodata=True).raster.vars
         assert np.all([f"{prefix}{n}" in dvars2 for n in ds.raster.vars])
         # test writing to subdir
-        ds.rename({"test": "test/test"}).raster.to_mapstack(root, driver="GTiff")
-        assert (Path(root) / "test" / "test.tif").is_file()
+        new_name: str = "test_open_mfraster_paths"
+        ds.rename({"test": f"test/{new_name}"}).raster.to_mapstack(root, driver="GTiff")
+        assert (Path(root) / "test" / f"{new_name}.tif").is_file()
 
     def test_open_mfraster_not_found(self, tmp_dir: Path):
         with pytest.raises(OSError, match="no files to open"):

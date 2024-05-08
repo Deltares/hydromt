@@ -588,7 +588,7 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
 
 
 def test_to_raster(rioda: xr.DataArray, tmp_dir: Path):
-    uri_tif = str(tmp_dir / "test.tif")
+    uri_tif = str(tmp_dir / "test_to_raster.tif")
     rioda.raster.to_raster(uri_tif)
     assert Path(uri_tif).is_file()
 
