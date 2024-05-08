@@ -24,8 +24,8 @@ class TestRasterioDriver:
         return SourceMetadata()
 
     @pytest.fixture()
-    def _test_settings(self, tmp_dir: Path):
-        SETTINGS.cache_root = tmp_dir / "TestRasterioDriver"
+    def _test_settings(self, tmp_path: Path):  # yielding tmp_dir errors on windows
+        SETTINGS.cache_root = tmp_path / "TestRasterioDriver"
         yield
         SETTINGS.cache_root = SETTINGS.model_fields["cache_root"].default
 
