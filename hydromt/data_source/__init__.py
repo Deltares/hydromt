@@ -15,6 +15,5 @@ __all__ = [
     "GeoDataFrameSource",
     "GeoDatasetSource",
     "RasterDatasetSource",
-    "metadata",
     "create_source",
 ]
