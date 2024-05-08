@@ -24,16 +24,16 @@ class TestRasterioDriver:
         return SourceMetadata()
 
     @pytest.fixture()
-    def _test_settings(self, tmp_dir: Path):
-        SETTINGS.cache_root = tmp_dir / "TestRasterioDriver"
+    def _test_settings(self, tmp_path: Path):
+        SETTINGS.cache_root = tmp_path / "TestRasterioDriver"
         yield
         SETTINGS.cache_root = SETTINGS.model_fields["cache_root"].default
 
     @pytest.fixture()
-    def vrt_tiled_raster_ds(self, tmp_dir: Path, rioda_large: xr.DataArray) -> str:
+    def vrt_tiled_raster_ds(self, tmp_path: Path, rioda_large: xr.DataArray) -> str:
         # write vrt data
         name = "test_vrt_tiled_raster_ds"
-        root = tmp_dir / name
+        root = tmp_path / name
         rioda_large.raster.to_xyz_tiles(
             root=root,
             tile_size=256,
@@ -52,8 +52,8 @@ class TestRasterioDriver:
         assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
     @pytest.fixture()
-    def small_tif(self, tmp_dir: Path, rioda: xr.DataArray) -> str:
-        path = tmp_dir / "small_tif.tif"
+    def small_tif(self, tmp_path: Path, rioda: xr.DataArray) -> str:
+        path = tmp_path / "small_tif.tif"
         rioda.raster.to_raster(str(path))
         return str(path)
 
@@ -67,12 +67,12 @@ class TestRasterioDriver:
         )
         assert list(ds.data_vars) == ["test"]
 
-    def test_sets_nodata(self, rioda: xr.DataArray, tmp_dir: Path):
+    def test_sets_nodata(self, rioda: xr.DataArray, tmp_path: Path):
         # hard-reset nodata value of rioda (cannot use set_nodata to set None)
         rioda.rio.set_nodata(None, inplace=True)
         rioda.rio.write_nodata(None, inplace=True)
         rioda.raster.set_nodata(None)
-        uri: str = str(tmp_dir / "test_sets_nodata.tif")
+        uri: str = str(tmp_path / "test_sets_nodata.tif")
         rioda.raster.to_raster(uri)
         ds: xr.Dataset = RasterioDriver().read(
             uri, SourceMetadata(nodata=np.float64(42))
@@ -82,8 +82,8 @@ class TestRasterioDriver:
 
 class TestOpenMFRaster:
     @pytest.fixture()
-    def raster_file(self, tmp_dir: Path, rioda: xr.DataArray) -> str:
-        uri_tif = str(tmp_dir / "test_open_mfraster.tif")
+    def raster_file(self, tmp_path: Path, rioda: xr.DataArray) -> str:
+        uri_tif = str(tmp_path / "test_open_mfraster.tif")
         rioda.raster.to_raster(uri_tif, crs=3857, tags={"name": "test"})
         return uri_tif
 
@@ -98,8 +98,8 @@ class TestOpenMFRaster:
         assert np.any(np.isnan(da_masked.values))
 
     @pytest.fixture()
-    def raster_file_masked_windowed(self, tmp_dir: Path, raster_file: str) -> str:
-        uri_tif = str(tmp_dir / "test_masked.tif")
+    def raster_file_masked_windowed(self, tmp_path: Path, raster_file: str) -> str:
+        uri_tif = str(tmp_path / "test_masked.tif")
         da_masked = open_raster(raster_file, mask_nodata=True)
         da_masked.raster.to_raster(uri_tif, nodata=-9999, windowed=True)
         return uri_tif
@@ -110,8 +110,10 @@ class TestOpenMFRaster:
         assert not np.any(np.isnan(da_windowed.values))
 
     @pytest.fixture()
-    def raster_file_t_dim(self, tmp_dir: Path, raster_file_masked_windowed: str) -> str:
-        uri_tif = str(tmp_dir / "t_dim.tif")
+    def raster_file_t_dim(
+        self, tmp_path: Path, raster_file_masked_windowed: str
+    ) -> str:
+        uri_tif = str(tmp_path / "t_dim.tif")
         da_masked = open_raster(raster_file_masked_windowed)
         da_masked.fillna(da_masked.attrs["_FillValue"]).expand_dims("t").round(
             0
@@ -124,11 +126,11 @@ class TestOpenMFRaster:
 
     @pytest.fixture()
     def raster_mapstack(
-        self, tmp_dir: Path, rioda: xr.DataArray
+        self, tmp_path: Path, rioda: xr.DataArray
     ) -> Tuple[str, str, xr.Dataset]:
         ds = rioda.to_dataset()
         prefix = "_test_"
-        root = str(tmp_dir)
+        root = str(tmp_path)
         ds.raster.to_mapstack(root, prefix=prefix, mask=True, driver="GTiff")
         return root, prefix, ds
 
@@ -167,20 +169,20 @@ class TestOpenMFRaster:
         ds.rename({"test": f"test/{new_name}"}).raster.to_mapstack(root, driver="GTiff")
         assert (Path(root) / "test" / f"{new_name}.tif").is_file()
 
-    def test_open_mfraster_not_found(self, tmp_dir: Path):
+    def test_open_mfraster_not_found(self, tmp_path: Path):
         with pytest.raises(OSError, match="no files to open"):
-            open_mfraster(str(tmp_dir / "test*.tiffff"))
+            open_mfraster(str(tmp_path / "test*.tiffff"))
 
-    def test_open_mfraster_mergeerror(self, tmp_dir: Path):
+    def test_open_mfraster_mergeerror(self, tmp_path: Path):
         da0: xr.DataArray = full_from_transform(
             [0.5, 0.0, 3.0, 0.0, -0.5, -9.0], (4, 6), nodata=-1, name="test"
         )
         da1: xr.DataArray = full_from_transform(
             [0.2, 0.0, 3.0, 0.0, 0.25, -11.0], (8, 15), nodata=-1, name="test"
         )
-        da0.raster.to_raster(str(tmp_dir / "test0.tif"))
-        da1.raster.to_raster(str(tmp_dir / "test1.tif"))
+        da0.raster.to_raster(str(tmp_path / "test0.tif"))
+        da1.raster.to_raster(str(tmp_path / "test1.tif"))
         with pytest.raises(
             xr.MergeError, match="Geotransform and/or shape do not match"
         ):
-            open_mfraster(str(tmp_dir / "test*.tif"))
+            open_mfraster(str(tmp_path / "test*.tif"))
