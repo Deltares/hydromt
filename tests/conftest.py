@@ -34,7 +34,7 @@ dask_config.set(scheduler="single-threaded")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture()
 def tmp_dir() -> Generator[Path, None, None]:
     with TemporaryDirectory() as tempdirname:
         yield Path(tempdirname)
