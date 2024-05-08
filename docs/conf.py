@@ -132,7 +132,6 @@ categories = [
     "other",
 ]
 data_cat = hydromt.DataCatalog()
-data_cat.set_predefined_catalogs(r"../data/predefined_catalogs.yml")
 predefined_catalogs = data_cat.predefined_catalogs
 for name in predefined_catalogs:
     try:
@@ -140,8 +139,9 @@ for name in predefined_catalogs:
     except OSError as e:
         print(e)
         continue
-    note = predefined_catalogs[name].get("notes", "")
-    write_nested_dropdown(name, data_cat, note=note, categories=categories)
+    # breakpoint()
+    # note = predefined_catalogs[name].notes
+    write_nested_dropdown(name, data_cat, categories=categories)
     data_cat._sources = {}  # reset
 with open("_generated/predefined_catalogs.rst", "w") as f:
     f.writelines(
