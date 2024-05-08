@@ -214,7 +214,7 @@ def open_raster_from_tindex(
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
 
     # Need to do dynamic import here until we create a new driver.
-    from hydromt.drivers.rasterio_driver import open_mfraster
+    from hydromt.drivers.raster.rasterio_driver import open_mfraster
 
     ds_out = open_mfraster(
         paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
