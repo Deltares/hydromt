@@ -3,7 +3,7 @@ from copy import copy
 import pandas as pd
 
 from hydromt.data_adapter.dataframe import DataFrameAdapter
-from hydromt.data_source import SourceMetadata
+from hydromt.metadata import SourceMetadata
 
 
 class TestDataFrameAdapter:

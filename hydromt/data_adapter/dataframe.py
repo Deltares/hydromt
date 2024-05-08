@@ -1,16 +1,13 @@
 """Data adapter for DataFrames."""
 from logging import Logger, getLogger
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 import numpy as np
 import pandas as pd
 
 from hydromt._typing import NoDataStrategy, TimeRange, Variables
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
-
+from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 
@@ -21,7 +18,7 @@ class DataFrameAdapter(DataAdapterBase):
     def transform(
         self,
         df: pd.DataFrame,
-        metadata: "SourceMetadata",
+        metadata: Optional[SourceMetadata] = None,
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,

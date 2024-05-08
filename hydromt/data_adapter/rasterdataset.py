@@ -38,7 +38,7 @@ from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
 
 if TYPE_CHECKING:
-    from hydromt.data_source.data_source import SourceMetadata
+    from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
 

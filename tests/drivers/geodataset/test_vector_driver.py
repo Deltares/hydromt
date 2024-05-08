@@ -8,7 +8,6 @@ import pytest
 from pytest_mock import MockerFixture
 from xarray import Dataset
 
-from hydromt.data_source import SourceMetadata
 from hydromt.drivers import GeoDatasetVectorDriver
 from hydromt.gis import vector
 from hydromt.io.readers import open_geodataset
@@ -17,11 +16,7 @@ from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 
 class TestGeoDatasetVectorDriver:
-    @pytest.fixture()
-    def metadata(self):
-        return SourceMetadata()
-
-    def test_calls_preprocess(self, mocker: MockerFixture, metadata: SourceMetadata):
+    def test_calls_preprocess(self, mocker: MockerFixture):
         mock_geods_open: mocker.MagicMock = mocker.patch(
             "hydromt.drivers.geodataset.vector_driver.open_geodataset",
             spec=open_geodataset,
@@ -47,7 +42,6 @@ class TestGeoDatasetVectorDriver:
         )
         res: Optional[Dataset] = driver.read(
             uri,
-            metadata,
             variables=["var1"],
         )
         assert res is not None
@@ -68,25 +62,22 @@ class TestGeoDatasetVectorDriver:
         geodf.to_file(gdf_path, driver="GeoJSON")
         return gdf_path
 
-    def test_read(self, geodf, example_vector_geods: Path, metadata: SourceMetadata):
+    def test_read(self, geodf, example_vector_geods: Path):
         res = GeoDatasetVectorDriver(metadata_resolver=ConventionResolver()).read(
             str(example_vector_geods),
-            metadata,
         )
         ds = vector.GeoDataset.from_gdf(geodf)
         assert res is not None
         assert ds.equals(res)
 
-    def test_raises_on_multiple_uris(self, metadata: SourceMetadata):
+    def test_raises_on_multiple_uris(self):
         with pytest.raises(
             ValueError,
             match="GeodatasetVectorDriver only supports reading from one URI per source",
         ):
-            _ = GeoDatasetVectorDriver().read_data(["one.zarr", "two.txt"], metadata)
+            _ = GeoDatasetVectorDriver().read_data(["one.zarr", "two.txt"])
 
-    def test_calls_open_geodataset(
-        self, mocker: MockerFixture, metadata: SourceMetadata
-    ):
+    def test_calls_open_geodataset(self, mocker: MockerFixture):
         mock_geods_open: mocker.MagicMock = mocker.patch(
             "hydromt.drivers.geodataset.vector_driver.open_geodataset",
             spec=open_geodataset,
@@ -99,5 +90,5 @@ class TestGeoDatasetVectorDriver:
 
         uri: str = "file.geojson"
         driver = GeoDatasetVectorDriver(metadata_resolver=FakeMetadataResolver())
-        _ = driver.read(uri, metadata)
+        _ = driver.read(uri)
         assert mock_geods_open.call_count == 1

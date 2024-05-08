@@ -60,10 +60,10 @@ class GeoDataFrameSource(DataSource):
             mask = parse_geom_bbox_buffer(mask, bbox, buffer)
         gdf: gpd.GeoDataFrame = self.driver.read(
             self.uri,
-            self.metadata,
             mask=mask,
             predicate=predicate,
             variables=variables,
+            metadata=self.metadata,
             handle_nodata=handle_nodata,
             logger=logger,
         )

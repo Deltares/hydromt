@@ -2,17 +2,14 @@
 
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 import pandas as pd
 
 from hydromt._typing import NoDataStrategy, StrPath, TimeRange, Variables
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.dataframe import DataFrameDriver
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
-
+from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 
@@ -26,10 +23,10 @@ class PandasDriver(DataFrameDriver):
     def read_data(
         self,
         uris: List[str],
-        metadata: "SourceMetadata",
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
@@ -40,7 +37,9 @@ class PandasDriver(DataFrameDriver):
                 f"{self.__class__.__name__} driver is not supported."
             )
         warn_on_unused_kwargs(
-            self.__class__.__name__, {"time_range": time_range}, logger
+            self.__class__.__name__,
+            {"time_range": time_range, "metadata": metadata},
+            logger,
         )
         uri = uris[0]
         extension: str = uri.split(".")[-1]

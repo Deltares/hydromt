@@ -21,10 +21,10 @@ from hydromt.components.vector import VectorComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.data_source import SourceMetadata
 from hydromt.drivers import GeoDataFrameDriver, RasterDatasetDriver
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.gis import raster, utils, vector
+from hydromt.metadata import SourceMetadata
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.models.model import Model
 from hydromt.root import ModelRoot

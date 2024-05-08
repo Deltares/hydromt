@@ -4,7 +4,7 @@ from io import IOBase
 from logging import Logger, getLogger
 from os.path import basename
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import dask
 import numpy as np
@@ -20,10 +20,7 @@ from hydromt.config import SETTINGS
 from hydromt.data_adapter.caching import cache_vrt_tiles
 from hydromt.drivers import RasterDatasetDriver
 from hydromt.gis.merge import merge
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
-
+from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 
@@ -36,19 +33,23 @@ class RasterioDriver(RasterDatasetDriver):
     def read_data(
         self,
         uris: List[str],
-        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         time_range: Optional[TimeRange] = None,
         variables: Optional[Variables] = None,
         zoom_level: Optional[ZoomLevel] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:
         """Read data using rasterio."""
+        if metadata is None:
+            metadata = SourceMetadata()
         # build up kwargs for open_raster
         warn_on_unused_kwargs(
-            self.__class__.__name__, {"time_range": time_range}, logger=logger
+            self.__class__.__name__,
+            {"time_range": time_range, "zoom_level": zoom_level},
+            logger=logger,
         )
         kwargs: Dict[str, Any] = {}
 

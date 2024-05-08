@@ -17,7 +17,7 @@ from hydromt.gis import parse_geom_bbox_buffer, utils
 from .data_adapter_base import DataAdapterBase
 
 if TYPE_CHECKING:
-    from hydromt.data_source.data_source import SourceMetadata
+    from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 

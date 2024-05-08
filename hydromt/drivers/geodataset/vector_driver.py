@@ -2,7 +2,7 @@
 
 from copy import copy
 from logging import Logger, getLogger
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import Callable, List, Optional
 
 from xarray import DataArray, Dataset
 
@@ -12,11 +12,9 @@ from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.drivers.preprocessing import PREPROCESSORS
 from hydromt.io import open_geodataset
+from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
 
 
 class GeoDatasetVectorDriver(GeoDatasetDriver):
@@ -27,13 +25,13 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
     def read_data(
         self,
         uris: List[str],
-        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -50,6 +48,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                 "variables": variables,
                 "time_range": time_range,
                 "single_var_as_array": single_var_as_array,
+                "metadata": metadata,
             },
             logger,
         )

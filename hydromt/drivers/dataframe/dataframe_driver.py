@@ -1,16 +1,13 @@
 """Generic driver for reading and writing DataFrames."""
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 import pandas as pd
 
 from hydromt._typing import NoDataStrategy, StrPath, TimeRange, Variables
 from hydromt.drivers import BaseDriver
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
-
+from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 
@@ -21,10 +18,10 @@ class DataFrameDriver(BaseDriver, ABC):
     def read(
         self,
         uri: str,
-        metadata: "SourceMetadata",
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -44,10 +41,10 @@ class DataFrameDriver(BaseDriver, ABC):
         )
         df = self.read_data(
             uris,
-            metadata,
             logger=logger,
             variables=variables,
             time_range=time_range,
+            metadata=metadata,
             handle_nodata=handle_nodata,
         )
         return df
@@ -56,10 +53,10 @@ class DataFrameDriver(BaseDriver, ABC):
     def read_data(
         self,
         uris: List[str],
-        metadata: "SourceMetadata",
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:

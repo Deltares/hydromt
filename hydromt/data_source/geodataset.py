@@ -65,9 +65,9 @@ class GeoDatasetSource(DataSource):
 
         ds: Optional[xr.Dataset] = self.driver.read(
             self.uri,
-            self.metadata,
             time_range=tr,
             variables=vrs,
+            metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(

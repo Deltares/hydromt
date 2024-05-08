@@ -7,8 +7,9 @@ from pydantic import ValidationError
 
 from hydromt._typing import StrPath
 from hydromt.data_adapter import RasterDatasetAdapter
-from hydromt.data_source import RasterDatasetSource, SourceMetadata
+from hydromt.data_source import RasterDatasetSource
 from hydromt.drivers import RasterDatasetDriver
+from hydromt.metadata import SourceMetadata
 
 
 @pytest.fixture()
@@ -105,7 +106,7 @@ class TestRasterDatasetSource:
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, metadata: SourceMetadata, **kwargs) -> xr.Dataset:
+            def read(self, uri: str, **kwargs) -> xr.Dataset:
                 return self.read_data([uri], **kwargs)
 
             def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
@@ -122,12 +123,10 @@ class TestRasterDatasetSource:
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, metadata: SourceMetadata, **kwargs) -> xr.Dataset:
-                return self.read_data([uri], metadata, **kwargs)
+            def read(self, uri: str, **kwargs) -> xr.Dataset:
+                return self.read_data([uri], **kwargs)
 
-            def read_data(
-                self, uris: List[str], metadata: SourceMetadata, **kwargs
-            ) -> xr.Dataset:
+            def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
                 return raster_ds
 
         return MockWritableRasterDatasetDriver

@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 import xarray as xr
 
@@ -11,9 +11,7 @@ from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate
 from hydromt.drivers import BaseDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
+from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
 
@@ -24,7 +22,6 @@ class GeoDatasetDriver(BaseDriver, ABC):
     def read(
         self,
         uri: str,
-        metadata: "SourceMetadata",
         *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
@@ -33,6 +30,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -57,12 +55,12 @@ class GeoDatasetDriver(BaseDriver, ABC):
         )
         return self.read_data(
             uris,
-            metadata,
             mask=mask,
             predicate=predicate,
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
+            metadata=metadata,
             logger=logger,
             handle_nodata=handle_nodata,
         )
@@ -71,13 +69,13 @@ class GeoDatasetDriver(BaseDriver, ABC):
     def read_data(
         self,
         uris: List[str],
-        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,

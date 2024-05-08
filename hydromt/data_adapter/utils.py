@@ -11,7 +11,7 @@ import xarray as xr
 from hydromt._typing.type_def import TimeRange, Variables
 
 if TYPE_CHECKING:
-    from hydromt.data_source.data_source import SourceMetadata
+    from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
 

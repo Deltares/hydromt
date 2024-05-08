@@ -2,18 +2,16 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 import xarray as xr
 
 from hydromt._typing import Geom, StrPath, TimeRange, Variables, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers.base_driver import BaseDriver
+from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
 
 
 logger: Logger = getLogger(__name__)
@@ -25,12 +23,12 @@ class RasterDatasetDriver(BaseDriver, ABC):
     def read(
         self,
         uri: str,
-        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -54,11 +52,11 @@ class RasterDatasetDriver(BaseDriver, ABC):
         )
         return self.read_data(
             uris,
-            metadata,
             mask=mask,
             time_range=time_range,
             variables=variables,
             zoom_level=zoom_level,
+            metadata=metadata,
             logger=logger,
             handle_nodata=handle_nodata,
         )
@@ -67,12 +65,12 @@ class RasterDatasetDriver(BaseDriver, ABC):
     def read_data(
         self,
         uris: List[str],
-        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:

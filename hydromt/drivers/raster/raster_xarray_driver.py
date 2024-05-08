@@ -4,7 +4,7 @@ from copy import copy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import Callable, List, Optional
 
 import xarray as xr
 
@@ -13,10 +13,7 @@ from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
 from hydromt.drivers.raster.rasterdataset_driver import RasterDatasetDriver
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
-
+from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 
@@ -30,13 +27,13 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     def read_data(
         self,
         uris: List[str],
-        metadata: "SourceMetadata",
         *,
         logger: Logger = logger,
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
+        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -52,6 +49,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 "time_range": time_range,
                 "variables": variables,
                 "zoom_level": zoom_level,
+                "metadata": metadata,
             },
             logger,
         )

@@ -1,7 +1,7 @@
 """Driver to read geodataframes using Pyogrio."""
 
 from logging import Logger, getLogger
-from typing import TYPE_CHECKING, List, Optional
+from typing import List, Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info, write_dataframe
@@ -11,10 +11,7 @@ from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataframe.geodataframe_driver import GeoDataFrameDriver
-
-if TYPE_CHECKING:
-    from hydromt.data_source import SourceMetadata
-
+from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 
@@ -28,11 +25,11 @@ class PyogrioDriver(GeoDataFrameDriver):
     def read_data(
         self,
         uris: List[str],
-        metadata: "SourceMetadata",
         *,
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
@@ -43,7 +40,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         """
         warn_on_unused_kwargs(
             self.__class__.__name__,
-            {"predicate": predicate},
+            {"predicate": predicate, "metadata": metadata},
             logger,
         )
         if len(uris) > 1:

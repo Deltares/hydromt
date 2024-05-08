@@ -7,17 +7,12 @@ import pytest
 from shapely import box
 
 from hydromt._typing import Bbox
-from hydromt.data_source import SourceMetadata
 from hydromt.drivers import PyogrioDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 
 class TestPyogrioDriver:
-    @pytest.fixture()
-    def metadata(self):
-        return SourceMetadata()
-
     @pytest.fixture(scope="class")
     def uri_gjson(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test.geojson")
@@ -67,18 +62,17 @@ class TestPyogrioDriver:
         request: pytest.FixtureRequest,
         geodf: gpd.GeoDataFrame,
         driver: PyogrioDriver,
-        metadata: SourceMetadata,
     ):
         uri = request.getfixturevalue(uri)
-        gdf: gpd.GeoDataFrame = driver.read(uri, metadata).sort_values("id")
+        gdf: gpd.GeoDataFrame = driver.read(uri).sort_values("id")
         assert np.all(gdf.reset_index(drop=True) == geodf)  # fgb scrambles order
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
-    def test_read_nodata(self, driver: PyogrioDriver, metadata: SourceMetadata):
+    def test_read_nodata(self, driver: PyogrioDriver):
         with pytest.raises(FileNotFoundError):
-            driver.read("no_data.geojson", metadata)
+            driver.read("no_data.geojson")
 
-    def test_read_multiple_uris(self, metadata: SourceMetadata):
+    def test_read_multiple_uris(self):
         # Create Resolver that returns multiple uris
         class FakeResolver(MetaDataResolver):
             def resolve(self, uri: str, *args, **kwargs):
@@ -88,7 +82,7 @@ class TestPyogrioDriver:
             metadata_resolver=FakeResolver(),
         )
         with pytest.raises(ValueError, match="not supported"):
-            driver.read("uri_{variable}", metadata, variables=["more", "than", "one"])
+            driver.read("uri_{variable}", variables=["more", "than", "one"])
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
     @fixture_uris
@@ -97,12 +91,11 @@ class TestPyogrioDriver:
         uri: str,
         request: pytest.FixtureRequest,
         driver: PyogrioDriver,
-        metadata: SourceMetadata,
     ):
         uri = request.getfixturevalue(uri)
         bbox: Bbox = (-60, -34.5600, -55, -30)
         mask = gpd.GeoSeries(box(*bbox), crs=4326).to_crs(3857).buffer(10000)
-        gdf = driver.read(uri, metadata, mask=mask)
+        gdf = driver.read(uri, mask=mask)
         assert gdf.shape == (1, 4)
 
     @fixture_uris
@@ -111,17 +104,14 @@ class TestPyogrioDriver:
         uri: str,
         request: pytest.FixtureRequest,
         driver: PyogrioDriver,
-        metadata: SourceMetadata,
     ):
         uri = request.getfixturevalue(uri)
         variables = ["country"]
-        gdf = driver.read(uri, metadata, variables=variables)
+        gdf = driver.read(uri, variables=variables)
         assert set(gdf.columns) == set(variables + ["geometry"])
 
-    def test_write(
-        self, geodf: gpd.GeoDataFrame, tmp_dir: Path, metadata: SourceMetadata
-    ):
+    def test_write(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
         df_path = tmp_dir / "temp.gpkg"
         driver = PyogrioDriver()
         driver.write(geodf, df_path)
-        assert np.all(driver.read(str(df_path), metadata) == geodf)
+        assert np.all(driver.read(str(df_path)) == geodf)

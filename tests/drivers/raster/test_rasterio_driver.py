@@ -9,20 +9,16 @@ import rasterio
 import xarray as xr
 
 from hydromt.config import SETTINGS
-from hydromt.data_source import SourceMetadata
 from hydromt.drivers.raster.rasterio_driver import (
     RasterioDriver,
     open_mfraster,
     open_raster,
 )
 from hydromt.gis.raster import full_from_transform
+from hydromt.metadata import SourceMetadata
 
 
 class TestRasterioDriver:
-    @pytest.fixture()
-    def metadata(self) -> SourceMetadata:
-        return SourceMetadata()
-
     @pytest.fixture()
     def _test_settings(self, tmp_path: Path):
         SETTINGS.cache_root = tmp_path / "TestRasterioDriver"
@@ -47,7 +43,6 @@ class TestRasterioDriver:
         driver = RasterioDriver(options={"cache_dir": cache_dir})
         driver.read(
             uri=str(Path(vrt_tiled_raster_ds) / "*.vrt"),
-            metadata=SourceMetadata(nodata=np.int32(0)),
         )
         assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
@@ -57,14 +52,12 @@ class TestRasterioDriver:
         rioda.raster.to_raster(str(path))
         return str(path)
 
-    def test_reads(self, small_tif: str, rioda: xr.DataArray, metadata: SourceMetadata):
-        ds: xr.Dataset = RasterioDriver().read(small_tif, metadata)
+    def test_reads(self, small_tif: str, rioda: xr.DataArray):
+        ds: xr.Dataset = RasterioDriver().read(small_tif)
         xr.testing.assert_equal(rioda, ds["small_tif"])
 
-    def test_renames_single_var(self, small_tif: str, metadata: SourceMetadata):
-        ds: xr.Dataset = RasterioDriver().read_data(
-            [small_tif], metadata, variables=["test"]
-        )
+    def test_renames_single_var(self, small_tif: str):
+        ds: xr.Dataset = RasterioDriver().read_data([small_tif], variables=["test"])
         assert list(ds.data_vars) == ["test"]
 
     def test_sets_nodata(self, rioda: xr.DataArray, tmp_path: Path):
@@ -75,7 +68,7 @@ class TestRasterioDriver:
         uri: str = str(tmp_path / "test_sets_nodata.tif")
         rioda.raster.to_raster(uri)
         ds: xr.Dataset = RasterioDriver().read(
-            uri, SourceMetadata(nodata=np.float64(42))
+            uri, metadata=SourceMetadata(nodata=np.float64(42))
         )
         assert ds["test_sets_nodata"].raster.nodata == 42
 
