@@ -5,9 +5,8 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from hydromt._typing import NoDataStrategy, TimeRange, Variables
+from hydromt._typing import NoDataStrategy, SourceMetadata, TimeRange, Variables
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
-from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 

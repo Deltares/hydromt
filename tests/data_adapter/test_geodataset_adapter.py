@@ -2,9 +2,9 @@ import numpy as np
 import pytest
 import xarray as xr
 
+from hydromt._typing import SourceMetadata
 from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.gis.utils import parse_geom_bbox_buffer
-from hydromt.metadata import SourceMetadata
 
 
 class TestGeoDatasetAdapter:

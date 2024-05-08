@@ -7,6 +7,7 @@ from .error import (
     _exec_nodata_strat,
 )
 from .fsspec_types import FS
+from .metadata import SourceMetadata
 from .model_mode import ModelMode
 from .type_def import (
     Bbox,
@@ -64,4 +65,5 @@ __all__ = [
     "GeomBuffer",
     "Predicate",
     "ZoomLevel",
+    "SourceMetadata",
 ]

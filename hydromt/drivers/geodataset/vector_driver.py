@@ -6,13 +6,13 @@ from typing import Callable, List, Optional
 
 from xarray import DataArray, Dataset
 
+from hydromt._typing import SourceMetadata
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Geom, Predicate, TimeRange
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.drivers.preprocessing import PREPROCESSORS
 from hydromt.io import open_geodataset
-from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
 

@@ -5,9 +5,14 @@ from typing import List, Optional
 
 import pandas as pd
 
-from hydromt._typing import NoDataStrategy, StrPath, TimeRange, Variables
+from hydromt._typing import (
+    NoDataStrategy,
+    SourceMetadata,
+    StrPath,
+    TimeRange,
+    Variables,
+)
 from hydromt.drivers import BaseDriver
-from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 

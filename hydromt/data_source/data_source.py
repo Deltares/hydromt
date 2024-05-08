@@ -15,11 +15,10 @@ from pydantic import (
     model_validator,
 )
 
-from hydromt._typing import DataType
+from hydromt._typing import DataType, SourceMetadata
 from hydromt._utils.uris import is_valid_url
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.drivers import BaseDriver
-from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 

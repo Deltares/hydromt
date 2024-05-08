@@ -6,12 +6,11 @@ from typing import List, Optional
 
 import xarray as xr
 
-from hydromt._typing import Geom, StrPath, TimeRange
+from hydromt._typing import Geom, SourceMetadata, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate
 from hydromt.drivers import BaseDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
-from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
 

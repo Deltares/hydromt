@@ -5,11 +5,10 @@ import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from hydromt._typing import StrPath
+from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_adapter import DataFrameAdapter
 from hydromt.data_source import DataFrameSource
 from hydromt.drivers import DataFrameDriver
-from hydromt.metadata import SourceMetadata
 
 
 @pytest.fixture(scope="session")

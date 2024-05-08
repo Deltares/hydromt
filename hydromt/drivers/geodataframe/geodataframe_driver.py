@@ -6,10 +6,9 @@ from typing import List, Optional
 
 import geopandas as gpd
 
-from hydromt._typing import Geom, StrPath
+from hydromt._typing import Geom, SourceMetadata, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers import BaseDriver
-from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 

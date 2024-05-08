@@ -6,10 +6,16 @@ from typing import List, Optional
 
 import xarray as xr
 
-from hydromt._typing import Geom, StrPath, TimeRange, Variables, ZoomLevel
+from hydromt._typing import (
+    Geom,
+    SourceMetadata,
+    StrPath,
+    TimeRange,
+    Variables,
+    ZoomLevel,
+)
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers.base_driver import BaseDriver
-from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
 

@@ -8,6 +8,7 @@ import pytest
 import rasterio
 import xarray as xr
 
+from hydromt._typing import SourceMetadata
 from hydromt.config import SETTINGS
 from hydromt.drivers.raster.rasterio_driver import (
     RasterioDriver,
@@ -15,7 +16,6 @@ from hydromt.drivers.raster.rasterio_driver import (
     open_raster,
 )
 from hydromt.gis.raster import full_from_transform
-from hydromt.metadata import SourceMetadata
 
 
 class TestRasterioDriver:

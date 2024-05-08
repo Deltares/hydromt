@@ -12,7 +12,14 @@ import rasterio
 import rioxarray
 import xarray as xr
 
-from hydromt._typing import Geom, StrPath, TimeRange, Variables, ZoomLevel
+from hydromt._typing import (
+    Geom,
+    SourceMetadata,
+    StrPath,
+    TimeRange,
+    Variables,
+    ZoomLevel,
+)
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt._utils.uris import strip_scheme
@@ -20,7 +27,6 @@ from hydromt.config import SETTINGS
 from hydromt.data_adapter.caching import cache_vrt_tiles
 from hydromt.drivers import RasterDatasetDriver
 from hydromt.gis.merge import merge
-from hydromt.metadata import SourceMetadata
 
 logger: Logger = getLogger(__name__)
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from logging import Logger, getLogger
 from os.path import join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 import pyproj
@@ -22,6 +22,7 @@ from hydromt._typing import (
     NoDataException,
     NoDataStrategy,
     RasterDatasetSource,
+    SourceMetadata,
     StrPath,
     TimeRange,
     Variables,
@@ -36,9 +37,6 @@ from hydromt.data_adapter.utils import (
 )
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
-
-if TYPE_CHECKING:
-    from hydromt.metadata import SourceMetadata
 
 logger = getLogger(__name__)
 

@@ -1,7 +1,7 @@
 """Implementation for the geodataset DataAdapter."""
 
 from logging import Logger, getLogger
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Union, cast
 
 import numpy as np
 import pyproj
@@ -11,6 +11,7 @@ from hydromt._typing import (
     Geom,
     NoDataStrategy,
     Predicate,
+    SourceMetadata,
     TimeRange,
     Variables,
     _exec_nodata_strat,
@@ -29,9 +30,6 @@ from hydromt.data_adapter.utils import (
 )
 from hydromt.gis.raster import GEO_MAP_COORD
 
-if TYPE_CHECKING:
-    from hydromt.metadata import SourceMetadata
-
 logger = getLogger(__name__)
 
 __all__ = ["GeoDatasetAdapter"]
@@ -43,7 +41,7 @@ class GeoDatasetAdapter(DataAdapterBase):
     def transform(
         self,
         maybe_ds: Optional[xr.Dataset],
-        metadata: "SourceMetadata",
+        metadata: SourceMetadata,
         *,
         mask: Optional[Geom] = None,
         predicate: Predicate = "intersects",

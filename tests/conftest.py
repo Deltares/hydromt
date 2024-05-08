@@ -15,6 +15,7 @@ import xugrid as xu
 from dask import config as dask_config
 from pytest_mock import MockerFixture
 
+from hydromt._typing import SourceMetadata
 from hydromt.components.config import ConfigComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.components.vector import VectorComponent
@@ -24,7 +25,6 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.drivers import GeoDataFrameDriver, RasterDatasetDriver
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.gis import raster, utils, vector
-from hydromt.metadata import SourceMetadata
 from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.models.model import Model
 from hydromt.root import ModelRoot

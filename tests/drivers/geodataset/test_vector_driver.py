@@ -64,7 +64,7 @@ class TestGeoDatasetVectorDriver:
 
     def test_read(self, geodf, example_vector_geods: Path):
         res = GeoDatasetVectorDriver(metadata_resolver=ConventionResolver()).read(
-            str(example_vector_geods),
+            str(example_vector_geods)
         )
         ds = vector.GeoDataset.from_gdf(geodf)
         assert res is not None
