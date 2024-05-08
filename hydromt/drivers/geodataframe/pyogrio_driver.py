@@ -7,7 +7,7 @@ import geopandas as gpd
 from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
 
-from hydromt._typing import Bbox, Geom, StrPath
+from hydromt._typing import Bbox, Geom, SourceMetadata, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataframe.geodataframe_driver import GeoDataFrameDriver
@@ -28,6 +28,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
@@ -38,7 +39,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         """
         warn_on_unused_kwargs(
             self.__class__.__name__,
-            {"predicate": predicate},
+            {"predicate": predicate, "metadata": metadata},
             logger,
         )
         if len(uris) > 1:

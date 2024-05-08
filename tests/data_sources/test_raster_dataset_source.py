@@ -5,9 +5,9 @@ import pytest
 import xarray as xr
 from pydantic import ValidationError
 
-from hydromt._typing import StrPath
+from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_adapter import RasterDatasetAdapter
-from hydromt.data_source import RasterDatasetSource, SourceMetadata
+from hydromt.data_source import RasterDatasetSource
 from hydromt.drivers import RasterDatasetDriver
 
 

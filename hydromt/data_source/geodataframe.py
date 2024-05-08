@@ -63,6 +63,7 @@ class GeoDataFrameSource(DataSource):
             mask=mask,
             predicate=predicate,
             variables=variables,
+            metadata=self.metadata,
             handle_nodata=handle_nodata,
             logger=logger,
         )

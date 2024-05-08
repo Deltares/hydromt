@@ -50,6 +50,7 @@ class DataFrameSource(DataSource):
             self.uri,
             variables=variables,
             time_range=time_range,
+            metadata=self.metadata,
             handle_nodata=handle_nodata,
             logger=logger,
         )

@@ -5,7 +5,13 @@ from typing import List, Optional
 
 import pandas as pd
 
-from hydromt._typing import NoDataStrategy, StrPath, TimeRange, Variables
+from hydromt._typing import (
+    NoDataStrategy,
+    SourceMetadata,
+    StrPath,
+    TimeRange,
+    Variables,
+)
 from hydromt.drivers import BaseDriver
 
 logger: Logger = getLogger(__name__)
@@ -20,6 +26,7 @@ class DataFrameDriver(BaseDriver, ABC):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -28,8 +35,6 @@ class DataFrameDriver(BaseDriver, ABC):
         Read in any compatible data source to a pandas `DataFrame`.
 
         args:
-            mask: Optional[Geom]. Mask for features to match the predicate, preferably
-                in the same CRS.
         """
         # Merge static kwargs from the catalog with dynamic kwargs from the query.
         uris = self.metadata_resolver.resolve(
@@ -44,6 +49,7 @@ class DataFrameDriver(BaseDriver, ABC):
             logger=logger,
             variables=variables,
             time_range=time_range,
+            metadata=metadata,
             handle_nodata=handle_nodata,
         )
         return df
@@ -53,8 +59,9 @@ class DataFrameDriver(BaseDriver, ABC):
         self,
         uris: List[str],
         *,
-        variables: Optional[Variables],
-        time_range: Optional[TimeRange],
+        variables: Optional[Variables] = None,
+        time_range: Optional[TimeRange] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:

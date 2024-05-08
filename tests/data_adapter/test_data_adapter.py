@@ -606,6 +606,8 @@ def test_dataframe_time(df_time, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
+# TODO: Partially tested in "test_rasterio_driver", just missing the cache=True option.
+# https://github.com/Deltares/hydromt/issues/897
 def test_cache_vrt(tmpdir, rioda_large):
     # write vrt data
     name = "tiled"

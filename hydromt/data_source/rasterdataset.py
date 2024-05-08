@@ -73,6 +73,7 @@ class RasterDatasetSource(DataSource):
             time_range=tr,
             variables=vrs,
             zoom_level=zoom_level,
+            metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(

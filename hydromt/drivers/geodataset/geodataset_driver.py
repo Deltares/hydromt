@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import xarray as xr
 
-from hydromt._typing import Geom, StrPath, TimeRange
+from hydromt._typing import Geom, SourceMetadata, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate
 from hydromt.drivers import BaseDriver
@@ -29,6 +29,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -58,6 +59,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
+            metadata=metadata,
             logger=logger,
             handle_nodata=handle_nodata,
         )
@@ -72,6 +74,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,

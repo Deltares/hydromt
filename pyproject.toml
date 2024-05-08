@@ -24,6 +24,7 @@ dependencies = [
   "packaging",              # compare versions of hydromt
   "pandas",                 # Dataframes
   "pydantic~=2.4",          # Validation
+  "pydantic-settings~=2.2", # Settings Management
   "pyflwdir>=0.5.4",        # Hight models and derivatives
   "pyogrio>=0.6",           # io for geopandas dataframes
   "pyproj",                 # projections for Coordinate reference systems

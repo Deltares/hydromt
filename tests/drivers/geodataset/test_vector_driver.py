@@ -90,7 +90,5 @@ class TestGeoDatasetVectorDriver:
 
         uri: str = "file.geojson"
         driver = GeoDatasetVectorDriver(metadata_resolver=FakeMetadataResolver())
-        _ = driver.read(
-            uri,
-        )
+        _ = driver.read(uri)
         assert mock_geods_open.call_count == 1

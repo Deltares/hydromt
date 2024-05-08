@@ -1,28 +1,22 @@
 # -*- coding: utf-8 -*-
 """Tests for the io submodule."""
 
-import glob
 import os
-from os.path import join
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
-import rasterio
 import xarray as xr
 from shapely.geometry import box
 from upath import UPath
 
 import hydromt
-from hydromt import _compat, raster
+from hydromt import _compat
 from hydromt.io.readers import (
     open_geodataset,
     open_mfcsv,
-    open_mfraster,
-    open_raster,
     open_timeseries_from_table,
     open_vector,
     open_vector_from_table,
@@ -189,54 +183,6 @@ def test_timeseries_io(tmpdir, ts):
         open_timeseries_from_table(fn_ts5)
 
 
-def test_raster_io(tmpdir, rioda):
-    da = rioda
-    fn_tif = str(tmpdir.join("test.tif"))
-    # to_raster / open_raster
-    da.raster.to_raster(fn_tif, crs=3857, tags={"name": "test"})
-    assert os.path.isfile(fn_tif)
-    assert np.all(open_raster(fn_tif).values == da.values)
-    with rasterio.open(fn_tif, "r") as src:
-        assert src.tags()["name"] == "test"
-        assert src.crs.to_epsg() == 3857
-    da1 = open_raster(fn_tif, mask_nodata=True)
-    assert np.any(np.isnan(da1.values))
-    # TODO window needs checking & better testing
-    fn_tif = str(tmpdir.join("test1.tif"))
-    da1.raster.to_raster(fn_tif, nodata=-9999, windowed=True)
-    da2 = open_raster(fn_tif)
-    assert not np.any(np.isnan(da2.values))
-    fn_tif = str(tmpdir.join("test_2.tif"))
-    da1.fillna(da1.attrs["_FillValue"]).expand_dims("t").round(0).astype(
-        np.int32
-    ).raster.to_raster(fn_tif, dtype=np.int32)
-    da3 = open_raster(fn_tif)
-    assert da3.dtype == np.int32
-    # to_mapstack / open_mfraster
-    ds = da.to_dataset()
-    prefix = "_test_"
-    root = str(tmpdir)
-    ds.raster.to_mapstack(root, prefix=prefix, mask=True, driver="GTiff")
-    for name in ds.raster.vars:
-        assert os.path.isfile(join(root, f"{prefix}{name}.tif"))
-    ds_in = open_mfraster(join(root, f"{prefix}*.tif"), mask_nodata=True)
-    dvars = ds_in.raster.vars
-    assert np.all([n in dvars for n in ds.raster.vars])
-    assert np.all([np.isnan(ds_in[n].raster.nodata) for n in dvars])
-    # concat
-    fn_tif = str(tmpdir.join("test_3.tif"))
-    da.raster.to_raster(fn_tif, crs=3857)
-    ds_in = open_mfraster(join(root, "test_*.tif"), concat=True)
-    assert ds_in[ds_in.raster.vars[0]].ndim == 3
-    # with reading with pathlib
-    paths = [Path(p) for p in glob.glob(join(root, f"{prefix}*.tif"))]
-    dvars2 = open_mfraster(paths, mask_nodata=True).raster.vars
-    assert np.all([f"{prefix}{n}" in dvars2 for n in ds.raster.vars])
-    # test writing to subdir
-    ds.rename({"test": "test/test"}).raster.to_mapstack(root, driver="GTiff")
-    assert os.path.isfile(join(root, "test", "test.tif"))
-
-
 def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
     df_fns = {
         i: str(tmpdir.join("data", f"{i}.csv"))
@@ -297,22 +243,3 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         test2 = ds.sel(id=i)["test2"]
         assert np.all(np.equal(test1, np.arange(len(ids)) * int(i))), test1
         assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
-
-
-def test_rasterio_errors(tmpdir, rioda):
-    with pytest.raises(OSError, match="no files to open"):
-        open_mfraster(str(tmpdir.join("test*.tiffff")))
-    da0 = raster.full_from_transform(
-        [0.5, 0.0, 3.0, 0.0, -0.5, -9.0], (4, 6), nodata=-1, name="test"
-    )
-    da1 = raster.full_from_transform(
-        [0.2, 0.0, 3.0, 0.0, 0.25, -11.0], (8, 15), nodata=-1, name="test"
-    )
-    da0.raster.to_raster(str(tmpdir.join("test0.tif")))
-    da1.raster.to_raster(str(tmpdir.join("test1.tif")))
-    with pytest.raises(xr.MergeError, match="Geotransform and/or shape do not match"):
-        open_mfraster(str(tmpdir.join("test*.tif")))
-    with pytest.raises(ValueError, match="will be set based on the DataArray"):
-        da0.raster.to_raster(str(tmpdir.join("test2.tif")), count=3)
-    with pytest.raises(ValueError, match="Extension unknown for driver"):
-        da0.to_dataset().raster.to_mapstack(root=str(tmpdir), driver="unknown")

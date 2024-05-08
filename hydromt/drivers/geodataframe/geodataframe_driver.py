@@ -6,7 +6,7 @@ from typing import List, Optional
 
 import geopandas as gpd
 
-from hydromt._typing import Geom, StrPath
+from hydromt._typing import Geom, SourceMetadata, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt.drivers import BaseDriver
 
@@ -23,6 +23,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -47,6 +48,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             mask=mask,
             predicate=predicate,
             variables=variables,
+            metadata=metadata,
             logger=logger,
             handle_nodata=handle_nodata,
         )
@@ -60,6 +62,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         mask: Optional[Geom] = None,
         predicate: str = "intersects",
         variables: Optional[List[str]] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:

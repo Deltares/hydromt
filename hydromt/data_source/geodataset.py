@@ -67,6 +67,7 @@ class GeoDatasetSource(DataSource):
             self.uri,
             time_range=tr,
             variables=vrs,
+            metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(

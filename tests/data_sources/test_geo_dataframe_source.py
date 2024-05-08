@@ -12,7 +12,7 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt._typing import StrPath
+from hydromt._typing import SourceMetadata, StrPath
 from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
@@ -184,10 +184,14 @@ class TestGeoDataFrameSource:
             def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
-                return self.read_data([uri], **kwargs)
+            def read(
+                self, uri: str, metadata: SourceMetadata, **kwargs
+            ) -> gpd.GeoDataFrame:
+                return self.read_data([uri], metadata, **kwargs)
 
-            def read_data(self, uris: List[str], **kwargs) -> gpd.GeoDataFrame:
+            def read_data(
+                self, uris: List[str], metadata: SourceMetadata, **kwargs
+            ) -> gpd.GeoDataFrame:
                 return geodf
 
         return MockGeoDataFrameDriver
@@ -201,10 +205,14 @@ class TestGeoDataFrameSource:
             def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
-                return self.read_data([uri], **kwargs)
+            def read(
+                self, uri: str, metadata: SourceMetadata, **kwargs
+            ) -> gpd.GeoDataFrame:
+                return self.read_data([uri], metadata, **kwargs)
 
-            def read_data(self, uris: List[str], **kwargs) -> gpd.GeoDataFrame:
+            def read_data(
+                self, uris: List[str], metadata: SourceMetadata, **kwargs
+            ) -> gpd.GeoDataFrame:
                 return geodf
 
         return MockWritableGeoDataFrameDriver

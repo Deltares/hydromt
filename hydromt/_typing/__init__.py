@@ -7,6 +7,7 @@ from .error import (
     _exec_nodata_strat,
 )
 from .fsspec_types import FS
+from .metadata import SourceMetadata
 from .model_mode import ModelMode
 from .type_def import (
     Bbox,
@@ -22,6 +23,7 @@ from .type_def import (
     GpdShapeGeom,
     ModeLike,
     Number,
+    Pathdantic,
     Predicate,
     RasterDatasetSource,
     SourceSpecDict,
@@ -44,6 +46,7 @@ __all__ = [
     "GeoDatasetSource",
     "ModeLike",
     "Number",
+    "Pathdantic",
     "RasterDatasetSource",
     "SourceSpecDict",
     "TimeRange",
@@ -62,4 +65,5 @@ __all__ = [
     "GeomBuffer",
     "Predicate",
     "ZoomLevel",
+    "SourceMetadata",
 ]

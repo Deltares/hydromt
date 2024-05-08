@@ -87,7 +87,10 @@ class TestPyogrioDriver:
     @pytest.mark.usefixtures("_raise_gdal_warnings")
     @fixture_uris
     def test_read_with_filters(
-        self, uri: str, request: pytest.FixtureRequest, driver: PyogrioDriver
+        self,
+        uri: str,
+        request: pytest.FixtureRequest,
+        driver: PyogrioDriver,
     ):
         uri = request.getfixturevalue(uri)
         bbox: Bbox = (-60, -34.5600, -55, -30)
@@ -97,7 +100,10 @@ class TestPyogrioDriver:
 
     @fixture_uris
     def test_read_variables(
-        self, uri: str, request: pytest.FixtureRequest, driver: PyogrioDriver
+        self,
+        uri: str,
+        request: pytest.FixtureRequest,
+        driver: PyogrioDriver,
     ):
         uri = request.getfixturevalue(uri)
         variables = ["country"]

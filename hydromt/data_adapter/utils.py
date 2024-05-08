@@ -1,17 +1,14 @@
 """Utility functions for data adapters."""
 
 from logging import Logger, getLogger
-from typing import TYPE_CHECKING, Dict, Optional, Union, cast
+from typing import Dict, Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-from hydromt._typing.type_def import TimeRange, Variables
-
-if TYPE_CHECKING:
-    from hydromt.data_source.data_source import SourceMetadata
+from hydromt._typing import SourceMetadata, TimeRange, Variables
 
 logger = getLogger(__name__)
 

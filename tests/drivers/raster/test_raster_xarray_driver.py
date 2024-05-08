@@ -109,9 +109,7 @@ class TestRasterXarrayDriver:
 
         uri: str = "file.zarr"
         driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
-        _ = driver.read(
-            uri,
-        )
+        _ = driver.read(uri)
         assert mock_xr_open.call_count == 1
 
     def test_calls_nc_func_with_nc_ext(self, mocker: MockerFixture):
@@ -127,7 +125,5 @@ class TestRasterXarrayDriver:
 
         uri: str = "file.netcdf"
         driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
-        _ = driver.read(
-            uri,
-        )
+        _ = driver.read(uri)
         assert mock_xr_open.call_count == 1

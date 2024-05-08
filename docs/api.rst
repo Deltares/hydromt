@@ -189,66 +189,75 @@ RasterDataset
 
 .. autosummary::
    :toctree: _generated
-   drivers.rasterdataset_driver.RasterDatasetDriver
-   drivers.rasterdataset_driver.RasterDatasetDriver.read
-   drivers.rasterdataset_driver.RasterDatasetDriver.read_data
-   drivers.rasterdataset_driver.RasterDatasetDriver.write
+   drivers.raster.rasterdataset_driver.RasterDatasetDriver
+   drivers.raster.rasterdataset_driver.RasterDatasetDriver.read
+   drivers.raster.rasterdataset_driver.RasterDatasetDriver.read_data
+   drivers.raster.rasterdataset_driver.RasterDatasetDriver.write
 
 RasterDatasetXarryDriver
 ^^^^^^^^^^^^^^^^^^^^^^^^
 .. autosummary::
    :toctree: _generated
-   drivers.raster_xarray_driver.RastterDatasetXarryDriver
-   drivers.raster_xarray_driver.RastterDatasetXarryDriver.read
-   drivers.raster_xarray_driver.RastterDatasetXarryDriver.write
+   drivers.raster.raster_xarray_driver.RastterDatasetXarryDriver
+   drivers.raster.raster_xarray_driver.RastterDatasetXarryDriver.read
+   drivers.raster.raster_xarray_driver.RastterDatasetXarryDriver.read_data
+   drivers.raster.raster_xarray_driver.RastterDatasetXarryDriver.write
+
+RasterioDriver
+^^^^^^^^^^^^^^
+.. autosummary::
+   :toctree: _generated
+   drivers.raster.rasterdataset_driver.rasterio_driver.RasterioDriver
+   drivers.raster.rasterdataset_driver.rasterio_driver.RasterioDriver.read
+   drivers.raster.rasterdataset_driver.rasterio_driver.RasterioDriver.write
 
 GeoDataFrame
 ------------
 
 .. autosummary::
    :toctree: _generated
-   drivers.geodataframe_driver.GeoDataFrameDriver
-   drivers.geodataframe_driver.GeoDataFrameDriver.read
-   drivers.geodataframe_driver.GeoDataFrameDriver.read_data
-   drivers.geodataframe_driver.GeoDataFrameDriver.write
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.read
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.read_data
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.write
 
 PyogrioDriver
 ^^^^^^^^^^^^^
 
 .. autosummary::
    :toctree: _generated
-   drivers.pyogrio_driver.PyogrioDriver
-   drivers.pyogrio_driver.PyogrioDriver.read
-   drivers.pyogrio_driver.PyogrioDriver.write
+   drivers.geodataframe.pyogrio_driver.PyogrioDriver
+   drivers.geodataframe.pyogrio_driver.PyogrioDriver.read
+   drivers.geodataframe.pyogrio_driver.PyogrioDriver.write
 
 DataFrame
 ---------
 
 .. autosummary::
    :toctree: _generated
-   drivers.dataframe_driver.DataFrameDriver
-   drivers.dataframe_driver.DataFrameDriver.read
-   drivers.dataframe_driver.DataFrameDriver.read_data
-   drivers.dataframe_driver.DataFrameDriver.write
+   drivers.dataframe.dataframe_driver.DataFrameDriver
+   drivers.dataframe.dataframe_driver.DataFrameDriver.read
+   drivers.dataframe.dataframe_driver.DataFrameDriver.read_data
+   drivers.dataframe.dataframe_driver.DataFrameDriver.write
 
 PandasDriver
 ^^^^^^^^^^^^
 
 .. autosummary::
    :toctree: _generated
-   drivers.pandas_driver.PandasDriver
-   drivers.pandas_driver.PandasDriver.read_data
-   drivers.pandas_driver.PandasDriver.write
+   drivers.dataframe.pandas_driver.PandasDriver
+   drivers.dataframe.pandas_driver.PandasDriver.read_data
+   drivers.dataframe.pandas_driver.PandasDriver.write
 
 GeoDataFrame
 ------------
 
 .. autosummary::
    :toctree: _generated
-   drivers.geodataset_driver.GeoDatasetDriver
-   drivers.geodataset_driver.GeoDatasetDriver.read
-   drivers.geodataset_driver.GeoDatasetDriver.read_data
-   drivers.geodataset_driver.GeoDatasetDriver.write
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver.read
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver.read_data
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver.write
 
 DataAdapter
 ===========

@@ -2,9 +2,8 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from hydromt._typing import NoDataException, NoDataStrategy
+from hydromt._typing import NoDataException, NoDataStrategy, SourceMetadata
 from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
-from hydromt.data_source import SourceMetadata
 
 
 class TestRasterDatasetAdapter:

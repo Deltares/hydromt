@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from logging import Logger, getLogger
 from os.path import join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 import pyproj
@@ -22,6 +22,7 @@ from hydromt._typing import (
     NoDataException,
     NoDataStrategy,
     RasterDatasetSource,
+    SourceMetadata,
     StrPath,
     TimeRange,
     Variables,
@@ -36,9 +37,6 @@ from hydromt.data_adapter.utils import (
 )
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
-
-if TYPE_CHECKING:
-    from hydromt.data_source.data_source import SourceMetadata
 
 logger = getLogger(__name__)
 
@@ -273,18 +271,18 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds : xarray.Dataset
             The sliced RasterDataset.
         """
-        if isinstance(ds, xr.DataArray):
+        if isinstance(ds, xr.DataArray):  # xr.DataArray has no variables
             if ds.name is None:
                 # dummy name, required to create dataset
                 # renamed to variable in _single_var_as_array
                 ds.name = "data"
             ds = ds.to_dataset()
-        elif variables is not None:
+        elif variables is not None:  # xr.Dataset has variables
             variables = cast(List, np.atleast_1d(variables).tolist())
             if len(variables) > 1 or len(ds.data_vars) > 1:
                 mvars = [var not in ds.data_vars for var in variables]
                 if any(mvars):
-                    raise ValueError(f"RasterDataset: variables not found {mvars}")
+                    raise NoDataException(f"RasterDataset: variables not found {mvars}")
                 ds = ds[variables]
         if time_tuple is not None:
             ds = _slice_temporal_dimension(
@@ -399,7 +397,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds.attrs.update(metadata.model_dump(exclude=["attrs"]))
         return ds
 
-    # TODO: uses rasterio and is specific to driver. Should be moved to driver
+    # TODO: https://github.com/Deltares/hydromt/issues/875
+    # uses rasterio and is specific to driver. Should be moved to driver
     def _get_zoom_levels_and_crs(
         self, fn: Optional[StrPath] = None, logger=logger
     ) -> Tuple[Optional[dict], Optional[int]]:

@@ -6,6 +6,7 @@ from typing import Callable, List, Optional
 
 from xarray import DataArray, Dataset
 
+from hydromt._typing import SourceMetadata
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Geom, Predicate, TimeRange
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
@@ -30,6 +31,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -46,6 +48,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                 "variables": variables,
                 "time_range": time_range,
                 "single_var_as_array": single_var_as_array,
+                "metadata": metadata,
             },
             logger,
         )

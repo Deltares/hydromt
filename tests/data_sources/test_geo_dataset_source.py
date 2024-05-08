@@ -5,9 +5,9 @@ import pytest
 import xarray as xr
 from pydantic import ValidationError
 
-from hydromt._typing import StrPath
+from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_adapter import GeoDatasetAdapter
-from hydromt.data_source import GeoDatasetSource, SourceMetadata
+from hydromt.data_source import GeoDatasetSource
 from hydromt.drivers import GeoDatasetDriver
 
 
@@ -125,14 +125,16 @@ class TestGeoDatasetSource:
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
 
-            def read(self, uri: str, **kwargs) -> xr.Dataset:
-                kinda_ds = self.read_data([uri], **kwargs)
+            def read(self, uri: str, metadata: SourceMetadata, **kwargs) -> xr.Dataset:
+                kinda_ds = self.read_data([uri], metadata, **kwargs)
                 if isinstance(kinda_ds, xr.DataArray):
                     return kinda_ds.to_dataset()
                 else:
                     return kinda_ds
 
-            def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
+            def read_data(
+                self, uris: List[str], metadata: SourceMetadata, **kwargs
+            ) -> xr.Dataset:
                 return geoda
 
         return MockWriteableGeoDatasetDriver
