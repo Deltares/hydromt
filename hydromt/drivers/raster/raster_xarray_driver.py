@@ -12,7 +12,7 @@ from hydromt._typing import Geom, StrPath, TimeRange, Variables, ZoomLevel
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
-from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.raster.rasterdataset_driver import RasterDatasetDriver
 
 if TYPE_CHECKING:
     from hydromt.data_source import SourceMetadata
@@ -25,6 +25,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     """RasterDatasetXarrayDriver."""
 
     name = "raster_xarray"
+    supports_writing: bool = True
 
     def read_data(
         self,

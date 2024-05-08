@@ -1,4 +1,5 @@
 """Common routines for preprocessing."""
+
 from typing import Callable, Dict
 
 import numpy as np

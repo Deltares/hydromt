@@ -141,7 +141,6 @@ def open_raster(
     # keep only 2D DataArray
     da = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
     # set missing _FillValue
-    # TODO: Find a way of getting metadata into drivers again?.
     if mask_nodata:
         da.raster.set_nodata(np.nan)
     elif da.raster.nodata is None:

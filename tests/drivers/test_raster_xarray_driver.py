@@ -12,7 +12,7 @@ from xarray import open_mfdataset
 
 from hydromt.data_source import SourceMetadata
 from hydromt.drivers.preprocessing import round_latlon
-from hydromt.drivers.raster_xarray_driver import RasterDatasetXarrayDriver
+from hydromt.drivers.raster.raster_xarray_driver import RasterDatasetXarrayDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
@@ -24,7 +24,7 @@ class TestRasterXarrayDriver:
 
     def test_calls_preprocess(self, mocker: MockerFixture, metadata: SourceMetadata):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.raster_xarray_driver.xr.open_mfdataset",
+            "hydromt.drivers.raster.raster_xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -110,7 +110,7 @@ class TestRasterXarrayDriver:
         self, mocker: MockerFixture, metadata: SourceMetadata
     ):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.raster_xarray_driver.xr.open_zarr",
+            "hydromt.drivers.raster.raster_xarray_driver.xr.open_zarr",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -131,7 +131,7 @@ class TestRasterXarrayDriver:
         self, mocker: MockerFixture, metadata: SourceMetadata
     ):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.raster_xarray_driver.xr.open_mfdataset",
+            "hydromt.drivers.raster.raster_xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()

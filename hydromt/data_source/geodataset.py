@@ -1,9 +1,9 @@
-"""DataSource class for the RasterDataset type."""
+"""DataSource class for the GeoDataset type."""
 
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, cast
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
 
 import pandas as pd
 import xarray as xr
@@ -24,105 +24,96 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     TotalBounds,
-    ZoomLevel,
 )
-from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
+from hydromt._typing.type_def import GeomBuffer, Predicate
+from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_source.data_source import DataSource
-from hydromt.drivers import RasterDatasetDriver
+from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 
 
-class RasterDatasetSource(DataSource):
-    """DataSource class for the RasterDataset type."""
+class GeoDatasetSource(DataSource):
+    """DataSource class for the GeoDatasetSource type."""
 
-    data_type: ClassVar[Literal["RasterDataset"]] = "RasterDataset"
-    driver: RasterDatasetDriver
-    data_adapter: RasterDatasetAdapter = Field(default_factory=RasterDatasetAdapter)
-    zoom_levels: Optional[Dict[int, float]] = None
+    data_type: ClassVar[Literal["GeoDataset"]] = "GeoDataset"
+    driver: GeoDatasetDriver
+    data_adapter: GeoDatasetAdapter = Field(default_factory=GeoDatasetAdapter)
 
     def read_data(
         self,
         *,
-        bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0,
+        predicate: Predicate = "intersects",
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> xr.Dataset:
+    ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """
         Read data from this source.
 
         Args:
         """
         self._used = True
-        if bbox is not None or (mask is not None and buffer > 0):
-            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
 
         # Transform time_range and variables to match the data source
         tr = self.data_adapter.to_source_timerange(time_range)
         vrs = self.data_adapter.to_source_variables(variables)
 
-        ds: xr.Dataset = self.driver.read(
+        ds: Optional[xr.Dataset] = self.driver.read(
             self.uri,
             self.metadata,
-            mask=mask,
             time_range=tr,
             variables=vrs,
-            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
             ds,
             self.metadata,
-            bbox=bbox,
+            predicate=predicate,
+            single_var_as_array=single_var_as_array,
             mask=mask,
-            buffer=buffer,
             variables=variables,
             time_range=time_range,
-            zoom_level=zoom_level,
+            logger=logger,
         )
 
     def to_file(
         self,
         file_path: StrPath,
         *,
-        driver_override: Optional[RasterDatasetDriver] = None,
+        driver_override: Optional[GeoDatasetDriver] = None,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0.0,
+        buffer: GeomBuffer = 0,
+        predicate: Predicate = "intersects",
+        variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
-    ) -> "RasterDatasetSource":
+    ) -> Optional["GeoDatasetSource"]:
         """
-        Write the RasterDatasetSource to a local file.
+        Write the GeoDatasetSource to a local file.
 
         args:
         """
-        if driver_override:
-            driver: RasterDatasetDriver = driver_override
-        else:
-            # use local filesystem
-            driver: RasterDatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
-            )
-        if not driver.supports_writing:
+        if not self.driver.supports_writing:
             raise RuntimeError(
-                f"driver {driver.__class__.__name__} does not support writing. please use a differnt driver "
+                f"driver {self.driver.__class__.__name__} does not support writing. please use a differnt driver "
             )
-        ds: Optional[xr.Dataset] = self.read_data(
-            bbox=bbox,
+        if bbox is not None or (mask is not None and buffer > 0):
+            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
+        ds: Optional[Union[xr.Dataset, xr.DataArray]] = self.read_data(
             mask=mask,
-            buffer=buffer,
+            predicate=predicate,
+            variables=variables,
+            single_var_as_array=single_var_as_array,
             time_range=time_range,
-            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
             logger=logger,
         )
@@ -132,6 +123,13 @@ class RasterDatasetSource(DataSource):
         # update driver based on local path
         update: Dict[str, Any] = {"uri": file_path}
 
+        if driver_override:
+            driver: GeoDatasetDriver = driver_override
+        else:
+            # use local filesystem
+            driver: GeoDatasetDriver = self.driver.model_copy(
+                update={"filesystem": filesystem("local")}
+            )
         update.update({"driver": driver})
 
         driver.write(
@@ -142,11 +140,11 @@ class RasterDatasetSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
+    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_bbox` will be used to detect it.
+        :py:meth:`hydromt.GeoDatasetAdapter.detect_bbox` will be used to detect it.
 
         Parameters
         ----------
@@ -176,7 +174,7 @@ class RasterDatasetSource(DataSource):
         """Detect the time range of the dataset.
 
         if the time range is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_time_range` will be used
+        :py:meth:`hydromt.GeoDatasetAdapter.detect_time_range` will be used
         to detect it.
 
 
@@ -205,7 +203,7 @@ class RasterDatasetSource(DataSource):
         """Detect the bounding box and crs of the dataset.
 
         If no dataset is provided, it will be fetched according to the settings in the
-        adapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`. the
+        adapter. also see :py:meth:`hydromt.GeoDatasetAdapter.get_data`. the
         coordinates are in the CRS of the dataset itself, which is also returned
         alongside the coordinates.
 
@@ -214,7 +212,7 @@ class RasterDatasetSource(DataSource):
         ----------
         ds: xr.Dataset, xr.DataArray, Optional
             the dataset to detect the bounding box of.
-            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            If none is provided, :py:meth:`hydromt.GeoDatasetAdapter.get_data`
             will be used to fetch the it before detecting.
 
         Returns
@@ -227,8 +225,8 @@ class RasterDatasetSource(DataSource):
         """
         if ds is None:
             ds = self.read_data()
-        crs = ds.raster.crs.to_epsg()
-        bounds = ds.raster.bounds
+        crs = ds.vector.crs.to_epsg()
+        bounds = ds.vector.bounds
 
         return bounds, crs
 
@@ -239,13 +237,13 @@ class RasterDatasetSource(DataSource):
         """Detect the temporal range of the dataset.
 
         If no dataset is provided, it will be fetched accodring to the settings in the
-        addapter. also see :py:meth:`hydromt.RasterdatasetAdapter.get_data`.
+        addapter. also see :py:meth:`hydromt.GeoDatasetAdapter.get_data`.
 
         Parameters
         ----------
         ds: xr.Dataset, xr.DataArray, Optional
             the dataset to detect the time range of. It must have a time dimentsion set.
-            If none is provided, :py:meth:`hydromt.RasterdatasetAdapter.get_data`
+            If none is provided, :py:meth:`hydromt.GeoDatasetAdapter.get_data`
             will be used to fetch the it before detecting.
 
         Returns
@@ -257,8 +255,8 @@ class RasterDatasetSource(DataSource):
         if ds is None:
             ds = self.read_data()
         return (
-            ds[ds.raster.time_dim].min().values,
-            ds[ds.raster.time_dim].max().values,
+            ds[ds.vector.time_dim].min().values,
+            ds[ds.vector.time_dim].max().values,
         )
 
     def to_stac_catalog(
@@ -266,7 +264,7 @@ class RasterDatasetSource(DataSource):
         on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
     ) -> Optional[StacCatalog]:
         """
-        Convert a rasterdataset into a STAC Catalog representation.
+        Convert a geodataset into a STAC Catalog representation.
 
         The collection will contain an asset for each of the associated files.
 
@@ -274,13 +272,14 @@ class RasterDatasetSource(DataSource):
         Parameters
         ----------
         - on_error (str, optional): The error handling strategy.
-          Options are: "raise" to raise an error on failure, "skip" to skip the
-          dataset on failure, and "coerce" (default) to set default values on failure.
+          Options are: "raise" to raise an error on failure, "skip" to skip
+          the dataset on failure, and "coerce" (default) to set default
+          values on failure.
 
         Returns
         -------
-        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or None
-          if the dataset was skipped.
+        - Optional[StacCatalog]: The STAC Catalog representation of the dataset, or
+          None if the dataset was skipped.
         """
         try:
             bbox, crs = self.get_bbox(detect=True)
@@ -288,16 +287,10 @@ class RasterDatasetSource(DataSource):
             start_dt, end_dt = self.get_time_range(detect=True)
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
-            props = {**self.data_adapter.meta, "crs": crs}
-            ext = splitext(self.uri)[-1]
-            if ext == ".nc" or ext == ".vrt":
+            props = {**self.meta, "crs": crs}
+            ext = splitext(self.path)[-1]
+            if ext in [".nc", ".vrt"]:
                 media_type = MediaType.HDF5
-            elif ext == ".tiff":
-                media_type = MediaType.TIFF
-            elif ext == ".cog":
-                media_type = MediaType.COG
-            elif ext == ".png":
-                media_type = MediaType.PNG
             else:
                 raise RuntimeError(
                     f"Unknown extention: {ext} cannot determine media type"
@@ -311,31 +304,29 @@ class RasterDatasetSource(DataSource):
                 return
             elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.data_adapter.meta
+                props = self.meta
                 start_dt = datetime(1, 1, 1)
                 end_dt = datetime(1, 1, 1)
                 media_type = MediaType.JSON
             else:
                 raise e
 
-        else:
-            # else makes type checkers a bit happier
-            stac_catalog = StacCatalog(
-                self.name,
-                description=self.name,
-            )
-            stac_item = StacItem(
-                self.name,
-                geometry=None,
-                bbox=list(bbox),
-                properties=props,
-                datetime=None,
-                start_datetime=start_dt,
-                end_datetime=end_dt,
-            )
-            stac_asset = StacAsset(str(self.uri), media_type=media_type)
-            base_name = basename(self.uri)
-            stac_item.add_asset(base_name, stac_asset)
+        stac_catalog = StacCatalog(
+            self.name,
+            description=self.name,
+        )
+        stac_item = StacItem(
+            self.name,
+            geometry=None,
+            bbox=bbox,
+            properties=props,
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        stac_asset = StacAsset(str(self.path), media_type=media_type)
+        base_name = basename(self.path)
+        stac_item.add_asset(base_name, stac_asset)
 
-            stac_catalog.add_item(stac_item)
-            return stac_catalog
+        stac_catalog.add_item(stac_item)
+        return stac_catalog

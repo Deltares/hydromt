@@ -1,6 +1,5 @@
 """Implementations for all of the necessary IO reading for HydroMT."""
 
-import io as pyio
 import logging
 from ast import literal_eval
 from glob import glob
@@ -23,7 +22,6 @@ from yaml import safe_load as load_yaml
 from hydromt import gis
 from hydromt._typing.type_def import StrPath
 from hydromt._utils.uris import is_valid_url
-from hydromt.drivers.rasterio_driver import open_mfraster
 from hydromt.gis import raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.path import make_config_paths_abs
@@ -214,6 +212,10 @@ def open_raster_from_tindex(
     # read & merge data
     if "dst_bounds" not in mosaic_kwargs:
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
+
+    # Need to do dynamic import here until we create a new driver.
+    from hydromt.drivers.rasterio_driver import open_mfraster
+
     ds_out = open_mfraster(
         paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
     )
@@ -235,7 +237,7 @@ def open_geodataset(
     geom=None,
     logger=logger,
     **kwargs,
-):
+) -> xr.Dataset:
     """Open and combine geometry location GIS file and timeseries file in a xr.Dataset.
 
     Arguments
@@ -433,12 +435,6 @@ def open_vector(
     gdf : geopandas.GeoDataFrame
         Parsed geometry file
     """
-
-    def _read(f: pyio.IOBase) -> gpd.GeoDataFrame:
-        bbox_reader = gis.bbox_from_file_and_filters(f, bbox, geom, crs)
-        f.seek(0)
-        return gpd.read_file(f, bbox=bbox_reader, mode=mode, **kwargs)
-
     driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(fn, driver=driver, **kwargs)
