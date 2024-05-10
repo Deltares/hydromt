@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 # this is the default location of the predefined catalogs
 # in the test environment this is set to local data/catalogs directory using a global fixture
-GIT_ROOT = r"https://raw.githubusercontent.com/savente93/hydromt/main/data/catalogs"
+GIT_ROOT = r"https://raw.githubusercontent.com/Deltares/hydromt/main/data/catalogs"
 
 __all__ = [
     "PredefinedCatalog",

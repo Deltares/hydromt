@@ -1,6 +1,6 @@
 meta:
   version: v0.0.7
-  root: https://github.com/savente93/hydromt-artifacts/releases/download/v0.0.7/data.tar.gz
+  root: https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.7/data.tar.gz
   name: artifact_data
 
 chelsa:
