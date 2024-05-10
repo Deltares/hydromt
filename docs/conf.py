@@ -139,8 +139,6 @@ for name in predefined_catalogs:
     except OSError as e:
         print(e)
         continue
-    # breakpoint()
-    # note = predefined_catalogs[name].notes
     write_nested_dropdown(name, data_cat, categories=categories)
     data_cat._sources = {}  # reset
 with open("_generated/predefined_catalogs.rst", "w") as f:
