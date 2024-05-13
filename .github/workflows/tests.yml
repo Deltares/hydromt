@@ -32,7 +32,7 @@ jobs:
   build:
     defaults:
       run:
-        shell: bash -l {0}
+        shell: bash -e -l {0}
     strategy:
       fail-fast: false
       matrix:

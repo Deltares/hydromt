@@ -27,7 +27,7 @@ jobs:
   test-docs:
     defaults:
       run:
-        shell: bash -l {0}
+        shell: bash -e -l {0}
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:

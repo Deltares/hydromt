@@ -73,10 +73,8 @@ Add data sources
    data_catalog.DataCatalog.add_source
    data_catalog.DataCatalog.update
    data_catalog.DataCatalog.from_predefined_catalogs
-   data_catalog.DataCatalog.from_archive
    data_catalog.DataCatalog.from_yml
    data_catalog.DataCatalog.from_dict
-   data_catalog.DataCatalog.set_predefined_catalogs
 
 .. _api_data_catalog_get:
 
@@ -91,6 +89,19 @@ Get data
    data_catalog.DataCatalog.get_geodataframe
    data_catalog.DataCatalog.get_dataframe
    data_catalog.DataCatalog.get_dataset
+
+
+Predefined data catalog
+=======================
+
+.. autosummary::
+   :toctree: _generated
+
+   predefined_catalog.PredefinedCatalog
+   predefined_catalog.PredefinedCatalog.get_catalog_file
+   predefined_catalog.create_registry_file
+
+
 
 DataAdapter
 ===========
