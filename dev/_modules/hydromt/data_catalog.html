@@ -37,7 +37,7 @@
   <script src="../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -449,16 +449,16 @@ document.write(`
 <span class="c1"># -*- coding: utf-8 -*-</span>
 
 <span class="sd">&quot;&quot;&quot;DataCatalog module for HydroMT.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">isdir</span><span class="p">,</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Dict</span><span class="p">,</span>
@@ -473,6 +473,7 @@ document.write(`
 <span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">pooch</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 <span class="kn">import</span> <span class="nn">yaml</span>
@@ -482,10 +483,14 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pystac</span> <span class="kn">import</span> <span class="n">CatalogType</span><span class="p">,</span> <span class="n">MediaType</span>
 
 <span class="kn">from</span> <span class="nn">hydromt.nodata</span> <span class="kn">import</span> <span class="n">NoDataException</span><span class="p">,</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">_exec_nodata_strat</span>
+<span class="kn">from</span> <span class="nn">hydromt.predefined_catalog</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PREDEFINED_CATALOGS</span><span class="p">,</span>
+    <span class="n">PredefinedCatalog</span><span class="p">,</span>
+    <span class="n">_copy_file</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">hydromt.typing</span> <span class="kn">import</span> <span class="n">Bbox</span><span class="p">,</span> <span class="n">ErrorHandleMethod</span><span class="p">,</span> <span class="n">SourceSpecDict</span><span class="p">,</span> <span class="n">TimeRange</span>
 <span class="kn">from</span> <span class="nn">hydromt.utils</span> <span class="kn">import</span> <span class="n">partition_dictionaries</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__version__</span>
 <span class="kn">from</span> <span class="nn">.data_adapter</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DataAdapter</span><span class="p">,</span>
     <span class="n">DataFrameAdapter</span><span class="p">,</span>
@@ -494,7 +499,7 @@ document.write(`
     <span class="n">GeoDatasetAdapter</span><span class="p">,</span>
     <span class="n">RasterDatasetAdapter</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.data_adapter.caching</span> <span class="kn">import</span> <span class="n">HYDROMT_DATADIR</span><span class="p">,</span> <span class="n">_copyfile</span><span class="p">,</span> <span class="n">_uri_validator</span>
+<span class="kn">from</span> <span class="nn">.data_adapter.caching</span> <span class="kn">import</span> <span class="n">HYDROMT_DATADIR</span><span class="p">,</span> <span class="n">_uri_validator</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -508,11 +513,9 @@ document.write(`
 <div class="viewcode-block" id="DataCatalog">
 <a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.html#hydromt.data_catalog.DataCatalog">[docs]</a>
 <span class="k">class</span> <span class="nc">DataCatalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for the data catalog object.&quot;&quot;&quot;</span>
 
-    <span class="c1"># root URL with data_catalog file</span>
-    <span class="n">_url</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;https://raw.githubusercontent.com/Deltares/hydromt/main/data/predefined_catalogs.yml&quot;</span>
+    <span class="n">_format_version</span> <span class="o">=</span> <span class="s2">&quot;v0&quot;</span>  <span class="c1"># format version of the data catalog</span>
     <span class="n">_cache_dir</span> <span class="o">=</span> <span class="n">HYDROMT_DATADIR</span>
 
 <div class="viewcode-block" id="DataCatalog.__init__">
@@ -558,7 +561,7 @@ document.write(`
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_libs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>  <span class="c1"># make sure data_libs is a list</span>
             <span class="n">data_libs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">data_libs</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sources</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary of DataAdapter</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary of predefined Catalogs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">PredefinedCatalog</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fallback_lib</span> <span class="o">=</span> <span class="n">fallback_lib</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
 
@@ -706,7 +709,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">predefined_catalogs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all predefined catalogs.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_predefined_catalogs</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_predefined_catalogs</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span>
 
 <div class="viewcode-block" id="DataCatalog.get_source_bbox">
@@ -1077,65 +1080,17 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add data sources to library or update them.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DataCatalog.set_predefined_catalogs">
-<a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.set_predefined_catalogs">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_predefined_catalogs</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">urlpath</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise the predefined catalogs.&quot;&quot;&quot;</span>
-        <span class="c1"># get predefined_catalogs</span>
-        <span class="n">urlpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="k">if</span> <span class="n">urlpath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">urlpath</span>
-        <span class="n">cache_path</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">,</span> <span class="n">basename</span><span class="p">(</span><span class="n">urlpath</span><span class="p">))</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># download file locally; overwrite existing file</span>
-            <span class="n">_copyfile</span><span class="p">(</span><span class="n">urlpath</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># if offline</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Downloading the predefined catalogs failed;&quot;</span>
-                <span class="s2">&quot;check your internet connection&quot;</span>
+    <span class="k">def</span> <span class="nf">_set_predefined_catalogs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set initialized predefined catalogs to _catalogs attribute.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">PREDEFINED_CATALOGS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">cat</span><span class="p">(</span>
+                <span class="n">format_version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_format_version</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span>
             <span class="p">)</span>
-            <span class="k">pass</span>
-        <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">cache_path</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span> <span class="o">=</span> <span class="n">_yml_from_uri_or_path</span><span class="p">(</span><span class="n">cache_path</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span>
-                <span class="s2">&quot;Predefined catalogs not found; check your internet connection.&quot;</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span></div>
-
-
-    <span class="k">def</span> <span class="nf">from_artifacts</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;artifact_data&quot;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataCatalog</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse artifacts.</span>
-
-<span class="sd">        Deprecated method. Use</span>
-<span class="sd">        :py:func:`hydromt.data_catalog.DataCatalog.from_predefined_catalogs` instead.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        name : str, optional</span>
-<span class="sd">            Catalog name. If None (default) sample data is downloaded.</span>
-<span class="sd">        version : str, optional</span>
-<span class="sd">            Release version. By default it takes the latest known release.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        DataCatalog</span>
-<span class="sd">            DataCatalog object with parsed artifact data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s1">&#39;&quot;from_artifacts&quot; is deprecated. Use &quot;from_predefined_catalogs instead&quot;.&#39;</span><span class="p">,</span>
-            <span class="ne">DeprecationWarning</span><span class="p">,</span>
-            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_predefined_catalogs</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_catalogs</span>
 
 <div class="viewcode-block" id="DataCatalog.from_predefined_catalogs">
 <a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.from_predefined_catalogs">[docs]</a>
-    <span class="k">def</span> <span class="nf">from_predefined_catalogs</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataCatalog</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_predefined_catalogs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add data sources from a predefined data catalog.</span>
 
 <span class="sd">        Parameters</span>
@@ -1145,10 +1100,6 @@ document.write(`
 <span class="sd">        version : str, optional</span>
 <span class="sd">            Catlog release version. By default it takes the latest known release.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        DataCatalog</span>
-<span class="sd">            DataCatalog object with parsed predefined catalog added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
             <span class="n">name</span><span class="p">,</span> <span class="n">version</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -1156,109 +1107,59 @@ document.write(`
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Catalog with name &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; not found in predefined catalogs&#39;</span>
             <span class="p">)</span>
-        <span class="n">urlpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predefined_catalogs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;urlpath&quot;</span><span class="p">)</span>
-        <span class="n">versions_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predefined_catalogs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;versions&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s2">&quot;latest&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="c1"># if a specific version is requested, we don&#39;t have to try others</span>
-            <span class="n">versions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">versions_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">versions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">version</span> <span class="o">=</span> <span class="n">versions</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">([</span><span class="n">Version</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">])]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">version</span> <span class="o">=</span> <span class="n">versions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">version</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">versions_dict</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Unknown version requested </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;options are :</span><span class="si">{</span><span class="n">versions_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
-        <span class="n">possible_catalg_versions</span> <span class="o">=</span> <span class="p">[(</span><span class="n">Version</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">versions_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
-        <span class="n">possible_catalg_versions_sorted</span> <span class="o">=</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">possible_catalg_versions</span><span class="p">))</span>
-
-        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="n">possible_catalg_versions_sorted</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">urlpath</span> <span class="o">=</span> <span class="n">urlpath</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="n">identifier</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">urlpath</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;gz&quot;</span><span class="p">,</span> <span class="s2">&quot;zip&quot;</span><span class="p">]:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data catalog archive </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">from_archive</span><span class="p">(</span><span class="n">urlpath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data catalog </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">from_yml</span><span class="p">(</span><span class="n">urlpath</span><span class="p">,</span> <span class="n">catalog_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-                <span class="k">return</span> <span class="bp">self</span>
-            <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;No compatible compatible catalog version could be found&quot;</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="DataCatalog.from_archive">
-<a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.from_archive.html#hydromt.data_catalog.DataCatalog.from_archive">[docs]</a>
-    <span class="k">def</span> <span class="nf">from_archive</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">urlpath</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataCatalog</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read and cache a data archive including a data_catalog.yml file.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        urlpath : str, Path</span>
-<span class="sd">            Path or url to data archive.</span>
-<span class="sd">        version : str, optional</span>
-<span class="sd">            Version of data archive, by default None.</span>
-<span class="sd">        name : str, optional</span>
-<span class="sd">            Name of data catalog, by default None.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        DataCatalog</span>
-<span class="sd">            DataCatalog object with parsed data archive added.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># add depreaction warning</span>
-        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_archive</span><span class="p">(</span><span class="n">urlpath</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">yml_fn</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s2">&quot;data_catalog.yml&quot;</span><span class="p">)</span>
-        <span class="c1"># parse catalog</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">from_yml</span><span class="p">(</span><span class="n">yml_fn</span><span class="p">,</span> <span class="n">catalog_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+        <span class="c1"># cache and get path to data_datalog.yml file of the &lt;name&gt; catalog with &lt;version&gt;</span>
+        <span class="n">catalog_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predefined_catalogs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get_catalog_file</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+        <span class="c1"># read catalog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data catalog </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">from_yml</span><span class="p">(</span><span class="n">catalog_path</span><span class="p">,</span> <span class="n">catalog_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="nf">_cache_archive</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">archive_fn</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataCatalog</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cache a data archive.</span>
+        <span class="n">archive_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">,</span>
+        <span class="n">sha256</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cache a data archive to the cache directory.</span>
+
+<span class="sd">        The archive is unpacked and cached to &lt;cache_dir&gt;/&lt;name&gt;/&lt;version&gt;</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        archive_fn : str, Path</span>
-<span class="sd">            Path or url to data archive.</span>
+<span class="sd">        archive_uri : str</span>
+<span class="sd">            uri to data archive.</span>
+<span class="sd">        name : str</span>
+<span class="sd">            Name of data catalog</span>
 <span class="sd">        version : str, optional</span>
-<span class="sd">            Version of data archive, by default None.</span>
-<span class="sd">        name : str, optional</span>
-<span class="sd">            Name of data catalog, by default None.</span>
+<span class="sd">            Version of data archive, by default &#39;latest&#39;.</span>
+<span class="sd">        sha256 : str, optional</span>
+<span class="sd">            SHA256 hash of the archive, by default None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        DataCatalog</span>
-<span class="sd">            DataCatalog object with parsed data archive added.</span>
+<span class="sd">        str</span>
+<span class="sd">            Path to the datacatalog of the cached data archive</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">archive_fn</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
-        <span class="n">root</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">root</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
-        <span class="n">archive_dst_fn</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">basename</span><span class="p">(</span><span class="n">archive_fn</span><span class="p">))</span>
-        <span class="c1"># copy archive to cache</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">isdir</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Caching data from </span><span class="si">{</span><span class="n">archive_fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">_copyfile</span><span class="p">(</span><span class="n">archive_fn</span><span class="p">,</span> <span class="n">archive_dst_fn</span><span class="p">)</span>
-        <span class="c1"># unpack data and remove archive</span>
-        <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">archive_dst_fn</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unpacking data from </span><span class="si">{</span><span class="n">archive_fn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">unpack_archive</span><span class="p">(</span><span class="n">archive_dst_fn</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">archive_dst_fn</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">root</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+        <span class="n">extract_dir</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">Path</span><span class="p">(</span><span class="n">archive_uri</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+        <span class="c1"># retrieve and unpack archive</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">archive_uri</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.zip&quot;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">processor</span><span class="o">=</span><span class="n">pooch</span><span class="o">.</span><span class="n">Unzip</span><span class="p">(</span><span class="n">extract_dir</span><span class="o">=</span><span class="n">extract_dir</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">Path</span><span class="p">(</span><span class="n">archive_uri</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.gz&quot;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">processor</span><span class="o">=</span><span class="n">pooch</span><span class="o">.</span><span class="n">Untar</span><span class="p">(</span><span class="n">extract_dir</span><span class="o">=</span><span class="n">extract_dir</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">archive_uri</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>  <span class="c1"># check if arhive is a local file</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">donwloader</span><span class="o">=</span><span class="n">_copy_file</span><span class="p">)</span>
+        <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
+            <span class="n">archive_uri</span><span class="p">,</span>
+            <span class="n">known_hash</span><span class="o">=</span><span class="n">sha256</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span>
+            <span class="n">fname</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">archive_uri</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">extract_dir</span>
 
 <div class="viewcode-block" id="DataCatalog.from_yml">
 <a class="viewcode-back" href="../../_generated/hydromt.data_catalog.DataCatalog.from_yml.html#hydromt.data_catalog.DataCatalog.from_yml">[docs]</a>
@@ -1294,6 +1195,8 @@ document.write(`
 <span class="sd">              root: &lt;path&gt;</span>
 <span class="sd">              category: &lt;category&gt;</span>
 <span class="sd">              version: &lt;version&gt;</span>
+<span class="sd">              name: &lt;name&gt;</span>
+<span class="sd">              sha256: &lt;sha256&gt; # only if the root is an archive</span>
 <span class="sd">            &lt;name&gt;:</span>
 <span class="sd">              path: &lt;path&gt;</span>
 <span class="sd">              data_type: &lt;data_type&gt;</span>
@@ -1347,15 +1250,6 @@ document.write(`
 
         <span class="c1"># read meta data</span>
         <span class="n">meta</span> <span class="o">=</span> <span class="n">yml</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;meta&quot;</span><span class="p">,</span> <span class="n">meta</span><span class="p">)</span>
-        <span class="c1"># check version required hydromt version</span>
-        <span class="n">requested_version</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hydromt_version&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">requested_version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">allow_dev</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;allow_dev_version&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_compatible</span><span class="p">(</span><span class="n">__version__</span><span class="p">,</span> <span class="n">requested_version</span><span class="p">,</span> <span class="n">allow_dev</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Data catalog requires Hydromt Version </span><span class="si">{</span><span class="n">requested_version</span><span class="si">}</span><span class="s2"> which &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;is incompattible with current hydromt verison </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span>
         <span class="k">if</span> <span class="n">catalog_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">catalog_name</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
                 <span class="nb">str</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">basename</span><span class="p">(</span><span class="n">urlpath</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
@@ -1365,12 +1259,12 @@ document.write(`
             <span class="n">root</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">urlpath</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;gz&quot;</span><span class="p">,</span> <span class="s2">&quot;zip&quot;</span><span class="p">]:</span>
             <span class="c1"># if root is an archive, unpack it at the cache dir</span>
-            <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_archive</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">catalog_name</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
-            <span class="c1"># save catalog to cache</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">catalog_name</span><span class="si">}</span><span class="s2">.yml&quot;</span><span class="p">),</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;meta&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">meta</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">&quot;root&quot;</span><span class="p">}}</span>
-                <span class="n">data_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">yml</span><span class="p">)</span>
-                <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cache_archive</span><span class="p">(</span>
+                <span class="n">archive_uri</span><span class="o">=</span><span class="n">root</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">catalog_name</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+                <span class="n">sha256</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sha256&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
             <span class="n">yml</span><span class="p">,</span>
             <span class="n">catalog_name</span><span class="o">=</span><span class="n">catalog_name</span><span class="p">,</span>
@@ -2379,8 +2273,7 @@ document.write(`
 <span class="k">def</span> <span class="nf">_yml_from_uri_or_path</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">_uri_validator</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">)):</span>
         <span class="k">with</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">r</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;URL </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">uri_or_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
             <span class="n">yml</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">FullLoader</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">uri_or_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
@@ -2507,7 +2400,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

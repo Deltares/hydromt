@@ -38,7 +38,7 @@
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -428,10 +428,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.add_source.html">hydromt.data_catalog.DataCatalog.add_source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_archive.html">hydromt.data_catalog.DataCatalog.from_archive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_yml.html">hydromt.data_catalog.DataCatalog.from_yml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.set_predefined_catalogs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
@@ -439,6 +437,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataset.html">hydromt.data_catalog.DataCatalog.get_dataset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.PredefinedCatalog.html">hydromt.predefined_catalog.PredefinedCatalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file.html">hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.create_registry_file.html">hydromt.predefined_catalog.create_registry_file</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.html">hydromt.data_adapter.DataAdapter</a></li>
@@ -957,7 +960,7 @@ grid is defined it is based on the first DataArray in the list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data_arrays</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.3.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a>) – Tiles to merge</p></li>
+<li><p><strong>data_arrays</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.5.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a>) – Tiles to merge</p></li>
 <li><p><strong>dst_crs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pyproj.CRS</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – CRS (or EPSG code) of destination grid</p></li>
 <li><p><strong>dst_bounds</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Bounding box [xmin, ymin, xmax, ymax] of destination grid</p></li>
 <li><p><strong>dst_res</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Resolution of destination grid</p></li>
@@ -981,7 +984,7 @@ Used to determine dst_crs, dst_bounds and dst_res if missing.</p></li>
 <dd class="field-even"><p><strong>da_out</strong> – Merged tiles.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.3.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.5.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1097,7 +1100,7 @@ Used to determine dst_crs, dst_bounds and dst_res if missing.</p></li>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

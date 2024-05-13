@@ -39,7 +39,7 @@
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -545,7 +545,7 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:19:47,246 - read vector data - log - INFO - HydroMT version: 0.9.5.dev0
+2024-05-13 13:46:01,877 - read vector data - log - INFO - HydroMT version: 0.9.5.dev0
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -553,24 +553,17 @@ document.write(`
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Download artifacts for the Piave basin to `~/.hydromt_data/`.</span>
-<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data&quot;</span><span class="p">])</span>
+<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data=v0.0.8&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-2024-04-25 17:19:47,276 - read vector data - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
-</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:19:47,276 - read vector data - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2024-05-13 13:46:01,902 - read vector data - data_catalog - INFO - Reading data catalog artifact_data v0.0.8
+2024-05-13 13:46:01,902 - read vector data - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
 </pre></div></div>
 </div>
 </section>
@@ -614,7 +607,7 @@ meta:
   source_license: https://gadm.org/license.html
   source_url: https://gadm.org/download_world.html
   source_version: 1.0
-path: /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
+path: /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/gadm_level3.gpkg
 </pre></div></div>
 </div>
 <p>We can load any GeoDataFrame using the <a class="reference external" href="https://deltares.github.io/hydromt/latest/_generated/hydromt.data_catalog.DataCatalog.get_geodataframe.html">get_geodataframe()</a> method of the DataCatalog. Note that if we don’t provide any arguments it returns the full dataset with nine data variables and for the full spatial domain. Only the data coordinates are actually read, the data variables are still loaded lazy.</p>
@@ -633,14 +626,7 @@ path: /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:19:47,339 - read vector data - geodataframe - INFO - Reading gadm_level3 vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
+2024-05-13 13:46:02,510 - read vector data - geodataframe - INFO - Reading gadm_level3 vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/gadm_level3.gpkg
 number of rows: 509
 </pre></div></div>
 </div>
@@ -809,22 +795,8 @@ number of rows: 509
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:19:47,546 - read vector data - geodataframe - INFO - Reading gadm_level3 vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/gadm_level3.gpkg
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-2024-04-25 17:19:47,571 - read vector data - geodataframe - DEBUG - Clip intersects [11.557, 46.096, 11.851, 46.477] (EPSG:4326)
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
+2024-05-13 13:46:02,709 - read vector data - geodataframe - INFO - Reading gadm_level3 vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/gadm_level3.gpkg
+2024-05-13 13:46:02,732 - read vector data - geodataframe - DEBUG - Clip intersects [11.557, 46.096, 11.851, 46.477] (EPSG:4326)
 number of rows: 28
 </pre></div></div>
 </div>
@@ -1027,14 +999,7 @@ path: /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:19:47,822 - read vector data - geodataframe - INFO - Reading GADM_level3_centroids vector_table data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
+2024-05-13 13:46:02,982 - read vector data - geodataframe - INFO - Reading GADM_level3_centroids vector_table data from /home/runner/work/hydromt/hydromt/docs/_examples/tmpdir/xy.csv
 CRS: EPSG:4326
 </pre></div></div>
 </div>
@@ -1244,7 +1209,7 @@ CRS: EPSG:4326
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

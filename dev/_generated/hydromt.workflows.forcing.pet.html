@@ -38,7 +38,7 @@
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -428,10 +428,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.add_source.html">hydromt.data_catalog.DataCatalog.add_source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_archive.html">hydromt.data_catalog.DataCatalog.from_archive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_yml.html">hydromt.data_catalog.DataCatalog.from_yml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.set_predefined_catalogs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
@@ -439,6 +437,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataset.html">hydromt.data_catalog.DataCatalog.get_dataset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.PredefinedCatalog.html">hydromt.predefined_catalog.PredefinedCatalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file.html">hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.create_registry_file.html">hydromt.predefined_catalog.create_registry_file</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.html">hydromt.data_adapter.DataAdapter</a></li>
@@ -948,13 +951,13 @@ document.write(`
 <h1>hydromt.workflows.forcing.pet<a class="headerlink" href="#hydromt-workflows-forcing-pet" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="hydromt.workflows.forcing.pet">
-<span class="sig-prename descclassname"><span class="pre">hydromt.workflows.forcing.</span></span><span class="sig-name descname"><span class="pre">pet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds:</span> <span class="pre">~xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp:</span> <span class="pre">~xarray.core.dataarray.DataArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dem_model:</span> <span class="pre">~xarray.core.dataarray.DataArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'debruin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">press_correction:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_correction:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_altitude:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reproj_method:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'nearest_index'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_kwargs:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">hydromt.workflows.forcing</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.3.1.dev0)"><span class="pre">DataArray</span></a></span></span><a class="reference internal" href="../_modules/hydromt/workflows/forcing.html#pet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.workflows.forcing.pet" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">hydromt.workflows.forcing.</span></span><span class="sig-name descname"><span class="pre">pet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds:</span> <span class="pre">~xarray.core.dataset.Dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp:</span> <span class="pre">~xarray.core.dataarray.DataArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dem_model:</span> <span class="pre">~xarray.core.dataarray.DataArray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'debruin'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">press_correction:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_correction:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wind_altitude:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reproj_method:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'nearest_index'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample_kwargs:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger=&lt;Logger</span> <span class="pre">hydromt.workflows.forcing</span> <span class="pre">(WARNING)&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.5.1.dev0)"><span class="pre">DataArray</span></a></span></span><a class="reference internal" href="../_modules/hydromt/workflows/forcing.html#pet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.workflows.forcing.pet" title="Link to this definition">#</a></dt>
 <dd><p>Determine reference evapotranspiration.</p>
 <p>(lazy reprojection on model grid and resampling of time dimension to frequency).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.3.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>) – <p>Dataset with climate variables: pressure [hPa], global radiation [W m-2],
+<li><p><strong>ds</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.5.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>) – <p>Dataset with climate variables: pressure [hPa], global radiation [W m-2],
 TOA incident solar radiation [W m-2], wind [m s-1]</p>
 <ul>
 <li><p>Required variables: {“temp”, “press” or “press_msl”, “kin”}</p></li>
@@ -971,8 +974,8 @@ TOA incident solar radiation [W m-2], wind [m s-1]</p>
 </li>
 </ul>
 </p></li>
-<li><p><strong>temp</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.3.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a>) – DataArray with temperature on model grid resolution [°C]</p></li>
-<li><p><strong>dem_model</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.3.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a>) – DataArray of the target resolution and projection, contains elevation
+<li><p><strong>temp</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.5.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a>) – DataArray with temperature on model grid resolution [°C]</p></li>
+<li><p><strong>dem_model</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2024.5.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.DataArray</span></code></a>) – DataArray of the target resolution and projection, contains elevation
 data</p></li>
 <li><p><strong>method</strong> (<code class="docutils literal notranslate"><span class="pre">{'debruin',</span> <span class="pre">'makkink',</span> <span class="pre">&quot;penman-monteith_rh_simple&quot;,</span> <span class="pre">&quot;penman-monteith_tdew&quot;}</span></code>) – Potential evapotranspiration method.
 if penman-monteith is used, requires the installation of the pyet package.</p></li>
@@ -1106,7 +1109,7 @@ original <cite>wind_altitude</cite>.</p></li>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

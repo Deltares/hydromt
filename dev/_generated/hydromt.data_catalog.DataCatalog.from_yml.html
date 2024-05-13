@@ -38,7 +38,7 @@
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -53,7 +53,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="hydromt.data_catalog.DataCatalog.from_dict" href="hydromt.data_catalog.DataCatalog.from_dict.html" />
-    <link rel="prev" title="hydromt.data_catalog.DataCatalog.from_archive" href="hydromt.data_catalog.DataCatalog.from_archive.html" />
+    <link rel="prev" title="hydromt.data_catalog.DataCatalog.from_predefined_catalogs" href="hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -428,10 +428,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.add_source.html">hydromt.data_catalog.DataCatalog.add_source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_archive.html">hydromt.data_catalog.DataCatalog.from_archive</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">hydromt.data_catalog.DataCatalog.from_yml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.set_predefined_catalogs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
@@ -439,6 +437,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_dataset.html">hydromt.data_catalog.DataCatalog.get_dataset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.PredefinedCatalog.html">hydromt.predefined_catalog.PredefinedCatalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file.html">hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hydromt.predefined_catalog.create_registry_file.html">hydromt.predefined_catalog.create_registry_file</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="hydromt.data_adapter.DataAdapter.html">hydromt.data_adapter.DataAdapter</a></li>
@@ -969,6 +972,8 @@ for more information about the required and optional arguments.</p>
 <span class="w">  </span><span class="nt">root</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;path&gt;</span>
 <span class="w">  </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;category&gt;</span>
 <span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;version&gt;</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;name&gt;</span>
+<span class="w">  </span><span class="nt">sha256</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;sha256&gt;</span><span class="w"> </span><span class="c1"># only if the root is an archive</span>
 <span class="nt">&lt;name&gt;</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;path&gt;</span>
 <span class="w">  </span><span class="nt">data_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;data_type&gt;</span>
@@ -1019,12 +1024,12 @@ for more information about the required and optional arguments.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="hydromt.data_catalog.DataCatalog.from_archive.html"
+       href="hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">hydromt.data_catalog.DataCatalog.from_archive</p>
+        <p class="prev-next-title">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</p>
       </div>
     </a>
     <a class="right-next"
@@ -1117,7 +1122,7 @@ for more information about the required and optional arguments.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

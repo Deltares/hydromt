@@ -38,10 +38,12 @@
   <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
@@ -428,10 +430,8 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.add_source.html">hydromt.data_catalog.DataCatalog.add_source</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_archive.html">hydromt.data_catalog.DataCatalog.from_archive</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_yml.html">hydromt.data_catalog.DataCatalog.from_yml</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.set_predefined_catalogs</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
@@ -439,6 +439,11 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.get_dataset.html">hydromt.data_catalog.DataCatalog.get_dataset</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.predefined_catalog.PredefinedCatalog.html">hydromt.predefined_catalog.PredefinedCatalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file.html">hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.predefined_catalog.create_registry_file.html">hydromt.predefined_catalog.create_registry_file</a></li>
 </ul>
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="_generated/hydromt.data_adapter.DataAdapter.html">hydromt.data_adapter.DataAdapter</a></li>
@@ -1030,17 +1035,11 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.from_predefined_catalogs" title="hydromt.data_catalog.DataCatalog.from_predefined_catalogs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_predefined_catalogs</span></code></a>(name)</p></td>
 <td><p>Add data sources from a predefined data catalog.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_archive.html#hydromt.data_catalog.DataCatalog.from_archive" title="hydromt.data_catalog.DataCatalog.from_archive"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_archive</span></code></a>(urlpath)</p></td>
-<td><p>Read and cache a data archive including a data_catalog.yml file.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_yml.html#hydromt.data_catalog.DataCatalog.from_yml" title="hydromt.data_catalog.DataCatalog.from_yml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_yml</span></code></a>(urlpath[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_yml.html#hydromt.data_catalog.DataCatalog.from_yml" title="hydromt.data_catalog.DataCatalog.from_yml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_yml</span></code></a>(urlpath[, ...])</p></td>
 <td><p>Add data sources based on yaml file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_dict.html#hydromt.data_catalog.DataCatalog.from_dict" title="hydromt.data_catalog.DataCatalog.from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_dict</span></code></a>(data_dict)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.from_dict.html#hydromt.data_catalog.DataCatalog.from_dict" title="hydromt.data_catalog.DataCatalog.from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.from_dict</span></code></a>(data_dict)</p></td>
 <td><p>Add data sources based on dictionary.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.data_catalog.DataCatalog.set_predefined_catalogs.html#hydromt.data_catalog.DataCatalog.set_predefined_catalogs" title="hydromt.data_catalog.DataCatalog.set_predefined_catalogs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_catalog.DataCatalog.set_predefined_catalogs</span></code></a>([...])</p></td>
-<td><p>Initialise the predefined catalogs.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1067,6 +1066,22 @@ document.write(`
 </tbody>
 </table>
 </section>
+</section>
+<section id="predefined-data-catalog">
+<h3>Predefined data catalog<a class="headerlink" href="#predefined-data-catalog" title="Link to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.predefined_catalog.PredefinedCatalog.html#hydromt.predefined_catalog.PredefinedCatalog" title="hydromt.predefined_catalog.PredefinedCatalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predefined_catalog.PredefinedCatalog</span></code></a>([...])</p></td>
+<td><p>Predefined data catalog.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_generated/hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file.html#hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file" title="hydromt.predefined_catalog.PredefinedCatalog.get_catalog_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predefined_catalog.PredefinedCatalog.get_catalog_file</span></code></a>([...])</p></td>
+<td><p>Get the cached catalog file path for a specific version.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_generated/hydromt.predefined_catalog.create_registry_file.html#hydromt.predefined_catalog.create_registry_file" title="hydromt.predefined_catalog.create_registry_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predefined_catalog.create_registry_file</span></code></a>(root)</p></td>
+<td><p>Create a registry file for all catalog files in the root directory.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="dataadapter">
 <h3>DataAdapter<a class="headerlink" href="#dataadapter" title="Link to this heading">#</a></h3>
@@ -2560,6 +2575,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#get-data">Get data</a></li>
 </ul>
 </li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#predefined-data-catalog">Predefined data catalog</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dataadapter">DataAdapter</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">General</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#rasterdataset">RasterDataset</a></li>
@@ -2723,7 +2739,7 @@ visit the <a class="reference external" href="https://deltares.github.io/pyflwdi
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

@@ -39,7 +39,7 @@
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -571,7 +571,7 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:18:43,443 - basin_delineation - log - INFO - HydroMT version: 0.9.5.dev0
+2024-05-13 13:44:53,846 - basin_delineation - log - INFO - HydroMT version: 0.9.5.dev0
 </pre></div></div>
 </div>
 </section>
@@ -584,24 +584,36 @@ the original <code class="docutils literal notranslate"><span class="pre">'MERIT
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># instantiate instance of Data Catalog</span>
-<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data&quot;</span><span class="p">])</span>
+<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data=v0.0.8&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+Downloading file &#39;v0.0.8/data_catalog.yml&#39; from &#39;https://raw.githubusercontent.com/Deltares/hydromt/main/data/catalogs/artifact_data/v0.0.8/data_catalog.yml&#39; to &#39;/home/runner/.hydromt_data/artifact_data&#39;.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:18:43,477 - basin_delineation - data_catalog - INFO - Reading data catalog archive artifact_data v0.0.8
+2024-05-13 13:44:53,999 - basin_delineation - data_catalog - INFO - Reading data catalog artifact_data v0.0.8
+2024-05-13 13:44:53,999 - basin_delineation - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:18:43,477 - basin_delineation - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+Downloading data from &#39;https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.8/data.tar.gz&#39; to file &#39;/home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar.gz&#39;.
+SHA256 hash of downloaded file: f21f84df809d4c1ab3737428a67838181d3d9304048c8196822ad90eedf80739
+Use this value as the &#39;known_hash&#39; argument of &#39;pooch.retrieve&#39; to ensure that the file hasn&#39;t changed if it is downloaded again in the future.
+Untarring contents of &#39;/home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar.gz&#39; to &#39;/home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar&#39;
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -629,9 +641,9 @@ meta:
   source_license: CC-BY-NC 4.0 or ODbL 1.0
   source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
   source_version: 1.0
-path: /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+path: /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/merit_hydro/{variable}.tif
 
-2024-04-25 17:18:43,537 - basin_delineation - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro/{variable}.tif
+2024-05-13 13:44:56,467 - basin_delineation - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/merit_hydro/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -659,7 +671,7 @@ meta:
   paper_doi: 10.5194/hess-2020-582
   paper_ref: Eilander et al. (in review)
   source_license: CC-BY-NC 4.0
-path: /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_index.gpkg
+path: /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/merit_hydro_index.gpkg
 
 </pre></div></div>
 </div>
@@ -708,20 +720,13 @@ path: /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_index.gpkg
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-2024-04-25 17:18:47,227 - basin_delineation - basin_mask - DEBUG - Getting basin IDs at point locations.
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:18:47,309 - basin_delineation - basin_mask - INFO - basin bbox: [12.1958, 45.5850, 12.8983, 46.4167]
+2024-05-13 13:45:00,135 - basin_delineation - basin_mask - DEBUG - Getting basin IDs at point locations.
+2024-05-13 13:45:00,211 - basin_delineation - basin_mask - INFO - basin bbox: [12.1958, 45.5850, 12.8983, 46.4167]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -782,7 +787,7 @@ path: /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_index.gpkg
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:18:51,185 - basin_delineation - basin_mask - INFO - subbasin bbox: [12.2350, 45.7950, 12.8783, 46.4167]
+2024-05-13 13:45:04,049 - basin_delineation - basin_mask - INFO - subbasin bbox: [12.2350, 45.7950, 12.8783, 46.4167]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -834,20 +839,13 @@ path: /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_index.gpkg
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-2024-04-25 17:18:52,556 - basin_delineation - basin_mask - DEBUG - Getting IDs of intersecting basins.
-</pre></div></div>
-</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:18:52,849 - basin_delineation - basin_mask - INFO - subbasin bbox: [12.1958, 45.7192, 12.8783, 46.4167]
+2024-05-13 13:45:05,416 - basin_delineation - basin_mask - DEBUG - Getting IDs of intersecting basins.
+2024-05-13 13:45:05,685 - basin_delineation - basin_mask - INFO - subbasin bbox: [12.1958, 45.7192, 12.8783, 46.4167]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -907,7 +905,7 @@ path: /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_index.gpkg
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-04-25 17:18:55,618 - basin_delineation - basin_mask - INFO - interbasin bbox: [12.5000, 45.7200, 12.7000, 46.0000]
+2024-05-13 13:45:08,377 - basin_delineation - basin_mask - INFO - interbasin bbox: [12.5000, 45.7200, 12.7000, 46.0000]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -1055,7 +1053,7 @@ path: /home/runner/.hydromt_data/artifact_data/v0.0.8/merit_hydro_index.gpkg
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
