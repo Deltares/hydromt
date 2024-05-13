@@ -103,7 +103,7 @@ To preserve reproducibility for older versions of the catalogs, we DO NOT modify
 
 Testing
 -------
-If you want to make catalogs for HydroMT testing purposes, or to update a catalog with new data, we must first ensure that HydroMT can properly read and use your data. To do this, we need to test the data with HydroMT in our CI envornment on github. DO NOT moddify the `data/catalogs/predefined_catalogs.yml` file to do this. The use of this file is deprecated and it is mainained for backwards compatability, but should no longer be used.
+If you want to make catalogs for HydroMT testing purposes, or to update a catalog with new data, we must first ensure that HydroMT can properly read and use your data. To do this, we need to test the data with HydroMT in our CI environment on github. DO NOT modify the `data/catalogs/predefined_catalogs.yml` file to do this. The use of this file is deprecated and it is maintained for backwards compatibility, but should no longer be used.
 
 Testing a new data catalog should be fairly straight forward once it is created. The level of testing we require to add new catalogs can varry depending on the size, importance, and popularity of the set. In order of importance the tests that should be done are:
 
@@ -113,4 +113,4 @@ Testing a new data catalog should be fairly straight forward once it is created.
 4. Units should be acounted for properly using properties such as `unit`, `unti_add`, and `unit_mult` where appropriate
 5. Whatever domain specific quality assurance should be done, to avoid for example, rounding errors near the boundaries.
 
-At least, point one needs to be verified locally by the author of the PR, and preferably a test should be made for it in our CI as well. Depending on context we may ask you to verrify other points (on this list) as well.
+At least, point one needs to be verified locally by the author of the PR, and preferably a test should be made for it in our CI as well. Depending on context we may ask you to verify other points (on this list) as well.
