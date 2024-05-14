@@ -1,18 +1,19 @@
-"""Driver for RasterDatasets."""
+"""Driver for GeoDataFrames."""
 
 from abc import ABC, abstractmethod
-from logging import Logger
+from logging import Logger, getLogger
 from typing import List, Optional
 
-import xarray as xr
+import geopandas as gpd
 
-from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
+from hydromt._typing import Geom, SourceMetadata, StrPath
 from hydromt._typing.error import NoDataStrategy
+from hydromt.drivers import BaseDriver
 
-from .base_driver import BaseDriver
+logger: Logger = getLogger(__name__)
 
 
-class RasterDatasetDriver(BaseDriver, ABC):
+class GeoDataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
 
     def read(
@@ -21,14 +22,14 @@ class RasterDatasetDriver(BaseDriver, ABC):
         *,
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
-        logger: Optional[Logger] = None,
+        predicate: str = "intersects",
+        metadata: Optional[SourceMetadata] = None,
+        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> xr.Dataset:
+    ) -> gpd.GeoDataFrame:
         """
-        Read in any compatible data source to an xarray Dataset.
+        Read in any compatible data source to a geopandas `GeoDataFrame`.
 
         args:
             mask: Optional[Geom]. Mask for features to match the predicate, preferably
@@ -39,19 +40,19 @@ class RasterDatasetDriver(BaseDriver, ABC):
             uri,
             self.filesystem,
             mask=mask,
-            time_range=time_range,
             variables=variables,
-            zoom_level=zoom_level,
             handle_nodata=handle_nodata,
         )
-        return self.read_data(
+        gdf = self.read_data(
             uris,
             mask=mask,
-            time_range=time_range,
-            zoom_level=zoom_level,
+            predicate=predicate,
+            variables=variables,
+            metadata=metadata,
             logger=logger,
             handle_nodata=handle_nodata,
         )
+        return gdf
 
     @abstractmethod
     def read_data(
@@ -59,27 +60,23 @@ class RasterDatasetDriver(BaseDriver, ABC):
         uris: List[str],
         *,
         mask: Optional[Geom] = None,
-        time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
-        logger: Logger,
+        predicate: str = "intersects",
+        variables: Optional[List[str]] = None,
+        metadata: Optional[SourceMetadata] = None,
+        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> xr.Dataset:
-        """
-        Read in any compatible data source to an xarray Dataset.
-
-        args:
-        """
+    ) -> gpd.GeoDataFrame:
+        """Read in any compatible data source to a geopandas `GeoDataFrame`."""
         ...
 
     def write(
         self,
         path: StrPath,
-        ds: xr.Dataset,
+        gdf: gpd.GeoDataFrame,
         **kwargs,
     ) -> None:
         """
-        Write out a RasterDataset to file.
+        Write out a GeoDataFrame to file.
 
         Not all drivers should have a write function, so this method is not
         abstract.

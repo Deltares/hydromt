@@ -5,10 +5,9 @@ from __future__ import annotations
 import os
 from logging import Logger, getLogger
 from os.path import join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
-import pandas as pd
 import pyproj
 import rasterio
 import xarray as xr
@@ -23,18 +22,21 @@ from hydromt._typing import (
     NoDataException,
     NoDataStrategy,
     RasterDatasetSource,
+    SourceMetadata,
     StrPath,
     TimeRange,
     Variables,
     _exec_nodata_strat,
 )
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
-from hydromt.data_adapter.utils import has_no_data
+from hydromt.data_adapter.utils import (
+    _single_var_as_array,
+    _slice_temporal_dimension,
+    has_no_data,
+    shift_dataset_time,
+)
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
-
-if TYPE_CHECKING:
-    from hydromt.data_source.data_source import SourceMetadata
 
 logger = getLogger(__name__)
 
@@ -170,7 +172,9 @@ class RasterDatasetAdapter(DataAdapterBase):
             ds = self._validate_spatial_dims(ds)
             ds = self._set_crs(ds, metadata.crs, logger)
             ds = self._set_nodata(ds, metadata)
-            ds = self._shift_time(ds, logger)
+            ds = shift_dataset_time(
+                dt=self.unit_add.get("time", 0), ds=ds, logger=logger
+            )
             # slice data
             ds = RasterDatasetAdapter._slice_data(
                 ds,
@@ -189,7 +193,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             ds = self._apply_unit_conversions(ds, logger)
             ds = self._set_metadata(ds, metadata)
             # return array if single var and single_var_as_array
-            return self._single_var_as_array(ds, single_var_as_array, variables)
+            return _single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
             _exec_nodata_strat(
                 "No data was read from source",
@@ -233,7 +237,7 @@ class RasterDatasetAdapter(DataAdapterBase):
     @staticmethod
     def _slice_data(
         ds: Data,
-        variables: Optional[Variables] = None,
+        variables: Optional[List] = None,
         geom: Optional[Geom] = None,
         bbox: Optional[Bbox] = None,
         buffer: GeomBuffer = 0,
@@ -267,21 +271,21 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds : xarray.Dataset
             The sliced RasterDataset.
         """
-        if isinstance(ds, xr.DataArray):
+        if isinstance(ds, xr.DataArray):  # xr.DataArray has no variables
             if ds.name is None:
                 # dummy name, required to create dataset
                 # renamed to variable in _single_var_as_array
                 ds.name = "data"
             ds = ds.to_dataset()
-        elif variables is not None:
-            variables = np.atleast_1d(variables).tolist()
+        elif variables is not None:  # xr.Dataset has variables
+            variables = cast(List, np.atleast_1d(variables).tolist())
             if len(variables) > 1 or len(ds.data_vars) > 1:
                 mvars = [var not in ds.data_vars for var in variables]
                 if any(mvars):
-                    raise ValueError(f"RasterDataset: variables not found {mvars}")
+                    raise NoDataException(f"RasterDataset: variables not found {mvars}")
                 ds = ds[variables]
         if time_tuple is not None:
-            ds = RasterDatasetAdapter._slice_temporal_dimension(
+            ds = _slice_temporal_dimension(
                 ds,
                 time_tuple,
                 logger=logger,
@@ -296,39 +300,6 @@ class RasterDatasetAdapter(DataAdapterBase):
                 logger=logger,
             )
 
-        if has_no_data(ds):
-            return None
-        else:
-            return ds
-
-    def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
-        dt = self.unit_add.get("time", 0)
-        if (
-            dt != 0
-            and "time" in ds.dims
-            and ds["time"].size > 1
-            and np.issubdtype(ds["time"].dtype, np.datetime64)
-        ):
-            logger.debug(f"Shifting time labels with {dt} sec.")
-            ds["time"] = ds["time"] + pd.to_timedelta(dt, unit="s")
-        elif dt != 0:
-            logger.warning("Time shift not applied, time dimension not found.")
-        return ds
-
-    @staticmethod
-    def _slice_temporal_dimension(
-        ds: Data,
-        time_tuple: Optional[TimeRange],
-        logger: Logger = logger,
-    ):
-        if (
-            "time" in ds.dims
-            and ds["time"].size > 1
-            and np.issubdtype(ds["time"].dtype, np.datetime64)
-        ):
-            if time_tuple is not None:
-                logger.debug(f"Slicing time dim {time_tuple}")
-                ds = ds.sel({"time": slice(*time_tuple)})
         if has_no_data(ds):
             return None
         else:
@@ -426,7 +397,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds.attrs.update(metadata.model_dump(exclude=["attrs"]))
         return ds
 
-    # TODO: uses rasterio and is specific to driver. Should be moved to driver
+    # TODO: https://github.com/Deltares/hydromt/issues/875
+    # uses rasterio and is specific to driver. Should be moved to driver
     def _get_zoom_levels_and_crs(
         self, fn: Optional[StrPath] = None, logger=logger
     ) -> Tuple[Optional[dict], Optional[int]]:
@@ -546,19 +518,3 @@ class RasterDatasetAdapter(DataAdapterBase):
             raise TypeError(f"zoom_level not understood: {type(zoom_level)}")
         logger.debug(f"Using zoom level {zl} (res: {zls_dict[zl]:.6f})")
         return zl
-
-    @staticmethod
-    def _single_var_as_array(
-        ds: Data, single_var_as_array: bool, variable_name: Optional[List[str]] = None
-    ) -> Data:
-        # return data array if single variable dataset
-        dvars = list(ds.data_vars.keys())
-        if single_var_as_array and len(dvars) == 1:
-            da = ds[dvars[0]]
-            if isinstance(variable_name, list) and len(variable_name) == 1:
-                da.name = variable_name[0]
-            elif isinstance(variable_name, str):
-                da.name = variable_name
-            return da
-        else:
-            return ds

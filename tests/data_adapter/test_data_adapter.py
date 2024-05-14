@@ -38,9 +38,9 @@ CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
 
 @pytest.mark.skip(reason="Needs refactor from path to uri.")
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
-def test_gcs_cmip6(tmpdir):
+def test_gcs_cmip6():
     # TODO switch to pre-defined catalogs when pushed to main
-    catalog_fn = join(CATALOGDIR, "gcs_cmip6_data.yml")
+    catalog_fn = join(CATALOGDIR, "gcs_cmip6_data", "v0.1.0", "data_catalog.yml")
     data_catalog = DataCatalog(data_libs=[catalog_fn])
     ds = data_catalog.get_rasterdataset(
         "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
@@ -61,7 +61,7 @@ def test_gcs_cmip6(tmpdir):
 @pytest.mark.skip(reason="Needs implementation of all Drivers.")
 @pytest.mark.skipif(not compat.HAS_S3FS, reason="S3FS not installed.")
 def test_aws_worldcover():
-    catalog_fn = join(CATALOGDIR, "aws_data.yml")
+    catalog_fn = join(CATALOGDIR, "aws_data", "v0.1.0", "data_catalog.yml")
     data_catalog = DataCatalog(data_libs=[catalog_fn])
     da = data_catalog.get_rasterdataset(
         "esa_worldcover_2020_v100",
@@ -91,7 +91,7 @@ def test_http_data():
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
+def test_rasterdataset_zoomlevels(rioda_large, tmpdir, data_catalog):
     # write tif with zoom level 1 in name
     # NOTE zl 0 not written to check correct functioning
     name = "test_zoom"
@@ -106,7 +106,6 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
         }
     }
     # test zoom levels in name
-    data_catalog = DataCatalog()
     data_catalog.from_dict(yml_dict)
     rds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
     assert rds._parse_zoom_level(None) is None
@@ -144,8 +143,8 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
-    era5 = artifact_data.get_rasterdataset("era5")
+def test_rasterdataset_driver_kwargs(data_catalog: DataCatalog, tmpdir):
+    era5 = data_catalog.get_rasterdataset("era5")
     fp1 = join(tmpdir, "era5.zarr")
     era5.to_zarr(fp1)
     data_dict = {
@@ -183,22 +182,22 @@ def test_rasterdataset_driver_kwargs(artifact_data: DataCatalog, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_rasterdataset_unit_attrs(artifact_data: DataCatalog):
-    era5_dict = {"era5": artifact_data.get_source("era5").to_dict()}
+def test_rasterdataset_unit_attrs(data_catalog: DataCatalog):
+    era5_dict = {"era5": data_catalog.get_source("era5").to_dict()}
     attrs = {
         "temp": {"unit": "degrees C", "long_name": "temperature"},
         "temp_max": {"unit": "degrees C", "long_name": "maximum temperature"},
         "temp_min": {"unit": "degrees C", "long_name": "minimum temperature"},
     }
     era5_dict["era5"].update(dict(attrs=attrs))
-    artifact_data.from_dict(era5_dict)
-    raster = artifact_data.get_rasterdataset("era5")
+    data_catalog.from_dict(era5_dict)
+    raster = data_catalog.get_rasterdataset("era5")
     assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset(geoda, geodf, ts, tmpdir):
+def test_geodataset(geoda, geodf, ts, tmpdir, data_catalog):
     fn_nc = str(tmpdir.join("test.nc"))
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_csv = str(tmpdir.join("test.csv"))
@@ -207,7 +206,6 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
     geodf.to_file(fn_gdf, driver="GeoJSON")
     ts.to_csv(fn_csv)
     write_xy(fn_csv_locs, geodf)
-    data_catalog = DataCatalog()
     # added fn_ts to test if it does not go into xr.open_dataset
     da1 = data_catalog.get_geodataset(
         fn_nc, variables=["test1"], bbox=geoda.vector.bounds
@@ -258,8 +256,8 @@ def test_geodataset(geoda, geodf, ts, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_unit_attrs(artifact_data: DataCatalog):
-    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
+def test_geodataset_unit_attrs(data_catalog: DataCatalog):
+    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
     attrs = {
         "waterlevel": {
             "long_name": "sea surface height above mean sea level",
@@ -267,16 +265,16 @@ def test_geodataset_unit_attrs(artifact_data: DataCatalog):
         }
     }
     gtsm_dict["gtsmv3_eu_era5"].update(dict(attrs=attrs))
-    artifact_data.from_dict(gtsm_dict)
-    gtsm_geodataarray = artifact_data.get_geodataset("gtsmv3_eu_era5")
+    data_catalog.from_dict(gtsm_dict)
+    gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
     assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
     assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_unit_conversion(artifact_data: DataCatalog):
-    gtsm_geodataarray = artifact_data.get_geodataset("gtsmv3_eu_era5")
-    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
+def test_geodataset_unit_conversion(data_catalog: DataCatalog):
+    gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
+    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
     gtsm_dict["gtsmv3_eu_era5"].update(dict(unit_mult=dict(waterlevel=1000)))
     datacatalog = DataCatalog()
     datacatalog.from_dict(gtsm_dict)
@@ -285,8 +283,8 @@ def test_geodataset_unit_conversion(artifact_data: DataCatalog):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_set_nodata(artifact_data: DataCatalog):
-    gtsm_dict = {"gtsmv3_eu_era5": artifact_data.get_source("gtsmv3_eu_era5").to_dict()}
+def test_geodataset_set_nodata(data_catalog: DataCatalog):
+    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
     gtsm_dict["gtsmv3_eu_era5"].update(dict(nodata=-99))
     datacatalog = DataCatalog()
     datacatalog.from_dict(gtsm_dict)
@@ -421,12 +419,11 @@ def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataframe(geodf, tmpdir):
+def test_geodataframe(geodf, tmpdir, data_catalog):
     fn_gdf = str(tmpdir.join("test.geojson"))
     fn_shp = str(tmpdir.join("test.shp"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
     geodf.to_file(fn_shp)
-    data_catalog = DataCatalog()
     # test read geojson using total bounds
     gdf1 = data_catalog.get_geodataframe(fn_gdf, bbox=geodf.total_bounds)
     assert isinstance(gdf1, gpd.GeoDataFrame)
@@ -474,21 +471,20 @@ def test_geodataframe(geodf, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataframe_unit_attrs(artifact_data: DataCatalog):
-    gadm_level1 = {"gadm_level1": artifact_data.get_source("gadm_level1").to_dict()}
+def test_geodataframe_unit_attrs(data_catalog: DataCatalog):
+    gadm_level1 = {"gadm_level1": data_catalog.get_source("gadm_level1").to_dict()}
     attrs = {"NAME_0": {"long_name": "Country names"}}
     gadm_level1["gadm_level1"].update(dict(attrs=attrs))
-    artifact_data.from_dict(gadm_level1)
-    gadm_level1_gdf = artifact_data.get_geodataframe("gadm_level1")
+    data_catalog.from_dict(gadm_level1)
+    gadm_level1_gdf = data_catalog.get_geodataframe("gadm_level1")
     assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_dataframe(df, tmpdir):
+def test_dataframe(df, tmpdir, data_catalog):
     # Test reading csv
     fn_df = str(tmpdir.join("test.csv"))
     df.to_csv(fn_df)
-    data_catalog = DataCatalog()
     df1 = data_catalog.get_dataframe(fn_df, driver_kwargs=dict(index_col=0))
     assert isinstance(df1, pd.DataFrame)
     pd.testing.assert_frame_equal(df, df1)
@@ -544,11 +540,10 @@ def test_dataframe_unit_attrs(df: pd.DataFrame, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_dataframe_time(df_time, tmpdir):
+def test_dataframe_time(df_time, tmpdir, data_catalog):
     # Test time df
     fn_df_ts = str(tmpdir.join("test_ts.csv"))
     df_time.to_csv(fn_df_ts)
-    data_catalog = DataCatalog()
     dfts1 = data_catalog.get_dataframe(
         fn_df_ts, driver_kwargs=dict(index_col=0, parse_dates=True)
     )
@@ -606,6 +601,8 @@ def test_dataframe_time(df_time, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
+# TODO: Partially tested in "test_rasterio_driver", just missing the cache=True option.
+# https://github.com/Deltares/hydromt/issues/897
 def test_cache_vrt(tmpdir, rioda_large):
     # write vrt data
     name = "tiled"
@@ -642,12 +639,9 @@ def test_detect_extent(geodf, geoda, rioda, ts):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_geodataframe(geodf, tmpdir):
+def test_to_stac_geodataframe(geodf, tmpdir, data_catalog):
     fn_gdf = str(tmpdir.join("test.geojson"))
     geodf.to_file(fn_gdf, driver="GeoJSON")
-    data_catalog = DataCatalog()  # read artifacts
-    _ = data_catalog.sources  # load artifact data as fallback
-
     # geodataframe
     name = "gadm_level1"
     adapter = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
@@ -674,10 +668,7 @@ def test_to_stac_geodataframe(geodf, tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_raster():
-    data_catalog = DataCatalog()  # read artifacts
-    _ = data_catalog.sources  # load artifact data as fallback
-
+def test_to_stac_raster(data_catalog):
     # raster dataset
     name = "chirps_global"
     adapter = cast(RasterDatasetAdapter, data_catalog.get_source(name))
@@ -711,10 +702,7 @@ def test_to_stac_raster():
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_geodataset(geoda, tmpdir):
-    data_catalog = DataCatalog()  # read artifacts
-    _ = data_catalog.sources  # load artifact data as fallback
-
+def test_to_stac_geodataset(data_catalog):
     # geodataset
     name = "gtsmv3_eu_era5"
     adapter = cast(GeoDatasetAdapter, data_catalog.get_source(name))

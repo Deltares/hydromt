@@ -15,22 +15,56 @@ import xugrid as xu
 from dask import config as dask_config
 from pytest_mock import MockerFixture
 
+from hydromt import (
+    Model,
+    raster,
+    vector,
+)
+from hydromt.predefined_catalog import PREDEFINED_CATALOGS
+
+dask_config.set(scheduler="single-threaded")
+
+from hydromt._typing import SourceMetadata
 from hydromt.components.config import ConfigComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
+from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.data_source import SourceMetadata
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
-from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
-from hydromt.gis import raster, utils, vector
+from hydromt.drivers import GeoDataFrameDriver, RasterDatasetDriver
+from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.gis import utils
 from hydromt.metadata_resolver import MetaDataResolver
-from hydromt.models.model import Model
 from hydromt.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+@pytest.fixture(autouse=True)
+def _local_catalog_eps(monkeypatch) -> dict:
+    """Set entrypoints to local predefined catalogs."""
+    cat_root = Path(__file__).parent.parent / "data" / "catalogs"
+    for name, cls in PREDEFINED_CATALOGS.items():
+        monkeypatch.setattr(
+            f"hydromt.predefined_catalog.{cls.__name__}.base_url",
+            str(cat_root / name),
+        )
+
+
+@pytest.fixture()
+def data_catalog(_local_catalog_eps) -> DataCatalog:
+    """DataCatalog instance that points to local predefined catalogs."""
+    return DataCatalog("artifact_data=v0.0.8")
+
+
+@pytest.fixture(scope="session")
+def latest_dd_version_uri():
+    cat_root = Path(__file__).parent.parent / "data" / "catalogs" / "deltares_data"
+    versions = [d.name for d in cat_root.iterdir() if d.is_dir()]
+    latest_version = sorted(versions)[-1]
+    return cat_root / latest_version / "data_catalog.yml"
 
 
 @pytest.fixture(scope="class")
@@ -419,6 +453,15 @@ def mock_geodataframe_adapter():
 
 
 @pytest.fixture()
+def mock_geo_ds_adapter():
+    class MockGeoDatasetAdapter(GeoDatasetAdapter):
+        def transform(self, ds, metadata: SourceMetadata, **kwargs):
+            return ds
+
+    return MockGeoDatasetAdapter()
+
+
+@pytest.fixture()
 def mock_geodf_driver(
     geodf: gpd.GeoDataFrame, mock_resolver: MetaDataResolver
 ) -> GeoDataFrameDriver:
@@ -437,11 +480,26 @@ def mock_raster_ds_driver(
 ) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
         name = "mock_raster_ds_driver"
+        supports_writing: bool = True
 
         def read_data(self, *args, **kwargs) -> xr.Dataset:
             return raster_ds
 
     return MockRasterDatasetDriver(metadata_resolver=mock_resolver)
+
+
+@pytest.fixture()
+def mock_geo_ds_driver(
+    geoda: xr.DataArray, mock_resolver: MetaDataResolver
+) -> GeoDatasetDriver:
+    class MockGeoDatasetDriver(GeoDatasetDriver):
+        name = "mock_geo_ds_driver"
+        supports_writing: bool = True
+
+        def read_data(self, *args, **kwargs) -> xr.Dataset:
+            return geoda.to_dataset()
+
+    return MockGeoDatasetDriver(metadata_resolver=mock_resolver)
 
 
 @pytest.fixture()

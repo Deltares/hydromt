@@ -5,7 +5,7 @@ import pytest
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_source import DataSource, GeoDataFrameSource, create_source
 from hydromt.data_source.data_source import get_nested_var, set_nested_var
-from hydromt.drivers.geodataframe_driver import GeoDataFrameDriver
+from hydromt.drivers import GeoDataFrameDriver
 
 
 class TestDataSource:

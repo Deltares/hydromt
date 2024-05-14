@@ -28,7 +28,7 @@ from hydromt._typing import (
 )
 from hydromt.data_adapter.rasterdataset import RasterDatasetAdapter
 from hydromt.data_source.data_source import DataSource
-from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers import RasterDatasetDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
@@ -73,6 +73,7 @@ class RasterDatasetSource(DataSource):
             time_range=tr,
             variables=vrs,
             zoom_level=zoom_level,
+            metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
@@ -105,6 +106,17 @@ class RasterDatasetSource(DataSource):
 
         args:
         """
+        if driver_override:
+            driver: RasterDatasetDriver = driver_override
+        else:
+            # use local filesystem
+            driver: RasterDatasetDriver = self.driver.model_copy(
+                update={"filesystem": filesystem("local")}
+            )
+        if not driver.supports_writing:
+            raise RuntimeError(
+                f"driver {driver.__class__.__name__} does not support writing. please use a differnt driver "
+            )
         ds: Optional[xr.Dataset] = self.read_data(
             bbox=bbox,
             mask=mask,
@@ -120,13 +132,6 @@ class RasterDatasetSource(DataSource):
         # update driver based on local path
         update: Dict[str, Any] = {"uri": file_path}
 
-        if driver_override:
-            driver: RasterDatasetDriver = driver_override
-        else:
-            # use local filesystem
-            driver: RasterDatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
-            )
         update.update({"driver": driver})
 
         driver.write(

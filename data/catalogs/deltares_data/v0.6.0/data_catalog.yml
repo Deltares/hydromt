@@ -1,12 +1,8 @@
 ---
 meta:
-  roots:
-    - p:/wflow_global/hydromt
-    - /mnt/p/wflow_global/hydromt
-    - /p/wflow_global/hydromt
-  version: 2024.1.30
-  hydromt_version: '>=1.0a, <2.0'
-
+  root: p:/wflow_global/hydromt
+  version: v0.6.0
+  name: deltares_data
 
 basin_atlas_level12_v10:
   crs: 4326
@@ -144,7 +140,7 @@ copdem30_v2021.1:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: '2021_1'
+    source_version: "2021_1"
   nodata: -9999 # copdem has no actual nodata, this is to suppress a missing nodata warning
   path: topography/copdem/copdem.vrt
   rename:
@@ -163,7 +159,7 @@ copdem30_mask_v2021.1:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: '2021_1'
+    source_version: "2021_1"
   nodata: -1 # copdem has no actual nodata, this is to suppress a missing nodata warning
   path: topography/copdem/copdem_mask.vrt
   rename:
@@ -182,7 +178,7 @@ copdem30_masked_v2021.1:
     category: topography
     source_license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     source_url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    source_version: '2021_1'
+    source_version: "2021_1"
   path: topography/copdem/copdem_masked.vrt
   rename:
     copdem_masked: elevtn
@@ -352,6 +348,34 @@ eobs_v25.0e:
   unit_add:
     time: 86400
 
+eobs_v29.0e:
+  crs: 4326
+  data_type: RasterDataset
+  driver: netcdf
+  kwargs:
+    chunks:
+      latitude: 100
+      longitude: 100
+      time: 100
+    combine: by_coords
+    parallel: true
+    preprocess: round_latlon
+  meta:
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_version: 29.0e
+  path: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
+  rename:
+    pp: press_msl
+    qq: kin
+    rr: precip
+    tg: temp
+  unit_add:
+    time: 86400
+
 eobs_orography_v20.0e:
   crs: 4326
   data_type: RasterDataset
@@ -446,6 +470,25 @@ eobs_orography_v25.0e:
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_version: 25.0e
   path: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
+  rename:
+    elevation: elevtn
+
+eobs_orography_v29.0e:
+  crs: 4326
+  data_type: RasterDataset
+  driver: netcdf
+  kwargs:
+    chunks:
+      latitude: 100
+      longitude: 100
+  meta:
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    source_version: 29.0e
+  path: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
   rename:
     elevation: elevtn
 
@@ -1041,7 +1084,6 @@ glw_sheeps_v3:
     source_version: GLW 3, last downloaded 2020-06-11
   path: socio_economic/glw/5_Sh_2010_Da.tif
 
-
 grdc:
   crs: 4326
   data_type: GeoDataFrame
@@ -1459,14 +1501,14 @@ pcr_globwb:
     source_version: 2017.11b1
     processing_script: hydro/pcr_globwb/prep_glob.py
   variants:
-  - version: 1990
-    path: hydro/pcr_globwb/glob_1990.zarr
-  - version: 1995
-    path: hydro/pcr_globwb/glob_1995.zarr
-  - version: 2000
-    path: hydro/pcr_globwb/glob_2000.zarr
-  - version: 2005
-    path: hydro/pcr_globwb/glob_2005.zarr
+    - version: 1990
+      path: hydro/pcr_globwb/glob_1990.zarr
+    - version: 1995
+      path: hydro/pcr_globwb/glob_1995.zarr
+    - version: 2000
+      path: hydro/pcr_globwb/glob_2000.zarr
+    - version: 2005
+      path: hydro/pcr_globwb/glob_2005.zarr
   nodata: -9999
   rename:
     domesticNettoDemand: dom_net
@@ -1588,7 +1630,8 @@ soilgrids_v1.0:
       y: 2400
   meta:
     category: soil
-    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil
+    notes:
+      "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil
       database distribution version 2.0, european commission and the European soil bureau\n network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos,
       P., Van Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre: Response to european policy support  and public data requirements.
       Land Use Policy 29 (2), 329â€“338. \n"
@@ -1677,7 +1720,8 @@ soilgrids_v2.0:
       y: 2400
   meta:
     category: soil
-    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil
+    notes:
+      "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil
       database distribution version 2.0, european commission and the European soil bureau network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos,
       P., Van Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre: Response to european policy support  and public data requirements.
       Land Use Policy 29 (2), 329â€“338. \n"

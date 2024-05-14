@@ -2,32 +2,44 @@
 
 from copy import copy
 from functools import partial
-from logging import Logger
+from logging import Logger, getLogger
 from os.path import splitext
 from typing import Callable, List, Optional
 
 import xarray as xr
 
-from hydromt._typing import Geom, StrPath, TimeRange, ZoomLevel
+from hydromt._typing import (
+    Geom,
+    SourceMetadata,
+    StrPath,
+    TimeRange,
+    Variables,
+    ZoomLevel,
+)
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
-from hydromt.drivers.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.raster.rasterdataset_driver import RasterDatasetDriver
+
+logger: Logger = getLogger(__name__)
 
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
     """RasterDatasetXarrayDriver."""
 
     name = "raster_xarray"
+    supports_writing: bool = True
 
     def read_data(
         self,
         uris: List[str],
         *,
-        logger: Logger,
+        logger: Logger = logger,
         mask: Optional[Geom] = None,
+        variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
+        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -38,7 +50,13 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         """
         warn_on_unused_kwargs(
             self.__class__.__name__,
-            {"mask": mask, "time_range": time_range, "zoom_level": zoom_level},
+            {
+                "mask": mask,
+                "time_range": time_range,
+                "variables": variables,
+                "zoom_level": zoom_level,
+                "metadata": metadata,
+            },
             logger,
         )
         options = copy(self.options)

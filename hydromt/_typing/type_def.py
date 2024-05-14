@@ -6,7 +6,12 @@ from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 
 import geopandas as gpd
 from dateutil.parser import parse
-from pydantic.functional_validators import AfterValidator, BeforeValidator
+from pydantic import ValidationInfo, ValidatorFunctionWrapHandler
+from pydantic.functional_validators import (
+    AfterValidator,
+    BeforeValidator,
+    WrapValidator,
+)
 from shapely.geometry.base import BaseGeometry
 from typing_extensions import Annotated
 from xarray import DataArray, Dataset
@@ -49,6 +54,17 @@ DataType = Literal[
     "DataFrame", "DataSet", "GeoDataFrame", "GeoDataSet", "RasterDataset"
 ]
 Bbox = Annotated[Tuple[float, float, float, float], _validate_bbox]
+
+
+def _validate_path(
+    path: Any, handler: ValidatorFunctionWrapHandler, info: ValidationInfo
+):
+    if isinstance(path, str):
+        path = Path(str)
+    return handler(path, info)
+
+
+Pathdantic = Annotated[Path, WrapValidator(_validate_path)]
 
 StrPath = Union[str, Path]
 GeoDataframeSource = StrPath

@@ -7,7 +7,7 @@ import pytest
 from shapely import box
 
 from hydromt._typing import Bbox
-from hydromt.drivers.pyogrio_driver import PyogrioDriver
+from hydromt.drivers import PyogrioDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
@@ -87,13 +87,28 @@ class TestPyogrioDriver:
     @pytest.mark.usefixtures("_raise_gdal_warnings")
     @fixture_uris
     def test_read_with_filters(
-        self, uri: str, request: pytest.FixtureRequest, driver: PyogrioDriver
+        self,
+        uri: str,
+        request: pytest.FixtureRequest,
+        driver: PyogrioDriver,
     ):
         uri = request.getfixturevalue(uri)
         bbox: Bbox = (-60, -34.5600, -55, -30)
         mask = gpd.GeoSeries(box(*bbox), crs=4326).to_crs(3857).buffer(10000)
         gdf = driver.read(uri, mask=mask)
         assert gdf.shape == (1, 4)
+
+    @fixture_uris
+    def test_read_variables(
+        self,
+        uri: str,
+        request: pytest.FixtureRequest,
+        driver: PyogrioDriver,
+    ):
+        uri = request.getfixturevalue(uri)
+        variables = ["country"]
+        gdf = driver.read(uri, variables=variables)
+        assert set(gdf.columns) == set(variables + ["geometry"])
 
     def test_write(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
         df_path = tmp_dir / "temp.gpkg"

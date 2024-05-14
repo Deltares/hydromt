@@ -1883,7 +1883,7 @@ class RasterDataArray(XRasterBase):
                 nodata = self._obj.rio.encoded_nodata
         # Only numerical nodata values are supported
         if np.issubdtype(type(nodata), np.number):
-            # python naitive types don't play very nice
+            # python native types don't play very nice
             try:
                 if isinstance(nodata, float):
                     nodata_cast = np.float32(nodata)

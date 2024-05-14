@@ -1,13 +1,20 @@
 """Driver for DataFrames using the pandas library."""
+
 from logging import Logger, getLogger
 from pathlib import Path
 from typing import List, Optional
 
 import pandas as pd
 
-from hydromt._typing import NoDataStrategy, StrPath, TimeRange, Variables
+from hydromt._typing import (
+    NoDataStrategy,
+    SourceMetadata,
+    StrPath,
+    TimeRange,
+    Variables,
+)
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
-from hydromt.drivers import DataFrameDriver
+from hydromt.drivers.dataframe import DataFrameDriver
 
 logger: Logger = getLogger(__name__)
 
@@ -16,6 +23,7 @@ class PandasDriver(DataFrameDriver):
     """Driver for DataFrames using the pandas library."""
 
     name = "pandas"
+    supports_writing: bool = True
 
     def read_data(
         self,
@@ -23,6 +31,7 @@ class PandasDriver(DataFrameDriver):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
@@ -33,7 +42,9 @@ class PandasDriver(DataFrameDriver):
                 f"{self.__class__.__name__} driver is not supported."
             )
         warn_on_unused_kwargs(
-            self.__class__.__name__, {"time_range": time_range}, logger
+            self.__class__.__name__,
+            {"time_range": time_range, "metadata": metadata},
+            logger,
         )
         uri = uris[0]
         extension: str = uri.split(".")[-1]
