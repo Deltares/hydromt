@@ -1,7 +1,8 @@
 """Implementation for grid based workflows."""
 
 import logging
-from typing import Dict, List, Optional, Tuple, Union
+from logging import Logger
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -10,10 +11,18 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import Polygon
 
+from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
+from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster
 from hydromt.gis.raster import full
+from hydromt.workflows.region import (
+    parse_region_basin,
+    parse_region_bbox,
+    parse_region_geom,
+    parse_region_grid,
+)
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 __all__ = [
     "create_non_rotated_grid",
@@ -24,6 +33,147 @@ __all__ = [
     "grid_from_geodataframe",
     "rotated_grid",
 ]
+
+
+def create_grid_from_region(
+    region: Dict[str, Any],
+    *,
+    logger: Logger = _logger,
+    data_catalog: Optional[DataCatalog] = None,
+    res: Optional[float] = None,
+    crs: Optional[int] = None,
+    rotated: bool = False,
+    hydrography_fn: Optional[str] = None,
+    basin_index_fn: Optional[str] = None,
+    add_mask: bool = True,
+    align: bool = True,
+    dec_origin: int = 0,
+    dec_rotation: int = 3,
+):
+    """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
+
+    A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
+    existing grid is given, then no new grid will be generated.
+
+    Adds/Updates model layers (if add_mask):
+    * **mask** grid mask: add grid mask to grid object
+
+    Parameters
+    ----------
+    region : dict, optional
+        Dictionary describing region of interest, e.g.:
+        * {'bbox': [xmin, ymin, xmax, ymax]}
+        * {'geom': 'path/to/polygon_geometry'}
+        * {'grid': 'path/to/grid_file'}
+        * {'basin': [x, y]}
+
+        Region must be of kind [grid, bbox, geom, basin, subbasin, interbasin].
+    res: float
+        Resolution used to generate 2D grid [unit of the CRS], required if region
+        is not based on 'grid'.
+    crs : EPSG code, int, str optional
+        EPSG code of the model or "utm" to let hydromt find the closest projected
+    rotated : bool, optional
+        if True, a minimum rotated rectangular grid is fitted around the region,
+        by default False. Only  applies if region is of kind 'bbox', 'geom'
+    hydrography_fn : str
+        Name of data source for hydrography data. Required if region is of kind
+            'basin', 'subbasin' or 'interbasin'.
+
+        * Required variables: ['flwdir'] and any other 'snapping' variable required
+            to define the region.
+
+        * Optional variables: ['basins'] if the `region` is based on a
+            (sub)(inter)basins without a 'bounds' argument.
+
+    basin_index_fn : str
+        Name of data source with basin (bounding box) geometries associated with
+        the 'basins' layer of `hydrography_fn`. Only required if the `region` is
+        based on a (sub)(inter)basins without a 'bounds' argument.
+    add_mask : bool, optional
+        Add mask variable to grid object, by default True.
+    align : bool, optional
+        If True (default), align target transform to resolution.
+    dec_origin : int, optional
+        number of decimals to round the origin coordinates, by default 0
+    dec_rotation : int, optional
+        number of decimals to round the rotation angle, by default 3
+
+    Returns
+    -------
+    grid : xr.DataArray
+        Generated grid mask.
+    """
+    if region is None:
+        _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, logger)
+    assert region is not None
+
+    data_catalog = data_catalog or DataCatalog()
+
+    kind = next(iter(region))
+    if kind in ["bbox", "geom"]:
+        if not res:
+            raise ValueError("res argument required for kind 'bbox', 'geom'")
+
+        geom = (
+            parse_region_geom(region, crs=crs, data_catalog=data_catalog)
+            if kind == "geom"
+            else parse_region_bbox(region, crs=crs)
+        )
+        if rotated:
+            grid = create_rotated_grid_from_geom(
+                geom, res=res, dec_origin=dec_origin, dec_rotation=dec_rotation
+            )
+        else:
+            xcoords, ycoords = _extract_coords_from_geom(geom, res=res, align=align)
+            grid = create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
+    elif kind == "grid":
+        if rotated:
+            logger.warning(
+                "Ignoring rotated argument when creating grid with kind grid"
+            )
+
+        if res is None:
+            logger.warning("Ignoring res argument when creating grid with kind grid")
+
+        if crs is None:
+            logger.warning("Ignoring crs argument when creating grid with kind grid")
+
+        dataset = parse_region_grid(region, data_catalog=data_catalog)
+        xcoords = dataset.raster.xcoords.values
+        ycoords = dataset.raster.ycoords.values
+        geom = dataset.raster.box
+        grid = create_non_rotated_grid(xcoords, ycoords, crs=dataset.raster.crs)
+    elif kind in ["basin", "interbasin", "subbasin"]:
+        if rotated:
+            raise ValueError("Cannot create a rotated grid from a basin region")
+        assert hydrography_fn is not None
+        geom = parse_region_basin(
+            region,
+            data_catalog=data_catalog,
+            logger=logger,
+            hydrography_fn=hydrography_fn,
+            basin_index_fn=basin_index_fn,
+        )
+        xcoords, ycoords = _extract_coords_from_basin(
+            geom,
+            hydrography_fn=hydrography_fn,
+            res=res,
+            crs=crs,
+            align=align,
+            data_catalog=data_catalog,
+            logger=logger,
+        )
+        grid = create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
+    else:
+        raise ValueError(f"Unsupported region kind: {kind}")
+
+    if add_mask:
+        grid = grid.raster.geometry_mask(geom, all_touched=True)
+        grid.name = "mask"
+        return grid
+    else:
+        return grid.drop_vars("mask")
 
 
 def create_non_rotated_grid(
@@ -460,3 +610,57 @@ def rotated_grid(
         nmax = int(np.ceil(axis2 / res))
 
     return x0, y0, mmax, nmax, rot
+
+
+def _extract_coords_from_geom(
+    geom: gpd.GeoDataFrame, *, res: float, align: bool
+) -> Tuple[np.typing.ArrayLike, np.typing.ArrayLike]:
+    xmin, ymin, xmax, ymax = geom.total_bounds
+    res = abs(res)
+    if align:
+        xmin = round(xmin / res) * res
+        ymin = round(ymin / res) * res
+        xmax = round(xmax / res) * res
+        ymax = round(ymax / res) * res
+    xcoords: np.typing.ArrayLike = np.linspace(
+        xmin + res / 2,
+        xmax - res / 2,
+        num=round((xmax - xmin) / res),
+        endpoint=True,
+    )
+    ycoords: np.typing.ArrayLike = np.flip(
+        np.linspace(
+            ymin + res / 2,
+            ymax - res / 2,
+            num=round((ymax - ymin) / res),
+            endpoint=True,
+        )
+    )
+    return xcoords, ycoords
+
+
+def _extract_coords_from_basin(
+    geom: gpd.GeoDataFrame,
+    *,
+    hydrography_fn: str,
+    res: Optional[float],
+    crs: Optional[int],
+    align: bool,
+    data_catalog: DataCatalog,
+    logger: Logger,
+) -> Tuple[np.typing.ArrayLike, np.typing.ArrayLike]:
+    da_hyd = data_catalog.get_rasterdataset(hydrography_fn, geom=geom)
+    assert da_hyd is not None
+    if not res:
+        logger.info(
+            "res argument not defined, using resolution of ",
+            f"hydrography data {da_hyd.raster.res}",
+        )
+        res = da_hyd.raster.res
+    # TODO add warning on res value if crs is projected or not?
+    if res != da_hyd.raster.res and crs != da_hyd.raster.crs:
+        da_hyd = da_hyd.raster.reproject(dst_crs=crs, dst_res=res, align=align)
+    assert da_hyd is not None
+    xcoords = da_hyd.raster.xcoords.values
+    ycoords = da_hyd.raster.ycoords.values
+    return xcoords, ycoords

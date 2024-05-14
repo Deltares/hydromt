@@ -1,7 +1,7 @@
 """Grid Component."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -19,18 +19,11 @@ from hydromt.components.spatial import SpatialModelComponent
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.workflows.grid import (
-    create_non_rotated_grid,
-    create_rotated_grid_from_geom,
+    create_grid_from_region,
     grid_from_constant,
     grid_from_geodataframe,
     grid_from_raster_reclass,
     grid_from_rasterdataset,
-)
-from hydromt.workflows.region import (
-    parse_region_basin,
-    parse_region_bbox,
-    parse_region_geom,
-    parse_region_grid,
 )
 
 if TYPE_CHECKING:
@@ -209,7 +202,7 @@ class GridComponent(SpatialModelComponent):
     def create(
         self,
         *,
-        region: Optional[dict] = None,
+        region: Dict[str, Any],
         res: Optional[float] = None,
         crs: Optional[int] = None,
         rotated: bool = False,
@@ -276,134 +269,21 @@ class GridComponent(SpatialModelComponent):
         """
         self.logger.info("Preparing 2D grid.")
 
-        if region is None:
-            _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, self.logger)
-
-        assert region is not None
-        kind = next(iter(region)) if region is not None else "geom"
-        if kind in ["bbox", "geom"]:
-            if not res:
-                raise ValueError("res argument required for kind 'bbox', 'geom'")
-
-            geom = (
-                parse_region_geom(region, crs=crs, data_catalog=self.data_catalog)
-                if kind == "geom"
-                else parse_region_bbox(region, crs=crs)
-            )
-            if rotated:
-                grid = create_rotated_grid_from_geom(
-                    geom, res=res, dec_origin=dec_origin, dec_rotation=dec_rotation
-                )
-            else:
-                xcoords, ycoords = self._extract_coords_from_geom(
-                    geom, res=res, align=align
-                )
-                grid = create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
-        elif kind == "grid":
-            if rotated:
-                self.logger.warning(
-                    "Ignoring rotated argument when creating grid with kind grid"
-                )
-
-            if res is None:
-                self.logger.warning(
-                    "Ignoring res argument when creating grid with kind grid"
-                )
-
-            if crs is None:
-                self.logger.warning(
-                    "Ignoring crs argument when creating grid with kind grid"
-                )
-
-            assert region is not None
-            dataset = parse_region_grid(region, data_catalog=self.data_catalog)
-            xcoords = dataset.raster.xcoords.values
-            ycoords = dataset.raster.ycoords.values
-            geom = dataset.raster.box
-            grid = create_non_rotated_grid(xcoords, ycoords, crs=dataset.raster.crs)
-        elif kind in ["basin", "interbasin", "subbasin"]:
-            if rotated:
-                raise ValueError("Cannot create a rotated grid from a basin region")
-            assert hydrography_fn is not None
-            assert region is not None
-            geom = parse_region_basin(
-                region,
-                data_catalog=self.data_catalog,
-                logger=self.logger,
-                hydrography_fn=hydrography_fn,
-                basin_index_fn=basin_index_fn,
-            )
-            xcoords, ycoords = self._extract_coords_from_basin(
-                geom, hydrography_fn=hydrography_fn, res=res, crs=crs, align=align
-            )
-            grid = create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
-        else:
-            raise ValueError(f"Unsupported region kind: {kind}")
-
-        grid = self._set_mask_on_grid(grid, geom=geom, add_mask=add_mask)
+        grid = create_grid_from_region(
+            region,
+            logger=self.logger,
+            res=res,
+            crs=crs,
+            rotated=rotated,
+            hydrography_fn=hydrography_fn,
+            basin_index_fn=basin_index_fn,
+            add_mask=add_mask,
+            align=align,
+            dec_origin=dec_origin,
+            dec_rotation=dec_rotation,
+        )
         self.set(grid)
         return grid
-
-    def _set_mask_on_grid(
-        self, grid: xr.DataArray, *, geom: gpd.GeoDataFrame, add_mask: bool
-    ) -> xr.DataArray:
-        if add_mask:
-            grid = grid.raster.geometry_mask(geom, all_touched=True)
-            grid.name = "mask"
-            return grid
-        else:
-            return grid.drop_vars("mask")
-
-    def _extract_coords_from_basin(
-        self,
-        geom: gpd.GeoDataFrame,
-        *,
-        hydrography_fn: str,
-        res: Optional[float],
-        crs: Optional[int],
-        align: bool,
-    ) -> Tuple[np.typing.ArrayLike, np.typing.ArrayLike]:
-        da_hyd = self.data_catalog.get_rasterdataset(hydrography_fn, geom=geom)
-        assert da_hyd is not None
-        if not res:
-            self.logger.info(
-                "res argument not defined, using resolution of ",
-                f"hydrography data {da_hyd.raster.res}",
-            )
-            res = da_hyd.raster.res
-        # TODO add warning on res value if crs is projected or not?
-        if res != da_hyd.raster.res and crs != da_hyd.raster.crs:
-            da_hyd = da_hyd.raster.reproject(dst_crs=crs, dst_res=res, align=align)
-        assert da_hyd is not None
-        xcoords = da_hyd.raster.xcoords.values
-        ycoords = da_hyd.raster.ycoords.values
-        return xcoords, ycoords
-
-    def _extract_coords_from_geom(
-        self, geom: gpd.GeoDataFrame, *, res: float, align: bool
-    ) -> Tuple[np.typing.ArrayLike, np.typing.ArrayLike]:
-        xmin, ymin, xmax, ymax = geom.total_bounds
-        res = abs(res)
-        if align:
-            xmin = round(xmin / res) * res
-            ymin = round(ymin / res) * res
-            xmax = round(xmax / res) * res
-            ymax = round(ymax / res) * res
-        xcoords: np.typing.ArrayLike = np.linspace(
-            xmin + res / 2,
-            xmax - res / 2,
-            num=round((xmax - xmin) / res),
-            endpoint=True,
-        )
-        ycoords: np.typing.ArrayLike = np.flip(
-            np.linspace(
-                ymin + res / 2,
-                ymax - res / 2,
-                num=round((ymax - ymin) / res),
-                endpoint=True,
-            )
-        )
-        return xcoords, ycoords
 
     @property
     def res(self) -> Optional[Tuple[float, float]]:
