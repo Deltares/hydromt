@@ -229,7 +229,7 @@ def parse_region_grid(
     if isinstance(value0, (xr.DataArray, xr.Dataset)):
         return value0.to_dataset()
     else:
-        assert data_catalog is not None
+        data_catalog = data_catalog or DataCatalog()
         # TODO: Pass kwargs?
         dataset = data_catalog.get_rasterdataset(value0)
         assert dataset is not None

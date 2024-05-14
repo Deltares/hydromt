@@ -54,12 +54,10 @@ class GridComponent(SpatialModelComponent):
         model: "Model",
         *,
         filename: Optional[str] = None,
-        region_component: Optional[str] = None,
         region_filename: Optional[StrPath] = None,
     ):
-        super().__init__(
-            model=model, region_component=region_component, filename=region_filename
-        )
+        # region_component referencing is not possible for grids. The region should be passed via create().
+        super().__init__(model=model, region_component=None, filename=region_filename)
         self._data: Optional[xr.Dataset] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
 
@@ -278,19 +276,20 @@ class GridComponent(SpatialModelComponent):
         """
         self.logger.info("Preparing 2D grid.")
 
-        if self._region_component is not None and region is not None:
-            raise ValueError(
-                "Cannot create a grid if a region component is set and region is provided."
-            )
-        if region is None and self._region_component is None:
+        if region is None:
             _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, self.logger)
 
+        assert region is not None
         kind = next(iter(region)) if region is not None else "geom"
         if kind in ["bbox", "geom"]:
             if not res:
                 raise ValueError("res argument required for kind 'bbox', 'geom'")
 
-            geom = self._extract_geom_from_region(region, kind, crs=crs)
+            geom = (
+                parse_region_geom(region, crs=crs, data_catalog=self.data_catalog)
+                if kind == "geom"
+                else parse_region_bbox(region, crs=crs)
+            )
             if rotated:
                 grid = create_rotated_grid_from_geom(
                     geom, res=res, dec_origin=dec_origin, dec_rotation=dec_rotation
@@ -354,29 +353,6 @@ class GridComponent(SpatialModelComponent):
             return grid
         else:
             return grid.drop_vars("mask")
-
-    def _extract_geom_from_region(
-        self, region: Optional[dict], kind: str, *, crs: Optional[int]
-    ) -> gpd.GeoDataFrame:
-        if self._region_component is not None:
-            if crs is not None:
-                self.logger.warning(
-                    "Ignoring crs argument when creating grid from region component"
-                )
-            return cast(
-                SpatialModelComponent, self.model.get_component(self._region_component)
-            ).region
-        elif kind == "geom":
-            assert region is not None
-            return parse_region_geom(region, crs=crs, data_catalog=self.data_catalog)
-        elif kind == "bbox":
-            assert region is not None
-            return parse_region_bbox(region, crs=crs)
-        else:
-            raise ValueError(
-                f"Unsupported region kind '{kind}' found in geom grid creation."
-                " This is likely a programming error."
-            )
 
     def _extract_coords_from_basin(
         self,

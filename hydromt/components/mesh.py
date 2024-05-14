@@ -3,7 +3,7 @@
 import os
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -47,11 +47,9 @@ class MeshComponent(SpatialModelComponent):
         *,
         filename: Optional[str] = None,
         region_filename: str = SpatialModelComponent.DEFAULT_REGION_FILENAME,
-        region_component: Optional[str] = None,
     ):
-        super().__init__(
-            model, region_component=region_component, filename=region_filename
-        )
+        # region_component reference is not used in mesh, must set a region via the create function.
+        super().__init__(model, region_component=None, filename=region_filename)
         self._data = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
 
@@ -262,16 +260,12 @@ class MeshComponent(SpatialModelComponent):
         """  # noqa: E501
         self.logger.info("Preparing 2D mesh.")
 
-        if self._region_component is not None and region is not None:
-            raise ValueError(
-                "Cannot create a mesh if a region component is set and region is provided."
-            )
-        if region is None and self._region_component is None:
+        if region is None:
             _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, self.logger)
 
+        assert region is not None
         kind = next(iter(region)) if region is not None else "geom"
         if kind == "mesh":
-            assert region is not None
             uds = parse_region_mesh(region)
             mesh2d = create_mesh2d_from_mesh(
                 uds,
@@ -283,7 +277,11 @@ class MeshComponent(SpatialModelComponent):
         elif kind in ["bbox", "geom"]:
             if not res:
                 raise ValueError(f"res argument required for kind '{kind}'")
-            geom = self._extract_geom_from_region(region, kind, crs=crs)
+            geom = (
+                parse_region_geom(region, crs=crs, data_catalog=self.data_catalog)
+                if kind == "geom"
+                else parse_region_bbox(region, crs=crs)
+            )
             mesh2d = create_mesh2d_from_geom(geom, res=res, align=align, kind=kind)
         else:
             raise ValueError(
@@ -292,29 +290,6 @@ class MeshComponent(SpatialModelComponent):
 
         self.set(mesh2d, grid_name=grid_name)
         return mesh2d
-
-    def _extract_geom_from_region(
-        self, region: Optional[dict], kind: str, *, crs: Optional[int]
-    ) -> gpd.GeoDataFrame:
-        if self._region_component is not None:
-            if crs is not None:
-                self.logger.warning(
-                    "Ignoring crs argument when creating grid from region component"
-                )
-            return cast(
-                SpatialModelComponent, self.model.get_component(self._region_component)
-            ).region
-        elif kind == "geom":
-            assert region is not None
-            return parse_region_geom(region, crs=crs, data_catalog=self.data_catalog)
-        elif kind == "bbox":
-            assert region is not None
-            return parse_region_bbox(region, crs=crs)
-        else:
-            raise ValueError(
-                f"Unsupported region kind '{kind}' found in geom grid creation."
-                " This is likely a programming error."
-            )
 
     @property
     def data(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
