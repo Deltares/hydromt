@@ -368,7 +368,7 @@ class GridComponent(SpatialModelComponent):
             ).region
         elif kind == "geom":
             assert region is not None
-            return parse_region_geom(region, crs=crs)
+            return parse_region_geom(region, crs=crs, data_catalog=self.data_catalog)
         elif kind == "bbox":
             assert region is not None
             return parse_region_bbox(region, crs=crs)

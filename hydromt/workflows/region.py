@@ -166,7 +166,12 @@ def parse_region_bbox(region: dict, *, crs: Optional[int] = None) -> gpd.GeoData
     return geom
 
 
-def parse_region_geom(region: dict, *, crs: Optional[int] = None) -> gpd.GeoDataFrame:
+def parse_region_geom(
+    region: dict,
+    *,
+    crs: Optional[int] = None,
+    data_catalog: Optional[DataCatalog] = None,
+) -> gpd.GeoDataFrame:
     """Parse a region and return the GeoDataFrame.
 
     Parameters
@@ -177,6 +182,8 @@ def parse_region_geom(region: dict, *, crs: Optional[int] = None) -> gpd.GeoData
         * {'geom': /path/to/polygon_geometry}
     crs : CRS, optional
         Target CRS to transform the geometry to.
+    data_catalog : DataCatalog, optional
+        DataCatalog object containing the data sources.
     """
     kwargs = region.copy()
     kind = next(iter(region))
@@ -185,7 +192,7 @@ def parse_region_geom(region: dict, *, crs: Optional[int] = None) -> gpd.GeoData
     _assert_parse_key(kind, "geom")
 
     # TODO: Make this very specific to geom
-    kwargs.update(_parse_region_value(value0, data_catalog=None))
+    kwargs.update(_parse_region_value(value0, data_catalog=data_catalog))
 
     _assert_parsed_values(
         key=next(iter(kwargs)), region_value=value0, kind="geom", expected=["geom"]
@@ -294,7 +301,7 @@ def _update_crs(
 def _parse_region_value(
     value: Any, *, data_catalog: Optional[DataCatalog]
 ) -> Dict[str, Any]:
-    kwarg = {}
+    kwarg: Dict[str, Any] = {}
     if isinstance(value, np.ndarray):
         value = value.tolist()  # array to list
 
@@ -312,7 +319,7 @@ def _parse_region_value(
     elif isinstance(value, (str, Path)) and isdir(value):
         kwarg = dict(root=value)
     elif isinstance(value, (str, Path)):
-        assert data_catalog is not None
+        data_catalog = data_catalog or DataCatalog()
         geom = data_catalog.get_geodataframe(value)
         kwarg = dict(geom=geom)
     elif isinstance(value, gpd.GeoDataFrame):  # geometry
