@@ -14,31 +14,8 @@ from hydromt._validators.data_catalog import (
 from hydromt.io.readers import _yml_from_uri_or_path
 
 
-@pytest.mark.parametrize(
-    "test_case",
-    [
-        {
-            "name": "deltares_data",
-            "path": "data/catalogs/deltares_data.yml",
-        },
-        {
-            "name": "artifact_data",
-            "path": "data/catalogs/artifact_data.yml",
-        },
-        {
-            "name": "aws_data",
-            "path": "data/catalogs/aws_data.yml",
-        },
-        {
-            "name": "gcs_cmip6_data",
-            "path": "data/catalogs/gcs_cmip6_data.yml",
-        },
-    ],
-    ids=lambda x: x["name"],
-)
-def test_deltares_data_catalog(test_case):
-    p = test_case["path"]
-    yml_dict = _yml_from_uri_or_path(p)
+def test_deltares_data_catalog(latest_dd_version_uri):
+    yml_dict = _yml_from_uri_or_path(latest_dd_version_uri)
     # whould raise error if something goes wrong
     _ = DataCatalogValidator.from_dict(yml_dict)
 

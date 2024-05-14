@@ -16,7 +16,6 @@ from pytest_mock import MockerFixture
 from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
-from hydromt.components.config import ConfigComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.region import ModelRegionComponent
 from hydromt.components.vector import VectorComponent
@@ -505,24 +504,6 @@ def test_gridmodel_setup(tmpdir):
     # write model
     mod.root.set(str(tmpdir), mode="w")
     mod.write(components=["geoms", "grid"])
-
-
-def test_vectormodel(vector_model, tmpdir):
-    # write model
-    vector_model.root.set(str(tmpdir), mode="w")
-    vector_model.write()
-    # read model
-    model1 = Model(
-        root=str(tmpdir),
-        mode="r",
-        components={
-            "vector": {"type": VectorComponent.__name__},
-            "config": {"type": ConfigComponent.__name__},
-        },
-    )
-    model1.read()
-    equal, errors = vector_model.test_equal(model1)
-    assert equal, errors
 
 
 def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):

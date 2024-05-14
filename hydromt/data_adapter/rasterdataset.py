@@ -237,7 +237,7 @@ class RasterDatasetAdapter(DataAdapterBase):
     @staticmethod
     def _slice_data(
         ds: Data,
-        variables: Optional[Variables] = None,
+        variables: Optional[List] = None,
         geom: Optional[Geom] = None,
         bbox: Optional[Bbox] = None,
         buffer: GeomBuffer = 0,

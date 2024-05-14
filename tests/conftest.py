@@ -15,6 +15,15 @@ import xugrid as xu
 from dask import config as dask_config
 from pytest_mock import MockerFixture
 
+from hydromt import (
+    Model,
+    raster,
+    vector,
+)
+from hydromt.predefined_catalog import PREDEFINED_CATALOGS
+
+dask_config.set(scheduler="single-threaded")
+
 from hydromt._typing import SourceMetadata
 from hydromt.components.config import ConfigComponent
 from hydromt.components.region import ModelRegionComponent
@@ -24,14 +33,38 @@ from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.drivers import GeoDataFrameDriver, RasterDatasetDriver
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
-from hydromt.gis import raster, utils, vector
+from hydromt.gis import utils
 from hydromt.metadata_resolver import MetaDataResolver
-from hydromt.models.model import Model
 from hydromt.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+@pytest.fixture(autouse=True)
+def _local_catalog_eps(monkeypatch) -> dict:
+    """Set entrypoints to local predefined catalogs."""
+    cat_root = Path(__file__).parent.parent / "data" / "catalogs"
+    for name, cls in PREDEFINED_CATALOGS.items():
+        monkeypatch.setattr(
+            f"hydromt.predefined_catalog.{cls.__name__}.base_url",
+            str(cat_root / name),
+        )
+
+
+@pytest.fixture()
+def data_catalog(_local_catalog_eps) -> DataCatalog:
+    """DataCatalog instance that points to local predefined catalogs."""
+    return DataCatalog("artifact_data=v0.0.8")
+
+
+@pytest.fixture(scope="session")
+def latest_dd_version_uri():
+    cat_root = Path(__file__).parent.parent / "data" / "catalogs" / "deltares_data"
+    versions = [d.name for d in cat_root.iterdir() if d.is_dir()]
+    latest_version = sorted(versions)[-1]
+    return cat_root / latest_version / "data_catalog.yml"
 
 
 @pytest.fixture(scope="class")
@@ -362,14 +395,6 @@ def _create_vector_model(
     mod.get_component("region", ModelRegionComponent).set(geodf)
     mod.get_component("vector", VectorComponent).set(da)
     return mod
-
-
-@pytest.fixture()
-def vector_model(ts, geodf):
-    return _create_vector_model(
-        ts=ts,
-        geodf=geodf,
-    )
 
 
 @pytest.fixture()

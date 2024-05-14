@@ -2,7 +2,7 @@
 
 import os
 from os import mkdir
-from os.path import abspath, dirname, isfile, join
+from os.path import abspath, dirname, join
 from pathlib import Path
 from typing import cast
 
@@ -10,6 +10,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
+import requests
 import xarray as xr
 from yaml import dump
 
@@ -24,6 +25,7 @@ from hydromt.data_catalog import (
     DataCatalog,
     _denormalise_data_dict,
     _parse_data_source_dict,
+    _yml_from_uri_or_path,
 )
 from hydromt.data_source import GeoDataFrameSource
 from hydromt.gis.utils import to_geographic_bbox
@@ -81,7 +83,7 @@ def test_from_yml_no_root(tmpdir):
         dump(d, f)
 
     cat = DataCatalog().from_yml(cat_file)
-    assert cat.root == Path(tmpdir)
+    assert cat.root == str(tmpdir)
 
 
 def test_parser():
@@ -176,16 +178,15 @@ def test_parser():
         _parse_data_source_dict("test", {})
     with pytest.raises(ValueError, match="Unknown 'data_type'"):
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
-    with pytest.raises(
-        ValueError, match="alias test not found in data_dict"
-    ), pytest.deprecated_call():
+    with (
+        pytest.raises(ValueError, match="alias test not found in data_dict"),
+        pytest.deprecated_call(),
+    ):
         _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_data_catalog_io(tmpdir):
-    data_catalog = DataCatalog()
-    _ = data_catalog.sources  # load artifact data as fallback
+@pytest.mark.skip("needs catalogs refactor")
+def test_data_catalog_io(tmpdir, data_catalog):
     # read / write
     fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
@@ -198,8 +199,8 @@ def test_data_catalog_io(tmpdir):
     print(data_catalog.get_source("merit_hydro"))
 
 
-@pytest.mark.skip(reason="Needs refactoring from path to uri.")
-def test_versioned_catalog_entries(tmpdir):
+@pytest.mark.skip("needs catalogs refactor")
+def test_versioned_catalog_entries():
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
@@ -283,37 +284,23 @@ def test_versioned_catalog_entries(tmpdir):
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_versioned_catalogs(tmpdir, monkeypatch):
-    v999_yml_fn = join(tmpdir, "test_sources_v999.yml")
-    with open(v999_yml_fn, "w") as f:
-        f.write(
-            """\
-            meta:
-                hydromt_version: '==999.*'
-            """
-        )
+@pytest.mark.skip("needs catalogs refactor")
+def test_versioned_catalogs(data_catalog):
+    data_catalog._sources = {}  # reset
+    data_catalog.from_predefined_catalogs("deltares_data")
+    assert len(data_catalog.sources) > 0
+    data_catalog._sources = {}  # reset
+    data_catalog.from_predefined_catalogs("deltares_data", "v0.5.0")
+    assert len(data_catalog.sources) > 0
 
-    DataCatalog().from_predefined_catalogs("deltares_data")
-    DataCatalog().from_predefined_catalogs("deltares_data", "v2022.7")
-
-    with pytest.raises(RuntimeError, match="Unknown version requested "):
-        _ = DataCatalog().from_predefined_catalogs("deltares_data", "v1993.7")
-
-    with pytest.raises(RuntimeError, match="Data catalog requires Hydromt Version"):
-        DataCatalog(data_libs=[v999_yml_fn])
-
-    with monkeypatch.context() as m:
-        import hydromt
-
-        m.setattr(hydromt.data_catalog, "__version__", "999.0.0")
-        DataCatalog(v999_yml_fn)
+    with pytest.raises(ValueError, match="Version v1993.7 not found "):
+        _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_data_catalog(tmpdir):
-    data_catalog = DataCatalog()
+@pytest.mark.skip("needs catalogs refactor")
+def test_data_catalog(tmpdir, data_catalog):
     # initialized with empty dict
+    data_catalog._sources = {}  # reset
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
     assert len(data_catalog.sources) > 0
@@ -343,12 +330,12 @@ def test_data_catalog(tmpdir):
     with pytest.deprecated_call():
         data_catalog = DataCatalog(deltares_data=False)
     assert len(data_catalog._sources) == 0
-    with pytest.deprecated_call():
-        data_catalog.from_artifacts("deltares_data")
+    data_catalog.from_predefined_catalogs("deltares_data")
     assert len(data_catalog._sources) > 0
-    with pytest.raises(
-        RuntimeError, match="Unknown version requested"
-    ), pytest.deprecated_call():
+    with (
+        pytest.raises(ValueError, match="Version unknown_version not found"),
+        pytest.deprecated_call(),
+    ):
         data_catalog = DataCatalog(deltares_data="unknown_version")
 
     # test hydromt version in meta data
@@ -357,27 +344,7 @@ def test_data_catalog(tmpdir):
     data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_from_archive(tmpdir):
-    data_catalog = DataCatalog()
-    # change cache to tmpdir
-    data_catalog._cache_dir = str(tmpdir.join(".hydromt_data"))
-    urlpath = data_catalog.predefined_catalogs["artifact_data"]["urlpath"]
-    version_hash = list(
-        data_catalog.predefined_catalogs["artifact_data"]["versions"].values()
-    )[0]
-    data_catalog.from_archive(urlpath.format(version=version_hash))
-    assert len(data_catalog.iter_sources()) > 0
-    source0 = data_catalog.get_source(
-        next(iter([source_name for source_name, _ in data_catalog.iter_sources()]))
-    )
-    assert ".hydromt_data" in str(source0.path)
-    # failed to download
-    with pytest.raises(ConnectionError, match="Data download failed"):
-        data_catalog.from_archive("https://asdf.com/asdf.zip")
-
-
-@pytest.mark.skip(reason="needs implementation of all data types.")
+@pytest.mark.skip("needs catalogs refactor")
 def test_used_sources(tmpdir):
     merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_fn)
@@ -391,40 +358,36 @@ def test_used_sources(tmpdir):
     assert sources[0][1].version == source.version
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_from_yml_with_archive(tmpdir):
-    yml_fn = join(CATALOGDIR, "artifact_data.yml")
-    data_catalog = DataCatalog(yml_fn)
+@pytest.mark.skip("needs catalogs refactor")
+def test_from_yml_with_archive(data_catalog):
+    cache_dir = Path(data_catalog._cache_dir)
+    data_catalog.from_predefined_catalogs("artifact_data=v0.0.8")
     sources = list(data_catalog.sources.keys())
     assert len(sources) > 0
     # as part of the getting the archive a a local
     # catalog file is written to the same folder
     # check if this file exists and we can read it
-    root = dirname(data_catalog.get_source(sources[0]).path)
-    yml_dst_fn = join(root, "artifact_data.yml")
-    assert isfile(yml_dst_fn)
+    yml_dst_fn = Path(cache_dir, "artifact_data", "v0.0.8", "data_catalog.yml")
+    assert yml_dst_fn.exists()
     data_catalog1 = DataCatalog(yml_dst_fn)
     sources = list(data_catalog1.sources.keys())
     source = data_catalog1.get_source(sources[0])
-    assert dirname(source.path) == root
+    assert yml_dst_fn.parent == Path(source.path).parent.parent
 
 
-@pytest.mark.skip(reason="needs refactoring from path to uri.")
-def test_from_predefined_catalogs():
-    data_catalog = DataCatalog()
-    data_catalog.set_predefined_catalogs(
-        join(CATALOGDIR, "..", "predefined_catalogs.yml")
-    )
+@pytest.mark.skip("needs catalogs refactor")
+def test_from_predefined_catalogs(data_catalog):
+    assert len(data_catalog.predefined_catalogs) > 0
     for name in data_catalog.predefined_catalogs:
+        data_catalog._sources = {}  # reset
         data_catalog.from_predefined_catalogs(f"{name}=latest")
         assert len(data_catalog._sources) > 0
-        data_catalog._sources = {}  # reset
     with pytest.raises(ValueError, match='Catalog with name "asdf" not found'):
         data_catalog.from_predefined_catalogs("asdf")
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_export_global_datasets(tmpdir):
+@pytest.mark.skip("needs catalogs refactor")
+def test_export_global_datasets(tmpdir, data_catalog):
     DTYPES = {
         "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),
         "GeoDatasetAdapter": (xr.DataArray, xr.Dataset),
@@ -432,7 +395,7 @@ def test_export_global_datasets(tmpdir):
     }
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_tuple = ("2010-02-10", "2010-02-15")
-    data_catalog = DataCatalog("artifact_data")  # read artifacts
+    data_catalog.from_predefined_catalogs("artifact_data")
     source_names = [
         "era5[precip,temp]",
         "grwl_mask",
@@ -539,9 +502,8 @@ def test_export_dataframe(tmpdir, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_get_rasterdataset():
-    data_catalog = DataCatalog("artifact_data")  # read artifacts
+@pytest.mark.skip("needs catalogs refactor")
+def test_get_rasterdataset(data_catalog):
     n = len(data_catalog)
     # raster dataset using three different ways
     name = "koppen_geiger"
@@ -569,9 +531,8 @@ def test_get_rasterdataset():
         data_catalog.get_rasterdataset({"name": "test"})
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_get_geodataframe():
-    data_catalog = DataCatalog("artifact_data")  # read artifacts
+@pytest.mark.skip("needs catalogs refactor")
+def test_get_geodataframe(data_catalog):
     n = len(data_catalog)
     # vector dataset using three different ways
     name = "osm_coastlines"
@@ -595,9 +556,8 @@ def test_get_geodataframe():
         data_catalog.get_geodataframe({"name": "test"})
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_get_geodataset():
-    data_catalog = DataCatalog("artifact_data")  # read artifacts
+@pytest.mark.skip("needs catalogs refactor")
+def test_get_geodataset(data_catalog):
     n = len(data_catalog)
     # geodataset using three different ways
     name = "gtsmv3_eu_era5"
@@ -625,10 +585,9 @@ def test_get_geodataset():
         data_catalog.get_geodataset({"name": "test"})
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_get_dataset(timeseries_df):
+@pytest.mark.skip("needs catalogs refactor")
+def test_get_dataset(timeseries_df, data_catalog):
     # get_dataset
-    data_catalog = DataCatalog("artifact_data")
     test_dataset = timeseries_df.to_xarray()
     subset_timeseries = timeseries_df.iloc[[0, len(timeseries_df) // 2]]
     time_tuple = (
@@ -644,9 +603,8 @@ def test_get_dataset(timeseries_df):
     assert ds.name == "col1"
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_get_dataframe(df, tmpdir):
-    data_catalog = DataCatalog("artifact_data")  # read artifacts
+@pytest.mark.skip("needs catalogs refactor")
+def test_get_dataframe(df, tmpdir, data_catalog):
     n = len(data_catalog)
     # dataframe using single way
     name = "test.csv"
@@ -671,38 +629,31 @@ def test_get_dataframe(df, tmpdir):
         data_catalog.get_dataframe({"name": "test"})
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_deprecation_warnings(artifact_data):
+@pytest.mark.skip("needs catalogs refactor")
+def test_deprecation_warnings(data_catalog):
     with pytest.deprecated_call():
         # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
-        DataCatalog(artifact_data="v0.0.6")
+        DataCatalog(artifact_data="v0.0.8")
     with pytest.deprecated_call():
-        cat = DataCatalog()
-        # should be cat.from_predefined_catalogs('artifact_data', 'v0.0.6')
-        cat.from_artifacts("artifact_data", version="v0.0.6")
-    with pytest.deprecated_call():
-        fn = artifact_data["chelsa"].path
+        fn = data_catalog["chelsa"].path
         # should be driver_kwargs=dict(chunks={'x': 100, 'y': 100})
-        artifact_data.get_rasterdataset(fn, chunks={"x": 100, "y": 100})
+        data_catalog.get_rasterdataset(fn, chunks={"x": 100, "y": 100})
     with pytest.deprecated_call():
-        fn = artifact_data["gadm_level1"].path
+        fn = data_catalog["gadm_level1"].path
         # should be driver_kwargs=dict(assert_gtype='Polygon')
-        artifact_data.get_geodataframe(fn, assert_gtype="MultiPolygon")
+        data_catalog.get_geodataframe(fn, assert_gtype="MultiPolygon")
     with pytest.deprecated_call():
-        fn = artifact_data["grdc"].path
+        fn = data_catalog["grdc"].path
         # should be driver_kwargs=dict(index_col=0)
-        artifact_data.get_dataframe(fn, index_col=0)
+        data_catalog.get_dataframe(fn, index_col=0)
     with pytest.deprecated_call():
-        fn = artifact_data["gtsmv3_eu_era5"].path
+        fn = data_catalog["gtsmv3_eu_era5"].path
         # should be driver_kwargs=dict(chunks={'time': 100})
-        artifact_data.get_geodataset(fn, chunks={"time": 100})
+        data_catalog.get_geodataset(fn, chunks={"time": 100})
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_detect_extent():
-    data_catalog = DataCatalog()  # read artifacts
-    _ = data_catalog.sources  # load artifact data as fallback
-
+@pytest.mark.skip("needs catalogs refactor")
+def test_detect_extent(data_catalog):
     # raster dataset
     name = "chirps_global"
     bbox = 11.60, 45.20, 13.00, 46.80
@@ -736,10 +687,7 @@ def test_detect_extent():
 
 
 @pytest.mark.skip(reason="needs implementation of all data types.")
-def test_to_stac(tmpdir):
-    data_catalog = DataCatalog()  # read artifacts
-    _ = data_catalog.sources  # load artifact data as fallback
-
+def test_to_stac(tmpdir, data_catalog):
     _ = data_catalog.get_rasterdataset("chirps_global")
     _ = data_catalog.get_geodataframe("gadm_level1")
     _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
@@ -763,7 +711,7 @@ def test_to_stac(tmpdir):
 
 
 @pytest.mark.skip(reason="Contains bug regarding switch to Pydantic.")
-def test_from_stac(tmpdir):
+def test_from_stac():
     catalog_from_stac = DataCatalog().from_stac_catalog(
         "./tests/data/stac/catalog.json"
     )
@@ -771,3 +719,13 @@ def test_from_stac(tmpdir):
     assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetAdapter
     assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameAdapter
     # assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == GeoDatasetAdapter
+
+
+def test_yml_from_uri_path():
+    uri = "https://google.com/nothinghere"
+    with pytest.raises(requests.HTTPError):
+        _yml_from_uri_or_path(uri)
+    uri = "https://raw.githubusercontent.com/Deltares/hydromt/main/.pre-commit-config.yaml"
+    yml = _yml_from_uri_or_path(uri)
+    assert isinstance(yml, dict)
+    assert len(yml) > 0

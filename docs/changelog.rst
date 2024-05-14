@@ -44,15 +44,31 @@ Removed
 Unreleased
 ==========
 
+New
+---
+- New `PredefinedCatalog` class to handle predefined catalog version based on pooch registry files. (#849)
+
+
 Changed
 -------
 - Development environment is now set up via pixi instead of mamba / conda. See the documentation for more information on how to install.
 - Use the native data CRS when determining zoom levels over the data catalog crs. (#851)
 - Improved `flw.d8_from_dem` method with different options to use river vector data to aid the flow direction derivation. (#305)
+- DataCatalog.predefined_catalogs retrieves predefined_catalogs specified in predefined_catalogs.py. There is no need for setting the predefined_catalogs anymore. (#844)
 
 Fixed
 -----
 - Bug in `raster.transform` with lazy coordinates. (#801)
+- Bug in `workflows.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
+- Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
+- Bug in `raster.clip_bbox` when bbox doesn't overlap with raster. (#860)
+- Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
+- Fixed incorrect renaming of single variable raster datasets (#883)
+- Provide better error message for 0D geometry arrays in GeoDataset (#885)
+
+Deprecated
+----------
+- The `DataCatalog.from_archive` method is deprecated. Use `DataCatalog.from_yml` with the root pointing to the archive instead. (#849)
 - Bug in `workflows.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
 - Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
 - Bug in `raster.clip_bbox` when bbox doesn't overlap with raster. (#860)

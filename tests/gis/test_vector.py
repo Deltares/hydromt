@@ -4,7 +4,7 @@
 import numpy as np
 import pytest
 import xarray as xr
-from geopandas import GeoDataFrame
+from geopandas import GeoDataFrame, GeoSeries
 from pyproj import CRS
 from shapely.geometry import MultiPolygon, Polygon
 
@@ -80,6 +80,20 @@ def test_vector(geoda, geodf):
     gdf1 = geodf.to_crs(3857)
     assert np.all(da1.vector.geometry == gdf1.geometry)
     assert da1.vector.crs == gdf1.crs
+
+
+def test_single_geom_vector(geoda, tmp_dir):
+    geom = geoda.isel(index=0).vector.geometry
+    assert geom is None
+    # write to file
+    with pytest.raises(ValueError, match="No geometry data found"):
+        geoda.isel(index=0).vector.to_netcdf(tmp_dir / "test.nc")
+
+    geom1 = geoda.isel(index=[0]).vector.geometry
+    assert isinstance(geom1, GeoSeries)
+    fn_nc = tmp_dir / "test.nc"
+    geoda.isel(index=[0]).vector.to_netcdf(fn_nc)
+    assert fn_nc.is_file()
 
 
 def test_from_gdf(geoda, geodf):
