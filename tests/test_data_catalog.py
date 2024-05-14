@@ -83,7 +83,7 @@ def test_from_yml_no_root(tmpdir):
         dump(d, f)
 
     cat = DataCatalog().from_yml(cat_file)
-    assert cat.root == Path(tmpdir)
+    assert cat.root == str(tmpdir)
 
 
 def test_parser():
