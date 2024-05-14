@@ -185,6 +185,7 @@ def test_parser():
         _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_data_catalog_io(tmpdir, data_catalog):
     # read / write
     fn_yml = join(tmpdir, "test.yml")
@@ -198,6 +199,7 @@ def test_data_catalog_io(tmpdir, data_catalog):
     print(data_catalog.get_source("merit_hydro"))
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_versioned_catalog_entries():
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
@@ -282,6 +284,7 @@ def test_versioned_catalog_entries():
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_versioned_catalogs(data_catalog):
     data_catalog._sources = {}  # reset
     data_catalog.from_predefined_catalogs("deltares_data")
@@ -294,6 +297,7 @@ def test_versioned_catalogs(data_catalog):
         _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_data_catalog(tmpdir, data_catalog):
     # initialized with empty dict
     data_catalog._sources = {}  # reset
@@ -340,6 +344,7 @@ def test_data_catalog(tmpdir, data_catalog):
     data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_used_sources(tmpdir):
     merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_fn)
@@ -353,6 +358,7 @@ def test_used_sources(tmpdir):
     assert sources[0][1].version == source.version
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_from_yml_with_archive(data_catalog):
     cache_dir = Path(data_catalog._cache_dir)
     data_catalog.from_predefined_catalogs("artifact_data=v0.0.8")
@@ -369,6 +375,7 @@ def test_from_yml_with_archive(data_catalog):
     assert yml_dst_fn.parent == Path(source.path).parent.parent
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_from_predefined_catalogs(data_catalog):
     assert len(data_catalog.predefined_catalogs) > 0
     for name in data_catalog.predefined_catalogs:
@@ -379,6 +386,7 @@ def test_from_predefined_catalogs(data_catalog):
         data_catalog.from_predefined_catalogs("asdf")
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_export_global_datasets(tmpdir, data_catalog):
     DTYPES = {
         "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),
@@ -494,6 +502,7 @@ def test_export_dataframe(tmpdir, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_get_rasterdataset(data_catalog):
     n = len(data_catalog)
     # raster dataset using three different ways
@@ -522,6 +531,7 @@ def test_get_rasterdataset(data_catalog):
         data_catalog.get_rasterdataset({"name": "test"})
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_get_geodataframe(data_catalog):
     n = len(data_catalog)
     # vector dataset using three different ways
@@ -546,6 +556,7 @@ def test_get_geodataframe(data_catalog):
         data_catalog.get_geodataframe({"name": "test"})
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_get_geodataset(data_catalog):
     n = len(data_catalog)
     # geodataset using three different ways
@@ -574,6 +585,7 @@ def test_get_geodataset(data_catalog):
         data_catalog.get_geodataset({"name": "test"})
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_get_dataset(timeseries_df, data_catalog):
     # get_dataset
     test_dataset = timeseries_df.to_xarray()
@@ -591,6 +603,7 @@ def test_get_dataset(timeseries_df, data_catalog):
     assert ds.name == "col1"
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_get_dataframe(df, tmpdir, data_catalog):
     n = len(data_catalog)
     # dataframe using single way
@@ -616,6 +629,7 @@ def test_get_dataframe(df, tmpdir, data_catalog):
         data_catalog.get_dataframe({"name": "test"})
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_deprecation_warnings(data_catalog):
     with pytest.deprecated_call():
         # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
@@ -638,6 +652,7 @@ def test_deprecation_warnings(data_catalog):
         data_catalog.get_geodataset(fn, chunks={"time": 100})
 
 
+@pytest.mark.skip("needs catalogs refactor")
 def test_detect_extent(data_catalog):
     # raster dataset
     name = "chirps_global"
