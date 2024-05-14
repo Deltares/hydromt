@@ -2,7 +2,7 @@
 
 import logging
 from logging import Logger
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -12,8 +12,14 @@ import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt.data_catalog import DataCatalog
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.workflows.region import (
+    parse_region_bbox,
+    parse_region_geom,
+    parse_region_mesh,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -23,6 +29,82 @@ __all__ = [
     "mesh2d_from_rasterdataset",
     "mesh2d_from_raster_reclass",
 ]
+
+
+def create_mesh2d_from_region(
+    region: Dict[str, Any],
+    *,
+    crs: Optional[int] = None,
+    res: Optional[float] = None,
+    align: bool = True,
+    logger: Logger = _logger,
+    data_catalog: Optional[DataCatalog] = None,
+):
+    """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
+
+    Grids are read according to UGRID conventions. An 2D unstructured mesh
+    will be created as 2D rectangular grid from a geometry (geom_filename) or bbox.
+    If an existing 2D mesh is given, then no new mesh will be generated but an extent
+    can be extracted using the `bounds` argument of region.
+
+    Note Only existing meshed with only 2D grid can be read.
+
+    Adds/Updates model layers:
+
+    * **grid_name** mesh topology: add grid_name 2D topology to mesh object
+
+    Parameters
+    ----------
+    region : dict
+        Dictionary describing region of interest, bounds can be provided for type 'mesh'.
+        In case of 'mesh', if the file includes several grids, the specific 2D grid can
+        be selected using the 'grid_name' argument.
+        CRS for 'bbox' and 'bounds' should be 4326; e.g.:
+
+        * {'bbox': [xmin, ymin, xmax, ymax]}
+
+        * {'geom': 'path/to/polygon_geometry'}
+
+        * {'mesh': 'path/to/2dmesh_file'}
+
+        * {'mesh': 'path/to/mesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
+    res: float
+        Resolution used to generate 2D mesh [unit of the CRS], required if region
+        is not based on 'mesh'.
+    crs : EPSG code, int, optional
+        Optional EPSG code of the model or "utm" to let hydromt find the closest projected CRS.
+        If None using the one from region, and else 4326.
+    grid_name : str, optional
+        Name of the 2D grid in mesh, by default "mesh2d".
+
+    Returns
+    -------
+    mesh2d : xu.UgridDataset
+        Generated mesh2d.
+
+    """  # noqa: E501
+    kind = next(iter(region))
+    if kind == "mesh":
+        uds = parse_region_mesh(region)
+        return create_mesh2d_from_mesh(
+            uds,
+            grid_name=region.get("grid_name", None),
+            logger=logger,
+            crs=crs,
+            bounds=region.get("bounds", None),
+        )
+    if kind in ["bbox", "geom"]:
+        if not res:
+            raise ValueError(f"res argument required for kind '{kind}'")
+        data_catalog = data_catalog or DataCatalog()
+        geom = (
+            parse_region_geom(region, crs=crs, data_catalog=data_catalog)
+            if kind == "geom"
+            else parse_region_bbox(region, crs=crs)
+        )
+        return create_mesh2d_from_geom(geom, res=res, align=align, kind=kind)
+
+    raise ValueError(f"Unsupported region kind '{kind}' found in grid creation.")
 
 
 def create_mesh2d_from_mesh(

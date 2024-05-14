@@ -18,15 +18,9 @@ from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
 from hydromt.workflows.mesh import (
-    create_mesh2d_from_geom,
-    create_mesh2d_from_mesh,
+    create_mesh2d_from_region,
     mesh2d_from_raster_reclass,
     mesh2d_from_rasterdataset,
-)
-from hydromt.workflows.region import (
-    parse_region_bbox,
-    parse_region_geom,
-    parse_region_mesh,
 )
 
 if TYPE_CHECKING:
@@ -262,32 +256,16 @@ class MeshComponent(SpatialModelComponent):
 
         if region is None:
             _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, self.logger)
-
         assert region is not None
-        kind = next(iter(region)) if region is not None else "geom"
-        if kind == "mesh":
-            uds = parse_region_mesh(region)
-            mesh2d = create_mesh2d_from_mesh(
-                uds,
-                grid_name=region.get("grid_name", None),
-                logger=self.logger,
-                crs=crs,
-                bounds=region.get("bounds", None),
-            )
-        elif kind in ["bbox", "geom"]:
-            if not res:
-                raise ValueError(f"res argument required for kind '{kind}'")
-            geom = (
-                parse_region_geom(region, crs=crs, data_catalog=self.data_catalog)
-                if kind == "geom"
-                else parse_region_bbox(region, crs=crs)
-            )
-            mesh2d = create_mesh2d_from_geom(geom, res=res, align=align, kind=kind)
-        else:
-            raise ValueError(
-                f"Unsupported region kind '{kind}' found in grid creation."
-            )
 
+        mesh2d = create_mesh2d_from_region(
+            region,
+            res=res,
+            crs=crs,
+            align=align,
+            logger=self.logger,
+            data_catalog=self.data_catalog,
+        )
         self.set(mesh2d, grid_name=grid_name)
         return mesh2d
 
