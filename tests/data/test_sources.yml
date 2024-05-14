@@ -1,6 +1,9 @@
 ---
 meta:
-  root: d:/hydromt_testdata
+  roots:
+    - d:/hydromt_testdata
+    - ~/.hydromt_testdata
+  hydromt_version: '>=1.0a, <2.0'
 era5:
   path: ERA5/daily/era5_{year}_daily.nc
   data_type: RasterDataset

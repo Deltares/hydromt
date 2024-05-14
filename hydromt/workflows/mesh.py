@@ -10,20 +10,14 @@ import xarray as xr
 import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
-from xugrid.ugrid import conventions
 
-from .. import gis_utils
-from ..raster import GEO_MAP_COORD
-from .basin_mask import parse_region
+from hydromt.components.region import _parse_region
+from hydromt.gis import utils
+from hydromt.gis.raster import GEO_MAP_COORD
 
 logger = logging.getLogger(__name__)
 
-__all__ = [
-    "create_mesh2d",
-    "mesh2d_from_rasterdataset",
-    "mesh2d_from_raster_reclass",
-    "rename_mesh",
-]
+__all__ = ["create_mesh2d", "mesh2d_from_rasterdataset", "mesh2d_from_raster_reclass"]
 
 
 def create_mesh2d(
@@ -76,7 +70,7 @@ def create_mesh2d(
     mesh2d : xu.UgridDataset
         Generated mesh2d.
     """  # noqa: E501
-    kind, region = parse_region(region, logger=logger)
+    kind, region = _parse_region(region, logger=logger)
     if kind != "mesh":
         if not isinstance(res, (int, float)):
             raise ValueError("res argument required for kind 'bbox', 'geom'")
@@ -94,7 +88,7 @@ def create_mesh2d(
             )
         # Parse crs and reproject geom if needed
         if crs is not None:
-            crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+            crs = utils.parse_crs(crs, bbox=geom.total_bounds)
             geom = geom.to_crs(crs)
         # Generate grid based on res for region bbox
         xmin, ymin, xmax, ymax = geom.total_bounds
@@ -164,7 +158,7 @@ def create_mesh2d(
             if grid_crs is not None:
                 if grid_crs.to_epsg() == 4326:
                     bbox = mesh2d.ugrid.grid.bounds
-            crs = gis_utils.parse_crs(crs, bbox=bbox)
+            crs = utils.parse_crs(crs, bbox=bbox)
         else:
             crs = CRS.from_user_input(4326)
         if grid_crs is not None:  # parse crs
@@ -201,7 +195,7 @@ def mesh2d_from_rasterdataset(
     mesh2d: Union[xu.UgridDataArray, xu.Ugrid2d],
     variables: Optional[List] = None,
     fill_method: Optional[str] = None,
-    resampling_method: Optional[str] = "centroid",
+    resampling_method: Optional[Union[str, List]] = "centroid",
     rename: Optional[Dict] = None,
     logger: logging.Logger = logger,
 ) -> xu.UgridDataset:
@@ -381,45 +375,3 @@ def mesh2d_from_raster_reclass(
     )
 
     return uds_out
-
-
-def rename_mesh(mesh: Union[xu.UgridDataArray, xu.UgridDataset], name: str):
-    """
-    Rename all grid variables in mesh according to UGRID conventions.
-
-    Note: adapted from xugrid.ugrid.grid.rename to also work on
-    UgridDataset and UgridDataArray
-    """
-    # Get the old and the new names. Their keys are the same.
-    old_attrs = mesh.ugrid.grid._attrs
-    new_attrs = conventions.default_topology_attrs(
-        name, mesh.ugrid.grid.topology_dimension
-    )
-
-    # The attrs will have some roles joined together, e.g. node_coordinates
-    # will contain x and y as "mesh2d_node_x mesh2d_node_y".
-    name_dict = {mesh.ugrid.grid.name: name}
-    skip = ("cf_role", "long_name", "topology_dimension")
-    for key, value in old_attrs.items():
-        if key in new_attrs and key not in skip:
-            split_new = new_attrs[key].split()
-            split_old = value.split()
-            if len(split_new) != len(split_old):
-                raise ValueError(
-                    f"Number of entries does not match on {key}: "
-                    f"{split_new} versus {split_old}"
-                )
-            for name_key, name_value in zip(split_old, split_new):
-                name_dict[name_key] = name_value
-
-    new = mesh.copy()
-    new.ugrid.grid.name = name
-    new.ugrid.grid._attrs = new_attrs
-    new.ugrid.grid._indexes = {
-        k: name_dict[v] for k, v in new.ugrid.grid._indexes.items()
-    }
-
-    to_rename = tuple(new.data_vars) + tuple(new.coords) + tuple(new.dims)
-    new = new.rename({k: v for k, v in name_dict.items() if k in to_rename})
-
-    return new

@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """DataCatalog module for HydroMT."""
 
 from __future__ import annotations
@@ -11,9 +8,10 @@ import logging
 import os
 import warnings
 from datetime import datetime
-from os.path import abspath, basename, isfile, join
+from os.path import abspath, basename, exists, isfile, join, splitext
 from pathlib import Path
 from typing import (
+    Any,
     Dict,
     Iterator,
     List,
@@ -27,7 +25,6 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pooch
-import requests
 import xarray as xr
 import yaml
 from packaging.specifiers import SpecifierSet
@@ -35,16 +32,12 @@ from packaging.version import Version
 from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
-from hydromt.nodata import NoDataException, NoDataStrategy, _exec_nodata_strat
-from hydromt.predefined_catalog import (
-    PREDEFINED_CATALOGS,
-    PredefinedCatalog,
-    _copy_file,
-)
-from hydromt.typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
-from hydromt.utils import partition_dictionaries
-
-from .data_adapter import (
+from hydromt import __version__
+from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
+from hydromt._typing.error import NoDataException, NoDataStrategy, _exec_nodata_strat
+from hydromt._typing.type_def import StrPath
+from hydromt._utils import partition_dictionaries
+from hydromt.data_adapter import (
     DataAdapter,
     DataFrameAdapter,
     DatasetAdapter,
@@ -52,15 +45,20 @@ from .data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from .data_adapter.caching import HYDROMT_DATADIR, _uri_validator
+from hydromt.data_adapter.caching import HYDROMT_DATADIR
+from hydromt.data_source import DataSource, create_source
+from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.predefined_catalog import (
+    PREDEFINED_CATALOGS,
+    PredefinedCatalog,
+    _copy_file,
+)
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
     "DataCatalog",
 ]
-
-# just for typehints
 
 
 class DataCatalog(object):
@@ -76,7 +74,6 @@ class DataCatalog(object):
         logger=logger,
         cache: Optional[bool] = False,
         cache_dir: Optional[str] = None,
-        **artifact_keys,
     ) -> None:
         """Catalog of DataAdapter sources.
 
@@ -109,8 +106,12 @@ class DataCatalog(object):
             data_libs = []
         elif not isinstance(data_libs, list):  # make sure data_libs is a list
             data_libs = np.atleast_1d(data_libs).tolist()
+
+        data_libs = cast(list, data_libs)
+
         self._sources = {}  # dictionary of DataAdapter
         self._catalogs: Dict[str, PredefinedCatalog] = {}
+        self.root = None
         self._fallback_lib = fallback_lib
         self.logger = logger
 
@@ -119,22 +120,6 @@ class DataCatalog(object):
         if cache_dir is not None:
             self._cache_dir = cache_dir
 
-        # legacy code. to be removed
-        for lib, version in artifact_keys.items():
-            warnings.warn(
-                "Adding a predefined data catalog as key-word argument is deprecated, "
-                f"add the catalog as '{lib}={version}'"
-                " to the data_libs list instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if not version:  # False or None
-                continue
-            elif isinstance(version, str):
-                lib += f"={version}"
-            data_libs = [lib] + data_libs
-
-        # parse data catalogs; both user and pre-defined
         for name_or_path in data_libs:
             if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
                 self.from_yml(name_or_path)
@@ -142,23 +127,12 @@ class DataCatalog(object):
                 self.from_predefined_catalogs(name_or_path)
 
     @property
-    def sources(self) -> Dict:
-        """Returns dictionary of DataAdapter sources."""
+    def sources(self) -> Dict[DataSource]:
+        """Returns dictionary of DataSources."""
         if len(self._sources) == 0 and self._fallback_lib is not None:
             # read artifacts by default if no catalogs are provided
             self.from_predefined_catalogs(self._fallback_lib)
         return self._sources
-
-    @property
-    def keys(self) -> List[str]:
-        """Returns list of data source names."""
-        warnings.warn(
-            "Using iterating over the DataCatalog directly is deprecated."
-            "Please use cat.get_source()",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return list(self._sources.keys())
 
     def get_source_names(self) -> List[str]:
         """Return a list of all available data source names."""
@@ -294,7 +268,7 @@ class DataCatalog(object):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        s = self.get_source(source, provider, version)
+        s: DataSource = self.get_source(source, provider, version)
         try:
             return s.get_bbox(detect=detect)  # type: ignore
         except TypeError as e:
@@ -355,7 +329,7 @@ class DataCatalog(object):
         source: str,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-    ) -> DataAdapter:
+    ) -> DataSource:
         """Return a data source.
 
         Parameters
@@ -371,8 +345,8 @@ class DataCatalog(object):
 
         Returns
         -------
-        DataAdapter
-            DataAdapter object.
+        DataSource
+            DataSource object.
         """
         source = str(source)
         if source not in self._sources:
@@ -475,26 +449,6 @@ class DataCatalog(object):
 
         self._sources[source][provider] = versions
 
-    def __getitem__(self, key: str) -> DataAdapter:
-        """Get the source."""
-        warnings.warn(
-            'Using iterating over the DataCatalog directly is deprecated."\
-            " Please use cat.get_source("name")',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.get_source(key)
-
-    def __setitem__(self, key: str, value: DataAdapter) -> None:
-        """Set or update adaptors."""
-        warnings.warn(
-            "Using DataCatalog as a dictionary directly is deprecated."
-            " Please use cat.add_source(adapter)",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.add_source(key, value)
-
     def iter_sources(self, used_only=False) -> List[Tuple[str, DataAdapter]]:
         """Return a flat list of all available data sources.
 
@@ -516,17 +470,6 @@ class DataCatalog(object):
     def __iter__(self) -> Iterator[Tuple[str, DataAdapter]]:
         """Iterate over sources."""
         return iter(self.iter_sources())
-
-    def __contains__(self, key: str) -> bool:
-        """Check if source is in catalog."""
-        warnings.warn(
-            "Directly checking for containement is deprecated. "
-            " Use 'contains_source' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        return self.contains_source(key)
 
     def contains_source(
         self,
@@ -691,7 +634,7 @@ class DataCatalog(object):
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        root: Optional[str] = None,
+        root: Optional[StrPath] = None,
         catalog_name: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
@@ -812,11 +755,26 @@ class DataCatalog(object):
         else:
             return version in requested
 
+    def _determine_catalog_root(
+        self, meta: Dict[str, Any], urlpath: Optional[StrPath] = None
+    ) -> Path:
+        """Determine which of the roots provided in meta exists and should be used."""
+        root = None
+        for r in meta["roots"]:
+            if exists(r):
+                root = r
+                break
+
+        if root is None:
+            raise ValueError("None of the specified roots were found")
+        else:
+            return Path(root)
+
     def from_dict(
         self,
         data_dict: Dict,
         catalog_name: str = "",
-        root: Optional[Union[str, Path]] = None,
+        root: Optional[StrPath] = None,
         category: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
@@ -864,17 +822,43 @@ class DataCatalog(object):
 
         """
         meta = data_dict.pop("meta", {})
-        if "root" in meta and root is None:
-            root = meta.pop("root")
+        # check version required hydromt version
+        requested_version = meta.get("hydromt_version", None)
+        if requested_version is not None:
+            allow_dev = meta.get("allow_dev_version", True)
+            if not self._is_compatible(__version__, requested_version, allow_dev):
+                raise RuntimeError(
+                    f"Data catalog requires Hydromt Version {requested_version} which "
+                    f"is incompattible with current hydromt version {__version__}."
+                )
+
         if "category" in meta and category is None:
             category = meta.pop("category")
-        if "name" in meta and catalog_name is None:
-            catalog_name = meta.pop("name")
+        version = meta.get("version", None)
+
+        if root is not None:
+            self.root = root
+        elif "roots" in meta:
+            self.root = self._determine_catalog_root(meta)
+
+        self.logger.info(f"Data Catalog is using root: {self.root}")
+
+        if self.root is not None and splitext(self.root)[-1] in ["gz", "zip"]:
+            # if root is an archive, unpack it at the cache dir
+            self.root = self._cache_archive(
+                self.root, name=catalog_name, version=version
+            )
+
+            # save catalog to cache
+            with open(join(self.root, f"{catalog_name}.yml"), "w") as f:
+                d = {"meta": {k: v for k, v in meta.items() if k != "roots"}}
+                d.update(data_dict)
+                yaml.dump(d, f, default_flow_style=False, sort_keys=False)
+
         for name, source_dict in _denormalise_data_dict(data_dict):
             adapter = _parse_data_source_dict(
                 name,
                 source_dict,
-                catalog_name=catalog_name,
                 root=root,
                 category=category,
             )
@@ -1184,7 +1168,6 @@ class DataCatalog(object):
         zoom_level: Optional[Union[int, tuple]] = None,
         buffer: Union[float, int] = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        align: Optional[bool] = None,
         variables: Optional[Union[List, str]] = None,
         time_tuple: Optional[Tuple] = None,
         single_var_as_array: Optional[bool] = True,
@@ -1195,7 +1178,7 @@ class DataCatalog(object):
         """Return a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
-        with optional additional `buffer` and `align` arguments.
+        with optional additional `buffer` argument.
         To slice the data to the time period of interest, provide the `time_tuple`
         argument. To return only the dataset variables of interest provide the
         `variables` argument.
@@ -1225,8 +1208,6 @@ class DataCatalog(object):
             Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         handle_nodata: NoDataStrategy, optional
             What to do if no data can be found.
-        align : float, optional
-            Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
             Names of RasterDataset variables to return. By default all dataset variables
             are returned.
@@ -1273,7 +1254,6 @@ class DataCatalog(object):
                 geom,
                 bbox,
                 buffer,
-                align,
                 time_tuple,
                 logger=self.logger,
             )
@@ -1295,7 +1275,6 @@ class DataCatalog(object):
             geom=geom,
             buffer=buffer,
             zoom_level=zoom_level,
-            align=align,
             variables=variables,
             time_tuple=time_tuple,
             single_var_as_array=single_var_as_array,
@@ -1321,7 +1300,7 @@ class DataCatalog(object):
         """Return a clipped and unified GeoDataFrame (vector).
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
-        with optional additional `buffer` and `align` arguments.
+        with optional additional `buffer` argument.
         To return only the dataframe columns of interest provide the
         `variables` argument.
 
@@ -1347,8 +1326,6 @@ class DataCatalog(object):
             the predicate function against each item. Requires bbox or mask.
             By default 'intersects' options are:
             {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
-        align : float, optional
-            Resolution to align the bounding box, by default None
         variables : str or list of str, optional.
             Names of GeoDataFrame columns to return. By default all columns are
             returned.
@@ -1431,7 +1408,7 @@ class DataCatalog(object):
         """Return a clipped, sliced and unified GeoDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
-        with optional additional `buffer` and `align` arguments.
+        with optional additional `buffer` argument.
         To slice the data to the time period of interest, provide the
         `time_tuple` argument. To return only the dataset variables
         of interest provide the `variables` argument.
@@ -1615,7 +1592,7 @@ class DataCatalog(object):
 
     def get_dataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[str, SourceSpecDict, Path, pd.DataFrame],
         variables: Optional[list] = None,
         time_tuple: Optional[Tuple] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -1709,69 +1686,39 @@ def _parse_data_like_dict(
 def _parse_data_source_dict(
     name: str,
     data_source_dict: Dict,
-    catalog_name: str = "",
     root: Optional[Union[Path, str]] = None,
     category: Optional[str] = None,
 ) -> Dict:
     """Parse data source dictionary."""
-    # link yml keys to adapter classes
-    ADAPTERS = {
-        "RasterDataset": RasterDatasetAdapter,
-        "GeoDataFrame": GeoDataFrameAdapter,
-        "GeoDataset": GeoDatasetAdapter,
-        "DataFrame": DataFrameAdapter,
-        "Dataset": DatasetAdapter,
-    }
     # parse data
     source = data_source_dict.copy()  # important as we modify with pop
 
-    # parse path
-    if "path" not in source:
-        raise ValueError(f"{name}: Missing required path argument.")
-    # if remote path, keep as is else call abs_path method to solve local files
-    path = source.pop("path")
-    if not _uri_validator(str(path)):
-        path = abs_path(root, path)
-    # parse data type > adapter
-    data_type = source.pop("data_type", None)
-    if data_type is None:
-        raise ValueError(f"{name}: Data type missing.")
-    elif data_type not in ADAPTERS:
-        raise ValueError(f"{name}: Data type {data_type} unknown")
-    adapter = ADAPTERS.get(data_type)
+    source["name"] = name
+
+    # add root
+    if root:
+        source.update({"root": str(root)})
+
     # source meta data
-    meta = source.pop("meta", {})
+    meta: Dict[str, str] = source.get("metadata", {})
     if "category" not in meta and category is not None:
         meta.update(category=category)
 
+    source["metadata"] = meta
+
     # driver arguments
-    driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
-    for driver_kwarg in driver_kwargs:
-        # required for geodataset where driver_kwargs can be a path
-        if "fn" in driver_kwarg:
-            driver_kwargs.update(
-                {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
-            )
+    # driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
+    # TODO: remove code under this depending on subclasses
+    #       The DataCatalog should now have specific implementations for different drivers
+    # for driver_kwarg in driver_kwargs:
+    #     # required for geodataset where driver_kwargs can be a path
+    #     if "fn" in driver_kwarg:
+    #         driver_kwargs.update(
+    #             {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
+    #         )
+    # source["driver_kwargs"] = driver_kwargs
 
-    return adapter(
-        path=path,
-        name=name,
-        catalog_name=catalog_name,
-        meta=meta,
-        driver_kwargs=driver_kwargs,
-        **source,
-    )
-
-
-def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
-    if _uri_validator(str(uri_or_path)):
-        with requests.get(uri_or_path, stream=True) as r:
-            r.raise_for_status()
-            yml = yaml.load(r.text, Loader=yaml.FullLoader)
-    else:
-        with open(uri_or_path, "r") as stream:
-            yml = yaml.load(stream, Loader=yaml.FullLoader)
-    return yml
+    return create_source(source)
 
 
 def _process_dict(d: Dict, logger=logger) -> Dict:
@@ -1821,7 +1768,8 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 name_copy = name
                 for k, v in zip(options.keys(), combination):
                     name_copy = name_copy.replace("{" + k + "}", v)
-                    source_copy["path"] = source_copy["path"].replace("{" + k + "}", v)
+                    # TODO: seems like the job for a MetaDataResolver?
+                    source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:
             data_list.append((name, source))

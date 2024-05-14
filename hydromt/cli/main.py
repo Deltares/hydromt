@@ -14,30 +14,20 @@ import numpy as np
 from geopandas import GeoDataFrame
 from pydantic import ValidationError
 
+from hydromt import __version__
+from hydromt._typing.error import NoDataStrategy
+from hydromt._utils import log
+from hydromt._validators.data_catalog import DataCatalogValidator
+from hydromt._validators.model_config import HydromtModelSetup
+from hydromt._validators.region import validate_region
+from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
-from hydromt.nodata import NoDataStrategy
-from hydromt.validators.data_catalog import DataCatalogValidator
-from hydromt.validators.model_config import HydromtModelSetup
-from hydromt.validators.region import validate_region
-
-from .. import __version__, log
-from ..models import MODELS
-from . import cli_utils
-
-BUILDING_EXE = False
-if BUILDING_EXE:
-    import sys
-
-    exepath = sys.prefix
-    import pyproj
-
-    pyproj_datadir = join(exepath, "proj-data")
-    pyproj.datadir.set_data_dir(pyproj_datadir)
+from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
 
 
-def print_models(ctx, param, value):
+def print_available_models(ctx, param, value):
     """Print the available models and exit.
 
     Parameters
@@ -51,7 +41,43 @@ def print_models(ctx, param, value):
     """
     if not value:
         return {}
-    click.echo(f"{MODELS}")
+    click.echo(f"{PLUGINS.model_summary()}")
+    ctx.exit()
+
+
+def print_available_components(ctx, param, value):
+    """Print the available components and exit.
+
+    Parameters
+    ----------
+    ctx : click.Context
+        The Click context object.
+    param : click.Parameter
+        The Click parameter object.
+    value : bool
+        The value of the parameter.
+    """
+    if not value:
+        return {}
+    click.echo(PLUGINS.component_summary())
+    ctx.exit()
+
+
+def print_available_plugins(ctx, param, value):
+    """Print the available plugins and exit.
+
+    Parameters
+    ----------
+    ctx : click.Context
+        The Click context object.
+    param : click.Parameter
+        The Click parameter object.
+    value : bool
+        The value of the parameter.
+    """
+    if not value:
+        return {}
+    click.echo(f"{PLUGINS.plugin_summary()}")
     ctx.exit()
 
 
@@ -76,7 +102,7 @@ region_opt = click.option(
     "--region",
     type=str,
     default="{}",
-    callback=cli_utils.parse_json,
+    callback=_utils.parse_json,
     help="Set the region for which to build the model,"
     " e.g. {'subbasin': [-7.24, 62.09]}",
 )
@@ -88,7 +114,7 @@ quiet_opt = click.option("--quiet", "-q", count=True, help="Decrease verbosity."
 opt_cli = click.option(
     "--opt",
     multiple=True,
-    callback=cli_utils.parse_opt,
+    callback=_utils.parse_opt,
     help="Method specific keyword arguments, see the method documentation "
     "of the specific model for more information about the arguments.",
 )
@@ -140,10 +166,26 @@ cache_opt = click.option(
     is_flag=True,
     is_eager=True,
     help="Print available model plugins and exit.",
-    callback=print_models,
+    callback=print_available_models,
+)
+@click.option(
+    "--components",
+    default=False,
+    is_flag=True,
+    is_eager=True,
+    help="Print available component plugins and exit.",
+    callback=print_available_components,
+)
+@click.option(
+    "--plugins",
+    default=False,
+    is_flag=True,
+    is_eager=True,
+    help="Print available component plugins and exit.",
+    callback=print_available_plugins,
 )
 @click.pass_context
-def main(ctx, models):  # , quiet, verbose):
+def main(ctx, models, components, plugins):
     """Command line interface for hydromt models."""
     if ctx.obj is None:
         ctx.obj = {}
@@ -187,8 +229,7 @@ def build(
 
     To build a wflow model for a subbasin using a point coordinates snapped to cells
     with upstream area >= 50 km2
-    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml  -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
-
+    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml -r "{'subbasin': [-7.24, 62.09], 'uparea': 50}" -d deltares_data -d /path/to/data_catalog.yml -v
     To build a sfincs model based on a bbox
     hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml  -r "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
 
@@ -199,8 +240,9 @@ def build(
     )
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
-    opt = cli_utils.parse_config(config, opt_cli=opt)
+    opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
+    modeltype = opt.pop("modeltype", model)
     # Set region to None if empty string json
     if len(region) == 0:
         region = None
@@ -212,7 +254,7 @@ def build(
     try:
         # initialize model and create folder structure
         mode = "w+" if fo else "w"
-        mod = MODELS.load(model)(
+        mod = PLUGINS.model_plugins[modeltype](
             root=model_root,
             mode=mode,
             logger=logger,
@@ -303,8 +345,9 @@ def update(
     if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
         opt = {components[0]: opt}
     logger.info("User settings:")
-    opt = cli_utils.parse_config(config, opt_cli=opt)
+    opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
+    modeltype = opt.pop("modeltype", model)
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -312,7 +355,7 @@ def update(
         data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
         # initialize model and create folder structure
-        mod = MODELS.load(model)(
+        mod = PLUGINS.model_plugins[modeltype](
             root=model_root,
             mode=mode,
             data_libs=data_libs,
@@ -353,7 +396,7 @@ def update(
 @click.pass_context
 def check(
     ctx,
-    model,
+    model: Optional[str],
     config,
     data,
     region: Optional[Dict[Any, Any]],
@@ -403,13 +446,13 @@ def check(
                 all_exceptions.append(e)
 
         if config:
-            mod = MODELS.load(model)
-            logger.info(f"Validating for model {model} of type {type(mod).__name__}")
+            logger.info(f"Validating config at {config}")
             try:
-                config_dict = cli_utils.parse_config(config)
-                logger.info(f"Validating config at {config}")
+                config_dict = _utils.parse_config(config)
+                if model:
+                    config_dict["modeltype"] = model
 
-                HydromtModelSetup.from_dict(config_dict, model=mod)
+                HydromtModelSetup(**config_dict)
                 logger.info("Model config valid!")
 
             except (ValidationError, ValueError) as e:
@@ -514,7 +557,7 @@ def export(
     append = False
 
     if config:
-        config_dict = cli_utils.parse_config(config)["export_data"]
+        config_dict = _utils.parse_config(config)["export_data"]
         if "data_libs" in config_dict.keys():
             data_libs = data_libs + config_dict.pop("data_libs")
         time_tuple = config_dict.pop("time_tuple", None)
@@ -596,7 +639,7 @@ def export(
 @click.argument(
     "REGION",
     type=str,
-    callback=cli_utils.parse_json,
+    callback=_utils.parse_json,
 )
 @quiet_opt
 @verbose_opt
@@ -632,10 +675,10 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
     if model != "wflow":
         raise NotImplementedError("Clip function only implemented for wflow model.")
     try:
-        mod = MODELS.load(model)(root=model_root, mode="r", logger=logger)
+        mod = PLUGINS.model_plugins[model](root=model_root, mode="r", logger=logger)
         logger.info("Reading model to clip")
         mod.read()
-        mod.set_root(model_destination, mode="w")
+        mod.root.set(model_destination, mode="w")
         logger.info("Clipping grid")
         mod.clip_grid(region)
         logger.info("Clipping forcing")

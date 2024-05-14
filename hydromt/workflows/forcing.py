@@ -8,7 +8,7 @@ import pandas as pd
 import xarray as xr
 import xarray.core.resample
 
-from .._compat import HAS_PYET
+from hydromt._compat import HAS_PYET
 
 if HAS_PYET:
     import pyet
@@ -86,7 +86,7 @@ def precip(
     return p_out
 
 
-# use dem_model (from staticmaps) and dem_forcing (meteo) in ini file
+# use dem_model (from staticmaps) and dem_forcing (meteo) in config file
 def temp(
     temp,
     dem_model,

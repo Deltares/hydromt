@@ -1,6 +1,9 @@
+import logging
+from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import Any, Generator, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -8,29 +11,31 @@ import pandas as pd
 import pyflwdir
 import pytest
 import xarray as xr
+import xugrid as xu
 from dask import config as dask_config
-from shapely.geometry import box
+from pytest_mock import MockerFixture
 
+from hydromt import (
+    Model,
+    raster,
+    vector,
+)
 from hydromt.predefined_catalog import PREDEFINED_CATALOGS
 
 dask_config.set(scheduler="single-threaded")
 
-import hydromt._compat as compat
-
-if compat.HAS_XUGRID:
-    import xugrid as xu
-
-from hydromt import (
-    MODELS,
-    GridModel,
-    Model,
-    NetworkModel,
-    VectorModel,
-    gis_utils,
-    raster,
-    vector,
-)
+from hydromt._typing import SourceMetadata
+from hydromt.components.config import ConfigComponent
+from hydromt.components.region import ModelRegionComponent
+from hydromt.components.vector import VectorComponent
+from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
+from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog import DataCatalog
+from hydromt.drivers import GeoDataFrameDriver, RasterDatasetDriver
+from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.gis import utils
+from hydromt.metadata_resolver import MetaDataResolver
+from hydromt.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
@@ -63,9 +68,19 @@ def latest_dd_version_uri():
 
 
 @pytest.fixture(scope="class")
-def tmp_dir() -> Path:
+def tmp_dir() -> Generator[Path, None, None]:
     with TemporaryDirectory() as tempdirname:
         yield Path(tempdirname)
+
+
+@pytest.fixture(scope="session")
+def root() -> str:
+    return abspath(sep)
+
+
+@pytest.fixture()
+def test_model(tmpdir) -> Model:
+    return Model(root=tmpdir)
 
 
 @pytest.fixture()
@@ -246,7 +261,7 @@ def flwda(flwdir):
         name="flwdir",
         data=flwdir.to_array("d8"),
         dims=("y", "x"),
-        coords=gis_utils.affine_to_coords(flwdir.transform, flwdir.shape),
+        coords=utils.affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
     # NOTE epsg 3785 is deprecated https://epsg.io/3785
@@ -277,6 +292,26 @@ def obsda():
     )
     da.raster.set_crs(4326)
     return da
+
+
+@pytest.fixture()
+def raster_ds():
+    temp = 15 + 8 * np.random.randn(2, 2, 3)
+    precip = 10 * np.random.rand(2, 2, 3)
+    lon = [[-99.83, -99.32], [-99.79, -99.23]]
+    lat = [[42.25, 42.21], [42.63, 42.59]]
+    return xr.Dataset(
+        {
+            "temperature": (["x", "y", "time"], temp),
+            "precipitation": (["x", "y", "time"], precip),
+        },
+        coords={
+            "lon": (["x", "y"], lon),
+            "lat": (["x", "y"], lat),
+            "time": pd.date_range("2014-09-06", periods=3),
+            "reference_time": pd.Timestamp("2014-09-05"),
+        },
+    )
 
 
 @pytest.fixture()
@@ -321,10 +356,8 @@ def griduda():
 @pytest.fixture()
 def model(demda, world, obsda):
     mod = Model(data_libs=["artifact_data"])
-    mod.setup_region({"geom": demda.raster.box})
+    mod.region.create({"geom": demda.raster.box})
     mod.setup_config(**{"header": {"setting": "value"}})
-    with pytest.deprecated_call():
-        mod.set_staticmaps(demda, "elevtn")
     mod.set_geoms(world, "world")
     mod.set_maps(demda, "elevtn")
     mod.set_forcing(obsda, "waterlevel")
@@ -333,20 +366,24 @@ def model(demda, world, obsda):
     return mod
 
 
-@pytest.fixture()
-def grid_model(demda, flwda):
-    mod = GridModel()
-    mod.setup_region({"geom": demda.raster.box})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_grid(demda, "elevtn")
-    mod.set_grid(flwda, "flwdir")
-    return mod
+def _create_vector_model(
+    *,
+    use_default_filename: bool = True,
+    use_default_geometry_filename: bool = True,
+    ts,
+    geodf,
+) -> Model:
+    components: dict[str, Any] = {
+        "vector": {"type": VectorComponent.__name__},
+        "config": {"type": ConfigComponent.__name__},
+    }
+    if not use_default_filename:
+        components["vector"]["filename"] = None
+    if not use_default_geometry_filename:
+        components["vector"]["geometry_filename"] = None
 
-
-@pytest.fixture()
-def vector_model(ts, geodf):
-    mod = VectorModel()
-    mod.setup_config(**{"header": {"setting": "value"}})
+    mod = Model(components=components)
+    mod.get_component("config", ConfigComponent).set("header.setting", "value")
     da = xr.DataArray(
         ts,
         dims=["index", "time"],
@@ -355,24 +392,121 @@ def vector_model(ts, geodf):
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     da.vector.set_crs(geodf.crs)
-    mod.set_vector(da)
+    mod.get_component("region", ModelRegionComponent).set(geodf)
+    mod.get_component("vector", VectorComponent).set(da)
     return mod
 
 
 @pytest.fixture()
-def network_model():
-    mod = NetworkModel()
-    # TODO set data and attributes of mod
-    return mod
-
-
-@pytest.fixture()
-def mesh_model(griduda):
-    mod = MODELS.load("mesh_model")()
-    region = gpd.GeoDataFrame(
-        geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
+def vector_model_no_defaults(ts, geodf):
+    return _create_vector_model(
+        use_default_filename=False,
+        use_default_geometry_filename=False,
+        ts=ts,
+        geodf=geodf,
     )
-    mod.setup_region({"geom": region})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_mesh(griduda, "elevtn")
-    return mod
+
+
+# @pytest.fixture()
+# def mesh_model(griduda):
+#     mod = MODELS.load("mesh_model")()
+##     region = gpd.GeoDataFrame(
+#         geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
+#     )
+#     mod.region.create({"geom": region})
+#     mod.setup_config(**{"header": {"setting": "value"}})
+#     mod.set_mesh(griduda, "elevtn")
+#     return mod
+
+
+@pytest.fixture()
+def mock_resolver() -> MetaDataResolver:
+    class MockMetaDataResolver(MetaDataResolver):
+        def resolve(self, uri, *args, **kwargs):
+            return [uri]
+
+    resolver = MockMetaDataResolver()
+    return resolver
+
+
+@pytest.fixture()
+def mock_geodataframe_adapter():
+    class MockGeoDataFrameAdapter(GeoDataFrameAdapter):
+        def transform(
+            self, gdf: gpd.GeoDataFrame, metadata: SourceMetadata, **kwargs
+        ) -> Optional[gpd.GeoDataFrame]:
+            return gdf
+
+    return MockGeoDataFrameAdapter()
+
+
+@pytest.fixture()
+def mock_geo_ds_adapter():
+    class MockGeoDatasetAdapter(GeoDatasetAdapter):
+        def transform(self, ds, metadata: SourceMetadata, **kwargs):
+            return ds
+
+    return MockGeoDatasetAdapter()
+
+
+@pytest.fixture()
+def mock_geodf_driver(
+    geodf: gpd.GeoDataFrame, mock_resolver: MetaDataResolver
+) -> GeoDataFrameDriver:
+    class MockGeoDataFrameDriver(GeoDataFrameDriver):
+        name = "mock_geodf_driver"
+
+        def read_data(self, *args, **kwargs) -> gpd.GeoDataFrame:
+            return geodf
+
+    return MockGeoDataFrameDriver(metadata_resolver=mock_resolver)
+
+
+@pytest.fixture()
+def mock_raster_ds_driver(
+    raster_ds: xr.Dataset, mock_resolver: MetaDataResolver
+) -> RasterDatasetDriver:
+    class MockRasterDatasetDriver(RasterDatasetDriver):
+        name = "mock_raster_ds_driver"
+        supports_writing: bool = True
+
+        def read_data(self, *args, **kwargs) -> xr.Dataset:
+            return raster_ds
+
+    return MockRasterDatasetDriver(metadata_resolver=mock_resolver)
+
+
+@pytest.fixture()
+def mock_geo_ds_driver(
+    geoda: xr.DataArray, mock_resolver: MetaDataResolver
+) -> GeoDatasetDriver:
+    class MockGeoDatasetDriver(GeoDatasetDriver):
+        name = "mock_geo_ds_driver"
+        supports_writing: bool = True
+
+        def read_data(self, *args, **kwargs) -> xr.Dataset:
+            return geoda.to_dataset()
+
+    return MockGeoDatasetDriver(metadata_resolver=mock_resolver)
+
+
+@pytest.fixture()
+def artifact_data():
+    datacatalog = DataCatalog()
+    datacatalog.from_predefined_catalogs("artifact_data")
+    return datacatalog
+
+
+@pytest.fixture()
+def mock_model(tmpdir, mocker: MockerFixture):
+    logger = logging.getLogger(__name__)
+    logger.propagate = True
+    model = mocker.create_autospec(Model)
+    model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
+    model.root.path.return_value = tmpdir
+    model.data_catalog = mocker.create_autospec(DataCatalog)
+    model.region = mocker.create_autospec(
+        ModelRegionComponent(model=model), instance=True
+    )
+    model.logger = logger
+    return model

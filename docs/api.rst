@@ -103,6 +103,181 @@ Predefined data catalog
 
 
 
+DataSource
+==========
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.data_source.DataSource
+   data_source.data_source.DataSource.summary
+
+RasterDataset
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.rasterdataset.RasterDatasetSource
+   data_source.rasterdataset.RasterDatasetSource.get_data
+   data_source.rasterdataset.RasterDatasetSource.to_stac_catalog
+   data_source.rasterdataset.RasterDatasetSource.get_bbox
+   data_source.rasterdataset.RasterDatasetSource.get_time_range
+   data_source.rasterdataset.RasterDatasetSource.detect_bbox
+   data_source.rasterdataset.RasterDatasetSource.detect_time_range
+
+GeoDataFrame
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.geodataframe.GeoDataFrameSource
+   data_source.geodataframe.GeoDataFrameSource.get_data
+   data_source.geodataframe.GeoDataFrameSource.to_stac_catalog
+   data_source.geodataframe.GeoDataFrameSource.get_bbox
+   data_source.geodataframe.GeoDataFrameSource.detect_bbox
+
+DataFrame
+---------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.dataframe.DataFrameSource
+   data_source.dataframe.DataFrameSource.get_data
+   data_source.dataframe.DataFrameSource.to_stac_catalog
+
+GeoDataset
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   data_source.geodataset.GeoDatasetSource
+   data_source.geodataset.GeoDatasetSource.get_data
+   data_source.geodataset.GeoDatasetSource.to_stac_catalog
+   data_source.geodataset.GeoDatasetSource.get_bbox
+   data_source.geodataset.GeoDatasetSource.detect_bbox
+
+MetaDataResolver
+================
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   metadata_resolver.metadata_resolver.MetaDataResolver
+   metadata_resolver.metadata_resolver.MetaDataResolver.resolve
+
+ConventionResolver
+------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   metadata_resolver.convention_resolver.ConventionResolver
+   metadata_resolver.convention_resolver.ConventionResolver.resolve
+
+Driver
+======
+
+General
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   drivers.base_driver.BaseDriver
+
+RasterDataset
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   drivers.raster.rasterdataset_driver.RasterDatasetDriver
+   drivers.raster.rasterdataset_driver.RasterDatasetDriver.read
+   drivers.raster.rasterdataset_driver.RasterDatasetDriver.read_data
+   drivers.raster.rasterdataset_driver.RasterDatasetDriver.write
+
+RasterDatasetXarryDriver
+^^^^^^^^^^^^^^^^^^^^^^^^
+.. autosummary::
+   :toctree: _generated
+
+   drivers.raster.raster_xarray_driver.RastterDatasetXarryDriver
+   drivers.raster.raster_xarray_driver.RastterDatasetXarryDriver.read
+   drivers.raster.raster_xarray_driver.RastterDatasetXarryDriver.read_data
+   drivers.raster.raster_xarray_driver.RastterDatasetXarryDriver.write
+
+RasterioDriver
+^^^^^^^^^^^^^^
+.. autosummary::
+   :toctree: _generated
+
+   drivers.raster.rasterdataset_driver.rasterio_driver.RasterioDriver
+   drivers.raster.rasterdataset_driver.rasterio_driver.RasterioDriver.read
+   drivers.raster.rasterdataset_driver.rasterio_driver.RasterioDriver.write
+
+GeoDataFrame
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.read
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.read_data
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.write
+
+PyogrioDriver
+^^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+
+   drivers.geodataframe.pyogrio_driver.PyogrioDriver
+   drivers.geodataframe.pyogrio_driver.PyogrioDriver.read
+   drivers.geodataframe.pyogrio_driver.PyogrioDriver.write
+
+DataFrame
+---------
+
+.. autosummary::
+   :toctree: _generated
+
+   drivers.dataframe.dataframe_driver.DataFrameDriver
+   drivers.dataframe.dataframe_driver.DataFrameDriver.read
+   drivers.dataframe.dataframe_driver.DataFrameDriver.read_data
+   drivers.dataframe.dataframe_driver.DataFrameDriver.write
+
+PandasDriver
+^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+
+   drivers.dataframe.pandas_driver.PandasDriver
+   drivers.dataframe.pandas_driver.PandasDriver.read_data
+   drivers.dataframe.pandas_driver.PandasDriver.write
+
+GeoDataFrame
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver.read
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver.read_data
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver.write
+
 DataAdapter
 ===========
 
@@ -113,8 +288,6 @@ General
    :toctree: _generated
 
    data_adapter.DataAdapter
-   data_adapter.DataAdapter.summary
-   data_adapter.DataAdapter.to_dict
 
 RasterDataset
 -------------
@@ -123,15 +296,7 @@ RasterDataset
    :toctree: _generated
 
    data_adapter.RasterDatasetAdapter
-   data_adapter.RasterDatasetAdapter.summary
-   data_adapter.RasterDatasetAdapter.get_data
-   data_adapter.RasterDatasetAdapter.to_dict
-   data_adapter.RasterDatasetAdapter.to_file
-   data_adapter.RasterDatasetAdapter.get_bbox
-   data_adapter.RasterDatasetAdapter.get_time_range
-   data_adapter.RasterDatasetAdapter.detect_bbox
-   data_adapter.RasterDatasetAdapter.detect_time_range
-   data_adapter.RasterDatasetAdapter.to_stac_catalog
+   data_adapter.RasterDatasetAdapter.transform
 
 GeoDataset
 ----------
@@ -157,13 +322,7 @@ GeoDataFrame
    :toctree: _generated
 
    data_adapter.GeoDataFrameAdapter
-   data_adapter.GeoDataFrameAdapter.summary
-   data_adapter.GeoDataFrameAdapter.get_data
-   data_adapter.GeoDataFrameAdapter.to_dict
-   data_adapter.GeoDataFrameAdapter.to_file
-   data_adapter.GeoDataFrameAdapter.get_bbox
-   data_adapter.GeoDataFrameAdapter.detect_bbox
-   data_adapter.GeoDataFrameAdapter.to_stac_catalog
+   data_adapter.GeoDataFrameAdapter.transform
 
 DataFrame
 ---------
@@ -171,12 +330,8 @@ DataFrame
 .. autosummary::
    :toctree: _generated
 
-   data_adapter.DataFrameAdapter
-   data_adapter.DataFrameAdapter.summary
-   data_adapter.DataFrameAdapter.get_data
-   data_adapter.DataFrameAdapter.to_dict
-   data_adapter.DataFrameAdapter.to_file
-   data_adapter.DataFrameAdapter.to_stac_catalog
+   data_adapter.dataframe.DataFrameAdapter
+   data_adapter.dataframe.DataFrameAdapter.transform
 
 Dataset
 -------
@@ -202,8 +357,7 @@ Discovery
 .. autosummary::
    :toctree: _generated
 
-   ModelCatalog
-
+   PLUGINS
 
 .. _model_api:
 
@@ -227,8 +381,9 @@ High level methods
    Model.write
    Model.build
    Model.update
-   Model.set_root
    Model.write_data_catalog
+   Model.get_component
+   Model.add_component
 
 Model attributes
 ----------------
@@ -237,79 +392,107 @@ Model attributes
    :toctree: _generated
 
    Model.crs
+   Model.model_root
    Model.region
-   Model.root
    Model.api
 
-Model components and attributes
--------------------------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.config
-   Model.maps
-   Model.geoms
-   Model.forcing
-   Model.states
-   Model.results
-
-General methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.get_config
-   Model.set_config
-   Model.read_config
-   Model.write_config
-
-   Model.set_maps
-   Model.read_maps
-   Model.write_maps
-
-   Model.set_geoms
-   Model.read_geoms
-   Model.write_geoms
-
-   Model.set_forcing
-   Model.read_forcing
-   Model.write_forcing
-
-   Model.set_states
-   Model.read_states
-   Model.write_states
-
-   Model.set_results
-   Model.read_results
-
-   Model.read_nc
-   Model.write_nc
-
-.. _setup_methods:
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   Model.setup_config
-   Model.setup_region
-   Model.setup_maps_from_rasterdataset
-   Model.setup_maps_from_raster_reclass
-
-
-.. _grid_model_api:
-
-GridModel
+ModelRoot
 =========
 
 .. autosummary::
    :toctree: _generated
 
-   GridModel
+   ModelRoot
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRoot.mode
+   ModelRoot.is_writing_mode
+   ModelRoot.is_reading_mode
+   ModelRoot.is_override_mode
+
+Methods
+-------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRoot.set
+
+ModelComponent
+==============
+
+Note that the base ModelComponent attributes and methods are available to all model
+components.
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelComponent
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelComponent.model
+   ModelComponent.data_catalog
+   ModelComponent.logger
+   ModelComponent.model_root
+
+ModelRegionComponent
+====================
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRegionComponent
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRegionComponent.data
+   ModelRegionComponent.model
+   ModelRegionComponent.crs
+   ModelRegionComponent.bounds
+   ModelRegionComponent.data_catalog
+   ModelRegionComponent.logger
+   ModelRegionComponent.model_root
+
+General Methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRegionComponent.set
+   ModelRegionComponent.read
+   ModelRegionComponent.write
+
+Data Methods
+------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ModelRegionComponent.create
+
+
+GridComponent
+=========
+
+.. autosummary::
+   :toctree: _generated
+
+   GridComponent
 
 
 Components and attributes
@@ -318,9 +501,16 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   GridModel.grid
-   GridModel.crs
-   GridModel.region
+   GridComponent.model
+   GridComponent.data_catalog
+   GridComponent.logger
+   GridComponent.model_root
+   GridComponent.res
+   GridComponent.transform
+   GridComponent.crs
+   GridComponent.bounds
+   GridComponent.region
+   GridComponent.data
 
 
 General methods
@@ -329,9 +519,10 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   GridModel.set_grid
-   GridModel.read_grid
-   GridModel.write_grid
+   GridComponent.set
+   GridComponent.write
+   GridComponent.read
+
 
 Setup methods
 -------------
@@ -339,26 +530,19 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   GridModel.setup_config
-   GridModel.setup_region
-   GridModel.setup_maps_from_rasterdataset
-   GridModel.setup_maps_from_raster_reclass
-   GridModel.setup_grid
-   GridModel.setup_grid_from_constant
-   GridModel.setup_grid_from_rasterdataset
-   GridModel.setup_grid_from_raster_reclass
-   GridModel.setup_grid_from_geodataframe
+   GridComponent.create
+   GridComponent.add_data_from_constant
+   GridComponent.add_data_from_rasterdataset
+   GridComponent.add_data_from_raster_reclass
+   GridComponent.add_data_from_geodataframe
 
-
-.. _vector_model_api:
-
-VectorModel
-===========
+TablesComponent
+==============
 
 .. autosummary::
    :toctree: _generated
 
-   VectorModel
+    TablesComponent
 
 
 Components and attributes
@@ -367,9 +551,12 @@ Components and attributes
 .. autosummary::
    :toctree: _generated
 
-   VectorModel.vector
-   VectorModel.crs
-   VectorModel.region
+   TablesComponent._model
+   TablesComponent._data_catalog
+   TablesComponent._logger
+   TablesComponent._root
+   TablesComponent.data
+
 
 General methods
 ---------------
@@ -377,9 +564,115 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   VectorModel.set_vector
-   VectorModel.read_vector
-   VectorModel.write_vector
+   TablesComponent.set
+   TablesComponent.write
+   TablesComponent.read
+
+DatasetsComponent
+==============
+
+.. autosummary::
+   :toctree: _generated
+
+    DatasetsComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent._model
+   DatasetsComponent._data_catalog
+   DatasetsComponent._logger
+   DatasetsComponent._root
+   DatasetsComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent.set
+   DatasetsComponent.write
+   DatasetsComponent.read
+   DatasetsComponent.add_raster_data_from_raster_reclass
+   DatasetsComponent.add_raster_data_from_rasterdataset
+
+GeomsComponent
+==============
+
+.. autosummary::
+   :toctree: _generated
+
+    GeomsComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GeomsComponent._model
+   GeomsComponent._data_catalog
+   GeomsComponent._logger
+   GeomsComponent._root
+   GeomsComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GeomsComponent.set
+   GeomsComponent.write
+   GeomsComponent.read
+
+
+MeshComponent
+=============
+.. autosummary::
+   :toctree: _generated
+
+   MeshComponent
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshComponent._model
+   MeshComponent._data_catalog
+   MeshComponent._logger
+   MeshComponent._root
+   MeshComponent.data
+   MeshComponent.crs
+   MeshComponent.bounds
+   MeshComponent.region
+   MeshComponent.mesh_names
+   MeshComponent.mesh_grids
+   MeshComponent.mesh_datasets
+   MeshComponent.mesh_gdf
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshComponent.set
+   MeshComponent.write
+   MeshComponent.read
+   MeshComponent.get_mesh
+
 
 Setup methods
 -------------
@@ -387,10 +680,91 @@ Setup methods
 .. autosummary::
    :toctree: _generated
 
-   VectorModel.setup_config
-   VectorModel.setup_region
-   VectorModel.setup_maps_from_rasterdataset
-   VectorModel.setup_maps_from_raster_reclass
+   MeshComponent.create2d
+   MeshComponent.add_2d_data_from_rasterdataset
+   MeshComponent.add_2d_data_from_raster_reclass
+
+
+ConfigComponent
+===============
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent._model
+   ConfigComponent._data_catalog
+   ConfigComponent._logger
+   ConfigComponent._root
+   ConfigComponent.data
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent.set
+   ConfigComponent.write
+   ConfigComponent.read
+   ConfigComponent.get_value
+
+
+
+Setup methods
+-------------
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent.create
+   ConfigComponent.update
+
+
+
+VectorComponent
+===============
+
+.. autosummary::
+   :toctree: _generated
+
+   VectorComponent
+
+
+Components and attributes
+-------------------------
+
+.. autosummary::
+   :toctree: _generated
+
+   VectorComponent.data
+   VectorComponent.geometry
+   VectorComponent.index_dim
+   VectorComponent.crs
+   VectorComponent._model
+   VectorComponent._data_catalog
+   VectorComponent._logger
+   VectorComponent._root
+
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   VectorComponent.set
+   VectorComponent.read
+   VectorComponent.write
 
 
 .. _mesh_model_api:
@@ -485,7 +859,6 @@ Basin mask
    :toctree: _generated
 
    workflows.basin_mask.get_basin_geometry
-   workflows.basin_mask.parse_region
 
 .. _workflows_rivers_api:
 
@@ -558,25 +931,32 @@ Reading methods
 .. autosummary::
    :toctree: _generated
 
-   io.open_raster
+   io.configread
+   io.open_geodataset
+   io.open_mfcsv
    io.open_mfraster
+   io.open_raster
    io.open_raster_from_tindex
+   io.open_timeseries_from_table
    io.open_vector
    io.open_vector_from_table
-   io.open_geodataset
-   io.open_timeseries_from_table
+   io.read_nc
+   io.read_toml
+   io.read_yaml
 
-Raster writing methods
-======================
+Writing methods
+===============
 
 .. autosummary::
-   :template: autosummary/accessor_method.rst
    :toctree: _generated
 
-   DataArray.raster.to_xyz_tiles
-   DataArray.raster.to_slippy_tiles
-   DataArray.raster.to_raster
-   Dataset.raster.to_mapstack
+   io.netcdf_writer
+   io.write_nc
+   io.write_toml
+   io.write_xy
+   io.write_yaml
+   io.zarr_writer
+
 
 .. _raster_api:
 
@@ -725,6 +1105,18 @@ Low level methods
    gis_utils.axes_attrs
    gis_utils.meridian_offset
 
+Writing methods
+===============
+
+.. autosummary::
+   :template: autosummary/accessor_method.rst
+   :toctree: _generated
+
+   DataArray.raster.to_xyz_tiles
+   DataArray.raster.to_slippy_tiles
+   DataArray.raster.to_raster
+   Dataset.raster.to_mapstack
+
 .. _geodataset_api:
 
 ==================
@@ -847,16 +1239,16 @@ visit the `pyflwdir docs. <https://deltares.github.io/pyflwdir/latest/>`_
 .. autosummary::
    :toctree: _generated
 
-   flw.flwdir_from_da
-   flw.d8_from_dem
-   flw.reproject_hydrography_like
-   flw.upscale_flwdir
-   flw.stream_map
-   flw.basin_map
-   flw.gauge_map
-   flw.outlet_map
-   flw.clip_basins
-   flw.dem_adjust
+   gis.flw.flwdir_from_da
+   gis.flw.d8_from_dem
+   gis.flw.reproject_hydrography_like
+   gis.flw.upscale_flwdir
+   gis.flw.stream_map
+   gis.flw.basin_map
+   gis.flw.gauge_map
+   gis.flw.outlet_map
+   gis.flw.clip_basins
+   gis.flw.dem_adjust
 
 .. _gis_utils_api:
 
@@ -865,16 +1257,16 @@ General GIS methods
 ===================
 
 Raster
-=========
+======
 
 .. autosummary::
    :toctree: _generated
 
-   gis_utils.create_vrt
-   gis_utils.spread2d
-   gis_utils.reggrid_area
-   gis_utils.cellarea
-   gis_utils.cellres
+   gis.utils.create_vrt
+   gis.utils.spread2d
+   gis.utils.reggrid_area
+   gis.utils.cellarea
+   gis.utils.cellres
 
 CRS and transform
 =================
@@ -882,9 +1274,13 @@ CRS and transform
 .. autosummary::
    :toctree: _generated
 
-   gis_utils.parse_crs
-   gis_utils.utm_crs
-   gis_utils.affine_to_coords
+   gis.utils.parse_crs
+   gis.utils.utm_crs
+   gis.utils.affine_to_coords
+   gis.utils.affine_to_meshgrid
+   gis.utils.bbox_from_file_and_filters
+   gis.utils.parse_geom_bbox_buffer
+   gis.utils.to_geographic_bbox
 
 Vector
 ======
@@ -892,9 +1288,9 @@ Vector
 .. autosummary::
    :toctree: _generated
 
-   gis_utils.filter_gdf
-   gis_utils.nearest
-   gis_utils.nearest_merge
+   gis.utils.filter_gdf
+   gis.utils.nearest
+   gis.utils.nearest_merge
 
 
 .. _statistics:
@@ -942,25 +1338,3 @@ Design Events
    :toctree: _generated
 
    stats.design_events.get_peak_hydrographs
-
-
-=========
-Utilities
-=========
-
-Configuration files
-===================
-
-.. autosummary::
-   :toctree: _generated
-
-   config.configread
-   config.configwrite
-
-Logging
-=======
-
-.. autosummary::
-   :toctree: _generated
-
-   log.setuplog

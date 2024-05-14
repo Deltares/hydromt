@@ -15,18 +15,16 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import yaml
-
-# from pystac import Item as StacItem
 from pystac import Catalog as StacCatalog
 from upath import UPath
 
-from hydromt.nodata import NoDataStrategy
-from hydromt.typing import (
+from hydromt._typing import (
     Bbox,
     Data,
     ErrorHandleMethod,
     Geom,
     GeomBuffer,
+    NoDataStrategy,
     StrPath,
     TimeRange,
     Variables,

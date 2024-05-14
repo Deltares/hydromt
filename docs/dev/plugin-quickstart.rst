@@ -44,7 +44,7 @@ As mentioned user guide, HydroMT interacts with models using the ``Model`` API c
 ``GridModel``, ``MeshModel``, ``VectorModel``, ``NetworkModel`` which will be described in more detail below. Using
 these sub-model classes, you might be able to already prepare most and if not all of
 the data you need to build your own model. Do note however that these generic classes can only write model data in netcdf,
-geojson (or other formats supported by geopandas), and configurations in either yaml, toml or ini file format. So
+geojson (or other formats supported by geopandas), and configurations in yaml. So
 in case your model needs different file formats, you will need to convert or write the output files in different formats.
 
 Another advantage of writing your own plugin is that other users from the same model can easily build instances of that model
@@ -288,7 +288,7 @@ be overwriting most ``read_<component>`` or ``write_<component>`` methods in you
 data comes in and goes out exactly as you want.
 
 In the default HydroMT CORE read and write methods, xarray objects are written as netcdf files, ``geoms`` as GeoJSON files by
-default but any geopandas driver is allowed. ``config`` can be either a TOML or YAML file. So again, you could decide to
+default but any geopandas driver is allowed. ``config`` must be a YAML file. So again, you could decide to
 completely overwrite the parent read and write methods or change the defaults.
 
 Eg if your geoms should be written in GeoPackage format rather than GeoJSON and in a geometry folder in your model:
