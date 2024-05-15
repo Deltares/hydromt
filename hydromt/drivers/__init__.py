@@ -10,7 +10,9 @@ from .preprocessing import (
     round_latlon,
     to_datetimeindex,
 )
-from .raster import RasterDatasetDriver, RasterDatasetXarrayDriver
+from .raster.raster_dataset_driver import RasterDatasetDriver
+from .raster.raster_xarray_driver import RasterDatasetXarrayDriver
+from .raster.rasterio_driver import RasterioDriver
 
 __all__ = [
     "BaseDriver",
@@ -22,6 +24,7 @@ __all__ = [
     "PyogrioDriver",
     "RasterDatasetDriver",
     "RasterDatasetXarrayDriver",
+    "RasterioDriver",
     "harmonise_dims",
     "remove_duplicates",
     "round_latlon",

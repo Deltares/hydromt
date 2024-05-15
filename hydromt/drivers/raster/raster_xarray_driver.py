@@ -19,7 +19,7 @@ from hydromt._typing import (
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
-from hydromt.drivers.raster.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.raster.raster_dataset_driver import RasterDatasetDriver
 
 logger: Logger = getLogger(__name__)
 
