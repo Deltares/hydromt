@@ -1,3 +1,5 @@
+
+from typing import Union
 import os
 import numpy as np
 import pandas as pd
@@ -54,7 +56,7 @@ def write_nested_dropdown(name, df_dict: dict, note: str=""):
             df = df_dict[version]#.reset_index().set_index(["name", "provider", "version"])
             df = df.sort_index()
             name_str = f"{version}"
-            if i == 0:
+            if i == len(df_dict)-1:
                 name_str += " (latest)"
             write_panel(f, name_str, level=1)
             write_panel(f, "", level=2, item="tab-set")
@@ -96,7 +98,7 @@ def write_sources_panel(f, df, level, sources=None):
         )
         write_panel(f, source, summary, level=level)
 
-def parse_item(k: str, v: str | list | dict) -> str:
+def parse_item(k: str, v: Union[str , list , dict]) -> str:
     def _parse_dict(d: dict) -> str:
         return " ".join([f"**{k}:** {_parse(v)}" for k, v in d.items()])
     def _parse_list(l: list) -> str:
@@ -121,26 +123,24 @@ def parse_item(k: str, v: str | list | dict) -> str:
     return f":{k}: {v}"
 
 def write_predefined_catalogs_to_rst_panels(
-    predefined_catalog_uri: Path = Path(FILE_ROOT, r"../data/predefined_catalogs.yml"),
     git_raw_uri: str = r"https://raw.githubusercontent.com/Deltares/hydromt",
 ) -> None:
     """Generate panels rst files from data catalogs to include in docs"""
     os.makedirs(Path(FILE_ROOT, "_generated"), exist_ok=True)
     data_cat = DataCatalog()
-    data_cat.set_predefined_catalogs(predefined_catalog_uri)
     predefined_catalogs = data_cat.predefined_catalogs
     paths = []
     for name in predefined_catalogs:
-        urlpath = predefined_catalogs[name].get("urlpath", "")
-        note = predefined_catalogs[name].get("notes", "")
+        urlpath = predefined_catalogs[name].base_url
+
         df_dict = {}
-        for iversion, version in enumerate(predefined_catalogs[name].get("versions", [])):
+        for iversion, version in enumerate(predefined_catalogs[name].versions):
             if iversion >= N_VERSIONS:
                 break
-            githash = predefined_catalogs[name]['versions'][version]
-            if urlpath.startswith(git_raw_uri) and githash == "main":
+
+            if urlpath.startswith(git_raw_uri):
                 # make sure to load the latest version from current branch
-                local_path = Path(FILE_ROOT, urlpath.replace(f'{git_raw_uri}/{{version}}', '../'))
+                local_path = predefined_catalogs[name].get_catalog_file(version)
                 data_cat.from_yml(local_path, catalog_name=name)
             else:
                 try:
@@ -151,7 +151,7 @@ def write_predefined_catalogs_to_rst_panels(
             df = data_cat.to_dataframe().sort_index().drop_duplicates("path")
             df_dict[version] = df.copy()
             data_cat._sources = {}  # reset
-        path = write_nested_dropdown(name, df_dict, note=note)
+        path = write_nested_dropdown(name, df_dict)
         paths.append(path)
     with open(Path(FILE_ROOT, "_generated/predefined_catalogs.rst"), "w") as f:
         f.writelines(
