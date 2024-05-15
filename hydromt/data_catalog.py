@@ -678,7 +678,7 @@ class DataCatalog(object):
         elif Path(archive_uri).suffix == ".gz":
             kwargs.update(processor=pooch.Untar(extract_dir=extract_dir))
         if Path(archive_uri).exists():  # check if arhive is a local file
-            kwargs.update(donwloader=_copy_file)
+            kwargs.update(downloader=_copy_file)
         pooch.retrieve(
             archive_uri,
             known_hash=sha256,
