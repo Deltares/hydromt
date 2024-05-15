@@ -24,6 +24,90 @@ Added
 deltares_data
 =============
 
+version v0.7.0
+--------------
+
+added
+^^^^^
+- version argument to data source where applicable
+- variants argument for data sources that are of the same dataset but different versions
+- processing_script / processing_notes arguments to data sources that have been (pre-) processed
+- temporal extent of datasets that have a temporal dimension.
+- spatial extents to datasets
+
+changed
+^^^^^^^
+- removed source_version from data source meta
+- kwargs to driver_kwargs
+- updated source_url if url was not working anymore
+- sorted datasets by alphabetical order
+- Removed version from dataset names
+- prefixed 'hydro' where for all HydroSHEDS datasets
+- added the epoch of the dataset to the name of the dataset
+
+See table below for mapping of old and new names:
+
++--------------------------------+---------------------------+
+| Old name                       | New name                  |
++================================+===========================+
+| basin_atlas_level12_v10        | hydro_basin_atlas_level12 |
++--------------------------------+---------------------------+
+| eobs_v..                       | eobs                      |
++--------------------------------+---------------------------+
+| eobs_orography_v..             | eobs_orography            |
++--------------------------------+---------------------------+
+| lake_atlas_pol_v10             | hydro_lake_atlas_pol      |
++--------------------------------+---------------------------+
+| river_atlas_v10                | hydro_river_atlas         |
++--------------------------------+---------------------------+
+| ghs_pop_2015_54009_v2019a      | ghs_pop_2015	             |
++--------------------------------+---------------------------+
+| ghs_smod_2015_54009_v2019a     | ghs_smod_2015             |
++--------------------------------+---------------------------+
+| glofas_era5_v31                | glofas_era5               |
++--------------------------------+---------------------------+
+| guf_bld_2012                   | guf_bld_2012              |
++--------------------------------+---------------------------+
+| rivers_lin2019_v1              | hydro_rivers_lin2019      |
++--------------------------------+---------------------------+
+| SM2RAIN_ASCAT_monthly_025_v1.4 | SM2RAIN_ASCAT_monthly_025 |
++--------------------------------+---------------------------+
+| SM2RAIN_ASCAT_monthly_05_v1.4  | SM2RAIN_ASCAT_monthly_05  |
++--------------------------------+---------------------------+
+| vito 					         | vito_2015                 |
++--------------------------------+---------------------------+
+| vito_2015_v2.0.2			   	 | vito_2015                 |
++--------------------------------+---------------------------+
+| vito_2016_v3.0.1               | vito_2016                 |
++--------------------------------+---------------------------+
+| vito_2017_v3.0.1               | vito_2017                 |
++--------------------------------+---------------------------+
+| vito_2018_v3.0.1               | vito_2018                 |
++--------------------------------+---------------------------+
+| vito_2019_v3.0.1               | vito_2019                 |
++--------------------------------+---------------------------+
+| esa_worldcover 			     | esa_worldcover_2020       |
++--------------------------------+---------------------------+
+| corine 					     | corine_2018               |
++--------------------------------+---------------------------+
+| globcover 				     | globcover_2009            |
++--------------------------------+---------------------------+
+
+
+- Some datasets have multiple versions, for these datasets the default can be changed if
+you do not supply a version in your config file. See the table below for which dataset
+the default version has changed.
+
++----------------+-----------------+--------------------------+
+| Dataset name   | Default version | Previous default version |
++================+=================+==========================+
+| eobs           | 25.0e           | 22.0e                    |
++----------------+-----------------+--------------------------+
+| eobs_orography | 25.0e           | 22.0e                    |
++----------------+-----------------+--------------------------+
+
+
+
 version: 2024.1.30
 ---------------
 
