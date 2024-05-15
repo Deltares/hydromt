@@ -1,7 +1,11 @@
 """Metadata on DataSource."""
 from typing import Any, Dict, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+from typing_extensions import Annotated
+
+# always stringify version
+Version = Annotated[str, BeforeValidator(str)]
 
 
 class SourceMetadata(BaseModel):
@@ -16,6 +20,7 @@ class SourceMetadata(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     crs: Union[int, str, None] = None
+    unit: Optional[str] = None
     extent: Dict[str, Any] = Field(default_factory=dict)
     nodata: Union[dict, float, int, None] = None
     attrs: Dict[str, Any] = Field(default_factory=dict)
@@ -25,5 +30,5 @@ class SourceMetadata(BaseModel):
     author: Optional[str] = None
     license: Optional[str] = None
     url: Optional[str] = None
-    version: Optional[str] = None
+    version: Optional[Version] = None
     notes: Optional[str] = None
