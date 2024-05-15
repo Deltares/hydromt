@@ -11,7 +11,6 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import Polygon
 
-from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster
 from hydromt.gis.raster import full
@@ -107,10 +106,6 @@ def create_grid_from_region(
     grid : xr.DataArray
         Generated grid mask.
     """
-    if region is None:
-        _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, logger)
-    assert region is not None
-
     data_catalog = data_catalog or DataCatalog()
 
     kind = next(iter(region))

@@ -3,7 +3,7 @@
 import os
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -13,7 +13,6 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import hydromt_step
-from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
@@ -202,7 +201,7 @@ class MeshComponent(SpatialModelComponent):
     @hydromt_step
     def create2d(
         self,
-        region: Optional[dict] = None,
+        region: Dict[str, Any],
         *,
         res: Optional[float] = None,
         crs: Optional[int] = None,
@@ -249,10 +248,6 @@ class MeshComponent(SpatialModelComponent):
             Generated mesh2d.
         """
         self.logger.info("Preparing 2D mesh.")
-
-        if region is None:
-            _exec_nodata_strat("No region provided", NoDataStrategy.RAISE, self.logger)
-        assert region is not None
 
         mesh2d = create_mesh2d_from_region(
             region,
