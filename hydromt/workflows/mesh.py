@@ -24,8 +24,7 @@ from hydromt.workflows.region import (
 _logger = logging.getLogger(__name__)
 
 __all__ = [
-    "create_mesh2d_from_mesh",
-    "create_mesh2d_from_geom",
+    "create_mesh2d_from_region",
     "mesh2d_from_rasterdataset",
     "mesh2d_from_raster_reclass",
 ]
@@ -49,10 +48,6 @@ def create_mesh2d_from_region(
 
     Note Only existing meshed with only 2D grid can be read.
 
-    Adds/Updates model layers:
-
-    * **grid_name** mesh topology: add grid_name 2D topology to mesh object
-
     Parameters
     ----------
     region : dict
@@ -62,52 +57,58 @@ def create_mesh2d_from_region(
         CRS for 'bbox' and 'bounds' should be 4326; e.g.:
 
         * {'bbox': [xmin, ymin, xmax, ymax]}
-
         * {'geom': 'path/to/polygon_geometry'}
-
         * {'mesh': 'path/to/2dmesh_file'}
-
         * {'mesh': 'path/to/mesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
-    res: float
+
+    res : float, optional
         Resolution used to generate 2D mesh [unit of the CRS], required if region
         is not based on 'mesh'.
-    crs : EPSG code, int, optional
-        Optional EPSG code of the model or "utm" to let hydromt find the closest projected CRS.
+    crs : int, optional
+        Optional EPSG code of the model.
         If None using the one from region, and else 4326.
-    grid_name : str, optional
-        Name of the 2D grid in mesh, by default "mesh2d".
+    align : bool, default True
+        Align the mesh to the resolution.
+        Required for 'bbox' and 'geom' region types.
+    logger : logging.Logger
+        Logger object, a default module logger is used if not specified.
+    data_catalog : DataCatalog, optional
+        Optional data catalog to use for reading data.
+        Required if region is based on 'geom'.
 
     Returns
     -------
     mesh2d : xu.UgridDataset
         Generated mesh2d.
-
-    """  # noqa: E501
+    """
     kind = next(iter(region))
     if kind == "mesh":
         uds = parse_region_mesh(region)
-        return create_mesh2d_from_mesh(
+        return _create_mesh2d_from_mesh(
             uds,
             grid_name=region.get("grid_name", None),
             logger=logger,
             crs=crs,
             bounds=region.get("bounds", None),
         )
-    if kind in ["bbox", "geom"]:
+
+    if kind == "bbox":
         if not res:
-            raise ValueError(f"res argument required for kind '{kind}'")
+            raise ValueError("res argument required for kind bbox")
+        geom = parse_region_bbox(region, crs=crs)
+        return _create_mesh2d_from_bbox(geom, res=res, align=align)
+
+    if kind == "geom":
+        if not res:
+            raise ValueError("res argument required for kind geom")
         data_catalog = data_catalog or DataCatalog()
-        geom = (
-            parse_region_geom(region, crs=crs, data_catalog=data_catalog)
-            if kind == "geom"
-            else parse_region_bbox(region, crs=crs)
-        )
-        return create_mesh2d_from_geom(geom, res=res, align=align, kind=kind)
+        geom = parse_region_geom(region, crs=crs, data_catalog=data_catalog)
+        return _create_mesh2d_from_geom(geom, res=res, align=align)
 
     raise ValueError(f"Unsupported region kind '{kind}' found in grid creation.")
 
 
-def create_mesh2d_from_mesh(
+def _create_mesh2d_from_mesh(
     uds: xu.UgridDataset,
     *,
     grid_name: Optional[str],
@@ -115,30 +116,6 @@ def create_mesh2d_from_mesh(
     logger: Logger = _logger,
     bounds: Optional[Tuple[float, float, float, float]] = None,
 ) -> xu.UgridDataset:
-    """
-    Read an existing 2D mesh.
-
-    Grids are read according to UGRID conventions. An 2D unstructured mesh
-    will be created as 2D rectangular grid from a geometry (geom_fn) or bbox.
-    If an existing 2D mesh is given, then no new mesh will be generated but an extent
-    can be extracted using the `bounds` argument of region.
-
-    Note Only existing meshed with only 2D grid can be read.
-
-    Adds/Updates model layers:
-
-    * **grid_name** mesh topology: add grid_name 2D topology to mesh object
-
-    Parameters
-    ----------
-    region : dict
-        Dictionary describing region of interest, bounds can be provided
-        for type 'mesh'. In case of 'mesh', if the file includes several
-        grids, the specific 2D grid can be selected using the 'grid_name' argument.
-
-        * {'mesh': 'path/to/2dmesh_file'}
-        * {'mesh': 'path/to/2dmesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
-    """
     grids = dict()
     for grid in uds.grids:
         grids[grid.name] = grid
@@ -198,32 +175,29 @@ def create_mesh2d_from_mesh(
     return mesh2d
 
 
-def create_mesh2d_from_geom(
+def _create_mesh2d_from_bbox(
+    geom: gpd.GeoDataFrame, *, res: float, align: bool = True
+) -> xu.UgridDataset:
+    return _create_mesh2d_from_geom_or_bbox(
+        geom, res=res, align=align, clip_to_geom=False
+    )
+
+
+def _create_mesh2d_from_geom(
+    geom: gpd.GeoDataFrame, *, res: float, align: bool = True
+) -> xu.UgridDataset:
+    return _create_mesh2d_from_geom_or_bbox(
+        geom, res=res, align=align, clip_to_geom=True
+    )
+
+
+def _create_mesh2d_from_geom_or_bbox(
     geom: gpd.GeoDataFrame,
     *,
     res: float,
     align: bool,
-    kind: str,
+    clip_to_geom: bool,
 ) -> xu.UgridDataset:
-    """Create a 2D mesh from a geometry.
-
-    Parameters
-    ----------
-    geom : gpd.GeoDataFrame
-        Input geometry to create the mesh from.
-    res : float
-        Resolution used to generate 2D mesh [unit of the CRS]
-    align : bool, optional
-        Align the mesh to the resolution.
-    kind : str
-        Kind of geometry to create the mesh from.
-        Will clip to geom if kind is bbox.
-
-    Returns
-    -------
-    mesh2d : xu.UgridDataset
-    """
-    # Generate grid based on res for region bbox
     xmin, ymin, xmax, ymax = geom.total_bounds
     if align:
         xmin = round(xmin / res) * res
@@ -243,8 +217,8 @@ def create_mesh2d_from_geom(
             right = xmin + (j + 1) * dx
             faces.append(box(left, bottom, right, top))
     grid = gpd.GeoDataFrame(geometry=faces, crs=geom.crs)
-    # If needed clip to geom
-    if kind != "bbox":
+    # clip to geom
+    if clip_to_geom:
         grid = grid.loc[
             gpd.sjoin(
                 grid, geom, how="left", predicate="intersects"

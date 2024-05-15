@@ -218,10 +218,6 @@ class MeshComponent(SpatialModelComponent):
 
         Note Only existing meshed with only 2D grid can be read.
 
-        Adds/Updates model layers:
-
-        * **grid_name** mesh topology: add grid_name 2D topology to mesh object
-
         Parameters
         ----------
         region : dict
@@ -231,27 +227,27 @@ class MeshComponent(SpatialModelComponent):
             CRS for 'bbox' and 'bounds' should be 4326; e.g.:
 
             * {'bbox': [xmin, ymin, xmax, ymax]}
-
             * {'geom': 'path/to/polygon_geometry'}
-
             * {'mesh': 'path/to/2dmesh_file'}
-
             * {'mesh': 'path/to/mesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
-        res: float
+
+        res : float, optional
             Resolution used to generate 2D mesh [unit of the CRS], required if region
             is not based on 'mesh'.
-        crs : EPSG code, int, optional
-            Optional EPSG code of the model or "utm" to let hydromt find the closest projected CRS.
+        crs : int, optional
+            Optional EPSG code of the model.
             If None using the one from region, and else 4326.
+        align : bool, default True
+            Align the mesh to the resolution.
+            Required for 'bbox' and 'geom' region types.
         grid_name : str, optional
-            Name of the 2D grid in mesh, by default "mesh2d".
+            Name of the 2D grid in the mesh, by default 'mesh2d'.
 
         Returns
         -------
         mesh2d : xu.UgridDataset
             Generated mesh2d.
-
-        """  # noqa: E501
+        """
         self.logger.info("Preparing 2D mesh.")
 
         if region is None:
