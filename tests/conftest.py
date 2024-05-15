@@ -230,6 +230,11 @@ def geoda(geodf, ts):
 
 
 @pytest.fixture()
+def geods(geoda):
+    return geoda.to_dataset()
+
+
+@pytest.fixture()
 def demda():
     np.random.seed(11)
     da = xr.DataArray(

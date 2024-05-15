@@ -13,10 +13,9 @@ from hydromt._typing import (
     SourceMetadata,
     StrPath,
     TimeRange,
-    Variables,
-    ZoomLevel,
 )
 from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.type_def import Predicate
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.drivers.preprocessing import PREPROCESSORS
@@ -34,12 +33,13 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         self,
         uris: List[str],
         *,
-        logger: Logger = logger,
         mask: Optional[Geom] = None,
-        variables: Optional[Variables] = None,
-        time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
         metadata: Optional[SourceMetadata] = None,
+        predicate: Predicate = "intersects",
+        single_var_as_array: bool = True,
+        time_range: Optional[TimeRange] = None,
+        variables: Optional[List[str]] = None,
+        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -54,7 +54,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 "mask": mask,
                 "time_range": time_range,
                 "variables": variables,
-                "zoom_level": zoom_level,
                 "metadata": metadata,
             },
             logger,
@@ -110,6 +109,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         if ext == ".zarr":
             ds.to_zarr(path, **kwargs)
         elif ext in [".nc", ".netcdf"]:
-            ds.to_netcdf(path, **kwargs)
+            ds.vector.to_netcdf(path, **kwargs)
         else:
             raise ValueError(f"Unknown extention for GeoDatasetXarrayDriver: {ext} ")

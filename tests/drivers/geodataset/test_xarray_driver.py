@@ -19,7 +19,7 @@ from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 class TestGeoDatasetXarrayDriver:
     def test_calls_preprocess(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.geodataset.geodataset_xarray_driver.xr.open_mfdataset",
+            "hydromt.drivers.geodataset.xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -46,11 +46,11 @@ class TestGeoDatasetXarrayDriver:
             driver.options.get("preprocess") == "round_latlon"
         )  # test does not consume property
 
-    def test_write(self, raster_ds: xr.Dataset, tmp_path: Path):
+    def test_write(self, geods: xr.Dataset, tmp_path: Path):
         netcdf_path = tmp_path / f"{uuid4().hex}.nc"
         driver = GeoDatasetXarrayDriver()
-        driver.write(netcdf_path, raster_ds)
-        assert np.all(driver.read(str(netcdf_path)) == raster_ds)
+        driver.write(netcdf_path, geods)
+        assert np.all(driver.read(str(netcdf_path)) == geods)
 
     @pytest.fixture()
     def example_zarr_file(self, tmp_dir: Path) -> Path:
@@ -90,11 +90,11 @@ class TestGeoDatasetXarrayDriver:
         assert list(res.coords.keys()) == ["xc", "yc"]
         assert res["variable"].values[0, 0] == 42
 
-    def test_zarr_write(self, raster_ds: xr.Dataset, tmp_dir: Path):
+    def test_zarr_write(self, geods: xr.Dataset, tmp_dir: Path):
         zarr_path: Path = tmp_dir / "geo.zarr"
         driver = GeoDatasetXarrayDriver()
-        driver.write(zarr_path, raster_ds)
-        assert np.all(driver.read(str(zarr_path)) == raster_ds)
+        driver.write(zarr_path, geods)
+        assert np.all(driver.read(str(zarr_path)) == geods)
 
     def test_calls_zarr_with_zarr_ext(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
