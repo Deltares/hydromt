@@ -1,2 +1,4 @@
+* text eol=lf
+
 # GitHub syntax highlighting
 pixi.lock linguist-language=YAML

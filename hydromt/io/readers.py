@@ -745,8 +745,7 @@ def read_toml(path: StrPath) -> Dict[str, Any]:
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
     if is_valid_url(str(uri_or_path)):
         with fetch(str(uri_or_path), stream=True) as r:
-            if r.status_code != 200:
-                raise IOError(f"URL {r.content}: {uri_or_path}")
+            r.raise_for_status()
             yml = parse_yaml(r.text)
 
     else:

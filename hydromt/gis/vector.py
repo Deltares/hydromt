@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Hashable, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -23,13 +23,13 @@ GDAL_VERSION = gdal_version()
 class GeoBase(raster.XGeoBase):
     """Base accessor class for geo data."""
 
-    def __init__(self, xarray_obj):
+    def __init__(self, xarray_obj) -> None:
         """Initialize a new object based on the provided xarray_obj."""
         super(GeoBase, self).__init__(xarray_obj)
         self._geometry = None
 
     @property
-    def _all_names(self):
+    def _all_names(self) -> list[Hashable]:
         """Return names of all variables and coordinates in the dataset/array."""
         # TODO: move to geobase
         names = [n for n in self._obj.coords]
@@ -44,23 +44,23 @@ class GeoBase(raster.XGeoBase):
         names, types = [], []
         dvars = self._all_names if geom_name is None else [geom_name]
         for name in dvars:
-            if self._obj[name].ndim == 1 and isinstance(
-                self._obj[name][0].values.item(), BaseGeometry
-            ):
+            ndim = self._obj[name].ndim
+            if ndim != 1:  # only single dim geometries
+                continue
+            item = self._obj[name][0].values.item()
+            if isinstance(item, BaseGeometry):
                 names.append(name)
                 types.append("geom")
-            elif self._obj[name].ndim == 1 and isinstance(
-                self._obj[name][0].values.item(), str
-            ):
+            elif isinstance(item, str):
                 try:
-                    shapely.wkt.loads(self._obj[name][0].values.item())
+                    shapely.wkt.loads(item)
                     names.append(name)
                     types.append("wkt")
                 except Exception:
                     pass
         return names, types
 
-    def _discover_xy(self, x_name=None, y_name=None, index_dim=None):
+    def _discover_xy(self, x_name=None, y_name=None, index_dim=None) -> None:
         """Discover xy type geometries in the dataset/array."""
         # infer x dim
         if x_name is None:
@@ -96,7 +96,7 @@ class GeoBase(raster.XGeoBase):
             self.attrs.pop("geom_format", None)
             self.attrs.pop("index_dim", None)
 
-    def _discover_geom(self, geom_name=None, index_dim=None):
+    def _discover_geom(self, geom_name=None, index_dim=None) -> None:
         """Discover geom/wkt type geometries in the dataset/array."""
         # check /infer geom dim
         names, types = self._get_geom_names_types(geom_name=geom_name)
@@ -155,7 +155,9 @@ class GeoBase(raster.XGeoBase):
             self._discover_xy(x_name=x_name, y_name=y_name, index_dim=index_dim)
             self.attrs.pop("geom_name", None)
         if "geom_format" not in self.attrs:
-            raise ValueError("No geometry data found.")
+            raise ValueError(
+                "No geometry data found. Make sure the data has a 1D geometry variable."
+            )
 
     @property
     def geom_format(self) -> Optional[str]:
@@ -189,7 +191,7 @@ class GeoBase(raster.XGeoBase):
         return geom_type
 
     @property
-    def x_name(self):
+    def x_name(self) -> Optional[str]:
         """Name of x coordinate; only for point geometries in xy format."""
         if self.get_attrs("x_name") not in self._obj.dims:
             self.set_spatial_dims()
@@ -197,7 +199,7 @@ class GeoBase(raster.XGeoBase):
             return self.attrs["x_name"]
 
     @property
-    def y_name(self):
+    def y_name(self) -> Optional[str]:
         """Name of y coordinate; only for point geometries in xy format."""
         if self.get_attrs("y_name") not in self._obj.dims:
             self.set_spatial_dims()
@@ -205,7 +207,7 @@ class GeoBase(raster.XGeoBase):
             return self.attrs["y_name"]
 
     @property
-    def index_dim(self):
+    def index_dim(self) -> Optional[str]:
         """Index dimension name."""
         if self.get_attrs("index_dim") not in self._obj.dims:
             self.set_spatial_dims()
@@ -213,27 +215,30 @@ class GeoBase(raster.XGeoBase):
             return self.attrs["index_dim"]
 
     @property
-    def sindex(self):
+    def sindex(self) -> Any:  # type of sindex can be different
         """Return the spatial index of the geometry."""
         return self.geometry.sindex
 
     @property
-    def index(self):
+    def index(self) -> Optional[xr.DataArray]:
         """Return the index values."""
-        return self._obj[self.index_dim]
+        if self.index_dim:
+            return self._obj[self.index_dim]
 
     @property
-    def size(self):
+    def size(self) -> Optional[int]:
         """Return the length of the index array."""
-        return self._obj[self.index_dim].size
+        if self.index_dim:
+            return self._obj[self.index_dim].size
 
     @property
-    def bounds(self):
+    def bounds(self) -> Optional[np.ndarray]:
         """Return the bounds (xmin, ymin, xmax, ymax) of the object."""
-        return self.geometry.total_bounds
+        if self.geometry is not None:
+            return self.geometry.total_bounds
 
     @property
-    def geometry(self) -> GeoSeries:
+    def geometry(self) -> Optional[GeoSeries]:
         """Return the geometry of the dataset or array as GeoSeries.
 
         Returns
@@ -244,7 +249,8 @@ class GeoBase(raster.XGeoBase):
         if self._geometry is not None and self._geometry.index.size == self.size:
             return self._geometry
         # if no geometry is present return None self._geometry
-        # rather than raising an error
+        # rather than raising an error ->
+        # FIXME is this the right approach?
         try:
             self.set_spatial_dims()
         except ValueError:
@@ -283,7 +289,7 @@ class GeoBase(raster.XGeoBase):
         y_name: Optional[str] = None,
         geom_name: Optional[str] = None,
         replace: bool = True,
-    ):
+    ) -> Union[xr.Dataset, xr.DataArray]:
         """Update the geometry in the Dataset/Array with a new geometry.
 
         if provided or use that, otherwise update the current
@@ -320,8 +326,8 @@ class GeoBase(raster.XGeoBase):
         drop_vars = []
         if self.geom_format != geom_format:
             if geom_format != "xy":
-                drop_vars = [self.x_name, self.y_name]
-            else:
+                drop_vars = [name for name in [self.x_name, self.y_name] if name]
+            elif self.geom_name is not None:
                 drop_vars = [self.geom_name]
 
         index_dim = self.index_dim
@@ -330,13 +336,13 @@ class GeoBase(raster.XGeoBase):
                 geom_name = self.attrs.get("geom_name", "geometry")
             elif self.geom_name != geom_name:
                 drop_vars.append(self.geom_name)
-            coords = {geom_name: (self.index_dim, geometry.values)}
+            coords = {geom_name: (index_dim, geometry.values)}
         elif geom_format == "wkt":
             if geom_name is None:
                 geom_name = self.attrs.get("geom_name", "ogc_wkt")
             elif self.geom_name != geom_name:
                 drop_vars.append(self.geom_name)
-            coords = {geom_name: (self.index_dim, geometry.to_wkt().values)}
+            coords = {geom_name: (index_dim, geometry.to_wkt().values)}
         elif geom_format == "xy":
             if x_name is None:
                 x_name = self.attrs.get("x_name", "x")
@@ -347,8 +353,8 @@ class GeoBase(raster.XGeoBase):
             elif self.y_name != y_name:
                 drop_vars.append(self.y_name)
             coords = {
-                x_name: (self.index_dim, geometry.x.values),
-                y_name: (self.index_dim, geometry.y.values),
+                x_name: (index_dim, geometry.x.values),
+                y_name: (index_dim, geometry.y.values),
             }
         obj = self._obj.copy()
         if replace:
@@ -368,7 +374,6 @@ class GeoBase(raster.XGeoBase):
         return obj
 
     # Internal conversion and selection methods
-    # i.e. produces xarray.Dataset/ xarray.DataArray
     def ogr_compliant(self, reducer=None) -> xr.Dataset:
         """Create a Dataset/Array which is understood by OGR.
 
@@ -501,7 +506,9 @@ class GeoBase(raster.XGeoBase):
         return obj
 
     ## clip
-    def clip_geom(self, geom, predicate="intersects"):
+    def clip_geom(
+        self, geom, predicate="intersects"
+    ) -> Union[xr.DataArray, xr.Dataset]:
         """Select all geometries that intersect with the input geometry.
 
         Arguments
@@ -523,7 +530,7 @@ class GeoBase(raster.XGeoBase):
         idx = utils.filter_gdf(self.geometry, geom=geom, predicate=predicate)
         return self._obj.isel({self.index_dim: idx})
 
-    def clip_bbox(self, bbox, crs=None, buffer=None):
+    def clip_bbox(self, bbox, crs=None, buffer=None) -> Union[xr.DataArray, xr.Dataset]:
         """Select point locations to bounding box.
 
         Arguments
@@ -551,7 +558,7 @@ class GeoBase(raster.XGeoBase):
 
     ## wrap GeoSeries functions
     # TODO write general wrapper
-    def to_crs(self, dst_crs):
+    def to_crs(self, dst_crs) -> Union[xr.DataArray, xr.Dataset]:
         """Transform spatial coordinates to a new coordinate reference system.
 
         The ``crs`` attribute on the current GeoDataArray must be set.
@@ -576,7 +583,7 @@ class GeoBase(raster.XGeoBase):
 
     ## Output methods
     ## Either writes to files or other data types
-    def to_gdf(self, reducer=None):
+    def to_gdf(self, reducer=None) -> gpd.GeoDataFrame:
         """Return geopandas GeoDataFrame with Point geometry.
 
         Geometry is based on Dataset coordinates. If a reducer is
@@ -594,6 +601,10 @@ class GeoBase(raster.XGeoBase):
         gdf: geopandas.GeoDataFrame
             GeoDataFrame
         """
+        if self.geometry is None:
+            raise ValueError(
+                "No geometry data found. Make sure the data has a 1D geometry variable."
+            )
         if isinstance(reducer, str):
             reducer = getattr(np, reducer)
         obj = self._obj
@@ -839,8 +850,8 @@ class GeoDataset(GeoBase):
     # Properties
     # Will probably be deleted in the future but now needed for compatibility
     @property
-    def vars(self):
-        """list: Returns non-coordinate variables."""
+    def vars(self) -> list[str]:
+        """list: Returns non-coordinate varibles."""
         return list(self._obj.data_vars.keys())
 
     # Internal conversion and selection methods

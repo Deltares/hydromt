@@ -2,6 +2,25 @@
 Change log predefined datasets
 ==============================
 
+Pre-defined catalog refactor
+============================
+
+Changed
+-------
+The pre-defined data catalogs have been moved to their own folders together with
+a version.yml. This file describes the different versions and relative paths of
+the data catalogs present in the folders.
+
+- predefined_catalogs.yml is deprecated
+- data catalog versions are associated with the SHA-256 hash of the files.
+- deltares_data versioning is now in semantic style
+
+Added
+-----
+- v0.0.6, v0.0.7, v0.0.9 of the artifact_data
+- v0.5.0, v0.6.0 of the deltares_data
+
+
 deltares_data
 =============
 
