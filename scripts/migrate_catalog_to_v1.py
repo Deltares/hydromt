@@ -1,7 +1,7 @@
 """Script to migrate your catalog to the v1 version."""
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from pathlib import Path
-from typing import Any, Dict, Set
+from typing import Any, Dict, Optional, Set
 
 from yaml import Loader, load
 
@@ -74,6 +74,7 @@ def migrate_entries(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
         item[0]: migrate_entry(item[1]) for item in catalog_dict.items()
     }
     new_catalog_dict["meta"] = new_catalog_meta
+    return new_catalog_dict
 
 
 def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
@@ -89,7 +90,8 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
         entry["uri"] = path
 
     # migrate driver str to dict
-    if data_type := entry.get("data_type") and entry.get("driver"):
+    data_type: Optional[str] = entry.get("data_type")
+    if data_type and entry.get("driver"):
         driver_name: str = DRIVER_RENAME_MAPPING[data_type][entry.pop("driver")]
         entry["driver"] = {"name": driver_name}
 
@@ -107,7 +109,16 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 
     # migrate meta to metadata
     if metadata := entry.pop("meta"):
-        entry["metadata"] = metadata
+        for before, after in {
+            "source_url": "url",
+            "source_author": "author",
+            "source_version": "version",
+            "source_license": "license",
+        }.items():
+            if value := metadata.pop(before, None):
+                metadata[after] = value
+            entry["metadata"] = metadata
+
     # move crs and nodata to metadata
     new_meta: Set[str] = {"crs", "nodata"}
     for field in new_meta:
@@ -126,6 +137,8 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     # Migrate variants
     if variants := entry.get("variants"):
         entry["variants"] = [migrate_entry(variant) for variant in variants]
+
+    return entry
 
 
 def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
@@ -149,8 +162,11 @@ if __name__ == "__main__":
     parser.add_argument("filein")
     parser.add_argument("fileout")
     parser.add_argument("-o", "--overwrite", action="store_true", default=True)
-    args: Namespace = parser.parse_args()
-    file_in: Path = Path(args.filein)
-    file_out: Path = Path(args.fileout)
-    overwrite: bool = args.overwrite
+    # args: Namespace = parser.parse_args()
+    # file_in: Path = Path(args.filein)
+    # file_out: Path = Path(args.fileout)
+    # overwrite: bool = args.overwrite
+    file_in: Path = Path("data/catalogs/artifact_data/v0.0.9/data_catalog.yml")
+    file_out: Path = Path("data/catalogs/artifact_data/v1.0.0/data_catalog.yml")
+    overwrite: bool = True
     main(file_in, file_out, overwrite)

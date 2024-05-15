@@ -396,10 +396,10 @@ class DataCatalog(object):
 
         return self._sources[source][requested_provider][requested_version]
 
-    def add_source(self, source: str, adapter: DataAdapter) -> None:
+    def add_source(self, name: str, source: DataSource) -> None:
         """Add a new data source to the data catalog.
 
-        The data version and provider are extracted from the DataAdapter object.
+        The data version and provider are extracted from the DataSource object.
 
         Parameters
         ----------
@@ -408,46 +408,46 @@ class DataCatalog(object):
         adapter : DataAdapter
             DataAdapter object.
         """
-        if not isinstance(adapter, DataAdapter):
-            raise ValueError("Value must be DataAdapter")
+        if not isinstance(source, DataSource):
+            raise ValueError("Value must be DataSource")
 
-        if hasattr(adapter, "version") and adapter.version is not None:
-            version = adapter.version
+        if source.version:
+            version = source.version
         else:
             version = "_UNSPECIFIED_"  # make sure this comes first in sorted list
 
-        if hasattr(adapter, "provider") and adapter.provider is not None:
-            provider = adapter.provider
+        if source.provider:
+            provider = source.provider
         else:
-            provider = adapter.catalog_name
+            provider = "_UNSPECIFIED_"
 
-        if source not in self._sources:
-            self._sources[source] = {}
-        else:  # check if data type is the same as adapter with same name
-            adapter0 = next(iter(next(iter(self._sources[source].values())).values()))
-            if adapter0.data_type != adapter.data_type:
+        if name not in self._sources:
+            self._sources[name] = {}
+        else:  # check if data type is the same as source with same name
+            source0 = next(iter(next(iter(self._sources[name].values())).values()))
+            if source0.data_type != source.data_type:
                 raise ValueError(
-                    f"Data source '{source}' already exists with data type "
-                    f"'{adapter0.data_type}' but new data source has data type "
-                    f"'{adapter.data_type}'."
+                    f"Data source '{name}' already exists with data type "
+                    f"'{source0.data_type}' but new data source has data type "
+                    f"'{source.data_type}'."
                 )
 
-        if provider not in self._sources[source]:
-            versions = {version: adapter}
+        if provider not in self._sources[name]:
+            versions = {version: source}
         else:
-            versions = self._sources[source][provider]
-            if provider in self._sources[source] and version in versions:
+            versions = self._sources[name][provider]
+            if provider in self._sources[name] and version in versions:
                 warnings.warn(
-                    f"overwriting data source '{source}' with "
+                    f"overwriting data source '{name}' with "
                     f"provider {provider} and version {version}.",
                     UserWarning,
                     stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
-            versions.update({version: adapter})
+            versions.update({version: source})
             versions = {k: versions[k] for k in sorted(list(versions.keys()))}
 
-        self._sources[source][provider] = versions
+        self._sources[name][provider] = versions
 
     def iter_sources(self, used_only=False) -> List[Tuple[str, DataAdapter]]:
         """Return a flat list of all available data sources.
@@ -821,7 +821,7 @@ class DataCatalog(object):
             }
 
         """
-        meta = data_dict.pop("meta", {})
+        meta = data_dict.pop("metadata", {})
         # check version required hydromt version
         requested_version = meta.get("hydromt_version", None)
         if requested_version is not None:
