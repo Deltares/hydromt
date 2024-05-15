@@ -49,7 +49,7 @@ def create_grid_from_region(
     align: bool = True,
     dec_origin: int = 0,
     dec_rotation: int = 3,
-):
+) -> xr.DataArray:
     """HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.
 
     A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
@@ -60,7 +60,7 @@ def create_grid_from_region(
 
     Parameters
     ----------
-    region : dict, optional
+    region : dict
         Dictionary describing region of interest, e.g.:
         * {'bbox': [xmin, ymin, xmax, ymax]}
         * {'geom': 'path/to/polygon_geometry'}
@@ -68,15 +68,19 @@ def create_grid_from_region(
         * {'basin': [x, y]}
 
         Region must be of kind [grid, bbox, geom, basin, subbasin, interbasin].
-    res: float
+    logger : Logger
+        Logger object, by default a module level logger is used.
+    data_catalog : DataCatalog, optional
+        If the data_catalog is None, a new DataCatalog will be created, by default None.
+    res: float, optional
         Resolution used to generate 2D grid [unit of the CRS], required if region
         is not based on 'grid'.
-    crs : EPSG code, int, str optional
-        EPSG code of the model or "utm" to let hydromt find the closest projected
-    rotated : bool, optional
+    crs : int, optional
+        EPSG code of the model
+    rotated : bool
         if True, a minimum rotated rectangular grid is fitted around the region,
-        by default False. Only  applies if region is of kind 'bbox', 'geom'
-    hydrography_fn : str
+        by default False. Only applies if region is of kind 'bbox', 'geom'
+    hydrography_fn : str, optional
         Name of data source for hydrography data. Required if region is of kind
             'basin', 'subbasin' or 'interbasin'.
 
@@ -86,13 +90,13 @@ def create_grid_from_region(
         * Optional variables: ['basins'] if the `region` is based on a
             (sub)(inter)basins without a 'bounds' argument.
 
-    basin_index_fn : str
+    basin_index_fn : str, optional
         Name of data source with basin (bounding box) geometries associated with
         the 'basins' layer of `hydrography_fn`. Only required if the `region` is
         based on a (sub)(inter)basins without a 'bounds' argument.
-    add_mask : bool, optional
+    add_mask : bool
         Add mask variable to grid object, by default True.
-    align : bool, optional
+    align : bool
         If True (default), align target transform to resolution.
     dec_origin : int, optional
         number of decimals to round the origin coordinates, by default 0

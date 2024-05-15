@@ -401,10 +401,10 @@ Adjust your data and file calls as appropriate.
 Another change to mention is that the region methods ``parse_region`` and
 ``parse_region_value`` are no longer located in ``workflows.basin_mask`` but in `workflows.region`.
 These functions are only relevant for components that inherit from `SpatialModelComponent`.
-See `GridComponent` on how to use these functions.
+See `GridComponent` and  `workflows.grid` on how to use these functions.
 
 In HydroMT core, we let `GridComponent` inherit from `SpatialModelComponent`.
-One can call `model.grid.create`, which will in turn call `create_region`.
+One can call `model.grid.create`, which will in turn call `parse_region_x`, based on the kind of region it receives.
 
 The command line interface no longer supports a `--region` argument.
 Instead, the region should be specified in the yaml file on the relevant component.
@@ -412,11 +412,16 @@ Instead, the region should be specified in the yaml file on the relevant compone
 +--------------------------+---------------------------+
 | v0.x                     | v1                        |
 +==========================+===========================+
-| model.setup_region(dict) | model.grid.create(dict)   |
+| model.setup_region(dict) | parse_region_basin        |
+|                          | parse_region_geom         |
+|                          | parse_region_bbox         |
+|                          | parse_region_other_model  |
+|                          | parse_region_grid         |
+|                          | parse_region_mesh         |
 +--------------------------+---------------------------+
-| model.write_geoms()      | model.grid.write()        |
+| model.write_geoms()      | model.<component>.write() |
 +--------------------------+---------------------------+
-| model.read_geoms()       | model.grid.read()         |
+| model.read_geoms()       | model.<component>.read()  |
 +--------------------------+---------------------------+
 | model.set_region(...)    | -                         |
 +--------------------------+---------------------------+
