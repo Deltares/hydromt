@@ -34,7 +34,7 @@ logger: Logger = getLogger(__name__)
 class RasterioDriver(RasterDatasetDriver):
     """Driver using rasterio for RasterDataset."""
 
-    name = "raster"
+    name = "rasterio"
 
     def read_data(
         self,
