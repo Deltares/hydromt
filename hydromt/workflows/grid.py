@@ -25,8 +25,7 @@ from hydromt.workflows.region import (
 _logger = logging.getLogger(__name__)
 
 __all__ = [
-    "create_non_rotated_grid",
-    "create_rotated_grid_from_geom",
+    "create_grid_from_region",
     "grid_from_constant",
     "grid_from_rasterdataset",
     "grid_from_raster_reclass",
@@ -125,12 +124,12 @@ def create_grid_from_region(
             else parse_region_bbox(region, crs=crs)
         )
         if rotated:
-            grid = create_rotated_grid_from_geom(
+            grid = _create_rotated_grid_from_geom(
                 geom, res=res, dec_origin=dec_origin, dec_rotation=dec_rotation
             )
         else:
             xcoords, ycoords = _extract_coords_from_geom(geom, res=res, align=align)
-            grid = create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
+            grid = _create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
     elif kind == "grid":
         if rotated:
             logger.warning(
@@ -147,7 +146,7 @@ def create_grid_from_region(
         xcoords = dataset.raster.xcoords.values
         ycoords = dataset.raster.ycoords.values
         geom = dataset.raster.box
-        grid = create_non_rotated_grid(xcoords, ycoords, crs=dataset.raster.crs)
+        grid = _create_non_rotated_grid(xcoords, ycoords, crs=dataset.raster.crs)
     elif kind in ["basin", "interbasin", "subbasin"]:
         if rotated:
             raise ValueError("Cannot create a rotated grid from a basin region")
@@ -168,7 +167,7 @@ def create_grid_from_region(
             data_catalog=data_catalog,
             logger=logger,
         )
-        grid = create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
+        grid = _create_non_rotated_grid(xcoords, ycoords, crs=geom.crs)
     else:
         raise ValueError(f"Unsupported region kind: {kind}")
 
@@ -180,11 +179,8 @@ def create_grid_from_region(
         return grid.drop_vars("mask")
 
 
-def create_non_rotated_grid(
-    xcoords: np.typing.ArrayLike,
-    ycoords: np.typing.ArrayLike,
-    *,
-    crs: int,
+def _create_non_rotated_grid(
+    xcoords: np.typing.ArrayLike, ycoords: np.typing.ArrayLike, *, crs: int
 ) -> xr.DataArray:
     """Create a grid that is not rotated based on x and y coordinates.
 
@@ -214,7 +210,7 @@ def create_non_rotated_grid(
     )
 
 
-def create_rotated_grid_from_geom(
+def _create_rotated_grid_from_geom(
     geom: gpd.GeoDataFrame, *, res: float, dec_origin: int, dec_rotation: int
 ) -> xr.DataArray:
     """Create a rotated grid based on a geometry.
