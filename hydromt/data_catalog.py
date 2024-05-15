@@ -670,9 +670,9 @@ class DataCatalog(object):
 
         """
         root = Path(self._cache_dir, name, version)
-        extract_dir = root / Path(archive_uri).stem
+        extract_dir = root
         # retrieve and unpack archive
-        kwargs = {}
+        kwargs: dict = {}
         if Path(archive_uri).suffix == ".zip":
             kwargs.update(processor=pooch.Unzip(extract_dir=extract_dir))
         elif Path(archive_uri).suffix == ".gz":
@@ -686,7 +686,7 @@ class DataCatalog(object):
             fname=Path(archive_uri).name,
             **kwargs,
         )
-        return extract_dir
+        return str(extract_dir)
 
     def from_yml(
         self,
