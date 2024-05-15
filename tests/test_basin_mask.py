@@ -9,8 +9,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-import hydromt
-from hydromt import DataCatalog, raster
+from hydromt import raster
 from hydromt.models import MODELS
 from hydromt.workflows.basin_mask import (
     _check_size,
@@ -22,14 +21,13 @@ from hydromt.workflows.basin_mask import (
 logger = logging.getLogger("tets_basin")
 
 
-def test_region(tmpdir, world, geodf, rioda):
+def test_region(tmpdir, world, geodf, rioda, data_catalog):
     # prepare test data
     fn_gdf = str(tmpdir.join("world.geojson"))
     world.to_file(fn_gdf, driver="GeoJSON")
     fn_grid = str(tmpdir.join("grid.tif"))
     rioda.raster.to_raster(fn_grid)
-    cat = DataCatalog()
-    cat.from_dict(
+    data_catalog.from_dict(
         {
             "world": {
                 "path": fn_gdf,
@@ -62,7 +60,7 @@ def test_region(tmpdir, world, geodf, rioda):
     assert isinstance(region["geom"], gpd.GeoDataFrame)
     kind, region = parse_region({"geom": fn_gdf})
     assert isinstance(region["geom"], gpd.GeoDataFrame)
-    kind, region = parse_region({"geom": "world"}, data_catalog=cat)
+    kind, region = parse_region({"geom": "world"}, data_catalog=data_catalog)
     assert isinstance(region["geom"], gpd.GeoDataFrame)
     # geom:  points should fail
     region = {"geom": geodf}
@@ -74,7 +72,7 @@ def test_region(tmpdir, world, geodf, rioda):
     assert isinstance(region["grid"], xr.DataArray)
     kind, region = parse_region({"grid": fn_grid})
     assert isinstance(region["grid"], xr.DataArray)
-    kind, region = parse_region({"grid": "grid"}, data_catalog=cat)
+    kind, region = parse_region({"grid": "grid"}, data_catalog=data_catalog)
     assert isinstance(region["grid"], xr.DataArray)
 
     # basid
@@ -107,8 +105,7 @@ def test_region(tmpdir, world, geodf, rioda):
     assert "xy" in region
 
 
-def test_region_value():
-    data_catalog = DataCatalog()
+def test_region_value(data_catalog):
     array = np.array([1001, 1002, 1003, 1004, 1005])
     kwarg = _parse_region_value(array, data_catalog=data_catalog)
     assert kwarg.get("basid") == array.tolist()
@@ -137,8 +134,7 @@ def test_check_size(caplog):
 
 
 @pytest.mark.filterwarnings("ignore::UserWarning")
-def test_basin(caplog):
-    data_catalog = hydromt.DataCatalog("artifact_data", logger=logger)
+def test_basin(data_catalog):
     ds = data_catalog.get_rasterdataset("merit_hydro_1k")
     gdf_bas_index = data_catalog.get_geodataframe("merit_hydro_index")
     bas_index = data_catalog.get_source("merit_hydro_index")

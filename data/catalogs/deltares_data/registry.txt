@@ -1,0 +1,3 @@
+v0.6.0/data_catalog.yml 665fab293944a5c0bd56d8af11f1eccd58fb5d94eb55f06e8ac33192f5f42738
+v0.5.0/data_catalog.yml 418f93cebb57c8d165556c874a3cd4077afca1d38e76640273c86b740d18c0ef
+v0.7.0/data_catalog.yml 0c79d6070daa21e739daf01b3ebb4a2f9e2c2ba3be4b68bdfe14ecfc6efa09b9

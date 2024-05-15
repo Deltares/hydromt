@@ -4,13 +4,20 @@ Fixes #<issue number>
 ## Explanation
 Explain how you addressed the bug/feature request, what choices you made and why.
 
-## Checklist
+## General Checklist
 - [ ] Updated tests or added new tests
 - [ ] Branch is up to date with `main`
 - [ ] Tests & pre-commit hooks pass
-- [ ] Updated documentation if needed
-- [ ] Updated changelog.rst if needed
-- [ ] For predefined catalogs: update the catalog version in the file itself, the references in data/predefined_catalogs.yml, and the changelog in data/changelog.rst
+- [ ] Updated documentation
+- [ ] Updated changelog.rst
+
+## Data/Catalog checklist
+- [ ] `data/catalogs/predefined_catalogs.yml` has not been modified.
+- [ ] None of the old `data_catalog.yml` files have been chagned
+- [ ] `data/chagnelog.rst` has been updated
+- [ ] new file uses `LF` line endings (done automatically if you used `update_versions.py`)
+- [ ] New file has been tested locally
+- [ ] Tests have been added using the new file in the test suite
 
 ## Additional Notes (optional)
 Add any additional notes or information that may be helpful.
