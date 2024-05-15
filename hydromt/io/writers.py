@@ -17,7 +17,7 @@ from yaml import dump as dump_yaml
 
 from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def write_yaml(path: StrPath, data: Dict[str, Any]):
@@ -128,7 +128,7 @@ def write_nc(
     gdal_compliant: bool = False,
     rename_dims: bool = False,
     force_sn: bool = False,
-    logger: Logger = logger,
+    logger: Logger = _logger,
     **kwargs,
 ) -> Optional[DeferedFileClose]:
     """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
@@ -197,7 +197,7 @@ def write_region(
     region: gpd.GeoDataFrame,
     *,
     filename: StrPath,
-    logger: Logger = logger,
+    logger: Logger = _logger,
     root_path: StrPath,
     to_wgs84=False,
     **write_kwargs,
