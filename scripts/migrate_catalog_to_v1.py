@@ -78,13 +78,20 @@ def migrate_entries(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
 
 def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     """Migrate the v0.x entry to v1."""
+    # Check if alias
+    if entry.get("alias"):
+        raise RuntimeError(
+            "Warning: aliases have been deprecated. Please migrate alias"
+            f"{entry} to variants or remove completely."
+        )
     # migrate path to uri
-    entry["uri"] = entry.pop("path")
+    if path := entry.pop("path", None):
+        entry["uri"] = path
 
     # migrate driver str to dict
-    driver_name: str = DRIVER_RENAME_MAPPING[entry["data_type"]][entry.pop("driver")]
-
-    entry["driver"] = {"name": driver_name}
+    if data_type := entry.get("data_type") and entry.get("driver"):
+        driver_name: str = DRIVER_RENAME_MAPPING[data_type][entry.pop("driver")]
+        entry["driver"] = {"name": driver_name}
 
     # move kwargs and driver_kwargs to driver options
     old_kwarg_names: Set[str] = {"kwargs", "driver_kwargs"}
@@ -115,6 +122,10 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
         for param in postprocessing_params:
             if val := entry.pop(param, None):
                 entry["data_adapter"][param] = val
+
+    # Migrate variants
+    if variants := entry.get("variants"):
+        entry["variants"] = [migrate_entry(variant) for variant in variants]
 
 
 def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
