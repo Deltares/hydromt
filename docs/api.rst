@@ -826,10 +826,12 @@ Grid
 .. autosummary::
    :toctree: _generated
 
+   workflows.grid.create_grid_from_region
    workflows.grid.grid_from_constant
    workflows.grid.grid_from_rasterdataset
    workflows.grid.grid_from_raster_reclass
    workflows.grid.grid_from_geodataframe
+   workflows.grid.rotated_grid
 
 .. _workflows_mesh_api:
 
@@ -839,9 +841,24 @@ Mesh
 .. autosummary::
    :toctree: _generated
 
-   workflows.mesh.create_mesh2d
+   workflows.mesh.create_mesh2d_from_region
    workflows.mesh.mesh2d_from_rasterdataset
    workflows.mesh.mesh2d_from_raster_reclass
+
+.. _workflows_region_api:
+
+Region
+======
+
+.. autosummary::
+   :toctree: _generated
+
+   workflows.region.parse_region_basin
+   workflows.region.parse_region_bbox
+   workflows.region.parse_region_geom
+   workflows.region.parse_region_grid
+   workflows.region.parse_region_other_model
+   workflows.region.parse_region_mesh
 
 .. _workflows_basin_api:
 

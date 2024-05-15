@@ -23,6 +23,15 @@ if TYPE_CHECKING:
 
 _logger = getLogger(__name__)
 
+__all__ = [
+    "parse_region_basin",
+    "parse_region_bbox",
+    "parse_region_geom",
+    "parse_region_grid",
+    "parse_region_other_model",
+    "parse_region_mesh",
+]
+
 
 def parse_region_basin(
     region: dict,
