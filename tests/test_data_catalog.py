@@ -303,7 +303,7 @@ def test_from_yml_with_archive(data_catalog):
     data_catalog1 = DataCatalog(yml_dst_fn)
     sources = list(data_catalog1.sources.keys())
     source = data_catalog1.get_source(sources[0])
-    assert yml_dst_fn.parent == Path(source.path).parent.parent
+    assert yml_dst_fn.parent == Path(source.path).parent
 
 
 def test_from_predefined_catalogs(data_catalog):
