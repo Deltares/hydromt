@@ -107,7 +107,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         """
         ext = splitext(path)[-1]
         if ext == ".zarr":
-            ds.to_zarr(path, **kwargs)
+            ds.vector.to_zarr(path, **kwargs)
         elif ext in [".nc", ".netcdf"]:
             ds.vector.to_netcdf(path, **kwargs)
         else:
