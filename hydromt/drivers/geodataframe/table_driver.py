@@ -6,6 +6,7 @@ import geopandas as gpd
 import pandas as pd
 from pyproj import CRS
 
+from hydromt._typing import Geom
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.metadata import SourceMetadata
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
@@ -27,10 +28,10 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         self,
         uris: List[str],
         *,
-        mask: gpd.GeoDataFrame | gpd.GeoSeries | None = None,
+        mask: Optional[Geom] = None,
         predicate: str = "intersects",
-        variables: List[str] | None = None,
-        metadata: SourceMetadata | None = None,
+        variables: Optional[List[str]] = None,
+        metadata: Optional[SourceMetadata] = None,
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
