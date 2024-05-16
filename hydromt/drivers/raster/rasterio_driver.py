@@ -1,4 +1,5 @@
 """Driver using rasterio for RasterDataset."""
+
 from glob import glob
 from io import IOBase
 from logging import Logger, getLogger
@@ -91,6 +92,9 @@ class RasterioDriver(RasterDatasetDriver):
         #     if isinstance(zoom_level, int) and zoom_level > 0:
         #         # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
         #         kwargs.update(overview_level=zoom_level - 1)
+
+        if mask:
+            kwargs.update({"mask": mask})
         ds = open_mfraster(uris, logger=logger, **kwargs)
         # rename ds with single band if single variable is requested
         if variables is not None and len(variables) == 1 and len(ds.data_vars) == 1:

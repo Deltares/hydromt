@@ -55,6 +55,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
             variables=variables,
             zoom_level=zoom_level,
             handle_nodata=handle_nodata,
+            options=self.options,
         )
         return self.read_data(
             uris,
