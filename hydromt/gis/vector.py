@@ -666,6 +666,36 @@ class GeoBase(raster.XGeoBase):
             obj.to_netcdf(path, engine="netcdf4", **kwargs)
             del obj
 
+    def to_zarr(
+        self,
+        path: str,
+        ogr_compliant: bool = False,
+        reducer=None,
+        **kwargs,
+    ) -> None:
+        """Export geodataset vectordata to an ogr compliant netCDF4 file.
+
+        Parameters
+        ----------
+        path : str
+            Output path for netcdf file.
+        ogr_compliant : bool
+            write the netCDF4 file in an ogr compliant format
+            This makes it readable as a vector file in e.g. QGIS
+            see :py:meth:`~hydromt.vector.GeoBase.ogr_compliant` for more details.
+        reducer : callable, optional
+            Method by which multidimensional data is reduced to 1 dimensional
+            e.g. numpy.mean
+        kwargs:
+            Any additional arguments to be passed down to the driver.
+        """
+        if ogr_compliant:
+            self.ogr_compliant(reducer=reducer).to_zarr(path, **kwargs)
+        else:
+            obj = self.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
+            obj.to_zarr(path, **kwargs)
+            del obj
+
 
 @xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
