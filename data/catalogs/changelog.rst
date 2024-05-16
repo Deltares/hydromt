@@ -42,7 +42,7 @@ changed
 - updated source_url if url was not working anymore
 - sorted datasets by alphabetical order
 - Removed version from dataset names
-- prefixed 'hydro' where for all HydroSHEDS datasets
+- prefixed 'hydro' for all HydroSHEDS datasets
 - added the epoch of the dataset to the name of the dataset
 
 See table below for mapping of old and new names:
