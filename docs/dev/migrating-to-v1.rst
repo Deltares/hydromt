@@ -213,7 +213,7 @@ Moving from an inheritance to composition structure for the Model class
 **Rationale**
 
 Prior to v1, the `Model` class was the only real place where developers could
-modify the behavior of Core through either subclassing it, or using various
+modify the behaviour of Core through either sub-classing it, or using various
 `Mixin` classes. All parts of a model were implemented as class properties
 forcing every model to use the same terminology. While this was enough for
 some users, it was too restrictive for others. For example, the SFINCS
@@ -238,7 +238,7 @@ Implementing Model Components
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Components are objects that the `Model` class can delegate work to. Typically, they are associated with one object such as a grid,
-forcing or tables. To be able to work within a `Model` class properly a component must implement the following methods:
+forcing or tables. To be able to work within a `Model` class properly a `ModelComponent` must implement the following methods:
 
 - `read`: reading the component and its data from disk.
 - `write`: write the component in its current state to disk in the provided root.
@@ -250,16 +250,24 @@ Additionally, it is highly recommended to also provide the following methods to 
 
 Finally, you can provide additional functionality by providing the following optional functions:
 
-- `create`: the ability to construct the schematization of the component (computation units like grid cells, `mesh1d` or network lines, vector units for lumped model etc.) from the provided arguments.
-- `add_data`: the ability to add model data and parameters to the component once the schematization is well-defined (i.e. add land-use data to grid or mesh etc.).
+- `create`: the ability to construct the schematization of the component (computation units like grid cells, `mesh1d` or network lines,
+  vector units for lumped model etc.) from the provided arguments.
+- `add_data`: the ability to add model data and parameters to the component once the schematization is well-defined (i.e. add land-use
+  data to grid or mesh etc.).
 
 Additionally we encourage some best practices to be aware of when implementing a components:
 
-- Make sure that your component calls `super().__init__(model=model)` in the `__init__` function of your component. This will make sure that references such as `self.logger` and `self.root` are registered properly so you can access them.
-- Your component should take some variation of a `default_filename` argument in its `__init__` function that is either required or provides a default that is not `None`. This should be saved as an attribute and be used for reading and writing when the user does not provide a different path as an argument to the read or write functions. This allows developers, plugin developers and users alike to both provide sensible defaults as well as the opportunity to override them when necessary.
+- Make sure that your component calls `super().__init__(model=model)` in the `__init__` function of your component. This will make sure
+  that references such as `self.logger` and `self.root` are registered properly so you can access them.
+- Your component should take some variation of a `default_filename` argument in its `__init__` function that is either required or provides
+  a default that is not `None`. This should be saved as an attribute and be used for reading and writing when the user does not provide a different
+  path as an argument to the read or write functions. This allows developers, plugin developers and users alike to both provide sensible defaults
+  as well as the opportunity to override them when necessary.
 
 
-It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
+It may additionally implement any necessary functionality. Any implemented functionality should be available to the user when the plugin is
+loaded, both from the Python interpreter as well as the `yaml` file interface. However, to add some validation, functions that are intended
+to be called from the yaml interface need to be decorated with the `@hydromt_step` decorator like so:
 
 .. code-block:: python
 	@hydromt_step
@@ -283,31 +291,42 @@ but your components will also gain access to the following attributes:
 | root           | A reference to the model root which can be used for permissions checking and determining IO paths | self.root.path                           |
 +----------------+---------------------------------------------------------------------------------------------------+------------------------------------------+
 
-As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it receives. Note that this makes it impractical if not impossible to use components outside of the model they are assigned to.
+As briefly mentioned in the table above, your component will be able to retrieve other components in the model through the reference it receives.
+Note that this makes it impractical if not impossible to use components outside of the model they are assigned to.
 
 **Manipulating Components**
 
-Components can be added to a `Model` object by using the `model.add_component` function. This function takes the name of the component, and the TYPE (not an instance) of the component as argument. When these components
-are added, they are uninitialized (i.e. empty). You can populate them by calling functions such as `create` or `read` from the yaml interface or any other means through the interactive Python API.
+Components can be added to a `Model` object by using the `model.add_component` function. This function takes the name of the component,
+and the TYPE (not an instance) of the component as argument. When these components are added, they are uninitialized (i.e. empty). You can
+populate them by calling functions such as `create` or `read` from the yaml interface or any other means through the interactive Python API.
 
 Once a component has been added, any component (or other object or scope that has access to the model class) can retrieve necessary components by using the
 `model.get_component` function which takes the name of the desired component you wish to retrieve. At this point you can do with it as you please.
 
 In the core of HydroMT, the available components are:
 
-+-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
-| v0.x Model Attribute  | Component                                         | Description                                                                            |
-+=======================+===================================================+========================================================================================+
-| model.tables          | TablesComponent                                   | Component for managing non-geospatial data in pandas DataFrames                        |
-+-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
-| model.grid            | GridComponent                                     | Component for managing regular gridded data in single hydromt RasterDataset            |
-+-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
-| model.geoms('region') | Components inheriting from SpatialModelComponent  | Component for managing the area of interest for the model in a geopandas GeoDataFrame. |
-+-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
-| model.mesh            | MeshComponent                                     | Component for managing unstructured grids as a hydromt RasterDataset                   |
-+-----------------------+---------------------------------------------------+----------------------------------------------------------------------------------------+
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
+| v0.x Model Attribute  | Component                    | Description                                                                            |
++=======================+==============================+========================================================================================+
+| model.config          | ConfigComponent              | Component for managing model configuration in a dictionary                             |
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
+| model.geoms           | GeomsComponent               | Component for managing 1D vector data in geopandas GeoDataFrame dictionary             |
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
+| model.tables          | TablesComponent              | Component for managing non-geospatial data in pandas DataFrame dictionary              |
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
+| model.datasets        | DatasetsComponent            | Component for managing non-geospatial data in xarray DataArray/Dataset dictionary      |
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
+| model.spatialdatasets | SpatialDatasetsComponent     | Component for managing geospatial data in xarray DataArray/Dataset dictionary          |
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
+| model.grid            | GridComponent                | Component for managing regular gridded data in a single hydromt RasterDataset          |
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
+| model.mesh            | MeshComponent                | Component for managing unstructured grids as a xugrid UgridDataset                     |
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
+| model.vector          | VectorComponent              | Component for managing geospatial vector data as a hydromt GeoDataset                  |
++-----------------------+------------------------------+----------------------------------------------------------------------------------------+
 
-A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)). The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
+A user can defined its own new component either by inheriting from the base ``ModelComponent`` or from another one (eg SubgridComponent(GridComponent)).
+The new components can be accessed and discovered through the `PLUGINS` architecture of HydroMT similar to Model plugins. See the related paragraph for more details.
 
 The `Model.__init__` function can be used to add default components by plugins like so:
 
@@ -351,8 +370,8 @@ If you want to allow your plugin user to modify the root and update or add new c
 			)
 
 
-Making the model region its own component
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Model region and geo-spatial components
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Rationale**
 
@@ -362,11 +381,13 @@ To simplify this, highlight the importance of the model region,
 make this part of the code easier to customize, and consolidate a lot of functionality for easier maintenance,
 we decided to bring all this functionality together in the `SpatialModelComponent` class.
 Some components inherit from this base component in order to provide a `region`, `crs`, and `bounds` attribute.
-`SpatialModelComponent` is always able to provide a region by another referenced component,
-and if there is no referenced component, it will try to retrieve the region based on the data in the subclass.
-It is up to the implementor of the subclass to provide the correct GeoDataFrame.
 
-The `Model` contains a property for `region`. That property only works if there is a `SpatialModelComponent` in the model.
+The region of a `SpatialModelComponent` can either be derived directly from its own component or based on another referenced component
+(eg a forcing component for which the reference region can be taken from the grid component).
+For `SpatialModelComponent` that can derive their own region, it is up to the implementer of the subclass to define how to derive
+the region from the component `data` by implementing the `_region_data` property.
+
+The `Model` also contains a property for `region`. That property only works if there is a `SpatialModelComponent` in the model.
 If there is only one `SpatialModelComponent`, that component is automatically detected as the `region`.
 If there are more than one, the `region_component` can be specified in the `global` section of the yaml file.
 If there are no `SpatialModelComponent`s in the model, the `region` property will error.
@@ -388,14 +409,19 @@ The alternative is to specify the region component reference in python, which is
 		def __init__(self):
 			super().__init__(region_component="grid2d", components={"grid2d": {"type": "GridComponent"}})
 
+The available components that inherit from `SpatialModelComponent` in core are:
 
+- `GridComponent`
+- `VectorComponent`
+- `MeshComponent`
+- `SpatialDatasetsComponent`
 
 **Changes required**
 
-The Model Region is no longer part of the `geoms` data.
+The Model region is no longer part of the `geoms` data.
 The default path the region is written to is no longer
 `/path/to/root/geoms/region.geojson` but is now `/path/to/root/region.geojson`.
-This behavior can be modified both from the config file and the python API.
+This behaviour can be modified both from the config file and the python API.
 Adjust your data and file calls as appropriate.
 
 Another change to mention is that the region methods ``parse_region`` and
@@ -404,10 +430,10 @@ These functions are only relevant for components that inherit from `SpatialModel
 See `GridComponent` and  `workflows.grid` on how to use these functions.
 
 In HydroMT core, we let `GridComponent` inherit from `SpatialModelComponent`.
-One can call `model.grid.create`, which will in turn call `parse_region_x`, based on the kind of region it receives.
+One can call `model.grid.create_from_region`, which will in turn call `parse_region_x`, based on the kind of region it receives.
 
 The command line interface no longer supports a `--region` argument.
-Instead, the region should be specified in the yaml file on the relevant component.
+Instead, the region should be specified in the yaml file of the relevant component(s).
 
 +--------------------------+---------------------------+
 | v0.x                     | v1                        |
@@ -428,14 +454,14 @@ Instead, the region should be specified in the yaml file on the relevant compone
 
 .. code-block:: yaml
 
-	# Example of specifying the region component via grid.create
+	# Example of specifying the region component via grid.create_from_region
 	global:
 		region_component: grid
 		components:
 			grid:
 				type: GridComponent
 	steps:
-		- grid.create:
+		- grid.create_from_region:
 			region:
 				basin: [6.16, 51.84]
 
@@ -468,7 +494,7 @@ has not been changed compared to the GridModel.
 +------------------------------+-------------------------------------------+
 | model.write_grid(...)        | model.grid.write(...)                     |
 +------------------------------+-------------------------------------------+
-| model.setup_grid(...)        | model.grid.create(...)                    |
+| model.setup_grid(...)        | model.grid.create_from_region(...)        |
 +------------------------------+-------------------------------------------+
 | model.setup_grid_from_*(...) | model.grid.add_data_from_*(...)           |
 +------------------------------+-------------------------------------------+
@@ -493,16 +519,6 @@ and `read_vector` have been changed to the more generically named `set`,
 methods have been changed to `add_data_from_*`. The functionality of the VectorComponent
 has not been changed compared to the VectorModel.
 
-VectorComponent is not in the model by default. You can add the VectorComponent to the model by using the `model.add_component("vector", VectorComponent)` function.
-Or you can set it up in the yml file by using the `components` part.
-
-.. code-block:: yaml
-
-	global:
-		components:
-			vector:
-				type: VectorComponent
-
 +------------------------------+-------------------------------------------+
 | v0.x                         | v1                                        |
 +==============================+===========================================+
@@ -513,20 +529,52 @@ Or you can set it up in the yml file by using the `components` part.
 | model.write_vector(...)      | model.vector.write(...)                   |
 +------------------------------+-------------------------------------------+
 
+MeshComponent
+^^^^^^^^^^^^^
+
+The MeshModel has just like the `GridModel` been replaced with its implementation
+of the `ModelComponent`: `MeshComponent`. The restructuring of `MeshModel` follows the same pattern
+as the `GridComponent`.
+
++--------------------------------+-------------------------------------------+
+| v0.x                           | v1                                        |
++================================+===========================================+
+| model.set_mesh(...)            | model.mesh.set(...)                       |
++--------------------------------+-------------------------------------------+
+| model.read_mesh(...)           | model.mesh.read(...)                      |
++--------------------------------+-------------------------------------------+
+| model.write_mesh(...)          | model.mesh.write(...)                     |
++--------------------------------+-------------------------------------------+
+| model.setup_mesh(...)          | model.mesh.create_2d_from_region(...)     |
++--------------------------------+-------------------------------------------+
+| model.setup_mesh2d_from_*(...) | model.mesh.add_2d_data_from_*(...)        |
++--------------------------------+-------------------------------------------+
+
 TablesComponent
 ^^^^^^^^^^^^^^^
 
-The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several non-geospatial tabular data into a dictionary of pandas DataFrames. The `TablesComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+The previous `Model.tables` is now replaces by a `TablesComponent` that can used to store several
+non-geospatial tabular data into a dictionary of pandas DataFrames. The `TablesComponent` for now
+only contains the basic methods such as `read`, `write` and `set`.
 
 GeomsComponent
 ^^^^^^^^^^^^^^
 
-The previous `Model.geoms` is now replaced by a `GeomsComponent` that can be used to store several geospatial geometry based data into a dictionary of geopandas GeoDataFrames. The `GeomsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+The previous `Model.geoms` is now replaced by a `GeomsComponent` that can be used to store several
+geospatial geometry based data into a dictionary of geopandas GeoDataFrames. The `GeomsComponent`
+for now only contains the basic methods such as `read`, `write` and `set`.
 
-DatasetsComponent
-^^^^^^^^^^^^^^
+DatasetsComponent and SpatialDatasetsComponent
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The previous `Model` attributes `forcing`, `states`, `results` and `maps` are now replaced by a `DatasetsComponent` that can be used to store several xarray datasets into a dictionary. The `DatasetsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+The previous `Model` attributes `forcing`, `states`, `results` and `maps` are now replaced by
+a `DatasetsComponent` and a `SpatialDatasetsComponent` that can be used to store several xarray datasets
+into a dictionary. If your component should have a region property (in reference to another component),
+the component should inherit from `SpatialModelComponent`.
+
+The `DatasetsComponent` for now only contains the basic methods such as `read`, `write` and `set`.
+The `SpatialModelComponent` contains additional methods to ``add_raster_data_from`` rasterdataset
+and rasterdataset reclassification.
 
 ConfigComponent
 ^^^^^^^^^^^^^^^
@@ -534,48 +582,57 @@ ConfigComponent
 What was previously called `model.config` as well as some other class variables such as `Model._CONF` is now located in
 `ConfigComponent`. Otherwise it still works mostly identically, meaning that it will parse dotted keys like
 `a.b.c` into nested dictionaries such as `{'a':{'b':{'c': value}}}`. By default the data will be read from and written to
-`<root>/config.yml` which can be overwritten either by providing different arguments or by subclassing
+`<root>/config.yml` which can be overwritten either by providing different arguments or by sub-classing
 the component and providing a different default value.
 
 One main change is that the `model.config` used to be created by default from a template file which was usually located
 in `join(Model._DATADIR, Model._NAME, Model._CONF)`. To create a config from a template, users now need to directly call
 th new `config.create` method, which is similar to how other components work. Each plugin can still define a default config file
-template without subclassing the `ConfigComponent` by providing a `default_template_filename` when initializing their
+template without sub-classing the `ConfigComponent` by providing a `default_template_filename` when initializing their
 `ConfigComponent`.
-
-
-MeshComponent
-^^^^^^^^^^^^^
-
-The MeshModel has just like the `GridModel` been replaced with its implementation
-of the `ModelComponent`: `MeshComponent`. The restructering of `MeshModel` follows the same pattern
-as the `GridComponent`.
 
 
 Removed Model attributes
 ------------------------
 
-Below you will find a summary of the functionalities, features, attributes and other things that were removed from the `Model` class for v1 and how you can access their new equivalents.
+Below you will find a summary of the functionalities, features, attributes and other things that were removed from the `Model`
+class for v1 and how you can access their new equivalents.
 
-- **api**: The `api` property and its associated attributes such as `_API` were previously provided to the plugins to enable additional validation. These have been superseded by the component architecture and have therefore been removed. Except in the case of equality checking (which will be covered separately below) plugins do not need to access any replacement functionality. All the type checking that was previously handled by the `api` property is now performed by the component architecture itself. If you use components as instructed they will take care of the rest for you.
-- **_MAPS/_CONF/_GEOMS/etc.**: As most aspects are now handled by the components, their model level attributes such as `_CONF` or `_MAPS` have been removed. The same functionality/ convention can still be used by setting these in the components. For example, if you want to tell HydroMT that the default config for your plugin/model is called `my_plugin_default_config.yaml` you can do so by setting the `filename` attribute of the `ConfigComponent` at init like so:
+- **api**: The `api` property and its associated attributes such as `_API` were previously provided to the plugins to enable
+  additional validation. These have been superseded by the component architecture and have therefore been removed. Except in
+  the case of equality checking (which will be covered separately below) plugins do not need to access any replacement functionality.
+  All the type checking that was previously handled by the `api` property is now performed by the component architecture itself.
+  If you use components as instructed they will take care of the rest for you.
+- **_MAPS/_GEOMS/etc.**: As most aspects are now handled by the components, their model level attributes such as `_GEOMS` or
+  `_MAPS` have been removed. The same functionality/ convention can still be used by setting these in the components.
+- **_CONF** and **config_fn**: For the same reason, defining default config filename from the Model as been removed. To update
+  the default config filename for your plugin/model, you can do so by setting the `filename` attribute of the `ConfigComponent`
+  as followed. Similarly, if you would like to allow your user to easily update the model config file, you can re-add
+  the **config_fn** in your model plugin:
 
 .. code-block:: python
 
 	class MyModel(Model):
 	...
-	def __init__(self):
+	def __init__(self, config_filename: Optional[str] = None):
 		...
-		config_component = ConfigComponent(self, filename="my_plugin_default_config.yaml")
+		# Add the config component
+		if config_filename is None:
+			config_filename = "my_plugin_default_config.toml"
+		config_component = ConfigComponent(self, filename=config_filename)
 		self.add_component("config", config_component)
 
-	When done correctly the behaviour should be the same as in v0.x in this regard.
-- **_FOLDERS**: Since the components are now responsible for creating their folders when writing, we no longer have a `_FOLDERS` attribute and the `Model` will no longer create the folders during model init. This was done to provide more flexibility in which folders need to be created and which do not need to be. Components should make sure that they create the necessary folders themselves during writing.
+- **_FOLDERS**: Since the components are now responsible for creating their folders when writing, we no longer have a `_FOLDERS`
+  attribute and the `Model` will no longer create the folders during model init. This was done to provide more flexibility in
+  which folders need to be created and which do not need to be. Components should make sure that they create the necessary folders
+  themselves during writing.
+- **_CLI_ARGS**: As region and resolution are removed from the command line arguments, this was not needed anymore.
+- **deprecated attributes**: all grid related deprecated attributes have been removed (eg dims, coords, res etc.)
 
 Plugins
 -------
 
-Previously the `Model` class was the only entrypoint for providing core with custom behavior.
+Previously the `Model` class was the only entrypoint for providing core with custom behaviour.
 Now, there are three:
 
 - `Model`: This class is mostly responsible for dispatching function calls and otherwise delegating work to components.
@@ -616,7 +673,7 @@ responsibilities:
 model region.
 - Homogenize the data based on the data catalog entry and HydroMT conventions.
 
-In v1, this class has been split into three extentable components:
+In v1, this class has been split into three extendable components:
 
 DataSource
 ^^^^^^^^^^

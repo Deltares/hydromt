@@ -8,13 +8,18 @@ from typing import (
     TYPE_CHECKING,
     Dict,
     Optional,
+    Tuple,
     Union,
     cast,
 )
 
 import geopandas as gpd
+import numpy as np
 from geopandas import GeoDataFrame, GeoSeries
+from geopandas.testing import assert_geodataframe_equal
+from shapely.geometry import box
 
+from hydromt.components.base import ModelComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.hydromt_step import hydromt_step
 from hydromt.metadata_resolver import ConventionResolver
@@ -30,15 +35,17 @@ class GeomsComponent(SpatialModelComponent):
     """
 
     DEFAULT_FILENAME = "geoms/{name}.geojson"
+    DEFAULT_REGION_FILENAME = "geoms/geoms_region.geojson"
 
     def __init__(
         self,
         model: "Model",
         *,
-        region_component: str,
         filename: Optional[str] = None,
+        region_component: Optional[str] = None,
+        region_filename: Optional[str] = None,
     ):
-        """Initialize a GeomComponent.
+        """Initialize a GeomsComponent.
 
         Parameters
         ----------
@@ -47,10 +54,22 @@ class GeomsComponent(SpatialModelComponent):
         filename: str
             The path to use for reading and writing of component data by default.
             by default "geoms/{name}.geojson" ie one file per geodataframe in the data dictionary.
+        region_component: str, optional
+            The name of the region component to use as reference for this component's
+            region. If None, the region will be set to the union of all geometries in
+            the data dictionary.
+        region_filename: str, optional
+            The path to use for writing the region data to a file. By default
+            "geoms/geoms_region.geojson".
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
-        super().__init__(model=model, region_component=region_component)
+        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
+        super().__init__(
+            model=model,
+            region_component=region_component,
+            region_filename=region_filename,
+        )
 
     @property
     def data(self) -> Dict[str, Union[GeoDataFrame, GeoSeries]]:
@@ -73,9 +92,21 @@ class GeomsComponent(SpatialModelComponent):
 
     @property
     def _region_data(self) -> Optional[GeoDataFrame]:
-        raise AttributeError(
-            "region cannot be found in geoms component. Meaning that the region_component is not set or could not be found in the model."
+        # Use the total bounds of all geometries as region
+        if len(self.data) == 0:
+            return None
+        bounds = np.column_stack([geom.bounds for geom in self.data.values()])
+        total_bounds = (
+            bounds[0].min(),
+            bounds[1].min(),
+            bounds[2].max(),
+            bounds[3].max(),
         )
+        region = gpd.GeoDataFrame(
+            geometry=[gpd.GeoSeries(box(total_bounds))], crs=self.model.crs
+        )
+
+        return region
 
     def set(self, geom: Union[GeoDataFrame, GeoSeries], name: str):
         """Add data to the geom component.
@@ -190,3 +221,35 @@ class GeomsComponent(SpatialModelComponent):
                 gdf.to_crs(epsg=4326, inplace=True)  # type: ignore
 
             gdf.to_file(write_path, **kwargs)
+
+    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+        """Test if two GeomsComponents are equal.
+
+        Parameters
+        ----------
+        other: GeomsComponent
+            The other GeomsComponent to compare with.
+
+        Returns
+        -------
+        tuple[bool, dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_geoms = cast(GeomsComponent, other)
+        for name, gdf in self.data.items():
+            if name not in other_geoms.data:
+                errors[name] = "Geom not found in other component."
+            try:
+                assert_geodataframe_equal(
+                    gdf,
+                    other_geoms.data[name],
+                    check_like=True,
+                    check_less_precise=True,
+                )
+            except AssertionError as e:
+                errors[name] = str(e)
+
+        return len(errors) == 0, errors

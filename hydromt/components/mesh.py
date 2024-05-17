@@ -1,9 +1,9 @@
-"""Implementations for model mesh workloads."""
+"""Mesh Component."""
 
 import os
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import pandas as pd
@@ -25,25 +25,54 @@ from hydromt.workflows.mesh import (
 if TYPE_CHECKING:
     from hydromt.models import Model
 
-
 __all__ = ["MeshComponent"]
 
 
 class MeshComponent(SpatialModelComponent):
-    """ModelComponent class for mesh components."""
+    """ModelComponent class for mesh components.
+
+    This class is used to manage unstructured mesh data in a model. The mesh component
+    data stored in the ``data`` property is a xugrid.UgridDataset object.
+    """
 
     DEFAULT_FILENAME = "mesh/mesh.nc"
+    DEFAULT_REGION_FILENAME = "mesh/mesh_region.geojson"
 
     def __init__(
         self,
         model: "Model",
         *,
         filename: Optional[str] = None,
+        region_component: Optional[str] = None,
         region_filename: str = SpatialModelComponent.DEFAULT_REGION_FILENAME,
     ):
-        # region_component reference is not used in mesh, must set a region via the create function.
-        super().__init__(model, region_component=None, filename=region_filename)
-        self._data = None
+        """
+        Initialize a MeshComponent.
+
+        Parameters
+        ----------
+        model: Model
+            HydroMT model instance
+        filename: str, optional
+            The path to use for reading and writing of component data by default.
+            by default "mesh/mesh.nc".
+        region_component: str, optional
+            The name of the region component to use as reference for this component's
+            region. If None, the region will be set to the total bounds of the mesh.
+            Note that the create method only works if the region_component is None.
+            For add_data_from_* methods, the other region_component should be a
+            reference to another mesh component for correct reprojection.
+        region_filename: str, optional
+            The path to use for reading and writing of the region data by default.
+            by default "mesh/mesh_region.geojson".
+        """
+        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
+        super().__init__(
+            model,
+            region_component=region_component,
+            region_filename=region_filename,
+        )
+        self._data: Optional[xu.UgridDataset] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
 
     def set(
@@ -189,7 +218,7 @@ class MeshComponent(SpatialModelComponent):
                         "no crs is found in the file, assigning from user input."
                     )
             # Reading ugrid data adds nNodes coordinates to grid and makes it not
-            # possisble to test two equal grids for equality
+            # possible to test two equal grids for equality
             if f"{uds.grid.name}_nNodes" in uds.grid.to_dataset():
                 uds = xu.UgridDataset(
                     uds.ugrid.to_dataset().drop_vars(f"{uds.grid.name}_nNodes")
@@ -199,12 +228,13 @@ class MeshComponent(SpatialModelComponent):
             self._data = uds
 
     @hydromt_step
-    def create2d(
+    def create_2d_from_region(
         self,
         region: Dict[str, Any],
         *,
         res: Optional[float] = None,
         crs: Optional[int] = None,
+        region_crs: int = 4326,
         grid_name: str = "mesh2d",
         align: bool = True,
     ) -> xu.UgridDataset:
@@ -236,6 +266,9 @@ class MeshComponent(SpatialModelComponent):
         crs : int, optional
             Optional EPSG code of the model.
             If None using the one from region, and else 4326.
+        region_crs : int, optional
+            EPSG code of the region geometry, by default None. Only applies if region is
+            of kind 'bbox'or if geom crs is not defined in the file itself.
         align : bool, default True
             Align the mesh to the resolution.
             Required for 'bbox' and 'geom' region types.
@@ -249,10 +282,17 @@ class MeshComponent(SpatialModelComponent):
         """
         self.logger.info("Preparing 2D mesh.")
 
+        # Check if this component's region is a reference to another component
+        if self._region_component is not None:
+            raise ValueError(
+                "Region is a reference to another component. Cannot create grid."
+            )
+
         mesh2d = create_mesh2d_from_region(
             region,
             res=res,
             crs=crs,
+            region_crs=region_crs,
             align=align,
             logger=self.logger,
             data_catalog=self.data_catalog,
@@ -386,7 +426,7 @@ class MeshComponent(SpatialModelComponent):
                 if hasattr(self.data[var], "ugrid"):
                     if self.data[var].ugrid.grid.name != grid_name:
                         variables.append(var)
-                # additionnal topology properties
+                # additional topology properties
                 elif not var.startswith(grid_name):
                     variables.append(var)
                 # else is global property (not grid specific)
@@ -457,11 +497,11 @@ class MeshComponent(SpatialModelComponent):
             List of variables added to mesh.
         """  # noqa: E501
         self.logger.info(f"Preparing mesh data from raster source {raster_filename}")
-        # Check if grid name in self.mesh
-        if grid_name not in self.mesh_names:
-            raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
+        # Get the grid from the mesh or the reference one
+        mesh_like = self._get_mesh_grid_data(grid_name=grid_name)
+
         # Read raster data and select variables
-        bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
+        bounds = self._get_mesh_gdf_data(grid_name).to_crs(4326).total_bounds
         ds = self.data_catalog.get_rasterdataset(
             raster_filename,
             bbox=bounds,
@@ -472,7 +512,7 @@ class MeshComponent(SpatialModelComponent):
 
         uds_sample = mesh2d_from_rasterdataset(
             ds=ds,
-            mesh2d=self.mesh_grids[grid_name],
+            mesh2d=mesh_like,
             variables=variables,
             fill_method=fill_method,
             resampling_method=resampling_method,
@@ -557,11 +597,10 @@ class MeshComponent(SpatialModelComponent):
             f"Preparing mesh data by reclassifying the data in {raster_filename} "
             f"based on {reclass_table_filename}."
         )
-        # Check if grid name in self.mesh
-        if grid_name not in self.mesh_names:
-            raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
+        # Get the grid from the mesh or the reference one
+        mesh_like = self._get_mesh_grid_data(grid_name=grid_name)
         # Read raster data and mapping table
-        bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
+        bounds = self._get_mesh_gdf_data(grid_name).to_crs(4326).total_bounds
         da = self.data_catalog.get_rasterdataset(
             raster_filename,
             bbox=bounds,
@@ -581,7 +620,7 @@ class MeshComponent(SpatialModelComponent):
         uds_sample = mesh2d_from_raster_reclass(
             da=da,
             df_vars=df_vars,
-            mesh2d=self.mesh_grids[grid_name],
+            mesh2d=mesh_like,
             reclass_variables=reclass_variables,
             fill_method=fill_method,
             resampling_method=resampling_method,
@@ -679,6 +718,50 @@ class MeshComponent(SpatialModelComponent):
             .to_dataset(optional_attributes=True)
             .equals(data.grid.to_dataset(optional_attributes=True))
         )
+
+    def _get_mesh_grid_data(self, grid_name: str) -> Union[xu.Ugrid1d, xu.Ugrid2d]:
+        if self._region_component is not None:
+            region_component = cast(
+                MeshComponent, self.model.get_component(self._region_component)
+            )
+            if region_component is None:
+                raise ValueError(
+                    f"Unable to find the referenced region component: '{self._region_component}'"
+                )
+            if region_component.data is None:
+                raise ValueError(
+                    f"Unable to get grid from the referenced region component: '{self._region_component}'"
+                )
+            if grid_name not in region_component.mesh_names:
+                raise ValueError(f"Grid {grid_name} not found in mesh.")
+            return region_component.mesh_grids[grid_name]
+        if self.data is None:
+            raise ValueError("No mesh data available.")
+        if grid_name not in self.mesh_names:
+            raise ValueError(f"Grid {grid_name} not found in mesh.")
+        return self.mesh_grids[grid_name]
+
+    def _get_mesh_gdf_data(self, grid_name: str) -> gpd.GeoDataFrame:
+        if self._region_component is not None:
+            region_component = cast(
+                MeshComponent, self.model.get_component(self._region_component)
+            )
+            if region_component is None:
+                raise ValueError(
+                    f"Unable to find the referenced region component: '{self._region_component}'"
+                )
+            if region_component.data is None:
+                raise ValueError(
+                    f"Unable to get region from the referenced region component: '{self._region_component}'"
+                )
+            if grid_name not in region_component.mesh_names:
+                raise ValueError(f"Grid {grid_name} not found in mesh.")
+            return region_component.mesh_gdf[grid_name]
+        if self.data is None:
+            raise ValueError("No mesh data available.")
+        if grid_name not in self.mesh_names:
+            raise ValueError("No region data available.")
+        return self.mesh_gdf[grid_name]
 
 
 def _check_UGrid(

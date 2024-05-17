@@ -41,16 +41,43 @@ class GridComponent(SpatialModelComponent):
     """
 
     DEFAULT_FILENAME = "grid/grid.nc"
+    DEFAULT_REGION_FILENAME = "grid/grid_region.geojson"
 
     def __init__(
         self,
         model: "Model",
         *,
         filename: Optional[str] = None,
+        region_component: Optional[str] = None,
         region_filename: Optional[StrPath] = None,
     ):
+        """
+        Initialize a GridComponent.
+
+        Parameters
+        ----------
+        model: Model
+            HydroMT model instance
+        filename: str, optional
+            The path to use for reading and writing of component data by default.
+            By default "grid/grid.nc".
+        region_component: str, optional
+            The name of the region component to use as reference for this component's region.
+            If None, the region will be set to the grid extent. Note that the create
+            method only works if the region_component is None. For add_data_from_*
+            methods, the other region_component should be a reference to another
+            grid component for correct reprojection.
+        region_filename: str, optional
+            The path to use for reading and writing of the region data by default.
+            By default "grid/grid_region.geojson".
+        """
         # region_component referencing is not possible for grids. The region should be passed via create().
-        super().__init__(model=model, region_component=None, filename=region_filename)
+        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
+        super().__init__(
+            model=model,
+            region_component=region_component,
+            region_filename=region_filename,
+        )
         self._data: Optional[xr.Dataset] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
 
@@ -73,8 +100,7 @@ class GridComponent(SpatialModelComponent):
         """
         self._initialize_grid()
         assert self._data is not None
-        # NOTE: variables in a dataset are not longer renamed as used to be the case in
-        # set_staticmaps
+
         name_required = isinstance(data, np.ndarray) or (
             isinstance(data, xr.DataArray) and data.name is None
         )
@@ -199,12 +225,13 @@ class GridComponent(SpatialModelComponent):
             self.set(ds)
 
     @hydromt_step
-    def create(
+    def create_from_region(
         self,
         region: Dict[str, Any],
         *,
         res: Optional[float] = None,
         crs: Optional[int] = None,
+        region_crs: int = 4326,
         rotated: bool = False,
         hydrography_fn: Optional[str] = None,
         basin_index_fn: Optional[str] = None,
@@ -235,7 +262,10 @@ class GridComponent(SpatialModelComponent):
             Resolution used to generate 2D grid [unit of the CRS], required if region
             is not based on 'grid'.
         crs : int, optional
-            EPSG code of the model
+            EPSG code of the grid to create.
+        region_crs : int, optional
+            EPSG code of the region geometry, by default None. Only applies if region is
+            of kind 'bbox'or if geom crs is not defined in the file itself.
         rotated : bool
             if True, a minimum rotated rectangular grid is fitted around the region,
             by default False. Only applies if region is of kind 'bbox', 'geom'
@@ -269,11 +299,18 @@ class GridComponent(SpatialModelComponent):
         """
         self.logger.info("Preparing 2D grid.")
 
+        # Check if this component's region is a reference to another component
+        if self._region_component is not None:
+            raise ValueError(
+                "Region is a reference to another component. Cannot create grid."
+            )
+
         grid = create_grid_from_region(
             region,
-            logger=self.logger,
+            data_catalog=self.data_catalog,
             res=res,
             crs=crs,
+            region_crs=region_crs,
             rotated=rotated,
             hydrography_fn=hydrography_fn,
             basin_index_fn=basin_index_fn,
@@ -281,6 +318,7 @@ class GridComponent(SpatialModelComponent):
             align=align,
             dec_origin=dec_origin,
             dec_rotation=dec_rotation,
+            logger=self.logger,
         )
         self.set(grid)
         return grid
@@ -375,7 +413,7 @@ class GridComponent(SpatialModelComponent):
         self,
         constant: Union[int, float],
         name: str,
-        dtype: Optional[str] = "float32",  # TODO: change dtype to np.dtype
+        dtype: Optional[str] = "float32",
         nodata: Optional[Union[int, float]] = None,
         mask_name: Optional[str] = "mask",
     ) -> List[str]:
@@ -390,7 +428,7 @@ class GridComponent(SpatialModelComponent):
         dtype: str, optional
             Data type of grid. By default 'float32'.
         nodata: int, float, optional
-            Nodata value. By default infered from dtype.
+            Nodata value. By default inferred from dtype.
         mask_name: str, optional
             Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
             Use None to disable masking.
@@ -401,7 +439,7 @@ class GridComponent(SpatialModelComponent):
             Names of added model grid layer.
         """
         da = grid_from_constant(
-            grid_like=self.data,
+            grid_like=self._get_grid_data(),
             constant=constant,
             name=name,
             dtype=dtype,
@@ -471,7 +509,7 @@ class GridComponent(SpatialModelComponent):
         )
         # Data resampling
         ds_out = grid_from_rasterdataset(
-            grid_like=self.data,
+            grid_like=self._get_grid_data(),
             ds=ds,
             variables=variables,
             fill_method=fill_method,
@@ -559,7 +597,7 @@ class GridComponent(SpatialModelComponent):
         )
         # Data resampling
         ds_vars = grid_from_raster_reclass(
-            grid_like=self.data,
+            grid_like=self._get_grid_data(),
             da=da,
             reclass_table=df_vars,
             reclass_variables=reclass_variables,
@@ -644,7 +682,7 @@ class GridComponent(SpatialModelComponent):
             # the name directly
             rename = rename[vector_fn]
         ds = grid_from_geodataframe(
-            grid_like=self._data,
+            grid_like=self._get_grid_data(),
             gdf=gdf,
             variables=variables,
             nodata=nodata,
@@ -681,3 +719,23 @@ class GridComponent(SpatialModelComponent):
             errors["data"] = str(e)
 
         return len(errors) == 0, errors
+
+    def _get_grid_data(self) -> Union[xr.DataArray, xr.Dataset]:
+        """Get grid data as xarray.DataArray from this component or the reference."""
+        if self._region_component is not None:
+            region_component = cast(
+                GridComponent, self.model.get_component(self._region_component)
+            )
+            if region_component is None:
+                raise ValueError(
+                    f"Unable to find the referenced region component: '{self._region_component}'"
+                )
+            if region_component.data is None:
+                raise ValueError(
+                    f"Unable to get grid from the referenced region component: '{self._region_component}'"
+                )
+            return region_component.data
+
+        if self.data is None:
+            raise ValueError("Unable to get grid data from this component.")
+        return self.data

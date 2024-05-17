@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 
 class ConfigComponent(ModelComponent):
     """
-    A component to write configuration files for model simulations/settings.
+    A component to manage configuration files for model simulations/settings.
 
     ``ConfigComponent`` data is stored as a dictionary and can be written to a file
     in yaml or toml format. The component can be used to store model settings
@@ -216,6 +216,7 @@ class ConfigComponent(ModelComponent):
         """Create a new config file based on a template file.
 
         It the template is not provided, the default template will be used if available.
+        Only yaml and toml files are supported.
 
         Parameters
         ----------
@@ -262,30 +263,6 @@ class ConfigComponent(ModelComponent):
         else:
             raise ValueError(f"Unknown file extension: {template.suffix}")
 
-    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
-        """Test if two components are equal.
-
-        Parameters
-        ----------
-        other : ModelComponent
-            The component to compare against.
-
-        Returns
-        -------
-        tuple[bool, Dict[str, str]]
-            True if the components are equal, and a dict with the associated errors per property checked.
-        """
-        eq, errors = super().test_equal(other)
-        if not eq:
-            return eq, errors
-        other_config = cast(ConfigComponent, other)
-
-        # for once python does the recusion for us
-        if self.data == other_config.data:
-            return True, {}
-        else:
-            return False, {"config": "Configs are not equal"}
-
     @hydromt_step
     def update(self, data: Dict[str, Any]):
         """Set the config dictionary at key(s) with values.
@@ -309,3 +286,27 @@ class ConfigComponent(ModelComponent):
             self.logger.debug("Setting model config options.")
         for k, v in data.items():
             self.set(k, v)
+
+    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, Dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_config = cast(ConfigComponent, other)
+
+        # for once python does the recursion for us
+        if self.data == other_config.data:
+            return True, {}
+        else:
+            return False, {"config": "Configs are not equal"}

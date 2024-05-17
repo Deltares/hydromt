@@ -37,11 +37,7 @@ T = TypeVar("T", bound=ModelComponent)
 
 
 class Model(object, metaclass=ABCMeta):
-    """
-    General and basic API for models in HydroMT.
-
-    Inherit from this class to pre-define mandatory components in the model.
-    """
+    """General and basic API for models in HydroMT."""
 
     _NAME: str = "modelname"
     # supported model version should be filled by the plugins
@@ -50,19 +46,24 @@ class Model(object, metaclass=ABCMeta):
 
     def __init__(
         self,
+        root: Optional[str] = None,
         *,
         components: Optional[Dict[str, Any]] = None,
-        root: Optional[str] = None,
         mode: str = "w",
         data_libs: Optional[Union[List, str]] = None,
-        logger=_logger,
         region_component: Optional[str] = None,
-        **artifact_keys,
+        logger=_logger,
+        **catalog_keys,
     ):
         """Initialize a model.
 
+        Note that the * in the signature signifies that all of the arguments after the
+        * in this function MUST be provided as keyword arguments.
+
         Parameters
         ----------
+        root : str, optional
+            Model root, by default None
         components: Dict[str, Any], optional
             Dictionary of components to add to the model, by default None
             Every entry in this dictionary contains the name of the component as key,
@@ -75,21 +76,19 @@ class Model(object, metaclass=ABCMeta):
                         "filename": "path/to/grid.nc"
                     }
                 }
-        root : str, optional
-            Model root, by default None
         mode : {'r','r+','w'}, optional
             read/append/write mode, by default "w"
         data_libs : List[str], optional
             List of data catalog configuration files, by default None
-        logger:
-            The logger to be used.
         region_component : str, optional
             The name of the region component in the components dictionary.
             If None, the model will can automatically determine the region component if there is only one `SpatialModelComponent`.
             Otherwise it will raise an error.
             If there are no `SpatialModelComponent` it will raise a warning that `region` functionality will not work.
-        **artifact_keys:
-            Additional keyword arguments to be passed down.
+        logger:
+            The logger to be used.
+        **catalog_keys:
+            Additional keyword arguments to be passed down to the DataCatalog.
         """
         # Recursively update the options with any defaults that are missing in the configuration.
         components = components or {}
@@ -100,13 +99,13 @@ class Model(object, metaclass=ABCMeta):
 
         # link to data
         self.data_catalog = DataCatalog(
-            data_libs=data_libs, logger=self.logger, **artifact_keys
+            data_libs=data_libs, logger=self.logger, **catalog_keys
         )
 
         # file system
         self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
 
-        self._components: Dict[str, ModelComponent] = {}
+        self.components: Dict[str, ModelComponent] = {}
         self._add_components(components)
 
         self._defered_file_closes: List[DeferedFileClose] = []
@@ -122,10 +121,10 @@ class Model(object, metaclass=ABCMeta):
 
     def _determine_region_component(self, region_component: Optional[str]) -> str:
         if region_component is not None:
-            if region_component not in self._components:
+            if region_component not in self.components:
                 raise KeyError(f"Component {region_component} not found in components.")
             elif not isinstance(
-                self._components.get(region_component, None), SpatialModelComponent
+                self.components.get(region_component, None), SpatialModelComponent
             ):
                 raise ValueError(
                     f"Component {region_component} is not a {SpatialModelComponent.__name__}."
@@ -134,7 +133,7 @@ class Model(object, metaclass=ABCMeta):
         else:
             has_region_components = [
                 (name, c)
-                for name, c in self._components.items()
+                for name, c in self.components.items()
                 if isinstance(c, SpatialModelComponent)
             ]
             if len(has_region_components) > 1:
@@ -163,15 +162,15 @@ class Model(object, metaclass=ABCMeta):
 
     def add_component(self, name: str, component: ModelComponent) -> None:
         """Add a component to the model. Will raise an error if the component already exists."""
-        if name in self._components:
+        if name in self.components:
             raise ValueError(f"Component {name} already exists in the model.")
         if not name.isidentifier():
             raise ValueError(f"Component name {name} is not a valid identifier.")
-        self._components[name] = component
+        self.components[name] = component
 
     def get_component(self, name: str) -> ModelComponent:
         """Get a component from the model. Will raise an error if the component does not exist."""
-        return self._components[name]
+        return self.components[name]
 
     def __getattr__(self, name: str) -> ModelComponent:
         """Get a component from the model. Will raise an error if the component does not exist."""
@@ -182,9 +181,9 @@ class Model(object, metaclass=ABCMeta):
         """Return the model's region component."""
         return (
             cast(
-                SpatialModelComponent, self._components[self._region_component_name]
+                SpatialModelComponent, self.components[self._region_component_name]
             ).region
-            if self._region_component_name in self._components
+            if self._region_component_name in self.components
             else None
         )
 
@@ -343,7 +342,7 @@ class Model(object, metaclass=ABCMeta):
         if write and not self._options_contain_write(steps):
             self.write()
 
-        for comp in self._components.values():
+        for comp in self.components.values():
             if isinstance(comp, DatasetsComponent):
                 comp._cleanup(forceful_overwrite=forceful_overwrite)
 
@@ -357,8 +356,8 @@ class Model(object, metaclass=ABCMeta):
                 the components that should be writen to disk. If None is provided
                 all components will be written.
         """
-        components = components or list(self._components.keys())
-        for c in [self._components[name] for name in components]:
+        components = components or list(self.components.keys())
+        for c in [self.components[name] for name in components]:
             c.write()
 
     @hydromt_step
@@ -372,8 +371,8 @@ class Model(object, metaclass=ABCMeta):
                 all components will be read.
         """
         self.logger.info(f"Reading model data from {self.root.path}")
-        components = components or list(self._components.keys())
-        for c in [self._components[name] for name in components]:
+        components = components or list(self.components.keys())
+        for c in [self.components[name] for name in components]:
             c.read()
 
     @staticmethod
@@ -444,8 +443,8 @@ class Model(object, metaclass=ABCMeta):
             return False, {
                 "__class__": f"f{other.__class__} does not inherit from {self.__class__}."
             }
-        components = list(self._components.keys())
-        components_other = list(other._components.keys())
+        components = list(self.components.keys())
+        components_other = list(other.components.keys())
         if components != components_other:
             return False, {
                 "components": f"Components do not match: {components} != {components_other}"
@@ -453,8 +452,8 @@ class Model(object, metaclass=ABCMeta):
 
         errors: Dict[str, str] = {}
         is_equal = True
-        for name, c in self._components.items():
-            component_equal, component_errors = c.test_equal(other._components[name])
+        for name, c in self.components.items():
+            component_equal, component_errors = c.test_equal(other.components[name])
             is_equal &= component_equal
             errors.update(**component_errors)
         return is_equal, errors

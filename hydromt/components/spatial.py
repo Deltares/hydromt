@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class SpatialModelComponent(ModelComponent, ABC):
-    """Define the model region."""
+    """Base spatial model component for GIS components."""
 
     DEFAULT_REGION_FILENAME = "region.geojson"
 
@@ -25,11 +25,35 @@ class SpatialModelComponent(ModelComponent, ABC):
         model: "Model",
         *,
         region_component: Optional[str] = None,
-        filename: Optional[StrPath] = None,
+        region_filename: Optional[StrPath] = None,
     ) -> None:
+        """
+        Initialize a SpatialModelComponent.
+
+        This component serves as a base class for components that are geospatial and
+        require a region.
+
+        To re-use in your won component, make sure you implement the `_region_data`
+        property.
+
+        Parameters
+        ----------
+        model: Model
+            HydroMT model instance
+        region_component: str, optional
+            The name of the region component to use as reference for this component's
+            region in case the region of this new component depends on the region of a
+            different component. If None, the region will be set based on the
+            `_region_data` property of the component itself.
+        region_filename: str, optional
+            The path to use for writing the region data to a file.
+            By default "region.geojson".
+        """
         super().__init__(model)
         self._region_component = region_component
-        self._region_filename = filename or self.__class__.DEFAULT_REGION_FILENAME
+        self._region_filename = (
+            region_filename or self.__class__.DEFAULT_REGION_FILENAME
+        )
 
     @property
     def bounds(self) -> Optional[Tuple[float, float, float, float]]:

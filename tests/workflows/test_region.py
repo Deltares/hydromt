@@ -1,6 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import pytest
+import xarray as xr
 import xugrid as xu
 from pytest_mock import MockerFixture
 
@@ -55,7 +56,7 @@ def test_geom_from_points_fails(geodf):
 
 def test_region_from_grid(rioda):
     region = parse_region_grid({"grid": rioda}, data_catalog=None)
-    assert region == rioda
+    xr.testing.assert_equal(region, rioda)
 
 
 @pytest.mark.skip("new driver implementation causes validation error")
@@ -63,7 +64,7 @@ def test_region_from_grid_file(tmpdir, rioda):
     fn_grid = str(tmpdir.join("grid.tif"))
     rioda.raster.to_raster(fn_grid)
     region = parse_region_grid({"grid": fn_grid}, data_catalog=DataCatalog())
-    assert region["grid"] == rioda
+    xr.testing.assert_equal(region, rioda)
 
 
 @pytest.mark.skip(reason="Needs Rasterdataset impl")
@@ -81,7 +82,7 @@ def test_region_from_grid_cat(tmpdir, rioda):
         }
     )
     region = parse_region_grid({"grid": "grid"}, data_catalog=cat)
-    assert region["grid"] == rioda
+    xr.testing.assert_equal(region, rioda)
 
 
 @pytest.mark.skip(reason="Needs Rasterdataset impl")

@@ -368,8 +368,6 @@ def model(demda, world, obsda):
 
 def _create_vector_model(
     *,
-    use_default_filename: bool = True,
-    use_default_geometry_filename: bool = True,
     ts,
     geodf,
     mocker: MockerFixture,
@@ -382,10 +380,6 @@ def _create_vector_model(
         "vector": {"type": VectorComponent.__name__, "region_component": "area"},
         "config": {"type": ConfigComponent.__name__},
     }
-    if not use_default_filename:
-        components["vector"]["filename"] = None
-    if not use_default_geometry_filename:
-        components["vector"]["geometry_filename"] = None
 
     mod = Model(components=components, region_component="area")
     cast(ConfigComponent, mod.config).set("header.setting", "value")
@@ -411,8 +405,6 @@ def vector_model(ts, geodf, mocker: MockerFixture):
 @pytest.fixture()
 def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
     return _create_vector_model(
-        use_default_filename=False,
-        use_default_geometry_filename=False,
         ts=ts,
         geodf=geodf,
         mocker=mocker,

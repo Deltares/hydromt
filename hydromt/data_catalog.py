@@ -46,6 +46,7 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR
+from hydromt.data_adapter.utils import _single_var_as_array
 from hydromt.data_source import DataSource, create_source
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.predefined_catalog import (
@@ -1263,9 +1264,7 @@ class DataCatalog(object):
                     strategy=handle_nodata,
                     logger=logger,
                 )
-            ds = RasterDatasetAdapter._single_var_as_array(
-                data_like, single_var_as_array, variables
-            )
+            ds = _single_var_as_array(data_like, single_var_as_array, variables)
             return ds
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')

@@ -1,5 +1,6 @@
-"""Xarrays component."""
+"""Spatial Xarrays component."""
 
+from pathlib import Path
 from shutil import move
 from typing import (
     TYPE_CHECKING,
@@ -12,11 +13,13 @@ from typing import (
 )
 
 import xarray as xr
+from geopandas import GeoDataFrame
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
 from hydromt._typing.type_def import XArrayDict
 from hydromt.components.base import ModelComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.hydromt_step import hydromt_step
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
@@ -25,30 +28,51 @@ if TYPE_CHECKING:
     from hydromt.models.model import Model
 
 
-class DatasetsComponent(ModelComponent):
-    """A component to manage collections of Xarray objects.
+class SpatialDatasetsComponent(SpatialModelComponent):
+    """
+    A component to manage collection of geospatial xarray objects.
 
     It contains a dictionary of xarray DataArray or Dataset objects.
+    Compared to ``DatasetsComponent`` this component has a region property.
     """
 
-    DEFAULT_FILENAME = "datasets/{name}.nc"
+    DEFAULT_FILENAME = "spatial_datasets/{name}.nc"
+    DEFAULT_REGION_FILENAME = "spatial_datasets/spatial_datasets_region.geojson"
 
-    def __init__(self, model: "Model", filename: Optional[str] = None):
-        """Initialize a DatasetsComponent.
+    def __init__(
+        self,
+        model: "Model",
+        *,
+        region_component: Optional[str] = None,
+        filename: Optional[str] = None,
+        region_filename: Optional[str] = None,
+    ):
+        """Initialize a SpatialDatasetsComponent.
 
         Parameters
         ----------
         model: Model
             HydroMT model instance
+        region_component: str
+            The name of the region component to use as reference for this component's
+            region.
         filename: str
             The path to use for reading and writing of component data by default.
-            by default "datasets/{name}.nc" ie one file per dataset in the data
-            dictionary.
+            by default "spatial_datasets/{name}.nc" ie one file per xarray object in the
+            data dictionary.
+        region_filename: str, optional
+            The path to use for writing the region data to a file. By default
+            "geoms/geoms_region.geojson".
         """
         self._data: Optional[XArrayDict] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
+        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
         self._defered_file_closes = []
-        super().__init__(model=model)
+        super().__init__(
+            model=model,
+            region_component=region_component,
+            region_filename=region_filename,
+        )
 
     @property
     def data(self) -> XArrayDict:
@@ -68,6 +92,14 @@ class DatasetsComponent(ModelComponent):
             self._data = dict()
             if self.root.is_reading_mode() and not skip_read:
                 self.read()
+
+    @property
+    def _region_data(self) -> Optional[GeoDataFrame]:
+        raise AttributeError(
+            "region cannot be found in spatialdatasets component."
+            "Meaning that the region_component is not set or could not be found in"
+            " the model."
+        )
 
     def set(
         self,
@@ -244,6 +276,168 @@ class DatasetsComponent(ModelComponent):
 
         return list(set(failed_closes))
 
+    @hydromt_step
+    def add_raster_data_from_rasterdataset(
+        self,
+        raster_filename: Union[str, Path, Dataset],
+        variables: Optional[List] = None,
+        fill_method: Optional[str] = None,
+        name: Optional[str] = None,
+        reproject_method: Optional[str] = None,
+        split_dataset: bool = True,
+        rename: Optional[Dict[str, str]] = None,
+    ) -> List[str]:
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_filename`` to datasets component.
+
+        If raster is a xarray dataset, all variables will be added unless ``variables``
+        list is specified.
+
+        Adds model layers:
+        * **raster.name**: data from raster_filename
+
+        Parameters
+        ----------
+        raster_filename: str, Path, xr.Dataset
+            Data catalog key, path to raster file or raster xarray data object.
+        variables: list, optional
+            List of variables to add to datasets from raster_filename. By default all.
+        fill_method : str, optional
+            If specified, fills nodata values using fill_nodata method.
+            Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
+        name: str, optional
+            Name of new dataset in self.data dictionary,
+            only in case split_dataset=False.
+        reproject_method: str, optional
+            See rasterio.warp.reproject for existing methods, by default the data is
+            not reprojected (None).
+        split_dataset: bool, optional
+            If data is a xarray.Dataset split it into several xarray.DataArrays.
+        rename: dict, optional
+            Dictionary to rename variable names in raster_filename before adding to the datasets
+            {'name_in_raster_filename': 'name_in_dataset'}. By default empty.
+
+        Returns
+        -------
+        list
+            Names of added model map layers
+        """
+        rename = rename or {}
+        self.logger.info(f"Preparing dataset data from raster source {raster_filename}")
+        # Read raster data and select variables
+        ds = self.data_catalog.get_rasterdataset(
+            raster_filename,
+            geom=self.region,
+            buffer=2,
+            variables=variables,
+            single_var_as_array=False,
+        )
+        if isinstance(ds, DataArray):
+            ds = ds.to_dataset()
+
+        ds = cast(Dataset, ds)
+        # Fill nodata
+        if fill_method is not None:
+            ds = ds.raster.interpolate_na(method=fill_method)
+        # Reprojection
+        if ds.rio.crs != self.model.crs and reproject_method is not None:
+            ds = ds.raster.reproject(dst_crs=self.model.crs, method=reproject_method)
+        self.set(ds.rename(rename), name=name, split_dataset=split_dataset)
+
+        return list(ds.data_vars.keys())
+
+    @hydromt_step
+    def add_raster_data_from_raster_reclass(
+        self,
+        raster_filename: Union[str, Path, DataArray],
+        reclass_table_filename: Union[str, Path, DataFrame],
+        reclass_variables: List,
+        variable: Optional[str] = None,
+        fill_method: Optional[str] = None,
+        reproject_method: Optional[str] = None,
+        name: Optional[str] = None,
+        split_dataset: bool = True,
+        rename: Optional[Dict] = None,
+        **kwargs,
+    ) -> List[str]:
+        r"""HYDROMT CORE METHOD: Add data variable(s) to datasets component by reclassifying the data in ``raster_filename`` based on ``reclass_table_filename``.
+
+        This is done by reclassifying the data in
+        ``raster_filename`` based on ``reclass_table_filename``.
+
+        Adds model layers:
+
+        * **reclass_variables**: reclassified raster data
+
+        Parameters
+        ----------
+        raster_filename: str, Path, xr.DataArray
+            Data catalog key, path to raster file or raster xarray data object.
+            Should be a DataArray. Else use `variable` argument for selection.
+        reclass_table_filename: str, Path, pd.DataFrame
+            Data catalog key, path to tabular data file or tabular pandas dataframe
+            object for the reclassification table of `raster_filename`.
+        reclass_variables: list
+            List of reclass_variables from reclass_table_filename table to add to the datasets. Index
+            column should match values in `raster_filename`.
+        variable: str, optional
+            Name of raster dataset variable to use. This is only required when reading
+            datasets with multiple variables. By default None.
+        fill_method : str, optional
+            If specified, fills nodata values in `raster_filename` using fill_nodata method
+            before reclassifying. Available methods are {'linear', 'nearest',
+            'cubic', 'rio_idw'}.
+        reproject_method: str, optional
+            See rasterio.warp.reproject for existing methods, by default the data is
+            not reprojected (None).
+        name: str, optional
+            Name of new dataset variable, only in case split_dataset=False.
+        split_dataset: bool, optional
+            If data is a xarray.Dataset split it into several xarray.DataArrays.
+        rename: dict, optional
+            Dictionary to rename variable names in reclass_variables before adding to
+            grid {'name_in_reclass_table': 'name_in_grid'}. By default empty.
+        \**kwargs:
+            Additional keyword arguments that are passed to the
+            `data_catalog.get_rasterdataset` function.
+
+        Returns
+        -------
+        list
+            Names of added model map layers
+        """  # noqa: E501
+        rename = rename or {}
+        self.logger.info(
+            f"Preparing map data by reclassifying the data in {raster_filename} based"
+            f" on {reclass_table_filename}"
+        )
+        # Read raster data and remapping table
+        da = self.data_catalog.get_rasterdataset(
+            raster_filename,
+            geom=self.region,
+            buffer=2,
+            variables=variable,
+            **kwargs,
+        )
+        if not isinstance(da, DataArray):
+            raise ValueError(
+                f"raster_filename {raster_filename} should be a single variable. "
+                "Please select one using the 'variable' argument"
+            )
+        df_vars = self.data_catalog.get_dataframe(
+            reclass_table_filename, variables=reclass_variables
+        )
+        # Fill nodata
+        if fill_method is not None:
+            da = da.raster.interpolate_na(method=fill_method)
+        # Mapping function
+        ds_vars = da.raster.reclassify(reclass_table=df_vars, method="exact")
+        # Reprojection
+        if ds_vars.rio.crs != self.model.crs and reproject_method is not None:
+            ds_vars = ds_vars.raster.reproject(dst_crs=self.model.crs)
+        self.set(ds_vars.rename(rename), name=name, split_dataset=split_dataset)
+
+        return list(ds_vars.data_vars.keys())
+
     def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
         """
         Test if two DatasetsComponents are equal.
@@ -261,7 +455,7 @@ class DatasetsComponent(ModelComponent):
         eq, errors = super().test_equal(other)
         if not eq:
             return eq, errors
-        other_datasets = cast(DatasetsComponent, other)
+        other_datasets = cast(SpatialDatasetsComponent, other)
         for name, ds in self.data.items():
             if name not in other_datasets.data:
                 errors[name] = "Dataset not found in other component."

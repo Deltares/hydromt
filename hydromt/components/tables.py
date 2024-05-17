@@ -1,4 +1,4 @@
-"""Table component."""
+"""Tables component."""
 
 import glob
 import os
@@ -23,7 +23,7 @@ __all__ = ["TablesComponent"]
 
 
 class TablesComponent(ModelComponent):
-    """TablesComponent contains data as a dictionnary of pandas.DataFrame.
+    """TablesComponent contains data as a dictionary of pandas.DataFrame.
 
     It is well suited to represent non-geospatial tabular model data.
     """
@@ -37,11 +37,11 @@ class TablesComponent(ModelComponent):
         ----------
         model: Model
             HydroMT model instance
-        default_filename: str
-            The default place that should be used for reading and writing unless the user
-            overrides it. If a relative is given it will be used as being relative to the
-            model root. By default `tables/{name}.csv` for this component, and can be either
-            relative or absolute.
+        filename: str
+            The default place that should be used for reading and writing unless the
+            user overrides it. If a relative path is given it will be used as being
+            relative to the model root. By default `tables/{name}.csv` for this
+            component, and can be either relative or absolute.
         """
         self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME

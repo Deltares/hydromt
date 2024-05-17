@@ -83,10 +83,11 @@ def test_read(tmpdir, mock_model, hydds, mocker: MockerFixture):
 def test_create_grid_from_bbox_rotated(mock_model):
     grid_component = GridComponent(model=mock_model)
     grid_component.root.is_reading_mode.return_value = False
-    grid_component.create(
+    grid_component.create_from_region(
         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
         res=0.05,
         crs=4326,
+        region_crs=4326,
         rotated=True,
         add_mask=True,
     )
@@ -100,7 +101,7 @@ def test_create_grid_from_bbox(mock_model):
     grid_component = GridComponent(model=mock_model)
     grid_component.root.is_reading_mode.return_value = False
     bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_component.create(
+    grid_component.create_from_region(
         region={"bbox": bbox},
         res=0.05,
         add_mask=True,
@@ -115,14 +116,14 @@ def test_create_grid_from_bbox(mock_model):
 def test_create_raise_errors(mock_model):
     grid_component = GridComponent(mock_model)
     # Wrong region kind
-    with pytest.raises(ValueError, match="Unsupported region kind"):
-        grid_component.create(region={"vector_model": "test_model"})
+    with pytest.raises(ValueError, match="Region for grid must be of kind"):
+        grid_component.create_from_region(region={"vector_model": "test_model"})
     # bbox
     bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(
         ValueError, match="res argument required for kind 'bbox', 'geom'"
     ):
-        grid_component.create(region={"bbox": bbox})
+        grid_component.create_from_region(region={"bbox": bbox})
 
 
 @pytest.mark.skip(reason="needs working artifact data")
@@ -135,7 +136,7 @@ def test_create_basin_grid(tmpdir):
         model_region=None,
         model=Model(),
     )
-    grid_component.create(
+    grid_component.create_from_region(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
         crs="utm",

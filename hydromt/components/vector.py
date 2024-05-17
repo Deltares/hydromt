@@ -26,15 +26,22 @@ __all__ = ["VectorComponent"]
 
 
 class VectorComponent(SpatialModelComponent):
-    """Component to handle vector data in a model."""
+    """ModelComponent class for vector components.
+
+    This class is used to manage vector data in a model (e.g. for polygons of a semi
+    distributed model). The vector component data stored in the ``data`` property of
+    this clasee if of the hydromt.gis.vector.GeoDataset type which is an extension of
+    xarray.Dataset with a geometry coordinate.
+    """
+
+    DEFAULT_REGION_FILENAME = "vector/vector_region.geojson"
 
     def __init__(
         self,
         model: "Model",
         *,
-        filename: Optional[str] = "vector/vector.nc",
-        geometry_filename: Optional[str] = "vector/vector.geojson",
         region_component: Optional[str] = None,
+        region_filename: Optional[str] = None,
     ) -> None:
         """Initialize a vector component.
 
@@ -50,11 +57,17 @@ class VectorComponent(SpatialModelComponent):
             File name of the vector geometry, by default "vector/vector.geojson"
             If set to None, and the write/read function geometry_filename is also None, then vector will be read from/written to the netcdf file only.
             See read and write functions for more details.
+        region_component : str, optional
+            The name of the region component to use as reference for this component's region.
+            If None, the region will be set to the bounds of the geometry of this vector component.
+        region_filename : str, optional
+            The path to use for writing the region data to a file. By default "vector/vector_region.geojson".
         """
-        super().__init__(model, region_component=region_component)
+        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
+        super().__init__(
+            model, region_component=region_component, region_filename=region_filename
+        )
         self._data: Optional[xr.Dataset] = None
-        self._filename = filename
-        self._geometry_filename = geometry_filename
 
     @property
     def data(self) -> xr.Dataset:
@@ -175,8 +188,8 @@ class VectorComponent(SpatialModelComponent):
     def read(
         self,
         *,
-        filename: Optional[str] = None,
-        geometry_filename: Optional[str] = None,
+        filename: Optional[str] = "vector/vector.nc",
+        geometry_filename: Optional[str] = "vector/vector.geojson",
         **kwargs,
     ) -> None:
         """Read model vector from combined netcdf and geojson file.
@@ -207,8 +220,6 @@ class VectorComponent(SpatialModelComponent):
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
-        filename = filename or self._filename
-        geometry_filename = geometry_filename or self._geometry_filename
 
         if filename is None and geometry_filename is None:
             raise ValueError(
@@ -251,8 +262,8 @@ class VectorComponent(SpatialModelComponent):
     def write(
         self,
         *,
-        filename: Optional[str] = None,
-        geometry_filename: Optional[str] = None,
+        filename: Optional[str] = "vector/vector.nc",
+        geometry_filename: Optional[str] = "vector/vector.geojson",
         ogr_compliant: bool = False,
         **kwargs,
     ) -> None:
@@ -296,8 +307,6 @@ class VectorComponent(SpatialModelComponent):
             self.logger.debug("No vector data found, skip writing.")
             return
         self.root._assert_write_mode()
-        filename = filename or self._filename
-        geometry_filename = geometry_filename or self._geometry_filename
 
         if filename is None and geometry_filename is None:
             raise ValueError(

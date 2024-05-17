@@ -129,7 +129,7 @@ def test_create(mock_model, mocker: MockerFixture):
         "hydromt.components.mesh.create_mesh2d_from_region"
     )
     mock_create_mesh2d.return_value = test_data
-    mesh_component.create2d(region=region, res=res, crs=crs)
+    mesh_component.create_2d_from_region(region=region, res=res, crs=crs)
     mock_create_mesh2d.assert_called_once()
     assert mesh_component.data == test_data
 
@@ -162,7 +162,7 @@ def test_write(mock_model, caplog, tmpdir):
 def test_read(mock_model, caplog, tmpdir, griduda):
     mesh_component = MeshComponent(mock_model)
     mesh_component.root = ModelRoot(tmpdir, mode="w")
-    with pytest.raises(IOError, match="Model not opend in read mode"):
+    with pytest.raises(IOError, match="Model not opened in read mode"):
         mesh_component.read()
     fn = "test/test_mesh.nc"
     file_dir = join(mesh_component.model_root.path, dirname(fn))
@@ -190,7 +190,7 @@ def test_model_mesh_workflow(tmpdir: Path):
     }  # small area in Piave basin
     crs = 4326
     res = 0.001
-    mesh = component.create2d(region=region, res=res, crs=crs)
+    mesh = component.create_2d_from_region(region=region, res=res, crs=crs)
     assert component.data.grid.crs == crs
     # clear empty mesh dataset
     mesh._data = None
@@ -279,9 +279,7 @@ def test_add_2d_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixtur
     caplog.set_level(level=logging.INFO)
     with pytest.raises(
         ValueError,
-        match=re.escape(
-            f"Grid name {grid_name} not in mesh ({mesh_component.mesh_names})."
-        ),
+        match=re.escape(f"Grid {grid_name} not found in mesh."),
     ):
         mesh_component.add_2d_data_from_rasterdataset(
             raster_filename="mock_raster", grid_name=grid_name
@@ -311,9 +309,7 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
     caplog.set_level(level=logging.INFO)
     with pytest.raises(
         ValueError,
-        match=re.escape(
-            f"Grid name {grid_name} not in mesh ({mesh_component.mesh_names})."
-        ),
+        match=re.escape(f"Grid {grid_name} not found in mesh."),
     ):
         mesh_component.add_2d_data_from_raster_reclass(
             raster_filename="mock_raster",
