@@ -4,7 +4,7 @@ import logging
 import os
 from logging import Logger
 from os import makedirs
-from os.path import basename, dirname, exists, isdir, join
+from os.path import dirname, exists, isdir, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Union, cast
@@ -205,7 +205,7 @@ def write_region(
     """Write the model region to a file."""
     write_path = join(root_path, filename)
 
-    base_name = basename(write_path)
+    base_name = dirname(write_path)
     if not exists(base_name):
         makedirs(base_name, exist_ok=True)
 
