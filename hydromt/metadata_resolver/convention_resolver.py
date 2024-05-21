@@ -93,6 +93,7 @@ class ConventionResolver(MetaDataResolver):
         variables: Optional[List[str]] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
+        options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve the placeholders in the URI."""
         warn_on_unused_kwargs(
