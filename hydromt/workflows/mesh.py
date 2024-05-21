@@ -96,18 +96,21 @@ def create_mesh2d_from_region(
             bounds=region.get("bounds", None),
         )
 
-    if kind == "bbox" or kind == "geom":
+    if kind in ["bbox", "geom"]:
         if not res:
             raise ValueError(f"res argument required for kind {kind}")
-        if kind == "bbox":
-            geom = parse_region_bbox(region, crs=region_crs)
-            clip_to_geom = False
-        else:
-            geom = parse_region_geom(region, crs=region_crs, data_catalog=data_catalog)
-            clip_to_geom = True
+
+        geom = (
+            parse_region_bbox(region, crs=region_crs)
+            if kind == "bbox"
+            else parse_region_geom(region, crs=region_crs, data_catalog=data_catalog)
+        )
+        clip_to_geom = kind == "geom"
+
         if crs is not None:
             crs = utils.parse_crs(crs, bbox=geom.total_bounds)
             geom = geom.to_crs(crs)
+
         return create_mesh2d_from_geom(
             geom, res=res, align=align, clip_to_geom=clip_to_geom
         )
