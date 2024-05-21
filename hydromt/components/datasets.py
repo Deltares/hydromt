@@ -15,7 +15,7 @@ import xarray as xr
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt._typing.type_def import XArrayDict
+from hydromt._typing.type_def import DeferedFileClose, XArrayDict
 from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
 from hydromt.io.readers import read_nc
@@ -47,7 +47,7 @@ class DatasetsComponent(ModelComponent):
         """
         self._data: Optional[XArrayDict] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
-        self._defered_file_closes = []
+        self._defered_file_closes: List[DeferedFileClose] = []
         super().__init__(model=model)
 
     @property
