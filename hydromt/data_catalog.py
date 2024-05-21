@@ -170,7 +170,7 @@ class DataCatalog(object):
         """
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
-        for _name, source in self.iter_sources(used_only):
+        for _name, source in self.list_sources(used_only):
             stac_child_catalog = source.to_stac_catalog(on_error)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
@@ -449,7 +449,7 @@ class DataCatalog(object):
 
         self._sources[name][provider] = versions
 
-    def iter_sources(self, used_only=False) -> List[Tuple[str, DataAdapter]]:
+    def list_sources(self, used_only=False) -> List[Tuple[str, DataSource]]:
         """Return a flat list of all available data sources.
 
         Parameters
@@ -457,19 +457,19 @@ class DataCatalog(object):
         used_only: bool, optional
             If True, return only data entries marked as used, by default False.
         """
-        ans = []
+        sources = []
         for source_name, available_providers in self._sources.items():
             for _, available_versions in available_providers.items():
-                for _, adapter in available_versions.items():
-                    if used_only and not adapter._used:
+                for _, source in available_versions.items():
+                    if used_only and not source._used:
                         continue
-                    ans.append((source_name, adapter))
+                    sources.append((source_name, source))
 
-        return ans
+        return sources
 
     def __iter__(self) -> Iterator[Tuple[str, DataAdapter]]:
         """Iterate over sources."""
-        return iter(self.iter_sources())
+        return iter(self.list_sources())
 
     def contains_source(
         self,
@@ -518,7 +518,7 @@ class DataCatalog(object):
 
     def __len__(self):
         """Return number of sources."""
-        return len(self.iter_sources())
+        return len(self.list_sources())
 
     def __repr__(self):
         """Prettyprint the sources."""
@@ -528,7 +528,7 @@ class DataCatalog(object):
         if type(other) is type(self):
             if len(self) != len(other):
                 return False
-            for name, source in self.iter_sources():
+            for name, source in self.list_sources():
                 try:
                     other_source = other.get_source(
                         name, provider=source.provider, version=source.version
@@ -943,15 +943,15 @@ class DataCatalog(object):
             root = abspath(root)
             meta.update(**{"root": root})
             root_drive = os.path.splitdrive(root)[0]
-        sources = self.iter_sources(used_only=used_only)
+        sources = self.list_sources(used_only=used_only)
         sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
-            source_dict = source.to_dict()
+            source_dict = source.model_dump(exclude_defaults=True)
 
             if root is not None:
-                path = source_dict["path"]  # is abspath
+                path = source_dict["uri"]  # is abspath
                 source_drive = os.path.splitdrive(path)[0]
                 if (
                     root_drive == source_drive
@@ -997,7 +997,7 @@ class DataCatalog(object):
         """Return data catalog summary as DataFrame."""
         source_names = source_names or []
         d = []
-        for name, source in self.iter_sources():
+        for name, source in self.list_sources():
             if len(source_names) > 0 and name not in source_names:
                 continue
             d.append(
