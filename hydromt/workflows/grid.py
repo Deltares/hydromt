@@ -12,6 +12,7 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import Polygon
 
+from hydromt._typing.type_def import Number
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
@@ -39,7 +40,7 @@ def create_grid_from_region(
     region: Dict[str, Any],
     *,
     data_catalog: Optional[DataCatalog] = None,
-    res: Optional[float] = None,
+    res: Optional[Number] = None,
     crs: Optional[int] = None,
     region_crs: int = 4326,
     rotated: bool = False,
@@ -68,7 +69,7 @@ def create_grid_from_region(
         Region must be of kind [grid, bbox, geom, basin, subbasin, interbasin].
     data_catalog : DataCatalog, optional
         If the data_catalog is None, a new DataCatalog will be created, by default None.
-    res: float, optional
+    res: float or int, optional
         Resolution used to generate 2D grid [unit of the CRS], required if region
         is not based on 'grid'.
     crs : int, optional
@@ -113,7 +114,7 @@ def create_grid_from_region(
 
     kind = next(iter(region))
     if kind in ["bbox", "geom"]:
-        if not isinstance(res, (int, float)):
+        if not res:
             raise ValueError("res argument required for kind 'bbox', 'geom'")
 
         if kind == "geom":

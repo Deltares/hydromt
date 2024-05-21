@@ -13,7 +13,7 @@ from shapely.geometry import box
 
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
-from hydromt._typing.type_def import DeferedFileClose, StrPath
+from hydromt._typing.type_def import DeferedFileClose, Number, StrPath
 from hydromt.components.base import ModelComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.io.readers import read_nc
@@ -228,7 +228,7 @@ class GridComponent(SpatialModelComponent):
         self,
         region: Dict[str, Any],
         *,
-        res: Optional[float] = None,
+        res: Optional[Number] = None,
         crs: Optional[int] = None,
         region_crs: int = 4326,
         rotated: bool = False,
@@ -257,7 +257,7 @@ class GridComponent(SpatialModelComponent):
             * {'basin': [x, y]}
 
             Region must be of kind [grid, bbox, geom, basin, subbasin, interbasin].
-        res: float, optional
+        res: float or int, optional
             Resolution used to generate 2D grid [unit of the CRS], required if region
             is not based on 'grid'.
         crs : int, optional
