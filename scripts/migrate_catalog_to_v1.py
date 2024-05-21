@@ -1,5 +1,5 @@
 """Script to migrate your catalog to the v1 version."""
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
@@ -167,11 +167,8 @@ if __name__ == "__main__":
     parser.add_argument("filein")
     parser.add_argument("fileout")
     parser.add_argument("-o", "--overwrite", action="store_true", default=True)
-    # args: Namespace = parser.parse_args()
-    # file_in: Path = Path(args.filein)
-    # file_out: Path = Path(args.fileout)
-    # overwrite: bool = args.overwrite
-    file_in: Path = Path("data/catalogs/artifact_data/v0.0.9/data_catalog.yml")
-    file_out: Path = Path("data/catalogs/artifact_data/v1.0.0/data_catalog.yml")
-    overwrite: bool = True
+    args: Namespace = parser.parse_args()
+    file_in: Path = Path(args.filein)
+    file_out: Path = Path(args.fileout)
+    overwrite: bool = args.overwrite
     main(file_in, file_out, overwrite)
