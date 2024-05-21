@@ -46,7 +46,8 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR
-from hydromt.data_source import DataSource, create_source
+from hydromt.data_adapter.utils import _single_var_as_array
+from hydromt.data_source import DataSource, RasterDatasetSource, create_source
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.predefined_catalog import (
     PREDEFINED_CATALOGS,
@@ -1244,17 +1245,18 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = RasterDatasetAdapter(path=str(data_like), **kwargs)
+
                 name = basename(data_like)
+                source = RasterDatasetSource(name=name, uri=str(data_like))
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = RasterDatasetAdapter._slice_data(
-                data_like,
-                variables,
-                geom,
-                bbox,
-                buffer,
-                time_tuple,
+                ds=data_like,
+                variables=variables,
+                geom=geom,
+                bbox=bbox,
+                buffer=buffer,
+                time_tuple=time_tuple,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1263,24 +1265,29 @@ class DataCatalog(object):
                     strategy=handle_nodata,
                     logger=logger,
                 )
-            ds = RasterDatasetAdapter._single_var_as_array(
-                data_like, single_var_as_array, variables
+            ds = _single_var_as_array(
+                maybe_ds=data_like,
+                single_var_as_array=single_var_as_array,
+                variable_name=variables,
             )
             return ds
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
-        obj = source.get_data(
+        obj = source.read_data(
             bbox=bbox,
-            geom=geom,
+            mask=geom,
             buffer=buffer,
             zoom_level=zoom_level,
             variables=variables,
-            time_tuple=time_tuple,
-            single_var_as_array=single_var_as_array,
-            cache_root=self._cache_dir if self.cache else None,
+            time_range=time_tuple,
             handle_nodata=handle_nodata,
             logger=self.logger,
+        )
+        obj = _single_var_as_array(
+            maybe_ds=obj,
+            single_var_as_array=single_var_as_array,
+            variable_name=variables,
         )
         return obj
 

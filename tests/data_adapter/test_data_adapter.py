@@ -92,6 +92,9 @@ def test_http_data():
     assert da.raster.shape == (4000, 4000)
 
 
+@pytest.mark.skip(
+    "Needs implementation of https://github.com/Deltares/hydromt/issues/875"
+)
 @pytest.mark.integration()
 def test_rasterdataset_zoomlevels(
     rioda_large: xr.DataArray, tmp_dir: Path, artifact_data_catalog: DataCatalog
@@ -153,43 +156,47 @@ def test_rasterdataset_zoomlevels(
     assert isinstance(da1, xr.Dataset)
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_rasterdataset_driver_kwargs(data_catalog: DataCatalog, tmpdir):
-    era5 = data_catalog.get_rasterdataset("era5")
-    fp1 = join(tmpdir, "era5.zarr")
-    era5.to_zarr(fp1)
+@pytest.mark.integration()
+def test_rasterdataset_driver_kwargs(artifact_data_catalog: DataCatalog, tmp_dir: Path):
+    era5 = artifact_data_catalog.get_rasterdataset("era5")
+    path_zarr = tmp_dir / "era5.zarr"
+    era5.to_zarr(path_zarr)
     data_dict = {
         "era5_zarr": {
-            "crs": 4326,
             "data_type": "RasterDataset",
-            "driver": "zarr",
-            "driver_kwargs": {
+            "driver": {
+                "name": "raster_xarray",
                 "preprocess": "round_latlon",
             },
-            "path": fp1,
+            "metadata": {
+                "crs": 4326,
+            },
+            "uri": str(path_zarr),
         }
     }
     datacatalog = DataCatalog()
     datacatalog.from_dict(data_dict)
     era5_zarr = datacatalog.get_rasterdataset("era5_zarr")
-    fp2 = join(tmpdir, "era5.nc")
-    era5.to_netcdf(fp2)
+    path_nc = tmp_dir / "era5.nc"
+    era5.to_netcdf(path_nc)
 
     data_dict2 = {
         "era5_nc": {
-            "crs": 4326,
             "data_type": "RasterDataset",
-            "driver": "netcdf",
-            "driver_kwargs": {
+            "driver": {
+                "name": "raster_xarray",
                 "preprocess": "round_latlon",
             },
-            "path": fp2,
+            "metadata": {
+                "crs": 4326,
+            },
+            "uri": str(path_nc),
         }
     }
     datacatalog.from_dict(data_dict2)
     era5_nc = datacatalog.get_rasterdataset("era5_nc")
     assert era5_zarr.equals(era5_nc)
-    datacatalog.get_source("era5_zarr").to_file(tmpdir, "era5_zarr", driver="zarr")
+    datacatalog.get_source("era5_zarr").to_file(tmp_dir, "era5_zarr")
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
