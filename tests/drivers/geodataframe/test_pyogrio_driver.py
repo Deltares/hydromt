@@ -68,7 +68,7 @@ class TestPyogrioDriver:
         assert np.all(gdf.reset_index(drop=True) == geodf)  # fgb scrambles order
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
-    def test_read_nodata(self, driver: PyogrioDriver):
+    def test_read_no_file_found(self, driver: PyogrioDriver):
         with pytest.raises(FileNotFoundError):
             driver.read("no_data.geojson")
 
