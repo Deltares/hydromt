@@ -16,15 +16,15 @@ DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
     },
     "GeoDataset": {
         "vector": "geodataset_vector",
-        "zarr": "geodataset_xarray",  # TODO: https://github.com/Deltares/hydromt/issues/877
-        "netcdf": "geodataset_xarray",  # TODO: https://github.com/Deltares/hydromt/issues/877
+        "zarr": "geodataset_xarray",
+        "netcdf": "geodataset_xarray",
     },
     "GeoDataFrame": {
-        "csv": "geodataframe_table",  # TODO: https://github.com/Deltares/hydromt/issues/924
-        "parquet": "geodataframe_table",  # TODO: https://github.com/Deltares/hydromt/issues/924
-        "xls": "geodataframe_table",  # TODO: https://github.com/Deltares/hydromt/issues/924
-        "xlsx": "geodataframe_table",  # TODO: https://github.com/Deltares/hydromt/issues/924
-        "xy": "geodataframe_table",  # TODO: https://github.com/Deltares/hydromt/issues/924
+        "csv": "geodataframe_table",
+        "parquet": "geodataframe_table",
+        "xls": "geodataframe_table",
+        "xlsx": "geodataframe_table",
+        "xy": "geodataframe_table",
         "vector": "pyogrio",
     },
     "DataFrame": {
