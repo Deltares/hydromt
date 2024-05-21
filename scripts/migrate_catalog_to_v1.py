@@ -114,6 +114,7 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
             "source_author": "author",
             "source_version": "version",
             "source_license": "license",
+            "source_info": "info",
         }.items():
             if value := metadata.pop(before, None):
                 metadata[after] = value
@@ -143,7 +144,11 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 
 def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
     """Write the catalog out to the new structure."""
-    catalog = DataCatalog().from_dict(new_catalog_dict)
+    if meta := new_catalog_dict.pop("meta", None):
+        root = meta.pop("root", None)
+    else:
+        root = None
+    catalog = DataCatalog().from_dict(new_catalog_dict, root=root)
     catalog.to_yml(path_out)
 
 
