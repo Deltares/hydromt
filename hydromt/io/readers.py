@@ -401,8 +401,8 @@ def open_vector(
     driver: {'csv', 'xls', 'xy', 'vector', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
         files, :py:meth:`hydromt.io.open_vector_from_table`
-        for csv, parquet, xls(x) and xy files. By default None, and infered from
-        file extention.
+        for csv, parquet, xls(x) and xy files. By default None, and inferred from
+        file extension.
     crs: str, `pyproj.CRS`, or dict
         Source coordinate reference system, ignored for files with a native crs.
     dst_crs: str, `pyproj.CRS`, or dict
@@ -601,7 +601,7 @@ def configread(
     if ext in [".yaml", ".yml"]:
         cfdict = read_yaml(config_fn)
     else:
-        raise ValueError(f"Unknown extention: {ext} Hydromt only supports yaml")
+        raise ValueError(f"Unknown extension: {ext} Hydromt only supports yaml")
 
     # parse absolute paths
     if abs_path:

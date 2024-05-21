@@ -225,7 +225,7 @@ class GeoDataFrameSource(DataSource):
                 media_type = MediaType.GEOPACKAGE
             else:
                 raise RuntimeError(
-                    f"Unknown extention: {ext} cannot determine media type"
+                    f"Unknown extension: {ext} cannot determine media type"
                 )
         except (IndexError, KeyError, CRSError):
             if on_error == ErrorHandleMethod.SKIP:

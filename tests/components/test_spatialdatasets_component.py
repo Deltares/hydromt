@@ -1,7 +1,6 @@
 from os import makedirs
 from os.path import abspath, dirname, join
 from pathlib import Path
-from typing import cast
 
 import pytest
 import xarray as xr
@@ -16,8 +15,8 @@ DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 def test_model_spatialdataset_key_error(tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("test_spatialdataset", SpatialDatasetsComponent(m))
-    component = cast(SpatialDatasetsComponent, m.get_component("test_spatialdataset"))
+    component = SpatialDatasetsComponent(m, region_component="fake")
+    m.add_component("test_spatialdataset", component)
 
     with pytest.raises(KeyError):
         component.data["1"]
@@ -25,7 +24,7 @@ def test_model_spatialdataset_key_error(tmpdir: Path):
 
 def test_model_spatialdataset_sets_correctly(raster_ds, tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
-    component = SpatialDatasetsComponent(m)
+    component = SpatialDatasetsComponent(m, region_component="fake")
     m.add_component("test_spatialdataset", component)
 
     component.set(data=raster_ds, name="climate")
@@ -37,14 +36,14 @@ def test_model_spatialdataset_sets_correctly(raster_ds, tmpdir: Path):
 
 def test_model_spatialdataset_reads_and_writes_correctly(raster_ds, tmpdir: Path):
     model = Model(root=str(tmpdir), mode="w+")
-    component = SpatialDatasetsComponent(model)
+    component = SpatialDatasetsComponent(model, region_component="fake")
     model.add_component("test_spatialdataset", component)
 
     component.set(data=raster_ds, name="data")
 
     model.write()
     clean_model = Model(root=str(tmpdir), mode="r")
-    clean_component = SpatialDatasetsComponent(clean_model)
+    clean_component = SpatialDatasetsComponent(clean_model, region_component="fake")
     clean_model.add_component("test_spatialdataset", clean_component)
     clean_model.read()
 
@@ -58,7 +57,7 @@ def test_model_read_spatialdataset(raster_ds, tmpdir):
     raster_ds.to_netcdf(write_path, engine="netcdf4")
 
     model = Model(root=tmpdir, mode="r")
-    dataset_component = SpatialDatasetsComponent(model)
+    dataset_component = SpatialDatasetsComponent(model, region_component="fake")
     model.add_component("forcing", dataset_component)
 
     component_data = dataset_component.data["forcing"]
