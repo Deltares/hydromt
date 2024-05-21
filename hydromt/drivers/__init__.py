@@ -2,8 +2,8 @@
 
 from .base_driver import BaseDriver
 from .dataframe import DataFrameDriver, PandasDriver
-from .geodataframe import GeoDataFrameDriver, PyogrioDriver
-from .geodataset import GeoDatasetDriver, GeoDatasetVectorDriver
+from .geodataframe import GeoDataFrameDriver, GeoDataFrameTableDriver, PyogrioDriver
+from .geodataset import GeoDatasetDriver, GeoDatasetVectorDriver, GeoDatasetXarrayDriver
 from .preprocessing import (
     harmonise_dims,
     remove_duplicates,
@@ -18,8 +18,10 @@ __all__ = [
     "BaseDriver",
     "DataFrameDriver",
     "GeoDataFrameDriver",
+    "GeoDataFrameTableDriver",
     "GeoDatasetDriver",
     "GeoDatasetVectorDriver",
+    "GeoDatasetXarrayDriver",
     "PandasDriver",
     "PyogrioDriver",
     "RasterDatasetDriver",
