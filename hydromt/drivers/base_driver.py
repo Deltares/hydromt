@@ -116,7 +116,7 @@ class BaseDriver(BaseModel, ABC):
             yield from subclass._find_all_possible_types()
 
     @model_serializer(mode="wrap")
-    def ser_driver(
+    def _serialize(
         self,
         nxt: SerializerFunctionWrapHandler,
     ) -> Dict[str, Any]:

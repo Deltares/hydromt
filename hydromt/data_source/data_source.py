@@ -12,6 +12,8 @@ from pydantic import (
     ConfigDict,
     Field,
     PrivateAttr,
+    SerializerFunctionWrapHandler,
+    model_serializer,
     model_validator,
 )
 
@@ -79,6 +81,13 @@ class DataSource(BaseModel, ABC):
         if not is_valid_url(self.uri):
             self.uri = _abs_path(self.root, self.uri)
         return self
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, nxt: SerializerFunctionWrapHandler) -> Dict[str, Any]:
+        """Serialize data_type."""
+        res: Dict[str, Any] = nxt(self)
+        res["data_type"] = self.data_type
+        return res
 
 
 def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:

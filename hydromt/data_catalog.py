@@ -64,7 +64,7 @@ __all__ = [
 class DataCatalog(object):
     """Base class for the data catalog object."""
 
-    _format_version = "v0"  # format version of the data catalog
+    _format_version = "v1"  # format version of the data catalog
     _cache_dir = HYDROMT_DATADIR
 
     def __init__(
@@ -109,7 +109,7 @@ class DataCatalog(object):
 
         data_libs = cast(list, data_libs)
 
-        self._sources = {}  # dictionary of DataAdapter
+        self._sources = {}  # dictionary of DataSource
         self._catalogs: Dict[str, PredefinedCatalog] = {}
         self.root = None
         self._fallback_lib = fallback_lib

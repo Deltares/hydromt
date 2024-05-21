@@ -5,6 +5,7 @@ import glob
 import tempfile
 from datetime import datetime
 from os.path import abspath, basename, dirname, join
+from pathlib import Path
 from typing import cast
 
 import fsspec
@@ -29,6 +30,7 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
+from hydromt.data_source import DataSource, RasterDatasetSource
 from hydromt.gis.utils import to_geographic_bbox
 from hydromt.io.writers import write_xy
 
@@ -70,44 +72,50 @@ def test_aws_worldcover():
     assert da.name == "landuse"
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
+@pytest.mark.integration()
 def test_http_data():
     dc = DataCatalog().from_dict(
         {
             "global_wind_atlas": {
                 "data_type": "RasterDataset",
-                "driver": "raster",
-                "path": "https://globalwindatlas.info/api/gis/global/wind-speed/10",
+                "driver": {"name": "rasterio", "filesystem": "http"},
+                "uri": "https://globalwindatlas.info/api/gis/global/wind-speed/10",
             }
         }
     )
-    s = dc.get_source("global_wind_atlas")
+    s: DataSource = dc.get_source("global_wind_atlas")
     # test inferred file system
-    assert isinstance(s.fs, fsspec.implementations.http.HTTPFileSystem)
+    assert isinstance(s.driver.filesystem, fsspec.implementations.http.HTTPFileSystem)
     # test returns xarray DataArray
-    da = s.get_data(bbox=[0, 0, 10, 10])
+    da = s.read_data(bbox=[0, 0, 10, 10])
     assert isinstance(da, xr.DataArray)
     assert da.raster.shape == (4000, 4000)
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_rasterdataset_zoomlevels(rioda_large, tmpdir, data_catalog):
+@pytest.mark.integration()
+def test_rasterdataset_zoomlevels(
+    rioda_large: xr.DataArray, tmp_dir: Path, artifact_data_catalog: DataCatalog
+):
     # write tif with zoom level 1 in name
     # NOTE zl 0 not written to check correct functioning
     name = "test_zoom"
-    rioda_large.raster.to_raster(str(tmpdir.join("test_zl1.tif")))
+    rioda_large.raster.to_raster(str(tmp_dir / "test_zl1.tif"))
     yml_dict = {
         name: {
-            "crs": 4326,
             "data_type": "RasterDataset",
-            "driver": "raster",
-            "path": f"{str(tmpdir)}/test_zl{{zoom_level:d}}.tif",  # test with str format for zoom level
+            "driver": {"name": "rasterio"},
+            "uri": f"{str(tmp_dir)}/test_zl{{zoom_level:d}}.tif",  # test with str format for zoom level
+            "metadata": {
+                "crs": 4326,
+            },
             "zoom_levels": {0: 0.1, 1: 0.3},
         }
     }
     # test zoom levels in name
-    data_catalog.from_dict(yml_dict)
-    rds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    artifact_data_catalog.from_dict(yml_dict)
+    rds: RasterDatasetSource = cast(
+        RasterDatasetSource, artifact_data_catalog.get_source(name)
+    )
     assert rds._parse_zoom_level(None) is None
     assert rds._parse_zoom_level(zoom_level=1) == 1
     assert rds._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
@@ -118,27 +126,30 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir, data_catalog):
         rds._parse_zoom_level(zoom_level=(1, "asfd"))
     with pytest.raises(TypeError, match="zoom_level not understood"):
         rds._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
-    da1 = data_catalog.get_rasterdataset(name, zoom_level=(0.3, "degree"))
+    da1 = artifact_data_catalog.get_rasterdataset(name, zoom_level=(0.3, "degree"))
     assert isinstance(da1, xr.DataArray)
     # write COG
-    cog_fn = str(tmpdir.join("test_cog.tif"))
+    cog_fn = str(tmp_dir / "test_cog.tif")
     rioda_large.raster.to_raster(cog_fn, driver="COG", overviews="auto")
     # test COG zoom levels
     # return native resolution
     res = np.asarray(rioda_large.raster.res)
-    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=0)
+    da1 = artifact_data_catalog.get_rasterdataset(cog_fn, zoom_level=0)
     assert np.allclose(da1.raster.res, res)
     # reurn zoom level 1
-    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(res[0] * 2, "degree"))
+    da1 = artifact_data_catalog.get_rasterdataset(
+        cog_fn, zoom_level=(res[0] * 2, "degree")
+    )
     assert np.allclose(da1.raster.res, res * 2)
     # test if file hase no overviews
-    tif_fn = str(tmpdir.join("test_tif_no_overviews.tif"))
+    tif_fn = str(tmp_dir / "test_tif_no_overviews.tif")
     rioda_large.raster.to_raster(tif_fn, driver="GTiff")
-    da1 = data_catalog.get_rasterdataset(tif_fn, zoom_level=(0.01, "degree"))
+    da1 = artifact_data_catalog.get_rasterdataset(tif_fn, zoom_level=(0.01, "degree"))
     xr.testing.assert_allclose(da1, rioda_large)
     # test if file has {variable} in path
-    data_catalog.from_predefined_catalogs("artifact_data")
-    da1 = data_catalog.get_rasterdataset("merit_hydro", zoom_level=(0.01, "degree"))
+    da1 = artifact_data_catalog.get_rasterdataset(
+        "merit_hydro", zoom_level=(0.01, "degree")
+    )
     assert isinstance(da1, xr.Dataset)
 
 
