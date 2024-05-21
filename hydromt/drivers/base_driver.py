@@ -4,7 +4,14 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, ClassVar, Dict, Generator, List, Type
 
 from fsspec.implementations.local import LocalFileSystem
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    SerializerFunctionWrapHandler,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 
 from hydromt._typing import FS
 from hydromt.metadata_resolver import MetaDataResolver
@@ -107,6 +114,16 @@ class BaseDriver(BaseModel, ABC):
         # continue looking for possible types in subclasses
         for subclass in cls.__subclasses__():
             yield from subclass._find_all_possible_types()
+
+    @model_serializer(mode="wrap")
+    def ser_driver(
+        self,
+        nxt: SerializerFunctionWrapHandler,
+    ) -> Dict[str, Any]:
+        """Add name to serialized result."""
+        serialized: Dict[str, Any] = nxt(self)
+        serialized["name"] = self.name
+        return serialized
 
     # Args and kwargs will be refined by HydroMT subclasses.
     @abstractmethod
