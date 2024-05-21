@@ -36,16 +36,13 @@ class MeshComponent(SpatialModelComponent):
     data stored in the ``data`` property is a xugrid.UgridDataset object.
     """
 
-    DEFAULT_FILENAME = "mesh/mesh.nc"
-    DEFAULT_REGION_FILENAME = "mesh/mesh_region.geojson"
-
     def __init__(
         self,
         model: "Model",
         *,
-        filename: Optional[str] = None,
+        filename: str = "mesh/mesh.nc",
         region_component: Optional[str] = None,
-        region_filename: Optional[str] = None,
+        region_filename: str = "mesh/mesh_region.geojson",
     ):
         """
         Initialize a MeshComponent.
@@ -54,7 +51,7 @@ class MeshComponent(SpatialModelComponent):
         ----------
         model: Model
             HydroMT model instance
-        filename: str, optional
+        filename: str
             The path to use for reading and writing of component data by default.
             by default "mesh/mesh.nc".
         region_component: str, optional
@@ -63,7 +60,7 @@ class MeshComponent(SpatialModelComponent):
             Note that the create method only works if the region_component is None.
             For add_data_from_* methods, the other region_component should be a
             reference to another mesh component for correct reprojection.
-        region_filename: str, optional
+        region_filename: str
             The path to use for reading and writing of the region data by default.
             by default "mesh/mesh_region.geojson".
         """
@@ -73,7 +70,7 @@ class MeshComponent(SpatialModelComponent):
             region_filename=region_filename,
         )
         self._data: Optional[xu.UgridDataset] = None
-        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
+        self._filename: str = filename
 
     def set(
         self,
@@ -140,7 +137,7 @@ class MeshComponent(SpatialModelComponent):
         region_options : dict, optional
             Options to pass to the write_region method.
             Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
-            If `filename` is not provided, `SpatialModelComponent.DEFAULT_REGION_FILENAME` will be used.
+            If `filename` is not provided, `self.region_filename` will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the
             `xarray.Dataset.to_netcdf` method.

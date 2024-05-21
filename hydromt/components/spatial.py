@@ -18,14 +18,12 @@ if TYPE_CHECKING:
 class SpatialModelComponent(ModelComponent, ABC):
     """Base spatial model component for GIS components."""
 
-    DEFAULT_REGION_FILENAME = "region.geojson"
-
     def __init__(
         self,
         model: "Model",
         *,
         region_component: Optional[str] = None,
-        region_filename: Optional[StrPath] = None,
+        region_filename: str = "region.geojson",
     ) -> None:
         """
         Initialize a SpatialModelComponent.
@@ -45,15 +43,13 @@ class SpatialModelComponent(ModelComponent, ABC):
             region in case the region of this new component depends on the region of a
             different component. If None, the region will be set based on the
             `_region_data` property of the component itself.
-        region_filename: str, optional
+        region_filename: str
             The path to use for writing the region data to a file.
             By default "region.geojson".
         """
         super().__init__(model)
         self._region_component = region_component
-        self._region_filename = (
-            region_filename or self.__class__.DEFAULT_REGION_FILENAME
-        )
+        self._region_filename = region_filename
 
     @property
     def bounds(self) -> Optional[Tuple[float, float, float, float]]:

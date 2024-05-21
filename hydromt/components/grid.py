@@ -13,7 +13,7 @@ from shapely.geometry import box
 
 from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
-from hydromt._typing.type_def import DeferedFileClose, Number, StrPath
+from hydromt._typing.type_def import DeferedFileClose, Number
 from hydromt.components.base import ModelComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.io.readers import read_nc
@@ -40,16 +40,13 @@ class GridComponent(SpatialModelComponent):
     hydromt.gis.raster.RasterDataset type which is an extension of xarray.Dataset for regular grid.
     """
 
-    DEFAULT_FILENAME = "grid/grid.nc"
-    DEFAULT_REGION_FILENAME = "grid/grid_region.geojson"
-
     def __init__(
         self,
         model: "Model",
         *,
-        filename: Optional[str] = None,
+        filename: str = "grid/grid.nc",
         region_component: Optional[str] = None,
-        region_filename: Optional[StrPath] = None,
+        region_filename: str = "grid/grid_region.geojson",
     ):
         """
         Initialize a GridComponent.
@@ -58,7 +55,7 @@ class GridComponent(SpatialModelComponent):
         ----------
         model: Model
             HydroMT model instance
-        filename: str, optional
+        filename: str
             The path to use for reading and writing of component data by default.
             By default "grid/grid.nc".
         region_component: str, optional
@@ -67,7 +64,7 @@ class GridComponent(SpatialModelComponent):
             method only works if the region_component is None. For add_data_from_*
             methods, the other region_component should be a reference to another
             grid component for correct reprojection.
-        region_filename: str, optional
+        region_filename: str
             The path to use for reading and writing of the region data by default.
             By default "grid/grid_region.geojson".
         """
@@ -78,7 +75,7 @@ class GridComponent(SpatialModelComponent):
             region_filename=region_filename,
         )
         self._data: Optional[xr.Dataset] = None
-        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
+        self._filename: str = filename
 
     def set(
         self,
@@ -156,7 +153,7 @@ class GridComponent(SpatialModelComponent):
         region_options : dict, optional
             Options to pass to the write_region method.
             Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
-            If `filename` is not provided, `SpatialModelComponent.DEFAULT_REGION_FILENAME` will be used.
+            If `filename` is not provided, self.region_filename will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the `write_nc` method.
         """
@@ -172,9 +169,9 @@ class GridComponent(SpatialModelComponent):
             )
             return None
         # write_nc requires dict - use dummy 'grid' key
-        return write_nc(  # Can return DeferedFileClose object
+        return write_nc(
             {"grid": self.data},
-            filename or str(self._filename),
+            filename or self._filename,
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
             logger=self.logger,

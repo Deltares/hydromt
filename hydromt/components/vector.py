@@ -30,18 +30,16 @@ class VectorComponent(SpatialModelComponent):
 
     This class is used to manage vector data in a model (e.g. for polygons of a semi
     distributed model). The vector component data stored in the ``data`` property of
-    this clasee if of the hydromt.gis.vector.GeoDataset type which is an extension of
+    this class if of the hydromt.gis.vector.GeoDataset type which is an extension of
     xarray.Dataset with a geometry coordinate.
     """
-
-    DEFAULT_REGION_FILENAME = "vector/vector_region.geojson"
 
     def __init__(
         self,
         model: "Model",
         *,
         region_component: Optional[str] = None,
-        region_filename: Optional[str] = None,
+        region_filename: str = "vector/vector_region.geojson",
     ) -> None:
         """Initialize a vector component.
 
@@ -49,24 +47,14 @@ class VectorComponent(SpatialModelComponent):
         ----------
         model : Model
             Parent model
-        filename : str, optional
-            File name of the vector component, by default "vector/vector.nc".
-            If set to None, and the write/read function filename is also None, then vector will be read from/written to the geometry file only.
-            See read and write functions for more details.
-        geometry_filename : str, optional
-            File name of the vector geometry, by default "vector/vector.geojson"
-            If set to None, and the write/read function geometry_filename is also None, then vector will be read from/written to the netcdf file only.
-            See read and write functions for more details.
         region_component : str, optional
             The name of the region component to use as reference for this component's region.
             If None, the region will be set to the bounds of the geometry of this vector component.
-        region_filename : str, optional
+        region_filename : str
             The path to use for writing the region data to a file. By default "vector/vector_region.geojson".
         """
         super().__init__(
-            model,
-            region_component=region_component,
-            region_filename=region_filename,
+            model, region_component=region_component, region_filename=region_filename
         )
         self._data: Optional[xr.Dataset] = None
 

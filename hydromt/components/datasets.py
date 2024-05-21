@@ -31,9 +31,11 @@ class DatasetsComponent(ModelComponent):
     It contains a dictionary of xarray DataArray or Dataset objects.
     """
 
-    DEFAULT_FILENAME = "datasets/{name}.nc"
-
-    def __init__(self, model: "Model", filename: Optional[str] = None):
+    def __init__(
+        self,
+        model: "Model",
+        filename: str = "datasets/{name}.nc",
+    ):
         """Initialize a DatasetsComponent.
 
         Parameters
@@ -46,7 +48,7 @@ class DatasetsComponent(ModelComponent):
             dictionary.
         """
         self._data: Optional[XArrayDict] = None
-        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
+        self._filename: str = filename
         self._defered_file_closes: List[DeferedFileClose] = []
         super().__init__(model=model)
 
@@ -113,9 +115,12 @@ class DatasetsComponent(ModelComponent):
 
     @hydromt_step
     def read(
-        self, filename: Optional[str] = None, single_var_as_array: bool = True, **kwargs
+        self,
+        filename: Optional[str] = None,
+        single_var_as_array: bool = True,
+        **kwargs,
     ) -> None:
-        r"""Read model dataset files at <root>/<filename>.
+        """Read model dataset files at <root>/<filename>.
 
         key-word arguments are passed to :py:func:`hydromt.io.readers.read_nc`
 
@@ -185,7 +190,7 @@ class DatasetsComponent(ModelComponent):
         self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            self.logger.debug("No data found, skiping writing.")
+            self.logger.debug("No data found, skipping writing.")
             return
 
         kwargs = {**{"engine": "netcdf4"}, **kwargs}

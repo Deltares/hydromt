@@ -36,16 +36,13 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     Compared to ``DatasetsComponent`` this component has a region property.
     """
 
-    DEFAULT_FILENAME = "spatial_datasets/{name}.nc"
-    DEFAULT_REGION_FILENAME = "spatial_datasets/spatial_datasets_region.geojson"
-
     def __init__(
         self,
         model: "Model",
         *,
-        region_component: Optional[str] = None,
-        filename: Optional[str] = None,
-        region_filename: Optional[str] = None,
+        region_component: str,
+        filename: str = "spatial_datasets/{name}.nc",
+        region_filename: str = "spatial_datasets/spatial_datasets_region.geojson",
     ):
         """Initialize a SpatialDatasetsComponent.
 
@@ -60,12 +57,12 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             The path to use for reading and writing of component data by default.
             by default "spatial_datasets/{name}.nc" ie one file per xarray object in the
             data dictionary.
-        region_filename: str, optional
+        region_filename: str
             The path to use for writing the region data to a file. By default
-            "geoms/geoms_region.geojson".
+            "spatial_datasets/spatial_datasets_region.geojson".
         """
         self._data: Optional[XArrayDict] = None
-        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
+        self._filename: str = filename
         self._defered_file_closes: List[DeferedFileClose] = []
         super().__init__(
             model=model,

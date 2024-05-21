@@ -37,41 +37,39 @@ def test_config_dict():
 
 def test_rejects_non_yaml_format(tmpdir):
     config_file = tmpdir.join("config.toml")
-    # hydromt just cheks the extention, so an empty file is ok
+    # hydromt just checks the extension, so an empty file is ok
     with open(config_file, "w"):
         pass
 
-    with pytest.raises(ValueError, match="Unknown extention"):
+    with pytest.raises(ValueError, match="Unknown extension"):
         _ = configread(config_file, abs_path=True)
 
 
 def test_config_create_always_reads(tmpdir):
-    config_path = join(tmpdir, ConfigComponent.DEFAULT_FILENAME)
+    filename = "myconfig.yaml"
+    config_path = join(tmpdir, filename)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
-    config_component: ConfigComponent = ConfigComponent(
-        model,
-        filename=ConfigComponent.DEFAULT_FILENAME,
-        default_template_filename=config_path,
+    config_component = ConfigComponent(
+        model, filename=filename, default_template_filename=config_path
     )
     model.add_component("config", config_component)
     config_component.create()
-    # we use _data here to avoid initilaizing it through lazy loading
+    # we use _data here to avoid initializing it through lazy loading
     assert config_component._data == config_data
 
 
 def test_config_does_not_read_at_lazy_init(tmpdir):
-    config_path = join(tmpdir, ConfigComponent.DEFAULT_FILENAME)
+    filename = "myconfig.yaml"
+    config_path = join(tmpdir, filename)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
-    config_component: ConfigComponent = ConfigComponent(
-        model,
-        filename=ConfigComponent.DEFAULT_FILENAME,
-        default_template_filename=config_path,
+    config_component = ConfigComponent(
+        model, filename=filename, default_template_filename=config_path
     )
     model.add_component("config", config_component)
     assert config_component.data == {}
@@ -79,9 +77,7 @@ def test_config_does_not_read_at_lazy_init(tmpdir):
 
 def test_raises_on_no_config_template_found(tmpdir):
     model = Model(root=tmpdir, mode="w")
-    config_component: ConfigComponent = ConfigComponent(
-        model,
-    )
+    config_component = ConfigComponent(model)
     model.add_component("config", config_component)
     with pytest.raises(FileNotFoundError, match="No template file was provided"):
         config_component.create()
@@ -132,7 +128,7 @@ def test_write_config(tmpdir):
     config_component = ConfigComponent(model)
     model.add_component("config", config_component)
     config_component.set("global.name", "test")
-    write_path = join(tmpdir, ConfigComponent.DEFAULT_FILENAME)
+    write_path = join(tmpdir, "config.yaml")
     assert not isfile(write_path)
     config_component.write()
     assert isfile(write_path)

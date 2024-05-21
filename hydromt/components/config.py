@@ -25,13 +25,11 @@ class ConfigComponent(ModelComponent):
     settings.
     """
 
-    DEFAULT_FILENAME = "config.yaml"
-
     def __init__(
         self,
         model: "Model",
         *,
-        filename: Optional[str] = None,
+        filename: str = "config.yaml",
         default_template_filename: Optional[str] = None,
     ):
         """Initialize a ConfigComponent.
@@ -40,7 +38,7 @@ class ConfigComponent(ModelComponent):
         ----------
         model: Model
             HydroMT model instance
-        filename: Optional[str]
+        filename: str
             A path relative to the root where the configuration file will
             be read and written if user does not provide a path themselves.
             By default 'config.yml'
@@ -51,7 +49,7 @@ class ConfigComponent(ModelComponent):
             default configuration template. By default None.
         """
         self._data: Optional[Dict[str, Any]] = None
-        self._filename: str = filename or self.__class__.DEFAULT_FILENAME
+        self._filename: str = filename
         self._default_template_filename: Optional[str] = default_template_filename
 
         super().__init__(model=model)
@@ -103,8 +101,8 @@ class ConfigComponent(ModelComponent):
     def read(self, path: Optional[str] = None) -> None:
         """Read model config at <root>/{path}."""
         self._initialize(skip_read=True)
-        # if path is abs, join will just return path
         p = path or self._filename
+        # if path is abs, join will just return path
         read_path = join(self.root.path, p)
         if isfile(read_path):
             self.logger.info(f"Reading model config file from {read_path}.")
