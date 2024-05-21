@@ -1,4 +1,4 @@
-"""Tests the RasterXarray driver."""
+"""Tests the GeoDatasetXarray driver."""
 
 from pathlib import Path
 from uuid import uuid4
@@ -8,16 +8,16 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from xarray import open_mfdataset
 
+from hydromt.drivers.geodataset.xarray_driver import GeoDatasetXarrayDriver
 from hydromt.drivers.preprocessing import round_latlon
-from hydromt.drivers.raster.raster_xarray_driver import RasterDatasetXarrayDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 
-class TestRasterXarrayDriver:
+class TestGeoDatasetXarrayDriver:
     def test_calls_preprocess(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.raster.raster_xarray_driver.xr.open_mfdataset",
+            "hydromt.drivers.geodataset.xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -27,7 +27,7 @@ class TestRasterXarrayDriver:
                 return [uri]
 
         uri: str = "file.netcdf"
-        driver = RasterDatasetXarrayDriver(
+        driver = GeoDatasetXarrayDriver(
             metadata_resolver=FakeMetadataResolver(),
             options={"preprocess": "round_latlon"},
         )
@@ -44,14 +44,14 @@ class TestRasterXarrayDriver:
             driver.options.get("preprocess") == "round_latlon"
         )  # test does not consume property
 
-    def test_write(self, raster_ds: xr.Dataset, tmp_path: Path):
+    def test_write(self, geods: xr.Dataset, tmp_path: Path):
         netcdf_path = tmp_path / f"{uuid4().hex}.nc"
-        driver = RasterDatasetXarrayDriver()
-        driver.write(netcdf_path, raster_ds)
-        assert np.all(driver.read(str(netcdf_path)) == raster_ds)
+        driver = GeoDatasetXarrayDriver()
+        driver.write(netcdf_path, geods)
+        assert np.all(driver.read(str(netcdf_path)) == geods)
 
     def test_zarr_read(self, example_zarr_file: Path):
-        res: xr.Dataset = RasterDatasetXarrayDriver(
+        res: xr.Dataset = GeoDatasetXarrayDriver(
             metadata_resolver=ConventionResolver()
         ).read(str(example_zarr_file))
         assert list(res.data_vars.keys()) == ["variable"]
@@ -59,15 +59,15 @@ class TestRasterXarrayDriver:
         assert list(res.coords.keys()) == ["xc", "yc"]
         assert res["variable"].values[0, 0] == 42
 
-    def test_zarr_write(self, raster_ds: xr.Dataset, tmp_dir: Path):
-        zarr_path: Path = tmp_dir / "raster.zarr"
-        driver = RasterDatasetXarrayDriver()
-        driver.write(zarr_path, raster_ds)
-        assert np.all(driver.read(str(zarr_path)) == raster_ds)
+    def test_zarr_write(self, geods: xr.Dataset, tmp_dir: Path):
+        zarr_path: Path = tmp_dir / "geo.zarr"
+        driver = GeoDatasetXarrayDriver()
+        driver.write(zarr_path, geods)
+        assert np.all(driver.read(str(zarr_path)) == geods)
 
     def test_calls_zarr_with_zarr_ext(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.raster.raster_xarray_driver.xr.open_zarr",
+            "hydromt.drivers.geodataset.xarray_driver.xr.open_zarr",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -77,7 +77,7 @@ class TestRasterXarrayDriver:
                 return [uri]
 
         uri: str = "file.zarr"
-        driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
+        driver = GeoDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
         _ = driver.read(uri)
         assert mock_xr_open.call_count == 1
 
@@ -93,6 +93,6 @@ class TestRasterXarrayDriver:
                 return [uri]
 
         uri: str = "file.netcdf"
-        driver = RasterDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
+        driver = GeoDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
         _ = driver.read(uri)
         assert mock_xr_open.call_count == 1
