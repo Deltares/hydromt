@@ -722,18 +722,16 @@ class GridComponent(SpatialModelComponent):
     def _get_grid_data(self) -> Union[xr.DataArray, xr.Dataset]:
         """Get grid data as xarray.DataArray from this component or the reference."""
         if self._region_component is not None:
-            region_component = cast(
-                GridComponent, self.model.get_component(self._region_component)
-            )
-            if region_component is None:
+            reference_component = self.model.get_component(self._region_component)
+            if not isinstance(reference_component, GridComponent):
                 raise ValueError(
-                    f"Unable to find the referenced region component: '{self._region_component}'"
+                    f"Unable to find the referenced grid component: '{self._region_component}'."
                 )
-            if region_component.data is None:
+            if reference_component.data is None:
                 raise ValueError(
-                    f"Unable to get grid from the referenced region component: '{self._region_component}'"
+                    f"Unable to get grid from the referenced region component: '{self._region_component}'."
                 )
-            return region_component.data
+            return reference_component.data
 
         if self.data is None:
             raise ValueError("Unable to get grid data from this component.")
