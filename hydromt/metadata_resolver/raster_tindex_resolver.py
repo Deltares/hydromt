@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 import geopandas as gpd
 from fsspec import AbstractFileSystem
 
-from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
+from hydromt._typing import NoDataStrategy, TimeRange, ZoomLevel
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 logger: Logger = getLogger(__name__)
@@ -21,9 +21,9 @@ class RasterTindexResolver(MetaDataResolver):
         self,
         uri: str,
         fs: AbstractFileSystem,
+        mask: Optional[gpd.GeoDataFrame] = None,
         *,
         time_range: Optional[TimeRange] = None,
-        mask: Optional[Geom] = None,
         zoom_level: Optional[ZoomLevel] = None,
         variables: Union[int, tuple[float, str], None] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
