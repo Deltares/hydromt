@@ -72,7 +72,6 @@ class GridComponent(SpatialModelComponent):
             By default "grid/grid_region.geojson".
         """
         # region_component referencing is not possible for grids. The region should be passed via create().
-        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
         super().__init__(
             model=model,
             region_component=region_component,

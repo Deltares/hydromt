@@ -63,9 +63,10 @@ class VectorComponent(SpatialModelComponent):
         region_filename : str, optional
             The path to use for writing the region data to a file. By default "vector/vector_region.geojson".
         """
-        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
         super().__init__(
-            model, region_component=region_component, region_filename=region_filename
+            model,
+            region_component=region_component,
+            region_filename=region_filename,
         )
         self._data: Optional[xr.Dataset] = None
 

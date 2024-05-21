@@ -64,7 +64,6 @@ class GeomsComponent(SpatialModelComponent):
         """
         self._data: Optional[Dict[str, Union[GeoDataFrame, GeoSeries]]] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
-        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
         super().__init__(
             model=model,
             region_component=region_component,

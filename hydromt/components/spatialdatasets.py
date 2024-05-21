@@ -66,7 +66,6 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         """
         self._data: Optional[XArrayDict] = None
         self._filename: str = filename or self.__class__.DEFAULT_FILENAME
-        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
         self._defered_file_closes = []
         super().__init__(
             model=model,

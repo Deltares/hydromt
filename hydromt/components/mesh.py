@@ -44,7 +44,7 @@ class MeshComponent(SpatialModelComponent):
         *,
         filename: Optional[str] = None,
         region_component: Optional[str] = None,
-        region_filename: str = SpatialModelComponent.DEFAULT_REGION_FILENAME,
+        region_filename: Optional[str] = None,
     ):
         """
         Initialize a MeshComponent.
@@ -66,7 +66,6 @@ class MeshComponent(SpatialModelComponent):
             The path to use for reading and writing of the region data by default.
             by default "mesh/mesh_region.geojson".
         """
-        region_filename = region_filename or self.__class__.DEFAULT_REGION_FILENAME
         super().__init__(
             model,
             region_component=region_component,
