@@ -1285,6 +1285,7 @@ hydro_reservoirs:
   meta:
     category: surface water
     notes: GRanD.v1.1_HydroLAKES.v10_JRC.2016
+    processing_notes: combined not natural lakes from HydroLAKES v10 (Lake_type != 1) with reservoirs attributes from GRanD v1.1
     source_author: Alessia Matano
     source_spatial_extent:
       West: -153.059
