@@ -244,7 +244,19 @@ PyogrioDriver
 
    drivers.geodataframe.pyogrio_driver.PyogrioDriver
    drivers.geodataframe.pyogrio_driver.PyogrioDriver.read
+   drivers.geodataframe.pyogrio_driver.PyogrioDriver.read_data
    drivers.geodataframe.pyogrio_driver.PyogrioDriver.write
+
+GeoDataFrameTableDriver
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autosummary::
+   :toctree: _generated
+
+   drivers.geodataframe.table_driver.GeoDataFrameTableDriver
+   drivers.geodataframe.table_driver.GeoDataFrameTableDriver.read
+   drivers.geodataframe.table_driver.GeoDataFrameTableDriver.read_data
+   drivers.geodataframe.table_driver.GeoDataFrameTableDriver.write
 
 DataFrame
 ---------
