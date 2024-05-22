@@ -22,6 +22,7 @@ Added
 - Added a `DatasetsComponent` to manage multidimensional data of a model. (#894)
 - Added a `GeoDatasetDriver` to read vector data from tabular formats. (#912)
 - Added a `GeoDatasetSource` to handle vector data from tabular formats. (#912)
+- Added `RasterTindexResolver` to handle URIs in raster tindex files. (#928)
 
 Changed
 -------

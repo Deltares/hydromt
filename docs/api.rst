@@ -184,6 +184,14 @@ ConventionResolver
    metadata_resolver.convention_resolver.ConventionResolver
    metadata_resolver.convention_resolver.ConventionResolver.resolve
 
+RasterTindexResolver
+--------------------
+.. autosummary::
+   :toctree: _generated
+
+   metadata_resolver.raster_tindex_resolver.RasterTindexResolver
+   metadata_resolver.raster_tindex_resolver.RasterTindexResolver.resolve
+
 Driver
 ======
 
