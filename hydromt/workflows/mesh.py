@@ -25,6 +25,8 @@ _logger = logging.getLogger(__name__)
 
 __all__ = [
     "create_mesh2d_from_region",
+    "create_mesh2d_from_mesh",
+    "create_mesh2d_from_geom",
     "mesh2d_from_rasterdataset",
     "mesh2d_from_raster_reclass",
 ]

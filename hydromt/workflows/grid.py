@@ -28,6 +28,7 @@ _logger = logging.getLogger(__name__)
 
 __all__ = [
     "create_grid_from_region",
+    "create_rotated_grid_from_geom",
     "grid_from_constant",
     "grid_from_rasterdataset",
     "grid_from_raster_reclass",
