@@ -33,7 +33,9 @@ class RasterTindexResolver(MetaDataResolver):
         """Resolve URIs of a raster tindex file."""
         gdf = gpd.read_file(uri)
         gdf = gdf.iloc[gdf.sindex.query(mask.to_crs(gdf.crs).unary_union)]
-        tileindex = options.get("tileindex")
+        tileindex: Optional[str] = options.get("tileindex")
+        if tileindex is None:
+            raise ValueError(f"{self.__class__.__name__} needs options specifying 'tileindex'}")
         if gdf.index.size == 0:
             raise IOError("No intersecting tiles found.")
         elif tileindex not in gdf.columns:
