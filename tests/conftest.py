@@ -475,6 +475,8 @@ def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
 @pytest.fixture()
 def mock_resolver() -> MetaDataResolver:
     class MockMetaDataResolver(MetaDataResolver):
+        name = "mock_resolver"
+
         def resolve(self, uri, *args, **kwargs):
             return [uri]
 
