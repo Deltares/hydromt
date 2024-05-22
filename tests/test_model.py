@@ -142,7 +142,7 @@ def test_run_log_method():
 
 
 def test_write_data_catalog(tmpdir):
-    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
+    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data=v0.0.7"])
     sources = list(model.data_catalog.sources.keys())
     data_lib_fn = join(model.root, "hydromt_data.yml")
     # used_only=True -> no file written
@@ -157,7 +157,7 @@ def test_write_data_catalog(tmpdir):
     model.write_data_catalog(data_lib_fn=data_lib_fn1)
     assert isfile(data_lib_fn1)
     # append source
-    model1 = Model(root=model.root, data_libs=["artifact_data"], mode="r+")
+    model1 = Model(root=model.root, data_libs=["artifact_data=v0.0.7"], mode="r+")
     model1.data_catalog.get_source(sources[1]).mark_as_used()
     model1.write_data_catalog(append=False)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
@@ -425,9 +425,9 @@ def test_maps_setup(tmpdir):
         variables=["elevtn", "flwdir"],
         split_dataset=False,
     )
-    mod.setup_maps_from_rasterdataset(raster_fn="vito", fill_method="nearest")
+    mod.setup_maps_from_rasterdataset(raster_fn="vito_2015", fill_method="nearest")
     mod.setup_maps_from_raster_reclass(
-        raster_fn="vito",
+        raster_fn="vito_2015",
         reclass_table_fn="vito_mapping",
         reclass_variables=["roughness_manning"],
         split_dataset=True,
@@ -595,13 +595,13 @@ def test_gridmodel_setup(tmpdir):
         mask_name="mask",
     )
     mod.setup_grid_from_rasterdataset(
-        raster_fn="vito",
+        raster_fn="vito_2015",
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
     )
     mod.setup_grid_from_raster_reclass(
-        raster_fn="vito",
+        raster_fn="vito_2015",
         fill_method="nearest",
         reclass_table_fn="vito_mapping",
         reclass_variables=["roughness_manning"],
@@ -830,11 +830,11 @@ def test_meshmodel_setup(griduda, world):
     mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
     mod1.setup_mesh2d(region, grid_name="mesh2d")
     mod1.setup_mesh2d_from_rasterdataset(
-        "vito", grid_name="mesh2d", resampling_method="mode"
+        "vito_2015", grid_name="mesh2d", resampling_method="mode"
     )
     assert "vito" in mod1.mesh.data_vars
     mod1.setup_mesh2d_from_raster_reclass(
-        raster_fn="vito",
+        raster_fn="vito_2015",
         reclass_table_fn="vito_mapping",
         reclass_variables=["landuse", "roughness_manning"],
         resampling_method=["mode", "centroid"],
