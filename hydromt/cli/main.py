@@ -200,7 +200,6 @@ def main(ctx, models, components, plugins):
 @arg_root
 @opt_cli
 @opt_config
-@region_opt
 @data_opt
 @deltares_data_opt
 @overwrite_opt
@@ -214,7 +213,6 @@ def build(
     model_root,
     opt,
     config,
-    region,
     data,
     dd,
     fo,
@@ -243,9 +241,6 @@ def build(
     opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     modeltype = opt.pop("modeltype", model)
-    # Set region to None if empty string json
-    if len(region) == 0:
-        region = None
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -263,7 +258,7 @@ def build(
         )
         mod.data_catalog.cache = cache
         # build model
-        mod.build(region, opt=opt)
+        mod.build(opt=opt)
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise

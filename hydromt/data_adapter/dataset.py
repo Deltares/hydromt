@@ -1,4 +1,5 @@
 """Implementation for the dataset DataAdapter."""
+
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
@@ -434,7 +435,7 @@ class DatasetAdapter(DataAdapter):
 
             else:
                 raise RuntimeError(
-                    f"Unknown extention: {ext} cannot determine media type"
+                    f"Unknown extension: {ext} cannot determine media type"
                 )
         except (IndexError, KeyError) as e:
             if on_error == ErrorHandleMethod.SKIP:

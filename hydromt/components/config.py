@@ -15,12 +15,9 @@ if TYPE_CHECKING:
     from hydromt.models import Model
 
 
-_DEFAULT_CONFIG_FILENAME = "config.yaml"
-
-
 class ConfigComponent(ModelComponent):
     """
-    A component to write configuration files for model simulations/settings.
+    A component to manage configuration files for model simulations/settings.
 
     ``ConfigComponent`` data is stored as a dictionary and can be written to a file
     in yaml or toml format. The component can be used to store model settings
@@ -32,7 +29,7 @@ class ConfigComponent(ModelComponent):
         self,
         model: "Model",
         *,
-        filename: str = _DEFAULT_CONFIG_FILENAME,
+        filename: str = "config.yaml",
         default_template_filename: Optional[str] = None,
     ):
         """Initialize a ConfigComponent.
@@ -41,7 +38,7 @@ class ConfigComponent(ModelComponent):
         ----------
         model: Model
             HydroMT model instance
-        filename: Optional[str]
+        filename: str
             A path relative to the root where the configuration file will
             be read and written if user does not provide a path themselves.
             By default 'config.yml'
@@ -71,7 +68,7 @@ class ConfigComponent(ModelComponent):
         """Initialize the model config."""
         if self._data is None:
             self._data = dict()
-            if self._root.is_reading_mode() and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     @hydromt_step
@@ -80,15 +77,15 @@ class ConfigComponent(ModelComponent):
         path: Optional[str] = None,
     ) -> None:
         """Write model config at <root>/{path}."""
-        self._root._assert_write_mode()
+        self.root._assert_write_mode()
         if self.data:
             p = path or self._filename
 
-            write_path = join(self._root.path, p)
-            self._logger.info(f"Writing model config to {write_path}.")
+            write_path = join(self.root.path, p)
+            self.logger.info(f"Writing model config to {write_path}.")
             makedirs(dirname(write_path), exist_ok=True)
 
-            write_data = make_config_paths_relative(self.data, self._root.path)
+            write_data = make_config_paths_relative(self.data, self.root.path)
             ext = splitext(p)[-1]
             if ext in [".yml", ".yaml"]:
                 write_yaml(write_path, write_data)
@@ -98,19 +95,19 @@ class ConfigComponent(ModelComponent):
                 raise ValueError(f"Unknown file extension: {ext}")
 
         else:
-            self._logger.debug("Model config has no data, skip writing.")
+            self.logger.debug("Model config has no data, skip writing.")
 
     @hydromt_step
     def read(self, path: Optional[str] = None) -> None:
         """Read model config at <root>/{path}."""
         self._initialize(skip_read=True)
-        # if path is abs, join will just return path
         p = path or self._filename
-        read_path = join(self._root.path, p)
+        # if path is abs, join will just return path
+        read_path = join(self.root.path, p)
         if isfile(read_path):
-            self._logger.info(f"Reading model config file from {read_path}.")
+            self.logger.info(f"Reading model config file from {read_path}.")
         else:
-            self._logger.warning(
+            self.logger.warning(
                 f"No default model config was found at {read_path}. "
                 "It wil be initialized as empty dictionary"
             )
@@ -205,7 +202,7 @@ class ConfigComponent(ModelComponent):
         if abs_path and isinstance(value, (str, Path)):
             value = Path(value)
             if not isabs(value):
-                value = Path(abspath(join(self._root.path, value)))
+                value = Path(abspath(join(self.root.path, value)))
 
         return value
 
@@ -217,6 +214,7 @@ class ConfigComponent(ModelComponent):
         """Create a new config file based on a template file.
 
         It the template is not provided, the default template will be used if available.
+        Only yaml and toml files are supported.
 
         Parameters
         ----------
@@ -255,37 +253,13 @@ class ConfigComponent(ModelComponent):
 
         template = Path(template)
         # Here directly overwrite config with template
-        self._logger.info(f"Creating model config from {prefix} template: {template}")
+        self.logger.info(f"Creating model config from {prefix} template: {template}")
         if template.suffix in [".yml", ".yaml"]:
             self._data = read_yaml(template)
         elif template.suffix == ".toml":
             self._data = read_toml(template)
         else:
             raise ValueError(f"Unknown file extension: {template.suffix}")
-
-    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
-        """Test if two components are equal.
-
-        Parameters
-        ----------
-        other : ModelComponent
-            The component to compare against.
-
-        Returns
-        -------
-        tuple[bool, dict[str, str]]
-            True if the components are equal, and a dict with the associated errors per property checked.
-        """
-        eq, errors = super().test_equal(other)
-        if not eq:
-            return eq, errors
-        other_config = cast(ConfigComponent, other)
-
-        # for once python does the recusion for us
-        if self.data == other_config.data:
-            return True, {}
-        else:
-            return False, {"config": "Configs are not equal"}
 
     @hydromt_step
     def update(self, data: Dict[str, Any]):
@@ -307,6 +281,30 @@ class ConfigComponent(ModelComponent):
             {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
         """
         if len(data) > 0:
-            self._logger.debug("Setting model config options.")
+            self.logger.debug("Setting model config options.")
         for k, v in data.items():
             self.set(k, v)
+
+    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        tuple[bool, Dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_config = cast(ConfigComponent, other)
+
+        # for once python does the recursion for us
+        if self.data == other_config.data:
+            return True, {}
+        else:
+            return False, {"config": "Configs are not equal"}

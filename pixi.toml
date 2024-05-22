@@ -167,6 +167,7 @@ universal_pathlib = ">=0.2"
 xarray = "==2024.3.0"
 xmltodict = "*"
 zarr = "*"
+xugrid = ">=0.9.0"
 
 [feature.py39.dependencies]
 python = "3.9.*"
@@ -188,7 +189,6 @@ s3fs = "*"
 [feature.extra.dependencies]
 matplotlib = "*"
 pyet = "*"
-xugrid = ">=0.9.0"
 
 [feature.dev.dependencies]
 black = "*"
@@ -203,7 +203,6 @@ pytest = ">=2.7.3"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-timeout = "*"
-xugrid = "*"
 
 [feature.doc.dependencies]
 nbsphinx = "*"

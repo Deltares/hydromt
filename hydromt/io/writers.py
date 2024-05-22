@@ -3,11 +3,13 @@
 import logging
 import os
 from logging import Logger
-from os.path import dirname, isdir, join
+from os import makedirs
+from os.path import dirname, exists, isdir, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
+import geopandas as gpd
 import numpy as np
 import xarray as xr
 from tomli_w import dump as dump_toml
@@ -15,7 +17,7 @@ from yaml import dump as dump_yaml
 
 from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def write_yaml(path: StrPath, data: Dict[str, Any]):
@@ -126,7 +128,7 @@ def write_nc(
     gdal_compliant: bool = False,
     rename_dims: bool = False,
     force_sn: bool = False,
-    logger: Logger = logger,
+    logger: Logger = _logger,
     **kwargs,
 ) -> Optional[DeferedFileClose]:
     """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
@@ -189,3 +191,31 @@ def write_nc(
                 close_attempts=1,
             )
     return None
+
+
+def write_region(
+    region: gpd.GeoDataFrame,
+    *,
+    filename: StrPath,
+    logger: Logger = _logger,
+    root_path: StrPath,
+    to_wgs84=False,
+    **write_kwargs,
+):
+    """Write the model region to a file."""
+    write_path = join(root_path, filename)
+
+    base_name = dirname(write_path)
+    if not exists(base_name):
+        makedirs(base_name, exist_ok=True)
+
+    logger.info(f"writing region data to {write_path}")
+    gdf = cast(gpd.GeoDataFrame, region.copy())
+
+    if to_wgs84 and (
+        write_kwargs.get("driver") == "GeoJSON"
+        or str(filename).lower().endswith(".geojson")
+    ):
+        gdf = gdf.to_crs(4326)
+
+    gdf.to_file(write_path, **write_kwargs)

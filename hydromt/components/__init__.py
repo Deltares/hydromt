@@ -6,7 +6,7 @@ from hydromt.components.datasets import DatasetsComponent
 from hydromt.components.geoms import GeomsComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.mesh import MeshComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.tables import TablesComponent
 from hydromt.components.vector import VectorComponent
 
@@ -15,9 +15,9 @@ __all__ = [
     "GeomsComponent",
     "GridComponent",
     "ModelComponent",
-    "ModelRegionComponent",
     "TablesComponent",
     "VectorComponent",
     "MeshComponent",
     "DatasetsComponent",
+    "SpatialModelComponent",
 ]

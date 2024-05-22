@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from fsspec import AbstractFileSystem
 from pydantic import BaseModel, ConfigDict
@@ -29,6 +29,7 @@ class MetaDataResolver(BaseModel, ABC):
         zoom_level: Optional[ZoomLevel] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Optional[Logger] = logger,
+        options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve metadata of data behind a single URI."""
         ...

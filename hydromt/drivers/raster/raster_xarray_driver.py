@@ -97,7 +97,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             )
         else:
             raise ValueError(
-                f"Unknown extention for RasterDatasetXarrayDriver: {first_ext} "
+                f"Unknown extension for RasterDatasetXarrayDriver: {first_ext} "
             )
 
     def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
@@ -112,4 +112,4 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         elif ext in [".nc", ".netcdf"]:
             ds.to_netcdf(path, **kwargs)
         else:
-            raise ValueError(f"Unknown extention for RasterDatasetXarrayDriver: {ext} ")
+            raise ValueError(f"Unknown extension for RasterDatasetXarrayDriver: {ext} ")

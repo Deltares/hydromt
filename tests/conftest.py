@@ -3,7 +3,7 @@ from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Generator, Optional
+from typing import Any, Dict, Generator, Optional, cast
 
 import geopandas as gpd
 import numpy as np
@@ -27,7 +27,7 @@ dask_config.set(scheduler="single-threaded")
 
 from hydromt._typing import SourceMetadata
 from hydromt.components.config import ConfigComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_adapter.geodataset import GeoDatasetAdapter
@@ -417,22 +417,23 @@ def model(demda, world, obsda):
 
 def _create_vector_model(
     *,
-    use_default_filename: bool = True,
-    use_default_geometry_filename: bool = True,
     ts,
     geodf,
+    mocker: MockerFixture,
 ) -> Model:
-    components: dict[str, Any] = {
-        "vector": {"type": VectorComponent.__name__},
+    region_component = mocker.Mock(spec_set=SpatialModelComponent)
+    region_component.test_equal.return_value = (True, {})
+    region_component.region = geodf
+    components: Dict[str, Any] = {
+        "area": region_component,
+        "vector": {"type": VectorComponent.__name__, "region_component": "area"},
         "config": {"type": ConfigComponent.__name__},
     }
-    if not use_default_filename:
-        components["vector"]["filename"] = None
-    if not use_default_geometry_filename:
-        components["vector"]["geometry_filename"] = None
 
-    mod = Model(components=components)
-    mod.get_component("config", ConfigComponent).set("header.setting", "value")
+    mod = Model(components=components, region_component="area")
+    cast(ConfigComponent, mod.config).set("header.setting", "value")
+
+    # fill VectorComponent
     da = xr.DataArray(
         ts,
         dims=["index", "time"],
@@ -441,25 +442,28 @@ def _create_vector_model(
     )
     da = da.assign_coords(geometry=(["index"], geodf["geometry"]))
     da.vector.set_crs(geodf.crs)
-    mod.get_component("region", ModelRegionComponent).set(geodf)
-    mod.get_component("vector", VectorComponent).set(da)
+    cast(VectorComponent, mod.vector).set(da)
     return mod
 
 
 @pytest.fixture()
-def vector_model_no_defaults(ts, geodf):
+def vector_model(ts, geodf, mocker: MockerFixture):
+    return _create_vector_model(ts=ts, geodf=geodf, mocker=mocker)
+
+
+@pytest.fixture()
+def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
     return _create_vector_model(
-        use_default_filename=False,
-        use_default_geometry_filename=False,
         ts=ts,
         geodf=geodf,
+        mocker=mocker,
     )
 
 
 # @pytest.fixture()
 # def mesh_model(griduda):
 #     mod = MODELS.load("mesh_model")()
-##     region = gpd.GeoDataFrame(
+#     region = gpd.GeoDataFrame(
 #         geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
 #     )
 #     mod.region.create({"geom": region})
@@ -554,8 +558,5 @@ def mock_model(tmpdir, mocker: MockerFixture):
     model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
     model.root.path.return_value = tmpdir
     model.data_catalog = mocker.create_autospec(DataCatalog)
-    model.region = mocker.create_autospec(
-        ModelRegionComponent(model=model), instance=True
-    )
     model.logger = logger
     return model

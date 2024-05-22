@@ -293,7 +293,7 @@ class GeoDatasetSource(DataSource):
                 media_type = MediaType.HDF5
             else:
                 raise RuntimeError(
-                    f"Unknown extention: {ext} cannot determine media type"
+                    f"Unknown extension: {ext} cannot determine media type"
                 )
         except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:
