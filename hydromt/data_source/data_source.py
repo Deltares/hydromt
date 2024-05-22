@@ -47,7 +47,9 @@ class DataSource(BaseModel, ABC):
     data_adapter: DataAdapterBase
     driver: BaseDriver
     data_type: ClassVar[DataType]
-    root: Optional[str] = Field(default=None)
+    root: Optional[str] = Field(
+        default=None, exclude=True
+    )  # root is already in the catalog.
     version: Optional[str] = Field(default=None)
     provider: Optional[str] = Field(default=None)
     metadata: SourceMetadata = Field(default_factory=SourceMetadata)
@@ -75,12 +77,19 @@ class DataSource(BaseModel, ABC):
                     raise ValueError(f"'data_type' must be '{cls.data_type}'.")
         return copy_data
 
-    @model_validator(mode="after")
-    def _validate_uri(self) -> str:
-        """In case of a local path, add the root before it."""
-        if not is_valid_url(self.uri):
-            self.uri = _abs_path(self.root, self.uri)
-        return self
+    @property
+    def full_uri(self) -> str:
+        """Join root with uri."""
+        uri_is_url: bool = is_valid_url(self.uri)
+        if uri_is_url:
+            # uri is fully self-describing
+            return self.uri
+        if not uri_is_url and self.root:
+            if is_valid_url(self.root):
+                # use '/' to connect url parts
+                return f"{self.root.rstrip('/')}/{self.uri}"
+        # Local file, make absolute
+        return _abs_path(self.root, self.uri)
 
     @model_serializer(mode="wrap")
     def _serialize(self, nxt: SerializerFunctionWrapHandler) -> Dict[str, Any]:

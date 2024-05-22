@@ -822,7 +822,7 @@ class DataCatalog(object):
             }
 
         """
-        meta = data_dict.pop("metadata", {})
+        meta = data_dict.pop("meta", {})
         # check version required hydromt version
         requested_version = meta.get("hydromt_version", None)
         if requested_version is not None:
@@ -1695,7 +1695,7 @@ def _parse_data_source_dict(
     data_source_dict: Dict,
     root: Optional[Union[Path, str]] = None,
     category: Optional[str] = None,
-) -> Dict:
+) -> DataSource:
     """Parse data source dictionary."""
     # parse data
     source = data_source_dict.copy()  # important as we modify with pop

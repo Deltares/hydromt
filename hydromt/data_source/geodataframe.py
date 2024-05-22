@@ -59,7 +59,7 @@ class GeoDataFrameSource(DataSource):
         if bbox is not None or (mask is not None and buffer > 0):
             mask = parse_geom_bbox_buffer(mask, bbox, buffer)
         gdf: gpd.GeoDataFrame = self.driver.read(
-            self.uri,
+            self.full_uri,
             mask=mask,
             predicate=predicate,
             variables=variables,
@@ -220,7 +220,7 @@ class GeoDataFrameSource(DataSource):
             bbox, crs = self.get_bbox(detect=True)  # Should move to driver
             bbox = list(bbox)
             props = {**self.data_adapter.meta, "crs": crs}
-            ext = splitext(self.uri)[-1]
+            ext = splitext(self.full_uri)[-1]
             if ext == ".gpkg":
                 media_type = MediaType.GEOPACKAGE
             else:
@@ -252,8 +252,8 @@ class GeoDataFrameSource(DataSource):
                 properties=props,
                 datetime=datetime(1, 1, 1),
             )
-            stac_asset = StacAsset(str(self.uri), media_type=media_type)
-            base_name = basename(self.uri)
+            stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
+            base_name = basename(self.full_uri)
             stac_item.add_asset(base_name, stac_asset)
 
             stac_catalog.add_item(stac_item)

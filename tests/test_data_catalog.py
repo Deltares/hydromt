@@ -97,7 +97,7 @@ def test_parser():
     }
     datasource = _parse_data_source_dict("test", source, root=root)
     assert isinstance(datasource, GeoDataFrameSource)
-    assert datasource.uri == abspath(source["uri"])
+    assert datasource.full_uri == abspath(source["uri"])
     # TODO: do we want to allow Path objects?
     # # test with Path object
     # source.update(uri=Path(source["uri"]))
@@ -133,7 +133,7 @@ def test_parser():
             source,
             root=root,  # TODO: do we need catalog_name="tmp"
         )
-        assert datasource.uri == abspath(join(root, dd["test"]["uri"]))
+        assert datasource.full_uri == abspath(join(root, dd["test"]["uri"]))
     # placeholder
     dd = {
         "test_{p1}_{p2}": {
@@ -148,7 +148,7 @@ def test_parser():
     for name, source in sources:
         assert "placeholders" not in source
         datasource = _parse_data_source_dict(name, source, root=root)
-        assert datasource.uri == abspath(join(root, f"data_{name[-1]}.gpkg"))
+        assert datasource.full_uri == abspath(join(root, f"data_{name[-1]}.gpkg"))
     # variants
     dd = {
         "test": {
