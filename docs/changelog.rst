@@ -31,6 +31,7 @@ Fixed
 - Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 - Fixed incorrect renaming of single variable raster datasets (#883)
 - Provide better error message for 0D geometry arrays in GeoDataset (#885)
+- Fixed index error when the number of peaks varies between stations in get_hydrographs method (#933)
 
 Deprecated
 ----------
