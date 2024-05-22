@@ -10,7 +10,7 @@ from hydromt.components.datasets import DatasetsComponent
 from hydromt.components.geoms import GeomsComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.mesh import MeshComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.tables import TablesComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.models.model import Model
@@ -27,7 +27,7 @@ def test_core_component_plugins():
         "VectorComponent": VectorComponent,
         "TablesComponent": TablesComponent,
         "MeshComponent": MeshComponent,
-        "ModelRegionComponent": ModelRegionComponent,
+        "SpatialModelComponent": SpatialModelComponent,
         "DatasetsComponent": DatasetsComponent,
     }
 
@@ -43,7 +43,6 @@ def test_summary():
     driver_summary = PLUGINS.driver_summary()
     assert "Component plugins:" in component_summary
     assert "Model plugins:" in model_summary
-    assert "ModelRegionComponent" in component_summary
     assert "GridComponent" in component_summary
     assert "ModelComponent" in component_summary
     assert "Model" in model_summary

@@ -1,9 +1,9 @@
-"""Implementations for model mesh workloads."""
+"""Mesh Component."""
 
 import os
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import pandas as pd
@@ -14,10 +14,11 @@ from shapely.geometry import box
 
 from hydromt import hydromt_step
 from hydromt.components.base import ModelComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
 from hydromt.workflows.mesh import (
-    create_mesh2d,
+    create_mesh2d_from_region,
     mesh2d_from_raster_reclass,
     mesh2d_from_rasterdataset,
 )
@@ -25,19 +26,51 @@ from hydromt.workflows.mesh import (
 if TYPE_CHECKING:
     from hydromt.models import Model
 
-
-_DEFAULT_MESH_FILENAME = "mesh/mesh.nc"
-
 __all__ = ["MeshComponent"]
 
 
-class MeshComponent(ModelComponent):
-    """ModelComponent class for mesh components."""
+class MeshComponent(SpatialModelComponent):
+    """ModelComponent class for mesh components.
 
-    def __init__(self, model: "Model", filename: str = _DEFAULT_MESH_FILENAME):
-        super().__init__(model=model)
-        self._data = None
-        self._filename = filename
+    This class is used to manage unstructured mesh data in a model. The mesh component
+    data stored in the ``data`` property is a xugrid.UgridDataset object.
+    """
+
+    def __init__(
+        self,
+        model: "Model",
+        *,
+        filename: str = "mesh/mesh.nc",
+        region_component: Optional[str] = None,
+        region_filename: str = "mesh/mesh_region.geojson",
+    ):
+        """
+        Initialize a MeshComponent.
+
+        Parameters
+        ----------
+        model: Model
+            HydroMT model instance
+        filename: str
+            The path to use for reading and writing of component data by default.
+            by default "mesh/mesh.nc".
+        region_component: str, optional
+            The name of the region component to use as reference for this component's
+            region. If None, the region will be set to the total bounds of the mesh.
+            Note that the create method only works if the region_component is None.
+            For add_data_from_* methods, the other region_component should be a
+            reference to another mesh component for correct reprojection.
+        region_filename: str
+            The path to use for reading and writing of the region data by default.
+            by default "mesh/mesh_region.geojson".
+        """
+        super().__init__(
+            model,
+            region_component=region_component,
+            region_filename=region_filename,
+        )
+        self._data: Optional[xu.UgridDataset] = None
+        self._filename: str = filename
 
     def set(
         self,
@@ -84,55 +117,68 @@ class MeshComponent(ModelComponent):
     @hydromt_step
     def write(
         self,
-        fn: Optional[str] = None,
+        filename: Optional[str] = None,
+        *,
+        region_options: Optional[Dict] = None,
         write_optional_ugrid_attributes: bool = False,
         **kwargs,
     ) -> None:
-        """Write model grid data to a netCDF file at <root>/<fn>.
+        """Write model grid data to a netCDF file at <root>/<filename>.
 
         Keyword arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`.
 
         Parameters
         ----------
-        fn : str, optional
+        filename : str, optional
             Filename relative to the model root directory, by default 'grid/grid.nc'.
         write_optional_ugrid_attributes : bool, optional
             If True, write optional ugrid attributes to the netCDF file, by default
             True.
+        region_options : dict, optional
+            Options to pass to the write_region method.
+            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
+            If `filename` is not provided, `self.region_filename` will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the
             `xarray.Dataset.to_netcdf` method.
         """
+        self.root._assert_write_mode()
+        region_options = region_options or {}
+        self.write_region(**region_options)
+
         if len(self.data) < 1:
-            self._logger.debug("No mesh data found, skip writing.")
+            self.logger.debug("No mesh data found, skip writing.")
             return
-        self._root._assert_write_mode()
 
         # filename
-        fn = fn or self._filename
-        _fn = join(self._root.path, fn)
-        if not isdir(dirname(_fn)):
-            os.makedirs(dirname(_fn), exist_ok=True)
-        self._logger.debug(f"Writing file {fn}")
+        filename = filename or str(self._filename)
+        _filename = join(self.root.path, filename)
+        if not isdir(dirname(_filename)):
+            os.makedirs(dirname(_filename), exist_ok=True)
+        self.logger.debug(f"Writing file {filename}")
         ds_out = self.data.ugrid.to_dataset(
             optional_attributes=write_optional_ugrid_attributes,
         )
         if self.crs is not None:
             # save crs to spatial_ref coordinate
             ds_out = ds_out.rio.write_crs(self.crs)
-        ds_out.to_netcdf(_fn, **kwargs)
+        ds_out.to_netcdf(_filename, **kwargs)
 
     @hydromt_step
     def read(
-        self, fn: Optional[str] = None, crs: Optional[Union[CRS, int]] = None, **kwargs
+        self,
+        filename: Optional[str] = None,
+        *,
+        crs: Optional[Union[CRS, int]] = None,
+        **kwargs,
     ) -> None:
-        """Read model mesh data at <root>/<fn> and add to mesh property.
+        """Read model mesh data at <root>/<filename> and add to mesh property.
 
         key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
 
         Parameters
         ----------
-        fn : str, optional
+        filename : str, optional
             filename relative to model root, by default 'mesh/mesh.nc'
         crs : CRS or int, optional
             Coordinate Reference System (CRS) object or EPSG code representing the
@@ -141,14 +187,15 @@ class MeshComponent(ModelComponent):
         **kwargs : dict
             Additional keyword arguments to be passed to the `read_nc` method.
         """
-        self._root._assert_read_mode()
+        self.root._assert_read_mode()
         self._initialize(skip_read=True)
-        fn = fn or self._filename
+
+        filename = filename or str(self._filename)
         files = read_nc(
-            fn,
-            root=self._root.path,
+            filename,
+            root=self.root.path,
             single_var_as_array=False,
-            logger=self._logger,
+            logger=self.logger,
             **kwargs,
         ).values()
         if len(files) > 0:
@@ -164,11 +211,11 @@ class MeshComponent(ModelComponent):
                     )
                 else:
                     uds = xu.UgridDataset(ds)
-                    self._logger.info(
+                    self.logger.info(
                         "no crs is found in the file, assigning from user input."
                     )
             # Reading ugrid data adds nNodes coordinates to grid and makes it not
-            # possisble to test two equal grids for equality
+            # possible to test two equal grids for equality
             if f"{uds.grid.name}_nNodes" in uds.grid.to_dataset():
                 uds = xu.UgridDataset(
                     uds.ugrid.to_dataset().drop_vars(f"{uds.grid.name}_nNodes")
@@ -178,25 +225,24 @@ class MeshComponent(ModelComponent):
             self._data = uds
 
     @hydromt_step
-    def create2d(
+    def create_2d_from_region(
         self,
-        region: dict,
+        region: Dict[str, Any],
+        *,
         res: Optional[float] = None,
         crs: Optional[int] = None,
+        region_crs: int = 4326,
         grid_name: str = "mesh2d",
+        align: bool = True,
     ) -> xu.UgridDataset:
         """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
 
         Grids are read according to UGRID conventions. An 2D unstructured mesh
-        will be created as 2D rectangular grid from a geometry (geom_fn) or bbox.
+        will be created as 2D rectangular grid from a geometry (geom_filename) or bbox.
         If an existing 2D mesh is given, then no new mesh will be generated but an extent
         can be extracted using the `bounds` argument of region.
 
         Note Only existing meshed with only 2D grid can be read.
-
-        Adds/Updates model layers:
-
-        * **grid_name** mesh topology: add grid_name 2D topology to mesh object
 
         Parameters
         ----------
@@ -207,41 +253,48 @@ class MeshComponent(ModelComponent):
             CRS for 'bbox' and 'bounds' should be 4326; e.g.:
 
             * {'bbox': [xmin, ymin, xmax, ymax]}
-
             * {'geom': 'path/to/polygon_geometry'}
-
             * {'mesh': 'path/to/2dmesh_file'}
-
             * {'mesh': 'path/to/mesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
-        res: float
+
+        res : float, optional
             Resolution used to generate 2D mesh [unit of the CRS], required if region
             is not based on 'mesh'.
-        crs : EPSG code, int, optional
-            Optional EPSG code of the model or "utm" to let hydromt find the closest projected CRS.
+        crs : int, optional
+            Optional EPSG code of the model.
             If None using the one from region, and else 4326.
+        region_crs : int, optional
+            EPSG code of the region geometry, by default None. Only applies if region is
+            of kind 'bbox'or if geom crs is not defined in the file itself.
+        align : bool, default True
+            Align the mesh to the resolution.
+            Required for 'bbox' and 'geom' region types.
         grid_name : str, optional
-            Name of the 2D grid in mesh, by default "mesh2d".
+            Name of the 2D grid in the mesh, by default 'mesh2d'.
 
         Returns
         -------
         mesh2d : xu.UgridDataset
             Generated mesh2d.
+        """
+        self.logger.info("Preparing 2D mesh.")
 
-        """  # noqa: E501
-        self._logger.info("Preparing 2D mesh.")
+        # Check if this component's region is a reference to another component
+        if self._region_component is not None:
+            raise ValueError(
+                "Region is a reference to another component. Cannot create grid."
+            )
 
-        # Create mesh2d
-        mesh2d = create_mesh2d(
-            region=region,
+        mesh2d = create_mesh2d_from_region(
+            region,
             res=res,
             crs=crs,
-            logger=self._logger,
+            region_crs=region_crs,
+            align=align,
+            logger=self.logger,
+            data_catalog=self.data_catalog,
         )
-        # Add mesh2d to self
         self.set(mesh2d, grid_name=grid_name)
-
-        # This setup method returns mesh2d so that it can be wrapped for models
-        # which require more information
         return mesh2d
 
     @property
@@ -262,7 +315,7 @@ class MeshComponent(ModelComponent):
         """Initialize mesh object."""
         if self._data is None:
             self._data = xu.UgridDataset(xr.Dataset())
-            if self._root.is_reading_mode() and not skip_read:
+            if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     @property
@@ -274,14 +327,14 @@ class MeshComponent(ModelComponent):
         return None
 
     @property
-    def bounds(self) -> Optional[Dict]:
+    def bounds(self) -> Optional[Tuple[float, float, float, float]]:
         """Returns model mesh bounds."""
         if len(self.data) > 0:
             return self.data.ugrid.bounds
         return None
 
     @property
-    def region(self) -> Optional[gpd.GeoDataFrame]:
+    def _region_data(self) -> Optional[gpd.GeoDataFrame]:
         """Return mesh total_bounds as a geodataframe."""
         if len(self.data) > 0:
             region = gpd.GeoDataFrame(
@@ -300,7 +353,7 @@ class MeshComponent(ModelComponent):
 
     @property
     def mesh_grids(self) -> Dict[str, Union[xu.Ugrid1d, xu.Ugrid2d]]:
-        """Dictionnary of grid names and Ugrid topologies in mesh."""
+        """Dictionary of grid names and Ugrid topologies in mesh."""
         grids = dict()
         if len(self.data) > 0:
             for grid in self.data.ugrid.grids:
@@ -370,7 +423,7 @@ class MeshComponent(ModelComponent):
                 if hasattr(self.data[var], "ugrid"):
                     if self.data[var].ugrid.grid.name != grid_name:
                         variables.append(var)
-                # additionnal topology properties
+                # additional topology properties
                 elif not var.startswith(grid_name):
                     variables.append(var)
                 # else is global property (not grid specific)
@@ -394,15 +447,15 @@ class MeshComponent(ModelComponent):
     @hydromt_step
     def add_2d_data_from_rasterdataset(
         self,
-        raster_fn: Union[str, Path, xr.DataArray, xr.Dataset],
+        raster_filename: Union[str, Path, xr.DataArray, xr.Dataset],
         *,
-        grid_name: Optional[str] = "mesh2d",
+        grid_name: str = "mesh2d",
         variables: Optional[list] = None,
         fill_method: Optional[str] = None,
         resampling_method: Optional[Union[str, List]] = "centroid",
         rename: Optional[Dict] = None,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_fn`` to 2D ``grid_name`` in mesh object.
+        """HYDROMT CORE METHOD: Add data variable(s) from ``raster_filename`` to 2D ``grid_name`` in mesh object.
 
         Raster data is interpolated to the mesh ``grid_name`` using the ``resampling_method``.
         If raster is a dataset, all variables will be added unless ``variables`` list
@@ -410,16 +463,16 @@ class MeshComponent(ModelComponent):
 
         Adds model layers:
 
-        * **raster.name** mesh: data from raster_fn
+        * **raster.name** mesh: data from raster_filename
 
         Parameters
         ----------
-        raster_fn: str, Path, xr.DataArray, xr.Dataset
+        raster_filename: str, Path, xr.DataArray, xr.Dataset
             Data catalog key, path to raster file or raster xarray data object.
-        grid_name: str, optional
+        grid_name: str
             Name of the mesh grid to add the data to. By default 'mesh2d'.
         variables: list, optional
-            List of variables to add to mesh from raster_fn. By default all.
+            List of variables to add to mesh from raster_filename. By default all.
         fill_method : str, optional
             If specified, fills no data values using fill_nodata method.
             Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
@@ -432,22 +485,22 @@ class MeshComponent(ModelComponent):
             :py:meth:`xugrid.OverlapRegridder` method.
             Can provide a list corresponding to ``variables``.
         rename: dict, optional
-            Dictionary to rename variable names in raster_fn before adding to mesh
-            {'name_in_raster_fn': 'name_in_mesh'}. By default empty.
+            Dictionary to rename variable names in raster_filename before adding to mesh
+            {'name_in_raster_filename': 'name_in_mesh'}. By default empty.
 
         Returns
         -------
         list
             List of variables added to mesh.
         """  # noqa: E501
-        self._logger.info(f"Preparing mesh data from raster source {raster_fn}")
-        # Check if grid name in self.mesh
-        if grid_name not in self.mesh_names:
-            raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
+        self.logger.info(f"Preparing mesh data from raster source {raster_filename}")
+        # Get the grid from the mesh or the reference one
+        mesh_like = self._get_mesh_grid_data(grid_name=grid_name)
+
         # Read raster data and select variables
-        bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
-        ds = self._data_catalog.get_rasterdataset(
-            raster_fn,
+        bounds = self._get_mesh_gdf_data(grid_name).to_crs(4326).total_bounds
+        ds = self.data_catalog.get_rasterdataset(
+            raster_filename,
             bbox=bounds,
             buffer=2,
             variables=variables,
@@ -456,12 +509,12 @@ class MeshComponent(ModelComponent):
 
         uds_sample = mesh2d_from_rasterdataset(
             ds=ds,
-            mesh2d=self.mesh_grids[grid_name],
+            mesh2d=mesh_like,
             variables=variables,
             fill_method=fill_method,
             resampling_method=resampling_method,
             rename=rename,
-            logger=self._logger,
+            logger=self.logger,
         )
 
         self.set(uds_sample, grid_name=grid_name, overwrite_grid=False)
@@ -471,17 +524,17 @@ class MeshComponent(ModelComponent):
     @hydromt_step
     def add_2d_data_from_raster_reclass(
         self,
-        raster_fn: Union[str, Path, xr.DataArray],
-        reclass_table_fn: Union[str, Path, pd.DataFrame],
+        raster_filename: Union[str, Path, xr.DataArray],
+        reclass_table_filename: Union[str, Path, pd.DataFrame],
         reclass_variables: list,
-        grid_name: Optional[str] = "mesh2d",
+        grid_name: str = "mesh2d",
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
         resampling_method: Optional[Union[str, list]] = "centroid",
         rename: Optional[Dict] = None,
         **kwargs,
     ) -> List[str]:
-        """HYDROMT CORE METHOD: Add data variable(s) to 2D ``grid_name`` in mesh object by reclassifying the data in ``raster_fn`` based on ``reclass_table_fn``.
+        """HYDROMT CORE METHOD: Add data variable(s) to 2D ``grid_name`` in mesh object by reclassifying the data in ``raster_filename`` based on ``reclass_table_filename``.
 
         The reclassified raster data
         are subsequently interpolated to the mesh using `resampling_method`.
@@ -493,22 +546,22 @@ class MeshComponent(ModelComponent):
 
         Parameters
         ----------
-        raster_fn : str, Path, xr.DataArray
+        raster_filename : str, Path, xr.DataArray
             Data catalog key, path to the raster file, or raster xarray data object.
             Should be a DataArray. If not, use the `variable` argument for selection.
-        reclass_table_fn : str, Path, pd.DataFrame
+        reclass_table_filename : str, Path, pd.DataFrame
             Data catalog key, path to the tabular data file, or tabular pandas dataframe
-            object for the reclassification table of `raster_fn`.
+            object for the reclassification table of `raster_filename`.
         reclass_variables : list
-            List of reclass_variables from the reclass_table_fn table to add to the
-            mesh. The index column should match values in raster_fn.
+            List of reclass_variables from the reclass_table_filename table to add to the
+            mesh. The index column should match values in raster_filename.
         grid_name : str, optional
             Name of the mesh grid to add the data to. By default 'mesh2d'.
         variable : str, optional
             Name of the raster dataset variable to use. This is only required when
             reading datasets with multiple variables. By default, None.
         fill_method : str, optional
-            If specified, fills nodata values in `raster_fn` using the `fill_method`
+            If specified, fills nodata values in `raster_filename` using the `fill_method`
             method before reclassifying. Available methods are
             {'linear', 'nearest', 'cubic', 'rio_idw'}.
         resampling_method : str or list, optional
@@ -535,19 +588,18 @@ class MeshComponent(ModelComponent):
         Raises
         ------
         ValueError
-            If `raster_fn` is not a single variable raster.
+            If `raster_filename` is not a single variable raster.
         """  # noqa: E501
-        self._logger.info(
-            f"Preparing mesh data by reclassifying the data in {raster_fn} "
-            f"based on {reclass_table_fn}."
+        self.logger.info(
+            f"Preparing mesh data by reclassifying the data in {raster_filename} "
+            f"based on {reclass_table_filename}."
         )
-        # Check if grid name in self.mesh
-        if grid_name not in self.mesh_names:
-            raise ValueError(f"Grid name {grid_name} not in mesh ({self.mesh_names}).")
+        # Get the grid from the mesh or the reference one
+        mesh_like = self._get_mesh_grid_data(grid_name=grid_name)
         # Read raster data and mapping table
-        bounds = self.mesh_gdf[grid_name].to_crs(4326).total_bounds
-        da = self._data_catalog.get_rasterdataset(
-            raster_fn,
+        bounds = self._get_mesh_gdf_data(grid_name).to_crs(4326).total_bounds
+        da = self.data_catalog.get_rasterdataset(
+            raster_filename,
             bbox=bounds,
             buffer=2,
             variables=variable,
@@ -555,22 +607,22 @@ class MeshComponent(ModelComponent):
         )
         if not isinstance(da, xr.DataArray):
             raise ValueError(
-                f"raster_fn {raster_fn} should be a single variable raster. "
+                f"raster_filename {raster_filename} should be a single variable raster. "
                 "Please select one using the 'variable' argument"
             )
-        df_vars = self._data_catalog.get_dataframe(
-            reclass_table_fn, variables=reclass_variables
+        df_vars = self.data_catalog.get_dataframe(
+            reclass_table_filename, variables=reclass_variables
         )
 
         uds_sample = mesh2d_from_raster_reclass(
             da=da,
             df_vars=df_vars,
-            mesh2d=self.mesh_grids[grid_name],
+            mesh2d=mesh_like,
             reclass_variables=reclass_variables,
             fill_method=fill_method,
             resampling_method=resampling_method,
             rename=rename,
-            logger=self._logger,
+            logger=self.logger,
         )
 
         self.set(uds_sample, grid_name=grid_name, overwrite_grid=False)
@@ -613,7 +665,7 @@ class MeshComponent(ModelComponent):
                         )
                     else:
                         # Remove grid and all corresponding data variables from mesh
-                        self._logger.warning(
+                        self.logger.warning(
                             f"Overwriting grid {grid_name} and the corresponding"
                             " data variables in mesh."
                         )
@@ -636,7 +688,7 @@ class MeshComponent(ModelComponent):
                 grids = xr.merge(objects=grids)
                 for dvar in data.data_vars:
                     if dvar in self._data:
-                        self._logger.warning(f"Replacing mesh parameter: {dvar}")
+                        self.logger.warning(f"Replacing mesh parameter: {dvar}")
                     # The xugrid check on grid equal does not work properly compared to
                     # our _grid_is_equal method. Add to xarray Dataset and convert back
                     grids[dvar] = data.ugrid.to_dataset()[dvar]
@@ -663,6 +715,46 @@ class MeshComponent(ModelComponent):
             .to_dataset(optional_attributes=True)
             .equals(data.grid.to_dataset(optional_attributes=True))
         )
+
+    def _get_mesh_grid_data(self, grid_name: str) -> Union[xu.Ugrid1d, xu.Ugrid2d]:
+        if self._region_component is not None:
+            reference_component = self.model.get_component(self._region_component)
+            self._check_mesh_component(grid_name, reference_component)
+            mesh_component = cast(MeshComponent, reference_component)
+            return mesh_component.mesh_grids[grid_name]
+        if self.data is None:
+            raise ValueError("No mesh data available.")
+        if grid_name not in self.mesh_names:
+            raise ValueError(f"Grid {grid_name} not found in mesh.")
+        return self.mesh_grids[grid_name]
+
+    def _get_mesh_gdf_data(self, grid_name: str) -> gpd.GeoDataFrame:
+        if self._region_component is not None:
+            reference_component = self.model.get_component(self._region_component)
+            self._check_mesh_component(grid_name, reference_component)
+            mesh_component = cast(MeshComponent, reference_component)
+            return mesh_component.mesh_gdf[grid_name]
+        if self.data is None:
+            raise ValueError("No mesh data available.")
+        if grid_name not in self.mesh_names:
+            raise ValueError("No region data available.")
+        return self.mesh_gdf[grid_name]
+
+    def _check_mesh_component(
+        self, grid_name: str, reference_component: ModelComponent
+    ):
+        if not isinstance(reference_component, MeshComponent):
+            raise ValueError(
+                f"Referenced region component is not a MeshComponent: '{self._region_component}'."
+            )
+        if reference_component.data is None:
+            raise ValueError(
+                f"Unable to get mesh data from the referenced region component: '{self._region_component}'"
+            )
+        if grid_name not in reference_component.mesh_names:
+            raise ValueError(
+                f"Grid '{grid_name}' not found in mesh of '{self._region_component}'."
+            )
 
 
 def _check_UGrid(

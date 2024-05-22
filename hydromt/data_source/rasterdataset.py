@@ -300,7 +300,7 @@ class RasterDatasetSource(DataSource):
                 media_type = MediaType.PNG
             else:
                 raise RuntimeError(
-                    f"Unknown extention: {ext} cannot determine media type"
+                    f"Unknown extension: {ext} cannot determine media type"
                 )
         except (IndexError, KeyError, CRSError) as e:
             if on_error == ErrorHandleMethod.SKIP:

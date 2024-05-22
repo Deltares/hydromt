@@ -2,10 +2,10 @@
 """Tests for the hydromt.models module of HydroMT."""
 
 from os import listdir
-from os.path import abspath, dirname, exists, isfile, join
+from os.path import abspath, dirname, isfile, join
 from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock
+from typing import Any, List, cast
+from unittest.mock import Mock
 
 import geopandas as gpd
 import numpy as np
@@ -16,8 +16,9 @@ from pytest_mock import MockerFixture
 from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
+from hydromt.components.config import ConfigComponent
 from hydromt.components.grid import GridComponent
-from hydromt.components.region import ModelRegionComponent
+from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
@@ -28,7 +29,7 @@ DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 def _patch_plugin_components(
     mocker: MockerFixture, *component_classes: type
-) -> list[MagicMock]:
+) -> List[Mock]:
     """Set up PLUGINS with mocked classes.
 
     Returns a list of mocked instances of the classes.
@@ -56,25 +57,6 @@ def test_api_attrs():
     assert dm.api["region"] == gpd.GeoDataFrame
     assert "grid" in dm.api
     assert dm.api["grid"] == xr.Dataset
-
-
-# test both with and without xugrid
-# @pytest.mark.parametrize("has_xugrid", [hydromt._compat.HAS_XUGRID, False])
-# def test_global_models(mocker, has_xugrid):
-#     _MODELS = ModelCatalog()
-#     mocker.patch("hydromt._compat.HAS_XUGRID", has_xugrid)
-#     keys = list(plugins.LOCAL_EPS.keys())
-#     if not hydromt._compat.HAS_XUGRID:
-#         keys.remove("mesh_model")
-#     # set first local model as plugin for testing
-#     _MODELS._plugins.append(keys[0])
-#     assert isinstance(_MODELS[keys[0]], EntryPoint)
-#     assert issubclass(_MODELS.load(keys[0]), Model)
-#     assert keys[0] in _MODELS.__str__()
-#     assert all([k in _MODELS for k in keys])  # eps
-#     assert all([k in _MODELS.cls for k in keys])
-#     with pytest.raises(ValueError, match="Unknown model"):
-#         _MODELS["unknown"]
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
@@ -163,19 +145,6 @@ def test_model_append(demda, df, tmpdir):
     assert "dem" in mod1.geoms
     mod1.set_tables(df, name="df1")
     assert "df" in mod1.tables
-
-
-def test_model_does_not_overwrite_in_write_mode(tmpdir):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    root = join(tmpdir, "tmp")
-    model = Model(root=root, mode="w")
-    model.region.create({"bbox": bbox})
-    model.region.write()
-    assert exists(join(root, "region.geojson"))
-    with pytest.raises(
-        OSError, match="Model dir already exists and cannot be overwritten: "
-    ):
-        model.region.write()
 
 
 @pytest.mark.integration()
@@ -506,10 +475,33 @@ def test_gridmodel_setup(tmpdir):
     mod.write(components=["geoms", "grid"])
 
 
+def test_vectormodel(vector_model, tmpdir, mocker: MockerFixture, geodf):
+    # write model
+    vector_model.root.set(str(tmpdir), mode="w")
+    vector_model.write()
+    # read model
+    region_component = mocker.Mock(spec_set=SpatialModelComponent)
+    region_component.test_equal.return_value = (True, {})
+    region_component.region = geodf
+    model1 = Model(
+        root=str(tmpdir),
+        mode="r",
+        region_component="area",
+        components={
+            "area": region_component,
+            "vector": {"type": VectorComponent.__name__, "region_component": "area"},
+            "config": {"type": ConfigComponent.__name__},
+        },
+    )
+    model1.read()
+    equal, errors = vector_model.test_equal(model1)
+    assert equal, errors
+
+
 def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
     # test set vector
     testds = vector_model_no_defaults.vector.data.copy()
-    vector_component = vector_model_no_defaults.get_component("vector", VectorComponent)
+    vector_component = cast(VectorComponent, vector_model_no_defaults.vector)
     # np.ndarray
     with pytest.raises(ValueError, match="Unable to set"):
         vector_component.set(testds["zs"].values)
@@ -709,33 +701,35 @@ def test_meshmodel_setup(griduda, world):
     assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
 
 
-# NEW TESTS FOR REFACTOR MODEL COMPONENTS
-
-
-def test_initialize_model():
-    m = Model()
-    assert isinstance(m.region, ModelRegionComponent)
+def test_initialize_with_region_component(mocker: MockerFixture):
+    (region,) = _patch_plugin_components(mocker, SpatialModelComponent)
+    m = Model(components={"region": {"type": SpatialModelComponent.__name__}})
+    assert m.region is region.region
 
 
 def test_initialize_model_with_grid_component():
-    m = Model(components={"grid": {"type": "GridComponent"}})
+    m = Model(components={"grid": {"type": GridComponent.__name__}})
     assert isinstance(m.grid, GridComponent)
-    assert isinstance(m.region, ModelRegionComponent)
 
 
 def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
-    m = Model(root=str(tmpdir))
-    grid = mocker.Mock(spec_set=ModelComponent)
-    m.add_component("grid", grid)
+    m = Model(
+        root=str(tmpdir),
+    )
+    foo = mocker.Mock(spec_set=ModelComponent)
+    bar = mocker.Mock(spec_set=ModelComponent)
+    m.add_component("foo", foo)
+    m.add_component("bar", bar)
     m.write()
-    grid.write.assert_called_once()
+    bar.write.assert_called_once()
+    foo.write.assert_called_once()
 
 
 def test_getattr_component(mocker: MockerFixture):
-    m = Model()
     foo = mocker.Mock(spec_set=ModelComponent)
+    m = Model()
     m.add_component("foo", foo)
-    assert m.foo == foo
+    assert m.foo is foo
 
 
 def test_add_component_wrong_name(mocker: MockerFixture):
@@ -750,72 +744,48 @@ def test_add_component_wrong_name(mocker: MockerFixture):
 def test_get_component_non_existent():
     m = Model()
     with pytest.raises(KeyError):
-        m.get_component("foo", ModelComponent)
+        m.get_component("foo")
 
 
 def test_read_calls_components(mocker: MockerFixture):
     m = Model(mode="r")
-    mocker.patch.object(m.region, "read")
     foo = mocker.Mock(spec_set=ModelComponent)
     m.add_component("foo", foo)
     m.read()
     foo.read.assert_called_once()
 
 
-def test_read_in_write_mode():
-    m = Model(mode="w")
-    with pytest.raises(IOError, match="Model opened in write-only mode"):
-        m.read()
-
-
-def test_build_empty_model_builds_region(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
-    m = Model(root=str(tmpdir))
-    assert m.region is region
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    m.build(region=region_dict)
-    region.create.assert_called_once_with(region=region_dict)
-    region.write.assert_called_once()
-
-
 def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
-    region, foo = _patch_plugin_components(mocker, ModelRegionComponent, ModelComponent)
+    foo = mocker.Mock(spec_set=ModelComponent)
     foo.write.__ishydromtstep__ = True
+    bar = mocker.Mock(spec_set=ModelComponent)
     m = Model(root=str(tmpdir))
     m.add_component("foo", foo)
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    assert m.region is region
+    m.add_component("bar", bar)
     assert m.foo is foo
 
     # Specify to only write foo
-    m.build(region=region_dict, steps=[{"foo.write": {}}])
+    m.build(steps=[{"foo.write": {}}])
 
-    region.create.assert_called_once_with(region=region_dict)
-    region.write.assert_not_called()  # Only foo will be written, so no total write
+    bar.write.assert_not_called()  # Only foo will be written, so no total write
     foo.write.assert_called_once()  # foo was written, because it was specified in steps
 
 
 def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
+    foo = mocker.Mock(spec_set=ModelComponent)
     m = Model(root=str(tmpdir))
-    assert m.region is region
+    m.add_component("foo", foo)
 
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
-    m.build(write=False, region=region_dict)
+    m.build(steps=[], write=False)
 
-    region.create.assert_called_once()
-    region.write.assert_not_called()
+    foo.write.assert_not_called()
 
 
 def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
     m = Model(root=str(tmpdir))
-    assert m.region is region
-
-    region_dict = {"bbox": [12.05, 45.30, 12.85, 45.65]}
 
     with pytest.raises(KeyError):
-        m.build(region=region_dict, steps=[{"foo": {}}])
+        m.build(steps=[{"foo": {}}])
 
 
 def test_add_component_duplicate_throws(mocker: MockerFixture):
@@ -828,8 +798,14 @@ def test_add_component_duplicate_throws(mocker: MockerFixture):
         m.add_component("foo", foo2)
 
 
-def test_update_empty_model_with_region_none_throws(tmpdir: Path):
-    m = Model(root=str(tmpdir))
+def test_update_empty_model_with_region_none_throws(
+    tmpdir: Path, mocker: MockerFixture
+):
+    (foo,) = _patch_plugin_components(mocker, SpatialModelComponent)
+    foo.region = None
+    m = Model(
+        root=str(tmpdir), components={"foo": {"type": SpatialModelComponent.__name__}}
+    )
     with pytest.raises(
         ValueError, match="Model region not found, setup model using `build` first."
     ):
@@ -848,14 +824,17 @@ def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
 def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
     tmpdir: Path, mocker: MockerFixture
 ):
-    region = _patch_plugin_components(mocker, ModelRegionComponent)[0]
-    m = Model(root=str(tmpdir), mode="r")
-    assert region is m.region
+    (region,) = _patch_plugin_components(mocker, SpatialModelComponent)
+    m = Model(
+        root=str(tmpdir),
+        mode="r",
+        components={"region": {"type": SpatialModelComponent.__name__}},
+    )
+    assert region.region is m.region
 
     m.update(model_out=str(tmpdir / "out"))
 
     assert m.root.is_writing_mode()
     assert not m.root.is_override_mode()
     region.read.assert_called_once()
-    region.create.assert_not_called()
     region.write.assert_called_once()

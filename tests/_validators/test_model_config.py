@@ -72,7 +72,7 @@ def test_validate_component_config_unknown_component():
 
 
 def test_validate_component_config_known_component():
-    HydromtComponentConfig(name="foo", type="ModelComponent")
+    HydromtComponentConfig(name="foo", type=ModelComponent.__name__)
     HydromtComponentConfig(name="foo", type=ModelComponent)
 
 
@@ -105,8 +105,8 @@ def test_validate_step_signature_bind():
 def test_validate_global_config_components():
     globals = HydromtGlobalConfig(
         components={
-            "grid": {"type": "GridComponent"},
-            "subgrid": {"type": "GridComponent"},
+            "grid": {"type": GridComponent.__name__},
+            "subgrid": {"type": GridComponent.__name__},
         },  # type: ignore
     )
     assert globals.components[0].name == "grid"

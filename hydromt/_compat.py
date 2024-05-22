@@ -4,7 +4,6 @@ from packaging.version import Version
 
 __all__ = []
 
-HAS_XUGRID = False
 HAS_PYET = False
 HAS_GCSFS = False
 HAS_S3FS = False
@@ -15,13 +14,6 @@ try:
     import openpyxl
 
     HAS_OPENPYXL = True
-except ImportError:
-    pass
-
-try:
-    import xugrid
-
-    HAS_XUGRID = True
 except ImportError:
     pass
 

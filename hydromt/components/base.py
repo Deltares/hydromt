@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Dict, cast
 from weakref import ReferenceType, ref
 
 from hydromt.data_catalog import DataCatalog
@@ -29,26 +29,26 @@ class ModelComponent(ABC):
         ...
 
     @property
-    def _model(self) -> "Model":
+    def model(self) -> "Model":
         """Return the model object this component is associated with."""
         return cast("Model", self.__model_ref())
 
     @property
-    def _data_catalog(self) -> DataCatalog:
+    def data_catalog(self) -> DataCatalog:
         """Return the data catalog of the model this component is associated with."""
-        return self._model.data_catalog
+        return self.model.data_catalog
 
     @property
-    def _logger(self) -> Logger:
+    def logger(self) -> Logger:
         """Return the logger of the model this component is associated with."""
-        return self._model.logger
+        return self.model.logger
 
     @property
-    def _root(self) -> "ModelRoot":
+    def root(self) -> "ModelRoot":
         """Return the root of the model this component is associated with."""
-        return self._model.root
+        return self.model.root
 
-    def test_equal(self, other: "ModelComponent") -> tuple[bool, dict[str, str]]:
+    def test_equal(self, other: "ModelComponent") -> tuple[bool, Dict[str, str]]:
         """Test if two components are equal.
 
         Inherit this method in the subclass to test for equality on data.
@@ -61,10 +61,10 @@ class ModelComponent(ABC):
 
         Returns
         -------
-        tuple[bool, dict[str, str]]
+        tuple[bool, Dict[str, str]]
             True if the components are equal, and a dict with the associated errors per property checked.
         """
-        errors: dict[str, str] = {}
+        errors: Dict[str, str] = {}
         if not isinstance(other, self.__class__):
             errors["__class__"] = f"other does not inherit from {self.__class__}."
         return len(errors) == 0, errors

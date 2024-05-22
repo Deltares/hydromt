@@ -391,19 +391,27 @@ Note that the base Model attributes and methods are available to all models.
 
    Model
 
-High level methods
-------------------
+CLI methods
+-----------
 
 .. autosummary::
    :toctree: _generated
 
    Model.read
    Model.write
+   Model.write_data_catalog
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
    Model.build
    Model.update
-   Model.write_data_catalog
    Model.get_component
    Model.add_component
+   Model.test_equal
 
 Model attributes
 ----------------
@@ -411,10 +419,12 @@ Model attributes
 .. autosummary::
    :toctree: _generated
 
+   Model.data_catalog
    Model.crs
-   Model.model_root
+   Model.root
    Model.region
    Model.api
+   Model.components
 
 ModelRoot
 =========
@@ -435,8 +445,8 @@ Attributes
    ModelRoot.is_reading_mode
    ModelRoot.is_override_mode
 
-Methods
--------
+General Methods
+---------------
 
 .. autosummary::
    :toctree: _generated
@@ -463,15 +473,15 @@ Attributes
    ModelComponent.model
    ModelComponent.data_catalog
    ModelComponent.logger
-   ModelComponent.model_root
+   ModelComponent.root
 
-ModelRegionComponent
-====================
+SpatialModelComponent
+=====================
 
 .. autosummary::
    :toctree: _generated
 
-   ModelRegionComponent
+   SpatialModelComponent
 
 Attributes
 ----------
@@ -479,59 +489,54 @@ Attributes
 .. autosummary::
    :toctree: _generated
 
-   ModelRegionComponent.data
-   ModelRegionComponent.model
-   ModelRegionComponent.crs
-   ModelRegionComponent.bounds
-   ModelRegionComponent.data_catalog
-   ModelRegionComponent.logger
-   ModelRegionComponent.model_root
+   SpatialModelComponent.model
+   SpatialModelComponent.data_catalog
+   SpatialModelComponent.logger
+   SpatialModelComponent.root
+   SpatialModelComponent.crs
+   SpatialModelComponent.bounds
+   SpatialModelComponent.region
 
-General Methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   ModelRegionComponent.set
-   ModelRegionComponent.read
-   ModelRegionComponent.write
-
-Data Methods
-------------
+Plugin developer methods
+------------------------
 
 .. autosummary::
    :toctree: _generated
 
-   ModelRegionComponent.create
+   SpatialModelComponent._region_data
+   SpatialModelComponent.write_region
+   SpatialModelComponent.test_equal
 
-
-GridComponent
-=========
-
-.. autosummary::
-   :toctree: _generated
-
-   GridComponent
-
-
-Components and attributes
--------------------------
+ConfigComponent
+===============
 
 .. autosummary::
    :toctree: _generated
 
-   GridComponent.model
-   GridComponent.data_catalog
-   GridComponent.logger
-   GridComponent.model_root
-   GridComponent.res
-   GridComponent.transform
-   GridComponent.crs
-   GridComponent.bounds
-   GridComponent.region
-   GridComponent.data
+   ConfigComponent
 
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent.model
+   ConfigComponent.data_catalog
+   ConfigComponent.logger
+   ConfigComponent.root
+   ConfigComponent.data
+
+CLI methods
+-----------
+
+.. autosummary::
+   :toctree: _generated
+
+   ConfigComponent.write
+   ConfigComponent.read
+   ConfigComponent.create
+   ConfigComponent.update
 
 General methods
 ---------------
@@ -539,88 +544,9 @@ General methods
 .. autosummary::
    :toctree: _generated
 
-   GridComponent.set
-   GridComponent.write
-   GridComponent.read
-
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   GridComponent.create
-   GridComponent.add_data_from_constant
-   GridComponent.add_data_from_rasterdataset
-   GridComponent.add_data_from_raster_reclass
-   GridComponent.add_data_from_geodataframe
-
-TablesComponent
-==============
-
-.. autosummary::
-   :toctree: _generated
-
-    TablesComponent
-
-
-Components and attributes
--------------------------
-
-.. autosummary::
-   :toctree: _generated
-
-   TablesComponent._model
-   TablesComponent._data_catalog
-   TablesComponent._logger
-   TablesComponent._root
-   TablesComponent.data
-
-
-General methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   TablesComponent.set
-   TablesComponent.write
-   TablesComponent.read
-
-DatasetsComponent
-==============
-
-.. autosummary::
-   :toctree: _generated
-
-    DatasetsComponent
-
-
-Components and attributes
--------------------------
-
-.. autosummary::
-   :toctree: _generated
-
-   DatasetsComponent._model
-   DatasetsComponent._data_catalog
-   DatasetsComponent._logger
-   DatasetsComponent._root
-   DatasetsComponent.data
-
-
-General methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   DatasetsComponent.set
-   DatasetsComponent.write
-   DatasetsComponent.read
-   DatasetsComponent.add_raster_data_from_raster_reclass
-   DatasetsComponent.add_raster_data_from_rasterdataset
+   ConfigComponent.set
+   ConfigComponent.get_value
+   ConfigComponent.test_equal
 
 GeomsComponent
 ==============
@@ -631,18 +557,27 @@ GeomsComponent
     GeomsComponent
 
 
-Components and attributes
--------------------------
+Attributes
+----------
 
 .. autosummary::
    :toctree: _generated
 
-   GeomsComponent._model
-   GeomsComponent._data_catalog
-   GeomsComponent._logger
-   GeomsComponent._root
+   GeomsComponent.model
+   GeomsComponent.data_catalog
+   GeomsComponent.logger
+   GeomsComponent.root
    GeomsComponent.data
+   GeomsComponent.region
 
+CLI methods
+-----------
+
+.. autosummary::
+   :toctree: _generated
+
+   GeomsComponent.write
+   GeomsComponent.read
 
 General methods
 ---------------
@@ -651,9 +586,177 @@ General methods
    :toctree: _generated
 
    GeomsComponent.set
-   GeomsComponent.write
-   GeomsComponent.read
+   GeomsComponent.test_equal
 
+TablesComponent
+===============
+
+.. autosummary::
+   :toctree: _generated
+
+    TablesComponent
+
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   TablesComponent.model
+   TablesComponent.data_catalog
+   TablesComponent.logger
+   TablesComponent.root
+   TablesComponent.data
+
+
+CLI methods
+-----------
+
+.. autosummary::
+   :toctree: _generated
+
+   TablesComponent.write
+   TablesComponent.read
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   TablesComponent.set
+   TablesComponent.test_equal
+
+DatasetsComponent
+=================
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent
+
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent.model
+   DatasetsComponent.data_catalog
+   DatasetsComponent.logger
+   DatasetsComponent.root
+   DatasetsComponent.data
+
+
+CLI methods
+-----------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent.write
+   DatasetsComponent.read
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   DatasetsComponent.set
+   DatasetsComponent.test_equal
+
+SpatialDatasetsComponent
+========================
+
+.. autosummary::
+   :toctree: _generated
+
+   SpatialDatasetsComponent
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   SpatialDatasetsComponent.model
+   SpatialDatasetsComponent.data_catalog
+   SpatialDatasetsComponent.logger
+   SpatialDatasetsComponent.root
+   SpatialDatasetsComponent.data
+   SpatialDatasetsComponent.region
+
+CLI methods
+-----------
+
+.. autosummary::
+   :toctree: _generated
+
+   SpatialDatasetsComponent.write
+   SpatialDatasetsComponent.read
+   SpatialDatasetsComponent.add_raster_data_from_raster_reclass
+   SpatialDatasetsComponent.add_raster_data_from_rasterdataset
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   SpatialDatasetsComponent.set
+   SpatialDatasetsComponent.test_equal
+
+GridComponent
+=============
+
+.. autosummary::
+   :toctree: _generated
+
+   GridComponent
+
+Attributes
+----------
+
+.. autosummary::
+   :toctree: _generated
+
+   GridComponent.model
+   GridComponent.data_catalog
+   GridComponent.logger
+   GridComponent.root
+   GridComponent.res
+   GridComponent.transform
+   GridComponent.crs
+   GridComponent.bounds
+   GridComponent.region
+   GridComponent.data
+
+
+CLI methods
+-----------
+
+.. autosummary::
+   :toctree: _generated
+
+   GridComponent.write
+   GridComponent.read
+   GridComponent.create_from_region
+   GridComponent.add_data_from_constant
+   GridComponent.add_data_from_rasterdataset
+   GridComponent.add_data_from_raster_reclass
+   GridComponent.add_data_from_geodataframe
+
+General methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   GridComponent.set
+   GridComponent.test_equal
 
 MeshComponent
 =============
@@ -662,16 +765,16 @@ MeshComponent
 
    MeshComponent
 
-Components and attributes
--------------------------
+Attributes
+----------
 
 .. autosummary::
    :toctree: _generated
 
-   MeshComponent._model
-   MeshComponent._data_catalog
-   MeshComponent._logger
-   MeshComponent._root
+   MeshComponent.model
+   MeshComponent.data_catalog
+   MeshComponent.logger
+   MeshComponent.root
    MeshComponent.data
    MeshComponent.crs
    MeshComponent.bounds
@@ -682,6 +785,18 @@ Components and attributes
    MeshComponent.mesh_gdf
 
 
+CLI methods
+---------------
+
+.. autosummary::
+   :toctree: _generated
+
+   MeshComponent.write
+   MeshComponent.read
+   MeshComponent.create_2d_from_region
+   MeshComponent.add_2d_data_from_rasterdataset
+   MeshComponent.add_2d_data_from_raster_reclass
+
 General methods
 ---------------
 
@@ -689,67 +804,7 @@ General methods
    :toctree: _generated
 
    MeshComponent.set
-   MeshComponent.write
-   MeshComponent.read
    MeshComponent.get_mesh
-
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   MeshComponent.create2d
-   MeshComponent.add_2d_data_from_rasterdataset
-   MeshComponent.add_2d_data_from_raster_reclass
-
-
-ConfigComponent
-===============
-
-.. autosummary::
-   :toctree: _generated
-
-   ConfigComponent
-
-
-Components and attributes
--------------------------
-
-.. autosummary::
-   :toctree: _generated
-
-   ConfigComponent._model
-   ConfigComponent._data_catalog
-   ConfigComponent._logger
-   ConfigComponent._root
-   ConfigComponent.data
-
-
-General methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   ConfigComponent.set
-   ConfigComponent.write
-   ConfigComponent.read
-   ConfigComponent.get_value
-
-
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   ConfigComponent.create
-   ConfigComponent.update
-
-
 
 VectorComponent
 ===============
@@ -759,9 +814,8 @@ VectorComponent
 
    VectorComponent
 
-
-Components and attributes
--------------------------
+Attributes
+----------
 
 .. autosummary::
    :toctree: _generated
@@ -770,11 +824,19 @@ Components and attributes
    VectorComponent.geometry
    VectorComponent.index_dim
    VectorComponent.crs
-   VectorComponent._model
-   VectorComponent._data_catalog
-   VectorComponent._logger
-   VectorComponent._root
+   VectorComponent.model
+   VectorComponent.data_catalog
+   VectorComponent.logger
+   VectorComponent.root
 
+CLI methods
+-----------
+
+.. autosummary::
+   :toctree: _generated
+
+   VectorComponent.read
+   VectorComponent.write
 
 General methods
 ---------------
@@ -783,61 +845,8 @@ General methods
    :toctree: _generated
 
    VectorComponent.set
-   VectorComponent.read
-   VectorComponent.write
+   VectorComponent.test_equal
 
-
-.. _mesh_model_api:
-
-MeshModel
-=========
-
-.. autosummary::
-   :toctree: _generated
-
-   MeshModel
-
-
-Components and attributes
--------------------------
-
-.. autosummary::
-   :toctree: _generated
-
-   MeshModel.mesh
-   MeshModel.mesh_names
-   MeshModel.mesh_grids
-   MeshModel.mesh_datasets
-   MeshModel.mesh_gdf
-   MeshModel.crs
-   MeshModel.region
-   MeshModel.bounds
-
-General methods
----------------
-
-.. autosummary::
-   :toctree: _generated
-
-   MeshModel.set_mesh
-   MeshModel.get_mesh
-   MeshModel.read_mesh
-   MeshModel.write_mesh
-
-
-Setup methods
--------------
-
-.. autosummary::
-   :toctree: _generated
-
-   MeshModel.setup_config
-   MeshModel.setup_region
-   MeshModel.setup_mesh2d
-   MeshModel.setup_mesh2d_from_rasterdataset
-   MeshModel.setup_mesh2d_from_raster_reclass
-   MeshModel.setup_maps_from_rasterdataset
-   MeshModel.setup_maps_from_raster_reclass
 
 .. _workflows_api:
 
@@ -853,10 +862,13 @@ Grid
 .. autosummary::
    :toctree: _generated
 
+   workflows.grid.create_grid_from_region
+   workflows.grid.create_rotated_grid_from_geom
    workflows.grid.grid_from_constant
    workflows.grid.grid_from_rasterdataset
    workflows.grid.grid_from_raster_reclass
    workflows.grid.grid_from_geodataframe
+   workflows.grid.rotated_grid
 
 .. _workflows_mesh_api:
 
@@ -866,9 +878,26 @@ Mesh
 .. autosummary::
    :toctree: _generated
 
-   workflows.mesh.create_mesh2d
+   workflows.mesh.create_mesh2d_from_region
+   workflows.mesh.create_mesh2d_from_mesh
+   workflows.mesh.create_mesh2d_from_geom
    workflows.mesh.mesh2d_from_rasterdataset
    workflows.mesh.mesh2d_from_raster_reclass
+
+.. _workflows_region_api:
+
+Region
+======
+
+.. autosummary::
+   :toctree: _generated
+
+   workflows.region.parse_region_basin
+   workflows.region.parse_region_bbox
+   workflows.region.parse_region_geom
+   workflows.region.parse_region_grid
+   workflows.region.parse_region_other_model
+   workflows.region.parse_region_mesh
 
 .. _workflows_basin_api:
 
