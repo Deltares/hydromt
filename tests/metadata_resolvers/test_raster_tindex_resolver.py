@@ -72,11 +72,11 @@ class TestRasterTindexResolver:
         )
         assert len(paths) == 2
         assert (
-            str(Path(join(dirname(raster_tindex), "GRWL_mask_V01.01\\NA19.tif")))
+            str(Path(join(dirname(raster_tindex), "GRWL_mask_V01.01/NA19.tif")))
             in paths
         )
         assert (
-            str(Path(join(dirname(raster_tindex), "GRWL_mask_V01.01\\NA18.tif")))
+            str(Path(join(dirname(raster_tindex), "GRWL_mask_V01.01/NA18.tif")))
             in paths
         )
 
@@ -85,7 +85,7 @@ class TestRasterTindexResolver:
             uri=raster_tindex, fs=AbstractFileSystem(), mask=geom, options=options
         )
         assert len(paths) == 1
-        path = str(Path(join(dirname(raster_tindex), "GRWL_mask_V01.01\\NA19.tif")))
+        path = str(Path(join(dirname(raster_tindex), "GRWL_mask_V01.01/NA19.tif")))
         assert path in paths
 
     def test_raises_no_tileindex(self, raster_tindex):
