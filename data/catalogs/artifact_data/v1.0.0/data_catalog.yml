@@ -517,6 +517,28 @@ grwl:
     version: 1.01
     license: CC BY 4.0
   data_type: GeoDataFrame
+grwl_mask:
+  name: grwl_mask
+  uri: grwl_tindex.gpkg
+  driver:
+    metadata_resolver:
+      name: raster_tindex
+    options:
+      kwargs:
+        chunks:
+          x: 3000
+          y: 3000
+        mosaic_kwargs:
+          method: nearest
+        tileindex: location
+    name: rasterio
+  metadata:
+    paper_doi: 10.1126/science.aat0636
+    paper_ref: Allen and Pavelsky (2018)
+    url: https://doi.org/10.5281/zenodo.1297434
+    version: 1.01
+    license: CC BY 4.0
+  data_type: RasterDataset
 gswo:
   name: gswo
   uri: gswo.tif

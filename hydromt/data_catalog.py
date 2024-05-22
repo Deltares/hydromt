@@ -857,15 +857,15 @@ class DataCatalog(object):
                 yaml.dump(d, f, default_flow_style=False, sort_keys=False)
 
         for name, source_dict in _denormalise_data_dict(data_dict):
-            adapter = _parse_data_source_dict(
+            source = _parse_data_source_dict(
                 name,
                 source_dict,
                 root=root,
                 category=category,
             )
             if mark_used:
-                adapter.mark_as_used()
-            self.add_source(name, adapter)
+                source._used = True
+            self.add_source(name, source)
 
         return self
 

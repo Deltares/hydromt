@@ -12,7 +12,7 @@ DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
         "raster": "rasterio",
         "zarr": "raster_xarray",
         "netcdf": "raster_xarray",
-        "raster_tindex": "raster_tindex",  # TODO: https://github.com/Deltares/hydromt/issues/856
+        "raster_tindex": "rasterio",
     },
     "GeoDataset": {
         "vector": "geodataset_vector",
@@ -92,8 +92,11 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     # migrate driver str to dict
     data_type: Optional[str] = entry.get("data_type")
     if data_type and entry.get("driver"):
-        driver_name: str = DRIVER_RENAME_MAPPING[data_type][entry.pop("driver")]
+        old_driver: str = entry.pop("driver")
+        driver_name: str = DRIVER_RENAME_MAPPING[data_type][old_driver]
         entry["driver"] = {"name": driver_name}
+        if old_driver == "raster_tindex":
+            entry["driver"]["metadata_resolver"] = "raster_tindex"
 
     # move kwargs and driver_kwargs to driver options
     old_kwarg_names: Set[str] = {"kwargs", "driver_kwargs"}
