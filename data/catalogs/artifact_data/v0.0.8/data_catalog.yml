@@ -32,7 +32,7 @@ chirps_global:
   unit_add:
     time: 86400
 
-corine_2018:
+corine:
   data_type: RasterDataset
   driver: raster
   meta:
