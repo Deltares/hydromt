@@ -90,6 +90,17 @@ class TestRasterTindexResolver:
 
     def test_raises_no_tileindex(self, raster_tindex):
         resolver = RasterTindexResolver()
+        geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
+        with pytest.raises(
+            ValueError,
+            match="RasterTindexResolver needs options specifying 'tileindex'",
+        ):
+            resolver.resolve(
+                uri=raster_tindex, fs=AbstractFileSystem(), mask=geom, options={}
+            )
+
+    def test_raises_missing_tileindex(self, raster_tindex):
+        resolver = RasterTindexResolver()
         options = {"tileindex": "file"}
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
         with pytest.raises(
