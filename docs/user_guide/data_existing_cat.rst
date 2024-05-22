@@ -21,20 +21,27 @@ Using a predefined catalog
 From CLI
 ~~~~~~~~
 
-To use a predefined catalog, you can specify the catalog name with the ``--dd`` or ``--data_catalog`` option when running a HydroMT command.
+To use a predefined catalog, you can specify the catalog name with the ``-d`` or ``--data`` option when running a HydroMT command.
 For example, to use the ``deltares_data`` catalog with the `hydromt build` command, you can run the following:
 
 .. code-block:: bash
 
-    hydromt build MODEL --dd deltares_data ...
+    hydromt build MODEL -d deltares_data ...
+
+Alternatively, deltares_data can also be accessed with the ``--dd`` option:
+
+.. code-block:: bash
+
+    hydromt build MODEL --dd ...
+
 
 You can specify a version of the catalog by adding the version number after the catalog name, e.g. ``deltares_data=2024.2``.
 
 .. code-block:: bash
 
-    hydromt build MODEL --dd deltares_data=2024.2 ...
+    hydromt build MODEL -d deltares_data=2024.2 ...
 
-Once you have set the data catalog you can specify the datat source(s) for each method in the HydroMT
+Once you have set the data catalog you can specify the data source(s) for each method in the HydroMT
 :ref:`model configuration file <model_config>` as shown in the example below with the `setup_precip_forcing` method.
 
 .. code-block:: yaml
