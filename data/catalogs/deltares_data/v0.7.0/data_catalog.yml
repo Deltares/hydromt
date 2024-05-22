@@ -179,7 +179,7 @@ copdem30_masked:
   rename:
     copdem_masked: elevtn
 
-corine_2018:
+corine:
   data_type: RasterDataset
   driver: raster
   driver_kwargs:
@@ -596,7 +596,7 @@ era5_orography:
   unit_mult:
     elevtn: 0.10197162129779283
 
-esa_worldcover_2020:
+esa_worldcover:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -869,7 +869,7 @@ ghs_smod_2015:
       paper_ref: Pesaresi et al (2019)
       source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
 
-globcover_2009:
+globcover:
   crs: 4326
   data_type: RasterDataset
   driver: raster

@@ -264,19 +264,27 @@ gebco:
     unit: m+MSL
   version: 2020
   path: gebco.tif
-ghs-smod_2015_v2:
+
+ghs_smod_2015:
   crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
   meta:
     category: socio economic
-    paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
-    paper_ref: Pesaresi et al (2019)
     source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
-    source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
-  version: R2019A_v2.0
-  path: ghs-smod_2015_v2.tif
+  variants:
+  - version: R2016A_v1.0
+    path: ghs_smod_2015.tif
+    meta:
+      paper_ref: Pesaresi and Freire (2016)
+      source_url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
+  - version: R2019A_v2.0
+    path: ghs-smod_2015_v2.tif
+    meta:
+      paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+      paper_ref: Pesaresi et al (2019)
+      source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
 
 ghs_pop_2015:
   crs: 4326
@@ -289,7 +297,6 @@ ghs_pop_2015:
     source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
     source_url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
-
   path: ghs_pop_2015.tif
 
 ghs_pop_2015_54009:
@@ -305,20 +312,7 @@ ghs_pop_2015_54009:
   version: R2019A_v1.0
   path: ghs_pop_2015_54009.tif
 
-ghs_smod_2015:
-  crs: ESRI:54009
-  data_type: RasterDataset
-  driver: raster
-  meta:
-    category: socio economic
-    paper_ref: Pesaresi and Freire (2016)
-    source_author: JRC-ISPRA EC
-    source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
-    source_url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
-  version: R2016A_v1.0
-  path: ghs_smod_2015.tif
-
-globcover:
+globcover_2009:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -604,7 +598,7 @@ merit_hydro:
   version: 1.0
   path: merit_hydro/{variable}.tif
 
-merit_hydro_1k:
+merit_hydro_ihu:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -686,7 +680,7 @@ rgi:
   version: 6.0
   path: rgi.gpkg
 
-rivers_lin2019:
+hydro_rivers_lin:
   data_type: GeoDataFrame
   driver: vector
   meta:
@@ -695,6 +689,7 @@ rivers_lin2019:
     paper_ref: Lin et al. (2019)
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/3552776#.YVbOrppByUk
+    processing_notes: hydrography/rivers_lin2019/README
   version: 1
   path: rivers_lin2019_v1.gpkg
 
@@ -752,7 +747,7 @@ soilgrids:
     ph_sl6: 0.1
     ph_sl7: 0.1
 
-vito:
+vito_2015:
   crs: 4326
   data_type: RasterDataset
   driver: raster

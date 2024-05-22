@@ -86,12 +86,6 @@ See table below for mapping of old and new names:
 +--------------------------------+---------------------------+
 | vito_2019_v3.0.1               | vito_2019                 |
 +--------------------------------+---------------------------+
-| esa_worldcover 			     | esa_worldcover_2020       |
-+--------------------------------+---------------------------+
-| corine 					     | corine_2018               |
-+--------------------------------+---------------------------+
-| globcover 				     | globcover_2009            |
-+--------------------------------+---------------------------+
 
 
 - Some datasets have multiple versions, for these datasets the default can be changed if
