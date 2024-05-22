@@ -190,7 +190,7 @@ RasterTindexResolver
    :toctree: _generated
 
    metadata_resolver.raster_tindex_resolver.RasterTindexResolver
-      metadata_resolver.raster_tindex_resolver.RasterTindexResolver.resolve
+   metadata_resolver.raster_tindex_resolver.RasterTindexResolver.resolve
 
 Driver
 ======
