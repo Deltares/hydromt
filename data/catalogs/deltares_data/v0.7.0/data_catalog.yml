@@ -1700,7 +1700,7 @@ hydro_river_atlas:
   rename:
     dis_m3_pyr: Dis_avg
 
-hydro_rivers_lin2019:
+hydro_rivers_lin:
   data_type: GeoDataFrame
   driver: vector
   meta:
