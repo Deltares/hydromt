@@ -448,24 +448,24 @@ grwl:
     source_url: https://doi.org/10.5281/zenodo.1297434
     source_version: 1.01
   path: grwl.gpkg
-grwl_mask:
-  data_type: RasterDataset
-  driver: raster_tindex
-  kwargs:
-    chunks:
-      x: 3000
-      y: 3000
-    mosaic_kwargs:
-      method: nearest
-    tileindex: location
-  meta:
-    paper_doi: 10.1126/science.aat0636
-    paper_ref: Allen and Pavelsky (2018)
-    source_license: CC BY 4.0
-    source_url: https://doi.org/10.5281/zenodo.1297434
-    source_version: 1.01
-  nodata: 0
-  path: grwl_tindex.gpkg
+# grwl_mask:
+#   data_type: RasterDataset
+#   driver: raster_tindex
+#   kwargs:
+#     chunks:
+#       x: 3000
+#       y: 3000
+#     mosaic_kwargs:
+#       method: nearest
+#     tileindex: location
+#   meta:
+#     paper_doi: 10.1126/science.aat0636
+#     paper_ref: Allen and Pavelsky (2018)
+#     source_license: CC BY 4.0
+#     source_url: https://doi.org/10.5281/zenodo.1297434
+#     source_version: 1.01
+#   nodata: 0
+#   path: grwl_tindex.gpkg
 gswo:
   data_type: RasterDataset
   driver: raster

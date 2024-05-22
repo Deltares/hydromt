@@ -941,9 +941,7 @@ class DataCatalog(object):
         meta = meta or {}
         sources_out = dict()
         if root is not None:
-            root = abspath(root)
             meta.update(**{"root": root})
-            root_drive = os.path.splitdrive(root)[0]
         sources = self.list_sources(used_only=used_only)
         sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
@@ -951,16 +949,6 @@ class DataCatalog(object):
                 continue
             source_dict = source.model_dump(exclude_defaults=True)
 
-            if root is not None:
-                path = source_dict["uri"]  # is abspath
-                source_drive = os.path.splitdrive(path)[0]
-                if (
-                    root_drive == source_drive
-                    and os.path.commonpath([path, root]) == root
-                ):
-                    source_dict["path"] = os.path.relpath(
-                        source_dict["path"], root
-                    ).replace("\\", "/")
             # remove non serializable entries to prevent errors
             source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
             if name in sources_out:

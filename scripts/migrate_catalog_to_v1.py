@@ -144,12 +144,13 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 
 def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
     """Write the catalog out to the new structure."""
-    if meta := new_catalog_dict.pop("meta", None):
+    meta: Dict[str, Any] = new_catalog_dict.pop("meta", None)
+    if meta:
         root = meta.pop("root", None)
     else:
         root = None
     catalog = DataCatalog().from_dict(new_catalog_dict, root=root)
-    catalog.to_yml(path_out)
+    catalog.to_yml(path_out, root=root, meta=meta)
 
 
 def main(path_in: Path, path_out: Path, overwrite: bool):
