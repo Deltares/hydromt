@@ -329,7 +329,7 @@ ghs_pop_2015_54009:
   version: R2019A_v1.0
   path: ghs_pop_2015_54009.tif
 
-globcover_2009:
+globcover:
   crs: 4326
   data_type: RasterDataset
   driver: raster
