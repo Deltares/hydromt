@@ -90,7 +90,6 @@ def test_region_from_basin_ids():
     region = {"basin": [1001, 1002, 1003, 1004, 1005]}
     region = parse_region_basin(
         region,
-        crs=None,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
@@ -103,7 +102,6 @@ def test_region_from_basin_id():
     region = {"basin": 101}
     region = parse_region_basin(
         region,
-        crs=None,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
@@ -116,7 +114,6 @@ def test_region_from_subbasin():
     region = {"subbasin": [1.0, -1.0], "uparea": 5.0, "bounds": [0.0, -5.0, 3.0, 0.0]}
     region = parse_region_basin(
         region,
-        crs=None,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
@@ -130,7 +127,6 @@ def test_region_from_basin_xy():
     region = {"basin": [[1.0, 1.5], [0.0, -1.0]]}
     region = parse_region_basin(
         region,
-        crs=None,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
@@ -143,7 +139,6 @@ def test_region_from_inter_basin(geodf):
     region = {"interbasin": geodf}
     region = parse_region_basin(
         region,
-        crs=None,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
