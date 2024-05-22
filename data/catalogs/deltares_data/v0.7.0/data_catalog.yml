@@ -1615,7 +1615,7 @@ pcr_globwb:
   crs: 4326
   data_type: RasterDataset
   driver: zarr
-  kwargs:
+  driver_kwargs:
     chunks: auto
   meta:
     category: water demand
