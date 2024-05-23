@@ -1,4 +1,4 @@
-*.yaml text eol=lf
+*.yml text eol=lf
 
 # GitHub syntax highlighting
 pixi.lock linguist-language=YAML
