@@ -156,7 +156,7 @@ Add `Driver`, `URIResolver` and `DataAdapter` representations
 With the addition of new classes responsible for different stages of the data
 reading phase, the data catalog is updated accordingly:
 
-.. code-block:: yaml
+.. code-block::yaml
 	mysource:
 		crs: 4326
 		data_type: RasterDataset
@@ -192,6 +192,7 @@ reading phase, the data catalog is updated accordingly:
 				...
 
 Where there are a few changes from the previous versions:
+
 - `path` is renamed to `uri`
 - `driver` is it's own class and can be specified:
 	- by string, implying default arguments
