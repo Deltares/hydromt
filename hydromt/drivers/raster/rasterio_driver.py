@@ -35,7 +35,7 @@ logger: Logger = getLogger(__name__)
 class RasterioDriver(RasterDatasetDriver):
     """Driver using rasterio for RasterDataset."""
 
-    name = "raster"
+    name = "rasterio"
 
     def read_data(
         self,
@@ -93,8 +93,8 @@ class RasterioDriver(RasterDatasetDriver):
         #         # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
         #         kwargs.update(overview_level=zoom_level - 1)
 
-        if mask:
-            kwargs.update({"mask": mask})
+        if mask is not None:
+            kwargs.update({"mosaic_kwargs": {"mask": mask}})
         ds = open_mfraster(uris, logger=logger, **kwargs)
         # rename ds with single band if single variable is requested
         if variables is not None and len(variables) == 1 and len(ds.data_vars) == 1:

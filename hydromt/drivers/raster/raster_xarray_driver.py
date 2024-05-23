@@ -4,7 +4,7 @@ from copy import copy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import Callable, List, Optional
+from typing import Callable, ClassVar, List, Optional
 
 import xarray as xr
 
@@ -19,7 +19,7 @@ from hydromt._typing import (
 from hydromt._typing.error import NoDataStrategy
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
-from hydromt.drivers.raster.rasterdataset_driver import RasterDatasetDriver
+from hydromt.drivers.raster.raster_dataset_driver import RasterDatasetDriver
 
 logger: Logger = getLogger(__name__)
 
@@ -28,7 +28,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     """RasterDatasetXarrayDriver."""
 
     name = "raster_xarray"
-    supports_writing: bool = True
+    supports_writing: ClassVar[bool] = True
 
     def read_data(
         self,

@@ -47,7 +47,7 @@ class DataFrameSource(DataSource):
         """Use the driver and data adapter to read and harmonize the data."""
         self._used = True
         gdf: pd.DataFrame = self.driver.read(
-            self.uri,
+            self.full_uri,
             variables=variables,
             time_range=time_range,
             metadata=self.metadata,
@@ -88,7 +88,7 @@ class DataFrameSource(DataSource):
             return None
 
         # update source and its driver based on local path
-        update: Dict[str, Any] = {"uri": file_path}
+        update: Dict[str, Any] = {"uri": file_path, "root": None}
 
         if driver_override:
             driver: DataFrameDriver = driver_override
@@ -146,7 +146,7 @@ class DataFrameSource(DataSource):
                 properties=self.metadata.model_dump(),
                 datetime=datetime(1, 1, 1),
             )
-            stac_asset = StacAsset(self.uri)
+            stac_asset = StacAsset(self.full_uri)
             stac_item.add_asset("hydromt_path", stac_asset)
 
             stac_catalog.add_item(stac_item)

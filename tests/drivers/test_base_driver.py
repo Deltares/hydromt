@@ -21,3 +21,7 @@ class TestBaseDriver:
         assert driver.__class__.__qualname__ == "PyogrioDriver"
         assert driver.metadata_resolver.__class__.__qualname__ == "ConventionResolver"
         assert driver.filesystem.__class__.__qualname__ == "LocalFileSystem"
+
+    def test_serializes_name(self):
+        driver: BaseDriver = BaseDriver.model_validate({"name": "pyogrio"})
+        assert driver.model_dump().get("name") == "pyogrio"

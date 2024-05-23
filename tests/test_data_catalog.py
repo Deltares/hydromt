@@ -97,7 +97,7 @@ def test_parser():
     }
     datasource = _parse_data_source_dict("test", source, root=root)
     assert isinstance(datasource, GeoDataFrameSource)
-    assert datasource.uri == abspath(source["uri"])
+    assert datasource.full_uri == abspath(source["uri"])
     # TODO: do we want to allow Path objects?
     # # test with Path object
     # source.update(uri=Path(source["uri"]))
@@ -133,7 +133,7 @@ def test_parser():
             source,
             root=root,  # TODO: do we need catalog_name="tmp"
         )
-        assert datasource.uri == abspath(join(root, dd["test"]["uri"]))
+        assert datasource.full_uri == abspath(join(root, dd["test"]["uri"]))
     # placeholder
     dd = {
         "test_{p1}_{p2}": {
@@ -148,7 +148,7 @@ def test_parser():
     for name, source in sources:
         assert "placeholders" not in source
         datasource = _parse_data_source_dict(name, source, root=root)
-        assert datasource.uri == abspath(join(root, f"data_{name[-1]}.gpkg"))
+        assert datasource.full_uri == abspath(join(root, f"data_{name[-1]}.gpkg"))
     # variants
     dd = {
         "test": {
@@ -350,7 +350,7 @@ def test_used_sources(tmpdir):
     data_catalog = DataCatalog(merged_yml_fn)
     source = data_catalog.get_source("esa_worldcover")
     source.mark_as_used()
-    sources = data_catalog.iter_sources(used_only=True)
+    sources = data_catalog.list_sources(used_only=True)
     assert len(data_catalog) > 1
     assert len(sources) == 1
     assert sources[0][0] == "esa_worldcover"
@@ -431,7 +431,7 @@ def test_export_global_datasets(tmpdir, data_catalog):
     assert yml_list[2].strip().startswith("root:")
     # check if data is parsed correctly
     data_catalog1 = DataCatalog(data_lib_fn)
-    for key, source in data_catalog1.iter_sources():
+    for key, source in data_catalog1.list_sources():
         source_type = type(source).__name__
         dtypes = DTYPES[source_type]
         obj = source.get_data()
@@ -491,12 +491,12 @@ def test_export_dataframe(tmpdir, df, df_time):
         handle_nodata=NoDataStrategy.IGNORE,
     )
     data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    assert len(data_catalog1.iter_sources()) == 2
+    assert len(data_catalog1.list_sources()) == 2
 
     data_catalog.export_data(str(tmpdir))
     data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    assert len(data_catalog1.iter_sources()) == 4
-    for key, source in data_catalog1.iter_sources():
+    assert len(data_catalog1.list_sources()) == 4
+    for key, source in data_catalog1.list_sources():
         dtypes = pd.DataFrame
         obj = source.get_data()
         assert isinstance(obj, dtypes), key

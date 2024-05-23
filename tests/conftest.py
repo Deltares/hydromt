@@ -85,9 +85,22 @@ def example_zarr_file(tmp_dir: Path) -> Path:
 
 
 @pytest.fixture()
+def artifact_data_catalog() -> DataCatalog:
+    """DataCatalog instance that points to artifact data."""
+    return DataCatalog(
+        Path(__file__).parents[1]
+        / "data"
+        / "catalogs"
+        / "artifact_data"
+        / "v1.0.0"
+        / "data_catalog.yml"
+    )
+
+
+@pytest.fixture()
 def data_catalog(_local_catalog_eps) -> DataCatalog:
     """DataCatalog instance that points to local predefined catalogs."""
-    return DataCatalog("artifact_data=v0.0.8")
+    return DataCatalog("artifact_data=v1.0.0")
 
 
 @pytest.fixture(scope="session")
@@ -462,6 +475,8 @@ def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
 @pytest.fixture()
 def mock_resolver() -> MetaDataResolver:
     class MockMetaDataResolver(MetaDataResolver):
+        name = "mock_resolver"
+
         def resolve(self, uri, *args, **kwargs):
             return [uri]
 

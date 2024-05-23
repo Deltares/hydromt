@@ -23,6 +23,7 @@ class ConventionResolver(MetaDataResolver):
     """MetaDataResolver using HydroMT naming conventions."""
 
     _uri_placeholders = frozenset({"year", "month", "variable", "name"})
+    name = "convention"
 
     def _expand_uri_placeholders(
         self,
