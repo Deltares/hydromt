@@ -26,6 +26,7 @@ Added
 
 Changed
 -------
+- The data catalog format has been refactored to better represent the individual v1 components. (#912)
 - The `root` meta key of data catalogs yaml files has become `roots` (#786)
 - The model region is no longer a subset of the `geoms` but rather it's own component class. See the migration guide for more info (#810)
 - The model class has been moved to a component architecture. See the migration guide for more info (#845)

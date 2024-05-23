@@ -90,9 +90,12 @@ def test_get_versions_artifacts():
     assert "v0.0.8" in versions
 
 
-def test_catalog_versions(cat_root, tmpdir):
+def test_catalog_versions(cat_root: Path, tmpdir):
     # assert all subdirs are catalogs and have a versions.yml file
-    catalogs = [d for d in cat_root.iterdir() if d.is_dir()]
+    catalogs = filter(
+        lambda dir: "__pycache__" not in str(dir),
+        filter(lambda dir: dir.is_dir(), cat_root.iterdir()),
+    )
     for cat_dir in catalogs:
         registry_file = cat_dir / "registry.txt"
         assert registry_file.exists()

@@ -28,9 +28,28 @@ class TestDataSource:
         )
         summ: Dict[str, Any] = submodel.summary()
         assert summ["data_type"] == "GeoDataFrame"
-        assert summ["uri"] == f"{root}test_uri"
+        assert summ["uri"] == "test_uri"
         assert summ["driver"] == "MockGeoDataFrameDriver"
         assert summ["url"] == "www.example.com"
+
+    def test_serializes_data_type(
+        self,
+        mock_geodf_driver: GeoDataFrameDriver,
+        mock_geodataframe_adapter: GeoDataFrameAdapter,
+        root: str,
+    ):
+        submodel: DataSource = GeoDataFrameSource.model_validate(
+            {
+                "root": root,
+                "name": "geojsonfile",
+                "data_type": "GeoDataFrame",
+                "driver": mock_geodf_driver,
+                "data_adapter": mock_geodataframe_adapter,
+                "uri": "test_uri",
+                "metadata": {"url": "www.example.com"},
+            }
+        )
+        assert submodel.model_dump()["data_type"] == "GeoDataFrame"
 
 
 class TestGetNestedVar:

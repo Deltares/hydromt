@@ -17,6 +17,8 @@ logger: Logger = getLogger(__name__)
 class RasterTindexResolver(MetaDataResolver):
     """Implementation of the MetaDataResolver for raster tindex files."""
 
+    name = "raster_tindex"
+
     def resolve(
         self,
         uri: str,

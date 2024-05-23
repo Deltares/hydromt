@@ -3,12 +3,20 @@ from inspect import isabstract
 from typing import Any, Dict, Union
 
 from hydromt._typing.type_def import DataType
-from hydromt.data_source import DataSource, GeoDataFrameSource, RasterDatasetSource
+from hydromt.data_source import (
+    DataFrameSource,
+    DataSource,
+    GeoDataFrameSource,
+    GeoDatasetSource,
+    RasterDatasetSource,
+)
 
 # Map DataType to DataSource, need to add here when implementing a new Type
 available_sources: Dict[DataType, DataSource] = {
+    "DataFrame": DataFrameSource,
     "RasterDataset": RasterDatasetSource,
     "GeoDataFrame": GeoDataFrameSource,
+    "GeoDataset": GeoDatasetSource,
 }
 
 

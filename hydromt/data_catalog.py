@@ -47,7 +47,7 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR
 from hydromt.data_adapter.utils import _single_var_as_array
-from hydromt.data_source import DataSource, create_source
+from hydromt.data_source import DataSource, RasterDatasetSource, create_source
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.predefined_catalog import (
     PREDEFINED_CATALOGS,
@@ -65,7 +65,7 @@ __all__ = [
 class DataCatalog(object):
     """Base class for the data catalog object."""
 
-    _format_version = "v0"  # format version of the data catalog
+    _format_version = "v1"  # format version of the data catalog
     _cache_dir = HYDROMT_DATADIR
 
     def __init__(
@@ -110,7 +110,7 @@ class DataCatalog(object):
 
         data_libs = cast(list, data_libs)
 
-        self._sources = {}  # dictionary of DataAdapter
+        self._sources = {}  # dictionary of DataSource
         self._catalogs: Dict[str, PredefinedCatalog] = {}
         self.root = None
         self._fallback_lib = fallback_lib
@@ -171,7 +171,7 @@ class DataCatalog(object):
         """
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
-        for _name, source in self.iter_sources(used_only):
+        for _name, source in self.list_sources(used_only):
             stac_child_catalog = source.to_stac_catalog(on_error)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
@@ -397,10 +397,10 @@ class DataCatalog(object):
 
         return self._sources[source][requested_provider][requested_version]
 
-    def add_source(self, source: str, adapter: DataAdapter) -> None:
+    def add_source(self, name: str, source: DataSource) -> None:
         """Add a new data source to the data catalog.
 
-        The data version and provider are extracted from the DataAdapter object.
+        The data version and provider are extracted from the DataSource object.
 
         Parameters
         ----------
@@ -409,48 +409,48 @@ class DataCatalog(object):
         adapter : DataAdapter
             DataAdapter object.
         """
-        if not isinstance(adapter, DataAdapter):
-            raise ValueError("Value must be DataAdapter")
+        if not isinstance(source, DataSource):
+            raise ValueError("Value must be DataSource")
 
-        if hasattr(adapter, "version") and adapter.version is not None:
-            version = adapter.version
+        if source.version:
+            version = source.version
         else:
             version = "_UNSPECIFIED_"  # make sure this comes first in sorted list
 
-        if hasattr(adapter, "provider") and adapter.provider is not None:
-            provider = adapter.provider
+        if source.provider:
+            provider = source.provider
         else:
-            provider = adapter.catalog_name
+            provider = "_UNSPECIFIED_"
 
-        if source not in self._sources:
-            self._sources[source] = {}
-        else:  # check if data type is the same as adapter with same name
-            adapter0 = next(iter(next(iter(self._sources[source].values())).values()))
-            if adapter0.data_type != adapter.data_type:
+        if name not in self._sources:
+            self._sources[name] = {}
+        else:  # check if data type is the same as source with same name
+            source0 = next(iter(next(iter(self._sources[name].values())).values()))
+            if source0.data_type != source.data_type:
                 raise ValueError(
-                    f"Data source '{source}' already exists with data type "
-                    f"'{adapter0.data_type}' but new data source has data type "
-                    f"'{adapter.data_type}'."
+                    f"Data source '{name}' already exists with data type "
+                    f"'{source0.data_type}' but new data source has data type "
+                    f"'{source.data_type}'."
                 )
 
-        if provider not in self._sources[source]:
-            versions = {version: adapter}
+        if provider not in self._sources[name]:
+            versions = {version: source}
         else:
-            versions = self._sources[source][provider]
-            if provider in self._sources[source] and version in versions:
+            versions = self._sources[name][provider]
+            if provider in self._sources[name] and version in versions:
                 warnings.warn(
-                    f"overwriting data source '{source}' with "
+                    f"overwriting data source '{name}' with "
                     f"provider {provider} and version {version}.",
                     UserWarning,
                     stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
-            versions.update({version: adapter})
+            versions.update({version: source})
             versions = {k: versions[k] for k in sorted(list(versions.keys()))}
 
-        self._sources[source][provider] = versions
+        self._sources[name][provider] = versions
 
-    def iter_sources(self, used_only=False) -> List[Tuple[str, DataAdapter]]:
+    def list_sources(self, used_only=False) -> List[Tuple[str, DataSource]]:
         """Return a flat list of all available data sources.
 
         Parameters
@@ -458,19 +458,19 @@ class DataCatalog(object):
         used_only: bool, optional
             If True, return only data entries marked as used, by default False.
         """
-        ans = []
+        sources = []
         for source_name, available_providers in self._sources.items():
             for _, available_versions in available_providers.items():
-                for _, adapter in available_versions.items():
-                    if used_only and not adapter._used:
+                for _, source in available_versions.items():
+                    if used_only and not source._used:
                         continue
-                    ans.append((source_name, adapter))
+                    sources.append((source_name, source))
 
-        return ans
+        return sources
 
     def __iter__(self) -> Iterator[Tuple[str, DataAdapter]]:
         """Iterate over sources."""
-        return iter(self.iter_sources())
+        return iter(self.list_sources())
 
     def contains_source(
         self,
@@ -519,7 +519,7 @@ class DataCatalog(object):
 
     def __len__(self):
         """Return number of sources."""
-        return len(self.iter_sources())
+        return len(self.list_sources())
 
     def __repr__(self):
         """Prettyprint the sources."""
@@ -529,7 +529,7 @@ class DataCatalog(object):
         if type(other) is type(self):
             if len(self) != len(other):
                 return False
-            for name, source in self.iter_sources():
+            for name, source in self.list_sources():
                 try:
                     other_source = other.get_source(
                         name, provider=source.provider, version=source.version
@@ -857,15 +857,15 @@ class DataCatalog(object):
                 yaml.dump(d, f, default_flow_style=False, sort_keys=False)
 
         for name, source_dict in _denormalise_data_dict(data_dict):
-            adapter = _parse_data_source_dict(
+            source = _parse_data_source_dict(
                 name,
                 source_dict,
                 root=root,
                 category=category,
             )
             if mark_used:
-                adapter.mark_as_used()
-            self.add_source(name, adapter)
+                source._used = True
+            self.add_source(name, source)
 
         return self
 
@@ -941,26 +941,14 @@ class DataCatalog(object):
         meta = meta or {}
         sources_out = dict()
         if root is not None:
-            root = abspath(root)
             meta.update(**{"root": root})
-            root_drive = os.path.splitdrive(root)[0]
-        sources = self.iter_sources(used_only=used_only)
+        sources = self.list_sources(used_only=used_only)
         sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
-            source_dict = source.to_dict()
+            source_dict = source.model_dump(exclude_defaults=True)
 
-            if root is not None:
-                path = source_dict["path"]  # is abspath
-                source_drive = os.path.splitdrive(path)[0]
-                if (
-                    root_drive == source_drive
-                    and os.path.commonpath([path, root]) == root
-                ):
-                    source_dict["path"] = os.path.relpath(
-                        source_dict["path"], root
-                    ).replace("\\", "/")
             # remove non serializable entries to prevent errors
             source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
             if name in sources_out:
@@ -998,7 +986,7 @@ class DataCatalog(object):
         """Return data catalog summary as DataFrame."""
         source_names = source_names or []
         d = []
-        for name, source in self.iter_sources():
+        for name, source in self.list_sources():
             if len(source_names) > 0 and name not in source_names:
                 continue
             d.append(
@@ -1245,17 +1233,18 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = RasterDatasetAdapter(path=str(data_like), **kwargs)
+
                 name = basename(data_like)
+                source = RasterDatasetSource(name=name, uri=str(data_like))
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = RasterDatasetAdapter._slice_data(
-                data_like,
-                variables,
-                geom,
-                bbox,
-                buffer,
-                time_tuple,
+                ds=data_like,
+                variables=variables,
+                geom=geom,
+                bbox=bbox,
+                buffer=buffer,
+                time_tuple=time_tuple,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1264,22 +1253,29 @@ class DataCatalog(object):
                     strategy=handle_nodata,
                     logger=logger,
                 )
-            ds = _single_var_as_array(data_like, single_var_as_array, variables)
+            ds = _single_var_as_array(
+                maybe_ds=data_like,
+                single_var_as_array=single_var_as_array,
+                variable_name=variables,
+            )
             return ds
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
-        obj = source.get_data(
+        obj = source.read_data(
             bbox=bbox,
-            geom=geom,
+            mask=geom,
             buffer=buffer,
             zoom_level=zoom_level,
             variables=variables,
-            time_tuple=time_tuple,
-            single_var_as_array=single_var_as_array,
-            cache_root=self._cache_dir if self.cache else None,
+            time_range=time_tuple,
             handle_nodata=handle_nodata,
             logger=self.logger,
+        )
+        obj = _single_var_as_array(
+            maybe_ds=obj,
+            single_var_as_array=single_var_as_array,
+            variable_name=variables,
         )
         return obj
 
@@ -1687,7 +1683,7 @@ def _parse_data_source_dict(
     data_source_dict: Dict,
     root: Optional[Union[Path, str]] = None,
     category: Optional[str] = None,
-) -> Dict:
+) -> DataSource:
     """Parse data source dictionary."""
     # parse data
     source = data_source_dict.copy()  # important as we modify with pop

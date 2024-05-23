@@ -4,7 +4,7 @@ from copy import copy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import Callable, List, Optional
+from typing import Callable, ClassVar, List, Optional
 
 import xarray as xr
 
@@ -27,7 +27,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
     """GeoDatasetXarrayDriver."""
 
     name = "geodataset_xarray"
-    supports_writing: bool = True
+    supports_writing: ClassVar[bool] = True
 
     def read_data(
         self,

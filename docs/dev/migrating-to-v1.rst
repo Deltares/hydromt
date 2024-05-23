@@ -204,6 +204,9 @@ Where there are a few changes from the previous versions:
 	- using a YAML object, with a mandatory `protocol` plus kwargs.
 - `unit_add`, `unit_mult`, `rename`, `attrs`, `meta` are moved to `data_adapter`
 
+There is also a script available for migrating your data catalog, available at
+`scripts/migrate_catalog_to_v1.py'.
+
 Model
 -----
 
