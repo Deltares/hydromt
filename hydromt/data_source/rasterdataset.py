@@ -79,9 +79,7 @@ class RasterDatasetSource(DataSource):
         return self.data_adapter.transform(
             ds,
             self.metadata,
-            bbox=bbox,
             mask=mask,
-            buffer=buffer,
             variables=variables,
             time_range=time_range,
             zoom_level=zoom_level,

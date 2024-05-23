@@ -47,7 +47,13 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR
 from hydromt.data_adapter.utils import _single_var_as_array
-from hydromt.data_source import DataSource, RasterDatasetSource, create_source
+from hydromt.data_source import (
+    DataSource,
+    GeoDatasetSource,
+    RasterDatasetSource,
+    create_source,
+)
+from hydromt.gis.utils import parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.predefined_catalog import (
     PREDEFINED_CATALOGS,
@@ -1238,12 +1244,14 @@ class DataCatalog(object):
                 source = RasterDatasetSource(name=name, uri=str(data_like))
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
+            if geom or bbox:
+                mask = parse_geom_bbox_buffer(geom, bbox, buffer)
+            else:
+                mask = None
             data_like = RasterDatasetAdapter._slice_data(
                 ds=data_like,
                 variables=variables,
-                geom=geom,
-                bbox=bbox,
-                buffer=buffer,
+                mask=mask,
                 time_tuple=time_tuple,
                 logger=self.logger,
             )
@@ -1443,7 +1451,7 @@ class DataCatalog(object):
             If True, return a DataArray if the dataset consists of a single variable.
             If False, always return a Dataset. By default True.
         **kwargs:
-            Additional keyword arguments that are passed to the `GeoDatasetAdapter`
+            Additional keyword arguments that are passed to the `GeoDatasetSource`
             function. Only used if `data_like` is a path to a geodataset file.
 
         Returns
@@ -1462,18 +1470,20 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = GeoDatasetAdapter(path=str(data_like), **kwargs)
+                source = GeoDatasetSource(uri=str(data_like), **kwargs)
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
+            if geom or bbox:
+                mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+            else:
+                mask = None
             data_like = GeoDatasetAdapter._slice_data(
                 data_like,
-                variables,
-                geom,
-                bbox,
-                buffer,
-                predicate,
-                time_tuple,
+                variables=variables,
+                mask=mask,
+                predicate=predicate,
+                time_range=time_tuple,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1482,9 +1492,7 @@ class DataCatalog(object):
                     strategy=handle_nodata,
                     logger=logger,
                 )
-            return GeoDatasetAdapter._single_var_as_array(
-                data_like, single_var_as_array, variables
-            )
+            return _single_var_as_array(data_like, single_var_as_array, variables)
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 

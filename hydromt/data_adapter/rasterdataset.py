@@ -18,7 +18,6 @@ from hydromt._typing import (
     Bbox,
     Data,
     Geom,
-    GeomBuffer,
     NoDataException,
     NoDataStrategy,
     RasterDatasetSource,
@@ -147,9 +146,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds: xr.Dataset,
         metadata: SourceMetadata,
         *,
-        bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: GeomBuffer = 0,
         zoom_level: Optional[int] = None,
         align: Optional[bool] = None,
         variables: Optional[Variables] = None,
@@ -180,8 +177,6 @@ class RasterDatasetAdapter(DataAdapterBase):
                 ds,
                 variables,
                 mask,
-                bbox,
-                buffer,
                 align,
                 time_range,
                 logger=logger,
@@ -238,9 +233,7 @@ class RasterDatasetAdapter(DataAdapterBase):
     def _slice_data(
         ds: Data,
         variables: Optional[List] = None,
-        geom: Optional[Geom] = None,
-        bbox: Optional[Bbox] = None,
-        buffer: GeomBuffer = 0,
+        mask: Optional[Geom] = None,
         align: Optional[bool] = None,
         time_tuple: Optional[TimeRange] = None,
         logger: Logger = logger,
@@ -253,13 +246,8 @@ class RasterDatasetAdapter(DataAdapterBase):
             The RasterDataset to slice.
         variables : list of str, optional
             Names of variables to return. By default all dataset variables
-        geom : geopandas.GeoDataFrame/Series, optional
+        mask: geopandas.GeoDataFrame/Series, optional
             A geometry defining the area of interest.
-        bbox : array-like of floats, optional
-            (xmin, ymin, xmax, ymax) bounding box of area of interest
-            (in WGS84 coordinates).
-        buffer : int, optional
-            Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
         align : float, optional
             Resolution to align the bounding box, by default None
         time_tuple : Tuple of datetime, optional
@@ -290,12 +278,10 @@ class RasterDatasetAdapter(DataAdapterBase):
                 time_tuple,
                 logger=logger,
             )
-        if geom is not None or bbox is not None:
+        if mask is not None:
             ds = RasterDatasetAdapter._slice_spatial_dimensions(
                 ds,
-                geom,
-                bbox,
-                buffer,
+                mask,
                 align,
                 logger=logger,
             )
@@ -308,20 +294,16 @@ class RasterDatasetAdapter(DataAdapterBase):
     @staticmethod
     def _slice_spatial_dimensions(
         ds: Data,
-        geom: Optional[Geom],
-        bbox: Optional[Bbox],
-        buffer: GeomBuffer,
-        align: Optional[bool],
+        mask: Optional[Geom] = None,
+        align: Optional[bool] = None,
         logger: Logger = logger,
     ):
         # make sure bbox is in data crs
+        bbox = None
         crs = ds.raster.crs
         epsg = crs.to_epsg()  # this could return None
-        if geom is not None:
-            bbox = geom.to_crs(crs).total_bounds
-        elif epsg != 4326 and bbox is not None:
-            crs4326 = pyproj.CRS.from_epsg(4326)
-            bbox = rasterio.warp.transform_bounds(crs4326, crs, *bbox)
+        if mask is not None:
+            bbox = mask.to_crs(crs).total_bounds
         # work with 4326 data that is defined at 0-360 degrees longtitude
         w, _, e, _ = ds.raster.bounds
         if epsg == 4326 and np.isclose(e - w, 360):  # allow for rounding errors
@@ -345,7 +327,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 )
 
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
-            ds = ds.raster.clip_bbox(bbox, buffer=buffer, align=align)
+            ds = ds.raster.clip_bbox(bbox, align=align)
 
         if has_no_data(ds):
             return None

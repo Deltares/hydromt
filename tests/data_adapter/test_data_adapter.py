@@ -215,19 +215,24 @@ def test_rasterdataset_unit_attrs(data_catalog: DataCatalog):
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset(geoda, geodf, ts, tmpdir, data_catalog):
-    fn_nc = str(tmpdir.join("test.nc"))
-    fn_gdf = str(tmpdir.join("test.geojson"))
-    fn_csv = str(tmpdir.join("test.csv"))
-    fn_csv_locs = str(tmpdir.join("test_locs.xy"))
-    geoda.vector.to_netcdf(fn_nc)
-    geodf.to_file(fn_gdf, driver="GeoJSON")
-    ts.to_csv(fn_csv)
-    write_xy(fn_csv_locs, geodf)
+def test_geodataset(
+    geoda: xr.DataArray,
+    geodf: gpd.GeoDataFrame,
+    ts: pd.DataFrame,
+    tmp_dir: Path,
+    data_catalog: DataCatalog,
+):
+    uri_nc = str(tmp_dir / "test.nc")
+    uri_gdf = str(tmp_dir / "test.geojson")
+    uri_csv = str(tmp_dir / "test.csv")
+    uri_csv_locs = str(tmp_dir / "test_locs.xy")
+    geoda.vector.to_netcdf(uri_nc)
+    geodf.to_file(uri_gdf, driver="GeoJSON")
+    ts.to_csv(uri_csv)
+    write_xy(uri_csv_locs, geodf)
     # added fn_ts to test if it does not go into xr.open_dataset
     da1 = data_catalog.get_geodataset(
-        fn_nc, variables=["test1"], bbox=geoda.vector.bounds
+        uri_nc, variables=["test1"], bbox=geoda.vector.bounds
     ).sortby("index")
     assert np.allclose(da1, geoda)
     assert da1.name == "test1"
@@ -235,13 +240,13 @@ def test_geodataset(geoda, geodf, ts, tmpdir, data_catalog):
     assert isinstance(ds1, xr.Dataset)
     assert "test" in ds1
     da2 = data_catalog.get_geodataset(
-        fn_gdf, driver_kwargs=dict(fn_data=fn_csv)
+        uri_gdf, driver_kwargs=dict(fn_data=uri_csv)
     ).sortby("index")
     assert isinstance(da2, xr.DataArray), type(da2)
     assert np.allclose(da2, geoda)
     # test with xy locs
     da3 = data_catalog.get_geodataset(
-        fn_csv_locs, driver_kwargs=dict(fn_data=fn_csv), crs=geodf.crs
+        uri_csv_locs, driver_kwargs=dict(fn_data=uri_csv), crs=geodf.crs
     ).sortby("index")
     assert np.allclose(da3, geoda)
     assert da3.vector.crs.to_epsg() == 4326
@@ -265,13 +270,13 @@ def test_geodataset(geoda, geodf, ts, tmpdir, data_catalog):
 
     with tempfile.TemporaryDirectory() as td:
         # Test nc file writing to file
-        GeoDatasetAdapter(fn_nc).to_file(
+        GeoDatasetAdapter(uri_nc).to_file(
             data_root=td, data_name="test", driver="netcdf"
         )
-        GeoDatasetAdapter(fn_nc).to_file(
-            data_root=tmpdir, data_name="test1", driver="netcdf", variables="test1"
+        GeoDatasetAdapter(uri_nc).to_file(
+            data_root=tmp_dir, data_name="test1", driver="netcdf", variables="test1"
         )
-        GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
+        GeoDatasetAdapter(uri_nc).to_file(data_root=td, data_name="test", driver="zarr")
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
