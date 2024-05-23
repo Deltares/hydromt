@@ -1,5 +1,5 @@
 import logging
-from os.path import join
+from os.path import abspath, dirname, join
 from unittest.mock import MagicMock
 
 import geopandas as gpd
@@ -16,6 +16,8 @@ from hydromt.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 logger.propagate = True
+
+DATADIR = join(dirname(dirname(abspath(__file__))), "data")
 
 
 def test_set_dataset(mock_model, hydds):
@@ -323,3 +325,66 @@ def test_add_data_from_geodataframe(
         " skipping add_data_from_geodataframe."
     ) in caplog.text
     assert result is None
+
+
+@pytest.mark.integration()
+def test_grid_component_model(tmpdir):
+    # Initialize model
+    dc_param_fn = join(DATADIR, "parameters_data.yml")
+    model = Model(
+        root=join(tmpdir, "grid_model"),
+        mode="w",
+        data_libs=["artifact_data", dc_param_fn],
+    )
+    grid_component = GridComponent(model=model)
+    model.add_component(name="grid", component=grid_component)
+    # Add region
+    model.grid.create_from_region(
+        region={"subbasin": [12.319, 46.320], "uparea": 50},
+        res=0.008333,
+        hydrography_fn="merit_hydro",
+        basin_index_fn="merit_hydro_index",
+        add_mask=True,
+    )
+
+    # Add data with add_data_from_* methods
+    model.grid.add_data_from_constant(constant=0.01, name="c1", nodata=-99.0)
+    model.grid.add_data_from_constant(constant=2, name="c2", nodata=-99.0)
+    model.grid.add_data_from_rasterdataset(
+        raster_fn="merit_hydro",
+        variables=["elevtn", "basins"],
+        reproject_method=["average", "mode"],
+        mask_name="mask",
+    )
+    model.grid.add_data_from_raster_reclass(
+        raster_fn="vito",
+        fill_method="nearest",
+        reproject_method="mode",
+        rename={"vito": "landuse"},
+    )
+    model.grid.add_data_from_geodataframe(
+        vector_fn="hydro_lakes",
+        variables=["waterbody_id", "Depth_avg"],
+        nodata=[-1, -999.0],
+        rasterize_method="value",
+        rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
+    )
+    model.grid.add_data_from_geodataframe(
+        vector_fn="hydro_lakes",
+        rasterize_method="fraction",
+        rename={"hydro_lakes": "water_frac"},
+    )
+
+    assert len(model.grid.data) == 10
+    for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
+        assert v in model.grid.data
+
+    assert model.grid.data["lake_depth"].raster.nodata == -999.0
+    assert model.grid.data["roughness_manning"].raster.nodata == -999.0
+
+    assert np.unique(model.grid.data["c2"]).size == 2
+    assert np.isin([-1, 2], np.unique(model.grid.data["c2"])).all()
+
+    # write model
+    model.write()
+    # TODO add checks if model is correctly written
