@@ -156,7 +156,8 @@ Add `Driver`, `URIResolver` and `DataAdapter` representations
 With the addition of new classes responsible for different stages of the data
 reading phase, the data catalog is updated accordingly:
 
-.. code-block::yaml
+.. code-block:: yaml
+
 	mysource:
 		crs: 4326
 		data_type: RasterDataset
