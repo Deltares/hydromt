@@ -201,16 +201,15 @@ def test_rasterdataset_driver_kwargs(artifact_data_catalog: DataCatalog, tmp_dir
     )
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_rasterdataset_unit_attrs(data_catalog: DataCatalog):
-    era5_dict = {"era5": data_catalog.get_source("era5").to_dict()}
+    source = data_catalog.get_source("era5")
     attrs = {
         "temp": {"unit": "degrees C", "long_name": "temperature"},
         "temp_max": {"unit": "degrees C", "long_name": "maximum temperature"},
         "temp_min": {"unit": "degrees C", "long_name": "minimum temperature"},
     }
-    era5_dict["era5"].update(dict(attrs=attrs))
-    data_catalog.from_dict(era5_dict)
+    source.metadata.attrs.update(**attrs)
+    data_catalog.add_source("era5", source)
     raster = data_catalog.get_rasterdataset("era5")
     assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
