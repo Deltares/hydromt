@@ -156,7 +156,6 @@ def test_rasterdataset_zoomlevels(
     assert isinstance(da1, xr.Dataset)
 
 
-@pytest.mark.skip("still need to resolve the 'no unit' exception")
 @pytest.mark.integration()
 def test_rasterdataset_driver_kwargs(artifact_data_catalog: DataCatalog, tmp_dir: Path):
     era5 = artifact_data_catalog.get_rasterdataset("era5")
@@ -197,7 +196,9 @@ def test_rasterdataset_driver_kwargs(artifact_data_catalog: DataCatalog, tmp_dir
     datacatalog.from_dict(data_dict2)
     era5_nc = datacatalog.get_rasterdataset("era5_nc")
     assert era5_zarr.equals(era5_nc)
-    datacatalog.get_source("era5_zarr").to_file(tmp_dir, "era5_zarr")
+    cast(RasterDatasetSource, datacatalog.get_source("era5_zarr")).to_file(
+        tmp_dir / "era5_copy.zarr"
+    )
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")

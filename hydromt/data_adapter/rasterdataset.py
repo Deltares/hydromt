@@ -394,7 +394,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         for k in attrs:
             ds[k].attrs.update(attrs[k])
         # set meta data
-        ds.attrs.update(metadata.model_dump(exclude=["attrs"]))
+        ds.attrs.update(metadata.model_dump(exclude=["attrs"], exclude_unset=True))
         return ds
 
     # TODO: https://github.com/Deltares/hydromt/issues/875
