@@ -1,8 +1,9 @@
 
 .. _migration:
 
+###############
 Migrating to v1
-===============
+###############
 
 As part of the move to v1, several things have been changed that will need to be
 adjusted in plugins or applications when moving from a pre-v1 version.
@@ -10,28 +11,8 @@ In this document, the changes that will impact downstream users and how to deal 
 the changes will be listed. For an overview of all changes please refer to the
 changelog.
 
-Command line and general API users
-----------------------------------
-
-Removing support for `ini` and `toml` model configuration files
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**Rationale**
-To keep a consistent experience for our users we believe it is best to offer a single
-format for configuring HydroMT, as well as reducing the maintenance burden on our side.
-We have decided that YAML suits this use case the best. Therefore we have decided to
-deprecate other config formats for configuring HydroMT. Writing model config files
-to other formats will still be supported, but HydroMT won't be able to read them
-subsequently. From this point on YAML is the only supported format to configure HydroMT.
-
-**Changes required**
-
-Convert any model config files that are still in `ini` or `toml` format to their
-equivalent YAML files. This can be done with manually or any converter, or by reading
-and writing it through the standard Python interfaces.
-
-Changed import and hydromt folder structures
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Package API
+===========
 
 **Rationale**
 As HydroMT contains many functions and new classes with v1, the hydromt folder structure
@@ -59,156 +40,11 @@ The following changes are required in your code:
 | hydromt.gis_utils        | hydromt.gis.utils                    |
 +--------------------------+--------------------------------------+
 
-
-Changes to the format of the yaml interface
--------------------------------------------
-
-The first change to the YAML format is that now, at the root of the documents are three keys:
-`modeltype`, `global` and `steps`.
-- `modeltype` (optional) details what kind of model is going to be used in the model. This can currently also be provided only through the CLI,
-but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
-- `global` is intended for any configuration for the model object itself, here you may override any default
-configuration for the components provided by your implementation. Any options mentioned here will be passed to the `Model.__init__` function
-- `steps` should contain a list of function calls. In pre-v1 versions this used to be a dictionary, but now it has become a list
-which removes the necessity for adding numbers to the end of function calls of the same name. You may prefix a component name
-for the step in a dotted manner to indicate the function should be called on that component instead of the model. In general any step
-listed here will correspond to a function on either the model or one of its components. Any keys that are listed under a step will be
-provided to the function call as arguments.
-
-An example of a fictional Wflow YAML file would be:
-
-.. code-block:: yaml
-
-	modeltype: wflow
-	global:
-		data_libs: deltares_data
-		components:
-			config:
-				filename: wflow_sbm_calibrated.toml
-	steps:
-		- setup_basemaps:
-			region: {'basin': [6.16, 51.84]}
-			res: 0.008333
-			hydrography_fn: merit_hydro
-		- grid.add_data_from_geodataframe:
-			vector_fn: administrative_areas
-			variables: "id_level1"
-		- grid.add_data_from_geodataframe:
-			vector_fn: administrative_areas
-			variables: "id_level3"
-		- setup_reservoirs:
-			reservoirs_fn: hydro_reservoirs
-			min_area: 1.0
-		- write:
-			components:
-				- grid
-				- config
-		- geoms.write:
-			filename: geoms/*.gpkg
-			driver: GPKG
-
-
-Data catalog
-------------
-
-Removing dictionary-like features for the data catalog
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-**Rationale**
-
-To be able to support different version of the same data set (for example, data sets
-that get re-released frequently with updated data) or to be able to take the same data
-set from multiple data sources (e.g. local if you have it but AWS if you don't) the
-data catalog has undergone some changes. Now since a catalog entry no longer uniquely
-identifies one source, (since it can refer to any of the variants mentioned above) it
-becomes insufficient to request a data source by string only. Since the dictionary
-interface in python makes it impossible to add additional arguments when requesting a
-data source, we created a more extensive API for this. In order to make sure users'
-code remains working consistently and have a clear upgrade path when adding new
-variants we have decided to remove the old dictionary like interface.
-
-**Changes required**
-
-Dictionary like features such as `catalog['source']`, `catalog['source'] = data`,
-`source in catalog` etc. should be removed for v1. Equivalent interfaces have been
-provided for each operation, so it should be fairly simple. Below is a small table
-with their equivalent functions
-
-
-..table:: Dictionary translation guide for v1
-   :widths: auto
-
-+--------------------------+--------------------------------------+
-| v0.x                     | v1                                   |
-+==========================+======================================+
-| if 'name' in catalog:    | if catalog.contains_source('name'):  |
-+--------------------------+--------------------------------------+
-| catalog['name']          | catalog.get_source('name')           |
-+--------------------------+--------------------------------------+
-| for x in catalog.keys(): | for x in catalog.get_source_names(): |
-+--------------------------+--------------------------------------+
-| catalog['name'] = data   | catalog.set_source('name',data)      |
-+--------------------------+--------------------------------------+
-
-Add `Driver`, `URIResolver` and `DataAdapter` representations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-With the addition of new classes responsible for different stages of the data
-reading phase, the data catalog is updated accordingly:
-
-.. code-block:: yaml
-	mysource:
-		crs: 4326
-		data_type: RasterDataset
-		uri: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
-		metadata:
-			category: meteo
-			notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
-			crs: 4326
-			nodata: -9999
-			...
-		driver:
-			name: netcdf
-			filesystem: local
-			metadata_resolver: convention
-			options:
-				chunks:
-					latitude: 250
-					longitude: 240
-					time: 30
-				combine: by_coords
-		data_adapter:
-			rename:
-				d2m: temp_dew
-				msl: press_msl
-				...
-			unit_add:
-				temp: -273.15
-				temp_dew: -273.15
-				...
-			unit_mult:
-				kin: 0.000277778
-				kout: 0.000277778
-				...
-
-Where there are a few changes from the previous versions:
-- `path` is renamed to `uri`
-- `driver` is it's own class and can be specified:
-	- by string, implying default arguments
-	- using a YAML object, with a mandatory `name` plus kwargs.
-- `metadata_resolver` hangs under driver and can be specified:
-	- by string, implying default arguments
-	- using a YAML object, with a mandatory `name` plus kwargs.
-- `filesystem` is moved to driver, and can be specified:
-	- by string, implying default arguments
-	- using a YAML object, with a mandatory `protocol` plus kwargs.
-- `unit_add`, `unit_mult`, `rename`, `attrs`, `meta` are moved to `data_adapter`
-
 Model
------
+=====
 
-Moving from an inheritance to composition structure for the Model class
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Moving from an inheritance to composition structure
+---------------------------------------------------
 
 **Rationale**
 
@@ -235,7 +71,7 @@ for appropriate components see their entry in this migration guide, but general
 changes will be described here.
 
 Implementing Model Components
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
 Components are objects that the `Model` class can delegate work to. Typically, they are associated with one object such as a grid,
 forcing or tables. To be able to work within a `Model` class properly a `ModelComponent` must implement the following methods:
@@ -465,6 +301,7 @@ Instead, the region should be specified in the yaml file of the relevant compone
 			region:
 				basin: [6.16, 51.84]
 
+
 GridComponent
 ^^^^^^^^^^^^^
 
@@ -591,7 +428,6 @@ th new `config.create` method, which is similar to how other components work. Ea
 template without sub-classing the `ConfigComponent` by providing a `default_template_filename` when initializing their
 `ConfigComponent`.
 
-
 Removed Model attributes
 ------------------------
 
@@ -629,40 +465,80 @@ class for v1 and how you can access their new equivalents.
 - **_CLI_ARGS**: As region and resolution are removed from the command line arguments, this was not needed anymore.
 - **deprecated attributes**: all grid related deprecated attributes have been removed (eg dims, coords, res etc.)
 
-Plugins
--------
 
-Previously the `Model` class was the only entrypoint for providing core with custom behaviour.
-Now, there are three:
+Model configuration files
+-------------------------
 
-- `Model`: This class is mostly responsible for dispatching function calls and otherwise delegating work to components.
-- `ModelComponent`. This class provides more specialized functionalities to do with a single part of a model such as a mesh or grid.
-- `Driver`. This class provides customizable loading of any data source.
+Removing support for `ini` and `toml` files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each of these parts have entry points at their relevant submodules. For example, see how these are specified in the `pyproject.toml`
+**Rationale**
+To keep a consistent experience for our users we believe it is best to offer a single
+format for configuring HydroMT, as well as reducing the maintenance burden on our side.
+We have decided that YAML suits this use case the best. Therefore we have decided to
+deprecate other config formats for configuring HydroMT. Writing model config files
+to other formats will still be supported, but HydroMT won't be able to read them
+subsequently. From this point on YAML is the only supported format to configure HydroMT.
 
-.. code-block:: toml
-	[project.entry-points."hydromt.components"]
-	core = "hydromt.components"
+**Changes required**
 
-	[project.entry-points."hydromt.models"]
-	core = "hydromt.models"
+Convert any model config files that are still in `ini` or `toml` format to their
+equivalent YAML files. This can be done with manually or any converter, or by reading
+and writing it through the standard Python interfaces.
 
-	[project.entry-points."hydromt.drivers"]
-	core = "hydromt.drivers"
+Changes to the `yaml` file format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To have post v1 core recognize there are a few new requirements:
-1. There must be a dedicated separate submodule (i.e. a folder with a `__init__.py` file that you can import from) for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
-2. These submodules must have an `__init__.py` and this file must specify a `__all__` attribute.
-3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant category. This means these submodules should not re-export anything that is not a plugin.
-4. Though this cannot be enforced in Python, there is a base class for each of the plugin categories in core, which your objects should inherit from, this makes sure that you implement all the relevant functionality.
+The first change to the YAML format is that now, at the root of the documents are three keys:
+`modeltype`, `global` and `steps`.
+- `modeltype` (optional) details what kind of model is going to be used in the model. This can currently also be provided only through the CLI,
+but given that YAML files are very model specific we've decided to make this available through the YAML file as well.
+- `global` is intended for any configuration for the model object itself, here you may override any default
+configuration for the components provided by your implementation. Any options mentioned here will be passed to the `Model.__init__` function
+- `steps` should contain a list of function calls. In pre-v1 versions this used to be a dictionary, but now it has become a list
+which removes the necessity for adding numbers to the end of function calls of the same name. You may prefix a component name
+for the step in a dotted manner, e.g. `<component>.<method>`, to indicate the function should be called on that component instead of the model. In general any step
+listed here will correspond to a function on either the model or one of its components. Any keys that are listed under a step will be
+provided to the function call as arguments.
 
-When you have specified the plugins you wish to make available to core in your `pyproject.toml`, all objects should be made available through a global static object called `PLUGINS`. This object has attributes
-for each of the corresponding plugin categories.
+An example of a fictional Wflow YAML file would be:
+
+.. code-block:: yaml
+
+	modeltype: wflow
+	global:
+		data_libs: deltares_data
+		components:
+			config:
+				filename: wflow_sbm_calibrated.toml
+	steps:
+		- setup_basemaps:
+			region: {'basin': [6.16, 51.84]}
+			res: 0.008333
+			hydrography_fn: merit_hydro
+		- grid.add_data_from_geodataframe:
+			vector_fn: administrative_areas
+			variables: "id_level1"
+		- grid.add_data_from_geodataframe:
+			vector_fn: administrative_areas
+			variables: "id_level3"
+		- setup_reservoirs:
+			reservoirs_fn: hydro_reservoirs
+			min_area: 1.0
+		- write:
+			components:
+				- grid
+				- config
+		- geoms.write:
+			filename: geoms/*.gpkg
+			driver: GPKG
 
 
-DataAdapter
------------
+DataCatalog
+===========
+
+Split the responsibilities of the `DataAdapter` into separate classes
+---------------------------------------------------------------------
 
 The previous version of the `DataAdapter` and its subclasses had a lot of
 responsibilities:
@@ -716,7 +592,7 @@ Because the query parameters vary per HydroMT data type, the is a different driv
 interface per type, e.g. `RasterDatasetDriver`, `GeoDataFrameDriver`.
 
 DataAdapter
-^^^^^^^^^^^
+^^^^^^^^^^
 
 The `DataAdapter` now has its previous responsibilities reduced to just homogenizing
 the data coming from the `Driver`. This means slicing the data to the right region,
@@ -724,3 +600,130 @@ renaming variables, changing units, regridding and more. The `DataAdapter` has a
 `transform` method that takes a HydroMT data type and returns this same type. This
 method also accepts query parameters based on the data type, so there is a single
 `DataAdapter` per HydroMT data type.
+
+Changes to the data catalog `yaml` file format
+----------------------------------------------
+
+With the addition of new classes responsible for different stages of the data
+reading phase, the data catalog yaml file is updated accordingly:
+
+.. code-block:: yaml
+	mysource:
+		crs: 4326
+		data_type: RasterDataset
+		uri: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
+		metadata:
+			category: meteo
+			notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency
+			crs: 4326
+			nodata: -9999
+			...
+		driver:
+			name: netcdf
+			filesystem: local
+			metadata_resolver: convention
+			options:
+				chunks:
+					latitude: 250
+					longitude: 240
+					time: 30
+				combine: by_coords
+		data_adapter:
+			rename:
+				d2m: temp_dew
+				msl: press_msl
+				...
+			unit_add:
+				temp: -273.15
+				temp_dew: -273.15
+				...
+			unit_mult:
+				kin: 0.000277778
+				kout: 0.000277778
+				...
+
+Where there are a few changes from the previous versions:
+- `path` is renamed to `uri`
+- `driver` is it's own class and can be specified:
+	- by string, implying default arguments
+	- using a YAML object, with a mandatory `name` plus kwargs.
+- `metadata_resolver` hangs under driver and can be specified:
+	- by string, implying default arguments
+	- using a YAML object, with a mandatory `name` plus kwargs.
+- `filesystem` is moved to driver, and can be specified:
+	- by string, implying default arguments
+	- using a YAML object, with a mandatory `protocol` plus kwargs.
+- `unit_add`, `unit_mult`, `rename`, `attrs`, `meta` are moved to `data_adapter`
+
+
+Removing dictionary-like features for the DataCatalog
+-----------------------------------------------------
+
+**Rationale**
+
+To be able to support different version of the same data set (for example, data sets
+that get re-released frequently with updated data) or to be able to take the same data
+set from multiple data sources (e.g. local if you have it but AWS if you don't) the
+data catalog has undergone some changes. Now since a catalog entry no longer uniquely
+identifies one source, (since it can refer to any of the variants mentioned above) it
+becomes insufficient to request a data source by string only. Since the dictionary
+interface in python makes it impossible to add additional arguments when requesting a
+data source, we created a more extensive API for this. In order to make sure users'
+code remains working consistently and have a clear upgrade path when adding new
+variants we have decided to remove the old dictionary like interface.
+
+**Changes required**
+
+Dictionary like features such as `catalog['source']`, `catalog['source'] = data`,
+`source in catalog` etc. should be removed for v1. Equivalent interfaces have been
+provided for each operation, so it should be fairly simple. Below is a small table
+with their equivalent functions
+
+
+..table:: Dictionary translation guide for v1
+   :widths: auto
+
++--------------------------+--------------------------------------+
+| v0.x                     | v1                                   |
++==========================+======================================+
+| if 'name' in catalog:    | if catalog.contains_source('name'):  |
++--------------------------+--------------------------------------+
+| catalog['name']          | catalog.get_source('name')           |
++--------------------------+--------------------------------------+
+| for x in catalog.keys(): | for x in catalog.get_source_names(): |
++--------------------------+--------------------------------------+
+| catalog['name'] = data   | catalog.set_source('name',data)      |
++--------------------------+--------------------------------------+
+
+
+
+Plugins
+=======
+
+Previously the `Model` class was the only entrypoint for providing core with custom behaviour.
+Now, there are three:
+
+- `Model`: This class is mostly responsible for dispatching function calls and otherwise delegating work to components.
+- `ModelComponent`. This class provides more specialized functionalities to do with a single part of a model such as a mesh or grid.
+- `Driver`. This class provides customizable loading of any data source.
+
+Each of these parts have entry points at their relevant submodules. For example, see how these are specified in the `pyproject.toml`
+
+.. code-block:: toml
+	[project.entry-points."hydromt.components"]
+	core = "hydromt.components"
+
+	[project.entry-points."hydromt.models"]
+	core = "hydromt.models"
+
+	[project.entry-points."hydromt.drivers"]
+	core = "hydromt.drivers"
+
+To have post v1 core recognize there are a few new requirements:
+1. There must be a dedicated separate submodule (i.e. a folder with a `__init__.py` file that you can import from) for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
+2. These submodules must have an `__init__.py` and this file must specify a `__all__` attribute.
+3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant category. This means these submodules should not re-export anything that is not a plugin.
+4. Though this cannot be enforced in Python, there is a base class for each of the plugin categories in core, which your objects should inherit from, this makes sure that you implement all the relevant functionality.
+
+When you have specified the plugins you wish to make available to core in your `pyproject.toml`, all objects should be made available through a global static object called `PLUGINS`. This object has attributes
+for each of the corresponding plugin categories.
