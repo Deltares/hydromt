@@ -7,7 +7,6 @@ from os.path import abspath, basename, dirname, join
 from pathlib import Path
 from typing import cast
 
-import geopandas as gpd
 import numpy as np
 import pandas as pd
 import pytest
@@ -15,12 +14,9 @@ import xarray as xr
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
-from shapely import box
 
-import hydromt
 from hydromt import _compat as compat
 from hydromt._typing import ErrorHandleMethod
-from hydromt._typing.error import NoDataException, NoDataStrategy
 from hydromt.data_adapter import (
     DatasetAdapter,
     GeoDataFrameAdapter,
@@ -125,27 +121,6 @@ def test_rasterdataset_zoomlevels(
     # test if file has {variable} in path
     da1 = data_catalog.get_rasterdataset("merit_hydro", zoom_level=(0.01, "degree"))
     assert isinstance(da1, xr.Dataset)
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_unit_conversion(data_catalog: DataCatalog):
-    gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
-    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
-    gtsm_dict["gtsmv3_eu_era5"].update(dict(unit_mult=dict(waterlevel=1000)))
-    datacatalog = DataCatalog()
-    datacatalog.from_dict(gtsm_dict)
-    gtsm_geodataarray1000 = datacatalog.get_geodataset("gtsmv3_eu_era5")
-    assert gtsm_geodataarray1000.equals(gtsm_geodataarray * 1000)
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_set_nodata(data_catalog: DataCatalog):
-    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
-    gtsm_dict["gtsmv3_eu_era5"].update(dict(nodata=-99))
-    datacatalog = DataCatalog()
-    datacatalog.from_dict(gtsm_dict)
-    ds = datacatalog.get_geodataset("gtsmv3_eu_era5")
-    assert ds.vector.nodata == -99
 
 
 def test_dataset_get_data(timeseries_ds, tmpdir):
@@ -272,58 +247,6 @@ def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
     assert isinstance(stac_catalog, StacCatalog)
     stac_item = next(stac_catalog.get_items("timeseries_dataset"), None)
     assert list(stac_item.assets.keys())[0] == "test.nc"
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataframe(geodf, tmpdir, data_catalog):
-    fn_gdf = str(tmpdir.join("test.geojson"))
-    fn_shp = str(tmpdir.join("test.shp"))
-    geodf.to_file(fn_gdf, driver="GeoJSON")
-    geodf.to_file(fn_shp)
-    # test read geojson using total bounds
-    gdf1 = data_catalog.get_geodataframe(fn_gdf, bbox=geodf.total_bounds)
-    assert isinstance(gdf1, gpd.GeoDataFrame)
-    assert np.all(gdf1 == geodf)
-    # test read shapefile using total bounds
-    gdf1 = data_catalog.get_geodataframe(fn_shp, bbox=geodf.total_bounds)
-    assert isinstance(gdf1, gpd.GeoDataFrame)
-    assert np.all(gdf1 == geodf)
-    # testt read shapefile using mask
-    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
-    gdf1 = hydromt.open_vector(fn_shp, geom=mask)
-    assert np.all(gdf1 == geodf)
-    # test read with buffer
-    gdf1 = data_catalog.get_geodataframe(
-        fn_gdf, bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
-    )
-    assert np.all(gdf1 == geodf)
-    gdf1 = data_catalog.get_geodataframe(
-        fn_shp, bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
-    )
-    assert np.all(gdf1 == geodf)
-
-    # test nodata
-    gdf1 = data_catalog.get_geodataframe(
-        fn_gdf,
-        # only really care that the bbox doesn't intersect with anythign
-        bbox=[12.5, 12.6, 12.7, 12.8],
-        predicate="within",
-        handle_nodata=NoDataStrategy.IGNORE,
-    )
-
-    assert gdf1 is None
-
-    with pytest.raises(NoDataException):
-        gdf1 = data_catalog.get_geodataframe(
-            fn_gdf,
-            # only really care that the bbox doesn't intersect with anythign
-            bbox=[12.5, 12.6, 12.7, 12.8],
-            predicate="within",
-            handle_nodata=NoDataStrategy.RAISE,
-        )
-
-    with pytest.raises(FileNotFoundError):
-        data_catalog.get_geodataframe("no_file.geojson")
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")

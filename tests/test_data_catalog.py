@@ -14,6 +14,7 @@ import pandas as pd
 import pytest
 import requests
 import xarray as xr
+from shapely import box
 from yaml import dump
 
 from hydromt._typing.error import NoDataException, NoDataStrategy
@@ -619,6 +620,100 @@ def test_get_rasterdataset(data_catalog):
         data_catalog.get_rasterdataset({"name": "test"})
 
 
+class TestGetGeoDataFrame:
+    @pytest.fixture()
+    def uri_geojson(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
+        uri_gdf = tmp_dir / "test.geojson"
+        geodf.to_file(uri_gdf, driver="GeoJSON")
+        return uri_gdf
+
+    @pytest.fixture()
+    def uri_shp(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
+        uri_shapefile = tmp_dir / "test.shp"
+        geodf.to_file(uri_shapefile)
+        return uri_shapefile
+
+    @pytest.mark.integration()
+    def test_read_geojson_bbox(
+        self, uri_geojson: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        gdf = data_catalog.get_geodataframe(uri_geojson, bbox=geodf.total_bounds)
+        assert isinstance(gdf, gpd.GeoDataFrame)
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_shapefile_bbox(
+        self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        gdf = data_catalog.get_geodataframe(uri_shp, bbox=geodf.total_bounds)
+        assert isinstance(gdf, gpd.GeoDataFrame)
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_shapefile_mask(
+        self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
+        gdf = data_catalog.get_geodataframe(uri_shp, geom=mask)
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_geojson_buffer_rename(
+        self, uri_geojson: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        gdf = data_catalog.get_geodataframe(
+            uri_geojson,
+            bbox=geodf.total_bounds,
+            buffer=1000,
+            data_adapter={"rename": {"test": "test1"}},
+        )
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_shp_buffer_rename(
+        self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        gdf = data_catalog.get_geodataframe(
+            uri_shp,
+            bbox=geodf.total_bounds,
+            buffer=1000,
+            data_adapter={"rename": {"test": "test1"}},
+        )
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_geojson_nodata_ignore(
+        self, uri_geojson: str, data_catalog: DataCatalog
+    ):
+        gdf1 = data_catalog.get_geodataframe(
+            uri_geojson,
+            # only really care that the bbox doesn't intersect with anythign
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            predicate="within",
+            handle_nodata=NoDataStrategy.IGNORE,
+        )
+
+        assert gdf1 is None
+
+    @pytest.mark.integration()
+    def test_read_geojson_nodata_raise(
+        self, uri_geojson: str, data_catalog: DataCatalog
+    ):
+        with pytest.raises(NoDataException):
+            data_catalog.get_geodataframe(
+                uri_geojson,
+                # only really care that the bbox doesn't intersect with anythign
+                bbox=[12.5, 12.6, 12.7, 12.8],
+                predicate="within",
+                handle_nodata=NoDataStrategy.RAISE,
+            )
+
+    @pytest.mark.integration()
+    def test_raises_filenotfound(self, data_catalog: DataCatalog):
+        with pytest.raises(FileNotFoundError):
+            data_catalog.get_geodataframe("no_file.geojson")
+
+
 @pytest.mark.skip("needs catalogs refactor")
 def test_get_geodataframe(data_catalog):
     n = len(data_catalog)
@@ -777,6 +872,23 @@ class TestGetGeodataset:
         gtsm_geodataarray = data_catalog.get_geodataset(source)
         assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
         assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
+
+    @pytest.mark.integration()
+    def test_geodataset_unit_conversion(self, data_catalog: DataCatalog):
+        gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
+        source = data_catalog.get_source("gtsmv3_eu_era5")
+        source.data_adapter.unit_mult = {"waterlevel": 1000}
+        datacatalog = DataCatalog()
+        gtsm_geodataarray1000 = datacatalog.get_geodataset(source)
+        assert gtsm_geodataarray1000.equals(gtsm_geodataarray * 1000)
+
+    @pytest.mark.integration()
+    def test_geodataset_set_nodata(self, data_catalog: DataCatalog):
+        source = data_catalog.get_source("gtsmv3_eu_era5")
+        source.metadata.nodata = -99
+        datacatalog = DataCatalog()
+        ds = datacatalog.get_geodataset(source)
+        assert ds.vector.nodata == -99
 
 
 @pytest.mark.skip("needs catalogs refactor")

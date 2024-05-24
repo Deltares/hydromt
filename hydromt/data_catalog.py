@@ -1356,6 +1356,10 @@ class DataCatalog(object):
             will be returned. if it is set to RAISE and exception will be raised in that
             situation
         """
+        if geom is not None or bbox is not None:
+            mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+        else:
+            mask = None
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1367,17 +1371,18 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = GeoDataFrameAdapter(path=str(data_like), **kwargs)
+                driver = kwargs.pop("driver", "pyogrio")
+                source = GeoDataFrameSource(
+                    name="_USER_DEFINED_", uri=str(data_like), driver=driver, **kwargs
+                )
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             data_like = GeoDataFrameAdapter._slice_data(
                 data_like,
-                variables,
-                geom,
-                bbox,
-                buffer,
-                predicate,
+                variables=variables,
+                mask=mask,
+                predicate=predicate,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1392,11 +1397,9 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        gdf = source.get_data(
-            bbox=bbox,
-            geom=geom,
+        gdf = source.read_data(
+            mask=mask,
             handle_nodata=handle_nodata,
-            buffer=buffer,
             predicate=predicate,
             variables=variables,
             logger=self.logger,
