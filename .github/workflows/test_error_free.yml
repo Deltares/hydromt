@@ -45,10 +45,10 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.6.0
         with:
           pixi-version: "v0.21.1"
-          environments: full-py${{ matrix.python-version }}
+          environments: full-py312
       - name: Prepare pixi
         run: |
-          pixi run --locked -e full-py${{ matrix.python-version }} install-hydromt
+          pixi run --locked -e full-py312 install-hydromt
 
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
       - name: Setup tmate session
