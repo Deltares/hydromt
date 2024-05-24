@@ -562,3 +562,13 @@ def mock_model(tmpdir, mocker: MockerFixture):
     model.data_catalog = mocker.create_autospec(DataCatalog)
     model.logger = logger
     return model
+
+
+@pytest.fixture()
+def basin_files():
+    data_catalog = DataCatalog("artifact_data")
+    ds = data_catalog.get_rasterdataset("merit_hydro_1k")
+    gdf_bas_index = data_catalog.get_geodataframe("merit_hydro_index")
+    bas_index = data_catalog.get_source("merit_hydro_index")
+
+    return (data_catalog, ds, gdf_bas_index, bas_index)
