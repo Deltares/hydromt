@@ -1,4 +1,5 @@
 """Metadata on DataSource."""
+
 from typing import Any, Dict, Optional, Union
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
