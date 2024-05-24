@@ -128,22 +128,6 @@ def test_rasterdataset_zoomlevels(
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_unit_attrs(data_catalog: DataCatalog):
-    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
-    attrs = {
-        "waterlevel": {
-            "long_name": "sea surface height above mean sea level",
-            "unit": "meters",
-        }
-    }
-    gtsm_dict["gtsmv3_eu_era5"].update(dict(attrs=attrs))
-    data_catalog.from_dict(gtsm_dict)
-    gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
-    assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
-    assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_geodataset_unit_conversion(data_catalog: DataCatalog):
     gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
     gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}

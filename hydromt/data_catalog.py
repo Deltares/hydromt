@@ -48,7 +48,9 @@ from hydromt.data_adapter import (
 from hydromt.data_adapter.caching import HYDROMT_DATADIR
 from hydromt.data_adapter.utils import _single_var_as_array
 from hydromt.data_source import (
+    DataFrameSource,
     DataSource,
+    GeoDataFrameSource,
     GeoDatasetSource,
     RasterDatasetSource,
     create_source,
@@ -1158,7 +1160,9 @@ class DataCatalog(object):
 
     def get_rasterdataset(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, RasterDatasetSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[Union[int, tuple]] = None,
@@ -1268,6 +1272,8 @@ class DataCatalog(object):
                 variable_name=variables,
             )
             return ds
+        elif isinstance(data_like, RasterDatasetSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
@@ -1290,7 +1296,9 @@ class DataCatalog(object):
 
     def get_geodataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDataFrameSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
@@ -1379,7 +1387,8 @@ class DataCatalog(object):
                     logger=logger,
                 )
             return data_like
-
+        elif isinstance(data_like, GeoDataFrameSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
@@ -1396,7 +1405,9 @@ class DataCatalog(object):
 
     def get_geodataset(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDatasetSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
@@ -1502,6 +1513,8 @@ class DataCatalog(object):
                     logger=logger,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
+        elif isinstance(data_like, GeoDatasetSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
@@ -1602,7 +1615,7 @@ class DataCatalog(object):
 
     def get_dataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, pd.DataFrame],
+        data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
         variables: Optional[list] = None,
         time_tuple: Optional[Tuple] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,

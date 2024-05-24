@@ -764,6 +764,20 @@ class TestGetGeodataset:
                 handle_nodata=NoDataStrategy.RAISE,
             )
 
+    @pytest.mark.integration()
+    def test_geodataset_unit_attrs(self, data_catalog: DataCatalog):
+        source: DataSource = data_catalog.get_source("gtsmv3_eu_era5")
+        attrs = {
+            "waterlevel": {
+                "long_name": "sea surface height above mean sea level",
+                "unit": "meters",
+            }
+        }
+        source.metadata.attrs = attrs
+        gtsm_geodataarray = data_catalog.get_geodataset(source)
+        assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
+        assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
+
 
 @pytest.mark.skip("needs catalogs refactor")
 def test_get_geodataset(data_catalog):
