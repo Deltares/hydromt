@@ -92,9 +92,8 @@ def test_add_raster_data_from_rasterdataset(demda, tmpdir, mocker: MockerFixture
     xr.testing.assert_equal(model.maps.data["elevation"], demda)
 
 
-@pytest.mark.skip(reason="needs working artifact data")
 def test_add_raster_data_from_rasterdataset_reclass(tmpdir, demda):
-    dc_param_fn = join(DATADIR, "parameters_data.yml")
+    dc_param_fn = join(DATADIR, "parameters_data-migrated.yml")
     model = Model(root=tmpdir, data_libs=["artifact_data", dc_param_fn], mode="w")
 
     # add a grid and spatial component
