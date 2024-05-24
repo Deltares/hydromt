@@ -48,7 +48,7 @@ jobs:
           environments: full-py311
       - name: Prepare pixi
         run: |
-          pixi run --locked -e full-311 install-hydromt
+          pixi run --locked -e full-py311 install-hydromt
 
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
       - name: Setup tmate session
@@ -58,4 +58,4 @@ jobs:
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          pixi run --locked -e full-311 test-err-warn
+          pixi run --locked -e full-py311 test-err-warn
