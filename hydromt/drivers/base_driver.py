@@ -73,6 +73,9 @@ class BaseDriver(BaseModel, ABC):
 
         Inspired by: https://github.com/pydantic/pydantic/discussions/7008#discussioncomment
         """
+        if isinstance(data, str):
+            # name is enough for a default driver
+            data = {"name": data}
         if not isinstance(data, dict):
             # Other objects should already be the correct subclass.
             return handler(data)
