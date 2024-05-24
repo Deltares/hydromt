@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Type
+from typing import ClassVar, List, Type
 
 import pytest
 import xarray as xr
@@ -101,9 +101,6 @@ class TestGeoDatasetSource:
         class MockGeoDatasetDriver(GeoDatasetDriver):
             name = "mock_geods_to_file"
 
-            def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
-                pass
-
             def read(self, uri: str, **kwargs) -> xr.Dataset:
                 kinda_ds = self.read_data([uri], **kwargs)
                 if isinstance(kinda_ds, xr.DataArray):
@@ -120,7 +117,7 @@ class TestGeoDatasetSource:
     def MockWritableDriver(self, geoda: xr.Dataset):
         class MockWriteableGeoDatasetDriver(GeoDatasetDriver):
             name = "mock_geods_to_file"
-            supports_writing: bool = True
+            supports_writing: ClassVar[bool] = True
 
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass

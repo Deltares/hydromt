@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Type
+from typing import ClassVar, List, Type
 
 import pytest
 import xarray as xr
@@ -117,7 +117,7 @@ class TestRasterDatasetSource:
     def MockWritableDriver(self, raster_ds: xr.Dataset):
         class MockWritableRasterDatasetDriver(RasterDatasetDriver):
             name = "mock_rasterds_to_file"
-            supports_writing: bool = True
+            supports_writing: ClassVar[bool] = True
 
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
