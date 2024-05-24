@@ -511,9 +511,9 @@ class TestGetRasterDataset:
 
     @pytest.mark.integration()
     def test_zarr_and_netcdf_preprocessing_gives_same_results(
-        self, era5_ds: xr.Dataset, tmp_dir: Path
+        self, era5_ds: xr.Dataset, tmp_path: Path
     ):
-        path_zarr = tmp_dir / "era5.zarr"
+        path_zarr = tmp_path / "era5.zarr"
         era5_ds.to_zarr(path_zarr)
         data_dict = {
             "era5_zarr": {
@@ -532,7 +532,7 @@ class TestGetRasterDataset:
         datacatalog.from_dict(data_dict)
         era5_zarr = datacatalog.get_rasterdataset("era5_zarr")
 
-        path_nc = tmp_dir / "era5.nc"
+        path_nc = tmp_path / "era5.nc"
         era5_ds.to_netcdf(path_nc)
 
         data_dict2 = {
@@ -551,7 +551,7 @@ class TestGetRasterDataset:
         datacatalog.from_dict(data_dict2)
         era5_nc = datacatalog.get_rasterdataset("era5_nc")
         assert era5_zarr.equals(era5_nc)
-        dest: Path = tmp_dir / "era5_copy.zarr"
+        dest: Path = tmp_path / "era5_copy.zarr"
         cast(RasterDatasetSource, datacatalog.get_source("era5_zarr")).to_file(dest)
         assert dest.exists()
 
