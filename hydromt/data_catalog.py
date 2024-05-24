@@ -53,6 +53,7 @@ from hydromt.data_source import (
     RasterDatasetSource,
     create_source,
 )
+from hydromt.drivers import BaseDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.predefined_catalog import (
@@ -1470,7 +1471,15 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = GeoDatasetSource(uri=str(data_like), **kwargs)
+                driver: BaseDriver = (
+                    kwargs.pop("driver", None) or "geodataset_vector"
+                )  # Default to vector driver.
+                source = GeoDatasetSource(
+                    name="_USER_DEFINED_",
+                    uri=str(data_like),
+                    driver=driver,
+                    **kwargs,
+                )
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
