@@ -28,7 +28,6 @@ class BaseDriver(BaseModel, ABC):
     name: ClassVar[str]
     metadata_resolver: MetaDataResolver = Field(default_factory=RESOLVERS["convention"])
     filesystem: FS = Field(default=LocalFileSystem())
-    supports_writing: ClassVar[bool] = False
     options: Dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("metadata_resolver", mode="before")

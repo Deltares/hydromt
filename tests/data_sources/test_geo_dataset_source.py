@@ -100,6 +100,7 @@ class TestGeoDatasetSource:
     def MockDriver(self, geoda: xr.Dataset):
         class MockGeoDatasetDriver(GeoDatasetDriver):
             name = "mock_geods_to_file"
+            supports_writing: bool = False
 
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
