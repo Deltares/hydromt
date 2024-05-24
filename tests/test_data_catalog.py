@@ -643,10 +643,10 @@ class TestGetGeodataset:
         return uri_csv_locs
 
     @pytest.fixture()
-    def nc_dataset(self, geoda: xr.Dataset, tmp_dir: Path) -> str:
+    def nc_dataset(self, geoda: xr.Dataset, tmp_path: Path) -> str:
         backslash: str = "\\"
         uri_nc: str = str(
-            tmp_dir / f"{uuid4().hex.replace(backslash, '')}.nc"
+            tmp_path / f"{uuid4().hex.replace(backslash, '')}.nc"
         )  # generate random name for netcdf blocking
         geoda.vector.to_netcdf(uri_nc)
         return uri_nc
