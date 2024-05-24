@@ -644,8 +644,9 @@ class TestGetGeodataset:
 
     @pytest.fixture()
     def nc_dataset(self, geoda: xr.Dataset, tmp_dir: Path) -> str:
+        backslash: str = "\\"
         uri_nc: str = str(
-            tmp_dir / f"{uuid4().hex}.nc"
+            tmp_dir / f"{uuid4().hex.replace(backslash, '')}.nc"
         )  # generate random name for netcdf blocking
         geoda.vector.to_netcdf(uri_nc)
         return uri_nc
