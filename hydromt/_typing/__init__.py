@@ -1,5 +1,6 @@
 """A module for all of the type definitions used in HydroMT."""
 
+from .crs import CRS
 from .error import (
     ErrorHandleMethod,
     NoDataException,
@@ -37,7 +38,8 @@ from .type_def import (
 
 __all__ = [
     "Bbox",
-    "Crs",
+    "Crs",  # TODO: Unify usage of CRS in the code
+    "CRS",
     "StrPath",
     "DeferedFileClose",
     "ExportConfigDict",

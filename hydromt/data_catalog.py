@@ -1403,7 +1403,7 @@ class DataCatalog(object):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
         variables: Optional[List] = None,
-        time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        time_range: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1445,7 +1445,7 @@ class DataCatalog(object):
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        time_tuple : tuple of str, datetime, optional
+        time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         single_var_as_array: bool, optional
@@ -1460,6 +1460,10 @@ class DataCatalog(object):
         obj: xarray.Dataset or xarray.DataArray
             GeoDataset
         """
+        if geom is not None or bbox is not None:
+            mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+        else:
+            mask = None
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1483,16 +1487,12 @@ class DataCatalog(object):
                 name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            if geom or bbox:
-                mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
-            else:
-                mask = None
             data_like = GeoDatasetAdapter._slice_data(
                 data_like,
                 variables=variables,
                 mask=mask,
                 predicate=predicate,
-                time_range=time_tuple,
+                time_range=time_range,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1505,14 +1505,12 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
-        obj = source.get_data(
-            bbox=bbox,
-            geom=geom,
-            buffer=buffer,
+        obj = source.read_data(
+            mask=mask,
             handle_nodata=handle_nodata,
             predicate=predicate,
             variables=variables,
-            time_tuple=time_tuple,
+            time_range=time_range,
             single_var_as_array=single_var_as_array,
         )
         return obj

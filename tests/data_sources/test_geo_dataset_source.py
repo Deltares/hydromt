@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_adapter import GeoDatasetAdapter
 from hydromt.data_source import GeoDatasetSource
-from hydromt.drivers import GeoDatasetDriver
+from hydromt.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 
 
 @pytest.fixture()
@@ -183,3 +183,55 @@ class TestGeoDatasetSource:
         # make sure we are not changing the state
         assert id(new_source) != id(source)
         assert id(driver2) == id(new_source.driver)
+
+    @pytest.mark.integration()
+    def test_writes_to_netcdf(
+        self, tmp_dir: Path, MockWritableDriver: Type[GeoDatasetDriver]
+    ):
+        source = GeoDatasetSource(
+            name="test",
+            uri="geoda.zarr",
+            driver=MockWritableDriver(),
+            metadata=SourceMetadata(crs=4326),
+        )
+        local_driver = GeoDatasetXarrayDriver()
+        local_path: Path = tmp_dir / "geods_source_writes_netcdf.nc"
+        source.to_file(file_path=local_path, driver_override=local_driver)
+        assert local_driver.filesystem.exists(local_path)
+
+    @pytest.mark.integration()
+    def test_writes_to_netcdf_variables(
+        self, tmp_dir: Path, MockWritableDriver: Type[GeoDatasetDriver]
+    ):
+        source = GeoDatasetSource(
+            name="test",
+            uri="geoda.zarr",
+            driver=MockWritableDriver(),
+            metadata=SourceMetadata(crs=4326),
+        )
+        local_driver = GeoDatasetXarrayDriver()
+        local_path = tmp_dir / "geods_source_writes_netcdf_variables.nc"
+        source.to_file(
+            file_path=local_path,
+            driver_override=local_driver,
+            variables="test1",
+        )
+        assert local_driver.filesystem.exists(local_path)
+
+    @pytest.mark.integration()
+    def test_writes_to_zarr(
+        self, tmp_dir: Path, MockWritableDriver: Type[GeoDatasetDriver]
+    ):
+        source = GeoDatasetSource(
+            name="test",
+            uri="geoda.zarr",
+            driver=MockWritableDriver(),
+            metadata=SourceMetadata(crs=4326),
+        )
+        local_driver = GeoDatasetXarrayDriver()
+        local_path = tmp_dir / "geods_source_writes_netcdf.zarr"
+        source.to_file(
+            file_path=local_path,
+            driver_override=local_driver,
+        )
+        assert local_driver.filesystem.exists(local_path)

@@ -2,7 +2,6 @@
 """Tests for the hydromt.data_adapter submodule."""
 
 import glob
-import tempfile
 from datetime import datetime
 from os.path import abspath, basename, dirname, join
 from pathlib import Path
@@ -232,7 +231,10 @@ def test_geodataset(
     write_xy(uri_csv_locs, geodf)
     # added fn_ts to test if it does not go into xr.open_dataset
     da1 = data_catalog.get_geodataset(
-        uri_nc, variables=["test1"], bbox=geoda.vector.bounds
+        uri_nc,
+        variables=["test1"],
+        bbox=geoda.vector.bounds,
+        driver="geodataset_xarray",
     ).sortby("index")
     assert np.allclose(da1, geoda)
     assert da1.name == "test1"
@@ -240,21 +242,27 @@ def test_geodataset(
     assert isinstance(ds1, xr.Dataset)
     assert "test" in ds1
     da2 = data_catalog.get_geodataset(
-        uri_gdf, driver_kwargs=dict(fn_data=uri_csv)
+        uri_gdf, driver={"name": "geodataset_vector", "options": {"fn_data": uri_csv}}
     ).sortby("index")
     assert isinstance(da2, xr.DataArray), type(da2)
     assert np.allclose(da2, geoda)
     # test with xy locs
     da3 = data_catalog.get_geodataset(
-        uri_csv_locs, driver_kwargs=dict(fn_data=uri_csv), crs=geodf.crs
+        uri_csv_locs,
+        driver={
+            "name": "geodataset_vector",
+            "options": {"fn_data": uri_csv},
+        },
+        metadata={"crs": geodf.crs},
     ).sortby("index")
     assert np.allclose(da3, geoda)
     assert da3.vector.crs.to_epsg() == 4326
-    with pytest.raises(FileNotFoundError, match="No such file"):
+    with pytest.raises(FileNotFoundError, match="No files found for"):
         data_catalog.get_geodataset("no_file.geojson")
     da3 = data_catalog.get_geodataset(
         "test.nc",
         # only really care that the bbox doesn't intersect with anythign
+        driver="geodataset_xarray",
         bbox=[12.5, 12.6, 12.7, 12.8],
         handle_nodata=NoDataStrategy.IGNORE,
     )
@@ -267,16 +275,6 @@ def test_geodataset(
             bbox=[12.5, 12.6, 12.7, 12.8],
             handle_nodata=NoDataStrategy.RAISE,
         )
-
-    with tempfile.TemporaryDirectory() as td:
-        # Test nc file writing to file
-        GeoDatasetAdapter(uri_nc).to_file(
-            data_root=td, data_name="test", driver="netcdf"
-        )
-        GeoDatasetAdapter(uri_nc).to_file(
-            data_root=tmp_dir, data_name="test1", driver="netcdf", variables="test1"
-        )
-        GeoDatasetAdapter(uri_nc).to_file(data_root=td, data_name="test", driver="zarr")
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
