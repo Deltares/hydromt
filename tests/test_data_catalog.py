@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Optional, Union, cast
 from uuid import uuid4
 
+import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -28,7 +29,7 @@ from hydromt.data_catalog import (
     _parse_data_source_dict,
     _yml_from_uri_or_path,
 )
-from hydromt.data_source import GeoDataFrameSource, RasterDatasetSource
+from hydromt.data_source import DataSource, GeoDataFrameSource, RasterDatasetSource
 from hydromt.gis.utils import to_geographic_bbox
 from hydromt.io.writers import write_xy
 
@@ -504,6 +505,26 @@ def test_export_dataframe(tmpdir, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.integration()
+def test_http_data():
+    dc = DataCatalog().from_dict(
+        {
+            "global_wind_atlas": {
+                "data_type": "RasterDataset",
+                "driver": {"name": "rasterio", "filesystem": "http"},
+                "uri": "https://globalwindatlas.info/api/gis/global/wind-speed/10",
+            }
+        }
+    )
+    s: DataSource = dc.get_source("global_wind_atlas")
+    # test inferred file system
+    assert isinstance(s.driver.filesystem, fsspec.implementations.http.HTTPFileSystem)
+    # test returns xarray DataArray
+    da = s.read_data(bbox=[0, 0, 10, 10])
+    assert isinstance(da, xr.DataArray)
+    assert da.raster.shape == (4000, 4000)
+
+
 class TestGetRasterDataset:
     @pytest.fixture()
     def era5_ds(self, data_catalog: DataCatalog) -> xr.Dataset:
@@ -563,8 +584,8 @@ class TestGetRasterDataset:
             "temp_min": {"unit": "degrees C", "long_name": "minimum temperature"},
         }
         source.metadata.attrs.update(**attrs)
-        data_catalog.add_source("era5", source)
-        raster = data_catalog.get_rasterdataset("era5")
+        data_catalog.add_source("era5_new", source)
+        raster = data_catalog.get_rasterdataset("era5_new")
         assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
         assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 

@@ -7,7 +7,6 @@ from os.path import abspath, basename, dirname, join
 from pathlib import Path
 from typing import cast
 
-import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -29,7 +28,7 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
-from hydromt.data_source import DataSource, RasterDatasetSource
+from hydromt.data_source import RasterDatasetSource
 from hydromt.gis.utils import to_geographic_bbox
 
 TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
@@ -68,26 +67,6 @@ def test_aws_worldcover():
         bbox=[12.0, 46.0, 12.5, 46.50],
     )
     assert da.name == "landuse"
-
-
-@pytest.mark.integration()
-def test_http_data():
-    dc = DataCatalog().from_dict(
-        {
-            "global_wind_atlas": {
-                "data_type": "RasterDataset",
-                "driver": {"name": "rasterio", "filesystem": "http"},
-                "uri": "https://globalwindatlas.info/api/gis/global/wind-speed/10",
-            }
-        }
-    )
-    s: DataSource = dc.get_source("global_wind_atlas")
-    # test inferred file system
-    assert isinstance(s.driver.filesystem, fsspec.implementations.http.HTTPFileSystem)
-    # test returns xarray DataArray
-    da = s.read_data(bbox=[0, 0, 10, 10])
-    assert isinstance(da, xr.DataArray)
-    assert da.raster.shape == (4000, 4000)
 
 
 @pytest.mark.skip(
