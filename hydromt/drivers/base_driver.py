@@ -26,6 +26,7 @@ class BaseDriver(BaseModel, ABC):
     """
 
     name: ClassVar[str]
+    supports_writing: ClassVar[bool] = False
     metadata_resolver: MetaDataResolver = Field(default_factory=RESOLVERS["convention"])
     filesystem: FS = Field(default=LocalFileSystem())
     options: Dict[str, Any] = Field(default_factory=dict)

@@ -3,7 +3,7 @@ from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Generator, Optional, cast
+from typing import Any, ClassVar, Dict, Generator, Optional, cast
 
 import geopandas as gpd
 import numpy as np
@@ -523,7 +523,7 @@ def mock_raster_ds_driver(
 ) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
         name = "mock_raster_ds_driver"
-        supports_writing: bool = True
+        supports_writing: ClassVar[bool] = True
 
         def read_data(self, *args, **kwargs) -> xr.Dataset:
             return raster_ds
@@ -537,7 +537,7 @@ def mock_geo_ds_driver(
 ) -> GeoDatasetDriver:
     class MockGeoDatasetDriver(GeoDatasetDriver):
         name = "mock_geo_ds_driver"
-        supports_writing: bool = True
+        supports_writing: ClassVar[bool] = True
 
         def read_data(self, *args, **kwargs) -> xr.Dataset:
             return geoda.to_dataset()

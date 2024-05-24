@@ -1,7 +1,7 @@
 from datetime import datetime
 from os.path import basename
 from pathlib import Path
-from typing import List, Type, cast
+from typing import ClassVar, List, Type, cast
 from uuid import uuid4
 
 import geopandas as gpd
@@ -200,7 +200,7 @@ class TestGeoDataFrameSource:
     def MockWriteableDriver(self, geodf: gpd.GeoDataFrame):
         class MockWritableGeoDataFrameDriver(GeoDataFrameDriver):
             name = "mock_geodf_to_file"
-            supports_writing: bool = True
+            supports_writing: ClassVar[bool] = True
 
             def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
                 pass

@@ -1,7 +1,7 @@
 """Driver to read geodataframes using Pyogrio."""
 
 from logging import Logger, getLogger
-from typing import ClassVar, List, Optional
+from typing import List, Optional
 
 import geopandas as gpd
 from pyogrio import read_dataframe, read_info, write_dataframe
@@ -19,7 +19,7 @@ class PyogrioDriver(GeoDataFrameDriver):
     """Driver to read GeoDataFrames using the `pyogrio` package."""
 
     name = "pyogrio"
-    supports_writing: ClassVar[bool] = True
+    supports_writing = True
 
     def read_data(
         self,
