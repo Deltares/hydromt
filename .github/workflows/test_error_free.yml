@@ -45,10 +45,10 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.6.0
         with:
           pixi-version: "v0.21.1"
-          environments: full-py311
+          environments: full-py39
       - name: Prepare pixi
         run: |
-          pixi run --locked -e full-py311 install-hydromt
+          pixi run --locked -e full-py39 install-hydromt
 
       # Enable tmate debugging of manually-triggered workflows if the input option was provided
       - name: Setup tmate session
@@ -58,4 +58,4 @@ jobs:
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          pixi run --locked -e full-py311 test-err-warn
+          pixi run --locked -e full-py39 test-err-warn
