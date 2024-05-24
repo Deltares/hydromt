@@ -1476,7 +1476,7 @@ class DataCatalog(object):
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
                 driver: BaseDriver = (
-                    kwargs.pop("driver", None) or "geodataset_vector"
+                    kwargs.pop("driver", "geodataset_vector")
                 )  # Default to vector driver.
                 source = GeoDatasetSource(
                     name="_USER_DEFINED_",
