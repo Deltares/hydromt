@@ -4,7 +4,8 @@ import os
 from os import mkdir
 from os.path import abspath, dirname, join
 from pathlib import Path
-from typing import cast
+from typing import Optional, Union, cast
+from uuid import uuid4
 
 import geopandas as gpd
 import numpy as np
@@ -14,7 +15,7 @@ import requests
 import xarray as xr
 from yaml import dump
 
-from hydromt._typing import NoDataStrategy
+from hydromt._typing.error import NoDataException, NoDataStrategy
 from hydromt.data_adapter import (
     DataAdapter,
     GeoDataFrameAdapter,
@@ -27,8 +28,9 @@ from hydromt.data_catalog import (
     _parse_data_source_dict,
     _yml_from_uri_or_path,
 )
-from hydromt.data_source import GeoDataFrameSource
+from hydromt.data_source import GeoDataFrameSource, RasterDatasetSource
 from hydromt.gis.utils import to_geographic_bbox
+from hydromt.io.writers import write_xy
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "data")
@@ -502,6 +504,71 @@ def test_export_dataframe(tmpdir, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+class TestGetRasterDataset:
+    @pytest.fixture()
+    def era5_ds(self, data_catalog: DataCatalog) -> xr.Dataset:
+        return data_catalog.get_rasterdataset("era5")
+
+    @pytest.mark.integration()
+    def test_zarr_and_netcdf_preprocessing_gives_same_results(
+        self, era5_ds: xr.Dataset, tmp_dir: Path
+    ):
+        path_zarr = tmp_dir / "era5.zarr"
+        era5_ds.to_zarr(path_zarr)
+        data_dict = {
+            "era5_zarr": {
+                "data_type": "RasterDataset",
+                "driver": {
+                    "name": "raster_xarray",
+                    "preprocess": "round_latlon",
+                },
+                "metadata": {
+                    "crs": 4326,
+                },
+                "uri": str(path_zarr),
+            }
+        }
+        datacatalog = DataCatalog()
+        datacatalog.from_dict(data_dict)
+        era5_zarr = datacatalog.get_rasterdataset("era5_zarr")
+
+        path_nc = tmp_dir / "era5.nc"
+        era5_ds.to_netcdf(path_nc)
+
+        data_dict2 = {
+            "era5_nc": {
+                "data_type": "RasterDataset",
+                "driver": {
+                    "name": "raster_xarray",
+                    "preprocess": "round_latlon",
+                },
+                "metadata": {
+                    "crs": 4326,
+                },
+                "uri": str(path_nc),
+            }
+        }
+        datacatalog.from_dict(data_dict2)
+        era5_nc = datacatalog.get_rasterdataset("era5_nc")
+        assert era5_zarr.equals(era5_nc)
+        dest: Path = tmp_dir / "era5_copy.zarr"
+        cast(RasterDatasetSource, datacatalog.get_source("era5_zarr")).to_file(dest)
+        assert dest.exists()
+
+    def test_rasterdataset_unit_attrs(self, data_catalog: DataCatalog):
+        source = data_catalog.get_source("era5")
+        attrs = {
+            "temp": {"unit": "degrees C", "long_name": "temperature"},
+            "temp_max": {"unit": "degrees C", "long_name": "maximum temperature"},
+            "temp_min": {"unit": "degrees C", "long_name": "minimum temperature"},
+        }
+        source.metadata.attrs.update(**attrs)
+        data_catalog.add_source("era5", source)
+        raster = data_catalog.get_rasterdataset("era5")
+        assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
+        assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
+
+
 @pytest.mark.skip("needs catalogs refactor")
 def test_get_rasterdataset(data_catalog):
     n = len(data_catalog)
@@ -554,6 +621,126 @@ def test_get_geodataframe(data_catalog):
         data_catalog.get_geodataframe("test1.gpkg")
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataframe({"name": "test"})
+
+
+class TestGetGeodataset:
+    @pytest.fixture()
+    def geojson_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
+        uri_gdf = str(tmp_dir / "test.geojson")
+        geodf.to_file(uri_gdf, driver="GeoJSON")
+        return uri_gdf
+
+    @pytest.fixture()
+    def csv_dataset(self, ts: pd.DataFrame, tmp_dir: Path) -> str:
+        uri_csv = str(tmp_dir / "test.csv")
+        ts.to_csv(uri_csv)
+        return uri_csv
+
+    @pytest.fixture()
+    def xy_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
+        uri_csv_locs = str(tmp_dir / "test_locs.xy")
+        write_xy(uri_csv_locs, geodf)
+        return uri_csv_locs
+
+    @pytest.fixture()
+    def nc_dataset(self, geoda: xr.Dataset, tmp_dir: Path) -> str:
+        uri_nc: str = str(
+            tmp_dir / f"{uuid4().hex}.nc"
+        )  # generate random name for netcdf blocking
+        geoda.vector.to_netcdf(uri_nc)
+        return uri_nc
+
+    @pytest.mark.integration()
+    def test_geojson_vector_with_csv_data(
+        self,
+        geojson_dataset: str,
+        data_catalog: DataCatalog,
+        csv_dataset: str,
+        geoda: xr.DataArray,
+    ):
+        da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
+            geojson_dataset,
+            driver={"name": "geodataset_vector", "options": {"fn_data": csv_dataset}},
+        )
+        assert isinstance(da, xr.DataArray), type(da)
+        da = da.sortby("index")
+        assert np.allclose(da, geoda)
+
+    @pytest.mark.integration()
+    def test_netcdf_with_variable_name(
+        self, nc_dataset: str, data_catalog: DataCatalog, geoda: xr.DataArray
+    ):
+        da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
+            nc_dataset,
+            variables=["test1"],
+            bbox=geoda.vector.bounds,
+            driver="geodataset_xarray",
+        )
+        assert isinstance(da, xr.DataArray)
+        da = da.sortby("index")
+        assert np.allclose(da, geoda)
+        assert da.name == "test1"
+
+    @pytest.mark.integration()
+    def test_netcdf_single_var_as_array_false(
+        self, nc_dataset: str, data_catalog: DataCatalog
+    ):
+        ds: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
+            nc_dataset, single_var_as_array=False, driver="geodataset_xarray"
+        )
+        assert isinstance(ds, xr.Dataset)
+        assert "test" in ds
+
+    @pytest.mark.integration()
+    def test_xy_locs_with_csv_data(
+        self,
+        xy_dataset: str,
+        csv_dataset: str,
+        data_catalog: DataCatalog,
+        geoda: xr.DataArray,
+        geodf: gpd.GeoDataFrame,
+    ):
+        da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
+            xy_dataset,
+            driver={
+                "name": "geodataset_vector",
+                "options": {"fn_data": csv_dataset},
+            },
+            metadata={"crs": geodf.crs},
+        )
+        assert isinstance(da, xr.DataArray)
+        da = da.sortby("index")
+        assert np.allclose(da, geoda)
+        assert da.vector.crs.to_epsg() == 4326
+
+    @pytest.mark.integration()
+    def test_nodata_filenotfound(self, data_catalog: DataCatalog):
+        with pytest.raises(FileNotFoundError, match="No files found for"):
+            data_catalog.get_geodataset("no_file.geojson")
+
+    @pytest.mark.integration()
+    def test_nodata_ignore(self, nc_dataset: str, data_catalog: DataCatalog):
+        da: Optional[xr.DataArray] = data_catalog.get_geodataset(
+            nc_dataset,
+            # only really care that the bbox doesn't intersect with anythign
+            driver="geodataset_xarray",
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            handle_nodata=NoDataStrategy.IGNORE,
+        )
+        assert da is None
+
+    @pytest.mark.integration()
+    def test_nodata_raises_nodata(
+        geodf: gpd.GeoDataFrame, nc_dataset: str, data_catalog: DataCatalog
+    ):
+        with pytest.raises(NoDataException):
+            data_catalog.get_geodataset(
+                nc_dataset,
+                driver="geodataset_xarray",
+                # only really care that the bbox doesn't intersect with anythign
+                bbox=[12.5, 12.6, 12.7, 12.8],
+                handle_nodata=NoDataStrategy.RAISE,
+            )
 
 
 @pytest.mark.skip("needs catalogs refactor")
