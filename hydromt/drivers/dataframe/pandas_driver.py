@@ -2,7 +2,7 @@
 
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import ClassVar, List, Optional
+from typing import List, Optional
 
 import pandas as pd
 
@@ -23,7 +23,7 @@ class PandasDriver(DataFrameDriver):
     """Driver for DataFrames using the pandas library."""
 
     name = "pandas"
-    supports_writing: ClassVar[bool] = True
+    supports_writing = True
 
     def read_data(
         self,
