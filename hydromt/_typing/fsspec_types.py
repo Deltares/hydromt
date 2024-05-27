@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Tuple, Union
 
 from fsspec import AbstractFileSystem, filesystem
 from pydantic import PlainSerializer, PlainValidator
@@ -6,7 +6,7 @@ from typing_extensions import Annotated
 
 
 def validate_filesystem(
-    _fs: Union[AbstractFileSystem, Dict[str, Any], str],
+    _fs: Any,
 ) -> AbstractFileSystem:
     if isinstance(_fs, str):
         return filesystem(_fs)

@@ -64,7 +64,7 @@ class GeoDatasetSource(DataSource):
         vrs = self.data_adapter.to_source_variables(variables)
 
         ds: Optional[xr.Dataset] = self.driver.read(
-            self.uri,
+            self.full_uri,
             time_range=tr,
             variables=vrs,
             metadata=self.metadata,
@@ -78,6 +78,7 @@ class GeoDatasetSource(DataSource):
             mask=mask,
             variables=variables,
             time_range=time_range,
+            handle_nodata=handle_nodata,
             logger=logger,
         )
 

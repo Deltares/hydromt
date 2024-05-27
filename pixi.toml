@@ -124,6 +124,7 @@ clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 test = { cmd = ["pytest"] }
 test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
+test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error"] }
 test-cov = { cmd = [
   "pytest",
   "--verbose",
@@ -148,6 +149,7 @@ packaging = "*"
 pandas = "*"
 pip = "*"
 pooch = "*"
+pyarrow = "<16"
 pydantic = "~=2.4"
 pydantic-settings = "~=2.2"
 pyflwdir = ">=0.5.4"

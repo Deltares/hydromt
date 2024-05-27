@@ -2,10 +2,15 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import Any, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
 from fsspec import AbstractFileSystem
-from pydantic import BaseModel, ConfigDict
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    SerializerFunctionWrapHandler,
+    model_serializer,
+)
 
 from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
 
@@ -16,6 +21,14 @@ class MetaDataResolver(BaseModel, ABC):
     """Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
 
     model_config = ConfigDict(extra="forbid")
+    name: ClassVar[str]
+
+    @model_serializer(mode="wrap")
+    def _serialize(self, nxt: SerializerFunctionWrapHandler) -> Any:
+        """Also serialize name."""
+        res = nxt(self)
+        res["name"] = self.name
+        return res
 
     @abstractmethod
     def resolve(

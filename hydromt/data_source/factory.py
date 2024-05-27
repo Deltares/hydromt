@@ -3,12 +3,20 @@ from inspect import isabstract
 from typing import Any, Dict, Union
 
 from hydromt._typing.type_def import DataType
-from hydromt.data_source import DataSource, GeoDataFrameSource, RasterDatasetSource
+from hydromt.data_source import (
+    DataFrameSource,
+    DataSource,
+    GeoDataFrameSource,
+    GeoDatasetSource,
+    RasterDatasetSource,
+)
 
 # Map DataType to DataSource, need to add here when implementing a new Type
 available_sources: Dict[DataType, DataSource] = {
+    "DataFrame": DataFrameSource,
     "RasterDataset": RasterDatasetSource,
     "GeoDataFrame": GeoDataFrameSource,
+    "GeoDataset": GeoDatasetSource,
 }
 
 
@@ -25,7 +33,7 @@ def create_source(data: Union[Dict[str, Any], DataSource]) -> DataSource:
             return data
 
     elif isinstance(data, dict):
-        if data_type := data.pop("data_type", None):
+        if data_type := data.get("data_type", None):
             if target_source := available_sources.get(data_type):
                 return target_source.model_validate(data)
 

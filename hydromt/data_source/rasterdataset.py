@@ -68,7 +68,7 @@ class RasterDatasetSource(DataSource):
         vrs = self.data_adapter.to_source_variables(variables)
 
         ds: xr.Dataset = self.driver.read(
-            self.uri,
+            self.full_uri,
             mask=mask,
             time_range=tr,
             variables=vrs,
@@ -79,9 +79,7 @@ class RasterDatasetSource(DataSource):
         return self.data_adapter.transform(
             ds,
             self.metadata,
-            bbox=bbox,
             mask=mask,
-            buffer=buffer,
             variables=variables,
             time_range=time_range,
             zoom_level=zoom_level,
@@ -142,7 +140,7 @@ class RasterDatasetSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
+    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -162,7 +160,7 @@ class RasterDatasetSource(DataSource):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        bbox = self.extent.get("bbox", None)
+        bbox = self.metadata.extent.get("bbox", None)
         crs = cast(int, crs)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
@@ -192,7 +190,7 @@ class RasterDatasetSource(DataSource):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        time_range = self.extent.get("time_range", None)
+        time_range = self.metadata.extent.get("time_range", None)
         if time_range is None and detect:
             time_range = self.detect_time_range()
 
@@ -289,7 +287,7 @@ class RasterDatasetSource(DataSource):
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
             props = {**self.data_adapter.meta, "crs": crs}
-            ext = splitext(self.uri)[-1]
+            ext = splitext(self.full_uri)[-1]
             if ext == ".nc" or ext == ".vrt":
                 media_type = MediaType.HDF5
             elif ext == ".tiff":
@@ -333,8 +331,8 @@ class RasterDatasetSource(DataSource):
                 start_datetime=start_dt,
                 end_datetime=end_dt,
             )
-            stac_asset = StacAsset(str(self.uri), media_type=media_type)
-            base_name = basename(self.uri)
+            stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
+            base_name = basename(self.full_uri)
             stac_item.add_asset(base_name, stac_asset)
 
             stac_catalog.add_item(stac_item)

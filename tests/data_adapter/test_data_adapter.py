@@ -2,12 +2,11 @@
 """Tests for the hydromt.data_adapter submodule."""
 
 import glob
-import tempfile
 from datetime import datetime
 from os.path import abspath, basename, dirname, join
+from pathlib import Path
 from typing import cast
 
-import fsspec
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -29,8 +28,8 @@ from hydromt.data_adapter import (
     RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
+from hydromt.data_source import RasterDatasetSource
 from hydromt.gis.utils import to_geographic_bbox
-from hydromt.io.writers import write_xy
 
 TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
@@ -70,44 +69,31 @@ def test_aws_worldcover():
     assert da.name == "landuse"
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_http_data():
-    dc = DataCatalog().from_dict(
-        {
-            "global_wind_atlas": {
-                "data_type": "RasterDataset",
-                "driver": "raster",
-                "path": "https://globalwindatlas.info/api/gis/global/wind-speed/10",
-            }
-        }
-    )
-    s = dc.get_source("global_wind_atlas")
-    # test inferred file system
-    assert isinstance(s.fs, fsspec.implementations.http.HTTPFileSystem)
-    # test returns xarray DataArray
-    da = s.get_data(bbox=[0, 0, 10, 10])
-    assert isinstance(da, xr.DataArray)
-    assert da.raster.shape == (4000, 4000)
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_rasterdataset_zoomlevels(rioda_large, tmpdir, data_catalog):
+@pytest.mark.skip(
+    "Needs implementation of https://github.com/Deltares/hydromt/issues/875"
+)
+@pytest.mark.integration()
+def test_rasterdataset_zoomlevels(
+    rioda_large: xr.DataArray, tmp_dir: Path, data_catalog: DataCatalog
+):
     # write tif with zoom level 1 in name
     # NOTE zl 0 not written to check correct functioning
     name = "test_zoom"
-    rioda_large.raster.to_raster(str(tmpdir.join("test_zl1.tif")))
+    rioda_large.raster.to_raster(str(tmp_dir / "test_zl1.tif"))
     yml_dict = {
         name: {
-            "crs": 4326,
             "data_type": "RasterDataset",
-            "driver": "raster",
-            "path": f"{str(tmpdir)}/test_zl{{zoom_level:d}}.tif",  # test with str format for zoom level
+            "driver": {"name": "rasterio"},
+            "uri": f"{str(tmp_dir)}/test_zl{{zoom_level:d}}.tif",  # test with str format for zoom level
+            "metadata": {
+                "crs": 4326,
+            },
             "zoom_levels": {0: 0.1, 1: 0.3},
         }
     }
     # test zoom levels in name
     data_catalog.from_dict(yml_dict)
-    rds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
+    rds: RasterDatasetSource = cast(RasterDatasetSource, data_catalog.get_source(name))
     assert rds._parse_zoom_level(None) is None
     assert rds._parse_zoom_level(zoom_level=1) == 1
     assert rds._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
@@ -121,7 +107,7 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir, data_catalog):
     da1 = data_catalog.get_rasterdataset(name, zoom_level=(0.3, "degree"))
     assert isinstance(da1, xr.DataArray)
     # write COG
-    cog_fn = str(tmpdir.join("test_cog.tif"))
+    cog_fn = str(tmp_dir / "test_cog.tif")
     rioda_large.raster.to_raster(cog_fn, driver="COG", overviews="auto")
     # test COG zoom levels
     # return native resolution
@@ -132,127 +118,13 @@ def test_rasterdataset_zoomlevels(rioda_large, tmpdir, data_catalog):
     da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(res[0] * 2, "degree"))
     assert np.allclose(da1.raster.res, res * 2)
     # test if file hase no overviews
-    tif_fn = str(tmpdir.join("test_tif_no_overviews.tif"))
+    tif_fn = str(tmp_dir / "test_tif_no_overviews.tif")
     rioda_large.raster.to_raster(tif_fn, driver="GTiff")
     da1 = data_catalog.get_rasterdataset(tif_fn, zoom_level=(0.01, "degree"))
     xr.testing.assert_allclose(da1, rioda_large)
     # test if file has {variable} in path
-    data_catalog.from_predefined_catalogs("artifact_data")
     da1 = data_catalog.get_rasterdataset("merit_hydro", zoom_level=(0.01, "degree"))
     assert isinstance(da1, xr.Dataset)
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_rasterdataset_driver_kwargs(data_catalog: DataCatalog, tmpdir):
-    era5 = data_catalog.get_rasterdataset("era5")
-    fp1 = join(tmpdir, "era5.zarr")
-    era5.to_zarr(fp1)
-    data_dict = {
-        "era5_zarr": {
-            "crs": 4326,
-            "data_type": "RasterDataset",
-            "driver": "zarr",
-            "driver_kwargs": {
-                "preprocess": "round_latlon",
-            },
-            "path": fp1,
-        }
-    }
-    datacatalog = DataCatalog()
-    datacatalog.from_dict(data_dict)
-    era5_zarr = datacatalog.get_rasterdataset("era5_zarr")
-    fp2 = join(tmpdir, "era5.nc")
-    era5.to_netcdf(fp2)
-
-    data_dict2 = {
-        "era5_nc": {
-            "crs": 4326,
-            "data_type": "RasterDataset",
-            "driver": "netcdf",
-            "driver_kwargs": {
-                "preprocess": "round_latlon",
-            },
-            "path": fp2,
-        }
-    }
-    datacatalog.from_dict(data_dict2)
-    era5_nc = datacatalog.get_rasterdataset("era5_nc")
-    assert era5_zarr.equals(era5_nc)
-    datacatalog.get_source("era5_zarr").to_file(tmpdir, "era5_zarr", driver="zarr")
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_rasterdataset_unit_attrs(data_catalog: DataCatalog):
-    era5_dict = {"era5": data_catalog.get_source("era5").to_dict()}
-    attrs = {
-        "temp": {"unit": "degrees C", "long_name": "temperature"},
-        "temp_max": {"unit": "degrees C", "long_name": "maximum temperature"},
-        "temp_min": {"unit": "degrees C", "long_name": "minimum temperature"},
-    }
-    era5_dict["era5"].update(dict(attrs=attrs))
-    data_catalog.from_dict(era5_dict)
-    raster = data_catalog.get_rasterdataset("era5")
-    assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
-    assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset(geoda, geodf, ts, tmpdir, data_catalog):
-    fn_nc = str(tmpdir.join("test.nc"))
-    fn_gdf = str(tmpdir.join("test.geojson"))
-    fn_csv = str(tmpdir.join("test.csv"))
-    fn_csv_locs = str(tmpdir.join("test_locs.xy"))
-    geoda.vector.to_netcdf(fn_nc)
-    geodf.to_file(fn_gdf, driver="GeoJSON")
-    ts.to_csv(fn_csv)
-    write_xy(fn_csv_locs, geodf)
-    # added fn_ts to test if it does not go into xr.open_dataset
-    da1 = data_catalog.get_geodataset(
-        fn_nc, variables=["test1"], bbox=geoda.vector.bounds
-    ).sortby("index")
-    assert np.allclose(da1, geoda)
-    assert da1.name == "test1"
-    ds1 = data_catalog.get_geodataset("test.nc", single_var_as_array=False)
-    assert isinstance(ds1, xr.Dataset)
-    assert "test" in ds1
-    da2 = data_catalog.get_geodataset(
-        fn_gdf, driver_kwargs=dict(fn_data=fn_csv)
-    ).sortby("index")
-    assert isinstance(da2, xr.DataArray), type(da2)
-    assert np.allclose(da2, geoda)
-    # test with xy locs
-    da3 = data_catalog.get_geodataset(
-        fn_csv_locs, driver_kwargs=dict(fn_data=fn_csv), crs=geodf.crs
-    ).sortby("index")
-    assert np.allclose(da3, geoda)
-    assert da3.vector.crs.to_epsg() == 4326
-    with pytest.raises(FileNotFoundError, match="No such file"):
-        data_catalog.get_geodataset("no_file.geojson")
-    da3 = data_catalog.get_geodataset(
-        "test.nc",
-        # only really care that the bbox doesn't intersect with anythign
-        bbox=[12.5, 12.6, 12.7, 12.8],
-        handle_nodata=NoDataStrategy.IGNORE,
-    )
-    assert da3 is None
-
-    with pytest.raises(NoDataException):
-        da3 = data_catalog.get_geodataset(
-            "test.nc",
-            # only really care that the bbox doesn't intersect with anythign
-            bbox=[12.5, 12.6, 12.7, 12.8],
-            handle_nodata=NoDataStrategy.RAISE,
-        )
-
-    with tempfile.TemporaryDirectory() as td:
-        # Test nc file writing to file
-        GeoDatasetAdapter(fn_nc).to_file(
-            data_root=td, data_name="test", driver="netcdf"
-        )
-        GeoDatasetAdapter(fn_nc).to_file(
-            data_root=tmpdir, data_name="test1", driver="netcdf", variables="test1"
-        )
-        GeoDatasetAdapter(fn_nc).to_file(data_root=td, data_name="test", driver="zarr")
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")

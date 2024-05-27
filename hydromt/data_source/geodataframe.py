@@ -59,7 +59,7 @@ class GeoDataFrameSource(DataSource):
         if bbox is not None or (mask is not None and buffer > 0):
             mask = parse_geom_bbox_buffer(mask, bbox, buffer)
         gdf: gpd.GeoDataFrame = self.driver.read(
-            self.uri,
+            self.full_uri,
             mask=mask,
             predicate=predicate,
             variables=variables,
@@ -132,7 +132,7 @@ class GeoDataFrameSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
+    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -152,7 +152,7 @@ class GeoDataFrameSource(DataSource):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        bbox = self.extent.get("bbox", None)
+        bbox = self.metadata.extent.get("bbox", None)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 
@@ -219,8 +219,8 @@ class GeoDataFrameSource(DataSource):
         try:
             bbox, crs = self.get_bbox(detect=True)  # Should move to driver
             bbox = list(bbox)
-            props = {**self.data_adapter.meta, "crs": crs}
-            ext = splitext(self.uri)[-1]
+            props = {**self.metadata.model_dump(), "crs": crs}
+            ext = splitext(self.full_uri)[-1]
             if ext == ".gpkg":
                 media_type = MediaType.GEOPACKAGE
             else:
@@ -252,8 +252,8 @@ class GeoDataFrameSource(DataSource):
                 properties=props,
                 datetime=datetime(1, 1, 1),
             )
-            stac_asset = StacAsset(str(self.uri), media_type=media_type)
-            base_name = basename(self.uri)
+            stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
+            base_name = basename(self.full_uri)
             stac_item.add_asset(base_name, stac_asset)
 
             stac_catalog.add_item(stac_item)

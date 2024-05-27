@@ -27,7 +27,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
     """GeoDatasetXarrayDriver."""
 
     name = "geodataset_xarray"
-    supports_writing: bool = True
+    supports_writing = True
 
     def read_data(
         self,

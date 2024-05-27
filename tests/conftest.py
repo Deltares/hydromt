@@ -3,7 +3,7 @@ from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Generator, Optional, cast
+from typing import Any, ClassVar, Dict, Generator, Optional, cast
 
 import geopandas as gpd
 import numpy as np
@@ -87,7 +87,7 @@ def example_zarr_file(tmp_dir: Path) -> Path:
 @pytest.fixture()
 def data_catalog(_local_catalog_eps) -> DataCatalog:
     """DataCatalog instance that points to local predefined catalogs."""
-    return DataCatalog("artifact_data=v0.0.8")
+    return DataCatalog("artifact_data=v1.0.0")
 
 
 @pytest.fixture(scope="session")
@@ -462,6 +462,8 @@ def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
 @pytest.fixture()
 def mock_resolver() -> MetaDataResolver:
     class MockMetaDataResolver(MetaDataResolver):
+        name = "mock_resolver"
+
         def resolve(self, uri, *args, **kwargs):
             return [uri]
 
@@ -508,7 +510,7 @@ def mock_raster_ds_driver(
 ) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
         name = "mock_raster_ds_driver"
-        supports_writing: bool = True
+        supports_writing: ClassVar[bool] = True
 
         def read_data(self, *args, **kwargs) -> xr.Dataset:
             return raster_ds
@@ -522,7 +524,7 @@ def mock_geo_ds_driver(
 ) -> GeoDatasetDriver:
     class MockGeoDatasetDriver(GeoDatasetDriver):
         name = "mock_geo_ds_driver"
-        supports_writing: bool = True
+        supports_writing: ClassVar[bool] = True
 
         def read_data(self, *args, **kwargs) -> xr.Dataset:
             return geoda.to_dataset()

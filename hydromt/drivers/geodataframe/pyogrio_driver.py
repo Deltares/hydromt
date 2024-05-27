@@ -19,7 +19,7 @@ class PyogrioDriver(GeoDataFrameDriver):
     """Driver to read GeoDataFrames using the `pyogrio` package."""
 
     name = "pyogrio"
-    supports_writing: bool = True
+    supports_writing = True
 
     def read_data(
         self,

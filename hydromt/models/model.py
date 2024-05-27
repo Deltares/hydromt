@@ -414,7 +414,7 @@ class Model(object, metaclass=ABCMeta):
         if self.root.is_reading_mode() and isfile(path) and append:
             cat.from_yml(path)
         # update data catalog with new used sources
-        for name, source in self.data_catalog.iter_sources(used_only=used_only):
+        for name, source in self.data_catalog.list_sources(used_only=used_only):
             cat.add_source(name, source)
         # write data catalog
         if cat.sources:
