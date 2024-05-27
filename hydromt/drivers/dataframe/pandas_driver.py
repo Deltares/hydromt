@@ -50,7 +50,7 @@ class PandasDriver(DataFrameDriver):
         extension: str = uri.split(".")[-1]
         logger.info(f"Reading using {self.name} driver from {uri}")
         if extension == "csv":
-            return pd.read_csv(uri, usecols=variables, **self.options)
+            return pd.read_csv(uri, **self.options)
         elif extension == "parquet":
             return pd.read_parquet(uri, columns=variables, **self.options)
         elif extension in ["xls", "xlsx"]:

@@ -356,11 +356,18 @@ def test_grid_component_model(tmpdir):
         reproject_method=["average", "mode"],
         mask_name="mask",
     )
-    model.grid.add_data_from_raster_reclass(
+    model.grid.add_data_from_rasterdataset(
         raster_fn="vito",
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
+    )
+    model.grid.add_data_from_raster_reclass(
+        raster_fn="vito",
+        fill_method="nearest",
+        reclass_table_fn="vito_mapping",
+        reclass_variables=["roughness_manning"],
+        reproject_method=["average"],
     )
     model.grid.add_data_from_geodataframe(
         vector_fn="hydro_lakes",

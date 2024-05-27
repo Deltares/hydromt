@@ -4,8 +4,7 @@ vito_mapping:
   driver:
     name: pandas
     options:
-      kwargs:
-        index_col: 0
+      index_col: 0
   metadata:
     category: landuse
     source_info: landuse parameters based on vito classification (https://land.copernicus.eu/global/products/lc)

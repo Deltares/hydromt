@@ -1163,7 +1163,7 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
-    ) -> Optional[xr.Dataset]:
+    ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """Return a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
@@ -1374,9 +1374,9 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        gdf = source.get_data(
+        gdf = source.read_data(
             bbox=bbox,
-            geom=geom,
+            mask=geom,
             handle_nodata=handle_nodata,
             buffer=buffer,
             predicate=predicate,
@@ -1589,7 +1589,7 @@ class DataCatalog(object):
         self,
         data_like: Union[str, SourceSpecDict, Path, pd.DataFrame],
         variables: Optional[list] = None,
-        time_tuple: Optional[Tuple] = None,
+        time_range: Optional[Tuple] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1608,7 +1608,7 @@ class DataCatalog(object):
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        time_tuple : tuple of str, datetime, optional
+        time_range : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         handle_nodata: NoDataStrategy Optional
@@ -1640,7 +1640,7 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
             df = DataFrameAdapter._slice_data(
-                data_like, variables, time_tuple, logger=self.logger
+                data_like, variables, time_range, logger=self.logger
             )
             if df is None:
                 _exec_nodata_strat(
@@ -1652,9 +1652,9 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        obj = source.get_data(
+        obj = source.read_data(
             variables=variables,
-            time_tuple=time_tuple,
+            time_range=time_range,
             handle_nodata=handle_nodata,
             logger=self.logger,
         )
