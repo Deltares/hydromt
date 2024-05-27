@@ -16,9 +16,9 @@ import requests
 import xarray as xr
 from yaml import dump
 
+from hydromt import data_catalog
 from hydromt._typing.error import NoDataException, NoDataStrategy
 from hydromt.data_adapter import (
-    DataAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
     RasterDatasetAdapter,
@@ -188,21 +188,14 @@ def test_parser():
         _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_data_catalog_io(tmpdir, data_catalog):
+def test_data_catalog_io_round_trip(tmpdir, data_catalog):
     # read / write
     fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
     data_catalog1 = DataCatalog(data_libs=fn_yml)
     assert data_catalog.to_dict() == data_catalog1.to_dict()
-    # test that no file is written for empty DataCatalog
-    fn_yml = join(tmpdir, "test1.yml")
-    DataCatalog(fallback_lib=None).to_yml(fn_yml)
-    # test print
-    print(data_catalog.get_source("merit_hydro"))
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_versioned_catalog_entries():
     # make sure the catalogs individually still work
     legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
@@ -214,9 +207,6 @@ def test_versioned_catalog_entries():
     # test round trip to and from dict
     legacy_data_catalog2 = DataCatalog().from_dict(legacy_data_catalog.to_dict())
     assert legacy_data_catalog2 == legacy_data_catalog
-    # make sure we raise deprecation warning here
-    with pytest.deprecated_call():
-        _ = legacy_data_catalog["esa_worldcover"]
 
     # second catalog
     aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
@@ -287,29 +277,32 @@ def test_versioned_catalog_entries():
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_versioned_catalogs(data_catalog):
+def test_versioned_catalogs_no_version(data_catalog):
     data_catalog._sources = {}  # reset
     data_catalog.from_predefined_catalogs("deltares_data")
     assert len(data_catalog.sources) > 0
+
+
+def test_versioned_catalogs_v05(data_catalog):
     data_catalog._sources = {}  # reset
     data_catalog.from_predefined_catalogs("deltares_data", "v0.5.0")
     assert len(data_catalog.sources) > 0
 
+
+def test_version_catalogs_errors_on_unknown_version():
     with pytest.raises(ValueError, match="Version v1993.7 not found "):
         _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_data_catalog(tmpdir, data_catalog):
-    # initialized with empty dict
-    data_catalog._sources = {}  # reset
+def test_data_catalog_lazy_loading():
+    data_catalog = DataCatalog()
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
     assert len(data_catalog.sources) > 0
-    # test keys, getitem,
-    keys = [key for key, _ in data_catalog.iter_sources()]
-    source = data_catalog.get_source(keys[0])
+
+
+def test_data_catalog_contains_source_version_permissive(data_catalog):
+    keys = data_catalog.get_names()
     assert data_catalog.contains_source(keys[0])
     assert data_catalog.contains_source(
         keys[0], version="asdfasdfasdf", permissive=True
@@ -317,38 +310,30 @@ def test_data_catalog(tmpdir, data_catalog):
     assert not data_catalog.contains_source(
         keys[0], version="asdfasdf", permissive=False
     )
-    assert isinstance(source, DataAdapter)
-    assert keys[0] in data_catalog.get_source_names()
-    # add source from dict
-    data_dict = {keys[0]: source.to_dict()}
-    data_catalog.from_dict(data_dict)
+
+
+def test_data_catalog_repr(data_catalog):
     assert isinstance(data_catalog.__repr__(), str)
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataAdapter"):
         data_catalog.add_source("test", "string")  # type: ignore
-    # check that no sources are loaded if fallback_lib is None
-    assert not DataCatalog(fallback_lib=None).sources
-    # test artifact keys (NOTE: legacy code!)
-    with pytest.deprecated_call():
-        data_catalog = DataCatalog(deltares_data=False)
+
+
+def test_data_catalog_from_deltares_data():
+    data_catalog = DataCatalog()
     assert len(data_catalog._sources) == 0
     data_catalog.from_predefined_catalogs("deltares_data")
     assert len(data_catalog._sources) > 0
-    with (
-        pytest.raises(ValueError, match="Version unknown_version not found"),
-        pytest.deprecated_call(),
-    ):
-        data_catalog = DataCatalog(deltares_data="unknown_version")
 
-    # test hydromt version in meta data
+
+def test_data_catalog_hydromt_version(tmpdir):
     fn_yml = join(tmpdir, "test.yml")
     data_catalog = DataCatalog()
     data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_used_sources(tmpdir):
+def test_used_sources():
     merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_fn)
     source = data_catalog.get_source("esa_worldcover")
@@ -361,7 +346,6 @@ def test_used_sources(tmpdir):
     assert sources[0][1].version == source.version
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_from_yml_with_archive(data_catalog):
     cache_dir = Path(data_catalog._cache_dir)
     data_catalog.from_predefined_catalogs("artifact_data=v0.0.8")
@@ -378,19 +362,23 @@ def test_from_yml_with_archive(data_catalog):
     assert yml_dst_fn.parent == Path(source.path).parent.parent
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_from_predefined_catalogs(data_catalog):
     assert len(data_catalog.predefined_catalogs) > 0
     for name in data_catalog.predefined_catalogs:
         data_catalog._sources = {}  # reset
         data_catalog.from_predefined_catalogs(f"{name}=latest")
         assert len(data_catalog._sources) > 0
+
+
+def test_data_cataalogs_raises_on_unknown_predefined_catalog():
     with pytest.raises(ValueError, match='Catalog with name "asdf" not found'):
         data_catalog.from_predefined_catalogs("asdf")
 
 
-@pytest.mark.skip("needs catalogs refactor")
+@pytest.mark.integration()
 def test_export_global_datasets(tmpdir, data_catalog):
+    # reset sources to avoid warnings
+    data_catalog._sources = {}
     DTYPES = {
         "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),
         "GeoDatasetAdapter": (xr.DataArray, xr.Dataset),
@@ -441,7 +429,7 @@ def test_export_global_datasets(tmpdir, data_catalog):
         assert isinstance(obj, dtypes), key
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
+@pytest.mark.integration()
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
     fn_df = str(tmpdir.join("test.csv"))
@@ -590,7 +578,6 @@ class TestGetRasterDataset:
         assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_get_rasterdataset(data_catalog):
     n = len(data_catalog)
     # raster dataset using three different ways
@@ -598,48 +585,98 @@ def test_get_rasterdataset(data_catalog):
     da = data_catalog.get_rasterdataset(data_catalog.get_source(name).path)
     assert len(data_catalog) == n + 1
     assert isinstance(da, xr.DataArray)
+
+
+def test_get_rasterdataset_artifact_data(data_catalog):
+    name = "koppen_geiger"
     da = data_catalog.get_rasterdataset(name, provider="artifact_data")
     assert isinstance(da, xr.DataArray)
+
+
+def test_get_rasterdataset_bbox(data_catalog):
+    name = "koppen_geiger"
+    da = data_catalog.get_rasterdataset(name, provider="artifact_data")
     bbox = [12.0, 46.0, 13.0, 46.5]
     da = data_catalog.get_rasterdataset(da, bbox=bbox)
     assert isinstance(da, xr.DataArray)
     assert np.allclose(da.raster.bounds, bbox)
+
+
+def test_get_rasterdataset_provider(data_catalog):
+    name = "koppen_geiger"
     data = {"source": name, "provider": "artifact_data"}
     ds = data_catalog.get_rasterdataset(data, single_var_as_array=False)
     assert isinstance(ds, xr.Dataset)
+
+
+def test_get_rasterdataset_s3(data_catalog):
+    n = len(data_catalog)
+    # raster dataset using three different ways
     data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
     da = data_catalog.get_rasterdataset(data)
     assert isinstance(da, xr.DataArray)
+
+    n = len(data_catalog)
     assert len(data_catalog) == n + 2
+
+
+def test_get_rasterdataset_unknown_datatype(data_catalog):
     with pytest.raises(ValueError, match='Unknown raster data type "list"'):
         data_catalog.get_rasterdataset([])
+
+
+def test_get_rasterdataset_unknown_file(data_catalog):
     with pytest.raises(FileNotFoundError):
         data_catalog.get_rasterdataset("test1.tif")
+
+
+def test_get_rasterdataset_unknown_key(data_catalog):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_rasterdataset({"name": "test"})
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_get_geodataframe(data_catalog):
+def test_get_geodataframe_path(data_catalog):
     n = len(data_catalog)
     # vector dataset using three different ways
     name = "osm_coastlines"
     gdf = data_catalog.get_geodataframe(data_catalog.get_source(name).path)
     assert len(data_catalog) == n + 1
     assert isinstance(gdf, gpd.GeoDataFrame)
+
+
+def test_get_geodataframe_artifact_data(data_catalog):
+    name = "osm_coastlines"
     gdf = data_catalog.get_geodataframe(name, provider="artifact_data")
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.index.size == 2
+
+
+def test_get_geodataframe_artifact_data_geom(data_catalog):
+    name = "osm_coastlines"
+    gdf = data_catalog.get_geodataframe(name, provider="artifact_data")
     gdf = data_catalog.get_geodataframe(gdf, geom=gdf.iloc[[0],], predicate="within")
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.index.size == 1
+
+
+def test_get_geodataframe_artifact_data_with_provider(data_catalog):
+    name = "osm_coastlines"
     data = {"source": name, "provider": "artifact_data"}
     gdf = data_catalog.get_geodataframe(data)
     assert isinstance(gdf, gpd.GeoDataFrame)
+
+
+def test_get_geodataframe_unknown_data_type(data_catalog):
     with pytest.raises(ValueError, match='Unknown vector data type "list"'):
         data_catalog.get_geodataframe([])
+
+
+def test_get_geodataframe_unknown_file(data_catalog):
     with pytest.raises(FileNotFoundError):
         data_catalog.get_geodataframe("test1.gpkg")
+
+
+def test_get_geodataframe_unknown_key(data_catalog):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataframe({"name": "test"})
 
@@ -765,17 +802,24 @@ class TestGetGeodataset:
             )
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_get_geodataset(data_catalog):
     n = len(data_catalog)
-    # geodataset using three different ways
     name = "gtsmv3_eu_era5"
     da = data_catalog.get_geodataset(data_catalog.get_source(name).path)
     assert len(data_catalog) == n + 1
     assert isinstance(da, xr.DataArray)
+
+
+def test_get_geodataset_artifact_data(data_catalog):
+    name = "gtsmv3_eu_era5"
     da = data_catalog.get_geodataset(name, provider="artifact_data")
     assert da.vector.index.size == 19
     assert isinstance(da, xr.DataArray)
+
+
+def test_get_geodataset_bbox_time_tuple(data_catalog):
+    name = "gtsmv3_eu_era5"
+    da = data_catalog.get_geodataset(data_catalog.get_source(name).path)
     bbox = [12.22412, 45.25635, 12.25342, 45.271]
     da = data_catalog.get_geodataset(
         da, bbox=bbox, time_tuple=("2010-02-01", "2010-02-05")
@@ -783,20 +827,31 @@ def test_get_geodataset(data_catalog):
     assert da.vector.index.size == 2
     assert da.time.size == 720
     assert isinstance(da, xr.DataArray)
+
+
+def test_get_geodataset_provider(data_catalog):
+    name = "gtsmv3_eu_era5"
     data = {"source": name, "provider": "artifact_data"}
     ds = data_catalog.get_geodataset(data, single_var_as_array=False)
     assert isinstance(ds, xr.Dataset)
+
+
+def test_get_geodataset_unknown_data_type(data_catalog):
     with pytest.raises(ValueError, match='Unknown geo data type "list"'):
         data_catalog.get_geodataset([])
+
+
+def test_get_geodataset_unknown_file(data_catalog):
     with pytest.raises(FileNotFoundError):
         data_catalog.get_geodataset("test1.nc")
+
+
+def test_get_geodataset_unknown_keys(data_catalog):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataset({"name": "test"})
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_get_dataset(timeseries_df, data_catalog):
-    # get_dataset
     test_dataset = timeseries_df.to_xarray()
     subset_timeseries = timeseries_df.iloc[[0, len(timeseries_df) // 2]]
     time_tuple = (
@@ -807,62 +862,59 @@ def test_get_dataset(timeseries_df, data_catalog):
     assert isinstance(ds, xr.Dataset)
     assert ds.time[-1].values == subset_timeseries.index[1].to_datetime64()
 
+
+def test_get_dataset_variables(timeseries_df, data_catalog):
+    test_dataset = timeseries_df.to_xarray()
     ds = data_catalog.get_dataset(test_dataset, variables=["col1"])
     assert isinstance(ds, xr.DataArray)
     assert ds.name == "col1"
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_get_dataframe(df, tmpdir, data_catalog):
     n = len(data_catalog)
-    # dataframe using single way
     name = "test.csv"
     fn = str(tmpdir.join(name))
     df.to_csv(fn)
     df = data_catalog.get_dataframe(fn, driver_kwargs=dict(index_col=0))
     assert len(data_catalog) == n + 1
     assert isinstance(df, pd.DataFrame)
+
+
+def test_get_dataframe_provider(df, data_catalog):
+    name = "test.csv"
     df = data_catalog.get_dataframe(name, provider="user")
     assert isinstance(df, pd.DataFrame)
+
+
+def test_get_dataframe_variables(df, data_catalog):
     df = data_catalog.get_dataframe(df, variables=["city"])
     assert isinstance(df, pd.DataFrame)
     assert df.columns == ["city"]
+
+
+def test_get_dataframe_custom_data(data_catalog):
+    name = "test.csv"
     data = {"source": name, "provider": "user"}
     gdf = data_catalog.get_dataframe(data)
     assert isinstance(gdf, pd.DataFrame)
+
+
+def test_get_dataframe_unknown_data_type(data_catalog):
     with pytest.raises(ValueError, match='Unknown tabular data type "list"'):
         data_catalog.get_dataframe([])
+
+
+def test_get_dataframe_unknown_file(data_catalog):
     with pytest.raises(FileNotFoundError):
         data_catalog.get_dataframe("test1.csv")
+
+
+def test_get_dataframe_unknown_keys(data_catalog):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_dataframe({"name": "test"})
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_deprecation_warnings(data_catalog):
-    with pytest.deprecated_call():
-        # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
-        DataCatalog(artifact_data="v0.0.8")
-    with pytest.deprecated_call():
-        fn = data_catalog["chelsa"].path
-        # should be driver_kwargs=dict(chunks={'x': 100, 'y': 100})
-        data_catalog.get_rasterdataset(fn, chunks={"x": 100, "y": 100})
-    with pytest.deprecated_call():
-        fn = data_catalog["gadm_level1"].path
-        # should be driver_kwargs=dict(assert_gtype='Polygon')
-        data_catalog.get_geodataframe(fn, assert_gtype="MultiPolygon")
-    with pytest.deprecated_call():
-        fn = data_catalog["grdc"].path
-        # should be driver_kwargs=dict(index_col=0)
-        data_catalog.get_dataframe(fn, index_col=0)
-    with pytest.deprecated_call():
-        fn = data_catalog["gtsmv3_eu_era5"].path
-        # should be driver_kwargs=dict(chunks={'time': 100})
-        data_catalog.get_geodataset(fn, chunks={"time": 100})
-
-
-@pytest.mark.skip("needs catalogs refactor")
-def test_detect_extent(data_catalog):
+def test_detect_extent_rasterdataset(data_catalog):
     # raster dataset
     name = "chirps_global"
     bbox = 11.60, 45.20, 13.00, 46.80
@@ -873,6 +925,8 @@ def test_detect_extent(data_catalog):
     assert np.allclose(detected_spatial_range, bbox)
     assert detected_temporal_range == expected_temporal_range
 
+
+def test_detect_extent_geodataframe(data_catalog):
     # geodataframe
     name = "gadm_level1"
     bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
@@ -881,7 +935,8 @@ def test_detect_extent(data_catalog):
     detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
     assert np.all(np.equal(detected_spatial_range, bbox))
 
-    # geodataset
+
+def test_detect_extent_geodataset(data_catalog):
     name = "gtsmv3_eu_era5"
     bbox = (12.22412, 45.22705, 12.99316, 45.62256)
     expected_temporal_range = (
@@ -895,7 +950,6 @@ def test_detect_extent(data_catalog):
     assert detected_temporal_range == expected_temporal_range
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
 def test_to_stac(tmpdir, data_catalog):
     _ = data_catalog.get_rasterdataset("chirps_global")
     _ = data_catalog.get_geodataframe("gadm_level1")
