@@ -132,7 +132,7 @@ class GeoDataFrameSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
+    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -152,7 +152,7 @@ class GeoDataFrameSource(DataSource):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        bbox = self.extent.get("bbox", None)
+        bbox = self.metadata.extent.get("bbox", None)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
 
@@ -219,7 +219,7 @@ class GeoDataFrameSource(DataSource):
         try:
             bbox, crs = self.get_bbox(detect=True)  # Should move to driver
             bbox = list(bbox)
-            props = {**self.data_adapter.meta, "crs": crs}
+            props = {**self.metadata.model_dump(), "crs": crs}
             ext = splitext(self.full_uri)[-1]
             if ext == ".gpkg":
                 media_type = MediaType.GEOPACKAGE

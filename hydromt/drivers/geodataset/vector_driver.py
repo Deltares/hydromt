@@ -6,7 +6,7 @@ from typing import Callable, List, Optional
 
 from xarray import DataArray, Dataset
 
-from hydromt._typing import SourceMetadata
+from hydromt._typing import CRS, SourceMetadata
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Geom, Predicate, TimeRange
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
@@ -68,7 +68,10 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
             if not preprocessor:
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
-        data = open_geodataset(fn_locs=uri, geom=mask, logger=logger, **options)
+        crs: Optional[CRS] = metadata.crs if metadata else None
+        data = open_geodataset(
+            fn_locs=uri, geom=mask, logger=logger, crs=crs, **options
+        )
 
         if preprocessor is None:
             out = data

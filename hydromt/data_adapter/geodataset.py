@@ -196,10 +196,10 @@ class GeoDatasetAdapter(DataAdapterBase):
                 predicate=predicate,
                 logger=logger,
             )
-        if has_no_data(ds):
+        if has_no_data(maybe_ds):
             return None
         else:
-            return ds
+            return maybe_ds
 
     @staticmethod
     def _slice_spatial_dimension(

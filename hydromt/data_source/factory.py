@@ -33,7 +33,7 @@ def create_source(data: Union[Dict[str, Any], DataSource]) -> DataSource:
             return data
 
     elif isinstance(data, dict):
-        if data_type := data.pop("data_type", None):
+        if data_type := data.get("data_type", None):
             if target_source := available_sources.get(data_type):
                 return target_source.model_validate(data)
 
