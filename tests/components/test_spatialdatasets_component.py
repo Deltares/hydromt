@@ -92,7 +92,7 @@ def test_add_raster_data_from_rasterdataset(demda, tmpdir, mocker: MockerFixture
     xr.testing.assert_equal(model.maps.data["elevation"], demda)
 
 
-def test_add_raster_data_from_rasterdataset_reclass(tmpdir, demda):
+def test_add_raster_data_from_raster_reclass(tmpdir, demda):
     dc_param_fn = join(DATADIR, "parameters_data-migrated.yml")
     model = Model(root=tmpdir, data_libs=["artifact_data", dc_param_fn], mode="w")
 
@@ -106,7 +106,7 @@ def test_add_raster_data_from_rasterdataset_reclass(tmpdir, demda):
         "maps", SpatialDatasetsComponent(model, region_component="grid")
     )
 
-    model.maps.add_raster_data_from_rasterdataset_reclass(
+    model.maps.add_raster_data_from_raster_reclass(
         raster_filename="vito",
         reclass_table_filename="vito_mapping",
         reclass_variables=["roughness_manning"],
