@@ -78,6 +78,7 @@ class GeoDatasetSource(DataSource):
             mask=mask,
             variables=variables,
             time_range=time_range,
+            handle_nodata=handle_nodata,
             logger=logger,
         )
 

@@ -5,6 +5,8 @@ from typing import Any, Dict, Optional, Union
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from typing_extensions import Annotated
 
+from .crs import CRS
+
 # always stringify version
 Version = Annotated[str, BeforeValidator(str)]
 
@@ -24,7 +26,7 @@ class SourceMetadata(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    crs: Union[int, str, None] = None
+    crs: Optional[CRS] = None
     unit: Optional[str] = None
     extent: Dict[str, Any] = Field(default_factory=dict)
     nodata: Union[dict, float, int, None] = None
