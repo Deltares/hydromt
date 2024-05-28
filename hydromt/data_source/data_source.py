@@ -50,7 +50,7 @@ class DataSource(BaseModel, ABC):
     root: Optional[str] = Field(
         default=None, exclude=True
     )  # root is already in the catalog.
-    version: Optional[str] = Field(default=None)
+    version: Optional[Union[str, int, float]] = Field(default=None)
     provider: Optional[str] = Field(default=None)
     metadata: SourceMetadata = Field(default_factory=SourceMetadata)
     _used = False
