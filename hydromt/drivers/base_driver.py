@@ -6,6 +6,7 @@ from typing import Any, Callable, ClassVar, Dict, Generator, List, Type
 from fsspec.implementations.local import LocalFileSystem
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     SerializerFunctionWrapHandler,
     field_validator,
@@ -30,6 +31,8 @@ class BaseDriver(BaseModel, ABC):
     metadata_resolver: MetaDataResolver = Field(default_factory=RESOLVERS["convention"])
     filesystem: FS = Field(default=LocalFileSystem())
     options: Dict[str, Any] = Field(default_factory=dict)
+
+    model_config: ConfigDict = ConfigDict(extra="forbid")
 
     @field_validator("metadata_resolver", mode="before")
     @classmethod
@@ -84,7 +87,7 @@ class BaseDriver(BaseModel, ABC):
             # If cls is concrete, just validate as normal
             return handler(data)
 
-        if name := data.get("name"):
+        if name := data.pop("name", None):
             # Load plugins, importing subclasses of BaseDriver
             PLUGINS.driver_plugins  # noqa: B018
 

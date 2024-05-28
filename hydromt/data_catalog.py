@@ -70,6 +70,8 @@ __all__ = [
     "DataCatalog",
 ]
 
+_USER_DEFINED_NAME = "_USER_DEFINED_"
+
 
 class DataCatalog(object):
     """Base class for the data catalog object."""
@@ -1372,10 +1374,10 @@ class DataCatalog(object):
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
                 driver = kwargs.pop("driver", "pyogrio")
-                source = GeoDataFrameSource(
-                    name="_USER_DEFINED_", uri=str(data_like), driver=driver, **kwargs
-                )
                 name = basename(data_like)
+                source = GeoDataFrameSource(
+                    name=name, uri=str(data_like), driver=driver, **kwargs
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             data_like = GeoDataFrameAdapter._slice_data(
@@ -1492,13 +1494,13 @@ class DataCatalog(object):
                 driver: BaseDriver = kwargs.pop(
                     "driver", "geodataset_vector"
                 )  # Default to vector driver.
+                name = basename(data_like)
                 source = GeoDatasetSource(
-                    name="_USER_DEFINED_",
+                    name=name,
                     uri=str(data_like),
                     driver=driver,
                     **kwargs,
                 )
-                name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = GeoDatasetAdapter._slice_data(
@@ -1619,8 +1621,8 @@ class DataCatalog(object):
     def get_dataframe(
         self,
         data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
-        variables: Optional[list] = None,
-        time_tuple: Optional[Tuple] = None,
+        variables: Optional[List] = None,
+        time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1639,7 +1641,7 @@ class DataCatalog(object):
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        time_tuple : tuple of str, datetime, optional
+        time_range : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         handle_nodata: NoDataStrategy Optional
@@ -1662,16 +1664,23 @@ class DataCatalog(object):
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source: DataSource = self.get_source(
+                    name, provider=provider, version=version
+                )
+                if not isinstance(source, DataFrameSource):
+                    raise ValueError(f"Source '{source.name}' is not a DataFrame.")
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = DataFrameAdapter(path=data_like, **kwargs)
+                driver: str = kwargs.pop("driver", "pandas")
                 name = basename(data_like)
+                source = DataFrameSource(
+                    uri=data_like, name=name, driver=driver, **kwargs
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
             df = DataFrameAdapter._slice_data(
-                data_like, variables, time_tuple, logger=self.logger
+                data_like, variables, time_range, logger=self.logger
             )
             if df is None:
                 _exec_nodata_strat(
@@ -1683,9 +1692,9 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        obj = source.get_data(
+        obj = source.read_data(
             variables=variables,
-            time_tuple=time_tuple,
+            time_range=time_range,
             handle_nodata=handle_nodata,
             logger=self.logger,
         )

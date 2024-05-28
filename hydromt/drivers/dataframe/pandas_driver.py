@@ -57,7 +57,7 @@ class PandasDriver(DataFrameDriver):
             return pd.read_excel(
                 uri, usecols=variables, engine="openpyxl", **self.options
             )
-        elif extension in ["fwf"]:
+        elif extension in ["fwf", "txt"]:
             warn_on_unused_kwargs(
                 self.__class__.__name__, {"variables": variables}, logger
             )
