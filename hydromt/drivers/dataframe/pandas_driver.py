@@ -2,7 +2,7 @@
 
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import pandas as pd
 
@@ -50,12 +50,25 @@ class PandasDriver(DataFrameDriver):
         extension: str = uri.split(".")[-1]
         logger.info(f"Reading using {self.name} driver from {uri}")
         if extension == "csv":
-            return pd.read_csv(uri, usecols=variables, **self.options)
+            variables = self._unify_variables_and_pandas_kwargs(
+                uri, pd.read_csv, variables
+            )
+            return pd.read_csv(
+                uri,
+                usecols=variables,
+                **self.options,
+            )
         elif extension == "parquet":
             return pd.read_parquet(uri, columns=variables, **self.options)
         elif extension in ["xls", "xlsx"]:
+            variables = self._unify_variables_and_pandas_kwargs(
+                uri, pd.read_excel, variables
+            )
             return pd.read_excel(
-                uri, usecols=variables, engine="openpyxl", **self.options
+                uri,
+                usecols=variables,
+                engine="openpyxl",
+                **self.options,
             )
         elif extension in ["fwf", "txt"]:
             warn_on_unused_kwargs(
@@ -97,3 +110,21 @@ class PandasDriver(DataFrameDriver):
             df.to_excel(path, engine="openpyxl", **kwargs)
         else:
             raise ValueError(f"DataFrame: file extension {extension} is unknown.")
+
+    def _unify_variables_and_pandas_kwargs(
+        self,
+        uri: str,
+        read_method: Callable,
+        variables: Optional[Variables],
+    ):
+        """Prevent clashes between arguments and hydromt query parameters."""
+        # include index_col in variables
+        if variables:
+            if not isinstance(self.options.get("index_col", "str"), str):
+                # if index_col is an index, get name of col
+                new_options: Dict[str, Any] = self.options.copy()
+                new_options.pop("index_col")
+                df: pd.DataFrame = read_method(uri, **{"nrows": 1, **new_options})
+                return variables + [df.columns[0]]
+
+        return variables

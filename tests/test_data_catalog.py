@@ -1098,15 +1098,15 @@ class TestGetDataFrame:
     def test_time_variable_slice(self, csv_uri_time: str, data_catalog: DataCatalog):
         # Test variable slice
         vars_slice = ["precip", "temp"]
-        dfts5 = data_catalog.get_dataframe(
+        dfts = data_catalog.get_dataframe(
             csv_uri_time,
             variables=vars_slice,
             driver={
                 "name": "pandas",
-                "options": {"parse_dates": True},
-            },  #  not needed: "index_col": 0
+                "options": {"parse_dates": True, "index_col": 0},
+            },
         )
-        assert np.all(dfts5.columns == vars_slice)
+        assert np.all(dfts.columns == vars_slice)
 
 
 @pytest.mark.skip("needs catalogs refactor")

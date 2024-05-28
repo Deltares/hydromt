@@ -25,7 +25,6 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_source import RasterDatasetSource
-from hydromt.gis.utils import to_geographic_bbox
 
 TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
@@ -271,27 +270,6 @@ def test_reads_slippy_map_output(tmp_dir: Path, rioda_large: xr.DataArray):
     cat = DataCatalog(str(root / f"{name}.yml"), cache=True)
     cat.get_rasterdataset(name)
     assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16
-
-
-@pytest.mark.skip(reason="Needs refactoring to Pydantic BaseModel.")
-def test_detect_extent(geodf, geoda, rioda, ts):
-    ts_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-    ts_detected_bbox = to_geographic_bbox(*GeoDataFrameAdapter("").detect_bbox(geodf))
-    assert np.all(np.equal(ts_expected_bbox, ts_detected_bbox))
-
-    geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
-    geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-    geoda_detected_bbox = to_geographic_bbox(*GeoDatasetAdapter("").detect_bbox(geoda))
-    geoda_detected_time_range = GeoDatasetAdapter("").detect_time_range(geoda)
-    assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
-    assert geoda_expected_time_range == geoda_detected_time_range
-
-    rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
-    rioda_detected_bbox = to_geographic_bbox(
-        *RasterDatasetAdapter("").detect_bbox(rioda)
-    )
-
-    assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")

@@ -6,7 +6,9 @@ from uuid import uuid4
 
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import pytest
+import xarray as xr
 from pydantic import ValidationError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
@@ -18,6 +20,7 @@ from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_source.geodataframe import GeoDataFrameSource
 from hydromt.drivers import GeoDataFrameDriver, PyogrioDriver
+from hydromt.gis.utils import to_geographic_bbox
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 
@@ -276,3 +279,35 @@ class TestGeoDataFrameSource:
             -3.14
         )  # manually create an invalid adapter by deleting the crs
         assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
+    @pytest.mark.skip(
+        reason="Fix GeoDataSource.detect_ methods https://github.com/Deltares/hydromt/issues/942."
+    )
+    def test_detect_extent(
+        self,
+        geodf: gpd.GeoDataFrame,
+        geoda: xr.DataArray,
+        rioda: xr.DataArray,
+        ts: pd.DataFrame,
+    ):
+        ts_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
+        ts_detected_bbox = to_geographic_bbox(*GeoDataFrameSource().detect_bbox(geodf))
+        assert np.all(np.equal(ts_expected_bbox, ts_detected_bbox))
+
+        # Move to GeoDatasetSource
+        # geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
+        # geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
+        # geoda_detected_bbox = to_geographic_bbox(
+        #     *GeoDatasetSource("").detect_bbox(geoda)
+        # )
+        # geoda_detected_time_range = GeoDatasetAdapter("").detect_time_range(geoda)
+        # assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
+        # assert geoda_expected_time_range == geoda_detected_time_range
+
+        # Move to RasterDatsetSource
+        # rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
+        # rioda_detected_bbox = to_geographic_bbox(
+        #     *RasterDatasetAdapter("").detect_bbox(rioda)
+        # )
+
+        # assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
