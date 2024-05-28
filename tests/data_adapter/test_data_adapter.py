@@ -256,19 +256,19 @@ def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
     assert list(stac_item.assets.keys())[0] == "test.nc"
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-# TODO: Partially tested in "test_rasterio_driver", just missing the cache=True option.
-# https://github.com/Deltares/hydromt/issues/897
-def test_cache_vrt(tmpdir, rioda_large):
+@pytest.mark.skip(
+    reason="Needs implementation https://github.com/Deltares/hydromt/issues/875."
+)
+def test_reads_slippy_map_output(tmp_dir: Path, rioda_large: xr.DataArray):
     # write vrt data
     name = "tiled"
-    root = str(tmpdir.join(name))
+    root = tmp_dir / name
     rioda_large.raster.to_xyz_tiles(
         root=root,
         tile_size=256,
         zoom_levels=[0],
     )
-    cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
+    cat = DataCatalog(str(root / f"{name}.yml"), cache=True)
     cat.get_rasterdataset(name)
     assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16
 
