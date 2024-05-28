@@ -196,21 +196,23 @@ def test_data_catalog_io_round_trip(tmpdir, data_catalog):
     assert data_catalog.to_dict() == data_catalog1.to_dict()
 
 
-def test_versioned_catalog_entries():
+def test_catalog_entry_no_variant(legacy_aws_worldcover):
+    _, legacy_data_catalog = legacy_aws_worldcover
     # make sure the catalogs individually still work
-    legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
-    legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
     assert len(legacy_data_catalog) == 1
     source = legacy_data_catalog.get_source("esa_worldcover")
     assert Path(source.path).name == "esa-worldcover.vrt"
     assert source.version == "2020"
-    # test round trip to and from dict
+
+
+def test_catalog_entry_no_variant_round_trip(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     legacy_data_catalog2 = DataCatalog().from_dict(legacy_data_catalog.to_dict())
     assert legacy_data_catalog2 == legacy_data_catalog
 
-    # second catalog
-    aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
-    aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
+
+def test_catalog_entry_single_variant(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     assert len(aws_data_catalog) == 1
     # test get_source with all keyword combinations
     source = aws_data_catalog.get_source("esa_worldcover")
@@ -223,29 +225,67 @@ def test_versioned_catalog_entries():
         "esa_worldcover", version="2021", provider="aws"
     )
     assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
-    # test round trip to and from dict
-    aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
+
+
+@pytest.fixture()
+def aws_worldcover():
+    aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
+    aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
+    return (aws_yml_fn, aws_data_catalog)
+
+
+@pytest.fixture()
+def merged_aws_worldcover():
+    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
+    merged_catalog = DataCatalog(data_libs=[merged_yml_fn])
+    return (merged_yml_fn, merged_catalog)
+
+
+@pytest.fixture()
+def legacy_aws_worldcover():
+    legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
+    legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
+    return (legacy_yml_fn, legacy_data_catalog)
+
+
+def test_catalog_entry_single_variant_round_trip(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
+    aws_data_catalog2 = DataCatalog().from_dict(aws_worldcover_catalog.to_dict())
     assert aws_data_catalog2 == aws_data_catalog
 
-    # test errors
+
+def test_catalog_entry_single_variant_unknown_provider(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
             "esa_worldcover", version="2021", provider="asdfasdf"
         )
+
+
+def test_catalog_entry_single_variant_unknown_version(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
             "esa_worldcover", version="asdfasdf", provider="aws"
         )
+
+
+def test_catalog_entry_single_variant_unknown_source(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
         aws_data_catalog.get_source("asdfasdf", version="2021", provider="aws")
 
+
+def test_catalog_entry_warns_on_override_version(aws_worldcover):
+    aws_yml_fn, _ = aws_worldcover
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
         aws_data_catalog.from_yml(aws_yml_fn)
 
+
+def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
+    _, merged_catalog = merged_aws_worldcover
     # make sure we can read merged catalogs
-    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
-    merged_catalog = DataCatalog(data_libs=[merged_yml_fn])
     assert len(merged_catalog) == 3
     source_aws = merged_catalog.get_source("esa_worldcover")  # last variant is default
     assert source_aws.filesystem == "s3"
@@ -257,9 +297,17 @@ def test_versioned_catalog_entries():
     # test get_source with version only
     assert merged_catalog.get_source("esa_worldcover", version="2021") == source_loc
     # test round trip to and from dict
+
+
+def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
+    _, merged_catalog = merged_aws_worldcover
     merged_catalog2 = DataCatalog().from_dict(merged_catalog.to_dict())
     assert merged_catalog2 == merged_catalog
 
+
+def test_catalog_entry_merging(aws_worldcover_catalog, legacy_aws_worldcover_catalog):
+    aws_yml_fn, _ = aws_worldcover
+    legacy_yml_fn, _ = legacy_aws_worldcover
     # Make sure we can query for the version we want
     aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
     assert len(aws_and_legacy_catalog) == 2
@@ -272,6 +320,12 @@ def test_versioned_catalog_entries():
         provider="legacy_esa_worldcover",  # provider is filename
     )
     assert Path(source_loc.path).name == "esa-worldcover.vrt"
+
+
+def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover):
+    aws_yml_fn, _ = aws_worldcover
+    legacy_yml_fn, _ = legacy_aws_worldcover
+    aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
     # test round trip to and from dict
     aws_and_legacy_catalog2 = DataCatalog().from_dict(aws_and_legacy_catalog.to_dict())
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
