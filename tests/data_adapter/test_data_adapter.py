@@ -123,6 +123,7 @@ def test_rasterdataset_zoomlevels(
     assert isinstance(da1, xr.Dataset)
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_get_data(timeseries_ds, tmpdir):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -132,6 +133,7 @@ def test_dataset_get_data(timeseries_ds, tmpdir):
     assert ds1.identical(timeseries_ds)
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_to_file(timeseries_ds, tmpdir):
     path = str(tmpdir.join("test1.nc"))
     encoding = {k: {"zlib": True} for k in timeseries_ds.vector.vars}
@@ -166,6 +168,7 @@ def test_dataset_to_file(timeseries_ds, tmpdir):
         )
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_read_data(tmpdir, timeseries_ds):
     zarr_path = str(tmpdir.join("zarr_data"))
     timeseries_ds.to_zarr(zarr_path)
@@ -177,6 +180,7 @@ def test_dataset_read_data(tmpdir, timeseries_ds):
         dataset_adapter.get_data(variables=["col1", "col2"])
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_set_nodata(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -194,6 +198,7 @@ def test_dataset_set_nodata(tmpdir, timeseries_ds):
     assert ds["col1"].attrs["_FillValue"] == nodata["col1"]
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_apply_unit_conversion(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -211,6 +216,7 @@ def test_dataset_apply_unit_conversion(tmpdir, timeseries_ds):
     assert ds2["time"][-1].values == np.datetime64("2020-12-31T00:00:10")
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_set_metadata(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -238,6 +244,7 @@ def test_dataset_set_metadata(tmpdir, timeseries_ds):
     assert da.attrs["long_name"] == "column1"
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
