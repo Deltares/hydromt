@@ -257,16 +257,6 @@ def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataframe_unit_attrs(data_catalog: DataCatalog):
-    gadm_level1 = {"gadm_level1": data_catalog.get_source("gadm_level1").to_dict()}
-    attrs = {"NAME_0": {"long_name": "Country names"}}
-    gadm_level1["gadm_level1"].update(dict(attrs=attrs))
-    data_catalog.from_dict(gadm_level1)
-    gadm_level1_gdf = data_catalog.get_geodataframe("gadm_level1")
-    assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
 def test_dataframe(df, tmpdir, data_catalog):
     # Test reading csv
     fn_df = str(tmpdir.join("test.csv"))

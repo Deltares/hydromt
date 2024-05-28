@@ -682,6 +682,14 @@ class TestGetGeoDataFrame:
         assert np.all(gdf == geodf)
 
     @pytest.mark.integration()
+    def test_read_unit_attrs(self, data_catalog: DataCatalog):
+        gadm_level1: GeoDataFrameSource = data_catalog.get_source("gadm_level1")
+        attrs = {"NAME_0": {"long_name": "Country names"}}
+        gadm_level1.metadata.attrs.update(**attrs)
+        gadm_level1_gdf = data_catalog.get_geodataframe("gadm_level1")
+        assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
+
+    @pytest.mark.integration()
     def test_read_geojson_nodata_ignore(
         self, uri_geojson: str, data_catalog: DataCatalog
     ):
@@ -936,6 +944,10 @@ def test_get_dataset(timeseries_df, data_catalog):
     ds = data_catalog.get_dataset(test_dataset, variables=["col1"])
     assert isinstance(ds, xr.DataArray)
     assert ds.name == "col1"
+
+
+class TestGetDataFrame:
+    pass
 
 
 @pytest.mark.skip("needs catalogs refactor")
