@@ -57,7 +57,7 @@ class GeoDatasetSource(DataSource):
 
         Args:
         """
-        self._used = True
+        self.mark_as_used()
 
         # Transform time_range and variables to match the data source
         tr = self.data_adapter.to_source_timerange(time_range)
