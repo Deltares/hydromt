@@ -53,6 +53,7 @@ class DataSource(BaseModel, ABC):
     version: Optional[str] = Field(default=None)
     provider: Optional[str] = Field(default=None)
     metadata: SourceMetadata = Field(default_factory=SourceMetadata)
+    _used = False
 
     def summary(self) -> Dict[str, Any]:
         """Return a summary of the DataSource."""
@@ -65,6 +66,10 @@ class DataSource(BaseModel, ABC):
             }
         )
         return summ
+
+    def mark_as_used(self):
+        """Mark the data adapter as used."""
+        self._used = True
 
     @model_validator(mode="before")
     @classmethod

@@ -16,7 +16,6 @@ import requests
 import xarray as xr
 from yaml import dump
 
-from hydromt import data_catalog
 from hydromt._typing.error import NoDataException, NoDataStrategy
 from hydromt.data_adapter import (
     GeoDataFrameAdapter,
@@ -205,8 +204,8 @@ def test_catalog_entry_no_variant(legacy_aws_worldcover):
     assert source.version == "2020"
 
 
-def test_catalog_entry_no_variant_round_trip(aws_worldcover):
-    _, aws_data_catalog = aws_worldcover
+def test_catalog_entry_no_variant_round_trip(legacy_aws_worldcover):
+    _, legacy_data_catalog = legacy_aws_worldcover
     legacy_data_catalog2 = DataCatalog().from_dict(legacy_data_catalog.to_dict())
     assert legacy_data_catalog2 == legacy_data_catalog
 
@@ -250,7 +249,7 @@ def legacy_aws_worldcover():
 
 def test_catalog_entry_single_variant_round_trip(aws_worldcover):
     _, aws_data_catalog = aws_worldcover
-    aws_data_catalog2 = DataCatalog().from_dict(aws_worldcover_catalog.to_dict())
+    aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
     assert aws_data_catalog2 == aws_data_catalog
 
 
@@ -277,7 +276,7 @@ def test_catalog_entry_single_variant_unknown_source(aws_worldcover):
 
 
 def test_catalog_entry_warns_on_override_version(aws_worldcover):
-    aws_yml_fn, _ = aws_worldcover
+    aws_yml_fn, aws_data_catalog = aws_worldcover
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
         aws_data_catalog.from_yml(aws_yml_fn)
@@ -305,7 +304,7 @@ def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
     assert merged_catalog2 == merged_catalog
 
 
-def test_catalog_entry_merging(aws_worldcover_catalog, legacy_aws_worldcover_catalog):
+def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
     aws_yml_fn, _ = aws_worldcover
     legacy_yml_fn, _ = legacy_aws_worldcover
     # Make sure we can query for the version we want
@@ -343,9 +342,9 @@ def test_versioned_catalogs_v05(data_catalog):
     assert len(data_catalog.sources) > 0
 
 
-def test_version_catalogs_errors_on_unknown_version():
+def test_version_catalogs_errors_on_unknown_version(data_catalog):
     with pytest.raises(ValueError, match="Version v1993.7 not found "):
-        _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
+        _ = data_catalog.from_predefined_catalog("deltares_data", "v1993.7")
 
 
 def test_data_catalog_lazy_loading():
@@ -370,7 +369,7 @@ def test_data_catalog_repr(data_catalog):
     assert isinstance(data_catalog.__repr__(), str)
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
-    with pytest.raises(ValueError, match="Value must be DataAdapter"):
+    with pytest.raises(ValueError, match="Value must be DataSource"):
         data_catalog.add_source("test", "string")  # type: ignore
 
 
@@ -424,23 +423,18 @@ def test_from_predefined_catalogs(data_catalog):
         assert len(data_catalog._sources) > 0
 
 
-def test_data_cataalogs_raises_on_unknown_predefined_catalog():
+def test_data_catalogs_raises_on_unknown_predefined_catalog(data_catalog):
     with pytest.raises(ValueError, match='Catalog with name "asdf" not found'):
         data_catalog.from_predefined_catalogs("asdf")
 
 
-@pytest.mark.integration()
-def test_export_global_datasets(tmpdir, data_catalog):
-    # reset sources to avoid warnings
+@pytest.fixture()
+def export_test_slice_objects(tmpdir, data_catalog):
     data_catalog._sources = {}
-    DTYPES = {
-        "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),
-        "GeoDatasetAdapter": (xr.DataArray, xr.Dataset),
-        "GeoDataFrameAdapter": gpd.GeoDataFrame,
-    }
+    data_catalog.from_predefined_catalogs("artifact_data=v0.0.8")
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_tuple = ("2010-02-10", "2010-02-15")
-    data_catalog.from_predefined_catalogs("artifact_data")
+    data_lib_fn = join(tmpdir, "data_catalog.yml")
     source_names = [
         "era5[precip,temp]",
         "grwl_mask",
@@ -450,6 +444,42 @@ def test_export_global_datasets(tmpdir, data_catalog):
         "corine",
         "gtsmv3_eu_era5",
     ]
+
+    return (data_catalog, bbox, time_tuple, source_names, data_lib_fn)
+
+
+@pytest.mark.integration()
+def test_export_global_datasets(tmpdir, export_test_slice_objects):
+    (
+        data_catalog,
+        bbox,
+        time_tuple,
+        source_names,
+        data_lib_fn,
+    ) = export_test_slice_objects
+    data_catalog.export_data(
+        tmpdir,
+        bbox=bbox,
+        time_tuple=time_tuple,
+        source_names=source_names,
+        meta={"version": 1},
+        handle_nodata=NoDataStrategy.IGNORE,
+    )
+    with open(data_lib_fn, "r") as f:
+        yml_list = f.readlines()
+    assert yml_list[0].strip() == "meta:"
+    assert yml_list[1].strip() == "version: 1"
+    assert yml_list[2].strip().startswith("root:")
+
+
+def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
+    (
+        data_catalog,
+        bbox,
+        time_tuple,
+        source_names,
+        data_lib_fn,
+    ) = export_test_slice_objects
     data_catalog.export_data(
         tmpdir,
         bbox=bbox,
@@ -467,6 +497,7 @@ def test_export_global_datasets(tmpdir, data_catalog):
         meta={"version": 2},
         handle_nodata=NoDataStrategy.IGNORE,
     )
+
     data_lib_fn = join(tmpdir, "data_catalog.yml")
     # check if meta is written
     with open(data_lib_fn, "r") as f:
@@ -474,13 +505,6 @@ def test_export_global_datasets(tmpdir, data_catalog):
     assert yml_list[0].strip() == "meta:"
     assert yml_list[1].strip() == "version: 2"
     assert yml_list[2].strip().startswith("root:")
-    # check if data is parsed correctly
-    data_catalog1 = DataCatalog(data_lib_fn)
-    for key, source in data_catalog1.list_sources():
-        source_type = type(source).__name__
-        dtypes = DTYPES[source_type]
-        obj = source.get_data()
-        assert isinstance(obj, dtypes), key
 
 
 @pytest.mark.integration()

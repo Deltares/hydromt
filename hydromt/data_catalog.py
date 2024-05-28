@@ -871,7 +871,7 @@ class DataCatalog(object):
                 category=category,
             )
             if mark_used:
-                source._used = True
+                source.mark_as_used()
             self.add_source(name, source)
 
         return self
