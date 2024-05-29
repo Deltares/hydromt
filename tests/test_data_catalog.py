@@ -1,8 +1,9 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
+from datetime import datetime
 from os import mkdir
-from os.path import abspath, dirname, join
+from os.path import abspath, basename, dirname, join
 from pathlib import Path
 from typing import Optional, Union, cast
 from uuid import uuid4
@@ -14,11 +15,14 @@ import pandas as pd
 import pytest
 import requests
 import xarray as xr
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
 from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_OPENPYXL
-from hydromt._typing.error import NoDataException, NoDataStrategy
+from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
 from hydromt.data_adapter import (
     DataAdapter,
     GeoDataFrameAdapter,
@@ -31,7 +35,13 @@ from hydromt.data_catalog import (
     _parse_data_source_dict,
     _yml_from_uri_or_path,
 )
-from hydromt.data_source import DataSource, GeoDataFrameSource, RasterDatasetSource
+from hydromt.data_source import (
+    DataFrameSource,
+    DataSource,
+    GeoDataFrameSource,
+    GeoDatasetSource,
+    RasterDatasetSource,
+)
 from hydromt.gis.utils import to_geographic_bbox
 from hydromt.io.writers import write_xy
 
@@ -595,6 +605,40 @@ class TestGetRasterDataset:
         assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
         assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
+    def test_to_stac(self, data_catalog: DataCatalog):
+        # raster dataset
+        name = "chirps_global"
+        source = cast(RasterDatasetSource, data_catalog.get_source(name))
+        bbox, _ = source.get_bbox()
+        start_dt, end_dt = source.get_time_range(detect=True)
+        start_dt = pd.to_datetime(start_dt)
+        end_dt = pd.to_datetime(end_dt)
+        raster_stac_catalog = StacCatalog(id=name, description=name)
+        raster_stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=list(bbox),
+            properties=source.metadata.model_dump(exclude_none=True),
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        raster_stac_asset = StacAsset(str(source.uri))
+        raster_base_name = basename(source.uri)
+        raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
+
+        raster_stac_catalog.add_item(raster_stac_item)
+
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+        )
+
+        assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
 
 @pytest.mark.skip("needs catalogs refactor")
 def test_get_rasterdataset(data_catalog):
@@ -726,6 +770,34 @@ class TestGetGeoDataFrame:
         with pytest.raises(FileNotFoundError):
             data_catalog.get_geodataframe("no_file.geojson")
 
+    @pytest.mark.integration()
+    def test_to_stac_geodataframe(self, data_catalog: DataCatalog):
+        # geodataframe
+        name = "gadm_level1"
+        source = cast(GeoDataFrameSource, data_catalog.get_source(name))
+        bbox, _ = source.get_bbox()
+        gdf_stac_catalog = StacCatalog(id=name, description=name)
+        gds_stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=list(bbox),
+            properties=source.metadata,
+            datetime=datetime(1, 1, 1),
+        )
+        gds_stac_asset = StacAsset(str(source.metadata.url))
+        gds_base_name = basename(source.uri)
+        gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
+
+        gdf_stac_catalog.add_item(gds_stac_item)
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+        )
+        assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
 
 @pytest.mark.skip("needs catalogs refactor")
 def test_get_geodataframe(data_catalog):
@@ -752,7 +824,7 @@ def test_get_geodataframe(data_catalog):
         data_catalog.get_geodataframe({"name": "test"})
 
 
-class TestGetGeodataset:
+class TestGetGeoDataset:
     @pytest.fixture()
     def geojson_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
         uri_gdf = str(tmp_dir / "test.geojson")
@@ -902,6 +974,39 @@ class TestGetGeodataset:
         datacatalog = DataCatalog()
         ds = datacatalog.get_geodataset(source)
         assert ds.vector.nodata == -99
+
+    def test_to_stac_geodataset(self, data_catalog: DataCatalog):
+        # geodataset
+        name = "gtsmv3_eu_era5"
+        source = cast(GeoDatasetSource, data_catalog.get_source(name))
+        bbox, _ = source.get_bbox()
+        start_dt, end_dt = source.get_time_range(detect=True)
+        start_dt = pd.to_datetime(start_dt)
+        end_dt = pd.to_datetime(end_dt)
+        gds_stac_catalog = StacCatalog(id=name, description=name)
+        gds_stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=list(bbox),
+            properties=source.metadata.model_dump(exclude_none=True),
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        gds_stac_asset = StacAsset(str(source.uri))
+        gds_base_name = basename(source.uri)
+        gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
+
+        gds_stac_catalog.add_item(gds_stac_item)
+
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+        )
+        assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(ErrorHandleMethod.SKIP) is None
 
 
 @pytest.mark.skip("needs catalogs refactor")
@@ -1107,6 +1212,44 @@ class TestGetDataFrame:
             },
         )
         assert np.all(dfts.columns == vars_slice)
+
+    def test_to_stac(self, df: pd.DataFrame, tmp_dir: Path):
+        uri_df = str(tmp_dir / "test.csv")
+        name = "test_dataframe"
+        df.to_csv(uri_df)
+        dc = DataCatalog().from_dict(
+            {name: {"data_type": "DataFrame", "uri": uri_df, "driver": "pandas"}}
+        )
+
+        source = cast(DataFrameSource, dc.get_source(name))
+
+        with pytest.raises(
+            NotImplementedError,
+            match="DataFrameSource does not support full stac conversion ",
+        ):
+            source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+
+        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
+        stac_catalog = StacCatalog(
+            name,
+            description=name,
+        )
+        stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=[0, 0, 0, 0],
+            properties=source.metadata.model_dump(exclude_none=True),
+            datetime=datetime(1, 1, 1),
+        )
+        stac_asset = StacAsset(str(uri_df))
+        stac_item.add_asset("hydromt_path", stac_asset)
+
+        stac_catalog.add_item(stac_item)
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.COERCE)
+        )
+        assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
 
 
 @pytest.mark.skip("needs catalogs refactor")
