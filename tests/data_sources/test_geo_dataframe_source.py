@@ -1,7 +1,7 @@
 from datetime import datetime
 from os.path import basename
 from pathlib import Path
-from typing import List, Type, cast
+from typing import ClassVar, List, Type, cast
 from uuid import uuid4
 
 import geopandas as gpd
@@ -49,7 +49,7 @@ class TestGeoDataFrameSource:
         error_driver = next(
             filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
         )
-        assert error_driver["type"] == "model_type"
+        assert error_driver["type"] == "value_error"
 
     def test_raises_on_invalid_fields(
         self,
@@ -200,7 +200,7 @@ class TestGeoDataFrameSource:
     def MockWriteableDriver(self, geodf: gpd.GeoDataFrame):
         class MockWritableGeoDataFrameDriver(GeoDataFrameDriver):
             name = "mock_geodf_to_file"
-            supports_writing: bool = True
+            supports_writing: ClassVar[bool] = True
 
             def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
                 pass
@@ -239,21 +239,12 @@ class TestGeoDataFrameSource:
         assert id(new_source) != id(source)
         assert id(driver2) == id(new_source.driver)
 
-    @pytest.mark.skip("Missing driver: 'raster'")
     def test_geodataframe_unit_attrs(self, artifact_data: DataCatalog):
         source = artifact_data.get_source("gadm_level1")
-        source.attrs = {"NAME_0": {"long_name": "Country names"}}
-        gdf = GeoDataFrameAdapter(source=source).get_data("gadm_level1")
+        source.metadata.attrs = {"NAME_0": {"long_name": "Country names"}}
+        gdf = source.read_data()
         assert gdf["NAME_0"].attrs["long_name"] == "Country names"
 
-        # gadm_level1 = {"gadm_level1": artifact_data.get_source("gadm_level1").to_dict()}
-        # attrs = {"NAME_0": {"long_name": "Country names"}}
-        # gadm_level1["gadm_level1"].update(dict(attrs=attrs))
-        # artifact_data.from_dict(gadm_level1)
-        # gadm_level1_gdf = artifact_data.get_geodataframe("gadm_level1")
-        # assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
-
-    @pytest.mark.skip("Missing 'raster' driver implementation.")
     def test_to_stac_geodataframe(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
         fn_gdf = str(tmp_dir / "test.geojson")
         geodf.to_file(fn_gdf, driver="GeoJSON")
@@ -262,20 +253,18 @@ class TestGeoDataFrameSource:
 
         # geodataframe
         name = "gadm_level1"
-        adapter = cast(
-            GeoDataFrameAdapter, data_catalog.get_source(name)
-        )  # TODO: Fails because we have not implemented RasterDataset
+        adapter = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
         bbox, _ = adapter.get_bbox()
         gdf_stac_catalog = StacCatalog(id=name, description=name)
         gds_stac_item = StacItem(
             name,
             geometry=None,
             bbox=list(bbox),
-            properties=adapter.meta,
+            properties=adapter.metadata,
             datetime=datetime(1, 1, 1),
         )
-        gds_stac_asset = StacAsset(str(adapter.path))
-        gds_base_name = basename(adapter.path)
+        gds_stac_asset = StacAsset(str(adapter.uri))
+        gds_base_name = basename(adapter.uri)
         gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
         gdf_stac_catalog.add_item(gds_stac_item)
@@ -283,5 +272,7 @@ class TestGeoDataFrameSource:
             StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
         )
         assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-        adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
+        adapter.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
         assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None

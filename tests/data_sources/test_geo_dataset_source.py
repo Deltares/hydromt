@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Type
+from typing import ClassVar, List, Type
 
 import pytest
 import xarray as xr
@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_adapter import GeoDatasetAdapter
 from hydromt.data_source import GeoDatasetSource
-from hydromt.drivers import GeoDatasetDriver
+from hydromt.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 
 
 @pytest.fixture()
@@ -34,7 +34,7 @@ class TestGeoDatasetSource:
         error_driver = next(
             filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
         )
-        assert error_driver["type"] == "model_type"
+        assert error_driver["type"] == "value_error"
 
     def test_model_validate(
         self,
@@ -101,9 +101,6 @@ class TestGeoDatasetSource:
         class MockGeoDatasetDriver(GeoDatasetDriver):
             name = "mock_geods_to_file"
 
-            def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
-                pass
-
             def read(self, uri: str, **kwargs) -> xr.Dataset:
                 kinda_ds = self.read_data([uri], **kwargs)
                 if isinstance(kinda_ds, xr.DataArray):
@@ -120,7 +117,7 @@ class TestGeoDatasetSource:
     def MockWritableDriver(self, geoda: xr.Dataset):
         class MockWriteableGeoDatasetDriver(GeoDatasetDriver):
             name = "mock_geods_to_file"
-            supports_writing: bool = True
+            supports_writing: ClassVar[bool] = True
 
             def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
                 pass
@@ -183,3 +180,55 @@ class TestGeoDatasetSource:
         # make sure we are not changing the state
         assert id(new_source) != id(source)
         assert id(driver2) == id(new_source.driver)
+
+    @pytest.mark.integration()
+    def test_writes_to_netcdf(
+        self, tmp_dir: Path, MockWritableDriver: Type[GeoDatasetDriver]
+    ):
+        source = GeoDatasetSource(
+            name="test",
+            uri="geoda.zarr",
+            driver=MockWritableDriver(),
+            metadata=SourceMetadata(crs=4326),
+        )
+        local_driver = GeoDatasetXarrayDriver()
+        local_path: Path = tmp_dir / "geods_source_writes_netcdf.nc"
+        source.to_file(file_path=local_path, driver_override=local_driver)
+        assert local_driver.filesystem.exists(local_path)
+
+    @pytest.mark.integration()
+    def test_writes_to_netcdf_variables(
+        self, tmp_dir: Path, MockWritableDriver: Type[GeoDatasetDriver]
+    ):
+        source = GeoDatasetSource(
+            name="test",
+            uri="geoda.zarr",
+            driver=MockWritableDriver(),
+            metadata=SourceMetadata(crs=4326),
+        )
+        local_driver = GeoDatasetXarrayDriver()
+        local_path = tmp_dir / "geods_source_writes_netcdf_variables.nc"
+        source.to_file(
+            file_path=local_path,
+            driver_override=local_driver,
+            variables="test1",
+        )
+        assert local_driver.filesystem.exists(local_path)
+
+    @pytest.mark.integration()
+    def test_writes_to_zarr(
+        self, tmp_dir: Path, MockWritableDriver: Type[GeoDatasetDriver]
+    ):
+        source = GeoDatasetSource(
+            name="test",
+            uri="geoda.zarr",
+            driver=MockWritableDriver(),
+            metadata=SourceMetadata(crs=4326),
+        )
+        local_driver = GeoDatasetXarrayDriver()
+        local_path = tmp_dir / "geods_source_writes_netcdf.zarr"
+        source.to_file(
+            file_path=local_path,
+            driver_override=local_driver,
+        )
+        assert local_driver.filesystem.exists(local_path)

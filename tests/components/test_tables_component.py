@@ -47,7 +47,6 @@ def test_model_tables_sets_correctly(df, tmpdir: Path):
     assert list(component.data.keys()) == list(map(str, range(5)))
 
 
-@pytest.mark.skip(reason="Needs raster dataset implementation")
 def test_model_tables_reads_and_writes_correctly(df, tmpdir: Path):
     model = Model(root=str(tmpdir), mode="r+")
     model.add_component("test_table", TablesComponent(model))

@@ -4,7 +4,7 @@ from copy import copy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import Callable, ClassVar, List, Optional
+from typing import Callable, List, Optional
 
 import xarray as xr
 
@@ -28,7 +28,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     """RasterDatasetXarrayDriver."""
 
     name = "raster_xarray"
-    supports_writing: ClassVar[bool] = True
+    supports_writing = True
 
     def read_data(
         self,

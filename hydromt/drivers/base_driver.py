@@ -26,9 +26,9 @@ class BaseDriver(BaseModel, ABC):
     """
 
     name: ClassVar[str]
+    supports_writing: ClassVar[bool] = False
     metadata_resolver: MetaDataResolver = Field(default_factory=RESOLVERS["convention"])
     filesystem: FS = Field(default=LocalFileSystem())
-    supports_writing: ClassVar[bool] = False
     options: Dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("metadata_resolver", mode="before")
@@ -73,6 +73,9 @@ class BaseDriver(BaseModel, ABC):
 
         Inspired by: https://github.com/pydantic/pydantic/discussions/7008#discussioncomment
         """
+        if isinstance(data, str):
+            # name is enough for a default driver
+            data = {"name": data}
         if not isinstance(data, dict):
             # Other objects should already be the correct subclass.
             return handler(data)

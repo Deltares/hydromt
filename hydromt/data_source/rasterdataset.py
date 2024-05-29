@@ -79,9 +79,7 @@ class RasterDatasetSource(DataSource):
         return self.data_adapter.transform(
             ds,
             self.metadata,
-            bbox=bbox,
             mask=mask,
-            buffer=buffer,
             variables=variables,
             time_range=time_range,
             zoom_level=zoom_level,
@@ -142,7 +140,7 @@ class RasterDatasetSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS], detect: bool = True) -> TotalBounds:
+    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
         """Return the bounding box and espg code of the dataset.
 
         if the bounding box is not set and detect is True,
@@ -162,7 +160,7 @@ class RasterDatasetSource(DataSource):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        bbox = self.extent.get("bbox", None)
+        bbox = self.metadata.extent.get("bbox", None)
         crs = cast(int, crs)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
@@ -192,7 +190,7 @@ class RasterDatasetSource(DataSource):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        time_range = self.extent.get("time_range", None)
+        time_range = self.metadata.extent.get("time_range", None)
         if time_range is None and detect:
             time_range = self.detect_time_range()
 
