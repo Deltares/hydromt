@@ -1,11 +1,12 @@
 import logging
 import os
 import re
-from os.path import dirname, isdir, isfile, join
+from os.path import abspath, dirname, isdir, isfile, join
 from pathlib import Path
 from typing import cast
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
@@ -15,6 +16,8 @@ from pytest_mock import MockerFixture
 from hydromt.components.mesh import MeshComponent, _check_UGrid
 from hydromt.models import Model
 from hydromt.root import ModelRoot
+
+DATADIR = join(dirname(dirname(abspath(__file__))), "data")
 
 
 def test_check_UGrid(mocker: MockerFixture):
@@ -156,53 +159,6 @@ def test_write(mock_model, caplog, tmpdir):
     ds = xr.open_dataset(file_path)
     assert "elevation" in ds.data_vars
     assert "28992" in ds.spatial_ref.crs_wkt
-
-
-def test_read(mock_model, caplog, tmpdir, griduda):
-    mesh_component = MeshComponent(mock_model)
-    mesh_component.model.root = ModelRoot(tmpdir, mode="w")
-    with pytest.raises(IOError, match="Model not opened in read mode"):
-        mesh_component.read()
-    fn = "test/test_mesh.nc"
-    file_dir = join(mesh_component.model_root.path, dirname(fn))
-    os.makedirs(file_dir)
-    data = griduda.ugrid.to_dataset()
-    data.to_netcdf(join(mesh_component.model_root.path, fn))
-    mock_model.model.root = ModelRoot(tmpdir, mode="r+")
-    with pytest.raises(
-        ValueError, match="no crs is found in the file nor passed to the reader."
-    ):
-        mesh_component.read(filename=fn)
-    caplog.set_level(level=logging.INFO)
-    mesh_component.read(filename=fn, crs=4326)
-    assert "no crs is found in the file, assigning from user input." in caplog.text
-    assert mesh_component._data.ugrid.crs == 4326
-
-
-@pytest.mark.integration()
-def test_model_mesh_workflow(tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("mesh", MeshComponent(m))
-    component = cast(MeshComponent, m.mesh)
-    region = {
-        "bbox": [11.949099, 45.9722, 12.004855, 45.998441]
-    }  # small area in Piave basin
-    crs = 4326
-    res = 0.001
-    mesh = component.create_2d_from_region(region=region, res=res, crs=crs)
-    assert component.data.grid.crs == crs
-    # clear empty mesh dataset
-    mesh._data = None
-    # Test with sample data
-    data = xu.data.elevation_nl().to_dataset()
-    data.grid.crs = 28992
-    component.set(data=data, grid_name="elevation_mesh")
-    assert "elevation_mesh" in component.mesh_names
-    assert component.data == data
-    component.write()
-    component._data = None
-    component.read()
-    assert component.data == data
 
 
 def test_model_mesh_read_plus(tmpdir: Path):
@@ -350,3 +306,86 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
     assert all([var in mock_data.data_vars.keys() for var in data_vars])
     assert mesh_component.data == mock_data
     assert "mesh2d" in mesh_component.mesh_names
+
+
+@pytest.mark.integration()
+def test_read(mock_model, caplog, tmpdir, griduda):
+    mesh_component = MeshComponent(mock_model)
+    mesh_component.model.root = ModelRoot(tmpdir, mode="w")
+    with pytest.raises(IOError, match="Model opened in write-only mode"):
+        mesh_component.read()
+    fn = "test/test_mesh.nc"
+    file_dir = join(mesh_component.model.root.path, dirname(fn))
+    os.makedirs(file_dir)
+    data = griduda.ugrid.to_dataset()
+    data.to_netcdf(join(mesh_component.model.root.path, fn))
+    mock_model.root = ModelRoot(tmpdir, mode="r+")
+    with pytest.raises(
+        ValueError, match="no crs is found in the file nor passed to the reader."
+    ):
+        mesh_component.read(filename=fn)
+    caplog.set_level(level=logging.INFO)
+    mesh_component.read(filename=fn, crs=4326)
+    assert "no crs is found in the file, assigning from user input." in caplog.text
+    assert mesh_component._data.ugrid.crs["mesh2d"].to_epsg() == 4326
+
+
+@pytest.mark.integration()
+def test_model_mesh_workflow(tmpdir: Path):
+    m = Model(root=str(tmpdir), mode="r+")
+    m.add_component("mesh", MeshComponent(m))
+    component = cast(MeshComponent, m.mesh)
+    region = {
+        "bbox": [11.949099, 45.9722, 12.004855, 45.998441]
+    }  # small area in Piave basin
+    crs = 4326
+    res = 0.001
+    mesh = component.create_2d_from_region(region=region, res=res, crs=crs)
+    assert component.data.grid.crs == crs
+    # clear empty mesh dataset
+    mesh._data = None
+    # Test with sample data
+    data = xu.data.elevation_nl().to_dataset()
+    data.grid.crs = 28992
+    component.set(data=data, grid_name="elevation_mesh")
+    assert "elevation_mesh" in component.mesh_names
+    assert component.data == data
+    component.write()
+    component._data = None
+    component.read()
+    assert component.data == data
+
+
+@pytest.mark.integration()
+def test_mesh_with_model(griduda, world, tmpdir):
+    dc_param_fn = join(DATADIR, "parameters_data.yml")
+    root = join(tmpdir, "mesh_component1")
+    model = Model(root=root, data_libs=["artifact_data", dc_param_fn])
+    mesh_component = MeshComponent(model=model)
+    model.add_component(name="mesh", component=mesh_component)
+    region = {"geom": world[world.name == "Italy"]}
+    model.mesh.create_2d_from_region(region, res=10000, crs=3857, grid_name="mesh2d")
+    assert model.mesh.region.crs.to_epsg() == 3857
+
+    region = {"mesh": griduda}
+    model1 = Model(root=root, data_libs=["artifact_data", dc_param_fn])
+    mesh_component = MeshComponent(model=model1)
+    model1.add_component(name="mesh", component=mesh_component)
+    model1.mesh.create_2d_from_region(region, grid_name="mesh2d")
+    model1.mesh.add_2d_data_from_rasterdataset(
+        "vito", grid_name="mesh2d", resampling_method="mode"
+    )
+    assert "vito" in model.mesh.data.data_vars
+
+    model1.mesh.add_2d_data_from_raster_reclass(
+        raster_fn="vito",
+        reclass_table_fn="vito_mapping",
+        reclass_variables=["landuse", "roughness_manning"],
+        resampling_method=["mode", "centroid"],
+        grid_name="mesh2d",
+    )
+    ds_mesh2d = model1.mesh.get_mesh("mesh2d", include_data=True)
+
+    assert "vito" in ds_mesh2d
+    assert "roughness_manning" in model1.mesh.data.data_vars
+    assert np.all(model1.mesh.data["landuse"].values == model1.mesh.data["vito"].values)
