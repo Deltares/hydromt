@@ -13,7 +13,8 @@ from hydromt._typing import (
     NoDataStrategy,
     SourceMetadata,
 )
-from hydromt.gis import parse_geom_bbox_buffer, utils
+from hydromt._typing.error import NoDataException, _exec_nodata_strat
+from hydromt.gis import utils
 
 from .data_adapter_base import DataAdapterBase
 
@@ -28,9 +29,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         gdf: gpd.GeoDataFrame,
         metadata: "SourceMetadata",
         *,
-        bbox: Optional[List[float]] = None,
         mask: Optional[gpd.GeoDataFrame] = None,
-        buffer: float = 0.0,
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -38,25 +37,30 @@ class GeoDataFrameAdapter(DataAdapterBase):
     ) -> Optional[gpd.GeoDataFrame]:
         """Read transform data to HydroMT standards."""
         # rename variables and parse crs & nodata
-        gdf = self._rename_vars(gdf)
-        gdf = self._set_crs(gdf, metadata.crs, logger=logger)
-        gdf = self._set_nodata(gdf, metadata)
-        # slice
-        gdf = GeoDataFrameAdapter._slice_data(
-            gdf,
-            variables,
-            mask,
-            bbox,
-            metadata.crs,
-            buffer,
-            predicate,
-            handle_nodata,
-            logger=logger,
-        )
-        # uniformize
-        gdf = self._apply_unit_conversions(gdf, logger=logger)
-        gdf = self._set_metadata(gdf, metadata)
-        return gdf
+        try:
+            gdf = self._rename_vars(gdf)
+            gdf = self._set_crs(gdf, metadata.crs, logger=logger)
+            gdf = self._set_nodata(gdf, metadata)
+            # slice
+            gdf: Optional[gpd.GeoDataFrame] = GeoDataFrameAdapter._slice_data(
+                gdf,
+                variables=variables,
+                mask=mask,
+                predicate=predicate,
+                handle_nodata=handle_nodata,
+                logger=logger,
+            )
+            # uniformize
+            if gdf is not None:
+                gdf = self._apply_unit_conversions(gdf, logger=logger)
+                gdf = self._set_metadata(gdf, metadata)
+            return gdf
+        except NoDataException:
+            _exec_nodata_strat(
+                "No data was read from source",
+                strategy=handle_nodata,
+                logger=logger,
+            )
 
     def _rename_vars(self, gdf: gpd.GeoDataFrame):
         # rename and select columns
@@ -81,14 +85,11 @@ class GeoDataFrameAdapter(DataAdapterBase):
     def _slice_data(
         gdf: gpd.GeoDataFrame,
         variables: Optional[Union[str, List[str]]] = None,
-        geom: Optional[Geom] = None,
-        bbox: Optional[Geom] = None,
-        crs: Optional[CRS] = None,
-        buffer: float = 0.0,
+        mask: Optional[Geom] = None,
         predicate: str = "intersects",  # TODO: enum available predicates
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO: review NoDataStrategy + axes
         logger: Logger = logger,
-    ) -> gpd.GeoDataFrame:
+    ) -> Optional[gpd.GeoDataFrame]:
         """Return a clipped GeoDataFrame (vector).
 
         Arguments
@@ -97,15 +98,8 @@ class GeoDataFrameAdapter(DataAdapterBase):
             GeoDataFrame to slice.
         variables : str or list of str, optional.
             Names of GeoDataFrame columns to return.
-        geom : geopandas.GeoDataFrame/Series, optional
+        mask: geopandas.GeoDataFrame/Series, optional
             A geometry defining the area of interest.
-        bbox : array-like of floats, optional
-            (xmin, ymin, xmax, ymax) bounding box of area of interest
-            (in WGS84 coordinates).
-        crs: pyproj.CRS
-            Coordinate reference system of the bbox or geom.
-        buffer : float, optional
-            Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle no data values. By default NoDataStrategy.RAISE.
         predicate : str, optional
@@ -129,14 +123,19 @@ class GeoDataFrameAdapter(DataAdapterBase):
                 variables = variables + ["geometry"]
             gdf = gdf.loc[:, variables]
 
-        if geom is not None or bbox is not None:
+        if mask is not None:
             # NOTE if we read with vector driver this is already done ..
-            geom = parse_geom_bbox_buffer(geom, bbox, buffer, crs)
-            bbox_str = ", ".join([f"{c:.3f}" for c in geom.total_bounds])
-            epsg = geom.crs.to_epsg()
+            bbox_str = ", ".join([f"{c:.3f}" for c in mask.total_bounds])
+            epsg = mask.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
-            idxs = utils.filter_gdf(gdf, geom=geom, predicate=predicate)
+            idxs = utils.filter_gdf(gdf, geom=mask, predicate=predicate)
             gdf = gdf.iloc[idxs]
+
+        if np.all(gdf.is_empty):
+            _exec_nodata_strat(
+                "No data was read from source", strategy=handle_nodata, logger=logger
+            )
+            gdf = None
         return gdf
 
     def _set_nodata(self, gdf: gpd.GeoDataFrame, metadata: "SourceMetadata"):

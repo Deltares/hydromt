@@ -217,17 +217,20 @@ class TestGeoDataFrameSource:
 
         return MockWritableGeoDataFrameDriver
 
-    def test_to_file(self, MockWriteableDriver: Type[GeoDataFrameSource]):
-        mock_driver = MockWriteableDriver()
-
-        source = GeoDataFrameSource(
-            name="test", uri="points.geojson", driver=mock_driver
+    @pytest.fixture()
+    def writable_source(
+        self, MockWriteableDriver: Type[GeoDataFrameDriver]
+    ) -> GeoDataFrameSource:
+        return GeoDataFrameSource(
+            name="test", uri="points.geojson", driver=MockWriteableDriver()
         )
-        new_source = source.to_file("test")
+
+    def test_to_file(self, writable_source: GeoDataFrameSource):
+        new_source = writable_source.to_file("test")
         assert "local" in new_source.driver.filesystem.protocol
         # make sure we are not changing the state
-        assert id(new_source) != id(source)
-        assert id(mock_driver) != id(new_source.driver)
+        assert id(new_source) != id(writable_source)
+        assert id(writable_source.driver) != id(new_source.driver)
 
     def test_to_file_override(self, MockWriteableDriver: Type[GeoDataFrameDriver]):
         driver1 = MockWriteableDriver()

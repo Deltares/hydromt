@@ -14,31 +14,31 @@ class TestPandasDriver:
     @pytest.fixture(scope="class")
     def uri_csv(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test.csv")
-        df.to_csv(uri)
+        df.to_csv(uri, index=False)
         return uri
 
     @pytest.fixture(scope="class")
     def uri_parquet(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test.parquet")
-        df.to_parquet(uri)
+        df.to_parquet(uri, index=False)
         return uri
 
     @pytest.fixture(scope="class")
     def uri_xlsx(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test.xlsx")
-        df.to_excel(uri)
+        df.to_excel(uri, index=False)
         return uri
 
     @pytest.fixture(scope="class")
     def uri_xls(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test.xls")
-        df.to_excel(uri, engine="openpyxl")
+        df.to_excel(uri, engine="openpyxl", index=False)
         return uri
 
     @pytest.fixture(scope="class")
     def uri_fwf(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test.fwf")
-        df.to_string(uri)
+        df.to_string(uri, index=False)
         return uri
 
     @pytest.fixture(scope="class")
@@ -70,9 +70,6 @@ class TestPandasDriver:
     ):
         uri = request.getfixturevalue(uri)
         new_df: pd.DataFrame = driver.read(uri).sort_values("id")
-        unnamed_col_name = "Unnamed: 0"  # some ui methods struggle with this.
-        if unnamed_col_name in new_df.columns:
-            new_df.drop(unnamed_col_name, axis=1, inplace=True)
         pd.testing.assert_frame_equal(df, new_df)
 
     def test_read_nodata(self, driver: PandasDriver):
@@ -109,10 +106,16 @@ class TestPandasDriver:
     def test_write(self, filename: str, df: pd.DataFrame, tmp_dir: Path):
         df_path = tmp_dir / filename
         driver = PandasDriver()
-        driver.write(df_path, df)
+        driver.write(df_path, df, index=False)
         reread = driver.read(str(df_path))
-        unnamed_col_name = "Unnamed: 0"  # some ui methods struggle with this.
-        if unnamed_col_name in reread.columns:
-            reread.drop(unnamed_col_name, axis=1, inplace=True)
-
         assert np.all(reread == df)
+
+    @pytest.mark.parametrize("filename", ["temp_2.csv", "temp_2.xls", "temp_2.xlsx"])
+    def test_handles_index_col(self, filename: str, df: pd.DataFrame, tmp_dir: Path):
+        df_path = tmp_dir / filename
+        driver = PandasDriver(options={"index_col": 0})
+        driver.write(df_path, df)
+
+        vars_slice = ["city", "country"]
+        df_filtered = driver.read(str(df_path), variables=vars_slice)
+        assert np.all(df_filtered.columns == vars_slice)

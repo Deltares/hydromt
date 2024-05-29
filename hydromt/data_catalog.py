@@ -48,7 +48,9 @@ from hydromt.data_adapter import (
 from hydromt.data_adapter.caching import HYDROMT_DATADIR
 from hydromt.data_adapter.utils import _single_var_as_array
 from hydromt.data_source import (
+    DataFrameSource,
     DataSource,
+    GeoDataFrameSource,
     GeoDatasetSource,
     RasterDatasetSource,
     create_source,
@@ -67,6 +69,8 @@ logger = logging.getLogger(__name__)
 __all__ = [
     "DataCatalog",
 ]
+
+_USER_DEFINED_NAME = "_USER_DEFINED_"
 
 
 class DataCatalog(object):
@@ -1158,7 +1162,9 @@ class DataCatalog(object):
 
     def get_rasterdataset(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, RasterDatasetSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[Union[int, tuple]] = None,
@@ -1268,6 +1274,8 @@ class DataCatalog(object):
                 variable_name=variables,
             )
             return ds
+        elif isinstance(data_like, RasterDatasetSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
@@ -1290,7 +1298,9 @@ class DataCatalog(object):
 
     def get_geodataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDataFrameSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
@@ -1348,6 +1358,10 @@ class DataCatalog(object):
             will be returned. if it is set to RAISE and exception will be raised in that
             situation
         """
+        if geom is not None or bbox is not None:
+            mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+        else:
+            mask = None
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1359,17 +1373,18 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = GeoDataFrameAdapter(path=str(data_like), **kwargs)
+                driver = kwargs.pop("driver", "pyogrio")
                 name = basename(data_like)
+                source = GeoDataFrameSource(
+                    name=name, uri=str(data_like), driver=driver, **kwargs
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             data_like = GeoDataFrameAdapter._slice_data(
                 data_like,
-                variables,
-                geom,
-                bbox,
-                buffer,
-                predicate,
+                variables=variables,
+                mask=mask,
+                predicate=predicate,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1379,15 +1394,14 @@ class DataCatalog(object):
                     logger=logger,
                 )
             return data_like
-
+        elif isinstance(data_like, GeoDataFrameSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        gdf = source.get_data(
-            bbox=bbox,
-            geom=geom,
+        gdf = source.read_data(
+            mask=mask,
             handle_nodata=handle_nodata,
-            buffer=buffer,
             predicate=predicate,
             variables=variables,
             logger=self.logger,
@@ -1396,7 +1410,9 @@ class DataCatalog(object):
 
     def get_geodataset(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDatasetSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
@@ -1478,13 +1494,13 @@ class DataCatalog(object):
                 driver: BaseDriver = kwargs.pop(
                     "driver", "geodataset_vector"
                 )  # Default to vector driver.
+                name = basename(data_like)
                 source = GeoDatasetSource(
-                    name="_USER_DEFINED_",
+                    name=name,
                     uri=str(data_like),
                     driver=driver,
                     **kwargs,
                 )
-                name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = GeoDatasetAdapter._slice_data(
@@ -1502,6 +1518,8 @@ class DataCatalog(object):
                     logger=logger,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
+        elif isinstance(data_like, GeoDatasetSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
@@ -1602,9 +1620,9 @@ class DataCatalog(object):
 
     def get_dataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, pd.DataFrame],
-        variables: Optional[list] = None,
-        time_tuple: Optional[Tuple] = None,
+        data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
+        variables: Optional[List] = None,
+        time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1623,7 +1641,7 @@ class DataCatalog(object):
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        time_tuple : tuple of str, datetime, optional
+        time_range : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         handle_nodata: NoDataStrategy Optional
@@ -1646,16 +1664,23 @@ class DataCatalog(object):
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source: DataSource = self.get_source(
+                    name, provider=provider, version=version
+                )
+                if not isinstance(source, DataFrameSource):
+                    raise ValueError(f"Source '{source.name}' is not a DataFrame.")
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = DataFrameAdapter(path=data_like, **kwargs)
+                driver: str = kwargs.pop("driver", "pandas")
                 name = basename(data_like)
+                source = DataFrameSource(
+                    uri=data_like, name=name, driver=driver, **kwargs
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
             df = DataFrameAdapter._slice_data(
-                data_like, variables, time_tuple, logger=self.logger
+                data_like, variables, time_range, logger=self.logger
             )
             if df is None:
                 _exec_nodata_strat(
@@ -1667,9 +1692,9 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        obj = source.get_data(
+        obj = source.read_data(
             variables=variables,
-            time_tuple=time_tuple,
+            time_range=time_range,
             handle_nodata=handle_nodata,
             logger=self.logger,
         )
