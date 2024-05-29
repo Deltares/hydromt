@@ -158,10 +158,9 @@ def test_write(mock_model, caplog, tmpdir):
     assert "28992" in ds.spatial_ref.crs_wkt
 
 
-@pytest.mark.skip(reason="needs artifact data")
 def test_read(mock_model, caplog, tmpdir, griduda):
     mesh_component = MeshComponent(mock_model)
-    mesh_component.root = ModelRoot(tmpdir, mode="w")
+    mesh_component.model.root = ModelRoot(tmpdir, mode="w")
     with pytest.raises(IOError, match="Model not opened in read mode"):
         mesh_component.read()
     fn = "test/test_mesh.nc"
@@ -169,7 +168,7 @@ def test_read(mock_model, caplog, tmpdir, griduda):
     os.makedirs(file_dir)
     data = griduda.ugrid.to_dataset()
     data.to_netcdf(join(mesh_component.model_root.path, fn))
-    mock_model.root = ModelRoot(tmpdir, mode="r+")
+    mock_model.model.root = ModelRoot(tmpdir, mode="r+")
     with pytest.raises(
         ValueError, match="no crs is found in the file nor passed to the reader."
     ):
