@@ -331,8 +331,9 @@ def test_add_data_from_geodataframe(
 def test_grid_component_model(tmpdir):
     # Initialize model
     dc_param_fn = join(DATADIR, "parameters_data.yml")
+    root = join(tmpdir, "grid_model")
     model = Model(
-        root=join(tmpdir, "grid_model"),
+        root=root,
         mode="w",
         data_libs=["artifact_data", dc_param_fn],
     )
@@ -382,16 +383,32 @@ def test_grid_component_model(tmpdir):
         rename={"hydro_lakes": "water_frac"},
     )
 
-    assert len(model.grid.data) == 10
-    for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
-        assert v in model.grid.data
+    def grid_data_checks(mod):
+        assert len(mod.grid.data) == 10
+        for v in [
+            "mask",
+            "c1",
+            "basins",
+            "roughness_manning",
+            "lake_depth",
+            "water_frac",
+        ]:
+            assert v in mod.grid.data
 
-    assert model.grid.data["lake_depth"].raster.nodata == -999.0
-    assert model.grid.data["roughness_manning"].raster.nodata == -999.0
+        assert mod.grid.data["lake_depth"].raster.nodata == -999.0
+        assert mod.grid.data["roughness_manning"].raster.nodata == -999.0
 
-    assert np.unique(model.grid.data["c2"]).size == 2
-    assert np.isin([-1, 2], np.unique(model.grid.data["c2"])).all()
+        assert np.unique(mod.grid.data["c2"]).size == 2
+        assert np.isin([-1, 2], np.unique(mod.grid.data["c2"])).all()
+
+    grid_data_checks(model)
 
     # write model
     model.write()
-    # TODO add checks if model is correctly written
+
+    # Read model
+    written_model = Model(root=root, mode="r")
+    grid_component = GridComponent(model=written_model)
+    written_model.add_component(name="grid", component=grid_component)
+    written_model.read()
+    grid_data_checks(mod=written_model)
