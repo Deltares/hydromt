@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import ClassVar, List, Type
 
+import numpy as np
 import pytest
 import xarray as xr
 from pydantic import ValidationError
@@ -9,6 +10,7 @@ from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_adapter import RasterDatasetAdapter
 from hydromt.data_source import RasterDatasetSource
 from hydromt.drivers import RasterDatasetDriver
+from hydromt.gis.utils import to_geographic_bbox
 
 
 @pytest.fixture()
@@ -130,32 +132,40 @@ class TestRasterDatasetSource:
 
         return MockWritableRasterDatasetDriver
 
-    def test_to_file(self, MockWritableDriver: Type[RasterDatasetDriver]):
-        mock_driver = MockWritableDriver()
-
-        source = RasterDatasetSource(
+    @pytest.fixture()
+    def writable_source(
+        self, MockWritableDriver: Type[RasterDatasetDriver]
+    ) -> RasterDatasetSource:
+        return RasterDatasetSource(
             name="test",
-            uri="raster.nc",
-            driver=mock_driver,
+            uri="raster.zarr",
+            driver=MockWritableDriver(),
             metadata=SourceMetadata(crs=4326),
         )
-        new_source = source.to_file("test")
+
+    def test_to_file(self, writable_source: RasterDatasetSource):
+        new_source = writable_source.to_file("test")
         assert "local" in new_source.driver.filesystem.protocol
         # make sure we are not changing the state
-        assert id(new_source) != id(source)
-        assert id(mock_driver) != id(new_source.driver)
+        assert id(new_source) != id(writable_source)
+        assert id(writable_source.driver) != id(new_source.driver)
 
-    def test_to_file_override(self, MockWritableDriver: Type[RasterDatasetDriver]):
-        driver1 = MockWritableDriver()
-        source = RasterDatasetSource(
-            name="test",
-            uri="raster.nc",
-            driver=driver1,
-            metadata=SourceMetadata(crs=4326),
-        )
-        driver2 = MockWritableDriver(filesystem="memory")
-        new_source = source.to_file("test", driver_override=driver2)
+    def test_to_file_override(
+        self,
+        writable_source: RasterDatasetSource,
+        MockWritableDriver: Type[RasterDatasetDriver],
+    ):
+        driver = MockWritableDriver(filesystem="memory")
+        new_source = writable_source.to_file("test", driver_override=driver)
         assert new_source.driver.filesystem.protocol == "memory"
         # make sure we are not changing the state
-        assert id(new_source) != id(source)
-        assert id(driver2) == id(new_source.driver)
+        assert id(new_source) != id(writable_source)
+        assert id(driver) == id(new_source.driver)
+
+    def test_detect_extent(
+        self, writable_source: RasterDatasetSource, rioda: xr.DataArray
+    ):
+        rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
+        rioda_detected_bbox = to_geographic_bbox(*writable_source.detect_bbox(rioda))
+
+        assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
