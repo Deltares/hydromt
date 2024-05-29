@@ -10,7 +10,6 @@ import xarray as xr
 from pytest_mock import MockerFixture
 
 from hydromt.components.grid import GridComponent
-from hydromt.data_catalog import DataCatalog
 from hydromt.models.model import Model
 from hydromt.root import ModelRoot
 
@@ -128,16 +127,15 @@ def test_create_raise_errors(mock_model):
         grid_component.create_from_region(region={"bbox": bbox})
 
 
-@pytest.mark.skip(reason="needs working artifact data")
+@pytest.mark.integration()
 def test_create_basin_grid(tmpdir):
-    model_root = ModelRoot(path=join(tmpdir, "grid_model"))
-    data_catalog = DataCatalog(data_libs=["artifact_data"])
-    grid_component = GridComponent(
-        root=model_root,
-        data_catalog=data_catalog,
-        model_region=None,
-        model=Model(),
+    root = join(tmpdir, "grid_model")
+    model = Model(
+        root=root,
+        mode="w",
+        data_libs=["artifact_data"],
     )
+    grid_component = GridComponent(model=model)
     grid_component.create_from_region(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
