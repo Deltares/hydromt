@@ -344,7 +344,7 @@ def test_versioned_catalogs_v05(data_catalog):
 
 def test_version_catalogs_errors_on_unknown_version(data_catalog):
     with pytest.raises(ValueError, match="Version v1993.7 not found "):
-        _ = data_catalog.from_predefined_catalog("deltares_data", "v1993.7")
+        _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
 
 
 def test_data_catalog_lazy_loading():
@@ -355,7 +355,7 @@ def test_data_catalog_lazy_loading():
 
 
 def test_data_catalog_contains_source_version_permissive(data_catalog):
-    keys = data_catalog.get_names()
+    keys = data_catalog.get_source_names()
     assert data_catalog.contains_source(keys[0])
     assert data_catalog.contains_source(
         keys[0], version="asdfasdfasdf", permissive=True
