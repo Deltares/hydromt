@@ -412,7 +412,7 @@ def test_from_yml_with_archive(data_catalog):
     data_catalog1 = DataCatalog(yml_dst_fn)
     sources = list(data_catalog1.sources.keys())
     source = data_catalog1.get_source(sources[0])
-    assert yml_dst_fn.parent == Path(source.path).parent.parent
+    assert yml_dst_fn.parent == Path(source.uri).parent.parent
 
 
 def test_from_predefined_catalogs(data_catalog):
@@ -431,7 +431,7 @@ def test_data_catalogs_raises_on_unknown_predefined_catalog(data_catalog):
 @pytest.fixture()
 def export_test_slice_objects(tmpdir, data_catalog):
     data_catalog._sources = {}
-    data_catalog.from_predefined_catalogs("artifact_data=v0.0.6")
+    data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_tuple = ("2010-02-10", "2010-02-15")
     data_lib_fn = join(tmpdir, "data_catalog.yml")
@@ -660,7 +660,7 @@ def test_get_rasterdataset(data_catalog):
     n = len(data_catalog)
     # raster dataset using three different ways
     name = "koppen_geiger"
-    da = data_catalog.get_rasterdataset(data_catalog.get_source(name).path)
+    da = data_catalog.get_rasterdataset(data_catalog.get_source(name).uri)
     assert len(data_catalog) == n + 1
     assert isinstance(da, xr.DataArray)
 
