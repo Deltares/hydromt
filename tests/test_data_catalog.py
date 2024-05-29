@@ -431,7 +431,7 @@ def test_data_catalogs_raises_on_unknown_predefined_catalog(data_catalog):
 @pytest.fixture()
 def export_test_slice_objects(tmpdir, data_catalog):
     data_catalog._sources = {}
-    data_catalog.from_predefined_catalogs("artifact_data=v0.0.8")
+    data_catalog.from_predefined_catalogs("artifact_data=v0.0.6")
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_tuple = ("2010-02-10", "2010-02-15")
     data_lib_fn = join(tmpdir, "data_catalog.yml")

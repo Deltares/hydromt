@@ -61,6 +61,7 @@ from hydromt.predefined_catalog import (
     PredefinedCatalog,
     _copy_file,
 )
+from hydromt.utils import deep_merge
 
 logger = logging.getLogger(__name__)
 
@@ -1769,7 +1770,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             variants = source.pop("variants")
             for diff in variants:
                 source_copy = copy.deepcopy(source)
-                source_copy.update(**diff)
+                source_copy = deep_merge(source_copy, diff)
                 data_dicts.append({name: source_copy})
         elif "placeholders" in source:
             options = source.pop("placeholders")
