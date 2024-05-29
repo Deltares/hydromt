@@ -349,7 +349,7 @@ def test_grid_component_model(tmpdir):
 
     # Add data with add_data_from_* methods
     model.grid.add_data_from_constant(constant=0.01, name="c1", nodata=-99.0)
-    model.grid.add_data_from_constant(constant=2, name="c2", nodata=-99.0)
+    model.grid.add_data_from_constant(constant=2, name="c2", nodata=-1, dtype=np.int8)
     model.grid.add_data_from_rasterdataset(
         raster_fn="merit_hydro",
         variables=["elevtn", "basins"],
