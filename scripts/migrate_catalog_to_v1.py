@@ -108,7 +108,10 @@ def migrate_entry(entry_name: str, entry: Dict[str, Any]) -> Dict[str, Any]:
 
     # move fsspec filesystem to driver
     if filesystem := entry.pop("filesystem", None):
-        entry["driver"]["filesystem"] = {"protocol": filesystem}
+        if isinstance(filesystem, str):
+            entry["driver"]["filesystem"] = {"protocol": filesystem}
+        else:
+            entry["driver"]["filesystem"] = filesystem
         if storage_options := entry.pop("storage_options", None):
             entry["driver"]["filesystem"] = {
                 **entry["driver"]["filesystem"],

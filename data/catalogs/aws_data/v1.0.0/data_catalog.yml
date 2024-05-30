@@ -1,20 +1,26 @@
----
 meta:
-  version: v0.1.0
+  version: v1.0.0
   name: aws_data
-
 esa_worldcover_2020_v100:
-  crs: 4326
-  data_type: RasterDataset
-  driver: raster
-  filesystem:
-    protocol: s3
-    anon: true
-  meta:
+  name: esa_worldcover_2020_v100
+  uri: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
+  data_adapter:
+    rename:
+      ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
+  driver:
+    filesystem: s3
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
     category: landuse
-    source_license: CC BY 4.0
-    source_url: https://doi.org/10.5281/zenodo.5571936
-    source_version: v100
-  path: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
-  rename:
-    ESA_WorldCover_10m_2020_v100_Map_AWS: landuse
+    url: https://doi.org/10.5281/zenodo.5571936
+    version: v100
+    license: CC BY 4.0
+  data_type: RasterDataset
