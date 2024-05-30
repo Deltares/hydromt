@@ -713,22 +713,6 @@ class DataCatalog(object):
         yml = _yml_from_uri_or_path(urlpath)
         # parse metadata
         meta = dict()
-        # legacy code with root/category at highest yml level
-        if "root" in yml:
-            warnings.warn(
-                "The 'root' key is deprecated, use 'meta: root' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            meta.update(root=yml.pop("root"))
-        if "category" in yml:
-            warnings.warn(
-                "The 'category' key is deprecated, use 'meta: category' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            meta.update(category=yml.pop("category"))
-
         # read meta data
         meta = yml.pop("meta", meta)
         if catalog_name is None:

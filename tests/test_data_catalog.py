@@ -668,13 +668,13 @@ def test_get_rasterdataset(data_catalog):
 
 def test_get_rasterdataset_artifact_data(data_catalog):
     name = "koppen_geiger"
-    da = data_catalog.get_rasterdataset(name, provider="artifact_data")
+    da = data_catalog.get_rasterdataset(name)
     assert isinstance(da, xr.DataArray)
 
 
 def test_get_rasterdataset_bbox(data_catalog):
     name = "koppen_geiger"
-    da = data_catalog.get_rasterdataset(name, provider="artifact_data")
+    da = data_catalog.get_rasterdataset(name)
     bbox = [12.0, 46.0, 13.0, 46.5]
     da = data_catalog.get_rasterdataset(da, bbox=bbox)
     assert isinstance(da, xr.DataArray)
@@ -683,7 +683,7 @@ def test_get_rasterdataset_bbox(data_catalog):
 
 def test_get_rasterdataset_provider(data_catalog):
     name = "koppen_geiger"
-    data = {"source": name, "provider": "artifact_data"}
+    data = {"source": name}
     ds = data_catalog.get_rasterdataset(data, single_var_as_array=False)
     assert isinstance(ds, xr.Dataset)
 
@@ -827,14 +827,14 @@ def test_get_geodataframe_path(data_catalog):
 
 def test_get_geodataframe_artifact_data(data_catalog):
     name = "osm_coastlines"
-    gdf = data_catalog.get_geodataframe(name, provider="artifact_data")
+    gdf = data_catalog.get_geodataframe(name)
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.index.size == 2
 
 
 def test_get_geodataframe_artifact_data_geom(data_catalog):
     name = "osm_coastlines"
-    gdf = data_catalog.get_geodataframe(name, provider="artifact_data")
+    gdf = data_catalog.get_geodataframe(name)
     gdf = data_catalog.get_geodataframe(gdf, geom=gdf.iloc[[0],], predicate="within")
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.index.size == 1
@@ -842,7 +842,7 @@ def test_get_geodataframe_artifact_data_geom(data_catalog):
 
 def test_get_geodataframe_artifact_data_with_provider(data_catalog):
     name = "osm_coastlines"
-    data = {"source": name, "provider": "artifact_data"}
+    data = {"source": name}
     gdf = data_catalog.get_geodataframe(data)
     assert isinstance(gdf, gpd.GeoDataFrame)
 
@@ -1024,7 +1024,7 @@ def test_get_geodataset(data_catalog):
 
 def test_get_geodataset_artifact_data(data_catalog):
     name = "gtsmv3_eu_era5"
-    da = data_catalog.get_geodataset(name, provider="artifact_data")
+    da = data_catalog.get_geodataset(name)
     assert da.vector.index.size == 19
     assert isinstance(da, xr.DataArray)
 
@@ -1043,7 +1043,7 @@ def test_get_geodataset_bbox_time_tuple(data_catalog):
 
 def test_get_geodataset_provider(data_catalog):
     name = "gtsmv3_eu_era5"
-    data = {"source": name, "provider": "artifact_data"}
+    data = {"source": name}
     ds = data_catalog.get_geodataset(data, single_var_as_array=False)
     assert isinstance(ds, xr.Dataset)
 
@@ -1252,7 +1252,7 @@ def test_get_dataframe(df, tmpdir, data_catalog):
 
 def test_get_dataframe_provider(df, data_catalog):
     name = "test.csv"
-    df = data_catalog.get_dataframe(name, provider="user")
+    df = data_catalog.get_dataframe(name, provider="local")
     assert isinstance(df, pd.DataFrame)
 
 
@@ -1264,7 +1264,7 @@ def test_get_dataframe_variables(df, data_catalog):
 
 def test_get_dataframe_custom_data(data_catalog):
     name = "test.csv"
-    data = {"source": name, "provider": "user"}
+    data = {"source": name, "provider": "local"}
     gdf = data_catalog.get_dataframe(data)
     assert isinstance(gdf, pd.DataFrame)
 
