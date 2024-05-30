@@ -1778,8 +1778,9 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             for diff in variants:
                 source_copy = copy.deepcopy(source)
                 source_copy = {
-                    str(k): str(v) for (k, v) in deep_merge(source_copy, diff)
+                    str(k): v for (k, v) in deep_merge(source_copy, diff).items()
                 }
+
                 data_dicts.append({name: source_copy})
         elif "placeholders" in source:
             options = source.pop("placeholders")
