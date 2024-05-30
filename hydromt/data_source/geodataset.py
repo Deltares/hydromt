@@ -161,7 +161,7 @@ class GeoDatasetSource(DataSource):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        bbox = self.extent.get("bbox", None)
+        bbox = self.metadata.extent.get("bbox", None)
         crs = cast(int, crs)
         if bbox is None and detect:
             bbox, crs = self.detect_bbox()
@@ -191,7 +191,7 @@ class GeoDatasetSource(DataSource):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        time_range = self.extent.get("time_range", None)
+        time_range = self.metadata.extent.get("time_range", None)
         if time_range is None and detect:
             time_range = self.detect_time_range()
 
@@ -288,8 +288,8 @@ class GeoDatasetSource(DataSource):
             start_dt, end_dt = self.get_time_range(detect=True)
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
-            props = {**self.meta, "crs": crs}
-            ext = splitext(self.path)[-1]
+            props = {**self.metadata.model_dump(), "crs": crs}
+            ext = splitext(self.uri)[-1]
             if ext in [".nc", ".vrt"]:
                 media_type = MediaType.HDF5
             else:
@@ -305,7 +305,7 @@ class GeoDatasetSource(DataSource):
                 return
             elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.meta
+                props = self.metadata
                 start_dt = datetime(1, 1, 1)
                 end_dt = datetime(1, 1, 1)
                 media_type = MediaType.JSON
@@ -325,8 +325,8 @@ class GeoDatasetSource(DataSource):
             start_datetime=start_dt,
             end_datetime=end_dt,
         )
-        stac_asset = StacAsset(str(self.path), media_type=media_type)
-        base_name = basename(self.path)
+        stac_asset = StacAsset(str(self.uri), media_type=media_type)
+        base_name = basename(self.uri)
         stac_item.add_asset(base_name, stac_asset)
 
         stac_catalog.add_item(stac_item)

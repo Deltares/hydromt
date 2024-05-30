@@ -1319,14 +1319,51 @@ def test_detect_extent_geodataset(data_catalog):
     assert detected_temporal_range == expected_temporal_range
 
 
-def test_to_stac(tmpdir, data_catalog):
+def test_to_stac_raster_dataset(tmpdir, data_catalog):
+    data_catalog._sources = {}
     _ = data_catalog.get_rasterdataset("chirps_global")
-    _ = data_catalog.get_geodataframe("gadm_level1")
-    _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
 
     sources = [
         "chirps_global",
+    ]
+
+    stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
+
+    assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
+    # the two empty strings are for the root and self link which are destinct
+    assert sorted(
+        [
+            Path(join(tmpdir, x.get_href())) if x != str(tmpdir) else tmpdir
+            for x in stac_catalog.get_links()
+        ]
+    ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
+
+
+def test_to_stac_geodataframe(tmpdir, data_catalog):
+    data_catalog._sources = {}
+    _ = data_catalog.get_geodataframe("gadm_level1")
+
+    sources = [
         "gadm_level1",
+    ]
+
+    stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
+
+    assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
+    # the two empty strings are for the root and self link which are destinct
+    assert sorted(
+        [
+            Path(join(tmpdir, x.get_href())) if x != str(tmpdir) else tmpdir
+            for x in stac_catalog.get_links()
+        ]
+    ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
+
+
+def test_to_stac_geodataset(tmpdir, data_catalog):
+    data_catalog._sources = {}
+    _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
+
+    sources = [
         "gtsmv3_eu_era5",
     ]
 
