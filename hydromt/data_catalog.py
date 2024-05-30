@@ -1176,7 +1176,7 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
-    ) -> Optional[xr.Dataset]:
+    ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """Return a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,

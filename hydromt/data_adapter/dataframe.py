@@ -1,4 +1,5 @@
 """Data adapter for DataFrames."""
+
 from logging import Logger, getLogger
 from typing import Optional
 
@@ -63,7 +64,7 @@ class DataFrameAdapter(DataAdapterBase):
     def _slice_data(
         df: pd.DataFrame,
         variables: Optional[Variables] = None,
-        time_tuple: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
     ) -> Optional[pd.DataFrame]:
         """Return a sliced DataFrame.
 
@@ -88,10 +89,10 @@ class DataFrameAdapter(DataAdapterBase):
                 raise ValueError(f"DataFrame: Not all variables found: {variables}")
             df = df.loc[:, variables]
 
-        if time_tuple is not None and np.dtype(df.index).type == np.datetime64:
-            logger.debug(f"Slicing time dime {time_tuple}")
+        if time_range is not None and np.dtype(df.index).type == np.datetime64:
+            logger.debug(f"Slicing time dime {time_range}")
             try:
-                df = df[df.index.slice_indexer(*time_tuple)]
+                df = df[df.index.slice_indexer(*time_range)]
             except IndexError:
                 df = pd.DataFrame()
 

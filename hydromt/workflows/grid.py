@@ -354,9 +354,9 @@ def grid_from_rasterdataset(
         Dataset with data from ds resampled to grid_like
     """
     rename = rename or dict()
-    variables = ds or ds[variables]
     if isinstance(ds, xr.DataArray):
         ds = ds.to_dataset()
+    variables = ds or ds[variables]
     # Fill nodata
     if fill_method is not None:
         ds = ds.raster.interpolate_na(method=fill_method)
