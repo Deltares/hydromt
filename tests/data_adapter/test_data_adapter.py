@@ -2,26 +2,18 @@
 """Tests for the hydromt.data_adapter submodule."""
 
 import glob
-from datetime import datetime
-from os.path import abspath, basename, dirname, join
+from os.path import abspath, dirname, join
 from pathlib import Path
 from typing import cast
 
 import numpy as np
-import pandas as pd
 import pytest
 import xarray as xr
-from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
-from pystac import Item as StacItem
 
 from hydromt import _compat as compat
-from hydromt._typing import ErrorHandleMethod
 from hydromt.data_adapter import (
     DatasetAdapter,
-    GeoDataFrameAdapter,
-    GeoDatasetAdapter,
-    RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_source import RasterDatasetSource
@@ -270,144 +262,3 @@ def test_reads_slippy_map_output(tmp_dir: Path, rioda_large: xr.DataArray):
     cat = DataCatalog(str(root / f"{name}.yml"), cache=True)
     cat.get_rasterdataset(name)
     assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_geodataframe(geodf, tmpdir, data_catalog):
-    fn_gdf = str(tmpdir.join("test.geojson"))
-    geodf.to_file(fn_gdf, driver="GeoJSON")
-    # geodataframe
-    name = "gadm_level1"
-    adapter = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
-    bbox, crs = adapter.get_bbox()
-    gdf_stac_catalog = StacCatalog(id=name, description=name)
-    gds_stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=list(bbox),
-        properties=adapter.meta,
-        datetime=datetime(1, 1, 1),
-    )
-    gds_stac_asset = StacAsset(str(adapter.path))
-    gds_base_name = basename(adapter.path)
-    gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
-
-    gdf_stac_catalog.add_item(gds_stac_item)
-    outcome = cast(
-        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-    )
-    assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_raster(data_catalog):
-    # raster dataset
-    name = "chirps_global"
-    adapter = cast(RasterDatasetAdapter, data_catalog.get_source(name))
-    bbox, crs = adapter.get_bbox()
-    start_dt, end_dt = adapter.get_time_range(detect=True)
-    start_dt = pd.to_datetime(start_dt)
-    end_dt = pd.to_datetime(end_dt)
-    raster_stac_catalog = StacCatalog(id=name, description=name)
-    raster_stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=list(bbox),
-        properties=adapter.meta,
-        datetime=None,
-        start_datetime=start_dt,
-        end_datetime=end_dt,
-    )
-    raster_stac_asset = StacAsset(str(adapter.path))
-    raster_base_name = basename(adapter.path)
-    raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
-
-    raster_stac_catalog.add_item(raster_stac_item)
-
-    outcome = cast(
-        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-    )
-
-    assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_geodataset(data_catalog):
-    # geodataset
-    name = "gtsmv3_eu_era5"
-    adapter = cast(GeoDatasetAdapter, data_catalog.get_source(name))
-    bbox, crs = adapter.get_bbox()
-    start_dt, end_dt = adapter.get_time_range(detect=True)
-    start_dt = pd.to_datetime(start_dt)
-    end_dt = pd.to_datetime(end_dt)
-    gds_stac_catalog = StacCatalog(id=name, description=name)
-    gds_stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=list(bbox),
-        properties=adapter.meta,
-        datetime=None,
-        start_datetime=start_dt,
-        end_datetime=end_dt,
-    )
-    gds_stac_asset = StacAsset(str(adapter.path))
-    gds_base_name = basename(adapter.path)
-    gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
-
-    gds_stac_catalog.add_item(gds_stac_item)
-
-    outcome = cast(
-        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-    )
-    assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog(ErrorHandleMethod.SKIP) is None
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_dataframe(df, tmpdir):
-    fn_df = str(tmpdir.join("test.csv"))
-    name = "test_dataframe"
-    df.to_csv(fn_df)
-    dc = DataCatalog().from_dict(
-        {
-            name: {
-                "data_type": "DataFrame",
-                "path": fn_df,
-            }
-        }
-    )
-
-    adapter = dc.get_source(name)
-
-    with pytest.raises(
-        NotImplementedError,
-        match="DataframeAdapter does not support full stac conversion ",
-    ):
-        adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-
-    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
-
-    stac_catalog = StacCatalog(
-        name,
-        description=name,
-    )
-    stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=[0, 0, 0, 0],
-        properties=adapter.meta,
-        datetime=datetime(1, 1, 1),
-    )
-    stac_asset = StacAsset(str(fn_df))
-    stac_item.add_asset("hydromt_path", stac_asset)
-
-    stac_catalog.add_item(stac_item)
-    outcome = cast(
-        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.COERCE)
-    )
-    assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
