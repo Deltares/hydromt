@@ -385,7 +385,6 @@ def griduda():
     uda = uda["value"]
     uda = uda.rename("elevtn")
     uda.ugrid.grid.set_crs(epsg=gdf_da.crs.to_epsg())
-
     return uda
 
 

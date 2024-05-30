@@ -625,13 +625,12 @@ class DataCatalog(object):
 
         """
         root = Path(self._cache_dir, name, version)
-        extract_dir = root / Path(archive_uri).stem
         # retrieve and unpack archive
         kwargs = {}
         if Path(archive_uri).suffix == ".zip":
-            kwargs.update(processor=pooch.Unzip(extract_dir=extract_dir))
+            kwargs.update(processor=pooch.Unzip(extract_dir=root))
         elif Path(archive_uri).suffix == ".gz":
-            kwargs.update(processor=pooch.Untar(extract_dir=extract_dir))
+            kwargs.update(processor=pooch.Untar(extract_dir=root))
         if Path(archive_uri).exists():  # check if arhive is a local file
             kwargs.update(donwloader=_copy_file)
         pooch.retrieve(
@@ -641,7 +640,7 @@ class DataCatalog(object):
             fname=Path(archive_uri).name,
             **kwargs,
         )
-        return extract_dir
+        return root
 
     def from_yml(
         self,
@@ -1234,6 +1233,9 @@ class DataCatalog(object):
             will be returned. if it is set to RAISE and exception will be raised in that
             situation
         """
+        if isinstance(variables, str):
+            variables = [variables]
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version

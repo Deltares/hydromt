@@ -346,7 +346,7 @@ class MeshComponent(SpatialModelComponent):
     @property
     def mesh_names(self) -> List[str]:
         """List of grid names in mesh."""
-        if len(self.data) > 0:
+        if len(self.data.grids) > 0:
             return [grid.name for grid in self.data.ugrid.grids]
         else:
             return []
@@ -355,7 +355,7 @@ class MeshComponent(SpatialModelComponent):
     def mesh_grids(self) -> Dict[str, Union[xu.Ugrid1d, xu.Ugrid2d]]:
         """Dictionary of grid names and Ugrid topologies in mesh."""
         grids = dict()
-        if len(self.data) > 0:
+        if len(self.data.grids) > 0:
             for grid in self.data.ugrid.grids:
                 grids[grid.name] = grid
 
@@ -377,7 +377,7 @@ class MeshComponent(SpatialModelComponent):
     def mesh_gdf(self) -> Dict[str, gpd.GeoDataFrame]:
         """Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame."""
         mesh_gdf = dict()
-        if len(self.data) > 0:
+        if len(self.data.grids) > 0:
             for k, grid in self.mesh_grids.items():
                 if grid.topology_dimension == 1:
                     dim = grid.edge_dimension
