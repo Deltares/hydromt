@@ -1096,7 +1096,7 @@ class DataCatalog(object):
                             source.unit_add = {}
                         try:
                             fn_out, driver, driver_kwargs = source.to_file(
-                                data_root=data_root,
+                                file_path=Path(data_root) / source.uri,
                                 data_name=key,
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
