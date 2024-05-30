@@ -1,8 +1,9 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import os
+from datetime import datetime
 from os import mkdir
-from os.path import abspath, dirname, join
+from os.path import abspath, basename, dirname, join
 from pathlib import Path
 from typing import Optional, Union, cast
 from uuid import uuid4
@@ -14,9 +15,14 @@ import pandas as pd
 import pytest
 import requests
 import xarray as xr
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
+from shapely import box
 from yaml import dump
 
-from hydromt._typing.error import NoDataException, NoDataStrategy
+from hydromt._compat import HAS_OPENPYXL
+from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
 from hydromt.data_adapter import (
     DataAdapter,
     GeoDataFrameAdapter,
@@ -29,7 +35,13 @@ from hydromt.data_catalog import (
     _parse_data_source_dict,
     _yml_from_uri_or_path,
 )
-from hydromt.data_source import DataSource, GeoDataFrameSource, RasterDatasetSource
+from hydromt.data_source import (
+    DataFrameSource,
+    DataSource,
+    GeoDataFrameSource,
+    GeoDatasetSource,
+    RasterDatasetSource,
+)
 from hydromt.gis.utils import to_geographic_bbox
 from hydromt.io.writers import write_xy
 
@@ -541,7 +553,9 @@ class TestGetRasterDataset:
                 "data_type": "RasterDataset",
                 "driver": {
                     "name": "raster_xarray",
-                    "preprocess": "round_latlon",
+                    "options": {
+                        "preprocess": "round_latlon",
+                    },
                 },
                 "metadata": {
                     "crs": 4326,
@@ -561,7 +575,9 @@ class TestGetRasterDataset:
                 "data_type": "RasterDataset",
                 "driver": {
                     "name": "raster_xarray",
-                    "preprocess": "round_latlon",
+                    "options": {
+                        "preprocess": "round_latlon",
+                    },
                 },
                 "metadata": {
                     "crs": 4326,
@@ -588,6 +604,40 @@ class TestGetRasterDataset:
         raster = data_catalog.get_rasterdataset("era5_new")
         assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
         assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
+
+    def test_to_stac(self, data_catalog: DataCatalog):
+        # raster dataset
+        name = "chirps_global"
+        source = cast(RasterDatasetSource, data_catalog.get_source(name))
+        bbox, _ = source.get_bbox()
+        start_dt, end_dt = source.get_time_range(detect=True)
+        start_dt = pd.to_datetime(start_dt)
+        end_dt = pd.to_datetime(end_dt)
+        raster_stac_catalog = StacCatalog(id=name, description=name)
+        raster_stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=list(bbox),
+            properties=source.metadata.model_dump(exclude_none=True),
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        raster_stac_asset = StacAsset(str(source.uri))
+        raster_base_name = basename(source.uri)
+        raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
+
+        raster_stac_catalog.add_item(raster_stac_item)
+
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+        )
+
+        assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
 
 @pytest.mark.skip("needs catalogs refactor")
@@ -619,6 +669,136 @@ def test_get_rasterdataset(data_catalog):
         data_catalog.get_rasterdataset({"name": "test"})
 
 
+class TestGetGeoDataFrame:
+    @pytest.fixture()
+    def uri_geojson(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
+        uri_gdf = tmp_dir / "test.geojson"
+        geodf.to_file(uri_gdf, driver="GeoJSON")
+        return uri_gdf
+
+    @pytest.fixture()
+    def uri_shp(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
+        uri_shapefile = tmp_dir / "test.shp"
+        geodf.to_file(uri_shapefile)
+        return uri_shapefile
+
+    @pytest.mark.integration()
+    def test_read_geojson_bbox(
+        self, uri_geojson: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        gdf = data_catalog.get_geodataframe(uri_geojson, bbox=geodf.total_bounds)
+        assert isinstance(gdf, gpd.GeoDataFrame)
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_shapefile_bbox(
+        self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        gdf = data_catalog.get_geodataframe(uri_shp, bbox=geodf.total_bounds)
+        assert isinstance(gdf, gpd.GeoDataFrame)
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_shapefile_mask(
+        self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
+        gdf = data_catalog.get_geodataframe(uri_shp, geom=mask)
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_geojson_buffer_rename(
+        self, uri_geojson: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        gdf = data_catalog.get_geodataframe(
+            uri_geojson,
+            bbox=geodf.total_bounds,
+            buffer=1000,
+            data_adapter={"rename": {"test": "test1"}},
+        )
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_shp_buffer_rename(
+        self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
+    ):
+        gdf = data_catalog.get_geodataframe(
+            uri_shp,
+            bbox=geodf.total_bounds,
+            buffer=1000,
+            data_adapter={"rename": {"test": "test1"}},
+        )
+        assert np.all(gdf == geodf)
+
+    @pytest.mark.integration()
+    def test_read_unit_attrs(self, data_catalog: DataCatalog):
+        gadm_level1: GeoDataFrameSource = data_catalog.get_source("gadm_level1")
+        attrs = {"NAME_0": {"long_name": "Country names"}}
+        gadm_level1.metadata.attrs.update(**attrs)
+        gadm_level1_gdf = data_catalog.get_geodataframe("gadm_level1")
+        assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
+
+    @pytest.mark.integration()
+    def test_read_geojson_nodata_ignore(
+        self, uri_geojson: str, data_catalog: DataCatalog
+    ):
+        gdf1 = data_catalog.get_geodataframe(
+            uri_geojson,
+            # only really care that the bbox doesn't intersect with anythign
+            bbox=[12.5, 12.6, 12.7, 12.8],
+            predicate="within",
+            handle_nodata=NoDataStrategy.IGNORE,
+        )
+
+        assert gdf1 is None
+
+    @pytest.mark.integration()
+    def test_read_geojson_nodata_raise(
+        self, uri_geojson: str, data_catalog: DataCatalog
+    ):
+        with pytest.raises(NoDataException):
+            data_catalog.get_geodataframe(
+                uri_geojson,
+                # only really care that the bbox doesn't intersect with anythign
+                bbox=[12.5, 12.6, 12.7, 12.8],
+                predicate="within",
+                handle_nodata=NoDataStrategy.RAISE,
+            )
+
+    @pytest.mark.integration()
+    def test_raises_filenotfound(self, data_catalog: DataCatalog):
+        with pytest.raises(FileNotFoundError):
+            data_catalog.get_geodataframe("no_file.geojson")
+
+    @pytest.mark.integration()
+    def test_to_stac_geodataframe(self, data_catalog: DataCatalog):
+        # geodataframe
+        name = "gadm_level1"
+        source = cast(GeoDataFrameSource, data_catalog.get_source(name))
+        bbox, _ = source.get_bbox()
+        gdf_stac_catalog = StacCatalog(id=name, description=name)
+        gds_stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=list(bbox),
+            properties=source.metadata,
+            datetime=datetime(1, 1, 1),
+        )
+        gds_stac_asset = StacAsset(str(source.metadata.url))
+        gds_base_name = basename(source.uri)
+        gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
+
+        gdf_stac_catalog.add_item(gds_stac_item)
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+        )
+        assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
+
 @pytest.mark.skip("needs catalogs refactor")
 def test_get_geodataframe(data_catalog):
     n = len(data_catalog)
@@ -644,7 +824,7 @@ def test_get_geodataframe(data_catalog):
         data_catalog.get_geodataframe({"name": "test"})
 
 
-class TestGetGeodataset:
+class TestGetGeoDataset:
     @pytest.fixture()
     def geojson_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
         uri_gdf = str(tmp_dir / "test.geojson")
@@ -764,6 +944,70 @@ class TestGetGeodataset:
                 handle_nodata=NoDataStrategy.RAISE,
             )
 
+    @pytest.mark.integration()
+    def test_geodataset_unit_attrs(self, data_catalog: DataCatalog):
+        source: DataSource = data_catalog.get_source("gtsmv3_eu_era5")
+        attrs = {
+            "waterlevel": {
+                "long_name": "sea surface height above mean sea level",
+                "unit": "meters",
+            }
+        }
+        source.metadata.attrs = attrs
+        gtsm_geodataarray = data_catalog.get_geodataset(source)
+        assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
+        assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
+
+    @pytest.mark.integration()
+    def test_geodataset_unit_conversion(self, data_catalog: DataCatalog):
+        gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
+        source = data_catalog.get_source("gtsmv3_eu_era5")
+        source.data_adapter.unit_mult = {"waterlevel": 1000}
+        datacatalog = DataCatalog()
+        gtsm_geodataarray1000 = datacatalog.get_geodataset(source)
+        assert gtsm_geodataarray1000.equals(gtsm_geodataarray * 1000)
+
+    @pytest.mark.integration()
+    def test_geodataset_set_nodata(self, data_catalog: DataCatalog):
+        source = data_catalog.get_source("gtsmv3_eu_era5")
+        source.metadata.nodata = -99
+        datacatalog = DataCatalog()
+        ds = datacatalog.get_geodataset(source)
+        assert ds.vector.nodata == -99
+
+    def test_to_stac_geodataset(self, data_catalog: DataCatalog):
+        # geodataset
+        name = "gtsmv3_eu_era5"
+        source = cast(GeoDatasetSource, data_catalog.get_source(name))
+        bbox, _ = source.get_bbox()
+        start_dt, end_dt = source.get_time_range(detect=True)
+        start_dt = pd.to_datetime(start_dt)
+        end_dt = pd.to_datetime(end_dt)
+        gds_stac_catalog = StacCatalog(id=name, description=name)
+        gds_stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=list(bbox),
+            properties=source.metadata.model_dump(exclude_none=True),
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        gds_stac_asset = StacAsset(str(source.uri))
+        gds_base_name = basename(source.uri)
+        gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
+
+        gds_stac_catalog.add_item(gds_stac_item)
+
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+        )
+        assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(ErrorHandleMethod.SKIP) is None
+
 
 @pytest.mark.skip("needs catalogs refactor")
 def test_get_geodataset(data_catalog):
@@ -810,6 +1054,202 @@ def test_get_dataset(timeseries_df, data_catalog):
     ds = data_catalog.get_dataset(test_dataset, variables=["col1"])
     assert isinstance(ds, xr.DataArray)
     assert ds.name == "col1"
+
+
+class TestGetDataFrame:
+    @pytest.fixture()
+    def uri_csv(self, df: pd.DataFrame, tmp_dir: Path) -> str:
+        uri: str = str(tmp_dir / "test.csv")
+        df.to_csv(uri)
+        return uri
+
+    @pytest.fixture()
+    def uri_parquet(self, df: pd.DataFrame, tmp_dir: Path) -> str:
+        uri: str = str(tmp_dir / "test.parquet")
+        df.to_parquet(uri)
+        return uri
+
+    @pytest.fixture()
+    def uri_fwf(self, df: pd.DataFrame, tmp_dir: Path) -> str:
+        uri = str(tmp_dir / "test.txt")
+        df.to_string(uri, index=False)
+        return uri
+
+    @pytest.fixture()
+    def uri_xlsx(self, df: pd.DataFrame, tmp_dir: Path) -> str:
+        uri = str(tmp_dir / "test.xlsx")
+        df.to_excel(uri, index=False)
+        return uri
+
+    def test_reads_csv(self, df: pd.DataFrame, uri_csv: str, data_catalog: DataCatalog):
+        df1 = data_catalog.get_dataframe(
+            uri_csv, driver={"name": "pandas", "options": {"index_col": 0}}
+        )
+        assert isinstance(df1, pd.DataFrame)
+        pd.testing.assert_frame_equal(df, df1)
+
+    def test_reads_parquet(
+        self, df: pd.DataFrame, uri_parquet: str, data_catalog: DataCatalog
+    ):
+        df1 = data_catalog.get_dataframe(uri_parquet)
+        assert isinstance(df1, pd.DataFrame)
+        pd.testing.assert_frame_equal(df, df1)
+
+    def test_reads_fwf(self, df: pd.DataFrame, uri_fwf: str, data_catalog: DataCatalog):
+        df1 = data_catalog.get_dataframe(
+            uri_fwf, driver={"name": "pandas", "options": {"colspecs": "infer"}}
+        )
+        assert isinstance(df1, pd.DataFrame)
+        pd.testing.assert_frame_equal(df1, df)
+
+    @pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed.")
+    def test_reads_excel(
+        self, df: pd.DataFrame, uri_xlsx: str, data_catalog: DataCatalog
+    ):
+        df1 = data_catalog.get_dataframe(
+            uri_xlsx, driver={"name": "pandas", "options": {"index_col": 0}}
+        )
+        assert isinstance(df1, pd.DataFrame)
+        pd.testing.assert_frame_equal(df1, df.set_index("id"))
+
+    def test_dataframe_unit_attrs(
+        self, df: pd.DataFrame, tmp_dir: Path, data_catalog: DataCatalog
+    ):
+        df_path = tmp_dir / "cities.csv"
+        df["test_na"] = -9999
+        df.to_csv(df_path)
+        cities = {
+            "cities": {
+                "uri": str(df_path),
+                "data_type": "DataFrame",
+                "driver": "pandas",
+                "metadata": {
+                    "nodata": -9999,
+                    "attrs": {
+                        "city": {"long_name": "names of cities"},
+                        "country": {"long_name": "names of countries"},
+                    },
+                },
+            }
+        }
+        data_catalog.from_dict(cities)
+        cities_df = data_catalog.get_dataframe("cities")
+        assert cities_df["city"].attrs["long_name"] == "names of cities"
+        assert cities_df["country"].attrs["long_name"] == "names of countries"
+        assert np.all(cities_df["test_na"].isna())
+
+    @pytest.fixture()
+    def csv_uri_time(self, tmp_dir: Path, df_time: pd.DataFrame) -> str:
+        uri = str(tmp_dir / "test_ts.csv")
+        df_time.to_csv(uri)
+        return uri
+
+    def test_time(
+        self, df_time: pd.DataFrame, csv_uri_time: str, data_catalog: DataCatalog
+    ):
+        dfts = data_catalog.get_dataframe(
+            csv_uri_time,
+            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
+        )
+        assert isinstance(dfts, pd.DataFrame)
+        assert np.all(
+            dfts == df_time
+        )  # indexes have different freq when parse_dates is used.
+
+    def test_time_rename(self, csv_uri_time: str, data_catalog: DataCatalog):
+        # Test renaming
+        rename = {
+            "precip": "P",
+            "temp": "T",
+            "pet": "ET",
+        }
+        dfts = data_catalog.get_dataframe(
+            csv_uri_time,
+            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
+            data_adapter={"rename": rename},
+        )
+        assert np.all(list(dfts.columns) == list(rename.values()))
+
+    def test_time_unit_mult_add(
+        self, csv_uri_time: str, data_catalog: DataCatalog, df_time: pd.DataFrame
+    ):
+        unit_mult = {
+            "precip": 0.75,
+            "temp": 2,
+            "pet": 1,
+        }
+        unit_add = {
+            "precip": 0,
+            "temp": -1,
+            "pet": 2,
+        }
+        dfts = data_catalog.get_dataframe(
+            csv_uri_time,
+            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
+            data_adapter={"unit_mult": unit_mult, "unit_add": unit_add},
+        )
+        # Do checks
+        for var in df_time.columns:
+            assert np.all(df_time[var] * unit_mult[var] + unit_add[var] == dfts[var])
+
+    def test_time_slice(self, csv_uri_time: str, data_catalog: DataCatalog):
+        dfts = data_catalog.get_dataframe(
+            csv_uri_time,
+            time_range=("2007-01-02", "2007-01-04"),
+            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
+        )
+        assert len(dfts) == 3
+
+    def test_time_variable_slice(self, csv_uri_time: str, data_catalog: DataCatalog):
+        # Test variable slice
+        vars_slice = ["precip", "temp"]
+        dfts = data_catalog.get_dataframe(
+            csv_uri_time,
+            variables=vars_slice,
+            driver={
+                "name": "pandas",
+                "options": {"parse_dates": True, "index_col": 0},
+            },
+        )
+        assert np.all(dfts.columns == vars_slice)
+
+    def test_to_stac(self, df: pd.DataFrame, tmp_dir: Path):
+        uri_df = str(tmp_dir / "test.csv")
+        name = "test_dataframe"
+        df.to_csv(uri_df)
+        dc = DataCatalog().from_dict(
+            {name: {"data_type": "DataFrame", "uri": uri_df, "driver": "pandas"}}
+        )
+
+        source = cast(DataFrameSource, dc.get_source(name))
+
+        with pytest.raises(
+            NotImplementedError,
+            match="DataFrameSource does not support full stac conversion ",
+        ):
+            source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+
+        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+
+        stac_catalog = StacCatalog(
+            name,
+            description=name,
+        )
+        stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=[0, 0, 0, 0],
+            properties=source.metadata.model_dump(exclude_none=True),
+            datetime=datetime(1, 1, 1),
+        )
+        stac_asset = StacAsset(str(uri_df))
+        stac_item.add_asset("hydromt_path", stac_asset)
+
+        stac_catalog.add_item(stac_item)
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.COERCE)
+        )
+        assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
 
 
 @pytest.mark.skip("needs catalogs refactor")

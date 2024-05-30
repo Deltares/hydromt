@@ -593,7 +593,7 @@ def create_vrt(
     return None
 
 
-def to_geographic_bbox(bbox, source_crs):
+def to_geographic_bbox(bbox, source_crs: Optional[CRS] = None):
     target_crs = CRS.from_user_input(4326)
     if source_crs is None:
         logger.warning("No CRS was set. Skipping CRS conversion")

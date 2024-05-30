@@ -2,34 +2,21 @@
 """Tests for the hydromt.data_adapter submodule."""
 
 import glob
-from datetime import datetime
-from os.path import abspath, basename, dirname, join
+from os.path import abspath, dirname, join
 from pathlib import Path
 from typing import cast
 
-import geopandas as gpd
 import numpy as np
-import pandas as pd
 import pytest
 import xarray as xr
-from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
-from pystac import Item as StacItem
-from shapely import box
 
-import hydromt
 from hydromt import _compat as compat
-from hydromt._typing import ErrorHandleMethod
-from hydromt._typing.error import NoDataException, NoDataStrategy
 from hydromt.data_adapter import (
     DatasetAdapter,
-    GeoDataFrameAdapter,
-    GeoDatasetAdapter,
-    RasterDatasetAdapter,
 )
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_source import RasterDatasetSource
-from hydromt.gis.utils import to_geographic_bbox
 
 TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
@@ -127,43 +114,7 @@ def test_rasterdataset_zoomlevels(
     assert isinstance(da1, xr.Dataset)
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_unit_attrs(data_catalog: DataCatalog):
-    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
-    attrs = {
-        "waterlevel": {
-            "long_name": "sea surface height above mean sea level",
-            "unit": "meters",
-        }
-    }
-    gtsm_dict["gtsmv3_eu_era5"].update(dict(attrs=attrs))
-    data_catalog.from_dict(gtsm_dict)
-    gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
-    assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
-    assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_unit_conversion(data_catalog: DataCatalog):
-    gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
-    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
-    gtsm_dict["gtsmv3_eu_era5"].update(dict(unit_mult=dict(waterlevel=1000)))
-    datacatalog = DataCatalog()
-    datacatalog.from_dict(gtsm_dict)
-    gtsm_geodataarray1000 = datacatalog.get_geodataset("gtsmv3_eu_era5")
-    assert gtsm_geodataarray1000.equals(gtsm_geodataarray * 1000)
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataset_set_nodata(data_catalog: DataCatalog):
-    gtsm_dict = {"gtsmv3_eu_era5": data_catalog.get_source("gtsmv3_eu_era5").to_dict()}
-    gtsm_dict["gtsmv3_eu_era5"].update(dict(nodata=-99))
-    datacatalog = DataCatalog()
-    datacatalog.from_dict(gtsm_dict)
-    ds = datacatalog.get_geodataset("gtsmv3_eu_era5")
-    assert ds.vector.nodata == -99
-
-
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_get_data(timeseries_ds, tmpdir):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -173,6 +124,7 @@ def test_dataset_get_data(timeseries_ds, tmpdir):
     assert ds1.identical(timeseries_ds)
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_to_file(timeseries_ds, tmpdir):
     path = str(tmpdir.join("test1.nc"))
     encoding = {k: {"zlib": True} for k in timeseries_ds.vector.vars}
@@ -207,6 +159,7 @@ def test_dataset_to_file(timeseries_ds, tmpdir):
         )
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_read_data(tmpdir, timeseries_ds):
     zarr_path = str(tmpdir.join("zarr_data"))
     timeseries_ds.to_zarr(zarr_path)
@@ -218,6 +171,7 @@ def test_dataset_read_data(tmpdir, timeseries_ds):
         dataset_adapter.get_data(variables=["col1", "col2"])
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_set_nodata(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -235,6 +189,7 @@ def test_dataset_set_nodata(tmpdir, timeseries_ds):
     assert ds["col1"].attrs["_FillValue"] == nodata["col1"]
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_apply_unit_conversion(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -252,6 +207,7 @@ def test_dataset_apply_unit_conversion(tmpdir, timeseries_ds):
     assert ds2["time"][-1].values == np.datetime64("2020-12-31T00:00:10")
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_set_metadata(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -279,6 +235,7 @@ def test_dataset_set_metadata(tmpdir, timeseries_ds):
     assert da.attrs["long_name"] == "column1"
 
 
+# TODO: migrate with https://github.com/Deltares/hydromt/issues/878
 def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
     path = str(tmpdir.join("test.nc"))
     timeseries_ds.to_netcdf(path)
@@ -290,362 +247,18 @@ def test_dataset_to_stac_catalog(tmpdir, timeseries_ds):
     assert list(stac_item.assets.keys())[0] == "test.nc"
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataframe(geodf, tmpdir, data_catalog):
-    fn_gdf = str(tmpdir.join("test.geojson"))
-    fn_shp = str(tmpdir.join("test.shp"))
-    geodf.to_file(fn_gdf, driver="GeoJSON")
-    geodf.to_file(fn_shp)
-    # test read geojson using total bounds
-    gdf1 = data_catalog.get_geodataframe(fn_gdf, bbox=geodf.total_bounds)
-    assert isinstance(gdf1, gpd.GeoDataFrame)
-    assert np.all(gdf1 == geodf)
-    # test read shapefile using total bounds
-    gdf1 = data_catalog.get_geodataframe(fn_shp, bbox=geodf.total_bounds)
-    assert isinstance(gdf1, gpd.GeoDataFrame)
-    assert np.all(gdf1 == geodf)
-    # testt read shapefile using mask
-    mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
-    gdf1 = hydromt.open_vector(fn_shp, geom=mask)
-    assert np.all(gdf1 == geodf)
-    # test read with buffer
-    gdf1 = data_catalog.get_geodataframe(
-        fn_gdf, bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
-    )
-    assert np.all(gdf1 == geodf)
-    gdf1 = data_catalog.get_geodataframe(
-        fn_shp, bbox=geodf.total_bounds, buffer=1000, rename={"test": "test1"}
-    )
-    assert np.all(gdf1 == geodf)
-
-    # test nodata
-    gdf1 = data_catalog.get_geodataframe(
-        fn_gdf,
-        # only really care that the bbox doesn't intersect with anythign
-        bbox=[12.5, 12.6, 12.7, 12.8],
-        predicate="within",
-        handle_nodata=NoDataStrategy.IGNORE,
-    )
-
-    assert gdf1 is None
-
-    with pytest.raises(NoDataException):
-        gdf1 = data_catalog.get_geodataframe(
-            fn_gdf,
-            # only really care that the bbox doesn't intersect with anythign
-            bbox=[12.5, 12.6, 12.7, 12.8],
-            predicate="within",
-            handle_nodata=NoDataStrategy.RAISE,
-        )
-
-    with pytest.raises(FileNotFoundError):
-        data_catalog.get_geodataframe("no_file.geojson")
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_geodataframe_unit_attrs(data_catalog: DataCatalog):
-    gadm_level1 = {"gadm_level1": data_catalog.get_source("gadm_level1").to_dict()}
-    attrs = {"NAME_0": {"long_name": "Country names"}}
-    gadm_level1["gadm_level1"].update(dict(attrs=attrs))
-    data_catalog.from_dict(gadm_level1)
-    gadm_level1_gdf = data_catalog.get_geodataframe("gadm_level1")
-    assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_dataframe(df, tmpdir, data_catalog):
-    # Test reading csv
-    fn_df = str(tmpdir.join("test.csv"))
-    df.to_csv(fn_df)
-    df1 = data_catalog.get_dataframe(fn_df, driver_kwargs=dict(index_col=0))
-    assert isinstance(df1, pd.DataFrame)
-    pd.testing.assert_frame_equal(df, df1)
-
-    # test reading parquet
-    fn_df_parquet = str(tmpdir.join("test.parquet"))
-    df.to_parquet(fn_df_parquet)
-    data_catalog = DataCatalog()
-    df2 = data_catalog.get_dataframe(fn_df_parquet, driver="parquet")
-    assert isinstance(df2, pd.DataFrame)
-    pd.testing.assert_frame_equal(df, df2)
-
-    # Test FWF support
-    fn_fwf = str(tmpdir.join("test.txt"))
-    df.to_string(fn_fwf, index=False)
-    fwf = data_catalog.get_dataframe(
-        fn_fwf, driver="fwf", driver_kwargs=dict(colspecs="infer")
-    )
-    assert isinstance(fwf, pd.DataFrame)
-    assert np.all(fwf == df)
-
-    if compat.HAS_OPENPYXL:
-        fn_xlsx = str(tmpdir.join("test.xlsx"))
-        df.to_excel(fn_xlsx)
-        df3 = data_catalog.get_dataframe(fn_xlsx, driver_kwargs=dict(index_col=0))
-        assert isinstance(df3, pd.DataFrame)
-        assert np.all(df3 == df)
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_dataframe_unit_attrs(df: pd.DataFrame, tmpdir):
-    df_path = join(tmpdir, "cities.csv")
-    df["test_na"] = -9999
-    df.to_csv(df_path)
-    cities = {
-        "cities": {
-            "path": df_path,
-            "data_type": "DataFrame",
-            "driver": "csv",
-            "nodata": -9999,
-            "attrs": {
-                "city": {"long_name": "names of cities"},
-                "country": {"long_name": "names of countries"},
-            },
-        }
-    }
-    datacatalog = DataCatalog()
-    datacatalog.from_dict(cities)
-    cities_df = datacatalog.get_dataframe("cities")
-    assert cities_df["city"].attrs["long_name"] == "names of cities"
-    assert cities_df["country"].attrs["long_name"] == "names of countries"
-    assert np.all(cities_df["test_na"].isna())
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_dataframe_time(df_time, tmpdir, data_catalog):
-    # Test time df
-    fn_df_ts = str(tmpdir.join("test_ts.csv"))
-    df_time.to_csv(fn_df_ts)
-    dfts1 = data_catalog.get_dataframe(
-        fn_df_ts, driver_kwargs=dict(index_col=0, parse_dates=True)
-    )
-    assert isinstance(dfts1, pd.DataFrame)
-    assert np.all(dfts1 == df_time)
-
-    # Test renaming
-    rename = {
-        "precip": "P",
-        "temp": "T",
-        "pet": "ET",
-    }
-    dfts2 = data_catalog.get_dataframe(
-        fn_df_ts, driver_kwargs=dict(index_col=0, parse_dates=True), rename=rename
-    )
-    assert np.all(list(dfts2.columns) == list(rename.values()))
-
-    # Test unit add/multiply
-    unit_mult = {
-        "precip": 0.75,
-        "temp": 2,
-        "pet": 1,
-    }
-    unit_add = {
-        "precip": 0,
-        "temp": -1,
-        "pet": 2,
-    }
-    dfts3 = data_catalog.get_dataframe(
-        fn_df_ts,
-        driver_kwargs=dict(index_col=0, parse_dates=True),
-        unit_mult=unit_mult,
-        unit_add=unit_add,
-    )
-    # Do checks
-    for var in df_time.columns:
-        assert np.all(df_time[var] * unit_mult[var] + unit_add[var] == dfts3[var])
-
-    # Test timeslice
-    dfts4 = data_catalog.get_dataframe(
-        fn_df_ts,
-        time_tuple=("2007-01-02", "2007-01-04"),
-        driver_kwargs=dict(index_col=0, parse_dates=True),
-    )
-    assert len(dfts4) == 3
-
-    # Test variable slice
-    vars_slice = ["precip", "temp"]
-    dfts5 = data_catalog.get_dataframe(
-        fn_df_ts,
-        variables=vars_slice,
-        driver_kwargs=dict(index_col=0, parse_dates=True),
-    )
-    assert np.all(dfts5.columns == vars_slice)
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-# TODO: Partially tested in "test_rasterio_driver", just missing the cache=True option.
-# https://github.com/Deltares/hydromt/issues/897
-def test_cache_vrt(tmpdir, rioda_large):
+@pytest.mark.skip(
+    reason="Needs implementation https://github.com/Deltares/hydromt/issues/875."
+)
+def test_reads_slippy_map_output(tmp_dir: Path, rioda_large: xr.DataArray):
     # write vrt data
     name = "tiled"
-    root = str(tmpdir.join(name))
+    root = tmp_dir / name
     rioda_large.raster.to_xyz_tiles(
         root=root,
         tile_size=256,
         zoom_levels=[0],
     )
-    cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
+    cat = DataCatalog(str(root / f"{name}.yml"), cache=True)
     cat.get_rasterdataset(name)
     assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16
-
-
-@pytest.mark.skip(reason="Needs refactoring to Pydantic BaseModel.")
-def test_detect_extent(geodf, geoda, rioda, ts):
-    ts_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-    ts_detected_bbox = to_geographic_bbox(*GeoDataFrameAdapter("").detect_bbox(geodf))
-    assert np.all(np.equal(ts_expected_bbox, ts_detected_bbox))
-
-    geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
-    geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-    geoda_detected_bbox = to_geographic_bbox(*GeoDatasetAdapter("").detect_bbox(geoda))
-    geoda_detected_time_range = GeoDatasetAdapter("").detect_time_range(geoda)
-    assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
-    assert geoda_expected_time_range == geoda_detected_time_range
-
-    rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
-    rioda_detected_bbox = to_geographic_bbox(
-        *RasterDatasetAdapter("").detect_bbox(rioda)
-    )
-
-    assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_geodataframe(geodf, tmpdir, data_catalog):
-    fn_gdf = str(tmpdir.join("test.geojson"))
-    geodf.to_file(fn_gdf, driver="GeoJSON")
-    # geodataframe
-    name = "gadm_level1"
-    adapter = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
-    bbox, crs = adapter.get_bbox()
-    gdf_stac_catalog = StacCatalog(id=name, description=name)
-    gds_stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=list(bbox),
-        properties=adapter.meta,
-        datetime=datetime(1, 1, 1),
-    )
-    gds_stac_asset = StacAsset(str(adapter.path))
-    gds_base_name = basename(adapter.path)
-    gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
-
-    gdf_stac_catalog.add_item(gds_stac_item)
-    outcome = cast(
-        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-    )
-    assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_raster(data_catalog):
-    # raster dataset
-    name = "chirps_global"
-    adapter = cast(RasterDatasetAdapter, data_catalog.get_source(name))
-    bbox, crs = adapter.get_bbox()
-    start_dt, end_dt = adapter.get_time_range(detect=True)
-    start_dt = pd.to_datetime(start_dt)
-    end_dt = pd.to_datetime(end_dt)
-    raster_stac_catalog = StacCatalog(id=name, description=name)
-    raster_stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=list(bbox),
-        properties=adapter.meta,
-        datetime=None,
-        start_datetime=start_dt,
-        end_datetime=end_dt,
-    )
-    raster_stac_asset = StacAsset(str(adapter.path))
-    raster_base_name = basename(adapter.path)
-    raster_stac_item.add_asset(raster_base_name, raster_stac_asset)
-
-    raster_stac_catalog.add_item(raster_stac_item)
-
-    outcome = cast(
-        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-    )
-
-    assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_geodataset(data_catalog):
-    # geodataset
-    name = "gtsmv3_eu_era5"
-    adapter = cast(GeoDatasetAdapter, data_catalog.get_source(name))
-    bbox, crs = adapter.get_bbox()
-    start_dt, end_dt = adapter.get_time_range(detect=True)
-    start_dt = pd.to_datetime(start_dt)
-    end_dt = pd.to_datetime(end_dt)
-    gds_stac_catalog = StacCatalog(id=name, description=name)
-    gds_stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=list(bbox),
-        properties=adapter.meta,
-        datetime=None,
-        start_datetime=start_dt,
-        end_datetime=end_dt,
-    )
-    gds_stac_asset = StacAsset(str(adapter.path))
-    gds_base_name = basename(adapter.path)
-    gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
-
-    gds_stac_catalog.add_item(gds_stac_item)
-
-    outcome = cast(
-        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-    )
-    assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-    adapter.crs = -3.14  # manually create an invalid adapter by deleting the crs
-    assert adapter.to_stac_catalog(ErrorHandleMethod.SKIP) is None
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_to_stac_dataframe(df, tmpdir):
-    fn_df = str(tmpdir.join("test.csv"))
-    name = "test_dataframe"
-    df.to_csv(fn_df)
-    dc = DataCatalog().from_dict(
-        {
-            name: {
-                "data_type": "DataFrame",
-                "path": fn_df,
-            }
-        }
-    )
-
-    adapter = dc.get_source(name)
-
-    with pytest.raises(
-        NotImplementedError,
-        match="DataframeAdapter does not support full stac conversion ",
-    ):
-        adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-
-    assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
-
-    stac_catalog = StacCatalog(
-        name,
-        description=name,
-    )
-    stac_item = StacItem(
-        name,
-        geometry=None,
-        bbox=[0, 0, 0, 0],
-        properties=adapter.meta,
-        datetime=datetime(1, 1, 1),
-    )
-    stac_asset = StacAsset(str(fn_df))
-    stac_item.add_asset("hydromt_path", stac_asset)
-
-    stac_catalog.add_item(stac_item)
-    outcome = cast(
-        StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.COERCE)
-    )
-    assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore

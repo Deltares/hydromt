@@ -1,8 +1,9 @@
 import pytest
 from fsspec.implementations.local import LocalFileSystem
 from fsspec.implementations.memory import MemoryFileSystem
+from pydantic import BaseModel
 
-from hydromt._typing.fsspec_types import serialize_filesystem, validate_filesystem
+from hydromt._typing.fsspec_types import FS, serialize_filesystem, validate_filesystem
 
 
 class TestSerializeFileSystem:
@@ -36,3 +37,11 @@ class TestValidateFileSystem:
     def test_validates_dict_no_protocol(self):
         with pytest.raises(ValueError, match="requires 'protocol'"):
             validate_filesystem({"max_paths": 50})
+
+
+class MyModel(BaseModel):
+    fs: FS
+
+
+def test_deserializes_model():
+    MyModel.model_validate({"fs": {"protocol": "s3", "anon": True}})
