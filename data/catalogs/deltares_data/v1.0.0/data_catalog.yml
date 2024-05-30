@@ -94,10 +94,10 @@ chirps:
     license: CC
     crs: 4326
   data_adapter:
-    rename:
-      precipitation: precip
     unit_add:
       time: 86400
+    rename:
+      precipitation: precip
 chirps_global:
   data_type: RasterDataset
   uri: meteo/chirps_global_daily_v2.0/chirps-v2.0.{year}.days_p05.nc
@@ -120,10 +120,10 @@ chirps_global:
     license: CC
     crs: 4326
   data_adapter:
-    rename:
-      precipitation: precip
     unit_add:
       time: 86400
+    rename:
+      precipitation: precip
 copdem30:
   data_type: RasterDataset
   uri: topography/copdem/copdem.vrt
@@ -248,13 +248,13 @@ eobs:
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     crs: 4326
   data_adapter:
+    unit_add:
+      time: 86400
     rename:
       pp: press_msl
       qq: kin
       rr: precip
       tg: temp
-    unit_add:
-      time: 86400
 eobs_v23.1e:
   data_type: RasterDataset
   uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
@@ -277,13 +277,13 @@ eobs_v23.1e:
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     crs: 4326
   data_adapter:
+    unit_add:
+      time: 86400
     rename:
       pp: press_msl
       qq: kin
       rr: precip
       tg: temp
-    unit_add:
-      time: 86400
 eobs_v24.0e:
   data_type: RasterDataset
   uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
@@ -306,13 +306,13 @@ eobs_v24.0e:
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     crs: 4326
   data_adapter:
+    unit_add:
+      time: 86400
     rename:
       pp: press_msl
       qq: kin
       rr: precip
       tg: temp
-    unit_add:
-      time: 86400
 eobs_v25.0e:
   data_type: RasterDataset
   uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
@@ -335,13 +335,13 @@ eobs_v25.0e:
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     crs: 4326
   data_adapter:
+    unit_add:
+      time: 86400
     rename:
       pp: press_msl
       qq: kin
       rr: precip
       tg: temp
-    unit_add:
-      time: 86400
 eobs_v29.0e:
   data_type: RasterDataset
   uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
@@ -364,13 +364,13 @@ eobs_v29.0e:
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     crs: 4326
   data_adapter:
+    unit_add:
+      time: 86400
     rename:
       pp: press_msl
       qq: kin
       rr: precip
       tg: temp
-    unit_add:
-      time: 86400
 eobs_orography_v20.0e:
   data_type: RasterDataset
   uri: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
@@ -506,14 +506,12 @@ era5:
         combine: by_coords
         decode_times: true
         parallel: true
-    metadata: {}
   - provider: zarr
     uri: meteo/era5_daily.zarr
     driver:
       name: raster_xarray
       options:
         chunks: auto
-    metadata: {}
   metadata:
     category: meteo
     notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
@@ -525,6 +523,16 @@ era5:
     license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     crs: 4326
   data_adapter:
+    unit_add:
+      temp: -273.15
+      temp_dew: -273.15
+      temp_max: -273.15
+      temp_min: -273.15
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      ssr: 0.000277778
+      press_msl: 0.01
     rename:
       d2m: temp_dew
       msl: press_msl
@@ -536,16 +544,6 @@ era5:
       tp: precip
       u10: wind10_u
       v10: wind10_v
-    unit_add:
-      temp: -273.15
-      temp_dew: -273.15
-      temp_max: -273.15
-      temp_min: -273.15
-    unit_mult:
-      kin: 0.000277778
-      kout: 0.000277778
-      ssr: 0.000277778
-      press_msl: 0.01
 era5_hourly:
   data_type: RasterDataset
   variants:
@@ -561,14 +559,12 @@ era5_hourly:
         combine: by_coords
         decode_times: true
         parallel: true
-    metadata: {}
   - provider: zarr
     uri: meteo/era5.zarr
     driver:
       name: raster_xarray
       options:
         chunks: auto
-    metadata: {}
   metadata:
     category: meteo
     notes: Extracted from Copernicus Climate Data Store
@@ -579,15 +575,6 @@ era5_hourly:
     license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     crs: 4326
   data_adapter:
-    rename:
-      d2m: temp_dew
-      msl: press_msl
-      ssrd: kin
-      t2m: temp
-      tisr: kout
-      tp: precip
-      u10: wind10_u
-      v10: wind10_v
     unit_add:
       temp: -273.15
       temp_dew: -273.15
@@ -597,6 +584,15 @@ era5_hourly:
       ssr: 0.000277778
       precip: 1000
       press_msl: 0.01
+    rename:
+      d2m: temp_dew
+      msl: press_msl
+      ssrd: kin
+      t2m: temp
+      tisr: kout
+      tp: precip
+      u10: wind10_u
+      v10: wind10_v
 era5_ocean:
   data_type: RasterDataset
   uri: ocean/era5/{variable}/era5_{variable}_{year}_hourly.nc
@@ -636,10 +632,10 @@ era5_orography:
     license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     crs: 4326
   data_adapter:
-    rename:
-      z: elevtn
     unit_mult:
       elevtn: 0.10197162129779283
+    rename:
+      z: elevtn
 esa_worldcover:
   data_type: RasterDataset
   uri: landuse/esa_worldcover/esa-worldcover.vrt
@@ -767,10 +763,10 @@ gdp_world:
     license: CC BY-4.0
     crs: 4326
   data_adapter:
-    rename:
-      GDP: gdp
     unit_mult:
       gdp: 0.001
+    rename:
+      GDP: gdp
 gebco:
   data_type: RasterDataset
   uri: bathymetry/gebco/gebco.vrt
@@ -893,7 +889,6 @@ glofas_era5_v31:
         combine: by_coords
         decode_times: true
         parallel: true
-    metadata: {}
     data_adapter:
       rename:
         dis24: discharge
@@ -905,12 +900,11 @@ glofas_era5_v31:
         chunks:
           x: 150
           y: 360
-    metadata: {}
     data_adapter:
-      rename:
-        glofas_v31_uparea: uparea
       unit_mult:
         uparea: 1.0e-06
+      rename:
+        glofas_v31_uparea: uparea
   metadata:
     category: hydro
     notes: Extracted from Copernicus Climate Data Store
@@ -1200,6 +1194,8 @@ hydro_lakes:
     version: 1.0
     crs: 4326
   data_adapter:
+    unit_mult:
+      Area_avg: 1000000.0
     rename:
       Depth_avg: Depth_avg
       Dis_avg: Dis_avg
@@ -1208,8 +1204,6 @@ hydro_lakes:
       Pour_lat: yout
       Pour_long: xout
       Vol_total: Vol_avg
-    unit_mult:
-      Area_avg: 1000000.0
 hydro_reservoirs:
   data_type: GeoDataFrame
   uri: hydrography/reservoirs/reservoir-db.fgb
@@ -1223,6 +1217,12 @@ hydro_reservoirs:
     nodata: -99
     crs: 4326
   data_adapter:
+    unit_mult:
+      Area_avg: 1000000.0
+      Capacity_max: 1000000.0
+      Capacity_min: 1000000.0
+      Capacity_norm: 1000000.0
+      Vol_avg: 1000000.0
     rename:
       Depth_avg: Depth_avg
       Dis_avg: Dis_avg
@@ -1236,12 +1236,6 @@ hydro_reservoirs:
       Pour_lat: yout
       Pour_long: xout
       Vol_total: Vol_avg
-    unit_mult:
-      Area_avg: 1000000.0
-      Capacity_max: 1000000.0
-      Capacity_min: 1000000.0
-      Capacity_norm: 1000000.0
-      Vol_avg: 1000000.0
 koppen_geiger:
   data_type: RasterDataset
   uri: meteo/climate_classification_v2017/Map_KG-Global.tif
@@ -1460,16 +1454,12 @@ pcr_globwb:
   variants:
   - version: 1990
     uri: hydro/pcr_globwb/glob_1990.zarr
-    metadata: {}
   - version: 1995
     uri: hydro/pcr_globwb/glob_1995.zarr
-    metadata: {}
   - version: 2000
     uri: hydro/pcr_globwb/glob_2000.zarr
-    metadata: {}
   - version: 2005
     uri: hydro/pcr_globwb/glob_2005.zarr
-    metadata: {}
   driver:
     name: raster_xarray
     options:
@@ -1485,13 +1475,6 @@ pcr_globwb:
     nodata: -9999
     crs: 4326
   data_adapter:
-    rename:
-      domesticNettoDemand: dom_net
-      domesticGrossDemand: dom_gross
-      industryNettoDemand: ind_net
-      industryGrossDemand: ind_gross
-      livestockNettoDemand: lsk_net
-      livestockGrossDemand: lsk_gross
     unit_mult:
       dom_net: 1000
       dom_gross: 1000
@@ -1499,6 +1482,13 @@ pcr_globwb:
       ind_gross: 1000
       lsk_net: 1000
       lsk_gross: 1000
+    rename:
+      domesticNettoDemand: dom_net
+      domesticGrossDemand: dom_gross
+      industryNettoDemand: ind_net
+      industryGrossDemand: ind_gross
+      livestockNettoDemand: lsk_net
+      livestockGrossDemand: lsk_gross
 rgi:
   data_type: GeoDataFrame
   uri: hydrography/rgi/rgi.fgb
@@ -1619,6 +1609,28 @@ soilgrids:
     license: ODbL
     crs: 4326
   data_adapter:
+    unit_mult:
+      bd_sl1: 0.001
+      bd_sl2: 0.001
+      bd_sl3: 0.001
+      bd_sl4: 0.001
+      bd_sl5: 0.001
+      bd_sl6: 0.001
+      bd_sl7: 0.001
+      oc_sl1: 0.1
+      oc_sl2: 0.1
+      oc_sl3: 0.1
+      oc_sl4: 0.1
+      oc_sl5: 0.1
+      oc_sl6: 0.1
+      oc_sl7: 0.1
+      ph_sl1: 0.1
+      ph_sl2: 0.1
+      ph_sl3: 0.1
+      ph_sl4: 0.1
+      ph_sl5: 0.1
+      ph_sl6: 0.1
+      ph_sl7: 0.1
     rename:
       BLDFIE_M_sl1_250m_ll: bd_sl1
       BLDFIE_M_sl2_250m_ll: bd_sl2
@@ -1664,28 +1676,6 @@ soilgrids:
       SNDPPT_M_sl7_250m_ll: sndppt_sl7
       SoilThickness_250m_ll: soilthickness
       TAXOUSDA_250m_ll: tax_usda
-    unit_mult:
-      bd_sl1: 0.001
-      bd_sl2: 0.001
-      bd_sl3: 0.001
-      bd_sl4: 0.001
-      bd_sl5: 0.001
-      bd_sl6: 0.001
-      bd_sl7: 0.001
-      oc_sl1: 0.1
-      oc_sl2: 0.1
-      oc_sl3: 0.1
-      oc_sl4: 0.1
-      oc_sl5: 0.1
-      oc_sl6: 0.1
-      oc_sl7: 0.1
-      ph_sl1: 0.1
-      ph_sl2: 0.1
-      ph_sl3: 0.1
-      ph_sl4: 0.1
-      ph_sl5: 0.1
-      ph_sl6: 0.1
-      ph_sl7: 0.1
 soilgrids_2020:
   data_type: RasterDataset
   uri: soil/soilgrids_v2.0/*/*_mean.vrt
@@ -1710,45 +1700,6 @@ soilgrids_2020:
     version: 2020
     license: CC BY 4.0
   data_adapter:
-    rename:
-      bdod_0-5cm_mean: bd_sl1
-      bdod_5-15cm_mean: bd_sl2
-      bdod_15-30cm_mean: bd_sl3
-      bdod_30-60cm_mean: bd_sl4
-      bdod_60-100cm_mean: bd_sl5
-      bdod_100-200cm_mean: bd_sl6
-      clay_0-5cm_mean: clyppt_sl1
-      clay_5-15cm_mean: clyppt_sl2
-      clay_15-30cm_mean: clyppt_sl3
-      clay_30-60cm_mean: clyppt_sl4
-      clay_60-100cm_mean: clyppt_sl5
-      clay_100-200cm_mean: clyppt_sl6
-      soc_0-5cm_mean: oc_sl1
-      soc_5-15cm_mean: oc_sl2
-      soc_15-30cm_mean: oc_sl3
-      soc_30-60cm_mean: oc_sl4
-      soc_60-100cm_mean: oc_sl5
-      soc_100-200cm_mean: oc_sl6
-      phh2o_0-5cm_mean: ph_sl1
-      phh2o_5-15cm_mean: ph_sl2
-      phh2o_15-30cm_mean: ph_sl3
-      phh2o_30-60cm_mean: ph_sl4
-      phh2o_60-100cm_mean: ph_sl5
-      phh2o_100-200cm_mean: ph_sl6
-      silt_0-5cm_mean: sltppt_sl1
-      silt_5-15cm_mean: sltppt_sl2
-      silt_15-30cm_mean: sltppt_sl3
-      silt_30-60cm_mean: sltppt_sl4
-      silt_60-100cm_mean: sltppt_sl5
-      silt_100-200cm_mean: sltppt_sl6
-      sand_0-5cm_mean: sndppt_sl1
-      sand_5-15cm_mean: sndppt_sl2
-      sand_15-30cm_mean: sndppt_sl3
-      sand_30-60cm_mean: sndppt_sl4
-      sand_60-100cm_mean: sndppt_sl5
-      sand_100-200cm_mean: sndppt_sl6
-      SoilThickness_250_mean: soilthickness
-      TAXOUSDA_250_mean: tax_usda
     unit_mult:
       bd_sl1: 0.01
       bd_sl2: 0.01
@@ -1792,6 +1743,45 @@ soilgrids_2020:
       sndppt_sl5: 0.1
       sndppt_sl6: 0.1
       sndppt_sl7: 0.1
+    rename:
+      bdod_0-5cm_mean: bd_sl1
+      bdod_5-15cm_mean: bd_sl2
+      bdod_15-30cm_mean: bd_sl3
+      bdod_30-60cm_mean: bd_sl4
+      bdod_60-100cm_mean: bd_sl5
+      bdod_100-200cm_mean: bd_sl6
+      clay_0-5cm_mean: clyppt_sl1
+      clay_5-15cm_mean: clyppt_sl2
+      clay_15-30cm_mean: clyppt_sl3
+      clay_30-60cm_mean: clyppt_sl4
+      clay_60-100cm_mean: clyppt_sl5
+      clay_100-200cm_mean: clyppt_sl6
+      soc_0-5cm_mean: oc_sl1
+      soc_5-15cm_mean: oc_sl2
+      soc_15-30cm_mean: oc_sl3
+      soc_30-60cm_mean: oc_sl4
+      soc_60-100cm_mean: oc_sl5
+      soc_100-200cm_mean: oc_sl6
+      phh2o_0-5cm_mean: ph_sl1
+      phh2o_5-15cm_mean: ph_sl2
+      phh2o_15-30cm_mean: ph_sl3
+      phh2o_30-60cm_mean: ph_sl4
+      phh2o_60-100cm_mean: ph_sl5
+      phh2o_100-200cm_mean: ph_sl6
+      silt_0-5cm_mean: sltppt_sl1
+      silt_5-15cm_mean: sltppt_sl2
+      silt_15-30cm_mean: sltppt_sl3
+      silt_30-60cm_mean: sltppt_sl4
+      silt_60-100cm_mean: sltppt_sl5
+      silt_100-200cm_mean: sltppt_sl6
+      sand_0-5cm_mean: sndppt_sl1
+      sand_5-15cm_mean: sndppt_sl2
+      sand_15-30cm_mean: sndppt_sl3
+      sand_30-60cm_mean: sndppt_sl4
+      sand_60-100cm_mean: sndppt_sl5
+      sand_100-200cm_mean: sndppt_sl6
+      SoilThickness_250_mean: soilthickness
+      TAXOUSDA_250_mean: tax_usda
 vito:
   data_type: RasterDataset
   uri: landuse/vito/ProbaV_LC100_epoch2015_global_v2.0.2_discrete-classification_EPSG-4326.tif
@@ -1885,14 +1875,14 @@ wb_countries:
     license: CC-BY 4.0
     crs: 4326
   data_adapter:
+    unit_mult:
+      gdp_pc: 1000
     rename:
       ISO_A3: country_iso
       ISO_N3: country_code
       POP_EST: population
       GDP_MD_EST: gdp_pc
       GDP_kD_PPP: gdp
-    unit_mult:
-      gdp_pc: 1000
 worldclim:
   data_type: RasterDataset
   uri: meteo/worldclim_v2.0/wc2.0_30s_prec.nc
@@ -1918,13 +1908,11 @@ worldpop_2020_constrained:
   variants:
   - provider: normal
     uri: socio_economic/worldpop/ppp_2020_constrained.vrt
-    metadata: {}
     data_adapter:
       rename:
         ppp_2020_constrained: population
   - provider: UNadj
     uri: socio_economic/worldpop/ppp_2020_UNadj_constrained.vrt
-    metadata: {}
     data_adapter:
       rename:
         ppp_2020_UNadj_constrained: population

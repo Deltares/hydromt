@@ -60,7 +60,7 @@ def load_catalog(catalog_path: Path) -> Dict:
         return load(f, Loader)
 
 
-def migrate_meta(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
+def migrate_meta(catalog_dict: Dict[str, Any], version: str) -> Dict[str, Any]:
     """Migrate metadata of catalog."""
     if catalog_meta := catalog_dict.pop("meta", None):
         if hydromt_version := catalog_meta.get("hydromt_version"):
@@ -68,12 +68,14 @@ def migrate_meta(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
         else:
             catalog_meta["hydromt_version"] = ">1.0a,<2"
 
+        catalog_meta["version"] = version
+
         return catalog_meta
 
 
-def migrate_entries(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
+def migrate_entries(catalog_dict: Dict[str, Any], version: str) -> Dict[str, Any]:
     """Migrate all entries of the data catalog."""
-    new_catalog_meta: Dict[str, Any] = migrate_meta(catalog_dict)
+    new_catalog_meta: Dict[str, Any] = migrate_meta(catalog_dict, version)
     new_catalog_dict = {
         "meta": new_catalog_meta,
         **{item[0]: migrate_entry(*item) for item in catalog_dict.items()},
@@ -147,6 +149,8 @@ def migrate_entry(
     for field in new_meta:
         if value := entry.pop(field, None):
             entry["metadata"][field] = value
+    if not entry["metadata"]:
+        entry.pop("metadata")
 
     # Migrate postprocessing parameters to data_adapter
     postprocessing_params: Set[str] = {"unit_add", "unit_mult", "rename"}
@@ -187,11 +191,11 @@ def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
         dump(new_catalog_dict, f, default_flow_style=False, sort_keys=False)
 
 
-def main(path_in: Path, path_out: Path, overwrite: bool):
+def main(path_in: Path, path_out: Path, overwrite: bool, version: str):
     """Read in data catalog and write out."""
     prepare_path_out(path_out, overwrite)
     old_catalog_dict: Dict[str, Any] = load_catalog(path_in)
-    new_catalog_dict: Dict[str, Any] = migrate_entries(old_catalog_dict)
+    new_catalog_dict: Dict[str, Any] = migrate_entries(old_catalog_dict, version)
     write_out(new_catalog_dict, path_out)
 
 
@@ -202,8 +206,10 @@ if __name__ == "__main__":
     parser.add_argument("filein")
     parser.add_argument("fileout")
     parser.add_argument("-o", "--overwrite", action="store_true", default=True)
+    parser.add_argument("-v", "--version", default="v1.0.0")
     args: Namespace = parser.parse_args()
     file_in: Path = Path(args.filein)
     file_out: Path = Path(args.fileout)
     overwrite: bool = args.overwrite
-    main(file_in, file_out, overwrite)
+    version: str = args.version
+    main(file_in, file_out, overwrite, version)

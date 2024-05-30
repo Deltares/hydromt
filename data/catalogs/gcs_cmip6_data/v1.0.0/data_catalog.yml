@@ -57,16 +57,16 @@ cmip6_{model}_historical_{member}_{timestep}:
     license: CC BY 4.0
     crs: 4326
   data_adapter:
-    unit_add:
-      temp: -273.15
-    unit_mult:
-      precip: 86400
-      press_msl: 0.01
     rename:
       pr: precip
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_mult:
+      precip: 86400
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
 cmip6_{model}_ssp119_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -101,16 +101,16 @@ cmip6_{model}_ssp119_{member}_{timestep}:
     license: CC BY 4.0
     crs: 4326
   data_adapter:
-    unit_add:
-      temp: -273.15
-    unit_mult:
-      precip: 86400
-      press_msl: 0.01
     rename:
       pr: precip
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_mult:
+      precip: 86400
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
 cmip6_{model}_ssp126_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -152,16 +152,16 @@ cmip6_{model}_ssp126_{member}_{timestep}:
     license: CC BY 4.0
     crs: 4326
   data_adapter:
-    unit_add:
-      temp: -273.15
-    unit_mult:
-      precip: 86400
-      press_msl: 0.01
     rename:
       pr: precip
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_mult:
+      precip: 86400
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
 cmip6_{model}_ssp245_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -206,16 +206,16 @@ cmip6_{model}_ssp245_{member}_{timestep}:
     license: CC BY 4.0
     crs: 4326
   data_adapter:
-    unit_add:
-      temp: -273.15
-    unit_mult:
-      precip: 86400
-      press_msl: 0.01
     rename:
       pr: precip
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_mult:
+      precip: 86400
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
 cmip6_{model}_ssp370_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -260,16 +260,16 @@ cmip6_{model}_ssp370_{member}_{timestep}:
     license: CC BY 4.0
     crs: 4326
   data_adapter:
-    unit_add:
-      temp: -273.15
-    unit_mult:
-      precip: 86400
-      press_msl: 0.01
     rename:
       pr: precip
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_mult:
+      precip: 86400
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
 cmip6_{model}_ssp434_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -303,16 +303,16 @@ cmip6_{model}_ssp434_{member}_{timestep}:
     license: CC BY 4.0
     crs: 4326
   data_adapter:
-    unit_add:
-      temp: -273.15
-    unit_mult:
-      precip: 86400
-      press_msl: 0.01
     rename:
       pr: precip
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_mult:
+      precip: 86400
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
 cmip6_{model}_ssp460_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -346,16 +346,16 @@ cmip6_{model}_ssp460_{member}_{timestep}:
     license: CC BY 4.0
     crs: 4326
   data_adapter:
-    unit_add:
-      temp: -273.15
-    unit_mult:
-      precip: 86400
-      press_msl: 0.01
     rename:
       pr: precip
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_mult:
+      precip: 86400
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
 cmip6_{model}_ssp585_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -397,13 +397,13 @@ cmip6_{model}_ssp585_{member}_{timestep}:
     license: CC BY 4.0
     crs: 4326
   data_adapter:
-    unit_add:
-      temp: -273.15
-    unit_mult:
-      precip: 86400
-      press_msl: 0.01
     rename:
       pr: precip
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_mult:
+      precip: 86400
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
