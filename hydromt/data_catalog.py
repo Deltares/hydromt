@@ -368,6 +368,7 @@ class DataCatalog(object):
                 f"Requested unknown data source '{source}' "
                 f"available sources are: {available_sources}"
             )
+
         available_providers = self._sources[source]
 
         # make sure all arguments are strings
@@ -425,14 +426,14 @@ class DataCatalog(object):
             raise ValueError("Value must be DataSource")
 
         if source.version:
-            version = source.version
+            version = str(source.version)
         else:
             version = "_UNSPECIFIED_"  # make sure this comes first in sorted list
 
         if source.provider:
-            provider = source.provider
+            provider = str(source.provider)
         else:
-            provider = "_UNSPECIFIED_"
+            provider = source.driver.filesystem.protocol[0]
 
         if name not in self._sources:
             self._sources[name] = {}
@@ -446,7 +447,7 @@ class DataCatalog(object):
                 )
 
         if provider not in self._sources[name]:
-            versions = {version: source}
+            versions = {str(version): source}
         else:
             versions = self._sources[name][provider]
             if provider in self._sources[name] and version in versions:
@@ -457,8 +458,8 @@ class DataCatalog(object):
                     stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
-            versions.update({version: source})
-            versions = {k: versions[k] for k in sorted(list(versions.keys()))}
+            versions.update({str(version): source})
+            versions = {(k): versions[k] for k in sorted(list(versions.keys()))}
 
         self._sources[name][provider] = versions
 
@@ -544,7 +545,7 @@ class DataCatalog(object):
             for name, source in self.list_sources():
                 try:
                     other_source = other.get_source(
-                        name, provider=source.provider, version=source.version
+                        name, provider=source.provider, version=str(source.version)
                     )
                 except KeyError:
                     return False
@@ -626,13 +627,12 @@ class DataCatalog(object):
 
         """
         root = Path(self._cache_dir, name, version)
-        extract_dir = root / Path(archive_uri).stem
         # retrieve and unpack archive
         kwargs = {}
         if Path(archive_uri).suffix == ".zip":
-            kwargs.update(processor=pooch.Unzip(extract_dir=extract_dir))
+            kwargs.update(processor=pooch.Unzip(extract_dir=root))
         elif Path(archive_uri).suffix == ".gz":
-            kwargs.update(processor=pooch.Untar(extract_dir=extract_dir))
+            kwargs.update(processor=pooch.Untar(extract_dir=root))
         if Path(archive_uri).exists():  # check if arhive is a local file
             kwargs.update(donwloader=_copy_file)
         pooch.retrieve(
@@ -642,7 +642,7 @@ class DataCatalog(object):
             fname=Path(archive_uri).name,
             **kwargs,
         )
-        return extract_dir
+        return root
 
     def from_yml(
         self,
@@ -936,8 +936,9 @@ class DataCatalog(object):
         """
         meta = meta or {}
         sources_out = dict()
-        if root is not None:
-            meta.update(**{"root": root})
+        if root is None:
+            root = str(self.root)
+        meta.update(**{"root": root})
         sources = self.list_sources(used_only=used_only)
         sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
@@ -949,7 +950,8 @@ class DataCatalog(object):
             )
 
             # remove non serializable entries to prevent errors
-            source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
+            source_dict = _process_dict(source_dict, logger=self.logger)
+            source_dict["root"] = root
             if name in sources_out:
                 existing = sources_out.pop(name)
                 if existing == source_dict:
@@ -1096,7 +1098,7 @@ class DataCatalog(object):
                             source.unit_add = {}
                         try:
                             fn_out, driver, driver_kwargs = source.to_file(
-                                data_root=data_root,
+                                file_path=Path(data_root) / source.uri,
                                 data_name=key,
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
@@ -1222,6 +1224,9 @@ class DataCatalog(object):
             will be returned. if it is set to RAISE and exception will be raised in that
             situation
         """
+        if isinstance(variables, str):
+            variables = [variables]
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1762,25 +1767,14 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
     for name, source in data_dict.items():
         source = copy.deepcopy(source)
         data_dicts = []
-        if "alias" in source:
-            alias = source.pop("alias")
-            warnings.warn(
-                "The use of alias is deprecated, please add a version on the aliased"
-                "catalog instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if alias not in data_dict:
-                raise ValueError(f"alias {alias} not found in data_dict.")
-            # use alias source but overwrite any attributes with original source
-            source_copy = data_dict[alias].copy()
-            source_copy.update(source)
-            data_dicts.append({name: source_copy})
-        elif "variants" in source:
+        if "variants" in source:
             variants = source.pop("variants")
             for diff in variants:
                 source_copy = copy.deepcopy(source)
-                source_copy = deep_merge(source_copy, diff)
+                source_copy = {
+                    str(k): v for (k, v) in deep_merge(source_copy, diff).items()
+                }
+
                 data_dicts.append({name: source_copy})
         elif "placeholders" in source:
             options = source.pop("placeholders")
@@ -1793,6 +1787,13 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:
+            for k, v in source.items():
+                if isinstance(v, (int, float)):
+                    # numbers are pretty much always a version here,
+                    # and we need strings, so just cast to string when
+                    # we encoutner a number. not the pretties,
+                    # but it will have to do for now.
+                    source[k] = str(v)
             data_list.append((name, source))
             continue
 
