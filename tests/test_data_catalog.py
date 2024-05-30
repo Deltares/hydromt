@@ -213,7 +213,7 @@ def test_catalog_entry_no_variant(legacy_aws_worldcover):
     assert len(legacy_data_catalog) == 1
     source = legacy_data_catalog.get_source("esa_worldcover")
     assert Path(source.uri).name == "esa-worldcover.vrt"
-    assert source.version == 2020
+    assert source.version == "2020"
 
 
 def test_catalog_entry_no_variant_round_trip(legacy_aws_worldcover):
