@@ -396,6 +396,7 @@ def test_used_sources():
 
 
 def test_from_yml_with_archive(data_catalog):
+    data_catalog._sources = {}
     cache_dir = Path(data_catalog._cache_dir)
     data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
     sources = list(data_catalog.sources.keys())
