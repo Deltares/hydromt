@@ -390,4 +390,15 @@ def test_mesh_with_model(griduda, world, tmpdir):
     assert "roughness_manning" in model1.mesh.data.data_vars
     assert np.all(model1.mesh.data["landuse"].values == model1.mesh.data["vito"].values)
 
+    # write model
     model1.write()
+
+    # Read model
+    written_model = Model(root=root, mode="r")
+    mesh_component = MeshComponent(model=written_model)
+    written_model.add_component(name="mesh", component=mesh_component)
+    written_model.read()
+    variables = ["roughness_manning", "vito", "landuse"]
+    assert all(
+        [data_var in variables for data_var in written_model.mesh.data.data_vars]
+    )
