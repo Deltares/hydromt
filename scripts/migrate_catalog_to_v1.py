@@ -1,4 +1,5 @@
 """Script to migrate your catalog to the v1 version."""
+
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from typing import Any, Dict, Optional, Set
@@ -70,14 +71,12 @@ def migrate_meta(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
 def migrate_entries(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
     """Migrate all entries of the data catalog."""
     new_catalog_meta: Dict[str, Any] = migrate_meta(catalog_dict)
-    new_catalog_dict = {
-        item[0]: migrate_entry(item[1]) for item in catalog_dict.items()
-    }
+    new_catalog_dict = {item[0]: migrate_entry(*item) for item in catalog_dict.items()}
     new_catalog_dict["meta"] = new_catalog_meta
     return new_catalog_dict
 
 
-def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
+def migrate_entry(entry_name: str, entry: Dict[str, Any]) -> Dict[str, Any]:
     """Migrate the v0.x entry to v1."""
     # Check if alias
     if entry.get("alias"):
@@ -85,6 +84,7 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
             "Warning: aliases have been deprecated. Please migrate alias"
             f"{entry} to variants or remove completely."
         )
+    print(f"migrating entry: {entry_name}")
     # migrate path to uri
     if path := entry.pop("path", None):
         entry["uri"] = path
@@ -131,6 +131,8 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 
     # move crs and nodata to metadata
     new_meta: Set[str] = {"crs", "nodata"}
+    if "metadata" not in entry:
+        entry["metadata"] = {}
     for field in new_meta:
         if value := entry.pop(field, None):
             entry["metadata"][field] = value
@@ -146,7 +148,10 @@ def migrate_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 
     # Migrate variants
     if variants := entry.get("variants"):
-        entry["variants"] = [migrate_entry(variant) for variant in variants]
+        entry["variants"] = [
+            migrate_entry(entry_name=f"{entry_name} variant", entry=variant)
+            for variant in variants
+        ]
 
     return entry
 

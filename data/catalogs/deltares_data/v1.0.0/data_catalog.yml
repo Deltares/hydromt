@@ -1,0 +1,2705 @@
+meta:
+  version: v0.6.0
+  name: deltares_data
+  root: p:/wflow_global/hydromt
+SM2RAIN_ASCAT_monthly_025_v1.4:
+  name: SM2RAIN_ASCAT_monthly_025_v1.4
+  uri: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_025_2007_2020.nc
+  data_adapter:
+    rename:
+      rainfall: precip
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 360
+          longitude: 720
+          time: 84
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    notes: crs guessed as it is neither mentioned in the data nor in the literature,
+      0.25-degree resolution
+    paper_doi: 10.5194/essd-11-1583-2019
+    paper_ref: Brocca et al. (2019)
+    url: https://zenodo.org/record/4570192#.YueKJWNByUl
+    license: https://creativecommons.org/licenses/by/4.0/legalcode
+  data_type: RasterDataset
+SM2RAIN_ASCAT_monthly_05_v1.4:
+  name: SM2RAIN_ASCAT_monthly_05_v1.4
+  uri: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_05_2007_2020.nc
+  data_adapter:
+    rename:
+      rainfall: precip
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 180
+          longitude: 360
+          time: 84
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    notes: crs guessed as it is neither mentioned in the data nor in the literature,
+      0.5-degree resolution
+    paper_doi: 10.5194/essd-11-1583-2019
+    paper_ref: Brocca et al. (2019)
+    url: https://zenodo.org/record/4570192#.YueKJWNByUl
+    license: https://creativecommons.org/licenses/by/4.0/legalcode
+  data_type: RasterDataset
+basin_atlas_level12_v10:
+  name: basin_atlas_level12_v10
+  uri: hydrography/hydro_atlas/basin_atlas_v10.gpkg
+  driver:
+    options:
+      kwargs:
+        layer: BasinATLAS_v10_lev12
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: hydrography
+    notes: renaming and units might require some revision
+    paper_doi: 10.1038/s41597-019-0300-6
+    paper_ref: Linke et al. (2019)
+    url: https://www.hydrosheds.org/hydroatlas
+    version: 10
+    license: CC BY 4.0
+  data_type: GeoDataFrame
+chelsa_v1.2:
+  name: chelsa_v1.2
+  uri: meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1038/sdata.2017.122
+    paper_ref: Karger et al. (2017)
+    url: http://chelsa-climate.org/downloads/
+    version: 1.2
+    license: CC BY 4.0
+  data_type: RasterDataset
+chirps_africa_daily_v2.0:
+  name: chirps_africa_daily_v2.0
+  uri: meteo/chirps_africa_daily_v2.0/CHIRPS_rainfall_{year}.nc
+  data_adapter:
+    unit_add:
+      time: 86400
+    rename:
+      precipitation: precip
+  driver:
+    options:
+      kwargs:
+        chunks:
+          lat: 160
+          lon: 150
+          time: 20
+        combine: by_coords
+        decode_times: true
+        parallel: true
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1038/sdata.2015.66
+    paper_ref: Funk et al (2015)
+    url: https://www.chc.ucsb.edu/data/chirps
+    version: v2.0
+    license: CC
+  data_type: RasterDataset
+chirps_global_daily_v2.0:
+  name: chirps_global_daily_v2.0
+  uri: meteo/chirps_global_daily_v2.0/chirps-v2.0.{year}.days_p05.nc
+  data_adapter:
+    unit_add:
+      time: 86400
+    rename:
+      precipitation: precip
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 112
+          longitude: 400
+          time: 20
+        combine: by_coords
+        decode_times: true
+        parallel: true
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.3133/ds832
+    paper_ref: Funk et al (2014)
+    url: https://www.chc.ucsb.edu/data/chirps
+    version: v2.0
+    license: CC
+  data_type: RasterDataset
+copdem30_mask_v2021.1:
+  name: copdem30_mask_v2021.1
+  uri: topography/copdem/copdem_mask.vrt
+  data_adapter:
+    rename:
+      copdem_mask: mask
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    nodata: -1
+    category: topography
+    url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+    version: '2021_1'
+    license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+  data_type: RasterDataset
+copdem30_masked_v2021.1:
+  name: copdem30_masked_v2021.1
+  uri: topography/copdem/copdem_masked.vrt
+  data_adapter:
+    rename:
+      copdem_masked: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    category: topography
+    url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+    version: '2021_1'
+    license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+  data_type: RasterDataset
+copdem30_v2021.1:
+  name: copdem30_v2021.1
+  uri: topography/copdem/copdem.vrt
+  data_adapter:
+    rename:
+      copdem: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    nodata: -9999
+    category: topography
+    url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+    version: '2021_1'
+    license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+  data_type: RasterDataset
+corine_2018_v2020_u1:
+  name: corine_2018_v2020_u1
+  uri: landuse/corine/CLC2018_CLC2018_V2018_20.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 6000
+          y: 6000
+    name: rasterio
+  metadata:
+    category: landuse
+    url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
+    author: European Environment Agency
+    version: v.2020_20u1
+    license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
+  data_type: RasterDataset
+dtu10mdt:
+  name: dtu10mdt
+  uri: topography/dtu10mdt/DTU10MDT_1min_float32.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    unit: m+EGM2008
+    category: topography
+    paper_doi: 10.1029/2008JC005179
+    paper_ref: Andersen and Knudsen (2009)
+    url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
+    version: 2010
+  data_type: RasterDataset
+dtu10mdt_egm96:
+  name: dtu10mdt_egm96
+  uri: topography/dtu10mdt/DTU10MDT_1min_egm96.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    unit: m+EGM96
+    category: topography
+    paper_doi: 10.1029/2008JC005179
+    paper_ref: Andersen and Knudsen (2009)
+    url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
+    version: 2010
+  data_type: RasterDataset
+eobs_orography_v20.0e:
+  name: eobs_orography_v20.0e
+  uri: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
+  data_adapter:
+    rename:
+      elevation: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 20.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_orography_v22.0e:
+  name: eobs_orography_v22.0e
+  uri: meteo/eobs/elev_ens_0.1deg_reg_v22.0e.nc
+  data_adapter:
+    rename:
+      elevation: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 22.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_orography_v23.1e:
+  name: eobs_orography_v23.1e
+  uri: meteo/eobs/elev_ens_0.1deg_reg_v23.1e.nc
+  data_adapter:
+    rename:
+      elevation: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 23.1e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_orography_v24.0e:
+  name: eobs_orography_v24.0e
+  uri: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
+  data_adapter:
+    rename:
+      elevation: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 24.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_orography_v25.0e:
+  name: eobs_orography_v25.0e
+  uri: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
+  data_adapter:
+    rename:
+      elevation: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 25.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_orography_v29.0e:
+  name: eobs_orography_v29.0e
+  uri: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
+  data_adapter:
+    rename:
+      elevation: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 29.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_v22.0e:
+  name: eobs_v22.0e
+  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
+  data_adapter:
+    unit_add:
+      time: 86400
+    rename:
+      pp: press_msl
+      qq: kin
+      rr: precip
+      tg: temp
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+          time: 100
+        combine: by_coords
+        parallel: true
+        preprocess: round_latlon
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 22.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_v23.1e:
+  name: eobs_v23.1e
+  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
+  data_adapter:
+    unit_add:
+      time: 86400
+    rename:
+      pp: press_msl
+      qq: kin
+      rr: precip
+      tg: temp
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+          time: 100
+        combine: by_coords
+        parallel: true
+        preprocess: round_latlon
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 23.1e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_v24.0e:
+  name: eobs_v24.0e
+  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
+  data_adapter:
+    unit_add:
+      time: 86400
+    rename:
+      pp: press_msl
+      qq: kin
+      rr: precip
+      tg: temp
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+          time: 100
+        combine: by_coords
+        parallel: true
+        preprocess: round_latlon
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 24.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_v25.0e:
+  name: eobs_v25.0e
+  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
+  data_adapter:
+    unit_add:
+      time: 86400
+    rename:
+      pp: press_msl
+      qq: kin
+      rr: precip
+      tg: temp
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+          time: 100
+        combine: by_coords
+        parallel: true
+        preprocess: round_latlon
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 25.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+eobs_v29.0e:
+  name: eobs_v29.0e
+  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
+  data_adapter:
+    unit_add:
+      time: 86400
+    rename:
+      pp: press_msl
+      qq: kin
+      rr: precip
+      tg: temp
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 100
+          longitude: 100
+          time: 100
+        combine: by_coords
+        parallel: true
+        preprocess: round_latlon
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 29.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+  data_type: RasterDataset
+era5_daily:
+  name: era5_daily
+  uri: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
+  data_adapter:
+    unit_add:
+      temp: -273.15
+      temp_dew: -273.15
+      temp_max: -273.15
+      temp_min: -273.15
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      ssr: 0.000277778
+      press_msl: 0.01
+    rename:
+      d2m: temp_dew
+      msl: press_msl
+      ssrd: kin
+      t2m: temp
+      tisr: kout
+      tmax: temp_max
+      tmin: temp_min
+      tp: precip
+      u10: wind10_u
+      v10: wind10_v
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 250
+          longitude: 240
+          time: 30
+        combine: by_coords
+        decode_times: true
+        parallel: true
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    version: ERA5 daily data on pressure levels
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+  data_type: RasterDataset
+era5_daily_zarr:
+  name: era5_daily_zarr
+  uri: meteo/era5_daily.zarr
+  driver:
+    options:
+      kwargs:
+        chunks: auto
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+  data_type: RasterDataset
+era5_hourly:
+  name: era5_hourly
+  uri: meteo/era5/{variable}/era5_{variable}_{year}*_hourly.nc
+  data_adapter:
+    unit_add:
+      temp: -273.15
+      temp_dew: -273.15
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      ssr: 0.000277778
+      precip: 1000
+      press_msl: 0.01
+    rename:
+      d2m: temp_dew
+      msl: press_msl
+      ssrd: kin
+      t2m: temp
+      tisr: kout
+      tp: precip
+      u10: wind10_u
+      v10: wind10_v
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 125
+          longitude: 120
+          time: 50
+        combine: by_coords
+        decode_times: true
+        parallel: true
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    notes: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.adbb2d47
+    version: ERA5 hourly data on single levels from 1940 to present
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+  data_type: RasterDataset
+era5_hourly_zarr:
+  name: era5_hourly_zarr
+  uri: meteo/era5.zarr
+  driver:
+    options:
+      kwargs:
+        chunks: auto
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+  data_type: RasterDataset
+era5_ocean:
+  name: era5_ocean
+  uri: ocean/era5/{variable}/era5_{variable}_{year}_hourly.nc
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 60
+          longitude: 60
+          time: 720
+        combine: by_coords
+        decode_times: true
+        parallel: true
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: ocean
+    notes: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+  data_type: RasterDataset
+era5_orography:
+  name: era5_orography
+  uri: meteo/era5/meta/era5_orography_2018.nc
+  data_adapter:
+    unit_mult:
+      elevtn: 0.10197162129779283
+    rename:
+      z: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          latitude: 120
+          longitude: 125
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    notes: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://apps.ecmwf.int/codes/grib/param-db?id=129
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+  data_type: RasterDataset
+esa_worldcover_2020_v100:
+  name: esa_worldcover_2020_v100
+  uri: landuse/esa_worldcover/esa-worldcover.vrt
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 36000
+          y: 36000
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    url: https://doi.org/10.5281/zenodo.5571936
+    version: v100
+    license: CC BY 4.0
+  data_type: RasterDataset
+fabdem:
+  name: fabdem
+  uri: topography/fabdem/fabdem.vrt
+  data_adapter:
+    rename:
+      fabdem: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: topography
+    paper_doi: CC BY-NC-SA 4.0
+    paper_ref: Hawker et al. (2022)
+    url: https://data.bris.ac.uk/data/dataset/25wfy0f9ukoge2gs7a5mqpq2j7
+    version: 1.0
+    license: CC BY-NC-SA 4.0
+  data_type: RasterDataset
+gadm_level0:
+  name: gadm_level0
+  uri: geography/gadm/version4_1/gadm_level0.fgb
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: geography
+    notes: last downloaded 2023-12-18; license required for commercial use
+    processing_script: geography/gadm/version4_1/run_dissolve_level_0.sh
+    url: https://gadm.org/download_world.html
+    author: gadm
+    version: 4.1
+    license: https://gadm.org/license.html
+  data_type: GeoDataFrame
+gadm_level1:
+  name: gadm_level1
+  uri: geography/gadm/version4_1/gadm_level1.fgb
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: geography
+    notes: last downloaded 2023-12-18; license required for commercial use
+    processing_script: geography/gadm/version4_1/run_dissolve_level_1.sh
+    url: https://gadm.org/download_world.html
+    author: gadm
+    version: 4.1
+    license: https://gadm.org/license.html
+  data_type: GeoDataFrame
+gadm_level2:
+  name: gadm_level2
+  uri: geography/gadm/version4_1/gadm_level2.fgb
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: geography
+    notes: last downloaded 2023-12-18; license required for commercial use
+    processing_script: geography/gadm/version4_1/run_dissolve_level_2.sh
+    url: https://gadm.org/download_world.html
+    author: gadm
+    version: 4.1
+    license: https://gadm.org/license.html
+  data_type: GeoDataFrame
+gadm_level3:
+  name: gadm_level3
+  uri: geography/gadm/version4_1/gadm_level3.fgb
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: geography
+    notes: last downloaded 2023-12-18; license required for commercial use
+    processing_script: geography/gadm/version4_1/run_dissolve_level_3.sh
+    url: https://gadm.org/download_world.html
+    author: gadm
+    version: 4.1
+    license: https://gadm.org/license.html
+  data_type: GeoDataFrame
+gcn250_v1:
+  name: gcn250_v1
+  uri: landuse/gcn250/GCN250_*.tif
+  data_adapter:
+    rename:
+      GCN250_ARCI: cn_dry
+      GCN250_ARCII: cn_avg
+      GCN250_ARCIII: cn_wet
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    nodata: 255
+    category: soil
+    paper_doi: 10.1038/s41597-019-0155-x
+    paper_ref: Jaafar et al. (2019)
+    url: https://doi.org/10.6084/m9.figshare.7756202.v1
+    version: v1
+    license: CC BY 4.0
+  data_type: RasterDataset
+gdp_world_v1:
+  name: gdp_world_v1
+  uri: socio_economic/gdp_world/World_countries_GDPpcPPP.fgb
+  data_adapter:
+    unit_mult:
+      gdp: 0.001
+    rename:
+      GDP: gdp
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
+      and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
+    author: Wilfred Altena
+    version: 1.0
+    license: CC BY-4.0
+  data_type: GeoDataFrame
+gebco_v2020:
+  name: gebco_v2020
+  uri: bathymetry/gebco/gebco.vrt
+  data_adapter:
+    rename:
+      gebco: elevtn
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    unit: m+MSL
+    category: topography
+    paper_doi: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9
+    paper_ref: Weatherall et al (2020)
+    url: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2020/geotiff/
+    version: 2020
+    license: https://www.gebco.net/data_and_products/gridded_bathymetry_data/#a1
+  data_type: RasterDataset
+ghs_pop_2015_4326_v2019a:
+  name: ghs_pop_2015_4326_v2019a
+  uri: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_4326_9ss_V1_0.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.2905/0C6B9751-A71F-4062-830B-43C9F432370F
+    paper_ref: Schiavina et al (2019)
+    url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
+    author: JRC-ISPRA EC
+    version: R2019A_v1.0
+    license: https://data.jrc.ec.europa.eu/licence/com_reuse
+  data_type: RasterDataset
+ghs_pop_2015_54009_v2019a:
+  name: ghs_pop_2015_54009_v2019a
+  uri: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_54009_250_V1_0.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 1000
+          y: 1000
+    name: rasterio
+  metadata:
+    crs: PROJCRS["World_Mollweide",BASEGEOGCRS["WGS 84",DATUM["World Geodetic System
+      1984",ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]]],PRIMEM["Greenwich",0,ANGLEUNIT["Degree",0.0174532925199433]]],CONVERSION["World_Mollweide",METHOD["Mollweide"],PARAMETER["Longitude
+      of natural origin",0,ANGLEUNIT["Degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["False
+      easting",0,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",0,LENGTHUNIT["metre",1],ID["EPSG",8807]]],CS[Cartesian,2],AXIS["(E)",east,ORDER[1],LENGTHUNIT["metre",1]],AXIS["(N)",north,ORDER[2],LENGTHUNIT["metre",1]],USAGE[SCOPE["Not
+      known."],AREA["World."],BBOX[-90,-180,90,180]],ID["ESRI",54009]]
+    category: socio-economic
+    paper_doi: 10.2760/062975
+    paper_ref: Florczyk et al (2019)
+    url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
+    license: CC BY 4.0
+  data_type: RasterDataset
+ghs_smod_2015_54009_v2016a:
+  name: ghs_smod_2015_54009_v2016a
+  uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: PROJCRS["World_Mollweide",BASEGEOGCRS["WGS 84",DATUM["World Geodetic System
+      1984",ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]]],PRIMEM["Greenwich",0,ANGLEUNIT["Degree",0.0174532925199433]]],CONVERSION["World_Mollweide",METHOD["Mollweide"],PARAMETER["Longitude
+      of natural origin",0,ANGLEUNIT["Degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["False
+      easting",0,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",0,LENGTHUNIT["metre",1],ID["EPSG",8807]]],CS[Cartesian,2],AXIS["(E)",east,ORDER[1],LENGTHUNIT["metre",1]],AXIS["(N)",north,ORDER[2],LENGTHUNIT["metre",1]],USAGE[SCOPE["Not
+      known."],AREA["World."],BBOX[-90,-180,90,180]],ID["ESRI",54009]]
+    category: socio-economic
+    paper_ref: Pesaresi and Freire (2016)
+    url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
+    author: JRC-ISPRA EC
+    version: R2016A_v1.0
+    license: https://data.jrc.ec.europa.eu/licence/com_reuse
+  data_type: RasterDataset
+ghs_smod_2015_54009_v2019a:
+  name: ghs_smod_2015_54009_v2019a
+  uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: PROJCRS["World_Mollweide",BASEGEOGCRS["WGS 84",DATUM["World Geodetic System
+      1984",ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]]],PRIMEM["Greenwich",0,ANGLEUNIT["Degree",0.0174532925199433]]],CONVERSION["World_Mollweide",METHOD["Mollweide"],PARAMETER["Longitude
+      of natural origin",0,ANGLEUNIT["Degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["False
+      easting",0,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",0,LENGTHUNIT["metre",1],ID["EPSG",8807]]],CS[Cartesian,2],AXIS["(E)",east,ORDER[1],LENGTHUNIT["metre",1]],AXIS["(N)",north,ORDER[2],LENGTHUNIT["metre",1]],USAGE[SCOPE["Not
+      known."],AREA["World."],BBOX[-90,-180,90,180]],ID["ESRI",54009]]
+    category: socio-economic
+    paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+    paper_ref: Pesaresi et al (2019)
+    url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+    author: JRC-ISPRA EC
+    version: R2019A_v2.0
+    license: https://data.jrc.ec.europa.eu/licence/com_reuse
+  data_type: RasterDataset
+globcover_2009_v2.3:
+  name: globcover_2009_v2.3
+  uri: landuse/globcover/GLOBCOVER_L4_200901_200912_V2.3.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    paper_doi: 10.1594/PANGAEA.787668
+    paper_ref: Arino et al (2012)
+    url: http://due.esrin.esa.int/page_globcover.php
+    version: v2.3
+    license: CC-BY-3.0
+  data_type: RasterDataset
+glofas_era5_v31:
+  name: glofas_era5_v31
+  uri: hydro/glofas_era5/glofas_v31_{year}.nc
+  data_adapter:
+    rename:
+      dis24: discharge
+  driver:
+    options:
+      kwargs:
+        chunks:
+          time: 180
+          latitude: 150
+          longitude: 360
+        combine: by_coords
+        decode_times: true
+        parallel: true
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: hydro
+    notes: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.5194/essd-12-2043-2020
+    paper_ref: Harrigan et al. (2020)
+    url: https://doi.org/10.24381/cds.a4fdd6b9
+    version: v31
+    license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
+  data_type: RasterDataset
+glofas_uparea:
+  name: glofas_uparea
+  uri: hydro/glofas_era5/glofas_v31_uparea.tif
+  data_adapter:
+    unit_mult:
+      uparea: 1.0e-06
+    rename:
+      glofas_v31_uparea: uparea
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 150
+          y: 360
+    name: rasterio
+  data_type: RasterDataset
+glw_buffaloes_v3:
+  name: glw_buffaloes_v3
+  uri: socio_economic/glw/5_Bf_2010_Da.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.7910/DVN/5U8MWI
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+  data_type: RasterDataset
+glw_cattle_v3:
+  name: glw_cattle_v3
+  uri: socio_economic/glw/5_Ct_2010_Da.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.7910/DVN/GIVQ75
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+  data_type: RasterDataset
+glw_chicken_v3:
+  name: glw_chicken_v3
+  uri: socio_economic/glw/5_Ch_2010_Da.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.7910/DVN/SUFASB
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+  data_type: RasterDataset
+glw_ducks_v3:
+  name: glw_ducks_v3
+  uri: socio_economic/glw/5_Dk_2010_Da.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.7910/DVN/ICHCBH
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+  data_type: RasterDataset
+glw_goats_v3:
+  name: glw_goats_v3
+  uri: socio_economic/glw/5_Gt_2010_Da.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.7910/DVN/OCPH42
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+  data_type: RasterDataset
+glw_horses_v3:
+  name: glw_horses_v3
+  uri: socio_economic/glw/5_Ho_2010_Da.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.7910/DVN/7Q52MV
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+  data_type: RasterDataset
+glw_pigs_v3:
+  name: glw_pigs_v3
+  uri: socio_economic/glw/5_Pg_2010_Da.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.7910/DVN/33N0JG
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+  data_type: RasterDataset
+glw_sheeps_v3:
+  name: glw_sheeps_v3
+  uri: socio_economic/glw/5_Sh_2010_Da.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.7910/DVN/BLWPZN
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+  data_type: RasterDataset
+grdc:
+  name: grdc
+  uri: hydro/grdc/GRDC_Stations.csv
+  data_adapter:
+    rename:
+      area: uparea
+  driver:
+    options:
+      kwargs:
+        index_col: grdc_no
+    name: geodataframe_table
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: observed data
+    notes: GRDC-Station Catalogue, last downloaded 2020-07-16
+    url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
+    license: https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
+  data_type: GeoDataFrame
+grip_roads_v4:
+  name: grip_roads_v4
+  uri: infrastructure/grip/GRIP4_world.fgb
+  data_adapter:
+    rename:
+      GP_RTP: road_type
+      GP_RCY: country_code
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: road
+    paper_ref: Meijer et al, 2018
+    paper_doi: 10.1088/1748-9326/aabd42
+    url: https://www.globio.info/download-grip-dataset
+    version: v4
+    license: CC0-1.0
+  data_type: GeoDataFrame
+grwl_mask_v1.01:
+  name: grwl_mask_v1.01
+  uri: hydrography/grwl/tindex.gpkg
+  driver:
+    metadata_resolver:
+      name: raster_tindex
+    options:
+      kwargs:
+        chunks:
+          x: 3000
+          y: 3000
+        mosaic_kwargs:
+          method: nearest
+        tileindex: location
+    name: rasterio
+  metadata:
+    category: hydrography
+    paper_doi: 10.1126/science.aat0636
+    paper_ref: Allen and Pavelsky (2018)
+    url: https://doi.org/10.5281/zenodo.1297434
+    version: 1.01
+    license: CC BY 4.0
+  data_type: RasterDataset
+grwl_v1.01:
+  name: grwl_v1.01
+  uri: hydrography/grwl/GRWL_vector_V01.01/grwl.fgb
+  driver:
+    name: pyogrio
+  metadata:
+    category: surface water
+    paper_doi: 10.1126/science.aat0636
+    paper_ref: Allen and Pavelsky (2018)
+    url: https://doi.org/10.5281/zenodo.1297434
+    version: 1.01
+    license: CC BY 4.0
+  data_type: GeoDataFrame
+gswo_v2019:
+  name: gswo_v2019
+  uri: hydrography/gswo/occur.vrt
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 4000
+          y: 4000
+    name: rasterio
+  metadata:
+    nodata: 255
+    category: hydrography
+    paper_doi: 10.1038/nature20584
+    paper_ref: Pekel et al. (2016)
+    url: https://global-surface-water.appspot.com/download
+    version: v1_1_2019
+  data_type: RasterDataset
+gtsm_codec_reanalysis_10min_v1:
+  name: gtsm_codec_reanalysis_10min_v1
+  uri: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_10min_{year}_{month:02d}_v1.nc
+  data_adapter:
+    rename:
+      station_x_coordinate: lon
+      station_y_coordinate: lat
+      stations: index
+  driver:
+    options:
+      kwargs:
+        chunks:
+          stations: 10
+          time: -1
+    name: geodataset_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: ocean
+    paper_doi: 10.3389/fmars.2020.00263
+    paper_ref: Muis at al (2020)
+    url: https://doi.org/10.24381/cds.8c59054f
+    version: v1
+    license: https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
+  data_type: GeoDataset
+gtsm_codec_reanalysis_dailymax_v1:
+  name: gtsm_codec_reanalysis_dailymax_v1
+  uri: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_dailymax_{year}_{month:02d}_v1.nc
+  data_adapter:
+    rename:
+      station_x_coordinate: lon
+      station_y_coordinate: lat
+      stations: index
+  driver:
+    options:
+      kwargs:
+        chunks:
+          stations: 10
+          time: -1
+    name: geodataset_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: ocean
+    paper_doi: 10.3389/fmars.2020.00263
+    paper_ref: Muis at al (2020)
+    url: https://doi.org/10.24381/cds.8c59054f
+    version: v1
+    license: https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
+  data_type: GeoDataset
+gtsm_codec_reanalysis_hourly_v1:
+  name: gtsm_codec_reanalysis_hourly_v1
+  uri: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_hourly_{year}_{month:02d}_v1.nc
+  data_adapter:
+    rename:
+      station_x_coordinate: lon
+      station_y_coordinate: lat
+      stations: index
+  driver:
+    options:
+      kwargs:
+        chunks:
+          stations: 10
+          time: -1
+    name: geodataset_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: ocean
+    paper_doi: 10.3389/fmars.2020.00263
+    paper_ref: Muis at al (2020)
+    url: https://doi.org/10.24381/cds.8c59054f
+    version: v1
+    license: https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
+  data_type: GeoDataset
+guf_bld_2012_v02:
+  name: guf_bld_2012_v02
+  uri: infrastructure/guf/GUF04_DLR_v02.vrt
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 1000
+          y: 1000
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.1016/j.isprsjprs.2017.10.012
+    paper_ref: Esch et al (2017)
+    url: http://www.dlr.de/guf
+    license: https://www.dlr.de/eoc/en/PortalData/60/Resources/dokumente/guf/DLR-GUF_LicenseAgreement-and-OrderForm.pdf
+  data_type: RasterDataset
+hydro_lakes:
+  name: hydro_lakes
+  uri: hydrography/lakes/lake-db.fgb
+  data_adapter:
+    unit_mult:
+      Area_avg: 1000000.0
+    rename:
+      Depth_avg: Depth_avg
+      Dis_avg: Dis_avg
+      Hylak_id: waterbody_id
+      Lake_area: Area_avg
+      Pour_lat: yout
+      Pour_long: xout
+      Vol_total: Vol_avg
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: surface water
+    notes: HydroLAKES.v10_extract
+    author: Arjen Haag
+    version: 1.0
+  data_type: GeoDataFrame
+hydro_reservoirs:
+  name: hydro_reservoirs
+  uri: hydrography/reservoirs/reservoir-db.fgb
+  data_adapter:
+    unit_mult:
+      Area_avg: 1000000.0
+      Capacity_max: 1000000.0
+      Capacity_min: 1000000.0
+      Capacity_norm: 1000000.0
+      Vol_avg: 1000000.0
+    rename:
+      Depth_avg: Depth_avg
+      Dis_avg: Dis_avg
+      G_CAP_MAX: Capacity_max
+      G_CAP_MIN: Capacity_min
+      G_CAP_REP: Capacity_norm
+      G_DAM_HGT_: Dam_height
+      Grand_id: waterbody_id
+      Hylak_id: Hylak_id
+      Lake_area: Area_avg
+      Pour_lat: yout
+      Pour_long: xout
+      Vol_total: Vol_avg
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    nodata: -99
+    category: surface water
+    notes: GRanD.v1.1_HydroLAKES.v10_JRC.2016
+    author: Alessia Matano
+    version: 1.0
+  data_type: GeoDataFrame
+koppen_geiger:
+  name: koppen_geiger
+  uri: meteo/climate_classification_v2017/Map_KG-Global.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: meteo
+    paper_doi: 10.1127/0941-2948/2006/0130
+    paper_ref: Kottek et al. (2006)
+    url: http://koeppen-geiger.vu-wien.ac.at/present.htm
+    version: 2017
+  data_type: RasterDataset
+lake_atlas_pol_v10:
+  name: lake_atlas_pol_v10
+  uri: hydrography/hydro_atlas/lake_atlas_v10.gpkg
+  data_adapter:
+    rename:
+      dis_m3_pyr: Dis_avg
+  driver:
+    options:
+      kwargs:
+        layer: LakeATLAS_v10_pol
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: hydrography
+    notes: renaming and units might require some revision
+    paper_doi: 10.1038/s41597-022-01425-z
+    paper_ref: Lehner et al. (2022)
+    url: https://www.hydrosheds.org/hydroatlas
+    version: 10
+    license: CC BY 4.0
+  data_type: GeoDataFrame
+mdt_cnes_cls18:
+  name: mdt_cnes_cls18
+  uri: topography/mdt_cnes_cls18/MDT_CNES_CLS18_global_filled.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 720
+          y: 720
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    unit: m+GOCO05S
+    category: topography
+    paper_doi: 10.5194/os-17-789-2021
+    paper_ref: Mulet et al (2021)
+    url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
+    version: 18
+  data_type: RasterDataset
+merit_hydro_ihu_30sec_v1.0:
+  name: merit_hydro_ihu_30sec_v1.0
+  uri: topography/merit_hydro_ihu/30sec/*.tif
+  data_adapter:
+    rename:
+      30sec_basids: basins
+      30sec_flwdir: flwdir
+      30sec_elevtn: elevtn
+      30sec_strord: strord
+      30sec_uparea: uparea
+      30sec_rivlen: rivlen
+      30sec_rivslp: rivslp
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 6000
+          y: 6000
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: topography
+    paper_doi: 10.5194/hess-2020-582
+    paper_ref: Eilander et al. (2021)
+    source_doi: 10.5281/zenodo.5166932
+    url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
+    version: 1.0
+    license: ODC-By 1.0
+  data_type: RasterDataset
+merit_hydro_ihu_index:
+  name: merit_hydro_ihu_index
+  uri: topography/merit_hydro_ihu/30sec/basins.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: topography
+    paper_doi: 10.5194/hess-25-5287-2021
+    paper_ref: Eilander et al. (2021)
+    url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
+    license: CC-BY-NC 4.0
+  data_type: GeoDataFrame
+merit_hydro_index_v1.0:
+  name: merit_hydro_index_v1.0
+  uri: topography/merit_hydro/basin_index.fgb
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: topography
+    paper_doi: 10.5194/hess-25-5287-2021
+    paper_ref: Eilander et al. (2021)
+    license: CC-BY-NC 4.0
+  data_type: GeoDataFrame
+merit_hydro_patch_v1.0:
+  name: merit_hydro_patch_v1.0
+  uri: topography/merit_hydro/patches/*.vrt
+  data_adapter:
+    rename:
+      bas: basins
+      dir: flwdir
+      elv: elevtn
+      slp: lndslp
+      sto: strord
+      upa: uparea
+      upg: upgrid
+      wth: rivwth
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 6000
+          y: 6000
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: topography
+    paper_doi: 10.1029/2019WR024873
+    paper_ref: Yamazaki et al. (2019)
+    url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
+    version: 1.0 Deltares patch
+    license: CC-BY-NC 4.0 or ODbL 1.0
+  data_type: RasterDataset
+merit_hydro_v1.0:
+  name: merit_hydro_v1.0
+  uri: topography/merit_hydro/*.vrt
+  data_adapter:
+    rename:
+      bas: basins
+      dir: flwdir
+      elv: elevtn
+      slp: lndslp
+      sto: strord
+      upa: uparea
+      upg: upgrid
+      wth: rivwth
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 6000
+          y: 6000
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: topography
+    paper_doi: 10.1029/2019WR024873
+    paper_ref: Yamazaki et al. (2019)
+    url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
+    version: 1.0
+    license: CC-BY-NC 4.0 or ODbL 1.0
+  data_type: RasterDataset
+merit_v1.0.3:
+  name: merit_v1.0.3
+  uri: topography/merit/merit.nc
+  data_adapter:
+    rename:
+      elevation: elevtn
+  driver:
+    options:
+      kwargs:
+        drop_variables: projection
+        chunks:
+          lat: 6000
+          lon: 6000
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: topography
+    paper_doi: 10.1002/2017GL072874
+    paper_ref: Yamazaki et al. (2018)
+    url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/
+    version: 1.0.3
+    license: CC-BY-NC 4.0 or ODbL 1.0
+  data_type: RasterDataset
+modis_mcd15a3h_v006:
+  name: modis_mcd15a3h_v006
+  uri: landuse/modis/MODIS_MCD15A3H_LAI/*.tif
+  data_adapter:
+    unit_mult:
+      LAI: 0.1
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+        concat: true
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the
+      period '2003-01-01', '2017-12-31'
+    paper_doi: 10.5067/MODIS/MCD15A3H.006
+    paper_ref: Myneni et al (2015)
+    url: https://lpdaac.usgs.gov/products/mcd15a3hv006/
+    version: MCD15A3H V006
+    license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
+  data_type: RasterDataset
+osm_coastlines_v20200109:
+  name: osm_coastlines_v20200109
+  uri: geography/osm/osm_coastlines-db.fgb
+  data_adapter:
+    rename:
+      fid: coastline_id
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: geography
+    notes: OpenStreetMap coastlines water polygons, last updated 2020-01-09T05:29
+    url: https://osmdata.openstreetmap.de/data/coastlines.html
+    author: OpenStreetMap
+    version: 1.0
+    license: ODbL
+  data_type: GeoDataFrame
+osm_landareas_v20200109:
+  name: osm_landareas_v20200109
+  uri: geography/osm/osm_landareas-db.fgb
+  data_adapter:
+    rename:
+      fid: land_id
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: geography
+    notes: OpenStreetMap coastlines land polygons, last updated 2020-01-09T05:29
+    url: https://osmdata.openstreetmap.de/data/coastlines.html
+    author: OpenStreetMap
+    version: 1.0
+    license: ODbL
+  data_type: GeoDataFrame
+pcr_globwb:
+  metadata:
+    paper_ref: Sutanudjaja, E. H., et al (2017)
+    processing_script: hydro/pcr_globwb/prep_glob.py
+    notes: last downloaded 2023-11-23
+    category: water demand
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+    version: 2017.11b1
+    nodata: -9999
+    paper_doi: 10.5281/zenodo.1045339
+  data_type: RasterDataset
+  data_adapter:
+    rename:
+      domesticNettoDemand: dom_net
+      industryGrossDemand: ind_gross
+      livestockNettoDemand: lsk_net
+      livestockGrossDemand: lsk_gross
+      industryNettoDemand: ind_net
+      domesticGrossDemand: dom_gross
+    unit_mult:
+      lsk_net: 1000
+      lsk_gross: 1000
+      ind_gross: 1000
+      dom_net: 1000
+      ind_net: 1000
+      dom_gross: 1000
+  driver:
+    options:
+      kwargs:
+        chunks: auto
+    name: raster_xarray
+  name: pcr_globwb
+  variants:
+  - uri: hydro/pcr_globwb/glob_1990.zarr
+    version: 1990
+  - uri: hydro/pcr_globwb/glob_1995.zarr
+    version: 1995
+  - uri: hydro/pcr_globwb/glob_2000.zarr
+    version: 2000
+  - uri: hydro/pcr_globwb/glob_2005.zarr
+    version: 2005
+rgi_v0.6:
+  name: rgi_v0.6
+  uri: hydrography/rgi/rgi.fgb
+  data_adapter:
+    rename:
+      C3S_ID: C3S_id
+      GLIMSID: GLIMS_id
+      ID: simple_id
+      RGIID: RGI_id
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: surface water
+    notes: Randolph Glacier Inventory
+    paper_doi: 10.3189/2014JoG13J176
+    paper_ref: Pfeffer et al. (2014)
+    url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
+    version: 6.0
+    license: CC BY 4.0
+  data_type: GeoDataFrame
+river_atlas_v10:
+  name: river_atlas_v10
+  uri: hydrography/hydro_atlas/river_atlas_v10.gpkg
+  data_adapter:
+    rename:
+      dis_m3_pyr: Dis_avg
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: hydrography
+    notes: renaming and units might require some revision
+    paper_doi: 10.1038/s41597-019-0300-6
+    paper_ref: Linke et al. (2019)
+    url: https://www.hydrosheds.org/hydroatlas
+    version: 10
+    license: CC BY 4.0
+  data_type: GeoDataFrame
+rivers_lin2019_v1:
+  name: rivers_lin2019_v1
+  uri: hydrography/rivers_lin2019/rivers_ge30m.fgb
+  data_adapter:
+    rename:
+      width_m: rivwth
+      Q2: qbankfull
+  driver:
+    name: pyogrio
+  metadata:
+    category: hydrography
+    paper_doi: 10.5281/zenodo.3552776
+    paper_ref: Lin et al. (2019)
+    url: https://zenodo.org/record/3552776#.YVbOrppByUk
+    version: 1
+    license: CC-BY-NC 4.0
+  data_type: GeoDataFrame
+simard_v2011:
+  name: simard_v2011
+  uri: landuse/simard/sdat_10023_canopy_height_simard.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    paper_doi: 10.1029/2011JG001708
+    paper_ref: Simard et al (2011)
+    url: https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023
+  data_type: RasterDataset
+soilgrids_v1.0:
+  name: soilgrids_v1.0
+  uri: soil/soilgrids_v1.0/*_250m_ll.tif
+  data_adapter:
+    unit_mult:
+      bd_sl1: 0.001
+      bd_sl2: 0.001
+      bd_sl3: 0.001
+      bd_sl4: 0.001
+      bd_sl5: 0.001
+      bd_sl6: 0.001
+      bd_sl7: 0.001
+      oc_sl1: 0.1
+      oc_sl2: 0.1
+      oc_sl3: 0.1
+      oc_sl4: 0.1
+      oc_sl5: 0.1
+      oc_sl6: 0.1
+      oc_sl7: 0.1
+      ph_sl1: 0.1
+      ph_sl2: 0.1
+      ph_sl3: 0.1
+      ph_sl4: 0.1
+      ph_sl5: 0.1
+      ph_sl6: 0.1
+      ph_sl7: 0.1
+    rename:
+      BLDFIE_M_sl1_250m_ll: bd_sl1
+      BLDFIE_M_sl2_250m_ll: bd_sl2
+      BLDFIE_M_sl3_250m_ll: bd_sl3
+      BLDFIE_M_sl4_250m_ll: bd_sl4
+      BLDFIE_M_sl5_250m_ll: bd_sl5
+      BLDFIE_M_sl6_250m_ll: bd_sl6
+      BLDFIE_M_sl7_250m_ll: bd_sl7
+      CLYPPT_M_sl1_250m_ll: clyppt_sl1
+      CLYPPT_M_sl2_250m_ll: clyppt_sl2
+      CLYPPT_M_sl3_250m_ll: clyppt_sl3
+      CLYPPT_M_sl4_250m_ll: clyppt_sl4
+      CLYPPT_M_sl5_250m_ll: clyppt_sl5
+      CLYPPT_M_sl6_250m_ll: clyppt_sl6
+      CLYPPT_M_sl7_250m_ll: clyppt_sl7
+      ORCDRC_M_sl1_250m_ll: oc_sl1
+      ORCDRC_M_sl2_250m_ll: oc_sl2
+      ORCDRC_M_sl3_250m_ll: oc_sl3
+      ORCDRC_M_sl4_250m_ll: oc_sl4
+      ORCDRC_M_sl5_250m_ll: oc_sl5
+      ORCDRC_M_sl6_250m_ll: oc_sl6
+      ORCDRC_M_sl7_250m_ll: oc_sl7
+      PHIHOX_M_sl1_250m_ll: ph_sl1
+      PHIHOX_M_sl2_250m_ll: ph_sl2
+      PHIHOX_M_sl3_250m_ll: ph_sl3
+      PHIHOX_M_sl4_250m_ll: ph_sl4
+      PHIHOX_M_sl5_250m_ll: ph_sl5
+      PHIHOX_M_sl6_250m_ll: ph_sl6
+      PHIHOX_M_sl7_250m_ll: ph_sl7
+      SLTPPT_M_sl1_250m_ll: sltppt_sl1
+      SLTPPT_M_sl2_250m_ll: sltppt_sl2
+      SLTPPT_M_sl3_250m_ll: sltppt_sl3
+      SLTPPT_M_sl4_250m_ll: sltppt_sl4
+      SLTPPT_M_sl5_250m_ll: sltppt_sl5
+      SLTPPT_M_sl6_250m_ll: sltppt_sl6
+      SLTPPT_M_sl7_250m_ll: sltppt_sl7
+      SNDPPT_M_sl1_250m_ll: sndppt_sl1
+      SNDPPT_M_sl2_250m_ll: sndppt_sl2
+      SNDPPT_M_sl3_250m_ll: sndppt_sl3
+      SNDPPT_M_sl4_250m_ll: sndppt_sl4
+      SNDPPT_M_sl5_250m_ll: sndppt_sl5
+      SNDPPT_M_sl6_250m_ll: sndppt_sl6
+      SNDPPT_M_sl7_250m_ll: sndppt_sl7
+      SoilThickness_250m_ll: soilthickness
+      TAXOUSDA_250m_ll: tax_usda
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 2400
+          y: 2400
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: soil
+    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
+      \ (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database\
+      \ distribution version 2.0, european commission and the European soil bureau\n\
+      \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van\
+      \ Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre:\
+      \ Response to european policy support  and public data requirements. Land Use\
+      \ Policy 29 (2), 329\xE2\u20AC\u201C338. \n"
+    paper_doi: 10.1371/journal.pone.0169748
+    paper_ref: Hengl et al. (2017)
+    url: https://www.isric.org/explore/soilgrids/faq-soilgrids-2017
+    version: 2017
+    license: ODbL
+  data_type: RasterDataset
+soilgrids_v2.0:
+  name: soilgrids_v2.0
+  uri: soil/soilgrids_v2.0/*/*_mean.vrt
+  data_adapter:
+    unit_mult:
+      bd_sl1: 0.01
+      bd_sl2: 0.01
+      bd_sl3: 0.01
+      bd_sl4: 0.01
+      bd_sl5: 0.01
+      bd_sl6: 0.01
+      bd_sl7: 0.01
+      oc_sl1: 0.01
+      oc_sl2: 0.01
+      oc_sl3: 0.01
+      oc_sl4: 0.01
+      oc_sl5: 0.01
+      oc_sl6: 0.01
+      oc_sl7: 0.01
+      ph_sl1: 0.1
+      ph_sl2: 0.1
+      ph_sl3: 0.1
+      ph_sl4: 0.1
+      ph_sl5: 0.1
+      ph_sl6: 0.1
+      ph_sl7: 0.1
+      clyppt_sl1: 0.1
+      clyppt_sl2: 0.1
+      clyppt_sl3: 0.1
+      clyppt_sl4: 0.1
+      clyppt_sl5: 0.1
+      clyppt_sl6: 0.1
+      clyppt_sl7: 0.1
+      sltppt_sl1: 0.1
+      sltppt_sl2: 0.1
+      sltppt_sl3: 0.1
+      sltppt_sl4: 0.1
+      sltppt_sl5: 0.1
+      sltppt_sl6: 0.1
+      sltppt_sl7: 0.1
+      sndppt_sl1: 0.1
+      sndppt_sl2: 0.1
+      sndppt_sl3: 0.1
+      sndppt_sl4: 0.1
+      sndppt_sl5: 0.1
+      sndppt_sl6: 0.1
+      sndppt_sl7: 0.1
+    rename:
+      bdod_0-5cm_mean: bd_sl1
+      bdod_5-15cm_mean: bd_sl2
+      bdod_15-30cm_mean: bd_sl3
+      bdod_30-60cm_mean: bd_sl4
+      bdod_60-100cm_mean: bd_sl5
+      bdod_100-200cm_mean: bd_sl6
+      clay_0-5cm_mean: clyppt_sl1
+      clay_5-15cm_mean: clyppt_sl2
+      clay_15-30cm_mean: clyppt_sl3
+      clay_30-60cm_mean: clyppt_sl4
+      clay_60-100cm_mean: clyppt_sl5
+      clay_100-200cm_mean: clyppt_sl6
+      soc_0-5cm_mean: oc_sl1
+      soc_5-15cm_mean: oc_sl2
+      soc_15-30cm_mean: oc_sl3
+      soc_30-60cm_mean: oc_sl4
+      soc_60-100cm_mean: oc_sl5
+      soc_100-200cm_mean: oc_sl6
+      phh2o_0-5cm_mean: ph_sl1
+      phh2o_5-15cm_mean: ph_sl2
+      phh2o_15-30cm_mean: ph_sl3
+      phh2o_30-60cm_mean: ph_sl4
+      phh2o_60-100cm_mean: ph_sl5
+      phh2o_100-200cm_mean: ph_sl6
+      silt_0-5cm_mean: sltppt_sl1
+      silt_5-15cm_mean: sltppt_sl2
+      silt_15-30cm_mean: sltppt_sl3
+      silt_30-60cm_mean: sltppt_sl4
+      silt_60-100cm_mean: sltppt_sl5
+      silt_100-200cm_mean: sltppt_sl6
+      sand_0-5cm_mean: sndppt_sl1
+      sand_5-15cm_mean: sndppt_sl2
+      sand_15-30cm_mean: sndppt_sl3
+      sand_30-60cm_mean: sndppt_sl4
+      sand_60-100cm_mean: sndppt_sl5
+      sand_100-200cm_mean: sndppt_sl6
+      SoilThickness_250_mean: soilthickness
+      TAXOUSDA_250_mean: tax_usda
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 2400
+          y: 2400
+    name: rasterio
+  metadata:
+    category: soil
+    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
+      \ (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database\
+      \ distribution version 2.0, european commission and the European soil bureau\
+      \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van\
+      \ Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre:\
+      \ Response to european policy support  and public data requirements. Land Use\
+      \ Policy 29 (2), 329\xE2\u20AC\u201C338. \n"
+    paper_doi: https://doi.org/10.5194/soil-2020-65
+    paper_ref: de Sousa et al. (2020)
+    url: https://www.isric.org/explore/soilgrids/faq-soilgrids
+    version: 2020
+    license: CC BY 4.0
+  data_type: RasterDataset
+vito_2015_v2.0.2:
+  name: vito_2015_v2.0.2
+  uri: landuse/vito/ProbaV_LC100_epoch2015_global_v2.0.2_discrete-classification_EPSG-4326.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    paper_doi: 10.5281/zenodo.3939038
+    paper_ref: Buchhorn et al (2020)
+    url: https://land.copernicus.eu/global/products/lc
+    version: v2.0.2
+  data_type: RasterDataset
+vito_2016_v3.0.1:
+  name: vito_2016_v3.0.1
+  uri: landuse/vito/PROBAV_LC100_global_v3.0.1_2016-conso_Discrete-Classification-map_EPSG-4326.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    paper_doi: 10.5281/zenodo.3518026
+    paper_ref: Buchhorn et al (2020)
+    url: https://land.copernicus.eu/global/products/lc
+    version: v3.0.1
+  data_type: RasterDataset
+vito_2017_v3.0.1:
+  name: vito_2017_v3.0.1
+  uri: landuse/vito/PROBAV_LC100_global_v3.0.1_2017-conso_Discrete-Classification-map_EPSG-4326.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    paper_doi: 10.5281/zenodo.3518036
+    paper_ref: Buchhorn et al (2020)
+    url: https://land.copernicus.eu/global/products/lc
+    version: v3.0.1
+  data_type: RasterDataset
+vito_2018_v3.0.1:
+  name: vito_2018_v3.0.1
+  uri: landuse/vito/PROBAV_LC100_global_v3.0.1_2018-conso_Discrete-Classification-map_EPSG-4326.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    paper_doi: 10.5281/zenodo.3518038
+    paper_ref: Buchhorn et al (2020)
+    url: https://land.copernicus.eu/global/products/lc
+    version: v3.0.1
+  data_type: RasterDataset
+vito_2019_v3.0.1:
+  name: vito_2019_v3.0.1
+  uri: landuse/vito/ProbaV_LC100_global_v3.0.1_2019-nrt_discrete-classification-map_EPSG-4326.tif
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 3600
+          y: 3600
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: landuse
+    paper_doi: 10.5281/zenodo.3939050
+    paper_ref: Buchhorn et al (2020)
+    url: https://land.copernicus.eu/global/products/lc
+    version: v3.0.1
+  data_type: RasterDataset
+wb_countries_v20200319:
+  name: wb_countries_v20200319
+  uri: geography/wb/WB_countries_Admin0.fgb
+  data_adapter:
+    unit_mult:
+      gdp_pc: 1000
+    rename:
+      ISO_A3: country_iso
+      ISO_N3: country_code
+      POP_EST: population
+      GDP_MD_EST: gdp_pc
+      GDP_kD_PPP: gdp
+  driver:
+    name: pyogrio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    timestamp: February 2020
+    url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
+    author: World Bank
+    license: CC-BY 4.0
+  data_type: GeoDataFrame
+worldclim_v2.0:
+  name: worldclim_v2.0
+  uri: meteo/worldclim_v2.0/wc2.0_30s_prec.nc
+  data_adapter:
+    rename:
+      prec: precip
+  driver:
+    options:
+      kwargs:
+        chunks:
+          lat: 3600
+          lon: 3600
+    name: raster_xarray
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    nodata: -999.0
+    category: meteo
+    paper_doi: 10.1002/joc.5086
+    paper_ref: Fick and Hijmans (2017)
+    url: https://www.worldclim.org/data/worldclim21.html
+    version: 2
+  data_type: RasterDataset
+worldpop_2020_UNadj_constrained:
+  name: worldpop_2020_UNadj_constrained
+  uri: socio_economic/worldpop/ppp_2020_UNadj_constrained.vrt
+  data_adapter:
+    rename:
+      ppp_2020_UNadj_constrained: population
+  driver:
+    name: rasterio
+  data_type: RasterDataset
+worldpop_2020_constrained:
+  name: worldpop_2020_constrained
+  uri: socio_economic/worldpop/ppp_2020_constrained.vrt
+  data_adapter:
+    rename:
+      ppp_2020_constrained: population
+  driver:
+    options:
+      kwargs:
+        chunks: auto
+    name: rasterio
+  metadata:
+    nodata: -99999
+    category: socio-economic
+    paper_doi: 10.1371/journal.pone.0107042
+    paper_ref: Stevens et al. (2015)
+    url: https://www.worldpop.org/doi/10.5258/SOTON/WP00684
+    license: CC BY 4.0
+  data_type: RasterDataset
+wsf_bld_2015_v1:
+  name: wsf_bld_2015_v1
+  uri: infrastructure/wsf/WSF2015_v1_EPSG4326.vrt
+  driver:
+    options:
+      kwargs:
+        chunks:
+          x: 1000
+          y: 1000
+    name: rasterio
+  metadata:
+    crs: GEOGCRS["WGS 84",ENSEMBLE["World Geodetic System 1984 ensemble",MEMBER["World
+      Geodetic System 1984 (Transit)"],MEMBER["World Geodetic System 1984 (G730)"],MEMBER["World
+      Geodetic System 1984 (G873)"],MEMBER["World Geodetic System 1984 (G1150)"],MEMBER["World
+      Geodetic System 1984 (G1674)"],MEMBER["World Geodetic System 1984 (G1762)"],MEMBER["World
+      Geodetic System 1984 (G2139)"],ELLIPSOID["WGS 84",6378137,298.257223563,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[2.0]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],CS[ellipsoidal,2],AXIS["geodetic
+      latitude (Lat)",north,ORDER[1],ANGLEUNIT["degree",0.0174532925199433]],AXIS["geodetic
+      longitude (Lon)",east,ORDER[2],ANGLEUNIT["degree",0.0174532925199433]],USAGE[SCOPE["Horizontal
+      component of 3D system."],AREA["World."],BBOX[-90,-180,90,180]],ID["EPSG",4326]]
+    category: socio-economic
+    paper_doi: 10.1038/s41597-020-00580-5
+    paper_ref: Marconcini at al (2020)
+    url: https://un-spider.org/links-and-resources/data-sources/world-settlement-footprint-2015-wsf-dlr-eoc
+    license: CC0 1.0
+  data_type: RasterDataset
