@@ -46,7 +46,7 @@ class DataFrameSource(DataSource):
     ) -> pd.DataFrame:
         """Use the driver and data adapter to read and harmonize the data."""
         self.mark_as_used()
-        gdf: pd.DataFrame = self.driver.read(
+        df: pd.DataFrame = self.driver.read(
             self.full_uri,
             variables=variables,
             time_range=time_range,
@@ -55,7 +55,7 @@ class DataFrameSource(DataSource):
             logger=logger,
         )
         return self.data_adapter.transform(
-            gdf,
+            df,
             self.metadata,
             variables=variables,
             time_range=time_range,

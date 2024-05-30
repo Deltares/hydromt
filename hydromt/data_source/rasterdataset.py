@@ -286,7 +286,7 @@ class RasterDatasetSource(DataSource):
             start_dt, end_dt = self.get_time_range(detect=True)
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
-            props = {**self.metadata.model_dump(), "crs": crs}
+            props = {**self.metadata.model_dump(exclude_none=True), "crs": crs}
             ext = splitext(self.full_uri)[-1]
             if ext == ".nc" or ext == ".vrt":
                 media_type = MediaType.HDF5

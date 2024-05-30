@@ -172,6 +172,7 @@ class GridComponent(SpatialModelComponent):
         return write_nc(
             {"grid": self.data},
             filename or self._filename,
+            root=self.model.root.path,
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
             logger=self.logger,

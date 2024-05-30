@@ -1,19 +1,21 @@
 ---
 vito_mapping:
   data_type: DataFrame
-  driver: csv
-  kwargs:
-    index_col: 0
-  meta:
+  driver:
+    name: pandas
+    options:
+      index_col: 0
+  metadata:
     category: landuse
     source_info: landuse parameters based on vito classification (https://land.copernicus.eu/global/products/lc)
     source_version: 1.0
-  path: vito_mapping.csv
+  uri: vito_mapping.csv
 vito_mapping_parquet:
   data_type: DataFrame
-  driver: parquet
-  meta:
+  driver:
+    name: pandas
+  metadata:
     category: landuse
     source_info: landuse parameters based on vito classification (https://land.copernicus.eu/global/products/lc)
     source_version: 1.0
-  path: vito_mapping.parquet
+  uri: vito_mapping.parquet

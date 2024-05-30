@@ -65,6 +65,8 @@ def _single_var_as_array(
     single_var_as_array: bool,
     variable_name: Optional[Variables] = None,
 ) -> Optional[xr.Dataset]:
+    if isinstance(maybe_ds, xr.DataArray):
+        return maybe_ds
     if maybe_ds is None:
         return None
     elif isinstance(maybe_ds, xr.DataArray):
