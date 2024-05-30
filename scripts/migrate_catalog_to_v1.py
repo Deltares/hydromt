@@ -1,10 +1,11 @@
 """Script to migrate your catalog to the v1 version."""
 
 from argparse import ArgumentParser, Namespace
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
-from yaml import Loader, load
+from yaml import Loader, dump, load
 
 from hydromt.data_catalog import DataCatalog
 
@@ -53,7 +54,7 @@ def prepare_path_out(path_out: Path, overwrite: bool):
         path_out.parent.mkdir(parents=True, exist_ok=True)
 
 
-def load_catalog(catalog_path: Path):
+def load_catalog(catalog_path: Path) -> Dict:
     """Load the catalog into dict."""
     with open(catalog_path) as f:
         return load(f, Loader)
@@ -62,8 +63,10 @@ def load_catalog(catalog_path: Path):
 def migrate_meta(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
     """Migrate metadata of catalog."""
     if catalog_meta := catalog_dict.pop("meta", None):
-        if version := catalog_meta.get("hydromt_version"):
-            catalog_meta["hydromt_version"] = version
+        if hydromt_version := catalog_meta.get("hydromt_version"):
+            catalog_meta["hydromt_version"] = hydromt_version
+        else:
+            catalog_meta["hydromt_version"] = ">1.0a,<2"
 
         return catalog_meta
 
@@ -71,13 +74,19 @@ def migrate_meta(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
 def migrate_entries(catalog_dict: Dict[str, Any]) -> Dict[str, Any]:
     """Migrate all entries of the data catalog."""
     new_catalog_meta: Dict[str, Any] = migrate_meta(catalog_dict)
-    new_catalog_dict = {item[0]: migrate_entry(*item) for item in catalog_dict.items()}
-    new_catalog_dict["meta"] = new_catalog_meta
+    new_catalog_dict = {
+        "meta": new_catalog_meta,
+        **{item[0]: migrate_entry(*item) for item in catalog_dict.items()},
+    }
     return new_catalog_dict
 
 
-def migrate_entry(entry_name: str, entry: Dict[str, Any]) -> Dict[str, Any]:
+def migrate_entry(
+    entry_name: str, entry: Dict[str, Any], variant_ref: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Migrate the v0.x entry to v1."""
+    if variant_ref is None:
+        variant_ref = {}
     # Check if alias
     if entry.get("alias"):
         raise RuntimeError(
@@ -90,7 +99,7 @@ def migrate_entry(entry_name: str, entry: Dict[str, Any]) -> Dict[str, Any]:
         entry["uri"] = path
 
     # migrate driver str to dict
-    data_type: Optional[str] = entry.get("data_type")
+    data_type: Optional[str] = entry.get("data_type", variant_ref.get("data_type"))
     if data_type and entry.get("driver"):
         old_driver: str = entry.pop("driver")
         driver_name: str = DRIVER_RENAME_MAPPING[data_type][old_driver]
@@ -149,9 +158,13 @@ def migrate_entry(entry_name: str, entry: Dict[str, Any]) -> Dict[str, Any]:
                 entry["data_adapter"][param] = val
 
     # Migrate variants
-    if variants := entry.get("variants"):
+    if variants := entry.get("variants", None):
         entry["variants"] = [
-            migrate_entry(entry_name=f"{entry_name} variant", entry=variant)
+            migrate_entry(
+                entry_name=f"{entry_name} variant",
+                entry=variant,
+                variant_ref={"data_type": entry.get("data_type")},
+            )
             for variant in variants
         ]
 
@@ -160,13 +173,18 @@ def migrate_entry(entry_name: str, entry: Dict[str, Any]) -> Dict[str, Any]:
 
 def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
     """Write the catalog out to the new structure."""
-    meta: Dict[str, Any] = new_catalog_dict.pop("meta", None)
+    # validate catalog, need a copy because catalog_dict is changed by DataCatalog.from_dict
+    copy_catalog = deepcopy(new_catalog_dict)
+    meta = copy_catalog.pop("meta", None)
     if meta:
         root = meta.pop("root", None)
     else:
         root = None
-    catalog = DataCatalog().from_dict(new_catalog_dict, root=root)
-    catalog.to_yml(path_out, root=root, meta=meta)
+    DataCatalog().from_dict(copy_catalog, root=root)
+
+    # dump dict
+    with open(path_out, mode="w") as f:
+        dump(new_catalog_dict, f, default_flow_style=False, sort_keys=False)
 
 
 def main(path_in: Path, path_out: Path, overwrite: bool):

@@ -943,7 +943,10 @@ class DataCatalog(object):
         for name, source in sorted_sources:  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
-            source_dict = source.model_dump(exclude_defaults=True)
+            source_dict = source.model_dump(
+                exclude_defaults=True,  # keeps catalog as clean as possible
+                exclude=["name"],  # name is already in the key
+            )
 
             # remove non serializable entries to prevent errors
             source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
