@@ -61,12 +61,14 @@ def has_no_data(
 
 
 def _single_var_as_array(
-    maybe_ds: Optional[xr.Dataset],
+    maybe_ds: Optional[Union[xr.Dataset, xr.DataArray]],
     single_var_as_array: bool,
     variable_name: Optional[Variables] = None,
 ) -> Optional[xr.Dataset]:
     if maybe_ds is None:
         return None
+    elif isinstance(maybe_ds, xr.DataArray):
+        return maybe_ds
     else:
         ds = maybe_ds
     # return data array if single variable dataset

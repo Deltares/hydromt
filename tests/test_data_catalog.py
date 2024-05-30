@@ -202,7 +202,7 @@ def test_catalog_entry_no_variant(legacy_aws_worldcover):
     # make sure the catalogs individually still work
     assert len(legacy_data_catalog) == 1
     source = legacy_data_catalog.get_source("esa_worldcover")
-    assert Path(source.path).name == "esa-worldcover.vrt"
+    assert Path(source.uri).name == "esa-worldcover.vrt"
     assert source.version == "2020"
 
 
@@ -217,11 +217,11 @@ def test_catalog_entry_single_variant(aws_worldcover):
     assert len(aws_data_catalog) == 1
     # test get_source with all keyword combinations
     source = aws_data_catalog.get_source("esa_worldcover")
-    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
-    assert source.version == "2021"
+    assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+    assert source.version == 2021
     source = aws_data_catalog.get_source("esa_worldcover", version="2021")
-    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
-    assert source.version == "2021"
+    assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+    assert source.version == 2021
     source = aws_data_catalog.get_source(
         "esa_worldcover", version="2021", provider="aws"
     )
@@ -338,12 +338,6 @@ def test_versioned_catalogs_no_version(data_catalog):
     assert len(data_catalog.sources) > 0
 
 
-def test_versioned_catalogs_v05(data_catalog):
-    data_catalog._sources = {}  # reset
-    data_catalog.from_predefined_catalogs("deltares_data", "v0.5.0")
-    assert len(data_catalog.sources) > 0
-
-
 def test_version_catalogs_errors_on_unknown_version(data_catalog):
     with pytest.raises(ValueError, match="Version v1993.7 not found "):
         _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
@@ -403,13 +397,13 @@ def test_used_sources():
 
 def test_from_yml_with_archive(data_catalog):
     cache_dir = Path(data_catalog._cache_dir)
-    data_catalog.from_predefined_catalogs("artifact_data=v0.0.8")
+    data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
     sources = list(data_catalog.sources.keys())
     assert len(sources) > 0
     # as part of the getting the archive a a local
     # catalog file is written to the same folder
     # check if this file exists and we can read it
-    yml_dst_fn = Path(cache_dir, "artifact_data", "v0.0.8", "data_catalog.yml")
+    yml_dst_fn = Path(cache_dir, "artifact_data", "v1.0.0", "data_catalog.yml")
     assert yml_dst_fn.exists()
     data_catalog1 = DataCatalog(yml_dst_fn)
     sources = list(data_catalog1.sources.keys())
