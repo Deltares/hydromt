@@ -104,7 +104,7 @@ def migrate_entry(entry_name: str, entry: Dict[str, Any]) -> Dict[str, Any]:
         entry["driver"]["options"] = {}
         for field in old_kwarg_names:
             if value := entry.pop(field, None):
-                entry["driver"]["options"][field] = value
+                entry["driver"]["options"] = value
 
     # move fsspec filesystem to driver
     if filesystem := entry.pop("filesystem", None):
