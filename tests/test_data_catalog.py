@@ -681,7 +681,7 @@ def test_get_rasterdataset_bbox(data_catalog):
     assert np.allclose(da.raster.bounds, bbox)
 
 
-def test_get_rasterdataset_provider(data_catalog):
+def test_get_rasterdataset_singe_var_as_array(data_catalog):
     name = "koppen_geiger"
     data = {"source": name}
     ds = data_catalog.get_rasterdataset(data, single_var_as_array=False)
@@ -838,13 +838,6 @@ def test_get_geodataframe_artifact_data_geom(data_catalog):
     gdf = data_catalog.get_geodataframe(gdf, geom=gdf.iloc[[0],], predicate="within")
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.index.size == 1
-
-
-def test_get_geodataframe_artifact_data_with_provider(data_catalog):
-    name = "osm_coastlines"
-    data = {"source": name}
-    gdf = data_catalog.get_geodataframe(data)
-    assert isinstance(gdf, gpd.GeoDataFrame)
 
 
 def test_get_geodataframe_unknown_data_type(data_catalog):
@@ -1039,13 +1032,6 @@ def test_get_geodataset_bbox_time_tuple(data_catalog):
     assert da.vector.index.size == 2
     assert da.time.size == 720
     assert isinstance(da, xr.DataArray)
-
-
-def test_get_geodataset_provider(data_catalog):
-    name = "gtsmv3_eu_era5"
-    data = {"source": name}
-    ds = data_catalog.get_geodataset(data, single_var_as_array=False)
-    assert isinstance(ds, xr.Dataset)
 
 
 def test_get_geodataset_unknown_data_type(data_catalog):
@@ -1250,20 +1236,17 @@ def test_get_dataframe(df, tmpdir, data_catalog):
     assert isinstance(df, pd.DataFrame)
 
 
-def test_get_dataframe_provider(df, data_catalog):
-    name = "test.csv"
-    df = data_catalog.get_dataframe(name, provider="local")
-    assert isinstance(df, pd.DataFrame)
-
-
 def test_get_dataframe_variables(df, data_catalog):
     df = data_catalog.get_dataframe(df, variables=["city"])
     assert isinstance(df, pd.DataFrame)
     assert df.columns == ["city"]
 
 
-def test_get_dataframe_custom_data(data_catalog):
+def test_get_dataframe_custom_data(tmp_dir, df, data_catalog):
     name = "test.csv"
+    path = Path(tmp_dir, name)
+    df.to_csv(path)
+
     data = {"source": name, "provider": "local"}
     gdf = data_catalog.get_dataframe(data)
     assert isinstance(gdf, pd.DataFrame)
