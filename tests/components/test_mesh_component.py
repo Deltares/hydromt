@@ -330,7 +330,6 @@ def test_read(mock_model, caplog, tmpdir, griduda):
     assert mesh_component._data.ugrid.crs["mesh2d"].to_epsg() == 4326
 
 
-@pytest.mark.integration()
 def test_model_mesh_workflow(tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
     m.add_component("mesh", MeshComponent(m))
