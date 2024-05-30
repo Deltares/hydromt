@@ -136,10 +136,8 @@ def test_parser():
             "data_type": "GeoDataFrame",
             "uri": "path/to/data.gpkg",
         },
-        "test1": {"alias": "test"},
     }
-    with pytest.deprecated_call():
-        sources = _denormalise_data_dict(dd)
+    sources = _denormalise_data_dict(dd)
     assert len(sources) == 2
     for name, source in sources:
         datasource = _parse_data_source_dict(
