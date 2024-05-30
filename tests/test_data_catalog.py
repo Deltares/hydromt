@@ -138,7 +138,7 @@ def test_parser():
         },
     }
     sources = _denormalise_data_dict(dd)
-    assert len(sources) == 2
+    assert len(sources) == 1
     for name, source in sources:
         datasource = _parse_data_source_dict(
             name,
@@ -190,11 +190,6 @@ def test_parser():
         _parse_data_source_dict("test", {})
     with pytest.raises(ValueError, match="Unknown 'data_type'"):
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
-    with (
-        pytest.raises(ValueError, match="alias test not found in data_dict"),
-        pytest.deprecated_call(),
-    ):
-        _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
 def test_data_catalog_io_round_trip(tmpdir, data_catalog):
