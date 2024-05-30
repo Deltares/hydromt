@@ -107,14 +107,13 @@ def migrate_entry(entry_name: str, entry: Dict[str, Any]) -> Dict[str, Any]:
                 entry["driver"]["options"][field] = value
 
     # move fsspec filesystem to driver
-    if "filesystem" in entry:
-        if filesystem := entry.pop("filesystem"):
-            entry["driver"]["filesystem"] = {"protocol": filesystem}
-            if storage_options := entry.pop("storage_options", None):
-                entry["driver"]["filesystem"] = {
-                    **entry["driver"]["filesystem"],
-                    **storage_options,
-                }
+    if filesystem := entry.pop("filesystem", None):
+        entry["driver"]["filesystem"] = {"protocol": filesystem}
+        if storage_options := entry.pop("storage_options", None):
+            entry["driver"]["filesystem"] = {
+                **entry["driver"]["filesystem"],
+                **storage_options,
+            }
 
     # migrate meta to metadata
     if metadata := entry.pop("meta", None):
