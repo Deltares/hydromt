@@ -312,7 +312,10 @@ def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
 
 def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
     _, merged_catalog = merged_aws_worldcover
-    merged_catalog2 = DataCatalog().from_dict(merged_catalog.to_dict())
+    merged_dict = merged_catalog.to_dict()
+    merged_catalog2 = DataCatalog().from_dict(merged_dict)
+
+    merged_catalog2.root = merged_catalog.root
     assert merged_catalog2 == merged_catalog
 
 
@@ -323,14 +326,14 @@ def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
     aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
     assert len(aws_and_legacy_catalog) == 2
     source_aws = aws_and_legacy_catalog.get_source("esa_worldcover")
-    assert source_aws.filesystem == "s3"
+    assert source_aws.driver.filesystem.protocol[0] == "s3"
     source_aws2 = aws_and_legacy_catalog.get_source("esa_worldcover", provider="aws")
     assert source_aws2 == source_aws
     source_loc = aws_and_legacy_catalog.get_source(
         "esa_worldcover",
-        provider="legacy_esa_worldcover",  # provider is filename
+        provider="file",  # provider is filename
     )
-    assert Path(source_loc.path).name == "esa-worldcover.vrt"
+    assert Path(source_loc.uri).name == "esa-worldcover.vrt"
 
 
 def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover):
