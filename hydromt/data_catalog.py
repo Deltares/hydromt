@@ -1777,7 +1777,9 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             variants = source.pop("variants")
             for diff in variants:
                 source_copy = copy.deepcopy(source)
-                source_copy = deep_merge(source_copy, diff)
+                source_copy = {
+                    str(k): str(v) for (k, v) in deep_merge(source_copy, diff)
+                }
                 data_dicts.append({name: source_copy})
         elif "placeholders" in source:
             options = source.pop("placeholders")
@@ -1790,6 +1792,13 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:
+            for k, v in source.items():
+                if isinstance(v, (int, float)):
+                    # numbers are pretty much always a version here,
+                    # and we need strings, so just cast to string when
+                    # we encoutner a number. not the pretties,
+                    # but it will have to do for now.
+                    source[k] = str(v)
             data_list.append((name, source))
             continue
 

@@ -228,14 +228,14 @@ def test_catalog_entry_single_variant(aws_worldcover):
     # test get_source with all keyword combinations
     source = aws_data_catalog.get_source("esa_worldcover")
     assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
-    assert source.version == 2021
+    assert source.version == "2021"
     source = aws_data_catalog.get_source("esa_worldcover", version="2021")
     assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
-    assert source.version == 2021
+    assert source.version == "2021"
     source = aws_data_catalog.get_source(
         "esa_worldcover", version="2021", provider="aws"
     )
-    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+    assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
 
 
 @pytest.fixture()
@@ -890,9 +890,13 @@ class TestGetGeoDataFrame:
 
 def test_get_geodataframe_path(data_catalog):
     n = len(data_catalog)
-    # vector dataset using three different ways
+
     name = "osm_coastlines"
-    gdf = data_catalog.get_geodataframe(data_catalog.get_source(name).uri)
+    uri = data_catalog.get_source(name).uri
+    p = Path(data_catalog.root) / uri
+
+    # vector dataset using three different ways
+    gdf = data_catalog.get_geodataframe(p)
     assert len(data_catalog) == n + 1
     assert isinstance(gdf, gpd.GeoDataFrame)
 
@@ -1129,7 +1133,11 @@ def test_get_geodataset_artifact_data(data_catalog):
 
 def test_get_geodataset_bbox_time_tuple(data_catalog):
     name = "gtsmv3_eu_era5"
-    da = data_catalog.get_geodataset(data_catalog.get_source(name).uri)
+    uri = data_catalog.get_source(name).uri
+    p = Path(data_catalog.root) / uri
+
+    # vector dataset using three different ways
+    da = data_catalog.get_geodataset(p)
     bbox = [12.22412, 45.25635, 12.25342, 45.271]
     da = data_catalog.get_geodataset(
         da, bbox=bbox, time_tuple=("2010-02-01", "2010-02-05")
@@ -1390,8 +1398,7 @@ def test_get_dataframe_custom_data(tmp_dir, df, data_catalog):
     path = Path(tmp_dir, name)
     df.to_csv(path)
 
-    data = {"source": name, "provider": "local"}
-    gdf = data_catalog.get_dataframe(data)
+    gdf = data_catalog.get_dataframe(df)
     assert isinstance(gdf, pd.DataFrame)
 
 
