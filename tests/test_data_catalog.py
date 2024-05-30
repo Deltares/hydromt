@@ -892,7 +892,7 @@ def test_get_geodataframe_path(data_catalog):
     n = len(data_catalog)
     # vector dataset using three different ways
     name = "osm_coastlines"
-    gdf = data_catalog.get_geodataframe(data_catalog.get_source(name).path)
+    gdf = data_catalog.get_geodataframe(data_catalog.get_source(name).uri)
     assert len(data_catalog) == n + 1
     assert isinstance(gdf, gpd.GeoDataFrame)
 
@@ -1115,7 +1115,7 @@ class TestGetGeoDataset:
 def test_get_geodataset(data_catalog):
     n = len(data_catalog)
     name = "gtsmv3_eu_era5"
-    da = data_catalog.get_geodataset(data_catalog.get_source(name).path)
+    da = data_catalog.get_geodataset(data_catalog.get_source(name).uri)
     assert len(data_catalog) == n + 1
     assert isinstance(da, xr.DataArray)
 
@@ -1129,7 +1129,7 @@ def test_get_geodataset_artifact_data(data_catalog):
 
 def test_get_geodataset_bbox_time_tuple(data_catalog):
     name = "gtsmv3_eu_era5"
-    da = data_catalog.get_geodataset(data_catalog.get_source(name).path)
+    da = data_catalog.get_geodataset(data_catalog.get_source(name).uri)
     bbox = [12.22412, 45.25635, 12.25342, 45.271]
     da = data_catalog.get_geodataset(
         da, bbox=bbox, time_tuple=("2010-02-01", "2010-02-05")

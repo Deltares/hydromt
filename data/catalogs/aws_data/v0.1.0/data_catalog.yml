@@ -7,8 +7,8 @@ esa_worldcover_2020_v100:
   crs: 4326
   data_type: RasterDataset
   driver: raster
-  filesystem:
-    protocol: s3
+  filesystem: s3
+  storage_options:
     anon: true
   meta:
     category: landuse
