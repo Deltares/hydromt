@@ -64,7 +64,7 @@ def _single_var_as_array(
     maybe_ds: Optional[Union[xr.Dataset, xr.DataArray]],
     single_var_as_array: bool,
     variable_name: Optional[Variables] = None,
-) -> Optional[xr.Dataset]:
+) -> Optional[Union[xr.Dataset, xr.DataArray]]:
     if isinstance(maybe_ds, xr.DataArray):
         return maybe_ds
     if maybe_ds is None:
@@ -82,8 +82,10 @@ def _single_var_as_array(
         elif isinstance(variable_name, str):
             da.name = variable_name
         return da
-    else:
+    elif isinstance(ds, xr.Dataset):
         return ds
+    else:
+        return ds.to_dataset()
 
 
 def _set_vector_nodata(
