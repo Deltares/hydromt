@@ -1664,9 +1664,7 @@ class DataCatalog(object):
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
-            df = DataFrameAdapter._slice_data(
-                data_like, variables, time_range, logger=self.logger
-            )
+            df = DataFrameAdapter._slice_data(data_like, variables, time_range)
             if df is None:
                 _exec_nodata_strat(
                     "No data was left after slicing.",
