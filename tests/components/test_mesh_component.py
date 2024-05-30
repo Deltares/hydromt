@@ -375,11 +375,11 @@ def test_mesh_with_model(griduda, world, tmpdir):
     model1.mesh.add_2d_data_from_rasterdataset(
         "vito", grid_name="mesh2d", resampling_method="mode"
     )
-    assert "vito" in model.mesh.data.data_vars
+    assert "vito" in model1.mesh.data.data_vars
 
     model1.mesh.add_2d_data_from_raster_reclass(
-        raster_fn="vito",
-        reclass_table_fn="vito_mapping",
+        raster_filename="vito",
+        reclass_table_filename="vito_mapping",
         reclass_variables=["landuse", "roughness_manning"],
         resampling_method=["mode", "centroid"],
         grid_name="mesh2d",
@@ -389,3 +389,5 @@ def test_mesh_with_model(griduda, world, tmpdir):
     assert "vito" in ds_mesh2d
     assert "roughness_manning" in model1.mesh.data.data_vars
     assert np.all(model1.mesh.data["landuse"].values == model1.mesh.data["vito"].values)
+
+    model1.write()
