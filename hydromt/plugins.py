@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 __all__ = ["PLUGINS"]
 
 Plugin = TypedDict(
-    "Plugin", {"object": Type, "name": str, "plugin_name": str, "version": str}
+    "Plugin", {"type": Type, "name": str, "plugin_name": str, "version": str}
 )
 
 
@@ -65,9 +65,9 @@ class PluginGroup:
                     )
                 name = getattr(attr, "name", attr_name)
                 if name not in plugins:
-                    # other than object, this is for display only, hence string
+                    # other than type, this is for display only, hence string
                     plugins[name] = {
-                        "object": attr,
+                        "type": attr,
                         "name": name,
                         "plugin_name": str(ep.dist.name),
                         "version": str(ep.dist.version),
@@ -117,7 +117,7 @@ class ComponentPlugins(PluginGroup):
 
         return cast(
             Dict[str, Type["ModelComponent"]],
-            {name: value["object"] for name, value in self._plugins.items()},
+            {name: value["type"] for name, value in self._plugins.items()},
         )
 
 
@@ -133,7 +133,7 @@ class DriverPlugins(PluginGroup):
 
         return cast(
             Dict[str, Type["BaseDriver"]],
-            {name: value["object"] for name, value in self._plugins.items()},
+            {name: value["type"] for name, value in self._plugins.items()},
         )
 
 
@@ -149,7 +149,7 @@ class ModelPlugins(PluginGroup):
 
         return cast(
             Dict[str, Type["Model"]],
-            {name: value["object"] for name, value in self._plugins.items()},
+            {name: value["type"] for name, value in self._plugins.items()},
         )
 
 
@@ -165,7 +165,7 @@ class CatalogPlugins(PluginGroup):
 
         return cast(
             Dict[str, Type["PredefinedCatalog"]],
-            {name: value["object"] for name, value in self._plugins.items()},
+            {name: value["type"] for name, value in self._plugins.items()},
         )
 
 
