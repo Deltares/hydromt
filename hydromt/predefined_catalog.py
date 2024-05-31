@@ -26,6 +26,13 @@ __all__ = [
     "create_registry_file",
 ]
 
+__hydromt_eps__ = [
+    "DeltaresDataCatalog",
+    "ArtifactDataCatalog",
+    "AWSDataCatalog",
+    "GCSCMIP6DataCatalog",
+]
+
 
 def create_registry_file(root: Path, registry_path: Optional[Path] = None) -> None:
     """Create a registry file for all catalog files in the root directory.

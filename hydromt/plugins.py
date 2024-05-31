@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from hydromt.components import ModelComponent
     from hydromt.drivers import BaseDriver
     from hydromt.models import Model
+    from hydromt.predefined_catalog import PredefinedCatalog
 
 __all__ = ["PLUGINS"]
 
@@ -152,6 +153,22 @@ class ModelPlugins(PluginGroup):
         )
 
 
+class CatalogPlugins(PluginGroup):
+    group = "hydromt.catalogs"
+    base_module = "hydromt.predefined_catalog"
+    base_class = "PredefinedCatalog"
+
+    @property
+    def plugins(self) -> dict[str, Type["PredefinedCatalog"]]:
+        if self._plugins is None:
+            self._initialize_plugins()
+
+        return cast(
+            Dict[str, Type["PredefinedCatalog"]],
+            {name: value["object"] for name, value in self._plugins.items()},
+        )
+
+
 class Plugins:
     """The model catalogue provides access to plugins."""
 
@@ -160,10 +177,11 @@ class Plugins:
         self._component_plugins: ComponentPlugins = ComponentPlugins()
         self._driver_plugins: DriverPlugins = DriverPlugins()
         self._model_plugins: ModelPlugins = ModelPlugins()
+        self._catalog_plugins: CatalogPlugins = CatalogPlugins()
 
     @property
     def component_plugins(self) -> dict[str, type["ModelComponent"]]:
-        """Load and provide access to all known component plugins."""
+        """Load and provide access to all known model component plugins."""
         return self._component_plugins.plugins
 
     @property
@@ -177,19 +195,29 @@ class Plugins:
         return self._model_plugins.plugins
 
     @property
+    def catalog_plugins(self) -> dict[str, Type["PredefinedCatalog"]]:
+        """Load and provide access to all known catalog plugins."""
+        return self._catalog_plugins.plugins
+
+    @property
     def model_metadata(self) -> Dict[str, Dict[str, str]]:
         """Load and provide access to all known model plugins."""
         return self._model_plugins.metadata
 
     @property
     def component_metadata(self) -> Dict[str, Dict[str, str]]:
-        """Load and provide access to all known model plugins."""
+        """Load and provide access to all known model component plugins."""
         return self._component_plugins.metadata
 
     @property
     def driver_metadata(self) -> Dict[str, Dict[str, str]]:
         """Load and provide access to all known driver plugin metadata."""
         return self._driver_plugins.metadata
+
+    @property
+    def catalog_metadata(self) -> Dict[str, Dict[str, str]]:
+        """Load and provide access to all known catalog plugin metadata."""
+        return self._catalog_plugins.metadata
 
     def model_summary(self) -> str:
         """Generate string representation containing the registered model entrypoints."""
@@ -200,12 +228,21 @@ class Plugins:
         return self._driver_plugins.summary()
 
     def component_summary(self) -> str:
-        """Generate string representation containing the registered component entrypoints."""
+        """Generate string representation containing the registered model component entrypoints."""
         return self._component_plugins.summary()
+
+    def catalog_summary(self) -> str:
+        """Generate string representation containing the registered catalog entrypoints."""
+        return self._catalog_plugins.summary()
 
     def plugin_summary(self) -> str:
         return "\n".join(
-            [self.model_summary(), self.component_summary(), self.driver_summary()]
+            [
+                self.model_summary(),
+                self.component_summary(),
+                self.driver_summary(),
+                self.catalog_summary(),
+            ]
         )
 
 

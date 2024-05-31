@@ -4,11 +4,12 @@ import pytest
 from importlib_metadata import EntryPoint, EntryPoints, entry_points
 from pytest_mock import MockerFixture
 
-from hydromt.components import __hydromt_eps__ as component_eps  # noqa
+from hydromt.components import __hydromt_eps__ as component_eps
 from hydromt.components.grid import GridComponent
 from hydromt.drivers import __hydromt_eps__ as driver_eps
 from hydromt.models.model import Model
 from hydromt.plugins import Plugins
+from hydromt.predefined_catalog import __hydromt_eps__ as catalog_eps
 
 
 @pytest.fixture()
@@ -32,6 +33,12 @@ def test_core_driver_plugins(PLUGINS):
     drivers = PLUGINS.driver_plugins
     obj_names = [obj.__name__ for obj in drivers.values()]
     assert all([d in obj_names for d in driver_eps])
+
+
+def test_core_catalog_plugins(PLUGINS):
+    catalogs = PLUGINS.catalog_plugins
+    obj_names = [obj.__name__ for obj in catalogs.values()]
+    assert all([d in obj_names for d in catalog_eps])
 
 
 def test_summary(PLUGINS):

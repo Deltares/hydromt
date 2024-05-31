@@ -24,7 +24,7 @@ dependencies = [
   "packaging",              # compare versions of hydromt
   "pandas",                 # Dataframes
   "pooch",                  # data fetching
-  "pyarrow<16",	            # prevents incompat with pandas.
+  "pyarrow<16",             # prevents incompat with pandas.
   "pydantic~=2.4",          # Validation
   "pydantic-settings~=2.2", # Settings Management
   "pyflwdir>=0.5.4",        # Hight models and derivatives
@@ -117,6 +117,9 @@ core = "hydromt.drivers"
 
 [project.entry-points."hydromt.models"]
 core = "hydromt.models"
+
+[project.entry-points."hydromt.catalogs"]
+core = "hydromt.predefined_catalog"
 
 [tool.setuptools.dynamic]
 description = { file = "hydromt/__init__.py" }
