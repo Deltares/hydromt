@@ -9,7 +9,7 @@ from hydromt.data_catalog import DataCatalog
 
 if TYPE_CHECKING:
     from hydromt.model import Model
-    from hydromt.root import ModelRoot
+    from hydromt.model.root import ModelRoot
 
 
 class ModelComponent(ABC):

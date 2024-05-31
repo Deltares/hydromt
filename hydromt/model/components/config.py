@@ -5,11 +5,11 @@ from os.path import abspath, dirname, isabs, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
-from hydromt.hydromt_step import hydromt_step
 from hydromt.io.path import make_config_paths_relative
 from hydromt.io.readers import read_toml, read_yaml
 from hydromt.io.writers import write_toml, write_yaml
 from hydromt.model.components.base import ModelComponent
+from hydromt.model.hydromt_step import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model import Model

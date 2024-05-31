@@ -5,7 +5,7 @@ from pytest_mock import MockerFixture
 
 from hydromt.model.components.vector import VectorComponent
 from hydromt.model.model import Model
-from hydromt.root import ModelRoot
+from hydromt.model.root import ModelRoot
 
 
 def test_empty_data(tmpdir, mocker: MockerFixture):

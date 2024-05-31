@@ -36,7 +36,7 @@ from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.model.components.config import ConfigComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.components.vector import VectorComponent
-from hydromt.root import ModelRoot
+from hydromt.model.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 

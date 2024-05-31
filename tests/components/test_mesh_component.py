@@ -15,7 +15,7 @@ from pytest_mock import MockerFixture
 
 from hydromt.model import Model
 from hydromt.model.components.mesh import MeshComponent, _check_UGrid
-from hydromt.root import ModelRoot
+from hydromt.model.root import ModelRoot
 
 DATADIR = join(dirname(dirname(abspath(__file__))), "data")
 

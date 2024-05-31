@@ -11,11 +11,11 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt import hydromt_step
 from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose, Number
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
+from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.workflows.grid import (

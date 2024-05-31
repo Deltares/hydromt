@@ -11,7 +11,7 @@ from pytest_mock import MockerFixture
 
 from hydromt.model.components.grid import GridComponent
 from hydromt.model.model import Model
-from hydromt.root import ModelRoot
+from hydromt.model.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 logger.propagate = True
