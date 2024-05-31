@@ -1,4 +1,5 @@
 """Factory function for DataSource."""
+
 from inspect import isabstract
 from typing import Any, Dict, Union
 

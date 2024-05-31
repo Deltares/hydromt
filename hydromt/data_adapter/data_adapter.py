@@ -1,4 +1,5 @@
 """DataAdapter class."""
+
 from __future__ import annotations
 
 import logging
@@ -105,7 +106,6 @@ PREPROCESSORS = {
 
 
 class DataAdapter(object, metaclass=ABCMeta):
-
     """General Interface to data source for HydroMT."""
 
     _DEFAULT_DRIVER = None  # placeholder
@@ -216,17 +216,11 @@ class DataAdapter(object, metaclass=ABCMeta):
         self.meta = {k: v for k, v in meta.items() if v is not None}
         # variable attributes
         self.attrs = {k: v for k, v in attrs.items() if v is not None}
-        # keep track of wether the data is used
-        self._used = False
 
     @property
     def data_type(self):
         """Return the datatype of the addapter."""
         return type(self).__name__.replace("Adapter", "")
-
-    def mark_as_used(self):
-        """Mark the data adapter as used."""
-        self._used = True
 
     def summary(self):
         """Return a dictionary summary of the data adapter."""

@@ -63,6 +63,7 @@ from hydromt.predefined_catalog import (
     PredefinedCatalog,
     _copy_file,
 )
+from hydromt.utils import deep_merge
 
 logger = logging.getLogger(__name__)
 
@@ -367,6 +368,7 @@ class DataCatalog(object):
                 f"Requested unknown data source '{source}' "
                 f"available sources are: {available_sources}"
             )
+
         available_providers = self._sources[source]
 
         # make sure all arguments are strings
@@ -424,14 +426,18 @@ class DataCatalog(object):
             raise ValueError("Value must be DataSource")
 
         if source.version:
-            version = source.version
+            version = str(source.version)
         else:
             version = "_UNSPECIFIED_"  # make sure this comes first in sorted list
 
         if source.provider:
-            provider = source.provider
+            provider = str(source.provider)
         else:
-            provider = "_UNSPECIFIED_"
+            protocol = source.driver.filesystem.protocol
+            if isinstance(protocol, str):
+                provider: str = protocol
+            else:
+                provider: str = protocol[0]
 
         if name not in self._sources:
             self._sources[name] = {}
@@ -445,7 +451,7 @@ class DataCatalog(object):
                 )
 
         if provider not in self._sources[name]:
-            versions = {version: source}
+            versions = {str(version): source}
         else:
             versions = self._sources[name][provider]
             if provider in self._sources[name] and version in versions:
@@ -456,8 +462,8 @@ class DataCatalog(object):
                     stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
-            versions.update({version: source})
-            versions = {k: versions[k] for k in sorted(list(versions.keys()))}
+            versions.update({str(version): source})
+            versions = {(k): versions[k] for k in sorted(list(versions.keys()))}
 
         self._sources[name][provider] = versions
 
@@ -543,7 +549,7 @@ class DataCatalog(object):
             for name, source in self.list_sources():
                 try:
                     other_source = other.get_source(
-                        name, provider=source.provider, version=source.version
+                        name, provider=source.provider, version=str(source.version)
                     )
                 except KeyError:
                     return False
@@ -711,22 +717,6 @@ class DataCatalog(object):
         yml = _yml_from_uri_or_path(urlpath)
         # parse metadata
         meta = dict()
-        # legacy code with root/category at highest yml level
-        if "root" in yml:
-            warnings.warn(
-                "The 'root' key is deprecated, use 'meta: root' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            meta.update(root=yml.pop("root"))
-        if "category" in yml:
-            warnings.warn(
-                "The 'category' key is deprecated, use 'meta: category' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            meta.update(category=yml.pop("category"))
-
         # read meta data
         meta = yml.pop("meta", meta)
         if catalog_name is None:
@@ -874,7 +864,7 @@ class DataCatalog(object):
                 category=category,
             )
             if mark_used:
-                source._used = True
+                source.mark_as_used()
             self.add_source(name, source)
 
         return self
@@ -950,17 +940,22 @@ class DataCatalog(object):
         """
         meta = meta or {}
         sources_out = dict()
-        if root is not None:
-            meta.update(**{"root": root})
+        if root is None:
+            root = str(self.root)
+        meta.update(**{"root": root})
         sources = self.list_sources(used_only=used_only)
         sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
-            source_dict = source.model_dump(exclude_defaults=True)
+            source_dict = source.model_dump(
+                exclude_defaults=True,  # keeps catalog as clean as possible
+                exclude=["name"],  # name is already in the key
+            )
 
             # remove non serializable entries to prevent errors
-            source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
+            source_dict = _process_dict(source_dict, logger=self.logger)
+            source_dict["root"] = root
             if name in sources_out:
                 existing = sources_out.pop(name)
                 if existing == source_dict:
@@ -1107,7 +1102,7 @@ class DataCatalog(object):
                             source.unit_add = {}
                         try:
                             fn_out, driver, driver_kwargs = source.to_file(
-                                data_root=data_root,
+                                file_path=Path(data_root) / source.uri,
                                 data_name=key,
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
@@ -1249,8 +1244,11 @@ class DataCatalog(object):
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
 
+                driver = kwargs.pop("driver", "rasterio")
                 name = basename(data_like)
-                source = RasterDatasetSource(name=name, uri=str(data_like))
+                source = RasterDatasetSource(
+                    name=name, uri=str(data_like), driver=driver
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             if geom or bbox:
@@ -1681,9 +1679,7 @@ class DataCatalog(object):
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
-            df = DataFrameAdapter._slice_data(
-                data_like, variables, time_range, logger=self.logger
-            )
+            df = DataFrameAdapter._slice_data(data_like, variables, time_range)
             if df is None:
                 _exec_nodata_strat(
                     "No data was left after slicing.",
@@ -1778,25 +1774,14 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
     for name, source in data_dict.items():
         source = copy.deepcopy(source)
         data_dicts = []
-        if "alias" in source:
-            alias = source.pop("alias")
-            warnings.warn(
-                "The use of alias is deprecated, please add a version on the aliased"
-                "catalog instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if alias not in data_dict:
-                raise ValueError(f"alias {alias} not found in data_dict.")
-            # use alias source but overwrite any attributes with original source
-            source_copy = data_dict[alias].copy()
-            source_copy.update(source)
-            data_dicts.append({name: source_copy})
-        elif "variants" in source:
+        if "variants" in source:
             variants = source.pop("variants")
             for diff in variants:
                 source_copy = copy.deepcopy(source)
-                source_copy.update(**diff)
+                source_copy = {
+                    str(k): v for (k, v) in deep_merge(source_copy, diff).items()
+                }
+
                 data_dicts.append({name: source_copy})
         elif "placeholders" in source:
             options = source.pop("placeholders")
@@ -1809,6 +1794,13 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:
+            for k, v in source.items():
+                if isinstance(v, (int, float)):
+                    # numbers are pretty much always a version here,
+                    # and we need strings, so just cast to string when
+                    # we encoutner a number. not the pretties,
+                    # but it will have to do for now.
+                    source[k] = str(v)
             data_list.append((name, source))
             continue
 

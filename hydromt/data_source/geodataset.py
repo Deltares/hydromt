@@ -57,7 +57,7 @@ class GeoDatasetSource(DataSource):
 
         Args:
         """
-        self._used = True
+        self.mark_as_used()
 
         # Transform time_range and variables to match the data source
         tr = self.data_adapter.to_source_timerange(time_range)
@@ -305,7 +305,7 @@ class GeoDatasetSource(DataSource):
                 return
             elif on_error == ErrorHandleMethod.COERCE:
                 bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.meta
+                props = self.metadata
                 start_dt = datetime(1, 1, 1)
                 end_dt = datetime(1, 1, 1)
                 media_type = MediaType.JSON
