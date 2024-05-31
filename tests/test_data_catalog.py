@@ -192,13 +192,12 @@ def test_parser():
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
-def test_data_catalog_io_round_trip(tmpdir, data_catalog):
+def test_data_catalog_io_round_trip(tmp_dir: Path, data_catalog: DataCatalog):
     # read / write
-    fn_yml = join(tmpdir, "test.yml")
-    data_catalog.to_yml(fn_yml)
-    data_catalog1 = DataCatalog(data_libs=fn_yml)
-    assert data_catalog.to_dict() == data_catalog1.to_dict()
+    uri_yml = str(tmp_dir / "test.yml")
+    data_catalog.to_yml(uri_yml, root=str(data_catalog.root))
+    data_catalog_read = DataCatalog(data_libs=uri_yml)
+    assert data_catalog.to_dict() == data_catalog_read.to_dict()
 
 
 def test_catalog_entry_no_variant(legacy_aws_worldcover):
