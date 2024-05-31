@@ -12,7 +12,7 @@ from hydromt.components.base import ModelComponent
 from hydromt.io.writers import write_region
 
 if TYPE_CHECKING:
-    from hydromt.models import Model
+    from hydromt.model import Model
 
 
 class SpatialModelComponent(ModelComponent, ABC):

@@ -17,7 +17,7 @@ from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
 
 if TYPE_CHECKING:
-    from hydromt.models.model import Model
+    from hydromt.model.model import Model
 
 __all__ = ["TablesComponent"]
 

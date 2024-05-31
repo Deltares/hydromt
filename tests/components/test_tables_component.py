@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from hydromt.components.tables import TablesComponent
-from hydromt.models import Model
+from hydromt.model import Model
 
 
 def test_model_tables_key_error(df, tmpdir: Path):

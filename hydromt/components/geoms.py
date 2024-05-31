@@ -25,7 +25,7 @@ from hydromt.hydromt_step import hydromt_step
 from hydromt.metadata_resolver import ConventionResolver
 
 if TYPE_CHECKING:
-    from hydromt.models.model import Model
+    from hydromt.model.model import Model
 
 
 class GeomsComponent(SpatialModelComponent):

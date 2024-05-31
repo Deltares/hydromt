@@ -10,7 +10,7 @@ from importlib_metadata import entry_points
 if TYPE_CHECKING:
     from hydromt.components import ModelComponent
     from hydromt.drivers import BaseDriver
-    from hydromt.models import Model
+    from hydromt.model import Model
     from hydromt.predefined_catalog import PredefinedCatalog
 
 __all__ = ["PLUGINS"]
@@ -139,7 +139,7 @@ class DriverPlugins(PluginGroup):
 
 class ModelPlugins(PluginGroup):
     group = "hydromt.models"
-    base_module = "hydromt.models"
+    base_module = "hydromt.model"
     base_class = "Model"
 
     @property

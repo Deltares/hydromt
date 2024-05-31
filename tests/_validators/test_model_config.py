@@ -8,7 +8,7 @@ from hydromt._validators.model_config import (
 )
 from hydromt.components.base import ModelComponent
 from hydromt.components.grid import GridComponent
-from hydromt.models.model import Model
+from hydromt.model.model import Model
 
 
 def test_setup_grid_from_constant_validation():

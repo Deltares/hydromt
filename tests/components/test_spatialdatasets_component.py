@@ -8,7 +8,7 @@ from pytest_mock import MockerFixture
 
 from hydromt.components.grid import GridComponent
 from hydromt.components.spatialdatasets import SpatialDatasetsComponent
-from hydromt.models import Model
+from hydromt.model import Model
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 

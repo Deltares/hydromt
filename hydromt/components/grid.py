@@ -27,7 +27,7 @@ from hydromt.workflows.grid import (
 )
 
 if TYPE_CHECKING:
-    from hydromt.models.model import Model
+    from hydromt.model.model import Model
 
 __all__ = ["GridComponent"]
 
@@ -135,7 +135,7 @@ class GridComponent(SpatialModelComponent):
     ) -> Optional[DeferedFileClose]:
         """Write model grid data to netcdf file at <root>/<fn>.
 
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.write_nc`
+        key-word arguments are passed to :py:meth:`~hydromt.model.Model.write_nc`
 
         Parameters
         ----------
@@ -190,7 +190,7 @@ class GridComponent(SpatialModelComponent):
     ) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
 
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
+        key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`
 
         Parameters
         ----------

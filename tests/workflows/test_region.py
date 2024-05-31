@@ -6,7 +6,7 @@ import xugrid as xu
 from pytest_mock import MockerFixture
 
 from hydromt import DataCatalog
-from hydromt.models.model import Model
+from hydromt.model.model import Model
 from hydromt.workflows.region import (
     _parse_region_value,
     parse_region_basin,

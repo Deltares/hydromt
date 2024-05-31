@@ -2,7 +2,7 @@ import inspect
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from hydromt.models.model import Model
+    from hydromt.model.model import Model
 
 from .rgetattr import rgetattr
 

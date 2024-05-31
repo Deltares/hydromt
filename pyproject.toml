@@ -116,7 +116,7 @@ core = "hydromt.components"
 core = "hydromt.drivers"
 
 [project.entry-points."hydromt.models"]
-core = "hydromt.models"
+core = "hydromt.model"
 
 [project.entry-points."hydromt.catalogs"]
 core = "hydromt.predefined_catalog"

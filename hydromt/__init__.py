@@ -23,4 +23,4 @@ from .gis import raster, vector
 from .io import *
 
 # high-level methods
-from .models import *
+from .model import *

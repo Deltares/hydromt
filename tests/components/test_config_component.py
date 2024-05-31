@@ -7,7 +7,7 @@ from hydromt.components.config import ConfigComponent
 from hydromt.io.path import make_config_paths_abs, make_config_paths_relative
 from hydromt.io.readers import configread, read_yaml
 from hydromt.io.writers import write_yaml
-from hydromt.models import Model
+from hydromt.model import Model
 
 ABS_PATH = Path(abspath(__name__))
 

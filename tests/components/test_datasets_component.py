@@ -6,7 +6,7 @@ from typing import cast
 import pytest
 
 from hydromt.components.datasets import DatasetsComponent
-from hydromt.models import Model
+from hydromt.model import Model
 
 
 def test_model_dataset_key_error(tmpdir: Path):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for the hydromt.models module of HydroMT."""
+"""Tests for the hydromt.model module of HydroMT."""
 
 from os import listdir
 from os.path import abspath, dirname, isfile, join
@@ -21,7 +21,7 @@ from hydromt.components.grid import GridComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_catalog import DataCatalog
-from hydromt.models import Model
+from hydromt.model import Model
 from hydromt.plugins import PLUGINS
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
@@ -39,7 +39,7 @@ def _patch_plugin_components(
     for c in component_classes:
         class_type_mock = mocker.Mock(return_value=mocker.Mock(spec_set=c))
         type_mocks[c.__name__] = class_type_mock
-    mocker.patch("hydromt.models.model.PLUGINS", component_plugins=type_mocks)
+    mocker.patch("hydromt.model.model.PLUGINS", component_plugins=type_mocks)
     return [type_mocks[c.__name__].return_value for c in component_classes]
 
 

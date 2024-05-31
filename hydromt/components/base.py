@@ -8,7 +8,7 @@ from weakref import ReferenceType, ref
 from hydromt.data_catalog import DataCatalog
 
 if TYPE_CHECKING:
-    from hydromt.models import Model
+    from hydromt.model import Model
     from hydromt.root import ModelRoot
 
 

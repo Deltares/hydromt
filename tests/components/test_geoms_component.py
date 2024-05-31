@@ -10,7 +10,7 @@ from shapely.geometry import box
 
 from hydromt.components.geoms import GeomsComponent
 from hydromt.components.spatial import SpatialModelComponent
-from hydromt.models import Model
+from hydromt.model import Model
 
 
 def test_model_set_geoms(tmpdir):
@@ -52,7 +52,7 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir, mocker: MockerFixture):
     geom_3857 = cast(gpd.GeoDataFrame, geom_4326.copy().to_crs(3857))
 
     # Patch where meta_data is retrieved.
-    mocker.patch("hydromt.models.model.PLUGINS")
+    mocker.patch("hydromt.model.model.PLUGINS")
 
     class FakeModel(Model):
         def __init__(self):

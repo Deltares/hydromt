@@ -12,7 +12,7 @@ from hydromt.io.readers import read_toml, read_yaml
 from hydromt.io.writers import write_toml, write_yaml
 
 if TYPE_CHECKING:
-    from hydromt.models import Model
+    from hydromt.model import Model
 
 
 class ConfigComponent(ModelComponent):

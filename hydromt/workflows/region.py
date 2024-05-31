@@ -20,7 +20,7 @@ from hydromt.plugins import PLUGINS
 from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:
-    from hydromt.models.model import Model
+    from hydromt.model.model import Model
 
 _logger = getLogger(__name__)
 

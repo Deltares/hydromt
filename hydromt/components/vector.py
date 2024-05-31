@@ -20,7 +20,7 @@ from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 
 if TYPE_CHECKING:
-    from hydromt.models.model import Model
+    from hydromt.model.model import Model
 
 __all__ = ["VectorComponent"]
 
@@ -193,7 +193,7 @@ class VectorComponent(SpatialModelComponent):
             * The geojson file contains both the attribute and the geometry data.
                 (filename is ignored)
 
-        Key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
+        Key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`
 
         Parameters
         ----------
@@ -264,11 +264,11 @@ class VectorComponent(SpatialModelComponent):
 
             * The netcdf file contains the attribute data and the geojson file the
                 geometry vector data. Key-word arguments are passed to
-                :py:meth:`~hydromt.models.Model.write_nc`
+                :py:meth:`~hydromt.model.Model.write_nc`
 
             * The netcdf file contains both the attribute and the geometry data
                 (geometry_filename set to None). Key-word arguments are passed to
-                :py:meth:`~hydromt.models.Model.write_nc`
+                :py:meth:`~hydromt.model.Model.write_nc`
 
             * The geojson file contains both the attribute and the geometry data
                 (filename set to None). This option is possible only if all data variables

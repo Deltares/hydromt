@@ -4,7 +4,7 @@ import xarray as xr
 from pytest_mock import MockerFixture
 
 from hydromt.components.vector import VectorComponent
-from hydromt.models.model import Model
+from hydromt.model.model import Model
 from hydromt.root import ModelRoot
 
 

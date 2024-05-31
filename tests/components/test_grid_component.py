@@ -10,7 +10,7 @@ import xarray as xr
 from pytest_mock import MockerFixture
 
 from hydromt.components.grid import GridComponent
-from hydromt.models.model import Model
+from hydromt.model.model import Model
 from hydromt.root import ModelRoot
 
 logger = logging.getLogger(__name__)

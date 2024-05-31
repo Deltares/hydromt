@@ -13,7 +13,7 @@ from pydantic import (
 )
 
 from hydromt.components.base import ModelComponent
-from hydromt.models import Model
+from hydromt.model import Model
 from hydromt.plugins import PLUGINS
 
 

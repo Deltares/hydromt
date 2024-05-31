@@ -24,7 +24,7 @@ from hydromt.workflows.mesh import (
 )
 
 if TYPE_CHECKING:
-    from hydromt.models import Model
+    from hydromt.model import Model
 
 __all__ = ["MeshComponent"]
 
@@ -174,7 +174,7 @@ class MeshComponent(SpatialModelComponent):
     ) -> None:
         """Read model mesh data at <root>/<filename> and add to mesh property.
 
-        key-word arguments are passed to :py:meth:`~hydromt.models.Model.read_nc`
+        key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`
 
         Parameters
         ----------

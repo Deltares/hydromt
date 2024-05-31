@@ -25,7 +25,7 @@ from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 
 if TYPE_CHECKING:
-    from hydromt.models.model import Model
+    from hydromt.model.model import Model
 
 
 class SpatialDatasetsComponent(SpatialModelComponent):
