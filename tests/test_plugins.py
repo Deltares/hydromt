@@ -4,11 +4,11 @@ import pytest
 from importlib_metadata import EntryPoint, EntryPoints, entry_points
 from pytest_mock import MockerFixture
 
+from hydromt.data_catalog.predefined_catalog import __hydromt_eps__ as catalog_eps
 from hydromt.drivers import __hydromt_eps__ as driver_eps
 from hydromt.model.components import __hydromt_eps__ as component_eps
 from hydromt.model.components.grid import GridComponent
 from hydromt.model.model import Model
-from hydromt.predefined_catalog import __hydromt_eps__ as catalog_eps
 
 
 def test_core_component_plugins(PLUGINS):

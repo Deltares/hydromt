@@ -58,13 +58,13 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
     gdf1 = open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
     # read shapefile
-    gdf1 = hydromt.open_vector(fn_shp, bbox=list(geodf.total_bounds))
+    gdf1 = hydromt.io.open_vector(fn_shp, bbox=list(geodf.total_bounds))
     assert np.all(gdf1 == geodf)
     mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
-    gdf1 = hydromt.open_vector(fn_shp, geom=mask)
+    gdf1 = hydromt.io.open_vector(fn_shp, geom=mask)
     assert np.all(gdf1 == geodf)
     # read geopackage
-    gdf1 = hydromt.open_vector(fn_gpkg)
+    gdf1 = hydromt.io.open_vector(fn_gpkg)
     assert np.all(gdf1 == geodf)
     # read parquet
     gdf1 = open_vector(fn_parquet, crs=4326)
@@ -105,7 +105,7 @@ def test_open_vector_s3(geodf: gpd.GeoDataFrame):
     m = MagicMock()
     m.return_value = geodf
     with patch("geopandas.io.file._read_file_fiona", m):
-        df = hydromt.open_vector(UPath("s3://fake_url/file.geojson"))
+        df = hydromt.io.open_vector(UPath("s3://fake_url/file.geojson"))
     assert np.all(geodf == df)
 
 

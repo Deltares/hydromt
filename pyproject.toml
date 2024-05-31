@@ -119,7 +119,7 @@ core = "hydromt.drivers"
 core = "hydromt.model"
 
 [project.entry-points."hydromt.catalogs"]
-core = "hydromt.predefined_catalog"
+core = "hydromt.data_catalog.predefined_catalog"
 
 [tool.setuptools.dynamic]
 description = { file = "hydromt/__init__.py" }

@@ -13,12 +13,28 @@ import netCDF4  # noqa: F401
 # required for accessor style documentation
 from xarray import DataArray, Dataset  # noqa: F401
 
-from . import cli, gis, stats
-from .data_catalog import *
-
 # submodules
-from .gis import raster, vector
-from .io import *
+from . import data_catalog, gis, io, model, stats, utils
 
 # high-level methods
-from .model import *
+from .data_catalog import DataCatalog
+from .gis import raster, vector
+from .model import Model, hydromt_step
+
+__all__ = [
+    # high-level classes
+    "DataCatalog",
+    "Model",
+    # submodules
+    "data_catalog",
+    "gis",
+    "io",
+    "model",
+    "stats",
+    "utils",
+    # raster and vector accessor
+    "raster",
+    "vector",
+    # high-level functions
+    "hydromt_step",
+]

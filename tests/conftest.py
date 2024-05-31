@@ -55,7 +55,7 @@ def _local_catalog_eps(monkeypatch, PLUGINS) -> dict:
     cat_root = Path(__file__).parent.parent / "data" / "catalogs"
     for name, cls in PLUGINS.catalog_plugins.items():
         monkeypatch.setattr(
-            f"hydromt.predefined_catalog.{cls.__name__}.base_url",
+            f"hydromt.data_catalog.predefined_catalog.{cls.__name__}.base_url",
             str(cat_root / name),
         )
 

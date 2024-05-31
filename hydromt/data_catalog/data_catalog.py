@@ -47,6 +47,10 @@ from hydromt.data_adapter import (
 )
 from hydromt.data_adapter.caching import HYDROMT_DATADIR
 from hydromt.data_adapter.utils import _single_var_as_array
+from hydromt.data_catalog.predefined_catalog import (
+    PredefinedCatalog,
+    _copy_file,
+)
 from hydromt.data_source import (
     DataFrameSource,
     DataSource,
@@ -59,10 +63,6 @@ from hydromt.drivers import BaseDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
-from hydromt.predefined_catalog import (
-    PredefinedCatalog,
-    _copy_file,
-)
 from hydromt.utils import deep_merge
 
 logger = logging.getLogger(__name__)
