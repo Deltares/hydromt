@@ -18,16 +18,16 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataException
 from hydromt._typing.type_def import Number
-from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.data_catalog.adapters.utils import (
+from hydromt._utils import (
+    _has_no_data,
     _rename_vars,
     _set_metadata,
     _set_vector_nodata,
+    _shift_dataset_time,
     _single_var_as_array,
     _slice_temporal_dimension,
-    has_no_data,
-    shift_dataset_time,
 )
+from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.gis.raster import GEO_MAP_COORD
 
 logger = getLogger(__name__)
@@ -65,7 +65,7 @@ class GeoDatasetAdapter(DataAdapterBase):
                 maybe_ds, crs=metadata.crs, logger=logger
             )
             maybe_ds = _set_vector_nodata(maybe_ds, metadata)
-            maybe_ds = shift_dataset_time(
+            maybe_ds = _shift_dataset_time(
                 dt=self.unit_add.get("time", 0), ds=maybe_ds, logger=logger
             )
             maybe_ds = GeoDatasetAdapter._apply_unit_conversion(
@@ -84,7 +84,7 @@ class GeoDatasetAdapter(DataAdapterBase):
                 logger=logger,
             )
 
-            if has_no_data(maybe_ds):
+            if _has_no_data(maybe_ds):
                 raise NoDataException()
             return _single_var_as_array(maybe_ds, single_var_as_array, variables)
         except NoDataException:
@@ -196,7 +196,7 @@ class GeoDatasetAdapter(DataAdapterBase):
                 predicate=predicate,
                 logger=logger,
             )
-        if has_no_data(maybe_ds):
+        if _has_no_data(maybe_ds):
             return None
         else:
             return maybe_ds
@@ -215,7 +215,7 @@ class GeoDatasetAdapter(DataAdapterBase):
             epsg = mask.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
             ds = ds.vector.clip_geom(mask, predicate=predicate)
-            if has_no_data(ds):
+            if _has_no_data(ds):
                 return None
             else:
                 return ds

@@ -9,7 +9,7 @@ from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom, SourceMetadata, StrPath
 from hydromt._typing.error import NoDataStrategy
-from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -39,7 +39,7 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         args:
         """
-        warn_on_unused_kwargs(
+        _warn_on_unused_kwargs(
             self.__class__.__name__,
             {"predicate": predicate, "metadata": metadata},
             logger,

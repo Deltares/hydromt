@@ -9,7 +9,7 @@ from typing import Optional
 
 from hydromt._typing import ModeLike, ModelMode
 from hydromt._typing.type_def import StrPath
-from hydromt._utils.log import add_filehandler
+from hydromt.utils.log import add_filehandler
 
 logger = getLogger(__name__)
 

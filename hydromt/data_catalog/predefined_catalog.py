@@ -9,11 +9,8 @@ from typing import Callable, ClassVar, Optional
 import packaging.version
 import pooch
 
-from hydromt.data_catalog.adapters.caching import (
-    HYDROMT_DATADIR,
-    _copyfile,
-    _uri_validator,
-)
+from hydromt._utils import _copyfile, _is_valid_url
+from hydromt.config import SETTINGS
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +88,9 @@ class PredefinedCatalog(object):
     base_url: ClassVar[str] = GIT_ROOT
     name: ClassVar[str] = "predefined_catalog"
 
-    def __init__(self, format_version: str = "v0", cache_dir=HYDROMT_DATADIR) -> None:
+    def __init__(
+        self, format_version: str = "v0", cache_dir=SETTINGS.cache_root
+    ) -> None:
         # init arguments passed by DataCatalog
         self._format_version = format_version
         self._cache_dir: Path = Path(cache_dir)
@@ -189,7 +188,7 @@ class PredefinedCatalog(object):
 
     @property
     def _downloader(self) -> Optional[Callable]:
-        if not _uri_validator(self.base_url):
+        if not _is_valid_url(self.base_url):
             return _copy_file
         return None
 

@@ -13,7 +13,7 @@ from hydromt._typing import (
     TimeRange,
     Variables,
 )
-from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
 
 logger: Logger = getLogger(__name__)
@@ -41,7 +41,7 @@ class PandasDriver(DataFrameDriver):
                 "DataFrame: Reading multiple files with the "
                 f"{self.__class__.__name__} driver is not supported."
             )
-        warn_on_unused_kwargs(
+        _warn_on_unused_kwargs(
             self.__class__.__name__,
             {"time_range": time_range, "metadata": metadata},
             logger,
@@ -71,7 +71,7 @@ class PandasDriver(DataFrameDriver):
                 **self.options,
             )
         elif extension in ["fwf", "txt"]:
-            warn_on_unused_kwargs(
+            _warn_on_unused_kwargs(
                 self.__class__.__name__, {"variables": variables}, logger
             )
             return pd.read_fwf(uri, **self.options)

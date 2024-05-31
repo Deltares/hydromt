@@ -23,8 +23,8 @@ from hydromt._typing import (
     Variables,
     _exec_nodata_strat,
 )
+from hydromt._utils import _has_no_data, _shift_dataset_time
 from hydromt.data_catalog.adapters import DataAdapter
-from hydromt.data_catalog.adapters.utils import has_no_data, shift_dataset_time
 from hydromt.io import netcdf_writer, zarr_writer
 
 logger = getLogger(__name__)
@@ -252,7 +252,7 @@ class DatasetAdapter(DataAdapter):
         else:
             raise ValueError(f"Dataset: Driver {self.driver} unknown")
 
-        if has_no_data(ds):
+        if _has_no_data(ds):
             return None
         else:
             return ds
@@ -307,7 +307,7 @@ class DatasetAdapter(DataAdapter):
 
     def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
         dt = self.unit_add.get("time", 0)
-        return shift_dataset_time(dt=dt, ds=ds, logger=logger)
+        return _shift_dataset_time(dt=dt, ds=ds, logger=logger)
 
     @staticmethod
     def _slice_data(
@@ -347,7 +347,7 @@ class DatasetAdapter(DataAdapter):
         if time_tuple is not None:
             ds = DatasetAdapter._slice_temporal_dimension(ds, time_tuple, logger=logger)
 
-        if has_no_data(ds):
+        if _has_no_data(ds):
             return None
         else:
             return ds
@@ -367,7 +367,7 @@ class DatasetAdapter(DataAdapter):
             ds = ds.sel(time=slice(*time_tuple))
             if ds.time.size == 0:
                 raise IndexError("Dataset: Time slice out of range.")
-        if has_no_data(ds):
+        if _has_no_data(ds):
             return None
         else:
             return ds

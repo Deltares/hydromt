@@ -4,9 +4,7 @@ import os
 import shutil
 from ast import literal_eval
 from os.path import basename, dirname, isdir, isfile, join
-from pathlib import Path
-from typing import Optional, Union
-from urllib.parse import urlparse
+from typing import Optional
 
 import geopandas as gpd
 import numpy as np
@@ -14,28 +12,20 @@ import requests
 from affine import Affine
 from pyproj import CRS
 
-from hydromt._utils.uris import is_valid_url
+from hydromt._utils.uris import _is_valid_url
+from hydromt.config import SETTINGS
 
 logger = logging.getLogger(__name__)
 
 
-HYDROMT_DATADIR = join(Path.home(), ".hydromt_data")
-
-
-def _uri_validator(uri: Union[str, Path]) -> bool:
-    """Check if uri is valid."""
-    try:
-        result = urlparse(str(uri))
-        return all([result.scheme, result.netloc])
-    except (ValueError, AttributeError):
-        return False
+__all__ = ["_copyfile", "_cache_vrt_tiles"]
 
 
 def _copyfile(src, dst, chunk_size=1024):
     """Copy src file to dst. This method supports both online and local files."""
     if not isdir(dirname(dst)):
         os.makedirs(dirname(dst))
-    if is_valid_url(str(src)):
+    if _is_valid_url(str(src)):
         with requests.get(src, stream=True) as r:
             if r.status_code != 200:
                 raise ConnectionError(
@@ -48,10 +38,10 @@ def _copyfile(src, dst, chunk_size=1024):
         shutil.copyfile(src, dst)
 
 
-def cache_vrt_tiles(
+def _cache_vrt_tiles(
     vrt_fn: str,
     geom: Optional[gpd.GeoSeries] = None,
-    cache_dir: str = HYDROMT_DATADIR,
+    cache_dir: str = SETTINGS.cache_root,
     logger=logger,
 ) -> str:
     """Cache vrt tiles that intersect with geom.

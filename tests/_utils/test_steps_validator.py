@@ -1,6 +1,6 @@
 import pytest
 
-from hydromt._utils.steps_validator import validate_steps
+from hydromt._utils.steps_validator import _validate_steps
 from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.model import Model
@@ -40,7 +40,7 @@ def test_validate_steps_unknown_args_in_dict():
     model = Model()
     model.add_component("foo", FooComponent(model))
     with pytest.raises(TypeError, match="got an unexpected keyword argument 'c'"):
-        validate_steps(model, steps)
+        _validate_steps(model, steps)
 
 
 def test_validate_steps_not_all_args_in_dict():
@@ -48,14 +48,14 @@ def test_validate_steps_not_all_args_in_dict():
     model = Model()
     model.add_component("foo", FooComponent(model))
     with pytest.raises(TypeError, match="missing a required argument: 'b'"):
-        validate_steps(model, steps)
+        _validate_steps(model, steps)
 
 
 def test_validate_steps_correct():
     steps = [{"foo.create": {"a": 1, "b": "2"}}]
     model = Model()
     model.add_component("foo", FooComponent(model))
-    validate_steps(model, steps)
+    _validate_steps(model, steps)
 
 
 def test_validate_steps_in_model_correct(PLUGINS):
@@ -68,7 +68,7 @@ def test_validate_steps_in_model_correct(PLUGINS):
         "version": "999",
     }
     model = FooModel()
-    validate_steps(model, [{"foo": {"a": 1, "b": "2"}}, {"bar": None}])
+    _validate_steps(model, [{"foo": {"a": 1, "b": "2"}}, {"bar": None}])
 
 
 def test_validate_steps_disallowed_function(PLUGINS):
@@ -85,7 +85,7 @@ def test_validate_steps_disallowed_function(PLUGINS):
         AttributeError,
         match="Method baz is not allowed to be called on model, since it is not a HydroMT step definition. Add @hydromt_step if that is your intention.",
     ):
-        validate_steps(model, [{"baz": None}])
+        _validate_steps(model, [{"baz": None}])
 
 
 def test_validate_steps_blacklisted_function():
@@ -94,11 +94,11 @@ def test_validate_steps_blacklisted_function():
     with pytest.raises(
         AttributeError, match="Method build is not allowed to be called on model."
     ):
-        validate_steps(model, [{"build": None}])
+        _validate_steps(model, [{"build": None}])
 
 
 def test_validate_steps_correct_with_defaults():
     model = Model()
     model.add_component("foo", FooComponent(model))
-    validate_steps(model, [{"foo.with_defaults": {"a": 1}}])
-    validate_steps(model, [{"foo.with_defaults": {"a": 1, "b": "3"}}])
+    _validate_steps(model, [{"foo.with_defaults": {"a": 1}}])
+    _validate_steps(model, [{"foo.with_defaults": {"a": 1, "b": "3"}}])

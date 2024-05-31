@@ -40,7 +40,7 @@ from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
 from hydromt import _compat
-from hydromt._utils import elevation2rgba, rgba2elevation
+from hydromt._utils import _elevation2rgba, _rgba2elevation
 from hydromt.gis import utils
 
 logger = logging.getLogger(__name__)
@@ -2646,7 +2646,7 @@ class RasterDataArray(XRasterBase):
                                 os.remove(fn_bin)  # clean up
                             else:
                                 im = np.array(Image.open(fn))
-                                data = rgba2elevation(im, nodata=nodata, dtype=dtype)
+                                data = _rgba2elevation(im, nodata=nodata, dtype=dtype)
                             temp[yslice, xslice] = data
                     # coarsen the data using mean
                     temp = np.ma.masked_values(temp.reshape((pxs, 2, pxs, 2)), nodata)
@@ -2673,7 +2673,7 @@ class RasterDataArray(XRasterBase):
                         rgba = cmap(norm(dst_data), bytes=True)
                     else:
                         # Create RGBA bands from the data and save it as png
-                        rgba = elevation2rgba(dst_data, nodata=nodata)
+                        rgba = _elevation2rgba(dst_data, nodata=nodata)
                     Image.fromarray(rgba).save(fn_out, **kwargs)
                 elif ldriver == "netcdf4":
                     # write the data to netcdf

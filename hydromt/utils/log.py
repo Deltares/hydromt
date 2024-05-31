@@ -10,6 +10,8 @@ from hydromt import __version__
 
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 
+__all__ = ["setuplog"]
+
 
 def setuplog(
     name: str = "hydromt",

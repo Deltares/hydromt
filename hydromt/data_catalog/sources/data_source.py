@@ -18,7 +18,7 @@ from pydantic import (
 )
 
 from hydromt._typing import DataType, SourceMetadata
-from hydromt._utils.uris import is_valid_url
+from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 
@@ -85,12 +85,12 @@ class DataSource(BaseModel, ABC):
     @property
     def full_uri(self) -> str:
         """Join root with uri."""
-        uri_is_url: bool = is_valid_url(self.uri)
+        uri_is_url: bool = _is_valid_url(self.uri)
         if uri_is_url:
             # uri is fully self-describing
             return self.uri
         if not uri_is_url and self.root:
-            if is_valid_url(self.root):
+            if _is_valid_url(self.root):
                 # use '/' to connect url parts
                 return f"{self.root.rstrip('/')}/{self.uri}"
         # Local file, make absolute

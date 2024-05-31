@@ -22,10 +22,9 @@ from hydromt._typing import (
     ZoomLevel,
 )
 from hydromt._typing.error import NoDataStrategy
-from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
-from hydromt._utils.uris import strip_scheme
+from hydromt._utils import _cache_vrt_tiles, _strip_scheme
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.config import SETTINGS
-from hydromt.data_catalog.adapters.caching import cache_vrt_tiles
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.gis.merge import merge
 
@@ -53,7 +52,7 @@ class RasterioDriver(RasterDatasetDriver):
         if metadata is None:
             metadata = SourceMetadata()
         # build up kwargs for open_raster
-        warn_on_unused_kwargs(
+        _warn_on_unused_kwargs(
             self.__class__.__name__,
             {"time_range": time_range, "zoom_level": zoom_level},
             logger=logger,
@@ -69,12 +68,12 @@ class RasterioDriver(RasterDatasetDriver):
             cache_dir = Path(cache_root) / self.options.get(
                 "cache_dir",
                 Path(
-                    strip_scheme(uris[0])
+                    _strip_scheme(uris[0])
                 ).stem,  # default to first uri without extension
             )
             uris_cached = []
             for uri in uris:
-                cached_uri: str = cache_vrt_tiles(
+                cached_uri: str = _cache_vrt_tiles(
                     uri, geom=mask, cache_dir=cache_dir, logger=logger
                 )
                 uris_cached.append(cached_uri)

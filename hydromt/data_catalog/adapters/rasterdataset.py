@@ -27,13 +27,13 @@ from hydromt._typing import (
     Variables,
     _exec_nodata_strat,
 )
-from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.data_catalog.adapters.utils import (
+from hydromt._utils import (
+    _has_no_data,
+    _shift_dataset_time,
     _single_var_as_array,
     _slice_temporal_dimension,
-    has_no_data,
-    shift_dataset_time,
 )
+from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.gis import utils
 from hydromt.gis.raster import GEO_MAP_COORD
 
@@ -162,14 +162,14 @@ class RasterDatasetAdapter(DataAdapterBase):
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
         try:
-            if has_no_data(ds):
+            if _has_no_data(ds):
                 raise NoDataException()
             # rename variables and parse data and attrs
             ds = self._rename_vars(ds)
             ds = self._validate_spatial_dims(ds)
             ds = self._set_crs(ds, metadata.crs, logger)
             ds = self._set_nodata(ds, metadata)
-            ds = shift_dataset_time(
+            ds = _shift_dataset_time(
                 dt=self.unit_add.get("time", 0), ds=ds, logger=logger
             )
             # slice data
@@ -181,7 +181,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 time_range,
                 logger=logger,
             )
-            if has_no_data(ds):
+            if _has_no_data(ds):
                 raise NoDataException()
 
             # uniformize data
@@ -286,7 +286,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 logger=logger,
             )
 
-        if has_no_data(ds):
+        if _has_no_data(ds):
             return None
         else:
             return ds
@@ -329,7 +329,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
             ds = ds.raster.clip_bbox(bbox, align=align)
 
-        if has_no_data(ds):
+        if _has_no_data(ds):
             return None
         else:
             return ds

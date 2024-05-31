@@ -9,7 +9,7 @@ from pyproj import CRS
 from hydromt._typing import Geom
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.metadata import SourceMetadata
-from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -40,7 +40,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         """Read tabular data using a combination of the pandas and geopandas libraries."""
         if not metadata:
             metadata = SourceMetadata()
-        warn_on_unused_kwargs(
+        _warn_on_unused_kwargs(
             self.__class__.__name__,
             {"mask": mask, "predicate": predicate, "variables": variables},
             logger=logger,

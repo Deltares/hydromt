@@ -12,7 +12,7 @@ import pandas as pd
 from fsspec import AbstractFileSystem
 
 from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
-from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 
 from .metadata_resolver import MetaDataResolver
 
@@ -97,7 +97,7 @@ class ConventionResolver(MetaDataResolver):
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve the placeholders in the URI."""
-        warn_on_unused_kwargs(
+        _warn_on_unused_kwargs(
             self.__class__.__name__, {"mask": mask, "zoom_level": zoom_level}, logger
         )
 

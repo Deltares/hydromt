@@ -4,13 +4,15 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-from .rgetattr import rgetattr
+from hydromt._utils.rgetattr import _rgetattr
+
+__all__ = ["_validate_steps"]
 
 
-def validate_steps(model: "Model", steps: list[dict[str, dict[str, Any]]]) -> None:
+def _validate_steps(model: "Model", steps: list[dict[str, dict[str, Any]]]) -> None:
     for step_dict in steps:
         step, options = next(iter(step_dict.items()))
-        attr = rgetattr(model, step, None)
+        attr = _rgetattr(model, step, None)
         if attr is None:
             raise AttributeError(f"Method {step} not found in model.")
         if not hasattr(attr, "__ishydromtstep__"):

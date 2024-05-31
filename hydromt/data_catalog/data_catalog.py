@@ -36,7 +36,8 @@ from hydromt import __version__
 from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import StrPath
-from hydromt._utils import partition_dictionaries
+from hydromt._utils import _partition_dictionaries, _single_var_as_array
+from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
     DataAdapter,
     DataFrameAdapter,
@@ -45,8 +46,6 @@ from hydromt.data_catalog.adapters import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_catalog.adapters.caching import HYDROMT_DATADIR
-from hydromt.data_catalog.adapters.utils import _single_var_as_array
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.predefined_catalog import (
     PredefinedCatalog,
@@ -67,18 +66,14 @@ from hydromt.utils import deep_merge
 
 logger = logging.getLogger(__name__)
 
-__all__ = [
-    "DataCatalog",
-]
-
-_USER_DEFINED_NAME = "_USER_DEFINED_"
+__all__ = ["DataCatalog"]
 
 
 class DataCatalog(object):
     """Base class for the data catalog object."""
 
     _format_version = "v1"  # format version of the data catalog
-    _cache_dir = HYDROMT_DATADIR
+    _cache_dir = SETTINGS.cache_root
 
     def __init__(
         self,
@@ -963,11 +958,11 @@ class DataCatalog(object):
                     continue
                 if "variants" in existing:
                     variants = existing.pop("variants")
-                    _, variant, _ = partition_dictionaries(source_dict, existing)
+                    _, variant, _ = _partition_dictionaries(source_dict, existing)
                     variants.append(variant)
                     existing["variants"] = variants
                 else:
-                    base, diff_existing, diff_new = partition_dictionaries(
+                    base, diff_existing, diff_new = _partition_dictionaries(
                         source_dict, existing
                     )
                     # provider and version should always be in variants list

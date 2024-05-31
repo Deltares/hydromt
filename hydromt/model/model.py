@@ -22,8 +22,8 @@ from pyproj import CRS
 
 from hydromt._typing import StrPath
 from hydromt._typing.type_def import DeferedFileClose
-from hydromt._utils.rgetattr import rgetattr
-from hydromt._utils.steps_validator import validate_steps
+from hydromt._utils import _rgetattr
+from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
 from hydromt.model import hydromt_step
 from hydromt.model.components import (
@@ -236,13 +236,13 @@ class Model(object, metaclass=ABCMeta):
 
         """
         steps = steps or []
-        validate_steps(self, steps)
+        _validate_steps(self, steps)
 
         for step_dict in steps:
             step, kwargs = next(iter(step_dict.items()))
             self.logger.info(f"build: {step}")
             # Call the methods.
-            method = rgetattr(self, step)
+            method = _rgetattr(self, step)
             params = {
                 param: arg.default
                 for param, arg in signature(method).parameters.items()
@@ -307,7 +307,7 @@ class Model(object, metaclass=ABCMeta):
             to a temporary file in case the original file cannot be written to.
         """
         steps = steps or []
-        validate_steps(self, steps)
+        _validate_steps(self, steps)
 
         # read current model
         if not self.root.is_writing_mode():
@@ -328,7 +328,7 @@ class Model(object, metaclass=ABCMeta):
             step, kwargs = next(iter(step_dict.items()))
             self.logger.info(f"update: {step}")
             # Call the methods.
-            method = rgetattr(self, step)
+            method = _rgetattr(self, step)
             params = {
                 param: arg.default
                 for param, arg in signature(method).parameters.items()

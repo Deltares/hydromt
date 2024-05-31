@@ -21,7 +21,7 @@ from yaml import safe_load as load_yaml
 
 from hydromt import gis
 from hydromt._typing.type_def import StrPath
-from hydromt._utils.uris import is_valid_url
+from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.gis import raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -743,7 +743,7 @@ def read_toml(path: StrPath) -> Dict[str, Any]:
 
 
 def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
-    if is_valid_url(str(uri_or_path)):
+    if _is_valid_url(str(uri_or_path)):
         with fetch(str(uri_or_path), stream=True) as r:
             r.raise_for_status()
             yml = parse_yaml(r.text)

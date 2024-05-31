@@ -14,7 +14,6 @@ from typing import Optional, Union
 import fsspec
 import numpy as np
 import pandas as pd
-import xarray as xr
 import yaml
 from pystac import Catalog as StacCatalog
 from upath import UPath
@@ -35,74 +34,6 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = ["DataAdapter"]
-
-
-def round_latlon(ds, decimals=5):
-    x_dim = ds.raster.x_dim
-    y_dim = ds.raster.y_dim
-    ds[x_dim] = np.round(ds[x_dim], decimals=decimals)
-    ds[y_dim] = np.round(ds[y_dim], decimals=decimals)
-    return ds
-
-
-def to_datetimeindex(ds):
-    if ds.indexes["time"].dtype == "O":
-        ds["time"] = ds.indexes["time"].to_datetimeindex()
-    return ds
-
-
-def remove_duplicates(ds):
-    return ds.sel(time=~ds.get_index("time").duplicated())
-
-
-def harmonise_dims(ds):
-    """Harmonise lon-lat-time dimensions.
-
-    Where needed:
-        - lon: Convert longitude coordinates from 0-360 to -180-180
-        - lat: Do N->S orientation instead of S->N
-        - time: Convert to datetimeindex.
-
-    Parameters
-    ----------
-    ds: xr.DataSet
-        DataSet with dims to harmonise
-
-    Returns
-    -------
-    ds: xr.DataSet
-        DataSet with harmonised longitude-latitude-time dimensions
-    """
-    # Longitude
-    x_dim = ds.raster.x_dim
-    lons = ds[x_dim].values
-    if np.any(lons > 180):
-        ds[x_dim] = xr.Variable(x_dim, np.where(lons > 180, lons - 360, lons))
-        ds = ds.sortby(x_dim)
-    # Latitude
-    y_dim = ds.raster.y_dim
-    if np.diff(ds[y_dim].values)[0] > 0:
-        ds = ds.reindex({y_dim: ds[y_dim][::-1]})
-    # Final check for lat-lon
-    assert (
-        np.diff(ds[y_dim].values)[0] < 0
-    ), "orientation not N->S after get_data preprocess set_lon_lat_axis"
-    assert (
-        np.diff(ds[x_dim].values)[0] > 0
-    ), "orientation not W->E after get_data preprocess set_lon_lat_axis"
-    # Time
-    if ds.indexes["time"].dtype == "O":
-        ds = to_datetimeindex(ds)
-
-    return ds
-
-
-PREPROCESSORS = {
-    "round_latlon": round_latlon,
-    "to_datetimeindex": to_datetimeindex,
-    "remove_duplicates": remove_duplicates,
-    "harmonise_dims": harmonise_dims,
-}
 
 
 class DataAdapter(object, metaclass=ABCMeta):
