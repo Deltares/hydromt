@@ -13,7 +13,7 @@ import netCDF4  # noqa: F401
 # required for accessor style documentation
 from xarray import DataArray, Dataset  # noqa: F401
 
-from . import cli, gis, stats, workflows
+from . import cli, gis, stats
 from .data_catalog import *
 
 # submodules

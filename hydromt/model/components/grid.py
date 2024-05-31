@@ -18,7 +18,7 @@ from hydromt.io.writers import write_nc
 from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
-from hydromt.workflows.grid import (
+from hydromt.model.processes.grid import (
     create_grid_from_region,
     grid_from_constant,
     grid_from_geodataframe,

@@ -862,13 +862,13 @@ Grid
 .. autosummary::
    :toctree: _generated
 
-   workflows.grid.create_grid_from_region
-   workflows.grid.create_rotated_grid_from_geom
-   workflows.grid.grid_from_constant
-   workflows.grid.grid_from_rasterdataset
-   workflows.grid.grid_from_raster_reclass
-   workflows.grid.grid_from_geodataframe
-   workflows.grid.rotated_grid
+   model.processes.grid.create_grid_from_region
+   model.processes.grid.create_rotated_grid_from_geom
+   model.processes.grid.grid_from_constant
+   model.processes.grid.grid_from_rasterdataset
+   model.processes.grid.grid_from_raster_reclass
+   model.processes.grid.grid_from_geodataframe
+   model.processes.grid.rotated_grid
 
 .. _workflows_mesh_api:
 
@@ -878,11 +878,11 @@ Mesh
 .. autosummary::
    :toctree: _generated
 
-   workflows.mesh.create_mesh2d_from_region
-   workflows.mesh.create_mesh2d_from_mesh
-   workflows.mesh.create_mesh2d_from_geom
-   workflows.mesh.mesh2d_from_rasterdataset
-   workflows.mesh.mesh2d_from_raster_reclass
+   model.processes.mesh.create_mesh2d_from_region
+   model.processes.mesh.create_mesh2d_from_mesh
+   model.processes.mesh.create_mesh2d_from_geom
+   model.processes.mesh.mesh2d_from_rasterdataset
+   model.processes.mesh.mesh2d_from_raster_reclass
 
 .. _workflows_region_api:
 
@@ -892,12 +892,12 @@ Region
 .. autosummary::
    :toctree: _generated
 
-   workflows.region.parse_region_basin
-   workflows.region.parse_region_bbox
-   workflows.region.parse_region_geom
-   workflows.region.parse_region_grid
-   workflows.region.parse_region_other_model
-   workflows.region.parse_region_mesh
+   model.region.parse_region_basin
+   model.region.parse_region_bbox
+   model.region.parse_region_geom
+   model.region.parse_region_grid
+   model.region.parse_region_other_model
+   model.region.parse_region_mesh
 
 .. _workflows_basin_api:
 

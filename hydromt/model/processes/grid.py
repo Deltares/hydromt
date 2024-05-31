@@ -17,7 +17,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster
 from hydromt.gis import utils as gis_utils
 from hydromt.gis.raster import full
-from hydromt.workflows.region import (
+from hydromt.model.region import (
     parse_region_basin,
     parse_region_bbox,
     parse_region_geom,

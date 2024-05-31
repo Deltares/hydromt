@@ -17,7 +17,7 @@ from hydromt.io.readers import read_nc
 from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
-from hydromt.workflows.mesh import (
+from hydromt.model.processes.mesh import (
     create_mesh2d_from_region,
     mesh2d_from_raster_reclass,
     mesh2d_from_rasterdataset,

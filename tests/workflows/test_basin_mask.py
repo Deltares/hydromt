@@ -8,7 +8,7 @@ import pytest
 
 import hydromt
 from hydromt.gis import raster
-from hydromt.workflows.basin_mask import (
+from hydromt.model.processes.basin_mask import (
     _check_size,
     get_basin_geometry,
 )

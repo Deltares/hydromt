@@ -167,8 +167,8 @@ longer `/path/to/root/geoms/region.geojson` but is now `/path/to/root/region.geo
 be modified both from the config file and the python API. Adjust your data and file calls as appropriate.
 
 Another change to mention is that the region methods ``parse_region`` and ``parse_region_value`` are no
-longer located in ``workflows.basin_mask`` but in `workflows.region`. These functions are only relevant
-for components that inherit from `SpatialModelComponent`. See `GridComponent` and  `workflows.grid` on how
+longer located in ``workflows.basin_mask`` but in `model.region`. These functions are only relevant
+for components that inherit from `SpatialModelComponent`. See `GridComponent` and  `model.processes.grid` on how
 to use these functions.
 
 In HydroMT core, we let `GridComponent` inherit from `SpatialModelComponent`. One can call `model.grid.create_from_region`,

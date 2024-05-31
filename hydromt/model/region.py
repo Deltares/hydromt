@@ -16,8 +16,8 @@ from hydromt._typing import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import utils as gis_utils
+from hydromt.model.processes.basin_mask import get_basin_geometry
 from hydromt.plugins import PLUGINS
-from hydromt.workflows.basin_mask import get_basin_geometry
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
