@@ -15,6 +15,19 @@ if HAS_PYET:
 
 logger = logging.getLogger(__name__)
 
+__all__ = [
+    "precip",
+    "temp",
+    "press",
+    "wind",
+    "pet",
+    "press_correction",
+    "temp_correction",
+    "pet_debruin",
+    "pet_makkink",
+    "pm_fao56",
+]
+
 
 def precip(
     precip,
