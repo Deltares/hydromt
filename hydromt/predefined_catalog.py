@@ -249,15 +249,6 @@ class GCSCMIP6DataCatalog(PredefinedCatalog):
     name = "gcs_cmip6_data"
 
 
-# TODO: replace with a entrypoint plugin structure in v1
-PREDEFINED_CATALOGS = {
-    "artifact_data": ArtifactDataCatalog,
-    "deltares_data": DeltaresDataCatalog,
-    "aws_data": AWSDataCatalog,
-    "gcs_cmip6_data": GCSCMIP6DataCatalog,
-}
-
-
 def _replace_line_endings(file_path: Path):
     WINDOWS_LINE_ENDING = b"\r\n"
     UNIX_LINE_ENDING = b"\n"

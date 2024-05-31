@@ -58,8 +58,8 @@ from hydromt.data_source import (
 from hydromt.drivers import BaseDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.plugins import PLUGINS
 from hydromt.predefined_catalog import (
-    PREDEFINED_CATALOGS,
     PredefinedCatalog,
     _copy_file,
 )
@@ -567,7 +567,7 @@ class DataCatalog(object):
 
     def _set_predefined_catalogs(self) -> Dict:
         """Set initialized predefined catalogs to _catalogs attribute."""
-        for k, cat in PREDEFINED_CATALOGS.items():
+        for k, cat in PLUGINS.catalog_plugins.items():
             self._catalogs[k] = cat(
                 format_version=self._format_version, cache_dir=self._cache_dir
             )
