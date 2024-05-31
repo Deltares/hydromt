@@ -39,7 +39,7 @@ T = TypeVar("T", bound=ModelComponent)
 class Model(object, metaclass=ABCMeta):
     """General and basic API for models in HydroMT."""
 
-    _NAME: str = "modelname"
+    name: str = "model"
     # supported model version should be filled by the plugins
     # e.g. _MODEL_VERSION = ">=1.0, <1.1"
     _MODEL_VERSION = None
@@ -114,7 +114,7 @@ class Model(object, metaclass=ABCMeta):
             Dict[str, str], PLUGINS.model_metadata[self.__class__.__name__]
         )
         self.logger.info(
-            f"Initializing {self._NAME} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
+            f"Initializing {self.name} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
         )
 
         self._region_component_name = self._determine_region_component(region_component)

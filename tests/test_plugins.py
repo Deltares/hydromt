@@ -1,117 +1,93 @@
-from typing import List
+from typing import List, Type
 
 import pytest
 from importlib_metadata import EntryPoint, EntryPoints, entry_points
 from pytest_mock import MockerFixture
 
-from hydromt.components.base import ModelComponent
-from hydromt.components.config import ConfigComponent
-from hydromt.components.datasets import DatasetsComponent
-from hydromt.components.geoms import GeomsComponent
+from hydromt.components import __hydromt_eps__ as component_eps  # noqa
 from hydromt.components.grid import GridComponent
-from hydromt.components.mesh import MeshComponent
-from hydromt.components.spatial import SpatialModelComponent
-from hydromt.components.tables import TablesComponent
-from hydromt.components.vector import VectorComponent
+from hydromt.drivers import __hydromt_eps__ as driver_eps
 from hydromt.models.model import Model
-from hydromt.plugins import PLUGINS
+from hydromt.plugins import Plugins
 
 
-def test_core_component_plugins():
+@pytest.fixture()
+def PLUGINS() -> Plugins:
+    # make sure to start each test with a clean state
+    return Plugins()
+
+
+def test_core_component_plugins(PLUGINS):
     components = PLUGINS.component_plugins
-    assert components == {
-        "ConfigComponent": ConfigComponent,
-        "GeomsComponent": GeomsComponent,
-        "GridComponent": GridComponent,
-        "ModelComponent": ModelComponent,
-        "VectorComponent": VectorComponent,
-        "TablesComponent": TablesComponent,
-        "MeshComponent": MeshComponent,
-        "SpatialModelComponent": SpatialModelComponent,
-        "DatasetsComponent": DatasetsComponent,
-    }
+    obj_names = [obj.__name__ for obj in components.values()]
+    assert all([d in obj_names for d in component_eps])
 
 
-def test_core_model_plugins():
+def test_core_model_plugins(PLUGINS):
     models = PLUGINS.model_plugins
-    assert models == {"Model": Model}
+    assert models == {"model": Model}
 
 
-def test_summary():
+def test_core_driver_plugins(PLUGINS):
+    drivers = PLUGINS.driver_plugins
+    obj_names = [obj.__name__ for obj in drivers.values()]
+    assert all([d in obj_names for d in driver_eps])
+
+
+def test_summary(PLUGINS):
     component_summary = PLUGINS.component_summary()
     model_summary = PLUGINS.model_summary()
     driver_summary = PLUGINS.driver_summary()
-    assert "Component plugins:" in component_summary
-    assert "Model plugins:" in model_summary
+    assert "components:" in component_summary
+    assert "models:" in model_summary
     assert "GridComponent" in component_summary
-    assert "ModelComponent" in component_summary
-    assert "Model" in model_summary
-    assert "Driver Plugins:" in driver_summary
-    assert "PyogrioDriver" in driver_summary
-    assert "RasterDatasetDriver" not in driver_summary  # No ABCs in Plugins
-    assert "harmonize_dims" not in driver_summary  # only drivers in Plugins
+    assert "model" in model_summary
+    assert "drivers:" in driver_summary
+    assert "pyogrio" in driver_summary
 
 
-def _patch_plugin_entry_point(mocker: MockerFixture, component_names: List[str]):
-    ### SETUP
-    PLUGINS._component_plugins = None
-    PLUGINS._model_plugins = None
+def _patch_plugin_entry_point(
+    mocker: MockerFixture, component_names: List[str], component_class: Type
+):
+    # create a mocked version of hydromt.plugins.entry_points
+    mock_module = mocker.MagicMock(__hydromt_eps__=component_names)
+    if component_class:
+        for c in component_names:
+            mock_module.__setattr__(c, component_class)
 
     mock_single_entrypoint = mocker.create_autospec(EntryPoint, spec_set=True)
     mock_single_entrypoint.dist.version = "999.9.9"
     mock_single_entrypoint.dist.name = "hydromt-test"
+    # mock_single_entrypoint.name = "test" # this cannot be mocked?
+
     mock_multiple_entrypoints = mocker.create_autospec(EntryPoints, spec_set=True)
     mock_multiple_entrypoints.__iter__.return_value = [mock_single_entrypoint]
-
-    mock_module = mocker.MagicMock(__all__=component_names)
     mock_single_entrypoint.load.return_value = mock_module
-    mocked_components = []
-    for c in component_names:
-        mock_component = mocker.create_autospec(
-            ModelComponent, spec_set=True, instance=True
-        )
-        mock_module.__setattr__(c, mock_component)
-        mocked_components.append(mock_component)
 
     func = mocker.create_autospec(entry_points, spec_set=True)
     func.return_value = mock_multiple_entrypoints
 
-    return func, mocked_components
+    return func
 
 
-@pytest.fixture()
-def _reset_plugins():
-    PLUGINS._component_plugins = None
-    PLUGINS._driver_plugins = None
-    PLUGINS._model_plugins = None
-    yield
-    PLUGINS._component_plugins = None
-    PLUGINS._driver_plugins = None
-    PLUGINS._model_plugins = None
-
-
-@pytest.mark.usefixtures("_reset_plugins")
-def test_errors_on_duplicate_plugins(
-    mocker,
-):
-    mocked_entrypoints, _ = _patch_plugin_entry_point(
-        mocker, ["TestModelComponent", "TestModelComponent"]
+def test_errors_on_duplicate_plugins(PLUGINS, mocker):
+    mocked_entrypoints = _patch_plugin_entry_point(
+        mocker, ["GridComponent", "GridComponent"], GridComponent
     )
-
     mocker.patch("hydromt.plugins.entry_points", new=mocked_entrypoints)
     with pytest.raises(ValueError, match="Conflicting definitions for "):
         _ = PLUGINS.component_plugins
 
 
-@pytest.mark.usefixtures("_reset_plugins")
-def test_discover_mock_plugin(mocker):
-    PLUGINS._component_plugins = None
-    mock_entrypoints, mocked_components = _patch_plugin_entry_point(
-        mocker, ["TestModelComponent", "OtherTestModelComponent"]
-    )
-    mocker.patch("hydromt.plugins.entry_points", new=mock_entrypoints)
-    components = PLUGINS.component_plugins
-    assert components == {
-        "TestModelComponent": mocked_components[0],
-        "OtherTestModelComponent": mocked_components[1],
-    }
+def test_errors_on_non_existing_plugins(PLUGINS, mocker):
+    mocked_entrypoints = _patch_plugin_entry_point(mocker, ["SomeComponent"], None)
+    mocker.patch("hydromt.plugins.entry_points", new=mocked_entrypoints)
+    with pytest.raises(ValueError, match="is not a valid "):
+        _ = PLUGINS.component_plugins
+
+
+def test_errors_on_wrong_plugin_type(PLUGINS, mocker):
+    mocked_entrypoints = _patch_plugin_entry_point(mocker, ["SomeComponent"], Model)
+    mocker.patch("hydromt.plugins.entry_points", new=mocked_entrypoints)
+    with pytest.raises(ValueError, match="is not a valid "):
+        _ = PLUGINS.component_plugins
