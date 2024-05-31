@@ -8,8 +8,8 @@ from geopandas import GeoDataFrame
 from pyproj import CRS
 
 from hydromt._typing.type_def import StrPath
-from hydromt.components.base import ModelComponent
 from hydromt.io.writers import write_region
+from hydromt.model.components.base import ModelComponent
 
 if TYPE_CHECKING:
     from hydromt.model import Model

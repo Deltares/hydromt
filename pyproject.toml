@@ -110,7 +110,7 @@ Source = "https://github.com/Deltares/hydromt"
 hydromt = "hydromt.cli.main:main"
 
 [project.entry-points."hydromt.components"]
-core = "hydromt.components"
+core = "hydromt.model.components"
 
 [project.entry-points."hydromt.drivers"]
 core = "hydromt.drivers"

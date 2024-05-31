@@ -2,7 +2,7 @@ import pytest
 
 from hydromt import hydromt_step
 from hydromt._utils.steps_validator import validate_steps
-from hydromt.components.base import ModelComponent
+from hydromt.model.components.base import ModelComponent
 from hydromt.model.model import Model
 
 

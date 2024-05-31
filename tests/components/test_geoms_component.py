@@ -8,9 +8,9 @@ from pyproj import CRS
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-from hydromt.components.geoms import GeomsComponent
-from hydromt.components.spatial import SpatialModelComponent
 from hydromt.model import Model
+from hydromt.model.components.geoms import GeomsComponent
+from hydromt.model.components.spatial import SpatialModelComponent
 
 
 def test_model_set_geoms(tmpdir):

@@ -3,7 +3,7 @@ from typing import Optional, cast
 import geopandas as gpd
 from pytest_mock import MockerFixture
 
-from hydromt.components.spatial import SpatialModelComponent
+from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.model import Model
 
 

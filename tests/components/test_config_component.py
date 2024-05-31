@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pytest
 
-from hydromt.components.config import ConfigComponent
 from hydromt.io.path import make_config_paths_abs, make_config_paths_relative
 from hydromt.io.readers import configread, read_yaml
 from hydromt.io.writers import write_yaml
 from hydromt.model import Model
+from hydromt.model.components.config import ConfigComponent
 
 ABS_PATH = Path(abspath(__name__))
 

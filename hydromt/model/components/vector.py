@@ -13,11 +13,11 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import hydromt_step
-from hydromt.components.base import ModelComponent
-from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.vector import GeoDataset
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
+from hydromt.model.components.base import ModelComponent
+from hydromt.model.components.spatial import SpatialModelComponent
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model

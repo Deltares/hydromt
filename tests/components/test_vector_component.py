@@ -3,7 +3,7 @@ from logging import Logger
 import xarray as xr
 from pytest_mock import MockerFixture
 
-from hydromt.components.vector import VectorComponent
+from hydromt.model.components.vector import VectorComponent
 from hydromt.model.model import Model
 from hydromt.root import ModelRoot
 

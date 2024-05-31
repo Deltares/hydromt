@@ -6,9 +6,9 @@ import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
 
-from hydromt.components.grid import GridComponent
-from hydromt.components.spatialdatasets import SpatialDatasetsComponent
 from hydromt.model import Model
+from hydromt.model.components.grid import GridComponent
+from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 

@@ -1,14 +1,14 @@
 """Implementations of the core ModelComponents."""
 
-from hydromt.components.base import ModelComponent
-from hydromt.components.config import ConfigComponent
-from hydromt.components.datasets import DatasetsComponent
-from hydromt.components.geoms import GeomsComponent
-from hydromt.components.grid import GridComponent
-from hydromt.components.mesh import MeshComponent
-from hydromt.components.spatial import SpatialModelComponent
-from hydromt.components.tables import TablesComponent
-from hydromt.components.vector import VectorComponent
+from hydromt.model.components.base import ModelComponent
+from hydromt.model.components.config import ConfigComponent
+from hydromt.model.components.datasets import DatasetsComponent
+from hydromt.model.components.geoms import GeomsComponent
+from hydromt.model.components.grid import GridComponent
+from hydromt.model.components.mesh import MeshComponent
+from hydromt.model.components.spatial import SpatialModelComponent
+from hydromt.model.components.tables import TablesComponent
+from hydromt.model.components.vector import VectorComponent
 
 __all__ = [
     "ConfigComponent",

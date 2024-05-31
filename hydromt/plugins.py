@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Type, TypedDict, cas
 from importlib_metadata import entry_points
 
 if TYPE_CHECKING:
-    from hydromt.components import ModelComponent
     from hydromt.drivers import BaseDriver
     from hydromt.model import Model
+    from hydromt.model.components import ModelComponent
     from hydromt.predefined_catalog import PredefinedCatalog
 
 __all__ = ["PLUGINS"]
@@ -107,7 +107,7 @@ class PluginGroup:
 
 class ComponentPlugins(PluginGroup):
     group = "hydromt.components"
-    base_module = "hydromt.components"
+    base_module = "hydromt.model.components"
     base_class = "ModelComponent"
 
     @property

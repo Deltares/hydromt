@@ -13,10 +13,10 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import hydromt_step
-from hydromt.components.base import ModelComponent
-from hydromt.components.spatial import SpatialModelComponent
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
+from hydromt.model.components.base import ModelComponent
+from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.workflows.mesh import (
     create_mesh2d_from_region,
     mesh2d_from_raster_reclass,

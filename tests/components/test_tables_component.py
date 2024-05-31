@@ -4,8 +4,8 @@ from typing import cast
 import pandas as pd
 import pytest
 
-from hydromt.components.tables import TablesComponent
 from hydromt.model import Model
+from hydromt.model.components.tables import TablesComponent
 
 
 def test_model_tables_key_error(df, tmpdir: Path):

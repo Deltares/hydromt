@@ -13,8 +13,8 @@ from typing import (
 
 import pandas as pd
 
-from hydromt.components.base import ModelComponent
 from hydromt.hydromt_step import hydromt_step
+from hydromt.model.components.base import ModelComponent
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model

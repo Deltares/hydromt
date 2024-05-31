@@ -6,8 +6,8 @@ from hydromt._validators.model_config import (
     HydromtGlobalConfig,
     HydromtModelStep,
 )
-from hydromt.components.base import ModelComponent
-from hydromt.components.grid import GridComponent
+from hydromt.model.components.base import ModelComponent
+from hydromt.model.components.grid import GridComponent
 from hydromt.model.model import Model
 
 

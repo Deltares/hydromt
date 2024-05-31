@@ -15,13 +15,13 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-from hydromt.components.base import ModelComponent
-from hydromt.components.config import ConfigComponent
-from hydromt.components.grid import GridComponent
-from hydromt.components.spatial import SpatialModelComponent
-from hydromt.components.vector import VectorComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.model import Model
+from hydromt.model.components.base import ModelComponent
+from hydromt.model.components.config import ConfigComponent
+from hydromt.model.components.grid import GridComponent
+from hydromt.model.components.spatial import SpatialModelComponent
+from hydromt.model.components.vector import VectorComponent
 from hydromt.plugins import PLUGINS
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")

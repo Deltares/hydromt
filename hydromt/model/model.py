@@ -25,8 +25,12 @@ from hydromt._typing import StrPath
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt._utils.rgetattr import rgetattr
 from hydromt._utils.steps_validator import validate_steps
-from hydromt.components import DatasetsComponent, ModelComponent, SpatialModelComponent
 from hydromt.data_catalog import DataCatalog
+from hydromt.model.components import (
+    DatasetsComponent,
+    ModelComponent,
+    SpatialModelComponent,
+)
 from hydromt.plugins import PLUGINS
 from hydromt.root import ModelRoot
 
