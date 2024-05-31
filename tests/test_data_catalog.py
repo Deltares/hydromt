@@ -28,7 +28,7 @@ from hydromt.data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_catalog import (
+from hydromt.data_catalog.data_catalog import (
     DataCatalog,
     _denormalise_data_dict,
     _parse_data_source_dict,
