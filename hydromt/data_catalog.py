@@ -17,6 +17,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Type,
     Union,
     cast,
 )
@@ -225,18 +226,22 @@ class DataCatalog(object):
                     MediaType.COG,
                     MediaType.TIFF,
                 ]:
-                    adapter_kind = RasterDatasetAdapter
+                    Source: Type[DataSource] = RasterDatasetSource
                 elif asset.media_type in [MediaType.GEOPACKAGE, MediaType.FLATGEOBUF]:
-                    adapter_kind = GeoDataFrameAdapter
+                    Source: Type[DataSource] = GeoDataFrameSource
                 elif asset.media_type == MediaType.GEOJSON:
-                    adapter_kind = GeoDatasetAdapter
+                    Source: Type[DataSource] = GeoDatasetSource
                 elif asset.media_type == MediaType.JSON:
-                    adapter_kind = DataFrameAdapter
+                    Source: Type[DataSource] = DataFrameSource
                 else:
                     continue
 
-                adapter = adapter_kind(str(asset.get_absolute_href()))
-                self.add_source(source_name, adapter)
+                source: DataSource = Source(
+                    name=source_name,
+                    uri=asset.get_absolute_href(),
+                    driver=Source.fallback_driver,
+                )
+                self.add_source(source_name, source)
 
         return self
 

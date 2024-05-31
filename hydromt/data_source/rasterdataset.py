@@ -38,6 +38,7 @@ class RasterDatasetSource(DataSource):
     """DataSource class for the RasterDataset type."""
 
     data_type: ClassVar[Literal["RasterDataset"]] = "RasterDataset"
+    fallback_driver: ClassVar[str] = "rasterio"
     driver: RasterDatasetDriver
     data_adapter: RasterDatasetAdapter = Field(default_factory=RasterDatasetAdapter)
     zoom_levels: Optional[Dict[int, float]] = None

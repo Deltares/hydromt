@@ -1465,15 +1465,14 @@ def test_to_stac_raster_dataset(tmpdir, data_catalog):
     ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
 
 
-@pytest.mark.skip(reason="Contains bug regarding switch to Pydantic.")
 def test_from_stac():
     catalog_from_stac = DataCatalog().from_stac_catalog(
         "./tests/data/stac/catalog.json"
     )
 
-    assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetAdapter
-    assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameAdapter
-    # assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == GeoDatasetAdapter
+    assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetSource
+    assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameSource
+    assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == RasterDatasetSource
 
 
 def test_yml_from_uri_path():
