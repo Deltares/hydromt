@@ -29,7 +29,7 @@ from hydromt._typing import (
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.gis.utils import parse_geom_bbox_buffer
+from hydromt.gis.gis_utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 

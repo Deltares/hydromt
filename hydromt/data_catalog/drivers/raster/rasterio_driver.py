@@ -26,7 +26,7 @@ from hydromt._utils import _cache_vrt_tiles, _strip_scheme
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers import RasterDatasetDriver
-from hydromt.gis.merge import merge
+from hydromt.gis.raster_merge import merge
 
 logger: Logger = getLogger(__name__)
 

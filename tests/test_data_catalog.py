@@ -41,7 +41,7 @@ from hydromt.data_catalog.sources import (
     GeoDatasetSource,
     RasterDatasetSource,
 )
-from hydromt.gis.utils import to_geographic_bbox
+from hydromt.gis.gis_utils import to_geographic_bbox
 from hydromt.io.writers import write_xy
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")

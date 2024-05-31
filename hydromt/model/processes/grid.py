@@ -14,9 +14,7 @@ from shapely.geometry import Polygon
 
 from hydromt._typing.type_def import Number
 from hydromt.data_catalog import DataCatalog
-from hydromt.gis import raster
-from hydromt.gis import utils as gis_utils
-from hydromt.gis.raster import full
+from hydromt.gis import gis_utils, raster
 from hydromt.model.region import (
     parse_region_basin,
     parse_region_bbox,
@@ -294,7 +292,7 @@ def grid_from_constant(
     da: xr.DataArray
         Grid with constant value.
     """
-    da = full(
+    da = raster.full(
         coords=grid_like.raster.coords,
         nodata=constant,
         dtype=dtype,

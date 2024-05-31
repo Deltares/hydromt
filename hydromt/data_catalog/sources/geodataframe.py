@@ -25,7 +25,7 @@ from hydromt._typing import (
 )
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
-from hydromt.gis.utils import parse_geom_bbox_buffer
+from hydromt.gis.gis_utils import parse_geom_bbox_buffer
 
 from .data_source import DataSource
 

@@ -19,12 +19,11 @@ from shapely.geometry.base import GEOMETRY_TYPES
 from tomli import load as load_toml
 from yaml import safe_load as load_yaml
 
-from hydromt import gis
 from hydromt._typing.type_def import StrPath
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
-from hydromt.gis import raster, vector
+from hydromt.gis import gis_utils, raster, vector, vector_utils
 from hydromt.gis.raster import GEO_MAP_COORD
 
 if TYPE_CHECKING:
@@ -445,7 +444,7 @@ def open_vector(
                 bbox_shapely = box(*bbox)
             else:
                 bbox_shapely = None
-            bbox_reader = gis.bbox_from_file_and_filters(
+            bbox_reader = gis_utils.bbox_from_file_and_filters(
                 str(fn), bbox_shapely, geom, crs
             )
             gdf = read_dataframe(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
@@ -472,7 +471,7 @@ def open_vector(
         gdf = gdf.to_crs(dst_crs)
     # filter points
     if gdf.index.size > 0 and (geom is not None or bbox is not None):
-        idx = gis.filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
+        idx = vector_utils.filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
         gdf = gdf.iloc[idx, :]
     return gdf
 

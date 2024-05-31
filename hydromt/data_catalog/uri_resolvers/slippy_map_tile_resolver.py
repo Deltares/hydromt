@@ -12,7 +12,7 @@ import rasterio
 from pyproj import CRS
 
 from hydromt._typing import Geom, StrPath
-from hydromt.gis.utils import cellres
+from hydromt.gis.raster_utils import cellres
 
 logger: Logger = getLogger(__name__)
 

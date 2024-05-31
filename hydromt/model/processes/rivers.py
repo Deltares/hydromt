@@ -9,7 +9,7 @@ import xarray as xr
 from pyflwdir import Flwdir, FlwdirRaster
 from scipy import ndimage
 
-from hydromt.gis import spread2d
+from hydromt.gis.raster_utils import spread2d
 
 logger = logging.Logger(__name__)
 

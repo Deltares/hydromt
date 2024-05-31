@@ -10,7 +10,7 @@ from hydromt._typing import Geom, SourceMetadata, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate
 from hydromt.data_catalog.drivers import BaseDriver
-from hydromt.gis.utils import parse_geom_bbox_buffer
+from hydromt.gis.gis_utils import parse_geom_bbox_buffer
 
 logger = getLogger(__name__)
 

@@ -34,8 +34,9 @@ from hydromt._utils import (
     _slice_temporal_dimension,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.gis import utils
+from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP, GDAL_EXT_CODE_MAP
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.gis.raster_utils import cellres, meridian_offset
 
 logger = getLogger(__name__)
 
@@ -123,10 +124,10 @@ class RasterDatasetAdapter(DataAdapterBase):
         elif driver == "zarr":
             fn_out = join(data_root, f"{data_name}.zarr")
             obj.to_zarr(fn_out, **kwargs)
-        elif driver not in utils.GDAL_DRIVER_CODE_MAP.values():
+        elif driver not in GDAL_DRIVER_CODE_MAP.values():
             raise ValueError(f"RasterDataset: Driver {driver} unknown.")
         else:
-            ext = utils.GDAL_EXT_CODE_MAP.get(driver)
+            ext = GDAL_EXT_CODE_MAP.get(driver)
             if driver == "GTiff" and "compress" not in kwargs:
                 kwargs.update(compress="lzw")  # default lzw compression
             if isinstance(obj, xr.DataArray):
@@ -307,7 +308,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         # work with 4326 data that is defined at 0-360 degrees longtitude
         w, _, e, _ = ds.raster.bounds
         if epsg == 4326 and np.isclose(e - w, 360):  # allow for rounding errors
-            ds = utils.meridian_offset(ds, bbox)
+            ds = meridian_offset(ds, bbox)
 
         # clip with bbox
         if bbox is not None:
@@ -485,7 +486,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                         lat = (bbox[1] + bbox[3]) / 2
                     elif geom is not None:
                         lat = geom.to_crs(4326).centroid.y.item()
-                    conversions["degree"] = utils.cellres(lat=lat)[1]
+                    conversions["degree"] = cellres(lat=lat)[1]
                 fsrc = conversions.get(src_res_unit, 1)
                 fdst = conversions.get(dst_crs_unit, 1)
                 dst_res = src_res * fsrc / fdst

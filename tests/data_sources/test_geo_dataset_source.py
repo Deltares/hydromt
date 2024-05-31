@@ -11,7 +11,7 @@ from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_catalog.adapters import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 from hydromt.data_catalog.sources import GeoDatasetSource
-from hydromt.gis.utils import to_geographic_bbox
+from hydromt.gis.gis_utils import to_geographic_bbox
 
 
 @pytest.fixture()

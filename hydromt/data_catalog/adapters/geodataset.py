@@ -160,7 +160,7 @@ class GeoDatasetAdapter(DataAdapterBase):
             Buffer distance [m] applied to the geometry or bbox. By default 0 m.
         predicate : str, optional
             Predicate used to filter the GeoDataFrame, see
-            :py:func:`hydromt.gis.utils.filter_gdf` for details.
+            :py:func:`hydromt.gis.vector_utils.filter_gdf` for details.
         handle_nodata : NoDataStrategy, optional
             How to handle no data values. By default NoDataStrategy.RAISE.
         time_tuple : tuple of str, datetime, optional

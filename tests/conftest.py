@@ -21,6 +21,7 @@ from hydromt import (
     raster,
     vector,
 )
+from hydromt.gis.raster_utils import affine_to_coords
 from hydromt.plugins import Plugins
 
 dask_config.set(scheduler="single-threaded")
@@ -32,7 +33,6 @@ from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver, RasterDatasetDriver
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.data_catalog.uri_resolvers import MetaDataResolver
-from hydromt.gis import utils
 from hydromt.model.components.config import ConfigComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.components.vector import VectorComponent
@@ -303,7 +303,7 @@ def flwda(flwdir):
         name="flwdir",
         data=flwdir.to_array("d8"),
         dims=("y", "x"),
-        coords=utils.affine_to_coords(flwdir.transform, flwdir.shape),
+        coords=affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
     # NOTE epsg 3785 is deprecated https://epsg.io/3785

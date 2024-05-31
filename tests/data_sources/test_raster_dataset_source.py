@@ -10,7 +10,7 @@ from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_catalog.adapters import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources import RasterDatasetSource
-from hydromt.gis.utils import to_geographic_bbox
+from hydromt.gis.gis_utils import to_geographic_bbox
 
 
 @pytest.fixture()

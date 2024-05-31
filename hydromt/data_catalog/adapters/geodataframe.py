@@ -15,7 +15,7 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataException, _exec_nodata_strat
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.gis import utils
+from hydromt.gis.vector_utils import filter_gdf
 
 logger: Logger = getLogger(__name__)
 
@@ -127,7 +127,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
             bbox_str = ", ".join([f"{c:.3f}" for c in mask.total_bounds])
             epsg = mask.crs.to_epsg()
             logger.debug(f"Clip {predicate} [{bbox_str}] (EPSG:{epsg})")
-            idxs = utils.filter_gdf(gdf, geom=mask, predicate=predicate)
+            idxs = filter_gdf(gdf, geom=mask, predicate=predicate)
             gdf = gdf.iloc[idxs]
 
         if np.all(gdf.is_empty):
