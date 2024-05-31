@@ -113,7 +113,7 @@ hydromt = "hydromt.cli.main:main"
 core = "hydromt.model.components"
 
 [project.entry-points."hydromt.drivers"]
-core = "hydromt.drivers"
+core = "hydromt.data_catalog.drivers"
 
 [project.entry-points."hydromt.models"]
 core = "hydromt.model"

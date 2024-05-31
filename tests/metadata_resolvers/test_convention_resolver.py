@@ -5,7 +5,7 @@ from typing import Any, Dict, Iterator
 import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 
 
 class TestConventionResolver:

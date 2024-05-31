@@ -737,7 +737,7 @@ are specified in the `pyproject.toml`
 	core = "hydromt.models"
 
 	[project.entry-points."hydromt.drivers"]
-	core = "hydromt.drivers"
+	core = "hydromt.data_catalog.drivers"
 
 To have post v1 core recognize there are a few new requirements:
 1. The entrypoint exposes a submodule or script which must specify a `__hydromt_eps__` attribute.

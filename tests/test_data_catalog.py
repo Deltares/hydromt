@@ -23,7 +23,7 @@ from yaml import dump
 
 from hydromt._compat import HAS_OPENPYXL
 from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
-from hydromt.data_adapter import (
+from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
     RasterDatasetAdapter,
@@ -34,7 +34,7 @@ from hydromt.data_catalog.data_catalog import (
     _parse_data_source_dict,
     _yml_from_uri_or_path,
 )
-from hydromt.data_source import (
+from hydromt.data_catalog.sources import (
     DataFrameSource,
     DataSource,
     GeoDataFrameSource,

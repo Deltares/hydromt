@@ -6,9 +6,9 @@ import pytest
 from pydantic import ValidationError
 
 from hydromt._typing import SourceMetadata, StrPath
-from hydromt.data_adapter import DataFrameAdapter
-from hydromt.data_source import DataFrameSource
-from hydromt.drivers import DataFrameDriver
+from hydromt.data_catalog.adapters import DataFrameAdapter
+from hydromt.data_catalog.drivers import DataFrameDriver
+from hydromt.data_catalog.sources import DataFrameSource
 
 
 @pytest.fixture(scope="session")

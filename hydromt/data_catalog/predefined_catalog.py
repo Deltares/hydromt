@@ -9,7 +9,11 @@ from typing import Callable, ClassVar, Optional
 import packaging.version
 import pooch
 
-from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
+from hydromt.data_catalog.adapters.caching import (
+    HYDROMT_DATADIR,
+    _copyfile,
+    _uri_validator,
+)
 
 logger = logging.getLogger(__name__)
 

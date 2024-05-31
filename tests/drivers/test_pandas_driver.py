@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from hydromt.drivers.dataframe import PandasDriver
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
-from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.drivers.dataframe import PandasDriver
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
 
 
 class TestPandasDriver:

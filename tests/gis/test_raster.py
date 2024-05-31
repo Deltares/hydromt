@@ -14,7 +14,7 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import LineString, Point, box
 
-from hydromt.drivers.raster.rasterio_driver import open_raster
+from hydromt.data_catalog.drivers.raster.rasterio_driver import open_raster
 from hydromt.gis import raster, utils
 
 # origin, rotation, res, shape, internal_bounds

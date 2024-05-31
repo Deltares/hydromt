@@ -22,10 +22,10 @@ from yaml import safe_load as load_yaml
 from hydromt import gis
 from hydromt._typing.type_def import StrPath
 from hydromt._utils.uris import is_valid_url
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.gis import raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.path import make_config_paths_abs
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
@@ -214,7 +214,7 @@ def open_raster_from_tindex(
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
 
     # Need to do dynamic import here until we create a new driver.
-    from hydromt.drivers.raster.rasterio_driver import open_mfraster
+    from hydromt.data_catalog.drivers.raster.rasterio_driver import open_mfraster
 
     ds_out = open_mfraster(
         paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs

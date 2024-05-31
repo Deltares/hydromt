@@ -37,7 +37,7 @@ from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, _exec_nodata_strat
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import partition_dictionaries
-from hydromt.data_adapter import (
+from hydromt.data_catalog.adapters import (
     DataAdapter,
     DataFrameAdapter,
     DatasetAdapter,
@@ -45,13 +45,14 @@ from hydromt.data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_adapter.caching import HYDROMT_DATADIR
-from hydromt.data_adapter.utils import _single_var_as_array
+from hydromt.data_catalog.adapters.caching import HYDROMT_DATADIR
+from hydromt.data_catalog.adapters.utils import _single_var_as_array
+from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.predefined_catalog import (
     PredefinedCatalog,
     _copy_file,
 )
-from hydromt.data_source import (
+from hydromt.data_catalog.sources import (
     DataFrameSource,
     DataSource,
     GeoDataFrameSource,
@@ -59,7 +60,6 @@ from hydromt.data_source import (
     RasterDatasetSource,
     create_source,
 )
-from hydromt.drivers import BaseDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
@@ -98,7 +98,7 @@ class DataCatalog(object):
         data_libs: (list of) str, Path, optional
             One or more paths to data catalog configuration files or names of predefined
             data catalogs. By default the data catalog is initiated without data
-            entries. See :py:func:`~hydromt.data_adapter.DataCatalog.from_yml` for
+            entries. See :py:func:`~hydromt.data_catalog.adapters.DataCatalog.from_yml` for
             accepted yaml format.
         fallback_lib:
             Name of pre-defined data catalog to read if no data_libs are provided,

@@ -12,7 +12,7 @@ import numpy as np
 import xarray as xr
 from shapely.geometry import box
 
-from hydromt.data_source.geodataframe import GeoDataFrameSource
+from hydromt.data_catalog.sources.geodataframe import GeoDataFrameSource
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
 
 logger = logging.getLogger(__name__)

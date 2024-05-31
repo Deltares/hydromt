@@ -26,13 +26,13 @@ from hydromt.plugins import Plugins
 dask_config.set(scheduler="single-threaded")
 
 from hydromt._typing import SourceMetadata
-from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.drivers import GeoDataFrameDriver, RasterDatasetDriver
-from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
+from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
+from hydromt.data_catalog.drivers import GeoDataFrameDriver, RasterDatasetDriver
+from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 from hydromt.gis import utils
-from hydromt.metadata_resolver import MetaDataResolver
 from hydromt.model.components.config import ConfigComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.components.vector import VectorComponent

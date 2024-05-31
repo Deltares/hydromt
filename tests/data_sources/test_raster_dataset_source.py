@@ -7,9 +7,9 @@ import xarray as xr
 from pydantic import ValidationError
 
 from hydromt._typing import SourceMetadata, StrPath
-from hydromt.data_adapter import RasterDatasetAdapter
-from hydromt.data_source import RasterDatasetSource
-from hydromt.drivers import RasterDatasetDriver
+from hydromt.data_catalog.adapters import RasterDatasetAdapter
+from hydromt.data_catalog.drivers import RasterDatasetDriver
+from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.gis.utils import to_geographic_bbox
 
 

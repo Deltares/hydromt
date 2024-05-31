@@ -14,11 +14,11 @@ from pystac import Item as StacItem
 
 from hydromt._typing import SourceMetadata, StrPath
 from hydromt._typing.error import ErrorHandleMethod
-from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.data_source.geodataframe import GeoDataFrameSource
-from hydromt.drivers import GeoDataFrameDriver, PyogrioDriver
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
+from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
+from hydromt.data_catalog.drivers import GeoDataFrameDriver, PyogrioDriver
+from hydromt.data_catalog.sources.geodataframe import GeoDataFrameSource
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 
 
 class TestGeoDataFrameSource:

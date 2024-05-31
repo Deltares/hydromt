@@ -19,7 +19,7 @@ from geopandas import GeoDataFrame, GeoSeries
 from geopandas.testing import assert_geodataframe_equal
 from shapely.geometry import box
 
-from hydromt.metadata_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers import ConventionResolver
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.hydromt_step import hydromt_step

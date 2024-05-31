@@ -10,7 +10,7 @@ import xarray as xr
 
 from hydromt._typing import SourceMetadata
 from hydromt.config import SETTINGS
-from hydromt.drivers.raster.rasterio_driver import (
+from hydromt.data_catalog.drivers.raster.rasterio_driver import (
     RasterioDriver,
     open_mfraster,
     open_raster,

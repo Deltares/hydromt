@@ -12,7 +12,7 @@ from pyproj import CRS
 from rasterio.transform import from_origin
 from shapely import Polygon, box
 
-from hydromt.drivers.raster.rasterio_driver import open_raster
+from hydromt.data_catalog.drivers.raster.rasterio_driver import open_raster
 from hydromt.gis import utils
 from hydromt.gis.raster import RasterDataArray, full_from_transform
 

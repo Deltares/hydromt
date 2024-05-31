@@ -2,10 +2,10 @@ from typing import Any, Dict
 
 import pytest
 
-from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.data_source import DataSource, GeoDataFrameSource, create_source
-from hydromt.data_source.data_source import get_nested_var, set_nested_var
-from hydromt.drivers import GeoDataFrameDriver
+from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
+from hydromt.data_catalog.drivers import GeoDataFrameDriver
+from hydromt.data_catalog.sources import DataSource, GeoDataFrameSource, create_source
+from hydromt.data_catalog.sources.data_source import get_nested_var, set_nested_var
 
 
 class TestDataSource:
