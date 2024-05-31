@@ -956,6 +956,7 @@ class DataCatalog(object):
             source_dict = source.model_dump(
                 exclude_defaults=True,  # keeps catalog as clean as possible
                 exclude=["name"],  # name is already in the key
+                round_trip=True,
             )
 
             # remove non serializable entries to prevent errors
