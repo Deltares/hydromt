@@ -716,13 +716,15 @@ Plugins
 =======
 
 Previously the `Model` class was the only entrypoint for providing core with custom behavior.
-Now, there are three:
+Now, there are four:
 
 - `Model`: This class is mostly responsible for dispatching function calls and otherwise
    delegating work to components.
 - `ModelComponent`. This class provides more specialized functionalities to do with a single
    part of a model such as a mesh or grid.
 - `Driver`. This class provides customizable loading of any data source.
+- `PredefinedCatalog`. This class provides a way to define a catalog of data sources that
+   can be used in the model.
 
 Each of these parts have entry points at their relevant submodules. For example, see how these
 are specified in the `pyproject.toml`
@@ -738,14 +740,6 @@ are specified in the `pyproject.toml`
 	core = "hydromt.drivers"
 
 To have post v1 core recognize there are a few new requirements:
-1. There must be a dedicated separate submodule (i.e. a folder with a `__init__.py` file that you can import from)
-   for each of the plugins you want to implement (i.e. components, models and drivers need their own submodule)
-2. These submodules must have an `__init__.py` and this file must specify a `__all__` attribute.
-3. All objects listed in the `__all__` attribute will be made available as plugins in the relevant category.
-   This means these submodules should not re-export anything that is not a plugin.
-4. Though this cannot be enforced in Python, there is a base class for each of the plugin categories in core,
-   which your objects should inherit from, this makes sure that you implement all the relevant functionality.
-
-When you have specified the plugins you wish to make available to core in your `pyproject.toml`, all objects
-should be made available through a global static object called `PLUGINS`. This object has attributes for each
-of the corresponding plugin categories.
+1. The entrypoint exposes a submodule or script which must specify a `__hydromt_eps__` attribute.
+2. All objects listed in the `__hydromt_eps__` attribute will be made available as plugins in the relevant category.
+   These can only be subclasses of the relevant base classes in core for each category (e.g. `ModelComponent` for components)
