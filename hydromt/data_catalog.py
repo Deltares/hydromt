@@ -433,7 +433,11 @@ class DataCatalog(object):
         if source.provider:
             provider = str(source.provider)
         else:
-            provider = source.driver.filesystem.protocol[0]
+            protocol = source.driver.filesystem.protocol
+            if isinstance(protocol, str):
+                provider: str = protocol
+            else:
+                provider: str = protocol[0]
 
         if name not in self._sources:
             self._sources[name] = {}
