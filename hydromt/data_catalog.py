@@ -1240,8 +1240,11 @@ class DataCatalog(object):
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
 
+                driver = kwargs.pop("driver", "rasterio")
                 name = basename(data_like)
-                source = RasterDatasetSource(name=name, uri=str(data_like))
+                source = RasterDatasetSource(
+                    name=name, uri=str(data_like), driver=driver
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             if geom or bbox:

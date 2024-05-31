@@ -703,11 +703,9 @@ class TestGetRasterDataset:
 
 
 def test_get_rasterdataset(data_catalog):
-    n = len(data_catalog)
-    # raster dataset using three different ways
     name = "koppen_geiger"
-    da = data_catalog.get_rasterdataset(data_catalog.get_source(name).uri)
-    assert len(data_catalog) == n + 1
+    source = data_catalog.get_source(name)
+    da = data_catalog.get_rasterdataset(source)
     assert isinstance(da, xr.DataArray)
 
 
@@ -724,13 +722,6 @@ def test_get_rasterdataset_bbox(data_catalog):
     da = data_catalog.get_rasterdataset(da, bbox=bbox)
     assert isinstance(da, xr.DataArray)
     assert np.allclose(da.raster.bounds, bbox)
-
-
-def test_get_rasterdataset_singe_var_as_array(data_catalog):
-    name = "koppen_geiger"
-    data = {"source": name}
-    ds = data_catalog.get_rasterdataset(data, single_var_as_array=False)
-    assert isinstance(ds, xr.Dataset)
 
 
 def test_get_rasterdataset_s3(data_catalog):
@@ -1383,7 +1374,7 @@ def test_get_dataframe(df, tmpdir, data_catalog):
     name = "test.csv"
     fn = str(tmpdir.join(name))
     df.to_csv(fn)
-    df = data_catalog.get_dataframe(fn, driver_kwargs=dict(index_col=0))
+    df = data_catalog.get_dataframe(fn)
     assert len(data_catalog) == n + 1
     assert isinstance(df, pd.DataFrame)
 

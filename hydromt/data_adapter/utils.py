@@ -61,16 +61,14 @@ def has_no_data(
 
 
 def _single_var_as_array(
-    maybe_ds: Optional[Union[xr.Dataset, xr.DataArray]],
+    maybe_ds: Optional[xr.Dataset],
     single_var_as_array: bool,
     variable_name: Optional[Variables] = None,
-) -> Optional[Union[xr.Dataset, xr.DataArray]]:
+) -> Optional[xr.Dataset]:
     if isinstance(maybe_ds, xr.DataArray):
         return maybe_ds
     if maybe_ds is None:
         return None
-    elif isinstance(maybe_ds, xr.DataArray):
-        return maybe_ds
     else:
         ds = maybe_ds
     # return data array if single variable dataset
@@ -82,10 +80,8 @@ def _single_var_as_array(
         elif isinstance(variable_name, str):
             da.name = variable_name
         return da
-    elif isinstance(ds, xr.Dataset):
-        return ds
     else:
-        return ds.to_dataset()
+        return ds
 
 
 def _set_vector_nodata(
