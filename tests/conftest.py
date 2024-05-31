@@ -21,7 +21,7 @@ from hydromt import (
     raster,
     vector,
 )
-from hydromt.predefined_catalog import PREDEFINED_CATALOGS
+from hydromt.plugins import Plugins
 
 dask_config.set(scheduler="single-threaded")
 
@@ -43,11 +43,17 @@ dask_config.set(scheduler="single-threaded")
 DATADIR = join(dirname(abspath(__file__)), "data")
 
 
+@pytest.fixture()
+def PLUGINS() -> Plugins:
+    # make sure to start each test with a clean state
+    return Plugins()
+
+
 @pytest.fixture(autouse=True)
-def _local_catalog_eps(monkeypatch) -> dict:
+def _local_catalog_eps(monkeypatch, PLUGINS) -> dict:
     """Set entrypoints to local predefined catalogs."""
     cat_root = Path(__file__).parent.parent / "data" / "catalogs"
-    for name, cls in PREDEFINED_CATALOGS.items():
+    for name, cls in PLUGINS.catalog_plugins.items():
         monkeypatch.setattr(
             f"hydromt.predefined_catalog.{cls.__name__}.base_url",
             str(cat_root / name),

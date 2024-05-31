@@ -13,6 +13,8 @@ Added
 -----
 - Added Driver class for customizable io
 - Added entrypoints for Driver Plugins as "hydromt.drivers"
+- Added entrypoints for ModelComponent Plugins as "hydromt.components"
+- Added entrypoints for PredefinedCatalog Plugins as "hydromt.catalogs"
 - Added MetaDataResolver class for customizable metadata discovery
 - Added DataSource class to represent and validate DataCatalog entries.
 - Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)

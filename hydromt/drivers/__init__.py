@@ -32,3 +32,15 @@ __all__ = [
     "round_latlon",
     "to_datetimeindex",
 ]
+
+# define hydromt driver entry points
+# see also hydromt.driver group in pyproject.toml
+__hydromt_eps__ = [
+    "GeoDataFrameTableDriver",
+    "GeoDatasetVectorDriver",
+    "GeoDatasetXarrayDriver",
+    "PandasDriver",
+    "PyogrioDriver",
+    "RasterDatasetXarrayDriver",
+    "RasterioDriver",
+]
