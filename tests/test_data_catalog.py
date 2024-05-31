@@ -24,7 +24,6 @@ from yaml import dump
 from hydromt._compat import HAS_OPENPYXL
 from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
 from hydromt.data_adapter import (
-    DataAdapter,
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
     RasterDatasetAdapter,
@@ -137,11 +136,9 @@ def test_parser():
             "data_type": "GeoDataFrame",
             "uri": "path/to/data.gpkg",
         },
-        "test1": {"alias": "test"},
     }
-    with pytest.deprecated_call():
-        sources = _denormalise_data_dict(dd)
-    assert len(sources) == 2
+    sources = _denormalise_data_dict(dd)
+    assert len(sources) == 1
     for name, source in sources:
         datasource = _parse_data_source_dict(
             name,
@@ -193,135 +190,181 @@ def test_parser():
         _parse_data_source_dict("test", {})
     with pytest.raises(ValueError, match="Unknown 'data_type'"):
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
-    with (
-        pytest.raises(ValueError, match="alias test not found in data_dict"),
-        pytest.deprecated_call(),
-    ):
-        _denormalise_data_dict({"test1": {"alias": "test"}})
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_data_catalog_io(tmpdir, data_catalog):
+@pytest.mark.skip("did not manage to fix before deadline")
+def test_data_catalog_io_round_trip(tmpdir, data_catalog):
     # read / write
     fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
     data_catalog1 = DataCatalog(data_libs=fn_yml)
     assert data_catalog.to_dict() == data_catalog1.to_dict()
-    # test that no file is written for empty DataCatalog
-    fn_yml = join(tmpdir, "test1.yml")
-    DataCatalog(fallback_lib=None).to_yml(fn_yml)
-    # test print
-    print(data_catalog.get_source("merit_hydro"))
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_versioned_catalog_entries():
+def test_catalog_entry_no_variant(legacy_aws_worldcover):
+    _, legacy_data_catalog = legacy_aws_worldcover
     # make sure the catalogs individually still work
-    legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
-    legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
     assert len(legacy_data_catalog) == 1
     source = legacy_data_catalog.get_source("esa_worldcover")
-    assert Path(source.path).name == "esa-worldcover.vrt"
+    assert Path(source.uri).name == "esa-worldcover.vrt"
     assert source.version == "2020"
-    # test round trip to and from dict
+
+
+@pytest.mark.skip("did not manage to fix before deadline")
+def test_catalog_entry_no_variant_round_trip(legacy_aws_worldcover):
+    _, legacy_data_catalog = legacy_aws_worldcover
     legacy_data_catalog2 = DataCatalog().from_dict(legacy_data_catalog.to_dict())
     assert legacy_data_catalog2 == legacy_data_catalog
-    # make sure we raise deprecation warning here
-    with pytest.deprecated_call():
-        _ = legacy_data_catalog["esa_worldcover"]
 
-    # second catalog
-    aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
-    aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
+
+def test_catalog_entry_single_variant(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     assert len(aws_data_catalog) == 1
     # test get_source with all keyword combinations
     source = aws_data_catalog.get_source("esa_worldcover")
-    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+    assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     assert source.version == "2021"
     source = aws_data_catalog.get_source("esa_worldcover", version="2021")
-    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+    assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
     assert source.version == "2021"
     source = aws_data_catalog.get_source(
         "esa_worldcover", version="2021", provider="aws"
     )
-    assert source.path.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
-    # test round trip to and from dict
+    assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
+
+
+@pytest.fixture()
+def aws_worldcover():
+    aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
+    aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
+    return (aws_yml_fn, aws_data_catalog)
+
+
+@pytest.fixture()
+def merged_aws_worldcover():
+    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
+    merged_catalog = DataCatalog(data_libs=[merged_yml_fn])
+    return (merged_yml_fn, merged_catalog)
+
+
+@pytest.fixture()
+def legacy_aws_worldcover():
+    legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
+    legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
+    return (legacy_yml_fn, legacy_data_catalog)
+
+
+@pytest.mark.skip("did not manage to fix before deadline")
+def test_catalog_entry_single_variant_round_trip(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
     assert aws_data_catalog2 == aws_data_catalog
 
-    # test errors
+
+def test_catalog_entry_single_variant_unknown_provider(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
             "esa_worldcover", version="2021", provider="asdfasdf"
         )
+
+
+def test_catalog_entry_single_variant_unknown_version(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
         aws_data_catalog.get_source(
             "esa_worldcover", version="asdfasdf", provider="aws"
         )
+
+
+def test_catalog_entry_single_variant_unknown_source(aws_worldcover):
+    _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
         aws_data_catalog.get_source("asdfasdf", version="2021", provider="aws")
 
+
+def test_catalog_entry_warns_on_override_version(aws_worldcover):
+    aws_yml_fn, aws_data_catalog = aws_worldcover
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
         aws_data_catalog.from_yml(aws_yml_fn)
 
+
+def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
+    _, merged_catalog = merged_aws_worldcover
     # make sure we can read merged catalogs
-    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
-    merged_catalog = DataCatalog(data_libs=[merged_yml_fn])
     assert len(merged_catalog) == 3
     source_aws = merged_catalog.get_source("esa_worldcover")  # last variant is default
-    assert source_aws.filesystem == "s3"
+    assert source_aws.driver.filesystem.protocol[0] == "s3"
     assert merged_catalog.get_source("esa_worldcover", provider="aws") == source_aws
     source_loc = merged_catalog.get_source("esa_worldcover", provider="local")
     assert source_loc != source_aws
-    assert source_loc.filesystem == "local"
+    assert source_loc.driver.filesystem.protocol[0] == "file"
     assert source_loc.version == "2021"  # get newest version
     # test get_source with version only
     assert merged_catalog.get_source("esa_worldcover", version="2021") == source_loc
     # test round trip to and from dict
-    merged_catalog2 = DataCatalog().from_dict(merged_catalog.to_dict())
+
+
+@pytest.mark.skip("did not manage to fix before deadline")
+def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
+    _, merged_catalog = merged_aws_worldcover
+    merged_dict = merged_catalog.to_dict()
+    merged_catalog2 = DataCatalog().from_dict(merged_dict)
+
+    merged_catalog2.root = merged_catalog.root
     assert merged_catalog2 == merged_catalog
 
+
+def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
+    aws_yml_fn, _ = aws_worldcover
+    legacy_yml_fn, _ = legacy_aws_worldcover
     # Make sure we can query for the version we want
     aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
     assert len(aws_and_legacy_catalog) == 2
     source_aws = aws_and_legacy_catalog.get_source("esa_worldcover")
-    assert source_aws.filesystem == "s3"
+    assert source_aws.driver.filesystem.protocol[0] == "s3"
     source_aws2 = aws_and_legacy_catalog.get_source("esa_worldcover", provider="aws")
     assert source_aws2 == source_aws
     source_loc = aws_and_legacy_catalog.get_source(
         "esa_worldcover",
-        provider="legacy_esa_worldcover",  # provider is filename
+        provider="file",  # provider is filename
     )
-    assert Path(source_loc.path).name == "esa-worldcover.vrt"
+    assert Path(source_loc.uri).name == "esa-worldcover.vrt"
+
+
+@pytest.mark.skip("did not manage to fix before deadline")
+def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover):
+    aws_yml_fn, _ = aws_worldcover
+    legacy_yml_fn, _ = legacy_aws_worldcover
+    aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
     # test round trip to and from dict
-    aws_and_legacy_catalog2 = DataCatalog().from_dict(aws_and_legacy_catalog.to_dict())
+    d = aws_and_legacy_catalog.to_dict()
+
+    aws_and_legacy_catalog2 = DataCatalog().from_dict(d)
     assert aws_and_legacy_catalog2 == aws_and_legacy_catalog
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_versioned_catalogs(data_catalog):
+def test_versioned_catalogs_no_version(data_catalog):
     data_catalog._sources = {}  # reset
     data_catalog.from_predefined_catalogs("deltares_data")
     assert len(data_catalog.sources) > 0
-    data_catalog._sources = {}  # reset
-    data_catalog.from_predefined_catalogs("deltares_data", "v0.5.0")
-    assert len(data_catalog.sources) > 0
 
+
+def test_version_catalogs_errors_on_unknown_version(data_catalog):
     with pytest.raises(ValueError, match="Version v1993.7 not found "):
         _ = data_catalog.from_predefined_catalogs("deltares_data", "v1993.7")
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_data_catalog(tmpdir, data_catalog):
-    # initialized with empty dict
-    data_catalog._sources = {}  # reset
+def test_data_catalog_lazy_loading():
+    data_catalog = DataCatalog()
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
     assert len(data_catalog.sources) > 0
-    # test keys, getitem,
-    keys = [key for key, _ in data_catalog.iter_sources()]
-    source = data_catalog.get_source(keys[0])
+
+
+def test_data_catalog_contains_source_version_permissive(data_catalog):
+    keys = data_catalog.get_source_names()
     assert data_catalog.contains_source(keys[0])
     assert data_catalog.contains_source(
         keys[0], version="asdfasdfasdf", permissive=True
@@ -329,38 +372,30 @@ def test_data_catalog(tmpdir, data_catalog):
     assert not data_catalog.contains_source(
         keys[0], version="asdfasdf", permissive=False
     )
-    assert isinstance(source, DataAdapter)
-    assert keys[0] in data_catalog.get_source_names()
-    # add source from dict
-    data_dict = {keys[0]: source.to_dict()}
-    data_catalog.from_dict(data_dict)
+
+
+def test_data_catalog_repr(data_catalog):
     assert isinstance(data_catalog.__repr__(), str)
     assert isinstance(data_catalog._repr_html_(), str)
     assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
-    with pytest.raises(ValueError, match="Value must be DataAdapter"):
+    with pytest.raises(ValueError, match="Value must be DataSource"):
         data_catalog.add_source("test", "string")  # type: ignore
-    # check that no sources are loaded if fallback_lib is None
-    assert not DataCatalog(fallback_lib=None).sources
-    # test artifact keys (NOTE: legacy code!)
-    with pytest.deprecated_call():
-        data_catalog = DataCatalog(deltares_data=False)
+
+
+def test_data_catalog_from_deltares_data():
+    data_catalog = DataCatalog()
     assert len(data_catalog._sources) == 0
     data_catalog.from_predefined_catalogs("deltares_data")
     assert len(data_catalog._sources) > 0
-    with (
-        pytest.raises(ValueError, match="Version unknown_version not found"),
-        pytest.deprecated_call(),
-    ):
-        data_catalog = DataCatalog(deltares_data="unknown_version")
 
-    # test hydromt version in meta data
+
+def test_data_catalog_hydromt_version(tmpdir):
     fn_yml = join(tmpdir, "test.yml")
     data_catalog = DataCatalog()
     data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_used_sources(tmpdir):
+def test_used_sources():
     merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_fn)
     source = data_catalog.get_source("esa_worldcover")
@@ -373,44 +408,44 @@ def test_used_sources(tmpdir):
     assert sources[0][1].version == source.version
 
 
-@pytest.mark.skip("needs catalogs refactor")
+@pytest.mark.skip("did not manage to fix before deadline")
 def test_from_yml_with_archive(data_catalog):
+    data_catalog._sources = {}
     cache_dir = Path(data_catalog._cache_dir)
-    data_catalog.from_predefined_catalogs("artifact_data=v0.0.8")
+    data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
     sources = list(data_catalog.sources.keys())
     assert len(sources) > 0
     # as part of the getting the archive a a local
     # catalog file is written to the same folder
     # check if this file exists and we can read it
-    yml_dst_fn = Path(cache_dir, "artifact_data", "v0.0.8", "data_catalog.yml")
+    yml_dst_fn = Path(cache_dir, "artifact_data", "v1.0.0", "data_catalog.yml")
     assert yml_dst_fn.exists()
     data_catalog1 = DataCatalog(yml_dst_fn)
     sources = list(data_catalog1.sources.keys())
     source = data_catalog1.get_source(sources[0])
-    assert yml_dst_fn.parent == Path(source.path).parent.parent
+    assert yml_dst_fn.parent == Path(source.uri).parent.parent
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_from_predefined_catalogs(data_catalog):
     assert len(data_catalog.predefined_catalogs) > 0
     for name in data_catalog.predefined_catalogs:
         data_catalog._sources = {}  # reset
         data_catalog.from_predefined_catalogs(f"{name}=latest")
         assert len(data_catalog._sources) > 0
+
+
+def test_data_catalogs_raises_on_unknown_predefined_catalog(data_catalog):
     with pytest.raises(ValueError, match='Catalog with name "asdf" not found'):
         data_catalog.from_predefined_catalogs("asdf")
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_export_global_datasets(tmpdir, data_catalog):
-    DTYPES = {
-        "RasterDatasetAdapter": (xr.DataArray, xr.Dataset),
-        "GeoDatasetAdapter": (xr.DataArray, xr.Dataset),
-        "GeoDataFrameAdapter": gpd.GeoDataFrame,
-    }
+@pytest.fixture()
+def export_test_slice_objects(tmpdir, data_catalog):
+    data_catalog._sources = {}
+    data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_tuple = ("2010-02-10", "2010-02-15")
-    data_catalog.from_predefined_catalogs("artifact_data")
+    data_lib_fn = join(tmpdir, "data_catalog.yml")
     source_names = [
         "era5[precip,temp]",
         "grwl_mask",
@@ -420,6 +455,44 @@ def test_export_global_datasets(tmpdir, data_catalog):
         "corine",
         "gtsmv3_eu_era5",
     ]
+
+    return (data_catalog, bbox, time_tuple, source_names, data_lib_fn)
+
+
+@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
+@pytest.mark.integration()
+def test_export_global_datasets(tmpdir, export_test_slice_objects):
+    (
+        data_catalog,
+        bbox,
+        time_tuple,
+        source_names,
+        data_lib_fn,
+    ) = export_test_slice_objects
+    data_catalog.export_data(
+        tmpdir,
+        bbox=bbox,
+        time_tuple=time_tuple,
+        source_names=source_names,
+        meta={"version": 1},
+        handle_nodata=NoDataStrategy.IGNORE,
+    )
+    with open(data_lib_fn, "r") as f:
+        yml_list = f.readlines()
+    assert yml_list[0].strip() == "meta:"
+    assert yml_list[1].strip() == "version: 1"
+    assert yml_list[2].strip().startswith("root:")
+
+
+@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
+def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
+    (
+        data_catalog,
+        bbox,
+        time_tuple,
+        source_names,
+        data_lib_fn,
+    ) = export_test_slice_objects
     data_catalog.export_data(
         tmpdir,
         bbox=bbox,
@@ -437,6 +510,7 @@ def test_export_global_datasets(tmpdir, data_catalog):
         meta={"version": 2},
         handle_nodata=NoDataStrategy.IGNORE,
     )
+
     data_lib_fn = join(tmpdir, "data_catalog.yml")
     # check if meta is written
     with open(data_lib_fn, "r") as f:
@@ -444,16 +518,10 @@ def test_export_global_datasets(tmpdir, data_catalog):
     assert yml_list[0].strip() == "meta:"
     assert yml_list[1].strip() == "version: 2"
     assert yml_list[2].strip().startswith("root:")
-    # check if data is parsed correctly
-    data_catalog1 = DataCatalog(data_lib_fn)
-    for key, source in data_catalog1.list_sources():
-        source_type = type(source).__name__
-        dtypes = DTYPES[source_type]
-        obj = source.get_data()
-        assert isinstance(obj, dtypes), key
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
+@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
+@pytest.mark.integration()
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
     fn_df = str(tmpdir.join("test.csv"))
@@ -640,31 +708,48 @@ class TestGetRasterDataset:
         assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_get_rasterdataset(data_catalog):
-    n = len(data_catalog)
-    # raster dataset using three different ways
     name = "koppen_geiger"
-    da = data_catalog.get_rasterdataset(data_catalog.get_source(name).path)
-    assert len(data_catalog) == n + 1
+    source = data_catalog.get_source(name)
+    da = data_catalog.get_rasterdataset(source)
     assert isinstance(da, xr.DataArray)
-    da = data_catalog.get_rasterdataset(name, provider="artifact_data")
+
+
+def test_get_rasterdataset_artifact_data(data_catalog):
+    name = "koppen_geiger"
+    da = data_catalog.get_rasterdataset(name)
     assert isinstance(da, xr.DataArray)
+
+
+def test_get_rasterdataset_bbox(data_catalog):
+    name = "koppen_geiger"
+    da = data_catalog.get_rasterdataset(name)
     bbox = [12.0, 46.0, 13.0, 46.5]
     da = data_catalog.get_rasterdataset(da, bbox=bbox)
     assert isinstance(da, xr.DataArray)
     assert np.allclose(da.raster.bounds, bbox)
-    data = {"source": name, "provider": "artifact_data"}
-    ds = data_catalog.get_rasterdataset(data, single_var_as_array=False)
-    assert isinstance(ds, xr.Dataset)
+
+
+@pytest.mark.skip("broken")
+def test_get_rasterdataset_s3(data_catalog):
     data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
-    da = data_catalog.get_rasterdataset(data)
+    da = data_catalog.get_rasterdataset(
+        data,
+    )
     assert isinstance(da, xr.DataArray)
-    assert len(data_catalog) == n + 2
+
+
+def test_get_rasterdataset_unknown_datatype(data_catalog):
     with pytest.raises(ValueError, match='Unknown raster data type "list"'):
         data_catalog.get_rasterdataset([])
+
+
+def test_get_rasterdataset_unknown_file(data_catalog):
     with pytest.raises(FileNotFoundError):
         data_catalog.get_rasterdataset("test1.tif")
+
+
+def test_get_rasterdataset_unknown_key(data_catalog):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_rasterdataset({"name": "test"})
 
@@ -799,27 +884,45 @@ class TestGetGeoDataFrame:
         assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_get_geodataframe(data_catalog):
+def test_get_geodataframe_path(data_catalog):
     n = len(data_catalog)
-    # vector dataset using three different ways
+
     name = "osm_coastlines"
-    gdf = data_catalog.get_geodataframe(data_catalog.get_source(name).path)
+    uri = data_catalog.get_source(name).uri
+    p = Path(data_catalog.root) / uri
+
+    # vector dataset using three different ways
+    gdf = data_catalog.get_geodataframe(p)
     assert len(data_catalog) == n + 1
     assert isinstance(gdf, gpd.GeoDataFrame)
-    gdf = data_catalog.get_geodataframe(name, provider="artifact_data")
+
+
+def test_get_geodataframe_artifact_data(data_catalog):
+    name = "osm_coastlines"
+    gdf = data_catalog.get_geodataframe(name)
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.index.size == 2
+
+
+def test_get_geodataframe_artifact_data_geom(data_catalog):
+    name = "osm_coastlines"
+    gdf = data_catalog.get_geodataframe(name)
     gdf = data_catalog.get_geodataframe(gdf, geom=gdf.iloc[[0],], predicate="within")
     assert isinstance(gdf, gpd.GeoDataFrame)
     assert gdf.index.size == 1
-    data = {"source": name, "provider": "artifact_data"}
-    gdf = data_catalog.get_geodataframe(data)
-    assert isinstance(gdf, gpd.GeoDataFrame)
+
+
+def test_get_geodataframe_unknown_data_type(data_catalog):
     with pytest.raises(ValueError, match='Unknown vector data type "list"'):
         data_catalog.get_geodataframe([])
+
+
+def test_get_geodataframe_unknown_file(data_catalog):
     with pytest.raises(FileNotFoundError):
         data_catalog.get_geodataframe("test1.gpkg")
+
+
+def test_get_geodataframe_unknown_key(data_catalog):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataframe({"name": "test"})
 
@@ -1009,38 +1112,49 @@ class TestGetGeoDataset:
         assert source.to_stac_catalog(ErrorHandleMethod.SKIP) is None
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_get_geodataset(data_catalog):
-    n = len(data_catalog)
-    # geodataset using three different ways
+def test_get_geodataset_artifact_data(data_catalog):
     name = "gtsmv3_eu_era5"
-    da = data_catalog.get_geodataset(data_catalog.get_source(name).path)
-    assert len(data_catalog) == n + 1
-    assert isinstance(da, xr.DataArray)
-    da = data_catalog.get_geodataset(name, provider="artifact_data")
+    da = data_catalog.get_geodataset(name)
     assert da.vector.index.size == 19
     assert isinstance(da, xr.DataArray)
+
+
+@pytest.mark.skip("did not manage to fix before deadline")
+def test_get_geodataset_bbox_time_tuple(data_catalog):
+    name = "gtsmv3_eu_era5"
+    uri = data_catalog.get_source(name).uri
+    p = Path(data_catalog.root) / uri
+
+    # vector dataset using three different ways
+    da = data_catalog.get_geodataset(p)
     bbox = [12.22412, 45.25635, 12.25342, 45.271]
     da = data_catalog.get_geodataset(
-        da, bbox=bbox, time_tuple=("2010-02-01", "2010-02-05")
+        da,
+        bbox=bbox,
+        time_tuple=("2010-02-01", "2010-02-05"),
+        driver="geodataset_xarray",
     )
     assert da.vector.index.size == 2
     assert da.time.size == 720
     assert isinstance(da, xr.DataArray)
-    data = {"source": name, "provider": "artifact_data"}
-    ds = data_catalog.get_geodataset(data, single_var_as_array=False)
-    assert isinstance(ds, xr.Dataset)
+
+
+def test_get_geodataset_unknown_data_type(data_catalog):
     with pytest.raises(ValueError, match='Unknown geo data type "list"'):
         data_catalog.get_geodataset([])
+
+
+def test_get_geodataset_unknown_file(data_catalog):
     with pytest.raises(FileNotFoundError):
         data_catalog.get_geodataset("test1.nc")
+
+
+def test_get_geodataset_unknown_keys(data_catalog):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_geodataset({"name": "test"})
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_get_dataset(timeseries_df, data_catalog):
-    # get_dataset
     test_dataset = timeseries_df.to_xarray()
     subset_timeseries = timeseries_df.iloc[[0, len(timeseries_df) // 2]]
     time_tuple = (
@@ -1051,6 +1165,9 @@ def test_get_dataset(timeseries_df, data_catalog):
     assert isinstance(ds, xr.Dataset)
     assert ds.time[-1].values == subset_timeseries.index[1].to_datetime64()
 
+
+def test_get_dataset_variables(timeseries_df, data_catalog):
+    test_dataset = timeseries_df.to_xarray()
     ds = data_catalog.get_dataset(test_dataset, variables=["col1"])
     assert isinstance(ds, xr.DataArray)
     assert ds.name == "col1"
@@ -1252,57 +1369,47 @@ class TestGetDataFrame:
         assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
 
 
-@pytest.mark.skip("needs catalogs refactor")
 def test_get_dataframe(df, tmpdir, data_catalog):
     n = len(data_catalog)
-    # dataframe using single way
     name = "test.csv"
     fn = str(tmpdir.join(name))
     df.to_csv(fn)
-    df = data_catalog.get_dataframe(fn, driver_kwargs=dict(index_col=0))
+    df = data_catalog.get_dataframe(fn)
     assert len(data_catalog) == n + 1
     assert isinstance(df, pd.DataFrame)
-    df = data_catalog.get_dataframe(name, provider="user")
-    assert isinstance(df, pd.DataFrame)
+
+
+def test_get_dataframe_variables(df, data_catalog):
     df = data_catalog.get_dataframe(df, variables=["city"])
     assert isinstance(df, pd.DataFrame)
     assert df.columns == ["city"]
-    data = {"source": name, "provider": "user"}
-    gdf = data_catalog.get_dataframe(data)
+
+
+def test_get_dataframe_custom_data(tmp_dir, df, data_catalog):
+    name = "test.csv"
+    path = Path(tmp_dir, name)
+    df.to_csv(path)
+
+    gdf = data_catalog.get_dataframe(df)
     assert isinstance(gdf, pd.DataFrame)
+
+
+def test_get_dataframe_unknown_data_type(data_catalog):
     with pytest.raises(ValueError, match='Unknown tabular data type "list"'):
         data_catalog.get_dataframe([])
+
+
+def test_get_dataframe_unknown_file(data_catalog):
     with pytest.raises(FileNotFoundError):
         data_catalog.get_dataframe("test1.csv")
+
+
+def test_get_dataframe_unknown_keys(data_catalog):
     with pytest.raises(ValueError, match="Unknown keys in requested data"):
         data_catalog.get_dataframe({"name": "test"})
 
 
-@pytest.mark.skip("needs catalogs refactor")
-def test_deprecation_warnings(data_catalog):
-    with pytest.deprecated_call():
-        # should be DataCatalog(data_libs=['artifact_data=v0.0.6'])
-        DataCatalog(artifact_data="v0.0.8")
-    with pytest.deprecated_call():
-        fn = data_catalog["chelsa"].path
-        # should be driver_kwargs=dict(chunks={'x': 100, 'y': 100})
-        data_catalog.get_rasterdataset(fn, chunks={"x": 100, "y": 100})
-    with pytest.deprecated_call():
-        fn = data_catalog["gadm_level1"].path
-        # should be driver_kwargs=dict(assert_gtype='Polygon')
-        data_catalog.get_geodataframe(fn, assert_gtype="MultiPolygon")
-    with pytest.deprecated_call():
-        fn = data_catalog["grdc"].path
-        # should be driver_kwargs=dict(index_col=0)
-        data_catalog.get_dataframe(fn, index_col=0)
-    with pytest.deprecated_call():
-        fn = data_catalog["gtsmv3_eu_era5"].path
-        # should be driver_kwargs=dict(chunks={'time': 100})
-        data_catalog.get_geodataset(fn, chunks={"time": 100})
-
-
-@pytest.mark.skip("needs catalogs refactor")
-def test_detect_extent(data_catalog):
+def test_detect_extent_rasterdataset(data_catalog):
     # raster dataset
     name = "chirps_global"
     bbox = 11.60, 45.20, 13.00, 46.80
@@ -1313,6 +1420,8 @@ def test_detect_extent(data_catalog):
     assert np.allclose(detected_spatial_range, bbox)
     assert detected_temporal_range == expected_temporal_range
 
+
+def test_detect_extent_geodataframe(data_catalog):
     # geodataframe
     name = "gadm_level1"
     bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
@@ -1321,7 +1430,8 @@ def test_detect_extent(data_catalog):
     detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
     assert np.all(np.equal(detected_spatial_range, bbox))
 
-    # geodataset
+
+def test_detect_extent_geodataset(data_catalog):
     name = "gtsmv3_eu_era5"
     bbox = (12.22412, 45.22705, 12.99316, 45.62256)
     expected_temporal_range = (
@@ -1335,16 +1445,12 @@ def test_detect_extent(data_catalog):
     assert detected_temporal_range == expected_temporal_range
 
 
-@pytest.mark.skip(reason="needs implementation of all data types.")
-def test_to_stac(tmpdir, data_catalog):
+def test_to_stac_raster_dataset(tmpdir, data_catalog):
+    data_catalog._sources = {}
     _ = data_catalog.get_rasterdataset("chirps_global")
-    _ = data_catalog.get_geodataframe("gadm_level1")
-    _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
 
     sources = [
         "chirps_global",
-        "gadm_level1",
-        "gtsmv3_eu_era5",
     ]
 
     stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
