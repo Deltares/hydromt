@@ -325,8 +325,8 @@ class GeoDatasetSource(DataSource):
             start_datetime=start_dt,
             end_datetime=end_dt,
         )
-        stac_asset = StacAsset(str(self.path), media_type=media_type)
-        base_name = basename(self.path)
+        stac_asset = StacAsset(str(self.uri), media_type=media_type)
+        base_name = basename(self.uri)
         stac_item.add_asset(base_name, stac_asset)
 
         stac_catalog.add_item(stac_item)
