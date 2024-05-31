@@ -21,11 +21,11 @@ from yaml import safe_load as load_yaml
 
 from hydromt import gis
 from hydromt._typing.type_def import StrPath
+from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.gis import raster, vector
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io.path import make_config_paths_abs
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
@@ -606,7 +606,7 @@ def configread(
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_fn))
-        cfdict = make_config_paths_abs(cfdict, root, skip_abspath_sections)
+        cfdict = _make_config_paths_abs(cfdict, root, skip_abspath_sections)
 
     # update defaults
     if defaults:

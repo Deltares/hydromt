@@ -11,6 +11,7 @@ from .dataset import (
 from .dictionaries import _partition_dictionaries
 from .elevation import _elevation2rgba, _rgba2elevation
 from .nodata import _has_no_data, _set_raster_nodata, _set_vector_nodata
+from .path import _make_config_paths_abs, _make_config_paths_relative
 from .rgetattr import _rgetattr
 from .steps_validator import _validate_steps
 from .unused_kwargs import _warn_on_unused_kwargs
@@ -35,6 +36,8 @@ __all__ = [
     "_warn_on_unused_kwargs",
     "_is_valid_url",
     "_strip_scheme",
+    "_make_config_paths_abs",
+    "_make_config_paths_relative",
 ]
 
 

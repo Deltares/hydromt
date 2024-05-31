@@ -5,7 +5,7 @@ from os.path import abspath, dirname, isabs, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
-from hydromt.io.path import make_config_paths_relative
+from hydromt._utils.path import _make_config_paths_relative
 from hydromt.io.readers import read_toml, read_yaml
 from hydromt.io.writers import write_toml, write_yaml
 from hydromt.model.components.base import ModelComponent
@@ -85,7 +85,7 @@ class ConfigComponent(ModelComponent):
             self.logger.info(f"Writing model config to {write_path}.")
             makedirs(dirname(write_path), exist_ok=True)
 
-            write_data = make_config_paths_relative(self.data, self.root.path)
+            write_data = _make_config_paths_relative(self.data, self.root.path)
             ext = splitext(p)[-1]
             if ext in [".yml", ".yaml"]:
                 write_yaml(write_path, write_data)
