@@ -97,12 +97,12 @@ class PluginGroup:
         )
 
     def summary(self) -> str:
-        group = self.group.split(".")[-1]
+        name = self.group.split(".")[-1][:-1].capitalize()
         s = ""
         for metadata in self.metadata.values():
             s += f"\n\t- {_format_metadata(metadata)}"
         plugins = "\n\t- ".join(map(_format_metadata, self.metadata.values()))
-        return f"{group}:\n\t- {plugins}"
+        return f"{name} plugins:\n\t- {plugins}"
 
 
 class ComponentPlugins(PluginGroup):

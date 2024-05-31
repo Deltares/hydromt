@@ -8,14 +8,7 @@ from hydromt.components import __hydromt_eps__ as component_eps
 from hydromt.components.grid import GridComponent
 from hydromt.drivers import __hydromt_eps__ as driver_eps
 from hydromt.models.model import Model
-from hydromt.plugins import Plugins
 from hydromt.predefined_catalog import __hydromt_eps__ as catalog_eps
-
-
-@pytest.fixture()
-def PLUGINS() -> Plugins:
-    # make sure to start each test with a clean state
-    return Plugins()
 
 
 def test_core_component_plugins(PLUGINS):
@@ -45,11 +38,13 @@ def test_summary(PLUGINS):
     component_summary = PLUGINS.component_summary()
     model_summary = PLUGINS.model_summary()
     driver_summary = PLUGINS.driver_summary()
-    assert "components:" in component_summary
-    assert "models:" in model_summary
+
+    assert component_summary.startswith("Component plugins:")
+    assert model_summary.startswith("Model plugins:")
+    assert driver_summary.startswith("Driver plugins:")
+    # check for some specific plugins
     assert "GridComponent" in component_summary
     assert "model" in model_summary
-    assert "drivers:" in driver_summary
     assert "pyogrio" in driver_summary
 
 

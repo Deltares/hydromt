@@ -21,6 +21,7 @@ from hydromt import (
     raster,
     vector,
 )
+from hydromt.plugins import Plugins
 from hydromt.predefined_catalog import PREDEFINED_CATALOGS
 
 dask_config.set(scheduler="single-threaded")
@@ -41,6 +42,12 @@ from hydromt.root import ModelRoot
 dask_config.set(scheduler="single-threaded")
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+
+
+@pytest.fixture()
+def PLUGINS() -> Plugins:
+    # make sure to start each test with a clean state
+    return Plugins()
 
 
 @pytest.fixture(autouse=True)

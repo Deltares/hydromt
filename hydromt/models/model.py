@@ -110,9 +110,7 @@ class Model(object, metaclass=ABCMeta):
 
         self._defered_file_closes: List[DeferedFileClose] = []
 
-        model_metadata = cast(
-            Dict[str, str], PLUGINS.model_metadata[self.__class__.__name__]
-        )
+        model_metadata = cast(Dict[str, str], PLUGINS.model_metadata[self.name])
         self.logger.info(
             f"Initializing {self.name} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
         )

@@ -72,7 +72,7 @@ def test_validate_component_config_unknown_component():
 
 
 def test_validate_component_config_known_component():
-    HydromtComponentConfig(name="foo", type=ModelComponent.__name__)
+    HydromtComponentConfig(name="foo", type="GridComponent")
     HydromtComponentConfig(name="foo", type=ModelComponent)
 
 
