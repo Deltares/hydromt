@@ -14,9 +14,15 @@ from hydromt.config import SETTINGS
 
 logger = logging.getLogger(__name__)
 
-# this is the default location of the predefined catalogs
-# in the test environment this is set to local data/catalogs directory using a global fixture
-GIT_ROOT = r"https://raw.githubusercontent.com/Deltares/hydromt/main/data/catalogs"
+# get repos folder
+_hydromt_root = Path(__file__).parent.parent.parent
+if Path(_hydromt_root, "data/catalogs").exists():
+    # get local repos catalogs if these exist
+    CATALOG_ROOT = Path(_hydromt_root, "data/catalogs").as_posix()
+else:
+    # otherwise use the online catalogs
+    _git_root = r"https://raw.githubusercontent.com/Deltares/hydromt/main"
+    CATALOG_ROOT = f"{_git_root}/data/catalogs"
 
 __all__ = [
     "PredefinedCatalog",
@@ -85,7 +91,7 @@ class PredefinedCatalog(object):
     """
 
     # required class variables to be defined in subclasses
-    base_url: ClassVar[str] = GIT_ROOT
+    base_url: ClassVar[str] = CATALOG_ROOT
     name: ClassVar[str] = "predefined_catalog"
 
     def __init__(
@@ -227,28 +233,28 @@ def _copy_file(
 class DeltaresDataCatalog(PredefinedCatalog):
     """Deltares data catalog."""
 
-    base_url = f"{GIT_ROOT}/deltares_data"
+    base_url = f"{CATALOG_ROOT}/deltares_data"
     name = "deltares_data"
 
 
 class ArtifactDataCatalog(PredefinedCatalog):
     """Artifact data catalog."""
 
-    base_url = f"{GIT_ROOT}/artifact_data"
+    base_url = f"{CATALOG_ROOT}/artifact_data"
     name = "artifact_data"
 
 
 class AWSDataCatalog(PredefinedCatalog):
     """AWS data catalog."""
 
-    base_url = f"{GIT_ROOT}/aws_data"
+    base_url = f"{CATALOG_ROOT}/aws_data"
     name = "aws_data"
 
 
 class GCSCMIP6DataCatalog(PredefinedCatalog):
     """GCS CMIP6 data catalog."""
 
-    base_url = f"{GIT_ROOT}/gcs_cmip6_data"
+    base_url = f"{CATALOG_ROOT}/gcs_cmip6_data"
     name = "gcs_cmip6_data"
 
 

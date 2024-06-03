@@ -61,7 +61,7 @@ def write_panel(f, name, content="", level=0, item="dropdown"):
 
 
 def write_nested_dropdown(name, data_cat, note="", categories=[]):
-    df = data_cat.to_dataframe().sort_index().drop_duplicates("path")
+    df = data_cat.to_dataframe().sort_index().drop_duplicates("uri")
     with open(f"_generated/{name}.rst", mode="w") as f:
         write_panel(f, name, note, level=0)
         write_panel(f, "", level=1, item="tab-set")
@@ -73,7 +73,7 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
             if len(sources) > 0:
                 write_panel(f, category, level=2, item="tab-item")
             for source in sources:
-                items = data_cat[source].summary().items()
+                items = data_cat.get_source(source).summary().items()
                 summary = "\n".join(
                     [f":{k}: {clean_str(v)}" for k, v in items if k != "category"]
                 )
@@ -81,7 +81,7 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
 
         write_panel(f, "all", level=2, item="tab-item")
         for source in df.index.values:
-            items = data_cat[source].summary()
+            items = data_cat.get_source(source).summary()
             items = {k: clean_str(v) for (k, v) in items.items()}.items()
             summary = "\n".join([f":{k}: {v}" for k, v in items])
             write_panel(f, source, summary, level=3)
@@ -111,6 +111,7 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
+# FIXME: examples are not yet working see #796
 # if os.path.isdir("_examples"):
 #     remove_dir_content("_examples")
 # os.makedirs("_examples")
@@ -132,21 +133,21 @@ categories = [
     "climate",
     "other",
 ]
-# FIXME: this is not working anymore
-# data_cat = hydromt.DataCatalog()
-# predefined_catalogs = hydromt.plugins.PLUGINS.catalog_plugins
-# for name in predefined_catalogs:
-#     try:
-#         data_cat.from_predefined_catalogs(name)
-#     except OSError as e:
-#         print(e)
-#         continue
-#     write_nested_dropdown(name, data_cat, categories=categories)
-#     data_cat._sources = {}  # reset
-# with open("_generated/predefined_catalogs.rst", "w") as f:
-#     f.writelines(
-#         [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
-#     )
+
+data_cat = hydromt.DataCatalog()
+predefined_catalogs = hydromt.plugins.PLUGINS.catalog_plugins
+for name in predefined_catalogs:
+    try:
+        data_cat.from_predefined_catalogs(name)
+    except OSError as e:
+        print(e)
+        continue
+    write_nested_dropdown(name, data_cat, categories=categories)
+    data_cat._sources = {}  # reset
+with open("_generated/predefined_catalogs.rst", "w") as f:
+    f.writelines(
+        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
+    )
 
 # -- Generate cli help docs ----------------------------------------------
 
