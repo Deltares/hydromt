@@ -192,13 +192,31 @@ def test_parser():
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_data_catalog_io_round_trip(tmpdir, data_catalog):
     # read / write
     fn_yml = join(tmpdir, "test.yml")
     data_catalog.to_yml(fn_yml)
     data_catalog1 = DataCatalog(data_libs=fn_yml)
-    assert data_catalog.to_dict() == data_catalog1.to_dict()
+
+    # root has chagned by writing to a different location,
+    # so we'll just remove those parts.
+    rootless_dict_left = {
+        outer_k: {
+            inner_k: inner_v
+            for inner_k, inner_v in outer_v.items()
+            if inner_k != "root"
+        }
+        for outer_k, outer_v in data_catalog.to_dict().items()
+    }
+    rootless_dict_right = {
+        outer_k: {
+            inner_k: inner_v
+            for inner_k, inner_v in outer_v.items()
+            if inner_k != "root"
+        }
+        for outer_k, outer_v in data_catalog1.to_dict().items()
+    }
+    assert rootless_dict_left == rootless_dict_right
 
 
 def test_catalog_entry_no_variant(legacy_aws_worldcover):
