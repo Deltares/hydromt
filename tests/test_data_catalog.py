@@ -766,8 +766,8 @@ class TestGetGeoDataFrame:
         return uri_gdf
 
     @pytest.fixture()
-    def uri_shp(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
-        uri_shapefile = tmp_dir / "test.shp"
+    def uri_shp(self, tmp_path: Path, geodf: gpd.GeoDataFrame) -> str:
+        uri_shapefile = tmp_path / "test.shp"  # shapefile what a horror
         geodf.to_file(uri_shapefile)
         return uri_shapefile
 
