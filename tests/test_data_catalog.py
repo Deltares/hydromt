@@ -228,7 +228,6 @@ def test_catalog_entry_no_variant(legacy_aws_worldcover):
     assert source.version == "2020"
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_catalog_entry_no_variant_round_trip(legacy_aws_worldcover):
     _, legacy_data_catalog = legacy_aws_worldcover
     legacy_data_catalog2 = DataCatalog().from_dict(legacy_data_catalog.to_dict())
