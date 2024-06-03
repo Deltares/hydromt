@@ -1130,7 +1130,8 @@ def test_get_geodataset_artifact_data(data_catalog):
 
 def test_get_geodataset_bbox_time_tuple(data_catalog):
     name = "gtsmv3_eu_era5"
-    uri = data_catalog.get_source(name).uri
+    source = data_catalog.get_source(name)
+    uri = source.uri
     p = Path(data_catalog.root) / uri
 
     # vector dataset using three different ways
@@ -1140,7 +1141,6 @@ def test_get_geodataset_bbox_time_tuple(data_catalog):
         da,
         bbox=bbox,
         time_tuple=("2010-02-01", "2010-02-05"),
-        driver="geodataset_xarray",
     )
     assert da.vector.index.size == 2
     assert da.time.size == 720
@@ -1473,15 +1473,12 @@ def test_to_stac_raster_dataset(tmpdir, data_catalog):
     ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
 
 
-@pytest.mark.skip(reason="Contains bug regarding switch to Pydantic.")
 def test_from_stac():
     catalog_from_stac = DataCatalog().from_stac_catalog(
         "./tests/data/stac/catalog.json"
     )
-
     assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetAdapter
     assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameAdapter
-    # assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == GeoDatasetAdapter
 
 
 def test_yml_from_uri_path():
