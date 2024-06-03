@@ -157,8 +157,8 @@ markers = ["integration: marks tests as being integration tests"]
 filterwarnings = [
   # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
   "ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
-  "ignore::ResourceWarning", # upstream issue with aoihttp, can remove once aoihttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
   "ignore::pytest.PytestUnraisableExceptionWarning", # combine with the above: https://github.com/pytest-dev/pytest/issues/9825
+  # "ignore::ResourceWarning", # upstream issue with aoihttp, can remove once aoihttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
 ]
 
 [tool.mypy]
