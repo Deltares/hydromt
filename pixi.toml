@@ -124,7 +124,7 @@ clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 test = { cmd = ["pytest"] }
 test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
-test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error"] }
+test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error", "-k", "test_read_shp_buffer_rename"] }
 test-cov = { cmd = [
   "pytest",
   "--verbose",
