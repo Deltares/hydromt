@@ -3,6 +3,7 @@
 
 import logging
 
+import geopandas as gpd
 import numpy as np
 import pytest
 
@@ -13,6 +14,11 @@ from hydromt.workflows.basin_mask import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def reproject_to_utm_crs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    utm = gdf.geometry.estimate_utm_crs()
+    return gdf.to_crs(utm)
 
 
 def test_no_basin(basin_files):
@@ -35,7 +41,8 @@ def test_basin(basin_files):
     )
     assert gdf_out is None
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.area.sum(), 0.16847222)
+    gdf_bas = reproject_to_utm_crs(gdf_bas)
+    assert np.isclose(gdf_bas.area.sum(), 1460079731.4550357)
 
 
 def test_no_basid(basin_files):
@@ -58,7 +65,7 @@ def test_no_basid(basin_files):
 def test_crs_mismatch(basin_files, caplog):
     _, ds, gdf_bas, _ = basin_files
     caplog.set_level(logging.WARNING)
-    gdf_bas.to_crs(6875, inplace=True)
+    gdf_bas.to_crs(epsg=6875, inplace=True)
     gdf_bas, gdf_out = get_basin_geometry(
         ds.drop_vars("basins"),
         kind="basin",
@@ -70,15 +77,17 @@ def test_crs_mismatch(basin_files, caplog):
     assert gdf_bas.crs.to_epsg() == 4326
 
 
-def test_subbasin(basin_files):
+def test_subbasin(basin_files, caplog):
     _, ds, _, bas_index = basin_files
     gdf_bas, gdf_out = get_basin_geometry(
         ds, kind="subbasin", basin_index=bas_index, xy=[12.2051, 45.8331], strord=4
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.area.sum(), 0.001875)
-    assert np.isclose(gdf_out.geometry.x, 12.17916667)
-    assert np.isclose(gdf_out.geometry.y, 45.8041666)
+    gdf_bas = reproject_to_utm_crs(gdf_bas)
+    gdf_out = reproject_to_utm_crs(gdf_out)
+    assert np.isclose(gdf_bas.area.sum(), 16201389.58563961)
+    assert np.isclose(gdf_out.geometry.x[1], 280809.4346057499)
+    assert np.isclose(gdf_out.geometry.y[1], 5076159.488365294)
 
 
 def test_subbasin_xy(basin_files):
@@ -91,9 +100,11 @@ def test_subbasin_xy(basin_files):
         strord=5,
     )
     assert gdf_bas.index.size == 2
-    assert np.isclose(gdf_bas.area.sum(), 0.021389)
-    assert np.isclose(gdf_out.geometry.x[1], 12.970833333333266)
-    assert np.isclose(gdf_out.geometry.y[1], 45.69583333333334)
+    gdf_bas = reproject_to_utm_crs(gdf_bas)
+    gdf_out = reproject_to_utm_crs(gdf_out)
+    assert np.isclose(gdf_bas.area.sum(), 184897906.5105253)
+    assert np.isclose(gdf_out.geometry.x[1], 342018.9618917479)
+    assert np.isclose(gdf_out.geometry.y[1], 5062255.816882619)
 
 
 def test_basin_bbox(basin_files):
@@ -106,7 +117,8 @@ def test_basin_bbox(basin_files):
         buffer=1,
     )
     assert gdf_bas.index.size == 30
-    assert np.isclose(gdf_bas.area.sum(), 1.033125)
+    gdf_bas = reproject_to_utm_crs(gdf_bas)
+    assert np.isclose(gdf_bas.area.sum(), 8889419826.002827)
 
 
 def test_basin_stord(basin_files):
@@ -120,7 +132,8 @@ def test_basin_stord(basin_files):
         strord=4,
     )
     assert gdf_bas.index.size == 4
-    assert np.isclose(gdf_bas.area.sum(), 1.03104167)
+    gdf_bas = reproject_to_utm_crs(gdf_bas)
+    assert np.isclose(gdf_bas.area.sum(), 8871340671.25457)
 
 
 def test_subbasin_stord(basin_files):
@@ -133,8 +146,10 @@ def test_subbasin_stord(basin_files):
         strord=6,
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.area.sum(), 0.198055)
-    assert np.isclose(gdf_out.geometry.x, 12.295833)
+    gdf_bas = reproject_to_utm_crs(gdf_bas)
+    gdf_out = reproject_to_utm_crs(gdf_out)
+    assert np.isclose(gdf_bas.area.sum(), 1691220911.8689833)
+    assert np.isclose(gdf_out.geometry.x[0], 291384.75871699606)
 
 
 def test_subbasin_with_bounds(basin_files, caplog):
