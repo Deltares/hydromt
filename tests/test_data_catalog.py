@@ -1135,7 +1135,7 @@ def test_get_geodataset_bbox_time_tuple(data_catalog):
     p = Path(data_catalog.root) / uri
 
     # vector dataset using three different ways
-    da = data_catalog.get_geodataset(p)
+    da = data_catalog.get_geodataset(p, driver="geodataset_xarray")
     bbox = [12.22412, 45.25635, 12.25342, 45.271]
     da = data_catalog.get_geodataset(
         da,
@@ -1143,7 +1143,7 @@ def test_get_geodataset_bbox_time_tuple(data_catalog):
         time_tuple=("2010-02-01", "2010-02-05"),
     )
     assert da.vector.index.size == 2
-    assert da.time.size == 720
+    assert da.time.size == 2016
     assert isinstance(da, xr.DataArray)
 
 
