@@ -271,7 +271,6 @@ def legacy_aws_worldcover():
     return (legacy_yml_fn, legacy_data_catalog)
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_catalog_entry_single_variant_round_trip(aws_worldcover):
     _, aws_data_catalog = aws_worldcover
     aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
@@ -350,7 +349,6 @@ def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
     assert Path(source_loc.uri).name == "esa-worldcover.vrt"
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover):
     aws_yml_fn, _ = aws_worldcover
     legacy_yml_fn, _ = legacy_aws_worldcover
@@ -425,7 +423,6 @@ def test_used_sources():
     assert sources[0][1].version == source.version
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_from_yml_with_archive(data_catalog):
     data_catalog._sources = {}
     cache_dir = Path(data_catalog._cache_dir)
@@ -476,7 +473,6 @@ def export_test_slice_objects(tmpdir, data_catalog):
     return (data_catalog, bbox, time_tuple, source_names, data_lib_fn)
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 @pytest.mark.integration()
 def test_export_global_datasets(tmpdir, export_test_slice_objects):
     (
@@ -501,7 +497,6 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     (
         data_catalog,
@@ -537,7 +532,6 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 @pytest.mark.integration()
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
@@ -747,7 +741,6 @@ def test_get_rasterdataset_bbox(data_catalog):
     assert np.allclose(da.raster.bounds, bbox)
 
 
-@pytest.mark.skip("broken")
 def test_get_rasterdataset_s3(data_catalog):
     data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
     da = data_catalog.get_rasterdataset(
@@ -1136,7 +1129,6 @@ def test_get_geodataset_artifact_data(data_catalog):
     assert isinstance(da, xr.DataArray)
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_get_geodataset_bbox_time_tuple(data_catalog):
     name = "gtsmv3_eu_era5"
     uri = data_catalog.get_source(name).uri

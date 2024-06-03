@@ -55,6 +55,18 @@ class DataSource(BaseModel, ABC):
     metadata: SourceMetadata = Field(default_factory=SourceMetadata)
     _used = False
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        return (
+            self.name == other.name
+            and self.uri == other.uri
+            and self.version == other.version
+            and self.metadata == other.metadata
+            and self.provider == other.provider
+            and self.data_adapter == other.data_adapter
+        )
+
     def summary(self) -> Dict[str, Any]:
         """Return a summary of the DataSource."""
         summ: Dict[str, Any] = self.model_dump(include={"uri"})
