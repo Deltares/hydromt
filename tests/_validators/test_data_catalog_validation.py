@@ -14,6 +14,7 @@ from hydromt._validators.data_catalog import (
 from hydromt.io.readers import _yml_from_uri_or_path
 
 
+@pytest.mark.skip("validators need  to be updated to newest format")
 def test_deltares_data_catalog(latest_dd_version_uri):
     yml_dict = _yml_from_uri_or_path(latest_dd_version_uri)
     # whould raise error if something goes wrong

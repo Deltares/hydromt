@@ -48,7 +48,9 @@ from hydromt.data_adapter import (
 from hydromt.data_adapter.caching import HYDROMT_DATADIR
 from hydromt.data_adapter.utils import _single_var_as_array
 from hydromt.data_source import (
+    DataFrameSource,
     DataSource,
+    GeoDataFrameSource,
     GeoDatasetSource,
     RasterDatasetSource,
     create_source,
@@ -56,17 +58,20 @@ from hydromt.data_source import (
 from hydromt.drivers import BaseDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.plugins import PLUGINS
 from hydromt.predefined_catalog import (
-    PREDEFINED_CATALOGS,
     PredefinedCatalog,
     _copy_file,
 )
+from hydromt.utils import deep_merge
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
     "DataCatalog",
 ]
+
+_USER_DEFINED_NAME = "_USER_DEFINED_"
 
 
 class DataCatalog(object):
@@ -363,6 +368,7 @@ class DataCatalog(object):
                 f"Requested unknown data source '{source}' "
                 f"available sources are: {available_sources}"
             )
+
         available_providers = self._sources[source]
 
         # make sure all arguments are strings
@@ -420,14 +426,18 @@ class DataCatalog(object):
             raise ValueError("Value must be DataSource")
 
         if source.version:
-            version = source.version
+            version = str(source.version)
         else:
             version = "_UNSPECIFIED_"  # make sure this comes first in sorted list
 
         if source.provider:
-            provider = source.provider
+            provider = str(source.provider)
         else:
-            provider = "_UNSPECIFIED_"
+            protocol = source.driver.filesystem.protocol
+            if isinstance(protocol, str):
+                provider: str = protocol
+            else:
+                provider: str = protocol[0]
 
         if name not in self._sources:
             self._sources[name] = {}
@@ -441,7 +451,7 @@ class DataCatalog(object):
                 )
 
         if provider not in self._sources[name]:
-            versions = {version: source}
+            versions = {str(version): source}
         else:
             versions = self._sources[name][provider]
             if provider in self._sources[name] and version in versions:
@@ -452,8 +462,8 @@ class DataCatalog(object):
                     stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
-            versions.update({version: source})
-            versions = {k: versions[k] for k in sorted(list(versions.keys()))}
+            versions.update({str(version): source})
+            versions = {(k): versions[k] for k in sorted(list(versions.keys()))}
 
         self._sources[name][provider] = versions
 
@@ -539,7 +549,7 @@ class DataCatalog(object):
             for name, source in self.list_sources():
                 try:
                     other_source = other.get_source(
-                        name, provider=source.provider, version=source.version
+                        name, provider=source.provider, version=str(source.version)
                     )
                 except KeyError:
                     return False
@@ -563,7 +573,7 @@ class DataCatalog(object):
 
     def _set_predefined_catalogs(self) -> Dict:
         """Set initialized predefined catalogs to _catalogs attribute."""
-        for k, cat in PREDEFINED_CATALOGS.items():
+        for k, cat in PLUGINS.catalog_plugins.items():
             self._catalogs[k] = cat(
                 format_version=self._format_version, cache_dir=self._cache_dir
             )
@@ -621,13 +631,12 @@ class DataCatalog(object):
 
         """
         root = Path(self._cache_dir, name, version)
-        extract_dir = root / Path(archive_uri).stem
         # retrieve and unpack archive
         kwargs = {}
         if Path(archive_uri).suffix == ".zip":
-            kwargs.update(processor=pooch.Unzip(extract_dir=extract_dir))
+            kwargs.update(processor=pooch.Unzip(extract_dir=root))
         elif Path(archive_uri).suffix == ".gz":
-            kwargs.update(processor=pooch.Untar(extract_dir=extract_dir))
+            kwargs.update(processor=pooch.Untar(extract_dir=root))
         if Path(archive_uri).exists():  # check if arhive is a local file
             kwargs.update(donwloader=_copy_file)
         pooch.retrieve(
@@ -637,7 +646,7 @@ class DataCatalog(object):
             fname=Path(archive_uri).name,
             **kwargs,
         )
-        return extract_dir
+        return root
 
     def from_yml(
         self,
@@ -708,22 +717,6 @@ class DataCatalog(object):
         yml = _yml_from_uri_or_path(urlpath)
         # parse metadata
         meta = dict()
-        # legacy code with root/category at highest yml level
-        if "root" in yml:
-            warnings.warn(
-                "The 'root' key is deprecated, use 'meta: root' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            meta.update(root=yml.pop("root"))
-        if "category" in yml:
-            warnings.warn(
-                "The 'category' key is deprecated, use 'meta: category' instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            meta.update(category=yml.pop("category"))
-
         # read meta data
         meta = yml.pop("meta", meta)
         if catalog_name is None:
@@ -871,7 +864,7 @@ class DataCatalog(object):
                 category=category,
             )
             if mark_used:
-                source._used = True
+                source.mark_as_used()
             self.add_source(name, source)
 
         return self
@@ -947,17 +940,22 @@ class DataCatalog(object):
         """
         meta = meta or {}
         sources_out = dict()
-        if root is not None:
-            meta.update(**{"root": root})
+        if root is None:
+            root = str(self.root)
+        meta.update(**{"root": root})
         sources = self.list_sources(used_only=used_only)
         sorted_sources = sorted(sources, key=lambda x: x[0])
         for name, source in sorted_sources:  # alphabetical order
             if source_names is not None and name not in source_names:
                 continue
-            source_dict = source.model_dump(exclude_defaults=True)
+            source_dict = source.model_dump(
+                exclude_defaults=True,  # keeps catalog as clean as possible
+                exclude=["name"],  # name is already in the key
+            )
 
             # remove non serializable entries to prevent errors
-            source_dict = _process_dict(source_dict, logger=self.logger)  # TODO TEST
+            source_dict = _process_dict(source_dict, logger=self.logger)
+            source_dict["root"] = root
             if name in sources_out:
                 existing = sources_out.pop(name)
                 if existing == source_dict:
@@ -1104,7 +1102,7 @@ class DataCatalog(object):
                             source.unit_add = {}
                         try:
                             fn_out, driver, driver_kwargs = source.to_file(
-                                data_root=data_root,
+                                file_path=Path(data_root) / source.uri,
                                 data_name=key,
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
@@ -1158,7 +1156,9 @@ class DataCatalog(object):
 
     def get_rasterdataset(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, RasterDatasetSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[Union[int, tuple]] = None,
@@ -1170,7 +1170,7 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
-    ) -> Optional[xr.Dataset]:
+    ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """Return a clipped, sliced and unified RasterDataset.
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
@@ -1228,6 +1228,9 @@ class DataCatalog(object):
             will be returned. if it is set to RAISE and exception will be raised in that
             situation
         """
+        if isinstance(variables, str):
+            variables = [variables]
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1241,8 +1244,11 @@ class DataCatalog(object):
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
 
+                driver = kwargs.pop("driver", "rasterio")
                 name = basename(data_like)
-                source = RasterDatasetSource(name=name, uri=str(data_like))
+                source = RasterDatasetSource(
+                    name=name, uri=str(data_like), driver=driver
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             if geom or bbox:
@@ -1268,6 +1274,8 @@ class DataCatalog(object):
                 variable_name=variables,
             )
             return ds
+        elif isinstance(data_like, RasterDatasetSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
@@ -1290,7 +1298,9 @@ class DataCatalog(object):
 
     def get_geodataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDataFrameSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
@@ -1348,6 +1358,10 @@ class DataCatalog(object):
             will be returned. if it is set to RAISE and exception will be raised in that
             situation
         """
+        if geom is not None or bbox is not None:
+            mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+        else:
+            mask = None
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1359,17 +1373,18 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = GeoDataFrameAdapter(path=str(data_like), **kwargs)
+                driver = kwargs.pop("driver", "pyogrio")
                 name = basename(data_like)
+                source = GeoDataFrameSource(
+                    name=name, uri=str(data_like), driver=driver, **kwargs
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             data_like = GeoDataFrameAdapter._slice_data(
                 data_like,
-                variables,
-                geom,
-                bbox,
-                buffer,
-                predicate,
+                variables=variables,
+                mask=mask,
+                predicate=predicate,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1379,15 +1394,14 @@ class DataCatalog(object):
                     logger=logger,
                 )
             return data_like
-
+        elif isinstance(data_like, GeoDataFrameSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        gdf = source.get_data(
-            bbox=bbox,
-            geom=geom,
+        gdf = source.read_data(
+            mask=mask,
             handle_nodata=handle_nodata,
-            buffer=buffer,
             predicate=predicate,
             variables=variables,
             logger=self.logger,
@@ -1396,7 +1410,9 @@ class DataCatalog(object):
 
     def get_geodataset(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDatasetSource
+        ],
         bbox: Optional[List] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
@@ -1478,13 +1494,13 @@ class DataCatalog(object):
                 driver: BaseDriver = kwargs.pop(
                     "driver", "geodataset_vector"
                 )  # Default to vector driver.
+                name = basename(data_like)
                 source = GeoDatasetSource(
-                    name="_USER_DEFINED_",
+                    name=name,
                     uri=str(data_like),
                     driver=driver,
                     **kwargs,
                 )
-                name = basename(data_like)
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = GeoDatasetAdapter._slice_data(
@@ -1502,6 +1518,8 @@ class DataCatalog(object):
                     logger=logger,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
+        elif isinstance(data_like, GeoDatasetSource):
+            source = data_like
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
@@ -1602,9 +1620,9 @@ class DataCatalog(object):
 
     def get_dataframe(
         self,
-        data_like: Union[str, SourceSpecDict, Path, pd.DataFrame],
-        variables: Optional[list] = None,
-        time_tuple: Optional[Tuple] = None,
+        data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
+        variables: Optional[List] = None,
+        time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1623,7 +1641,7 @@ class DataCatalog(object):
         variables : str or list of str, optional.
             Names of GeoDataset variables to return. By default all dataset variables
             are returned.
-        time_tuple : tuple of str, datetime, optional
+        time_range : tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         handle_nodata: NoDataStrategy Optional
@@ -1646,17 +1664,22 @@ class DataCatalog(object):
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
-                source = self.get_source(name, provider=provider, version=version)
+                source: DataSource = self.get_source(
+                    name, provider=provider, version=version
+                )
+                if not isinstance(source, DataFrameSource):
+                    raise ValueError(f"Source '{source.name}' is not a DataFrame.")
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                source = DataFrameAdapter(path=data_like, **kwargs)
+                driver: str = kwargs.pop("driver", "pandas")
                 name = basename(data_like)
+                source = DataFrameSource(
+                    uri=data_like, name=name, driver=driver, **kwargs
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
-            df = DataFrameAdapter._slice_data(
-                data_like, variables, time_tuple, logger=self.logger
-            )
+            df = DataFrameAdapter._slice_data(data_like, variables, time_range)
             if df is None:
                 _exec_nodata_strat(
                     "No data was left after slicing.",
@@ -1667,9 +1690,9 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        obj = source.get_data(
+        obj = source.read_data(
             variables=variables,
-            time_tuple=time_tuple,
+            time_range=time_range,
             handle_nodata=handle_nodata,
             logger=self.logger,
         )
@@ -1751,25 +1774,14 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
     for name, source in data_dict.items():
         source = copy.deepcopy(source)
         data_dicts = []
-        if "alias" in source:
-            alias = source.pop("alias")
-            warnings.warn(
-                "The use of alias is deprecated, please add a version on the aliased"
-                "catalog instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if alias not in data_dict:
-                raise ValueError(f"alias {alias} not found in data_dict.")
-            # use alias source but overwrite any attributes with original source
-            source_copy = data_dict[alias].copy()
-            source_copy.update(source)
-            data_dicts.append({name: source_copy})
-        elif "variants" in source:
+        if "variants" in source:
             variants = source.pop("variants")
             for diff in variants:
                 source_copy = copy.deepcopy(source)
-                source_copy.update(**diff)
+                source_copy = {
+                    str(k): v for (k, v) in deep_merge(source_copy, diff).items()
+                }
+
                 data_dicts.append({name: source_copy})
         elif "placeholders" in source:
             options = source.pop("placeholders")
@@ -1782,6 +1794,13 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:
+            for k, v in source.items():
+                if isinstance(v, (int, float)):
+                    # numbers are pretty much always a version here,
+                    # and we need strings, so just cast to string when
+                    # we encoutner a number. not the pretties,
+                    # but it will have to do for now.
+                    source[k] = str(v)
             data_list.append((name, source))
             continue
 

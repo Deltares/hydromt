@@ -112,14 +112,15 @@ def parse_region_basin(
     logger : Logger, optional
         Logger object.
     """
-    kwargs = region.copy()
+    var_thresh_kwargs = region.copy()
     kind = next(iter(region))
-    value0 = kwargs.pop(kind)
+    value0 = var_thresh_kwargs.pop(kind)
 
     _assert_parse_key(kind, "basin", "interbasin", "subbasin")
 
     # TODO: Make this very specific to basin.
-    kwargs.update(_parse_region_value(value0, data_catalog=data_catalog))
+    kwargs = _parse_region_value(value0, data_catalog=data_catalog)
+    kwargs.update(var_thresh_kwargs)
 
     expected_keys = (
         ["basid", "geom", "bbox", "xy"] if kind == "basin" else ["geom", "bbox", "xy"]

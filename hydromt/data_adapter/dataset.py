@@ -210,7 +210,6 @@ class DatasetAdapter(DataAdapter):
         try:
             # load data
             fns = self._resolve_paths(variables, time_tuple)
-            self.mark_as_used()
             ds = self._read_data(fns, logger=logger)
             if ds is None:
                 raise NoDataException()
