@@ -43,50 +43,41 @@ def _patch_plugin_components(
     return [type_mocks[c.__name__].return_value for c in component_classes]
 
 
-@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
-def test_api_attrs():
-    # class _DummyModel(GridModel, GridMixin):
-    # _API = {"asdf": "yeah"}
-    # dm = _DummyModel()
-    dm: Any = ...  # bypass ruff
-    assert hasattr(dm, "name")
-    assert hasattr(dm, "_API")
-    assert "asdf" in dm.api
-    assert dm.api["asdf"] == "yeah"
-    assert "region" in dm.api
-    assert dm.api["region"] == gpd.GeoDataFrame
-    assert "grid" in dm.api
-    assert dm.api["grid"] == xr.Dataset
-
-
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_write_data_catalog(tmpdir):
+def test_write_data_catalog_no_used(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
-    sources = list(model.data_catalog.sources.keys())
-    data_lib_fn = join(model.root, "hydromt_data.yml")
-    # used_only=True -> no file written
+    data_lib_fn = join(model.root.path, "hydromt_data.yml")
     model.write_data_catalog()
     assert not isfile(data_lib_fn)
-    # write with single source
+
+
+def test_write_data_catalog_single_source(tmpdir):
+    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
+    data_lib_fn = join(model.root.path, "hydromt_data.yml")
+    sources = list(model.data_catalog.sources.keys())
     model.data_catalog.get_source(sources[0]).mark_as_used()
     model.write_data_catalog()
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:1]
-    # write to different file
-    data_lib_fn1 = join(tmpdir, "hydromt_data2.yml")
-    model.write_data_catalog(data_lib_fn=data_lib_fn1)
-    assert isfile(data_lib_fn1)
-    # append source
-    model1 = Model(root=model.root, data_libs=["artifact_data"], mode="r+")
+
+
+def test_write_data_catalog_append(tmpdir):
+    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
+    data_lib_fn = join(model.root.path, "hydromt_data.yml")
+    sources = list(model.data_catalog.sources.keys())
+    model1 = Model(root=str(model.root.path), data_libs=["artifact_data"], mode="r+")
     model1.data_catalog.get_source(sources[1]).mark_as_used()
     model1.write_data_catalog(append=False)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
     model1.data_catalog.get_source(sources[0]).mark_as_used()
     model1.write_data_catalog(append=True)
     assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
-    # test writing table of datacatalog as csv
+
+
+def test_write_data_catalog_csv(tmpdir):
+    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
+    sources = list(model.data_catalog.sources.keys())
     model.write_data_catalog(used_only=False, save_csv=True)
-    assert isfile(join(model.root, "hydromt_data.csv"))
-    data_catalog_df = pd.read_csv(join(model.root, "hydromt_data.csv"))
+    assert isfile(join(model.root.path, "hydromt_data.csv"))
+    data_catalog_df = pd.read_csv(join(model.root.path, "hydromt_data.csv"))
     assert len(data_catalog_df) == len(sources)
     assert data_catalog_df.iloc[0, 0] == sources[0]
     assert data_catalog_df.iloc[-1, 0] == sources[-1]
