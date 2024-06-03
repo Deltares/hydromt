@@ -734,7 +734,11 @@ def test_get_rasterdataset_s3(data_catalog: DataCatalog):
     data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
     # TODO: use filesystem in driver
     da = data_catalog.get_rasterdataset(
-        data, driver={"name": "rasterio", "filesystem": "s3"}
+        data,
+        driver={
+            "name": "rasterio",
+            "filesystem": {"protocol": "s3", "anon": "true"},
+        },
     )
     assert isinstance(da, xr.DataArray)
 
