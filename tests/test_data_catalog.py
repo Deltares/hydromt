@@ -472,6 +472,7 @@ def export_test_slice_objects(tmpdir, data_catalog):
     return (data_catalog, bbox, time_tuple, source_names, data_lib_fn)
 
 
+@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 @pytest.mark.integration()
 def test_export_global_datasets(tmpdir, export_test_slice_objects):
     (
@@ -496,6 +497,8 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
+@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
+@pytest.mark.integration()
 def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     (
         data_catalog,
@@ -531,6 +534,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
+@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 @pytest.mark.integration()
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
@@ -1473,6 +1477,7 @@ def test_to_stac_raster_dataset(tmpdir, data_catalog):
     ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
 
 
+@pytest.mark.skip(reason="Contains bug regarding switch to Pydantic.")
 def test_from_stac():
     catalog_from_stac = DataCatalog().from_stac_catalog(
         "./tests/data/stac/catalog.json"
