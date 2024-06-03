@@ -26,6 +26,7 @@ from click.testing import CliRunner
 
 import hydromt
 from hydromt.cli.main import main as hydromt_cli
+import hydromt.plugins
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
@@ -110,10 +111,10 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-if os.path.isdir("_examples"):
-    remove_dir_content("_examples")
-os.makedirs("_examples")
-copy_tree("../examples", "_examples")
+# if os.path.isdir("_examples"):
+#     remove_dir_content("_examples")
+# os.makedirs("_examples")
+# copy_tree("../examples", "_examples")
 
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
@@ -131,31 +132,33 @@ categories = [
     "climate",
     "other",
 ]
-data_cat = hydromt.DataCatalog()
-predefined_catalogs = data_cat.predefined_catalogs
-for name in predefined_catalogs:
-    try:
-        data_cat.from_predefined_catalogs(name)
-    except OSError as e:
-        print(e)
-        continue
-    write_nested_dropdown(name, data_cat, categories=categories)
-    data_cat._sources = {}  # reset
-with open("_generated/predefined_catalogs.rst", "w") as f:
-    f.writelines(
-        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
-    )
+# FIXME: this is not working anymore
+# data_cat = hydromt.DataCatalog()
+# predefined_catalogs = hydromt.plugins.PLUGINS.catalog_plugins
+# for name in predefined_catalogs:
+#     try:
+#         data_cat.from_predefined_catalogs(name)
+#     except OSError as e:
+#         print(e)
+#         continue
+#     write_nested_dropdown(name, data_cat, categories=categories)
+#     data_cat._sources = {}  # reset
+# with open("_generated/predefined_catalogs.rst", "w") as f:
+#     f.writelines(
+#         [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
+#     )
 
 # -- Generate cli help docs ----------------------------------------------
 
-cli_build = CliRunner().invoke(hydromt_cli, ["build", "--help"])
-cli2rst(cli_build.output, r"_generated/cli_build.rst")
+# FIXME: replace with sphinx-click ?
+# cli_build = CliRunner().invoke(hydromt_cli, ["build", "--help"])
+# cli2rst(cli_build.output, r"_generated/cli_build.rst")
 
-cli_update = CliRunner().invoke(hydromt_cli, ["update", "--help"])
-cli2rst(cli_update.output, r"_generated/cli_update.rst")
+# cli_update = CliRunner().invoke(hydromt_cli, ["update", "--help"])
+# cli2rst(cli_update.output, r"_generated/cli_update.rst")
 
-cli_clip = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
-cli2rst(cli_clip.output, r"_generated/cli_clip.rst")
+# cli_clip = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
+# cli2rst(cli_clip.output, r"_generated/cli_clip.rst")
 
 # -- General configuration ------------------------------------------------
 
@@ -239,7 +242,7 @@ doc_version = bare_version[: bare_version.find("dev") - 1]
 html_static_path = ["_static"]
 html_css_files = ["theme-deltares.css"]
 html_theme_options = {
-    "show_nav_level": 2,
+    "show_nav_level": 1,
     "navbar_align": "content",
     "use_edit_page_button": True,
     "icon_links": [

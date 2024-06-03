@@ -109,9 +109,11 @@ class Model(object, metaclass=ABCMeta):
         self.data_catalog = DataCatalog(
             data_libs=data_libs, logger=self.logger, **catalog_keys
         )
+        """DataCatalog for data access"""
 
         # file system
         self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
+        """Model root"""
 
         self.components: Dict[str, ModelComponent] = {}
         self._add_components(components)

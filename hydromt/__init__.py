@@ -10,9 +10,6 @@ __version__ = "1.0.0-alpha"
 # importing xarray
 import netCDF4  # noqa: F401
 
-# required for accessor style documentation
-from xarray import DataArray, Dataset  # noqa: F401
-
 # submodules
 from . import data_catalog, gis, io, model, stats, utils
 
@@ -20,6 +17,7 @@ from . import data_catalog, gis, io, model, stats, utils
 from .data_catalog import DataCatalog
 from .gis import raster, vector
 from .model import Model, hydromt_step
+from .plugins import PLUGINS
 
 __all__ = [
     # high-level classes
@@ -37,4 +35,6 @@ __all__ = [
     "vector",
     # high-level functions
     "hydromt_step",
+    # plugins
+    "PLUGINS",
 ]

@@ -1,5 +1,8 @@
 """Accessors to extend the functionality of xarray structures."""
 
+# required for accessor style documentation
+from xarray import DataArray, Dataset  # noqa: F401
+
 from .raster import (
     RasterDataArray,
     RasterDataset,
