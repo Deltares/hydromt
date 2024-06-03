@@ -139,7 +139,7 @@ class DriverPlugins(PluginGroup):
 
 class ModelPlugins(PluginGroup):
     group = "hydromt.models"
-    base_module = "hydromt.model"
+    base_module = "hydromt.model.model"
     base_class = "Model"
 
     @property

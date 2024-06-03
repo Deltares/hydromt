@@ -15,7 +15,7 @@ from shapely.geometry import box
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import gis_utils
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.model.region import (
+from hydromt.model.processes.region import (
     parse_region_bbox,
     parse_region_geom,
     parse_region_mesh,

@@ -2,9 +2,6 @@
 
 from .hydromt_step import hydromt_step
 from .model import Model
+from .root import ModelRoot
 
-__all__ = ["Model", "hydromt_step"]
-
-# define hydromt model entry points
-# see also hydromt.model group in pyproject.toml
-__hydromt_eps__ = ["Model"]
+__all__ = ["Model", "hydromt_step", "ModelRoot"]

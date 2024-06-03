@@ -15,7 +15,7 @@ from shapely.geometry import Polygon
 from hydromt._typing.type_def import Number
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import gis_utils, raster
-from hydromt.model.region import (
+from hydromt.model.processes.region import (
     parse_region_basin,
     parse_region_bbox,
     parse_region_geom,
