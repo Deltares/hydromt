@@ -38,6 +38,38 @@ def test_basin(basin_files):
     assert np.isclose(gdf_bas.area.sum(), 0.16847222)
 
 
+def test_no_basid(basin_files):
+    _, ds, gdf_bas, _ = basin_files
+    gdf_bas_no_id = gdf_bas.drop(
+        columns="basid",
+    )
+    with pytest.raises(
+        ValueError, match="Basin geometries does not have 'basid' column."
+    ):
+        get_basin_geometry(
+            ds.drop_vars("basins"),
+            kind="basin",
+            basin_index=gdf_bas_no_id,
+            xy=[12.2051, 45.8331],
+            buffer=1,
+        )
+
+
+def test_crs_mismatch(basin_files, caplog):
+    _, ds, gdf_bas, _ = basin_files
+    caplog.set_level(logging.WARNING)
+    gdf_bas.to_crs(3857, inplace=True)
+    gdf_bas, gdf_out = get_basin_geometry(
+        ds.drop_vars("basins"),
+        kind="basin",
+        basin_index=gdf_bas,
+        xy=[12.2051, 45.8331],
+        buffer=1,
+    )
+    assert "Basin geometries CRS does not match the input raster CRS." in caplog.text
+    assert gdf_bas.crs.to_epsg() == 4326
+
+
 def test_subbasin(basin_files):
     _, ds, _, bas_index = basin_files
     gdf_bas, gdf_out = get_basin_geometry(
@@ -103,6 +135,15 @@ def test_subbasin_stord(basin_files):
     assert gdf_bas.index.size == 1
     assert np.isclose(gdf_bas.area.sum(), 0.198055)
     assert np.isclose(gdf_out.geometry.x, 12.295833)
+
+
+def test_subbasin_with_bounds(basin_files, caplog):
+    _, ds, _, _ = basin_files
+    caplog.set_level(logging.WARNING)
+    gdf_bas, gdf_out = get_basin_geometry(
+        ds, kind="subbasin", bounds=[12.6, 45.5, 12.9, 45.7]
+    )
+    assert "The subbasin does not include all upstream cells." in caplog.text
 
 
 def test_interbasin(basin_files):
