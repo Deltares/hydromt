@@ -26,6 +26,13 @@ __all__ = [
     "create_registry_file",
 ]
 
+__hydromt_eps__ = [
+    "DeltaresDataCatalog",
+    "ArtifactDataCatalog",
+    "AWSDataCatalog",
+    "GCSCMIP6DataCatalog",
+]
+
 
 def create_registry_file(root: Path, registry_path: Optional[Path] = None) -> None:
     """Create a registry file for all catalog files in the root directory.
@@ -240,15 +247,6 @@ class GCSCMIP6DataCatalog(PredefinedCatalog):
 
     base_url = f"{GIT_ROOT}/gcs_cmip6_data"
     name = "gcs_cmip6_data"
-
-
-# TODO: replace with a entrypoint plugin structure in v1
-PREDEFINED_CATALOGS = {
-    "artifact_data": ArtifactDataCatalog,
-    "deltares_data": DeltaresDataCatalog,
-    "aws_data": AWSDataCatalog,
-    "gcs_cmip6_data": GCSCMIP6DataCatalog,
-}
 
 
 def _replace_line_endings(file_path: Path):

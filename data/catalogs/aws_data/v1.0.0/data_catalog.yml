@@ -1,0 +1,21 @@
+meta:
+  version: v1.0.0
+  name: aws_data
+  hydromt_version: '>1.0a,<2'
+esa_worldcover_2020_v100:
+  data_type: RasterDataset
+  uri: s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt
+  driver:
+    name: rasterio
+    filesystem:
+      protocol: s3
+      anon: true
+  metadata:
+    category: landuse
+    url: https://doi.org/10.5281/zenodo.5571936
+    version: v100
+    license: CC BY 4.0
+    crs: 4326
+  data_adapter:
+    rename:
+      ESA_WorldCover_10m_2020_v100_Map_AWS: landuse

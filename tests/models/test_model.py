@@ -49,7 +49,7 @@ def test_api_attrs():
     # _API = {"asdf": "yeah"}
     # dm = _DummyModel()
     dm: Any = ...  # bypass ruff
-    assert hasattr(dm, "_NAME")
+    assert hasattr(dm, "name")
     assert hasattr(dm, "_API")
     assert "asdf" in dm.api
     assert dm.api["asdf"] == "yeah"
@@ -153,7 +153,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     # build model
     model = Model(root=str(tmpdir), mode="w")
-    model._NAME = "testmodel"
+    model.name = "model"
     model.build(
         region={"bbox": bbox},
         steps={
@@ -180,7 +180,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
     model = Model(root=str(tmpdir), mode="w+")
-    model._NAME = "testmodel"
+    model.name = "model"
     model.build(
         region={"bbox": bbox},
         steps={

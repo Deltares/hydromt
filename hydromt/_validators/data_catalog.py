@@ -22,7 +22,7 @@ class SourceSpecDict(BaseModel):
 
     source: str
     provider: Optional[str] = None
-    version: Optional[Union[str, int]] = None
+    version: Optional[Union[str, Number]] = None
 
     @staticmethod
     def from_dict(input_dict):

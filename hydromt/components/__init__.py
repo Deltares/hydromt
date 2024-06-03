@@ -21,3 +21,15 @@ __all__ = [
     "DatasetsComponent",
     "SpatialModelComponent",
 ]
+
+# define hydromt component entry points; abstract classes are not included
+# see also hydromt.component group in pyproject.toml
+__hydromt_eps__ = [
+    "ConfigComponent",
+    "GeomsComponent",
+    "GridComponent",
+    "TablesComponent",
+    "VectorComponent",
+    "MeshComponent",
+    "DatasetsComponent",
+]
