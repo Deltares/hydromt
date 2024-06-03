@@ -124,7 +124,7 @@ clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 test = { cmd = ["pytest"] }
 test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
-test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error", "tests/test_data_catalog.py"] }
+test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error"] }
 test-cov = { cmd = [
   "pytest",
   "--verbose",
