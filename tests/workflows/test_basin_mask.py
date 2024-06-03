@@ -58,7 +58,7 @@ def test_no_basid(basin_files):
 def test_crs_mismatch(basin_files, caplog):
     _, ds, gdf_bas, _ = basin_files
     caplog.set_level(logging.WARNING)
-    gdf_bas.to_crs(3857, inplace=True)
+    gdf_bas.to_crs(6875, inplace=True)
     gdf_bas, gdf_out = get_basin_geometry(
         ds.drop_vars("basins"),
         kind="basin",
