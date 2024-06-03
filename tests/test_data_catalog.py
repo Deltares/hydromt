@@ -322,7 +322,6 @@ def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
     # test round trip to and from dict
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
     _, merged_catalog = merged_aws_worldcover
     merged_dict = merged_catalog.to_dict()
