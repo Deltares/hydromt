@@ -58,5 +58,4 @@ jobs:
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          export PYTHONTRACEMALLOC=20
           pixi run --locked -e full-py39 test-err-warn
