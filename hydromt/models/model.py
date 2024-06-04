@@ -413,6 +413,9 @@ class Model(object, metaclass=ABCMeta):
             cat.from_yml(path)
         # update data catalog with new used sources
         for name, source in self.data_catalog.list_sources(used_only=used_only):
+            # don't have to re add sources we already know
+            if source.name in cat.get_source_names():
+                continue
             cat.add_source(name, source)
         # write data catalog
         if cat.sources:
