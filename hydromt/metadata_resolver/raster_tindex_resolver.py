@@ -23,16 +23,18 @@ class RasterTindexResolver(MetaDataResolver):
         self,
         uri: str,
         fs: AbstractFileSystem,
-        mask: Optional[gpd.GeoDataFrame] = None,
         *,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
+        mask: Optional[gpd.GeoDataFrame] = None,
         variables: Union[int, tuple[float, str], None] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Optional[Logger] = logger,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve URIs of a raster tindex file."""
+        if mask is None:
+            raise ValueError(f"Resolver {self.name} needs a mask")
         gdf = gpd.read_file(uri)
         gdf = gdf.iloc[gdf.sindex.query(mask.to_crs(gdf.crs).unary_union)]
         tileindex: Optional[str] = options.get("tileindex")
