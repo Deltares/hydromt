@@ -32,7 +32,8 @@ class DataFrameSource(DataSource):
     """
 
     data_type: ClassVar[Literal["DataFrame"]] = "DataFrame"
-    _fallback_driver: ClassVar[str] = "pandas"
+    _fallback_driver_read: ClassVar[str] = "pandas"
+    _fallback_driver_write: ClassVar[str] = "pandas"
     driver: DataFrameDriver
     data_adapter: DataFrameAdapter = Field(default_factory=DataFrameAdapter)
 
@@ -81,7 +82,7 @@ class DataFrameSource(DataSource):
         """
         if not driver_override and not self.driver.supports_writing:
             # default to fallback driver
-            driver = DataFrameDriver.model_validate(self._fallback_driver)
+            driver = DataFrameDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(

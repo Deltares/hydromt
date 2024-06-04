@@ -38,7 +38,9 @@ class GeoDatasetSource(DataSource):
     """DataSource class for the GeoDatasetSource type."""
 
     data_type: ClassVar[Literal["GeoDataset"]] = "GeoDataset"
-    _fallback_driver: ClassVar[str] = "geodataset_vector"
+    _fallback_driver_read: ClassVar[str] = "geodataset_vector"
+    _fallback_driver_write: ClassVar[str] = "geodataset_xarray"
+
     driver: GeoDatasetDriver
     data_adapter: GeoDatasetAdapter = Field(default_factory=GeoDatasetAdapter)
 
@@ -107,7 +109,7 @@ class GeoDatasetSource(DataSource):
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver.
             driver: GeoDatasetDriver = GeoDatasetDriver.model_validate(
-                self._fallback_driver
+                self._fallback_driver_write
             )
         elif driver_override:
             if not driver_override.supports_writing:

@@ -238,7 +238,7 @@ class DataCatalog(object):
                 source: DataSource = Source(
                     name=source_name,
                     uri=asset.get_absolute_href(),
-                    driver=Source._fallback_driver,
+                    driver=Source._fallback_driver_read,
                 )
                 self.add_source(source_name, source)
 
@@ -1249,7 +1249,9 @@ class DataCatalog(object):
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
 
-                driver: str = kwargs.pop("driver", RasterDatasetSource._fallback_driver)
+                driver: str = kwargs.pop(
+                    "driver", RasterDatasetSource._fallback_driver_read
+                )
                 name = basename(data_like)
                 source = RasterDatasetSource(
                     name=name, uri=str(data_like), driver=driver
@@ -1378,7 +1380,9 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop("driver", GeoDataFrameSource._fallback_driver)
+                driver: str = kwargs.pop(
+                    "driver", GeoDataFrameSource._fallback_driver_read
+                )
                 name = basename(data_like)
                 source = GeoDataFrameSource(
                     name=name, uri=str(data_like), driver=driver, **kwargs
@@ -1496,7 +1500,9 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop("driver", GeoDatasetSource._fallback_driver)
+                driver: str = kwargs.pop(
+                    "driver", GeoDatasetSource._fallback_driver_read
+                )
                 name = basename(data_like)
                 source = GeoDatasetSource(
                     name=name,
@@ -1675,7 +1681,9 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop("driver", DataFrameSource._fallback_driver)
+                driver: str = kwargs.pop(
+                    "driver", DataFrameSource._fallback_driver_read
+                )
                 name = basename(data_like)
                 source = DataFrameSource(
                     uri=data_like, name=name, driver=driver, **kwargs

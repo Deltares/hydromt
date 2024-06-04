@@ -38,7 +38,8 @@ class RasterDatasetSource(DataSource):
     """DataSource class for the RasterDataset type."""
 
     data_type: ClassVar[Literal["RasterDataset"]] = "RasterDataset"
-    _fallback_driver: ClassVar[str] = "rasterio"
+    _fallback_driver_read: ClassVar[str] = "rasterio"
+    _fallback_driver_write: ClassVar[str] = "raster_xarray"
     driver: RasterDatasetDriver
     data_adapter: RasterDatasetAdapter = Field(default_factory=RasterDatasetAdapter)
     zoom_levels: Optional[Dict[int, float]] = None
@@ -108,7 +109,7 @@ class RasterDatasetSource(DataSource):
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver
             driver: RasterDatasetDriver = RasterDatasetDriver.model_validate(
-                self._fallback_driver
+                self._fallback_driver_write
             )
         elif driver_override:
             if not driver_override.supports_writing:

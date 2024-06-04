@@ -187,7 +187,7 @@ class TestGeoDatasetSource:
             uri=str(old_path),
             driver=NotWritableDriver(metadata_resolver=mock_resolver),
         ).to_file(new_path)
-        assert new_path.is_file()
+        assert new_path.is_dir()  # zarr
         assert new_source.root is None
         assert new_source.driver.filesystem.protocol == ("file", "local")
 

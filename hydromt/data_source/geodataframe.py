@@ -40,7 +40,8 @@ class GeoDataFrameSource(DataSource):
     """
 
     data_type: ClassVar[Literal["GeoDataFrame"]] = "GeoDataFrame"
-    _fallback_driver: ClassVar[str] = "pyogrio"
+    _fallback_driver_read: ClassVar[str] = "pyogrio"
+    _fallback_driver_write: ClassVar[str] = "pyogrio"
     driver: GeoDataFrameDriver
     data_adapter: GeoDataFrameAdapter = Field(default_factory=GeoDataFrameAdapter)
 
@@ -100,7 +101,7 @@ class GeoDataFrameSource(DataSource):
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver
             driver: GeoDataFrameDriver = GeoDataFrameDriver.model_validate(
-                self._fallback_driver
+                self._fallback_driver_write
             )
         elif driver_override:
             if not driver_override.supports_writing:
