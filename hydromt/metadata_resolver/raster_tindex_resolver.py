@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Union
 import geopandas as gpd
 from fsspec import AbstractFileSystem
 
-from hydromt._typing import NoDataStrategy, TimeRange, ZoomLevel
+from hydromt._typing import NoDataStrategy, TimeRange, ZoomLevel, _exec_nodata_strat
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 logger: Logger = getLogger(__name__)
@@ -43,7 +43,13 @@ class RasterTindexResolver(MetaDataResolver):
                 f"{self.__class__.__name__} needs options specifying 'tileindex'"
             )
         if gdf.index.size == 0:
-            raise IOError("No intersecting tiles found.")
+            _exec_nodata_strat(
+                f"resolver '{self.name}' found intersecting tiles.",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+            return []  # in case of ignore
+
         elif tileindex not in gdf.columns:
             raise IOError(
                 f'Tile index "{tileindex}" column missing in tile index file.'

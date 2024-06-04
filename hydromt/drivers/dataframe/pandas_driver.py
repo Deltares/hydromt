@@ -12,6 +12,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     Variables,
+    _exec_nodata_strat,
 )
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.dataframe import DataFrameDriver
@@ -53,18 +54,18 @@ class PandasDriver(DataFrameDriver):
             variables = self._unify_variables_and_pandas_kwargs(
                 uri, pd.read_csv, variables
             )
-            return pd.read_csv(
+            df = pd.read_csv(
                 uri,
                 usecols=variables,
                 **self.options,
             )
         elif extension == "parquet":
-            return pd.read_parquet(uri, columns=variables, **self.options)
+            df = pd.read_parquet(uri, columns=variables, **self.options)
         elif extension in ["xls", "xlsx"]:
             variables = self._unify_variables_and_pandas_kwargs(
                 uri, pd.read_excel, variables
             )
-            return pd.read_excel(
+            df = pd.read_excel(
                 uri,
                 usecols=variables,
                 engine="openpyxl",
@@ -74,9 +75,16 @@ class PandasDriver(DataFrameDriver):
             warn_on_unused_kwargs(
                 self.__class__.__name__, {"variables": variables}, logger
             )
-            return pd.read_fwf(uri, **self.options)
+            df = pd.read_fwf(uri, **self.options)
         else:
             raise IOError(f"DataFrame: extension {extension} unknown.")
+        if df.index.size == 0:
+            _exec_nodata_strat(
+                f"No data from driver {self}'.",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+        return df
 
     def write(
         self,

@@ -12,7 +12,13 @@ import pandas as pd
 from fsspec import AbstractFileSystem
 from fsspec.core import split_protocol
 
-from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
+from hydromt._typing import (
+    Geom,
+    NoDataStrategy,
+    TimeRange,
+    ZoomLevel,
+    _exec_nodata_strat,
+)
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 
 from .metadata_resolver import MetaDataResolver
@@ -153,5 +159,11 @@ class ConventionResolver(MetaDataResolver):
             )
         )
         if not uris:
+            _exec_nodata_strat(
+                f"resolver '{self.name}' found no files.",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+
             raise FileNotFoundError(f"No files found for: {uri_expanded}")
         return uris
