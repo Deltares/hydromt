@@ -19,6 +19,8 @@ from hydromt.components.base import ModelComponent
 from hydromt.components.config import ConfigComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.spatial import SpatialModelComponent
+from hydromt.components.spatialdatasets import SpatialDatasetsComponent
+from hydromt.components.tables import TablesComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
@@ -98,39 +100,75 @@ def test_model_mode_errors_writing_in_read_only(model):
         model.write()
 
 
-@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
-def test_model_append(demda, df, tmpdir):
-    # write a model
-    GridModel: Any = ...  # bypass ruff
+@pytest.mark.integration()
+def test_grid_model_append(demda, df, tmpdir):
     demda.name = "dem"
-    mod = GridModel(mode="w", root=str(tmpdir))
-    mod.set_config("test.data", "dem")
-    mod.set_grid(demda, name="dem")
-    mod.set_maps(demda, name="dem")
-    mod.set_forcing(demda, name="dem")
-    mod.set_states(demda, name="dem")
-    mod.set_geoms(demda.raster.box, name="dem")
-    mod.set_tables(df, name="df")
-    mod.write()
+    model = Model(mode="w", root=str(tmpdir))
+
+    config_component = ConfigComponent(model)
+    config_component.set("test.data", "dem")
+    model.add_component("config", config_component)
+
+    grid_component = GridComponent(model)
+    grid_component.set(demda, name="dem")
+    model.add_component("grid", grid_component)
+
+    maps_component = SpatialDatasetsComponent(model, region_component="grid")
+    maps_component.set(demda, name="dem")
+    model.add_component("maps", maps_component)
+
+    forcing_component = SpatialDatasetsComponent(model, region_component="grid")
+    forcing_component.set(demda, name="dem")
+    model.add_component("forcing", forcing_component)
+
+    tables_component = TablesComponent(model)
+    tables_component.set(df, name="df")
+    model.add_component("tables", tables_component)
+
+    model.write()
+
     # append to model and check if previous data is still there
-    mod1 = GridModel(mode="r+", root=str(tmpdir))
-    mod1.set_config("test1.data", "dem")
-    assert mod1.get_config("test.data") == "dem"
-    mod1.set_grid(demda, name="dem1")
-    assert "dem" in mod1.grid
-    mod1.set_maps(demda, name="dem1")
-    assert "dem" in mod1.maps
-    mod1.set_forcing(demda, name="dem1")
-    assert "dem" in mod1.forcing
-    mod1.set_forcing(df, name="df1", split_dataset=False)
-    assert "df1" in mod1.forcing
-    assert isinstance(mod1.forcing["df1"], xr.Dataset)
-    mod1.set_states(demda, name="dem1")
-    assert "dem" in mod1.states
-    mod1.set_geoms(demda.raster.box, name="dem1")
-    assert "dem" in mod1.geoms
-    mod1.set_tables(df, name="df1")
-    assert "df" in mod1.tables
+    demda.name = "dem"
+    model2 = Model(mode="w", root=str(tmpdir))
+
+    config_component = ConfigComponent(model2)
+    config_component.set("test.data", "dem")
+    model2.add_component("config", config_component)
+
+    grid_component = GridComponent(model2)
+    grid_component.set(demda, name="dem")
+    model2.add_component("grid", grid_component)
+
+    maps_component = SpatialDatasetsComponent(model2, region_component="grid")
+    maps_component.set(demda, name="dem")
+    model2.add_component("maps", maps_component)
+
+    forcing_component = SpatialDatasetsComponent(model2, region_component="grid")
+    forcing_component.set(demda, name="dem")
+    model2.add_component("forcing", forcing_component)
+
+    tables_component = TablesComponent(model2)
+    tables_component.set(df, name="df")
+    model2.add_component("tables", tables_component)
+
+    model2.config.set("test1.data", "dem")
+    assert model2.config.get_value("test.data") == "dem"
+
+    model2.grid.set(demda, name="dem1")
+    assert "dem" in model2.grid.data
+
+    model2.maps.set(demda, name="dem1")
+    assert "dem" in model2.maps.data
+
+    model2.forcing.set(demda, name="dem1")
+    assert "dem" in model2.forcing.data
+
+    model2.forcing.set(df, name="df1", split_dataset=False)
+    assert "df1" in model2.forcing.data
+    assert isinstance(model2.forcing.data["df1"], xr.Dataset)
+
+    model2.tables.set(df, name="df1")
+    assert "df" in model2.tables.data
 
 
 @pytest.mark.integration()
