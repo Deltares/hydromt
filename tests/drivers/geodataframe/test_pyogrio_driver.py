@@ -113,5 +113,5 @@ class TestPyogrioDriver:
     def test_write(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
         df_path = tmp_dir / "temp.gpkg"
         driver = PyogrioDriver()
-        driver.write(geodf, df_path)
+        driver.write(df_path, geodf)
         assert np.all(driver.read(str(df_path)) == geodf)
