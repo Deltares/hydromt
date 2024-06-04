@@ -111,6 +111,10 @@ class RasterDatasetSource(DataSource):
                 self._fallback_driver
             )
         elif driver_override:
+            if not driver_override.supports_writing:
+                raise RuntimeError(
+                    f"driver: '{driver_override.name}' does not support writing data."
+                )
             driver: RasterDatasetDriver = driver_override
         else:
             # use local filesystem

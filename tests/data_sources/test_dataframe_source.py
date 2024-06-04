@@ -25,6 +25,7 @@ def mock_df_adapter():
 def MockDataFrameDriver(df: pd.DataFrame) -> Type[DataFrameDriver]:
     class MockDataFrameDriver(DataFrameDriver):
         name = "mock_df_driver"
+        supports_writing = True
 
         def write(self, path: StrPath, df: pd.DataFrame, **kwargs) -> None:
             pass

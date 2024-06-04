@@ -140,21 +140,6 @@ class TestGeoDatasetSource:
 
         return MockWriteableGeoDatasetDriver
 
-    def test_raises_on_write_with_incapable_driver(
-        self, MockDriver: Type[GeoDatasetDriver]
-    ):
-        mock_driver = MockDriver()
-        source = GeoDatasetSource(
-            name="test",
-            uri="geoda.zarr",
-            driver=mock_driver,
-            metadata=SourceMetadata(crs=4326),
-        )
-        with pytest.raises(
-            RuntimeError, match="driver MockGeoDatasetDriver does not support writing"
-        ):
-            source.to_file("/non/existant/asdf.zarr")
-
     def test_to_file(self, MockWritableDriver: Type[GeoDatasetDriver]):
         mock_driver = MockWritableDriver()
 
@@ -205,6 +190,22 @@ class TestGeoDatasetSource:
         assert new_path.is_file()
         assert new_source.root is None
         assert new_source.driver.filesystem.protocol == ("file", "local")
+
+    def test_raises_on_write_with_incapable_driver(
+        self, MockDriver: Type[GeoDatasetDriver]
+    ):
+        mock_driver = MockDriver()
+        source = GeoDatasetSource(
+            name="test",
+            uri="geoda.zarr",
+            driver=mock_driver,
+            metadata=SourceMetadata(crs=4326),
+        )
+        with pytest.raises(
+            RuntimeError,
+            match=f"driver: '{mock_driver.name}' does not support writing data",
+        ):
+            source.to_file("/non/existant/asdf.zarr", driver_override=mock_driver)
 
     @pytest.fixture()
     def writable_source(
