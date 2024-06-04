@@ -21,6 +21,8 @@ from hydromt import (
     raster,
     vector,
 )
+from hydromt.components.geoms import GeomsComponent
+from hydromt.components.spatialdatasets import SpatialDatasetsComponent
 from hydromt.plugins import Plugins
 
 dask_config.set(scheduler="single-threaded")
@@ -397,13 +399,28 @@ def griduda():
 @pytest.fixture()
 def model(demda, world, obsda):
     mod = Model(data_libs=["artifact_data"])
-    mod.region.create({"geom": demda.raster.box})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_geoms(world, "world")
-    mod.set_maps(demda, "elevtn")
-    mod.set_forcing(obsda, "waterlevel")
-    mod.set_states(demda, "zsini")
-    mod.set_results(obsda, "zs")
+
+    geoms_component = GeomsComponent(mod)
+    print(type(world))
+    geoms_component.set(world, "world")
+    mod.add_component("geoms", geoms_component)
+
+    config_component = ConfigComponent(mod)
+    config_component.set("header.setting", "value")
+    mod.add_component("config", config_component)
+
+    forcing_component = SpatialDatasetsComponent(mod, region_component="geoms")
+    forcing_component.set(obsda, "waterlevel")
+    mod.add_component("forcing", forcing_component)
+
+    maps_component = SpatialDatasetsComponent(mod, region_component="geoms")
+    maps_component.set(demda, "elevtn")
+    mod.add_component("maps", maps_component)
+
+    states_component = SpatialDatasetsComponent(mod, region_component="geoms")
+    states_component.set(demda, "zsini")
+    mod.add_component("states", states_component)
+
     return mod
 
 

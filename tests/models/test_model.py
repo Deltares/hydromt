@@ -83,24 +83,19 @@ def test_write_data_catalog_csv(tmpdir):
     assert data_catalog_df.iloc[-1, 0] == sources[-1]
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_model(model, tmpdir):
+def test_model_mode_errors_reading_in_write_only(model, tmpdir):
     # write model
     model.root.set(str(tmpdir), mode="w")
     model.write()
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         model.read()
+
+
+def test_model_mode_errors_writing_in_read_only(model):
     # read model
-    model1 = Model(str(tmpdir), mode="r")
-    with pytest.deprecated_call():
-        model1.read()
+    model.root.mode = "r"
     with pytest.raises(IOError, match="Model opened in read-only mode"):
-        model1.write()
-    # check if equal
-    model._results = {}  # reset results for comparison
-    with pytest.deprecated_call():
-        equal, errors = model.test_equal(model1)
-    assert equal, errors
+        model.write()
 
 
 @pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
