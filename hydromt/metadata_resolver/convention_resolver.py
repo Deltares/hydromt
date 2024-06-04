@@ -1,7 +1,7 @@
 """MetaDataResolver using HydroMT naming conventions."""
 
 from functools import reduce
-from itertools import product
+from itertools import chain, product
 from logging import Logger, getLogger
 from re import compile as compile_regex
 from re import error as regex_error
@@ -10,6 +10,7 @@ from typing import Any, Dict, Iterable, List, Optional, Pattern, Set, Tuple
 
 import pandas as pd
 from fsspec import AbstractFileSystem
+from fsspec.core import split_protocol
 
 from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
@@ -81,7 +82,35 @@ class ConventionResolver(MetaDataResolver):
     def _resolve_wildcards(
         self, uris: Iterable[str], fs: AbstractFileSystem
     ) -> Set[str]:
-        return set(reduce(lambda uri_res, uri: uri_res + fs.glob(uri), uris, []))
+        def split_and_glob(uri: str) -> Tuple[Optional[str], List[str]]:
+            protocol, _ = split_protocol(uri)
+            return (protocol, fs.glob(uri))
+
+        def maybe_unstrip_protocol(
+            pair: Tuple[Optional[str], Iterable[str]],
+        ) -> Iterable[str]:
+            if pair[0] is not None:
+                return map(
+                    lambda uri: fs.unstrip_protocol(uri)
+                    if not uri.startswith(pair[0])
+                    else uri,
+                    pair[1],
+                )
+            else:
+                return pair[1]
+
+        return set(
+            chain.from_iterable(  # flatten result
+                map(
+                    lambda uri_pair: maybe_unstrip_protocol(
+                        uri_pair
+                    ),  # keep protocol in uri if present
+                    reduce(
+                        lambda uri_res, uri: uri_res + [split_and_glob(uri)], uris, []
+                    ),
+                )
+            )
+        )
 
     def resolve(
         self,

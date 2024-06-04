@@ -32,6 +32,7 @@ class DataFrameSource(DataSource):
     """
 
     data_type: ClassVar[Literal["DataFrame"]] = "DataFrame"
+    fallback_driver: ClassVar[str] = "pandas"
     driver: DataFrameDriver
     data_adapter: DataFrameAdapter = Field(default_factory=DataFrameAdapter)
 

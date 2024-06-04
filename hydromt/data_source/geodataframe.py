@@ -40,6 +40,7 @@ class GeoDataFrameSource(DataSource):
     """
 
     data_type: ClassVar[Literal["GeoDataFrame"]] = "GeoDataFrame"
+    fallback_driver: ClassVar[str] = "pyogrio"
     driver: GeoDataFrameDriver
     data_adapter: GeoDataFrameAdapter = Field(default_factory=GeoDataFrameAdapter)
 

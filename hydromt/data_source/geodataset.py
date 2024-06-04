@@ -38,6 +38,7 @@ class GeoDatasetSource(DataSource):
     """DataSource class for the GeoDatasetSource type."""
 
     data_type: ClassVar[Literal["GeoDataset"]] = "GeoDataset"
+    fallback_driver: ClassVar[str] = "geodataset_vector"
     driver: GeoDatasetDriver
     data_adapter: GeoDatasetAdapter = Field(default_factory=GeoDatasetAdapter)
 
