@@ -1,7 +1,7 @@
 """Driver to read geodataframes using Pyogrio."""
 
 from logging import Logger, getLogger
-from typing import List, Optional, Union, cast
+from typing import List, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -56,11 +56,10 @@ class PyogrioDriver(GeoDataFrameDriver):
         gdf: Union[pd.DataFrame, gpd.GeoDataFrame] = read_dataframe(
             _uri, bbox=bbox, columns=variables, **self.options
         )
-        if isinstance(gdf, pd.DataFrame):
+        if not isinstance(gdf, gpd.GeoDataFrame):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
 
-        gdf = cast(gdf, gpd.GeoDataFrame)
-        if gdf.index.shape == 0:
+        if gdf.index.size == 0:
             _exec_nodata_strat(
                 f"No data from driver {self}'.",
                 strategy=handle_nodata,

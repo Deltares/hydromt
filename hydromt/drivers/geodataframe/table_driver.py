@@ -57,7 +57,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             y_dim=self.options.get("y_dim"),
             crs=metadata.crs,
         )
-        if gdf.index.shape == 0:
+        if gdf.index.size == 0:
             _exec_nodata_strat(
                 f"No data from driver {self}'.",
                 strategy=handle_nodata,
