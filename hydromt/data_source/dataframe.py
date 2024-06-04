@@ -32,7 +32,7 @@ class DataFrameSource(DataSource):
     """
 
     data_type: ClassVar[Literal["DataFrame"]] = "DataFrame"
-    fallback_driver: ClassVar[str] = "pandas"
+    _fallback_driver: ClassVar[str] = "pandas"
     driver: DataFrameDriver
     data_adapter: DataFrameAdapter = Field(default_factory=DataFrameAdapter)
 
@@ -79,6 +79,16 @@ class DataFrameSource(DataSource):
 
         args:
         """
+        if not driver_override and not self.driver.supports_writing:
+            # default to fallback driver
+            driver = DataFrameDriver.model_validate(self._fallback_driver)
+        elif driver_override:
+            driver: DataFrameDriver = driver_override
+        else:
+            # use local filesystem
+            driver: DataFrameDriver = self.driver.model_copy(
+                update={"filesystem": filesystem("local")}
+            )
         df: Optional[pd.DataFrame] = self.read_data(
             variables=variables,
             time_range=time_range,
@@ -89,16 +99,7 @@ class DataFrameSource(DataSource):
             return None
 
         # update source and its driver based on local path
-        update: Dict[str, Any] = {"uri": file_path, "root": None}
-
-        if driver_override:
-            driver: DataFrameDriver = driver_override
-        else:
-            # use local filesystem
-            driver: DataFrameDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
-            )
-        update.update({"driver": driver})
+        update: Dict[str, Any] = {"uri": file_path, "root": None, "driver": driver}
 
         driver.write(
             file_path,

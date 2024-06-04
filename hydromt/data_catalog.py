@@ -56,7 +56,6 @@ from hydromt.data_source import (
     RasterDatasetSource,
     create_source,
 )
-from hydromt.drivers import BaseDriver
 from hydromt.gis.utils import parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
@@ -239,7 +238,7 @@ class DataCatalog(object):
                 source: DataSource = Source(
                     name=source_name,
                     uri=asset.get_absolute_href(),
-                    driver=Source.fallback_driver,
+                    driver=Source._fallback_driver,
                 )
                 self.add_source(source_name, source)
 
@@ -1250,7 +1249,7 @@ class DataCatalog(object):
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
 
-                driver = kwargs.pop("driver", "rasterio")
+                driver: str = kwargs.pop("driver", RasterDatasetSource._fallback_driver)
                 name = basename(data_like)
                 source = RasterDatasetSource(
                     name=name, uri=str(data_like), driver=driver
@@ -1379,7 +1378,7 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver = kwargs.pop("driver", "pyogrio")
+                driver: str = kwargs.pop("driver", GeoDataFrameSource._fallback_driver)
                 name = basename(data_like)
                 source = GeoDataFrameSource(
                     name=name, uri=str(data_like), driver=driver, **kwargs
@@ -1497,9 +1496,7 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver: BaseDriver = kwargs.pop(
-                    "driver", "geodataset_vector"
-                )  # Default to vector driver.
+                driver: str = kwargs.pop("driver", GeoDatasetSource._fallback_driver)
                 name = basename(data_like)
                 source = GeoDatasetSource(
                     name=name,
@@ -1678,7 +1675,7 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop("driver", "pandas")
+                driver: str = kwargs.pop("driver", DataFrameSource._fallback_driver)
                 name = basename(data_like)
                 source = DataFrameSource(
                     uri=data_like, name=name, driver=driver, **kwargs
@@ -1748,7 +1745,7 @@ def _parse_data_source_dict(
     # driver arguments
     # driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
     # TODO: remove code under this depending on subclasses
-    #       The DataCatalog should now have specific implementations for different drivers
+    #       The DataCatalog should not have specific implementations for different drivers
     # for driver_kwarg in driver_kwargs:
     #     # required for geodataset where driver_kwargs can be a path
     #     if "fn" in driver_kwarg:

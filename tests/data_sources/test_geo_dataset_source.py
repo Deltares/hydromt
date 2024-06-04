@@ -12,6 +12,7 @@ from hydromt.data_adapter import GeoDatasetAdapter
 from hydromt.data_source import GeoDatasetSource
 from hydromt.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 from hydromt.gis.utils import to_geographic_bbox
+from hydromt.metadata_resolver import MetaDataResolver
 
 
 @pytest.fixture()
@@ -183,6 +184,27 @@ class TestGeoDatasetSource:
         # make sure we are not changing the state
         assert id(new_source) != id(source)
         assert id(driver2) == id(new_source.driver)
+
+    def test_to_file_defaults(
+        self, tmp_dir: Path, geods: xr.Dataset, mock_resolver: MetaDataResolver
+    ):
+        class NotWritableDriver(GeoDatasetDriver):
+            name: ClassVar[str] = "test_to_file_defaults"
+
+            def read_data(self, uri: str, **kwargs) -> xr.Dataset:
+                return geods
+
+        old_path: Path = tmp_dir / "test.zarr"
+        new_path: Path = tmp_dir / "temp.zarr"
+
+        new_source: GeoDatasetSource = GeoDatasetSource(
+            name="test",
+            uri=str(old_path),
+            driver=NotWritableDriver(metadata_resolver=mock_resolver),
+        ).to_file(new_path)
+        assert new_path.is_file()
+        assert new_source.root is None
+        assert new_source.driver.filesystem.protocol == ("file", "local")
 
     @pytest.fixture()
     def writable_source(
