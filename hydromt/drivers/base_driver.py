@@ -140,3 +140,12 @@ class BaseDriver(BaseModel, ABC):
         args:
             uri: str identifying the data source.
         """
+
+    def __eq__(self, value: object) -> bool:
+        """Compare equality.
+
+        Overwritten as filesystem between two sources can not be the same.
+        """
+        if isinstance(value, self.__class__):
+            return self.model_dump(round_trip=True) == value.model_dump(round_trip=True)
+        return super().__eq__(value)
