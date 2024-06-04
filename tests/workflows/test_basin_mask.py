@@ -86,8 +86,8 @@ def test_subbasin(basin_files, caplog):
     gdf_bas = reproject_to_utm_crs(gdf_bas)
     gdf_out = reproject_to_utm_crs(gdf_out)
     assert np.isclose(gdf_bas.area.sum(), 16201389.58563961)
-    assert np.isclose(gdf_out.geometry.x[1], 280809.4346057499)
-    assert np.isclose(gdf_out.geometry.y[1], 5076159.488365294)
+    assert np.isclose(gdf_out.geometry.x[0], 280809.4346057499)
+    assert np.isclose(gdf_out.geometry.y[0], 5076159.488365294)
 
 
 def test_subbasin_xy(basin_files):
@@ -103,8 +103,8 @@ def test_subbasin_xy(basin_files):
     gdf_bas = reproject_to_utm_crs(gdf_bas)
     gdf_out = reproject_to_utm_crs(gdf_out)
     assert np.isclose(gdf_bas.area.sum(), 184897906.5105253)
-    assert np.isclose(gdf_out.geometry.x[1], 342018.9618917479)
-    assert np.isclose(gdf_out.geometry.y[1], 5062255.816882619)
+    assert np.isclose(gdf_out.geometry.x[0], 278668.97710990265)
+    assert np.isclose(gdf_out.geometry.y[0], 5070673.469794823)
 
 
 def test_basin_bbox(basin_files):
@@ -171,8 +171,10 @@ def test_interbasin(basin_files):
         strord=6,
     )
     assert gdf_bas.index.size == 1
-    assert np.isclose(gdf_bas.area.sum(), 0.0172222)
-    assert np.isclose(gdf_out.geometry.x, 12.295833)
+    gdf_bas = reproject_to_utm_crs(gdf_bas)
+    gdf_out = reproject_to_utm_crs(gdf_out)
+    assert np.isclose(gdf_bas.area.sum(), 147653247.45211384)
+    assert np.isclose(gdf_out.geometry.x[0], 291384.75871699594)
 
 
 def test_interbasin_outlets(basin_files):
