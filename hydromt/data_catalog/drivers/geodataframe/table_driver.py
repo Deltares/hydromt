@@ -1,6 +1,6 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
 from logging import Logger, getLogger
-from typing import List, Optional, Set
+from typing import ClassVar, List, Optional, Set
 
 import geopandas as gpd
 import pandas as pd
@@ -24,7 +24,7 @@ Y_DIM_LABELS = ("y", "latitude", "lat")
 class GeoDataFrameTableDriver(GeoDataFrameDriver):
     """Driver for reading in GeoDataFrames from tabular formats."""
 
-    name = "geodataframe_table"
+    name: ClassVar[str] = "geodataframe_table"
 
     def read_data(
         self,

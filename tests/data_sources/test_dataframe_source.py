@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Type
+from typing import ClassVar, List, Type
 
 import pandas as pd
 import pytest
@@ -9,6 +9,7 @@ from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataFrameSource
+from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
 @pytest.fixture(scope="session")
@@ -24,6 +25,7 @@ def mock_df_adapter():
 def MockDataFrameDriver(df: pd.DataFrame) -> Type[DataFrameDriver]:
     class MockDataFrameDriver(DataFrameDriver):
         name = "mock_df_driver"
+        supports_writing = True
 
         def write(self, path: StrPath, df: pd.DataFrame, **kwargs) -> None:
             pass
@@ -120,7 +122,7 @@ class TestDataFrameSource:
             driver=mock_df_driver,
             metadata=SourceMetadata(crs=4326),
         )
-        new_source = source.to_file("test")
+        new_source = source.to_file("test.csv")
         assert "local" in new_source.driver.filesystem.protocol
         # make sure we are not changing the state
         assert id(new_source) != id(source)
@@ -140,3 +142,24 @@ class TestDataFrameSource:
         # make sure we are not changing the state
         assert id(new_source) != id(source)
         assert id(driver2) == id(new_source.driver)
+
+    def test_to_file_defaults(
+        self, tmp_dir: Path, df: pd.DataFrame, mock_resolver: MetaDataResolver
+    ):
+        class NotWritableDriver(DataFrameDriver):
+            name: ClassVar[str] = "test_to_file_defaults"
+
+            def read_data(self, uri: str, **kwargs) -> pd.DataFrame:
+                return df
+
+        old_path: Path = tmp_dir / "test.csv"
+        new_path: Path = tmp_dir / "temp.csv"
+
+        new_source: DataFrameSource = DataFrameSource(
+            name="test",
+            uri=str(old_path),
+            driver=NotWritableDriver(metadata_resolver=mock_resolver),
+        ).to_file(new_path)
+        assert new_path.is_file()
+        assert new_source.root is None
+        assert new_source.driver.filesystem.protocol == ("file", "local")

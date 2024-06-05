@@ -1,7 +1,7 @@
 """Generic driver for reading and writing DataFrames."""
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import ClassVar, List, Optional
 
 import pandas as pd
 
@@ -19,6 +19,8 @@ logger: Logger = getLogger(__name__)
 
 class DataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read DataFrames."""
+
+    supports_writing: ClassVar[bool] = False
 
     def read(
         self,

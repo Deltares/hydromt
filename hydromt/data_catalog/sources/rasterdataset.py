@@ -38,6 +38,8 @@ class RasterDatasetSource(DataSource):
     """DataSource class for the RasterDataset type."""
 
     data_type: ClassVar[Literal["RasterDataset"]] = "RasterDataset"
+    _fallback_driver_read: ClassVar[str] = "rasterio"
+    _fallback_driver_write: ClassVar[str] = "raster_xarray"
     driver: RasterDatasetDriver
     data_adapter: RasterDatasetAdapter = Field(default_factory=RasterDatasetAdapter)
     zoom_levels: Optional[Dict[int, float]] = None
@@ -104,17 +106,23 @@ class RasterDatasetSource(DataSource):
 
         args:
         """
-        if driver_override:
+        if driver_override is None and not self.driver.supports_writing:
+            # default to fallback driver
+            driver: RasterDatasetDriver = RasterDatasetDriver.model_validate(
+                self._fallback_driver_write
+            )
+        elif driver_override:
+            if not driver_override.supports_writing:
+                raise RuntimeError(
+                    f"driver: '{driver_override.name}' does not support writing data."
+                )
             driver: RasterDatasetDriver = driver_override
         else:
             # use local filesystem
             driver: RasterDatasetDriver = self.driver.model_copy(
                 update={"filesystem": filesystem("local")}
             )
-        if not driver.supports_writing:
-            raise RuntimeError(
-                f"driver {driver.__class__.__name__} does not support writing. please use a differnt driver "
-            )
+
         ds: Optional[xr.Dataset] = self.read_data(
             bbox=bbox,
             mask=mask,
@@ -128,9 +136,7 @@ class RasterDatasetSource(DataSource):
             return None
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": file_path}
-
-        update.update({"driver": driver})
+        update: Dict[str, Any] = {"uri": file_path, "root": None, "driver": driver}
 
         driver.write(
             file_path,

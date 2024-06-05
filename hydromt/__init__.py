@@ -8,6 +8,8 @@ __version__ = "1.0.0-alpha"
 # We have to make sure that netcdf4 is imported before
 # numpy is imported for the first time, e.g. also via
 # importing xarray
+import warnings
+
 import netCDF4  # noqa: F401
 
 # submodules

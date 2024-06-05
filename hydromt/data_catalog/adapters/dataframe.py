@@ -6,7 +6,13 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from hydromt._typing import NoDataStrategy, SourceMetadata, TimeRange, Variables
+from hydromt._typing import (
+    NoDataStrategy,
+    SourceMetadata,
+    TimeRange,
+    Variables,
+    _exec_nodata_strat,
+)
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 
 logger: Logger = getLogger(__name__)
@@ -29,11 +35,17 @@ class DataFrameAdapter(DataAdapterBase):
         df = self._rename_vars(df)
         df = self._set_nodata(df, metadata)
         # slice data
-        df = DataFrameAdapter._slice_data(
+        df: Optional[pd.DataFrame] = DataFrameAdapter._slice_data(
             df,
             variables,
             time_range,
         )
+
+        if df is None:
+            _exec_nodata_strat(
+                "DataFrame has no data after slicing.", handle_nodata, logger
+            )
+
         # uniformize data
         df = self._apply_unit_conversion(df)
         df = self._set_metadata(df, metadata)

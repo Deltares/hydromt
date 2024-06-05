@@ -17,6 +17,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Type,
     Union,
     cast,
 )
@@ -46,7 +47,6 @@ from hydromt.data_catalog.adapters import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.predefined_catalog import (
     PredefinedCatalog,
     _copy_file,
@@ -220,18 +220,22 @@ class DataCatalog(object):
                     MediaType.COG,
                     MediaType.TIFF,
                 ]:
-                    adapter_kind = RasterDatasetAdapter
+                    Source: Type[DataSource] = RasterDatasetSource
                 elif asset.media_type in [MediaType.GEOPACKAGE, MediaType.FLATGEOBUF]:
-                    adapter_kind = GeoDataFrameAdapter
+                    Source: Type[DataSource] = GeoDataFrameSource
                 elif asset.media_type == MediaType.GEOJSON:
-                    adapter_kind = GeoDatasetAdapter
+                    Source: Type[DataSource] = GeoDatasetSource
                 elif asset.media_type == MediaType.JSON:
-                    adapter_kind = DataFrameAdapter
+                    Source: Type[DataSource] = DataFrameSource
                 else:
                     continue
 
-                adapter = adapter_kind(str(asset.get_absolute_href()))
-                self.add_source(source_name, adapter)
+                source: DataSource = Source(
+                    name=source_name,
+                    uri=asset.get_absolute_href(),
+                    driver=Source._fallback_driver_read,
+                )
+                self.add_source(source_name, source)
 
         return self
 
@@ -946,6 +950,7 @@ class DataCatalog(object):
             source_dict = source.model_dump(
                 exclude_defaults=True,  # keeps catalog as clean as possible
                 exclude=["name"],  # name is already in the key
+                round_trip=True,
             )
 
             # remove non serializable entries to prevent errors
@@ -1239,7 +1244,9 @@ class DataCatalog(object):
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
 
-                driver = kwargs.pop("driver", "rasterio")
+                driver: str = kwargs.pop(
+                    "driver", RasterDatasetSource._fallback_driver_read
+                )
                 name = basename(data_like)
                 source = RasterDatasetSource(
                     name=name, uri=str(data_like), driver=driver
@@ -1368,7 +1375,9 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver = kwargs.pop("driver", "pyogrio")
+                driver: str = kwargs.pop(
+                    "driver", GeoDataFrameSource._fallback_driver_read
+                )
                 name = basename(data_like)
                 source = GeoDataFrameSource(
                     name=name, uri=str(data_like), driver=driver, **kwargs
@@ -1486,9 +1495,9 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver: BaseDriver = kwargs.pop(
-                    "driver", "geodataset_vector"
-                )  # Default to vector driver.
+                driver: str = kwargs.pop(
+                    "driver", GeoDatasetSource._fallback_driver_read
+                )
                 name = basename(data_like)
                 source = GeoDatasetSource(
                     name=name,
@@ -1667,7 +1676,9 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop("driver", "pandas")
+                driver: str = kwargs.pop(
+                    "driver", DataFrameSource._fallback_driver_read
+                )
                 name = basename(data_like)
                 source = DataFrameSource(
                     uri=data_like, name=name, driver=driver, **kwargs
@@ -1737,7 +1748,7 @@ def _parse_data_source_dict(
     # driver arguments
     # driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
     # TODO: remove code under this depending on subclasses
-    #       The DataCatalog should now have specific implementations for different drivers
+    #       The DataCatalog should not have specific implementations for different drivers
     # for driver_kwarg in driver_kwargs:
     #     # required for geodataset where driver_kwargs can be a path
     #     if "fn" in driver_kwarg:

@@ -248,6 +248,7 @@ PandasDriver
    :toctree: ../_generated
 
    drivers.dataframe.pandas_driver.PandasDriver
+   drivers.dataframe.pandas_driver.PandasDriver.read
    drivers.dataframe.pandas_driver.PandasDriver.read_data
    drivers.dataframe.pandas_driver.PandasDriver.write
 

@@ -40,6 +40,8 @@ class GeoDataFrameSource(DataSource):
     """
 
     data_type: ClassVar[Literal["GeoDataFrame"]] = "GeoDataFrame"
+    _fallback_driver_read: ClassVar[str] = "pyogrio"
+    _fallback_driver_write: ClassVar[str] = "pyogrio"
     driver: GeoDataFrameDriver
     data_adapter: GeoDataFrameAdapter = Field(default_factory=GeoDataFrameAdapter)
 
@@ -96,10 +98,23 @@ class GeoDataFrameSource(DataSource):
 
         args:
         """
-        if not self.driver.supports_writing:
-            raise RuntimeError(
-                f"driver {self.driver.__class__.__name__} does not support writing. please use a differnt driver "
+        if driver_override is None and not self.driver.supports_writing:
+            # default to fallback driver
+            driver: GeoDataFrameDriver = GeoDataFrameDriver.model_validate(
+                self._fallback_driver_write
             )
+        elif driver_override:
+            if not driver_override.supports_writing:
+                raise RuntimeError(
+                    f"driver: '{driver_override.name}' does not support writing data."
+                )
+            driver: GeoDataFrameDriver = driver_override
+        else:
+            # use local filesystem
+            driver: GeoDataFrameDriver = self.driver.model_copy(
+                update={"filesystem": filesystem("local")}
+            )
+
         gdf: Optional[gpd.GeoDataFrame] = self.read_data(
             bbox=bbox,
             mask=mask,
@@ -113,16 +128,7 @@ class GeoDataFrameSource(DataSource):
             return None
 
         # update source and its driver based on local path
-        update: Dict[str, Any] = {"uri": file_path}
-
-        if driver_override:
-            driver: GeoDataFrameDriver = driver_override
-        else:
-            # use local filesystem
-            driver: GeoDataFrameDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
-            )
-        update.update({"driver": driver})
+        update: Dict[str, Any] = {"uri": file_path, "root": None, "driver": driver}
 
         driver.write(
             file_path,

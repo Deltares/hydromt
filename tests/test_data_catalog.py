@@ -5,7 +5,7 @@ from datetime import datetime
 from os import mkdir
 from os.path import abspath, basename, dirname, join
 from pathlib import Path
-from typing import Optional, Union, cast
+from typing import Optional, Tuple, Union, cast
 from uuid import uuid4
 
 import fsspec
@@ -192,13 +192,12 @@ def test_parser():
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
-def test_data_catalog_io_round_trip(tmpdir, data_catalog):
+def test_data_catalog_io_round_trip(tmp_dir: Path, data_catalog: DataCatalog):
     # read / write
-    fn_yml = join(tmpdir, "test.yml")
-    data_catalog.to_yml(fn_yml)
-    data_catalog1 = DataCatalog(data_libs=fn_yml)
-    assert data_catalog.to_dict() == data_catalog1.to_dict()
+    uri_yml = str(tmp_dir / "test.yml")
+    data_catalog.to_yml(uri_yml, root=str(data_catalog.root))
+    data_catalog_read = DataCatalog(data_libs=uri_yml)
+    assert data_catalog.to_dict() == data_catalog_read.to_dict()
 
 
 def test_catalog_entry_no_variant(legacy_aws_worldcover):
@@ -210,8 +209,9 @@ def test_catalog_entry_no_variant(legacy_aws_worldcover):
     assert source.version == "2020"
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
-def test_catalog_entry_no_variant_round_trip(legacy_aws_worldcover):
+def test_catalog_entry_no_variant_round_trip(
+    legacy_aws_worldcover: Tuple[str, DataCatalog],
+):
     _, legacy_data_catalog = legacy_aws_worldcover
     legacy_data_catalog2 = DataCatalog().from_dict(legacy_data_catalog.to_dict())
     assert legacy_data_catalog2 == legacy_data_catalog
@@ -254,11 +254,14 @@ def legacy_aws_worldcover():
     return (legacy_yml_fn, legacy_data_catalog)
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
-def test_catalog_entry_single_variant_round_trip(aws_worldcover):
+def test_catalog_entry_single_variant_round_trip(
+    aws_worldcover: Tuple[str, DataCatalog],
+):
     _, aws_data_catalog = aws_worldcover
-    aws_data_catalog2 = DataCatalog().from_dict(aws_data_catalog.to_dict())
-    assert aws_data_catalog2 == aws_data_catalog
+    aws_data_catalog_read = DataCatalog().from_dict(
+        aws_data_catalog.to_dict(), root=aws_data_catalog.root
+    )
+    assert aws_data_catalog_read == aws_data_catalog
 
 
 def test_catalog_entry_single_variant_unknown_provider(aws_worldcover):
@@ -306,7 +309,6 @@ def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
     # test round trip to and from dict
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
     _, merged_catalog = merged_aws_worldcover
     merged_dict = merged_catalog.to_dict()
@@ -333,7 +335,6 @@ def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
     assert Path(source_loc.uri).name == "esa-worldcover.vrt"
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
 def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover):
     aws_yml_fn, _ = aws_worldcover
     legacy_yml_fn, _ = legacy_aws_worldcover
@@ -408,8 +409,7 @@ def test_used_sources():
     assert sources[0][1].version == source.version
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
-def test_from_yml_with_archive(data_catalog):
+def test_from_yml_with_archive(data_catalog: DataCatalog):
     data_catalog._sources = {}
     cache_dir = Path(data_catalog._cache_dir)
     data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
@@ -418,12 +418,12 @@ def test_from_yml_with_archive(data_catalog):
     # as part of the getting the archive a a local
     # catalog file is written to the same folder
     # check if this file exists and we can read it
-    yml_dst_fn = Path(cache_dir, "artifact_data", "v1.0.0", "data_catalog.yml")
-    assert yml_dst_fn.exists()
-    data_catalog1 = DataCatalog(yml_dst_fn)
+    yml_dst_path = Path(cache_dir, "artifact_data", "v1.0.0", "data_catalog.yml")
+    assert yml_dst_path.exists()
+    data_catalog1 = DataCatalog(yml_dst_path)
     sources = list(data_catalog1.sources.keys())
     source = data_catalog1.get_source(sources[0])
-    assert yml_dst_fn.parent == Path(source.uri).parent.parent
+    assert yml_dst_path.parent == Path(source.full_uri).parent
 
 
 def test_from_predefined_catalogs(data_catalog):
@@ -730,11 +730,15 @@ def test_get_rasterdataset_bbox(data_catalog):
     assert np.allclose(da.raster.bounds, bbox)
 
 
-@pytest.mark.skip("broken")
-def test_get_rasterdataset_s3(data_catalog):
+def test_get_rasterdataset_s3(data_catalog: DataCatalog):
     data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
+    # TODO: use filesystem in driver
     da = data_catalog.get_rasterdataset(
         data,
+        driver={
+            "name": "rasterio",
+            "filesystem": {"protocol": "s3", "anon": "true"},
+        },
     )
     assert isinstance(da, xr.DataArray)
 
@@ -763,7 +767,7 @@ class TestGetGeoDataFrame:
 
     @pytest.fixture()
     def uri_shp(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
-        uri_shapefile = tmp_dir / "test.shp"
+        uri_shapefile = tmp_dir / "test.shp"  # shapefile what a horror
         geodf.to_file(uri_shapefile)
         return uri_shapefile
 
@@ -1119,19 +1123,18 @@ def test_get_geodataset_artifact_data(data_catalog):
     assert isinstance(da, xr.DataArray)
 
 
-@pytest.mark.skip("did not manage to fix before deadline")
-def test_get_geodataset_bbox_time_tuple(data_catalog):
+def test_get_geodataset_bbox_time_tuple(data_catalog: DataCatalog):
     name = "gtsmv3_eu_era5"
     uri = data_catalog.get_source(name).uri
     p = Path(data_catalog.root) / uri
 
     # vector dataset using three different ways
-    da = data_catalog.get_geodataset(p)
+    da = data_catalog.get_geodataset(p, driver="geodataset_xarray")
     bbox = [12.22412, 45.25635, 12.25342, 45.271]
     da = data_catalog.get_geodataset(
         da,
         bbox=bbox,
-        time_tuple=("2010-02-01", "2010-02-05"),
+        time_range=("2010-02-01", "2010-02-05"),
         driver="geodataset_xarray",
     )
     assert da.vector.index.size == 2
@@ -1465,15 +1468,14 @@ def test_to_stac_raster_dataset(tmpdir, data_catalog):
     ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
 
 
-@pytest.mark.skip(reason="Contains bug regarding switch to Pydantic.")
 def test_from_stac():
     catalog_from_stac = DataCatalog().from_stac_catalog(
         "./tests/data/stac/catalog.json"
     )
 
-    assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetAdapter
-    assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameAdapter
-    # assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == GeoDatasetAdapter
+    assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetSource
+    assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameSource
+    assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == RasterDatasetSource
 
 
 def test_yml_from_uri_path():

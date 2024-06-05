@@ -58,8 +58,8 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     def write(
         self,
-        gdf: gpd.GeoDataFrame,
         path: StrPath,
+        gdf: gpd.GeoDataFrame,
         **kwargs,
     ) -> None:
         """
