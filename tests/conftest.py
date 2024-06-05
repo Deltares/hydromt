@@ -407,7 +407,7 @@ def bbox():
 @pytest.fixture()
 def grid_model(demda, world, obsda):
     mod = Model(
-        data_libs=["artifact_data"],
+        data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )

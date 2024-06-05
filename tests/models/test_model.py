@@ -435,83 +435,141 @@ def test_setup_grid(tmpdir, demda):
     assert model.grid.raster.shape == (47, 61)
 
 
-@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
-def test_gridmodel_setup(tmpdir):
-    # Initialize model
-    dc_param_fn = join(DATADIR, "parameters_data.yml")
-    GridModel: Any = ...  # bypass ruff
-    mod = GridModel(
-        root=join(tmpdir, "grid_model"),
-        data_libs=["artifact_data", dc_param_fn],
-        mode="w",
-    )
-    # Add region
-    mod.setup_grid(
+def test_grid_model_subbasin(grid_model):
+    grid_model.grid.create_from_region(
         {"subbasin": [12.319, 46.320], "uparea": 50},
         res=0.008333,
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
         add_mask=True,
     )
-    # Add data with setup_* methods
-    mod.setup_grid_from_constant(
+    assert not np.all(grid_model.grid.data["mask"].values is True)
+    assert grid_model.grid.data.raster.shape == (50, 93)
+
+
+def test_grid_model_constant(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model.grid.create_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    grid_model.grid.add_data_from_constant(
         constant=0.01,
         name="c1",
         nodata=-99.0,
     )
-    mod.setup_grid_from_constant(
+    assert "c1" in grid_model.grid.data
+
+
+def test_grid_model_constant_dtype(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model.grid.create_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    grid_model.grid.add_data_from_constant(
         constant=2,
         name="c2",
         dtype=np.int8,
         nodata=-1,
     )
-    mod.setup_grid_from_rasterdataset(
+    assert np.unique(grid_model.grid.data["c2"]).size == 1
+    assert np.isin([2], np.unique(grid_model.grid.data["c2"])).all()
+    assert "c2" in grid_model.grid.data
+
+
+def test_grid_model_raster_dataset_merit_hydro(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model.grid.create_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    grid_model.grid.add_data_from_rasterdataset(
         raster_fn="merit_hydro",
         variables=["elevtn", "basins"],
         reproject_method=["average", "mode"],
         mask_name="mask",
     )
-    mod.setup_grid_from_rasterdataset(
+    assert "basins" in grid_model.grid.data
+
+
+def test_grid_model_raster_dataset_vito(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model.grid.create_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    grid_model.grid.add_data_from_rasterdataset(
         raster_fn="vito",
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
     )
-    mod.setup_grid_from_raster_reclass(
+    assert "landuse" in grid_model.grid.data
+
+
+def test_grid_model_raster_reclass(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model.grid.create_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    grid_model.grid.add_data_from_raster_reclass(
         raster_fn="vito",
         fill_method="nearest",
         reclass_table_fn="vito_mapping",
         reclass_variables=["roughness_manning"],
         reproject_method=["average"],
     )
-    mod.setup_grid_from_geodataframe(
+
+    assert grid_model.grid.data["roughness_manning"].raster.nodata == -999.0
+    assert "roughness_manning" in grid_model.grid.data
+
+
+def test_grid_model_geodataframe_value(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model.grid.create_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    grid_model.grid.add_data_from_geodataframe(
         vector_fn="hydro_lakes",
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
         rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
     )
-    mod.setup_grid_from_geodataframe(
+    assert grid_model.grid.data["lake_depth"].raster.nodata == -999.0
+    assert "lake_depth" in grid_model.grid.data
+
+
+def test_grid_model_geodataframe_fraction(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model.grid.create_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+    )
+    grid_model.grid.add_data_from_geodataframe(
         vector_fn="hydro_lakes",
         rasterize_method="fraction",
         rename={"hydro_lakes": "water_frac"},
     )
 
-    # Checks
-    assert len(mod.grid) == 10
-    for v in ["mask", "c1", "basins", "roughness_manning", "lake_depth", "water_frac"]:
-        assert v in mod.grid
-    assert mod.grid["lake_depth"].raster.nodata == -999.0
-    assert mod.grid["roughness_manning"].raster.nodata == -999.0
-    assert np.unique(mod.grid["c2"]).size == 2
-    assert np.isin([-1, 2], np.unique(mod.grid["c2"])).all()
-
-    non_compliant = mod._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
-
-    # write model
-    mod.root.set(str(tmpdir), mode="w")
-    mod.write(components=["geoms", "grid"])
+    assert "water_frac" in grid_model.grid.data
 
 
 def test_vectormodel(vector_model, tmpdir, mocker: MockerFixture, geodf):
