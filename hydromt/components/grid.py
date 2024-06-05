@@ -168,6 +168,7 @@ class GridComponent(SpatialModelComponent):
                 logger=self.logger,
             )
             return None
+        self.write_region()
         # write_nc requires dict - use dummy 'grid' key
         return write_nc(
             {"grid": self.data},

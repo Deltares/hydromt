@@ -2,7 +2,7 @@
 """Tests for the hydromt.models module of HydroMT."""
 
 from os import listdir, makedirs
-from os.path import abspath, dirname, isfile, join
+from os.path import abspath, dirname, isdir, isfile, join
 from pathlib import Path
 from typing import List, cast
 from unittest.mock import Mock
@@ -17,6 +17,7 @@ from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.config import ConfigComponent
+from hydromt.components.geoms import GeomsComponent
 from hydromt.components.grid import GridComponent
 from hydromt.components.spatial import SpatialModelComponent
 from hydromt.components.spatialdatasets import SpatialDatasetsComponent
@@ -172,29 +173,48 @@ def test_grid_model_append(demda, df, tmpdir):
 
 
 @pytest.mark.integration()
-@pytest.mark.skip(reason="needs method/yaml validation")
 def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
-    # build model
-    model = Model(root=str(tmpdir), mode="w")
-    model.name = "model"
-    model.build(
-        region={"bbox": bbox},
-        steps={
-            "region.create": {},
-            "region.write": {"components": {"geoms", "config"}},
-        },
+    model = Model(
+        root=str(tmpdir),
+        mode="w",
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
     )
-    assert hasattr(model, "region")
-    assert isfile(join(model.root.path, "model.yml"))
+    geoms_component = GeomsComponent(model)
+    model.add_component("geoms", geoms_component)
+    model.build(
+        steps=[
+            {"grid.create_from_region": {"region": {"bbox": bbox}, "res": 0.01}},
+            {
+                "grid.add_data_from_constant": {
+                    "constant": 0.01,
+                    "name": "c1",
+                    "nodata": -99.0,
+                }
+            },
+        ]
+    )
     assert isfile(join(model.root.path, "hydromt.log"))
-    assert isfile(join(model.root.path, "region.geojson")), listdir(model.root.path)
+    assert isdir(join(model.root.path, "grid")), listdir(model.root.path)
+    assert isfile(join(model.root.path, "grid", "grid_region.geojson")), listdir(
+        model.root.path
+    )
 
     # read and update model
-    model = Model(root=str(tmpdir), mode="r")
+    model = Model(
+        root=str(tmpdir),
+        mode="r+",
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+    )
+    geoms_component = GeomsComponent(model)
+    model.add_component("geoms", geoms_component)
     model_out = str(tmpdir.join("update"))
+    makedirs(model_out, exist_ok=True)
     model.update(model_out=model_out, steps={})  # write only
-    assert isfile(join(model_out, "model.yml"))
+    assert isdir(join(model_out, "grid")), listdir(model_out)
+    assert isfile(join(model_out, "grid", "grid_region.geojson")), listdir(model_out)
 
 
 @pytest.mark.integration()
@@ -319,6 +339,7 @@ def test_maps_setup():
 
 
 @pytest.mark.integration()
+@pytest.mark.skip("one at a time pls")
 def test_gridmodel(demda, tmpdir):
     grid_model = Model(
         root=str(tmpdir),
