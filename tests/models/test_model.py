@@ -204,7 +204,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     # read and update model
     model = Model(
         root=str(tmpdir),
-        mode="r+",
+        mode="r",
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
