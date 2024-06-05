@@ -237,38 +237,40 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
     assert "temp" in model.forcing
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_setup_region(model, demda, tmpdir):
-    # bbox
-    model.region.create({"bbox": [12.05, 45.30, 12.85, 45.65]})
-    region = model._geoms.pop("region")
+def test_setup_region_geom(model, bbox):
     # geom
-    model.region.create({"geom": region})
-    gpd.testing.assert_geodataframe_equal(region, model.region)
+    model.grid.create_from_region({"geom": bbox}, res=0.001)
+    gpd.testing.assert_geodataframe_equal(bbox, model.region, check_less_precise=True)
+
+
+def test_setup_region_geom_catalog(model, bbox, tmpdir):
     # geom via data catalog
     fn_region = str(tmpdir.join("region.gpkg"))
-    region.to_file(fn_region, driver="GPKG")
+    bbox.to_file(fn_region, driver="GPKG")
     model.data_catalog.from_dict(
         {
             "region": {
-                "path": fn_region,
+                "uri": fn_region,
                 "data_type": "GeoDataFrame",
-                "driver": "vector",
+                "driver": "pyogrio",
             }
         }
     )
-    model._geoms.pop("region")  # remove old region
-    model.region.create({"geom": "region"})
-    gpd.testing.assert_geodataframe_equal(region, model.region)
+    model.grid.create_from_region({"geom": "region"}, res=0.01)
+    gpd.testing.assert_geodataframe_equal(bbox, model.region, check_less_precise=True)
+
+
+def test_setup_region_grid(model, demda, tmpdir):
     # grid
-    model._geoms.pop("region")  # remove old region
     grid_fn = str(tmpdir.join("grid.tif"))
     demda.raster.to_raster(grid_fn)
-    model.region.create({"grid": grid_fn})
+    model.grid.create_from_region({"grid": grid_fn})
     assert np.all(demda.raster.bounds == model.region.total_bounds)
+
+
+def test_setup_region_basin(model, demda, tmpdir):
     # basin
-    model._geoms.pop("region")  # remove old region
-    model.region.create({"basin": [12.2, 45.833333333333329]})
+    model.grid.create_from_region({"basin": [12.2, 45.833333333333329]})
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 

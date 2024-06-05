@@ -15,6 +15,7 @@ import xugrid as xu
 import zarr
 from dask import config as dask_config
 from pytest_mock import MockerFixture
+from shapely.geometry import box
 
 from hydromt import (
     Model,
@@ -397,11 +398,20 @@ def griduda():
 
 
 @pytest.fixture()
+def bbox():
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    return gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+
+
+@pytest.fixture()
 def model(demda, world, obsda):
-    mod = Model(data_libs=["artifact_data"])
+    mod = Model(
+        data_libs=["artifact_data"],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+    )
 
     geoms_component = GeomsComponent(mod)
-    print(type(world))
     geoms_component.set(world, "world")
     mod.add_component("geoms", geoms_component)
 
