@@ -217,7 +217,15 @@ def test_model_build_update(tmpdir, demda, obsda):
 
 
 @pytest.mark.integration()
-def test_model_build_update_with_data(tmpdir, demda, obsda):
+def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
+    # users will not have a use for `set` in their yaml file because there is
+    # nothing they will have access to then that they cat set it to
+    # so we want to keep `SpatialDatasetsComponent.set` a non-hydromt-step
+    # but for testing it's much easier, so we'll enable it
+    # for the duration of this test with monkeypatch
+    monkeypatch.setattr(
+        SpatialDatasetsComponent.set, "__ishydromtstep__", True, raising=False
+    )
     # Build model with some data
     bbox = [12.05, 45.30, 12.85, 45.65]
     model = Model(
