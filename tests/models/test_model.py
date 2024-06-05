@@ -27,6 +27,7 @@ from hydromt.models import Model
 from hydromt.plugins import PLUGINS
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
+DC_PARAM_PATH = join(DATADIR, "parameters_data.yml")
 
 
 def _patch_plugin_components(
@@ -85,19 +86,19 @@ def test_write_data_catalog_csv(tmpdir):
     assert data_catalog_df.iloc[-1, 0] == sources[-1]
 
 
-def test_model_mode_errors_reading_in_write_only(model, tmpdir):
+def test_model_mode_errors_reading_in_write_only(grid_model, tmpdir):
     # write model
-    model.root.set(str(tmpdir), mode="w")
-    model.write()
+    grid_model.root.set(str(tmpdir), mode="w")
+    grid_model.write()
     with pytest.raises(IOError, match="Model opened in write-only mode"):
-        model.read()
+        grid_model.read()
 
 
-def test_model_mode_errors_writing_in_read_only(model):
+def test_model_mode_errors_writing_in_read_only(grid_model):
     # read model
-    model.root.mode = "r"
+    grid_model.root.mode = "r"
     with pytest.raises(IOError, match="Model opened in read-only mode"):
-        model.write()
+        grid_model.write()
 
 
 @pytest.mark.integration()
@@ -237,17 +238,19 @@ def test_model_build_update_with_data(tmpdir, demda, obsda):
     assert "temp" in model.forcing
 
 
-def test_setup_region_geom(model, bbox):
+def test_setup_region_geom(grid_model, bbox):
     # geom
-    model.grid.create_from_region({"geom": bbox}, res=0.001)
-    gpd.testing.assert_geodataframe_equal(bbox, model.region, check_less_precise=True)
+    grid_model.grid.create_from_region({"geom": bbox}, res=0.001)
+    gpd.testing.assert_geodataframe_equal(
+        bbox, grid_model.region, check_less_precise=True
+    )
 
 
-def test_setup_region_geom_catalog(model, bbox, tmpdir):
+def test_setup_region_geom_catalog(grid_model, bbox, tmpdir):
     # geom via data catalog
     fn_region = str(tmpdir.join("region.gpkg"))
     bbox.to_file(fn_region, driver="GPKG")
-    model.data_catalog.from_dict(
+    grid_model.data_catalog.from_dict(
         {
             "region": {
                 "uri": fn_region,
@@ -256,16 +259,18 @@ def test_setup_region_geom_catalog(model, bbox, tmpdir):
             }
         }
     )
-    model.grid.create_from_region({"geom": "region"}, res=0.01)
-    gpd.testing.assert_geodataframe_equal(bbox, model.region, check_less_precise=True)
+    grid_model.grid.create_from_region({"geom": "region"}, res=0.01)
+    gpd.testing.assert_geodataframe_equal(
+        bbox, grid_model.region, check_less_precise=True
+    )
 
 
-def test_setup_region_grid(model, demda, tmpdir):
+def test_setup_region_grid(grid_model, demda, tmpdir):
     # grid
     grid_fn = str(tmpdir.join("grid.tif"))
     demda.raster.to_raster(grid_fn)
-    model.grid.create_from_region({"grid": grid_fn})
-    assert np.all(demda.raster.bounds == model.region.total_bounds)
+    grid_model.grid.create_from_region({"grid": grid_fn})
+    assert np.all(demda.raster.bounds == grid_model.region.total_bounds)
 
 
 @pytest.mark.skip(reason="TODO")
@@ -277,9 +282,8 @@ def test_setup_region_basin(model):
 
 @pytest.mark.integration()
 def test_maps_setup():
-    dc_param_fn = join(DATADIR, "parameters_data.yml")
     mod = Model(
-        data_libs=["artifact_data", dc_param_fn],
+        data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
         mode="w",
@@ -619,15 +623,7 @@ def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
     assert "zs" not in vector3
 
 
-def test_empty_mesh_model(tmpdir):
-    mesh_model = Model(
-        data_libs=["artifact_data"],
-        components={"mesh": {"type": "MeshComponent"}},
-        region_component="mesh",
-    )
-
-    # write model
-    mesh_model.root.set(str(tmpdir), mode="w")
+def test_empty_mesh_model(mesh_model):
     mesh_model.write()
     # read model
     mesh_model2 = Model(
@@ -713,34 +709,43 @@ def test_setup_mesh(tmpdir, griduda):
     assert np.all(np.round(model.region.total_bounds, 3) == bounds)
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_meshmodel_setup(griduda, world):
-    MeshModel = PLUGINS.model_plugins["mesh_model"]
-    dc_param_fn = join(DATADIR, "parameters_data.yml")
-    mod = MeshModel(data_libs=["artifact_data", dc_param_fn])
-    mod.setup_config(**{"header": {"setting": "value"}})
+@pytest.mark.skip("needs oracle")
+def test_mesh_model_setup_grid(mesh_model, world):
     region = {"geom": world[world.name == "Italy"]}
-    mod.setup_mesh2d(region, res=10000, crs=3857, grid_name="mesh2d")
-    _ = mod.region
+    mesh_model.mesh.create_2d_from_region(
+        region, res=10000, crs=3857, grid_name="mesh2d"
+    )
+    assert mesh_model.mesh.data.equals(region["geom"])
 
+
+def test_mesh_model_setup_from_raster_dataset(mesh_model, griduda):
     region = {"mesh": griduda}
-    mod1 = MeshModel(data_libs=["artifact_data", dc_param_fn])
-    mod1.setup_mesh2d(region, grid_name="mesh2d")
-    mod1.setup_mesh2d_from_rasterdataset(
+    mesh_model.mesh.create_2d_from_region(region, grid_name="mesh2d")
+    mesh_model.mesh.add_2d_data_from_rasterdataset(
         "vito", grid_name="mesh2d", resampling_method="mode"
     )
-    assert "vito" in mod1.mesh.data_vars
-    mod1.setup_mesh2d_from_raster_reclass(
-        raster_fn="vito",
-        reclass_table_fn="vito_mapping",
+    assert "vito" in mesh_model.mesh.data.data_vars
+
+
+def test_mesh_model_setup_from_raster_reclass(mesh_model, griduda):
+    region = {"mesh": griduda}
+    mesh_model.mesh.create_2d_from_region(region, grid_name="mesh2d")
+    mesh_model.mesh.add_2d_data_from_rasterdataset(
+        "vito", grid_name="mesh2d", resampling_method="mode"
+    )
+    mesh_model.mesh.add_2d_data_from_raster_reclass(
+        raster_filename="vito",
+        reclass_table_filename="vito_mapping",
         reclass_variables=["landuse", "roughness_manning"],
         resampling_method=["mode", "centroid"],
         grid_name="mesh2d",
     )
-    ds_mesh2d = mod1.get_mesh("mesh2d", include_data=True)
+    ds_mesh2d = mesh_model.mesh.get_mesh("mesh2d", include_data=True)
     assert "vito" in ds_mesh2d
-    assert "roughness_manning" in mod1.mesh.data_vars
-    assert np.all(mod1.mesh["landuse"].values == mod1.mesh["vito"].values)
+    assert "roughness_manning" in mesh_model.mesh.data.data_vars
+    assert np.all(
+        mesh_model.mesh.data["landuse"].values == mesh_model.mesh.data["vito"].values
+    )
 
 
 def test_initialize_with_region_component(mocker: MockerFixture):
@@ -823,7 +828,7 @@ def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path
     foo.write.assert_not_called()
 
 
-def test_build_non_existing_step(mocker: MockerFixture, tmpdir: Path):
+def test_build_non_existing_step(tmpdir: Path):
     m = Model(root=str(tmpdir))
 
     with pytest.raises(KeyError):

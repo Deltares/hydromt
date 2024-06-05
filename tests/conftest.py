@@ -44,6 +44,7 @@ from hydromt.root import ModelRoot
 dask_config.set(scheduler="single-threaded")
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+DC_PARAM_PATH = join(DATADIR, "parameters_data.yml")
 
 
 @pytest.fixture()
@@ -404,7 +405,7 @@ def bbox():
 
 
 @pytest.fixture()
-def model(demda, world, obsda):
+def grid_model(demda, world, obsda):
     mod = Model(
         data_libs=["artifact_data"],
         components={"grid": {"type": "GridComponent"}},
@@ -432,6 +433,18 @@ def model(demda, world, obsda):
     mod.add_component("states", states_component)
 
     return mod
+
+
+@pytest.fixture()
+def mesh_model(tmpdir):
+    mesh_model = Model(
+        root=str(tmpdir),
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"mesh": {"type": "MeshComponent"}},
+        region_component="mesh",
+    )
+
+    return mesh_model
 
 
 def _create_vector_model(
