@@ -367,7 +367,6 @@ def test_maps_setup():
 
 
 @pytest.mark.integration()
-@pytest.mark.skip("one at a time pls")
 def test_gridmodel(demda, tmpdir):
     grid_model = Model(
         root=str(tmpdir),
