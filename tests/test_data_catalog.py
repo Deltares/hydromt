@@ -23,25 +23,25 @@ from yaml import dump
 
 from hydromt._compat import HAS_OPENPYXL
 from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
-from hydromt.data_adapter import (
+from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_catalog import (
+from hydromt.data_catalog.data_catalog import (
     DataCatalog,
     _denormalise_data_dict,
     _parse_data_source_dict,
     _yml_from_uri_or_path,
 )
-from hydromt.data_source import (
+from hydromt.data_catalog.sources import (
     DataFrameSource,
     DataSource,
     GeoDataFrameSource,
     GeoDatasetSource,
     RasterDatasetSource,
 )
-from hydromt.gis.utils import to_geographic_bbox
+from hydromt.gis.gis_utils import to_geographic_bbox
 from hydromt.io.writers import write_xy
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
@@ -748,8 +748,9 @@ def test_get_rasterdataset_unknown_datatype(data_catalog):
         data_catalog.get_rasterdataset([])
 
 
+@pytest.mark.integration()
 def test_get_rasterdataset_unknown_file(data_catalog):
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(NoDataException):
         data_catalog.get_rasterdataset("test1.tif")
 
 
@@ -856,7 +857,7 @@ class TestGetGeoDataFrame:
 
     @pytest.mark.integration()
     def test_raises_filenotfound(self, data_catalog: DataCatalog):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(NoDataException):
             data_catalog.get_geodataframe("no_file.geojson")
 
     @pytest.mark.integration()
@@ -921,8 +922,9 @@ def test_get_geodataframe_unknown_data_type(data_catalog):
         data_catalog.get_geodataframe([])
 
 
+@pytest.mark.integration()
 def test_get_geodataframe_unknown_file(data_catalog):
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(NoDataException):
         data_catalog.get_geodataframe("test1.gpkg")
 
 
@@ -1024,7 +1026,7 @@ class TestGetGeoDataset:
 
     @pytest.mark.integration()
     def test_nodata_filenotfound(self, data_catalog: DataCatalog):
-        with pytest.raises(FileNotFoundError, match="No files found for"):
+        with pytest.raises(NoDataException, match="no files"):
             data_catalog.get_geodataset("no_file.geojson")
 
     @pytest.mark.integration()
@@ -1147,8 +1149,9 @@ def test_get_geodataset_unknown_data_type(data_catalog):
         data_catalog.get_geodataset([])
 
 
+@pytest.mark.integration()
 def test_get_geodataset_unknown_file(data_catalog):
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(NoDataException, match="no files"):
         data_catalog.get_geodataset("test1.nc")
 
 
@@ -1402,8 +1405,9 @@ def test_get_dataframe_unknown_data_type(data_catalog):
         data_catalog.get_dataframe([])
 
 
+@pytest.mark.integration()
 def test_get_dataframe_unknown_file(data_catalog):
-    with pytest.raises(FileNotFoundError):
+    with pytest.raises(NoDataException, match="no files"):
         data_catalog.get_dataframe("test1.csv")
 
 

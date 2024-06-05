@@ -12,8 +12,8 @@ from pydantic import (
     model_validator,
 )
 
-from hydromt.components.base import ModelComponent
-from hydromt.models import Model
+from hydromt.model import Model
+from hydromt.model.components.base import ModelComponent
 from hydromt.plugins import PLUGINS
 
 

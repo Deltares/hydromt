@@ -3,7 +3,7 @@ from logging import Logger
 from typing import Any, Dict
 
 
-def warn_on_unused_kwargs(
+def _warn_on_unused_kwargs(
     obj_name: str, name_value_dict: Dict[str, Any], logger: Logger
 ):
     """Warn on unused kwargs."""

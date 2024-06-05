@@ -39,14 +39,11 @@ of the Wflow model.
 
 **Overview of options**
 
-To check all options do:
+To check all options see :ref:`the CLI API <clip_api>`, or do:
 
 .. code-block:: console
 
     hydromt clip --help
-
-.. include:: ../_generated/cli_clip.rst
-
 
 .. _python_clip:
 

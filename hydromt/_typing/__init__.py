@@ -5,7 +5,7 @@ from .error import (
     ErrorHandleMethod,
     NoDataException,
     NoDataStrategy,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from .fsspec_types import FS
 from .metadata import SourceMetadata
@@ -58,7 +58,7 @@ __all__ = [
     "ErrorHandleMethod",
     "NoDataStrategy",
     "NoDataException",
-    "_exec_nodata_strat",
+    "exec_nodata_strat",
     "Variables",
     "Geom",
     "GpdShapeGeom",
