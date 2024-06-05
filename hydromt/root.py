@@ -4,7 +4,7 @@ from logging import FileHandler, Logger, getLogger
 from os import makedirs, remove
 from os.path import dirname, exists, isdir, join
 from pathlib import Path
-from shutil import copyfile
+from shutil import SameFileError, copyfile
 from typing import Optional
 
 from hydromt._typing import ModeLike, ModelMode
@@ -117,7 +117,10 @@ class ModelRoot:
         if old_path is not None and exists(old_path):
             old_log_path = join(old_path, "hydromt.log")
             if exists(old_log_path):
-                copyfile(old_log_path, new_path)
+                try:
+                    copyfile(old_log_path, new_path)
+                except SameFileError:
+                    pass
 
         add_filehandler(self.logger, new_path, log_level)
 
