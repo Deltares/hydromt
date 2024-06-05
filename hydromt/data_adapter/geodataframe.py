@@ -47,7 +47,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
                 variables=variables,
                 mask=mask,
                 predicate=predicate,
-                handle_nodata=handle_nodata,
                 logger=logger,
             )
             # uniformize
@@ -87,7 +86,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
         variables: Optional[Union[str, List[str]]] = None,
         mask: Optional[Geom] = None,
         predicate: str = "intersects",  # TODO: enum available predicates
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO: review NoDataStrategy + axes
         logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
         """Return a clipped GeoDataFrame (vector).
@@ -132,9 +130,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
             gdf = gdf.iloc[idxs]
 
         if np.all(gdf.is_empty):
-            _exec_nodata_strat(
-                "No data was read from source", strategy=handle_nodata, logger=logger
-            )
             gdf = None
         return gdf
 

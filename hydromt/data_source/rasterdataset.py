@@ -54,7 +54,7 @@ class RasterDatasetSource(DataSource):
         zoom_level: Optional[ZoomLevel] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> xr.Dataset:
+    ) -> Optional[xr.Dataset]:
         """
         Read data from this source.
 
@@ -75,6 +75,7 @@ class RasterDatasetSource(DataSource):
             variables=vrs,
             zoom_level=zoom_level,
             metadata=self.metadata,
+            logger=logger,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
@@ -84,6 +85,7 @@ class RasterDatasetSource(DataSource):
             variables=variables,
             time_range=time_range,
             zoom_level=zoom_level,
+            logger=logger,
         )
 
     def to_file(

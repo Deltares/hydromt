@@ -16,7 +16,7 @@ from hydromt._typing import (
     Variables,
     ZoomLevel,
 )
-from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
 from hydromt.drivers.raster.raster_dataset_driver import RasterDatasetDriver
@@ -81,7 +81,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                         preprocessor(opn(_uri)) if preprocessor else opn(_uri)
                     )
 
-            return xr.merge(datasets)
+            ds: xr.Dataset = xr.merge(datasets)
         elif first_ext in [".nc", ".netcdf"]:
             filtered_uris = []
             for _uri in uris:
@@ -92,13 +92,19 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 else:
                     filtered_uris.append(_uri)
 
-            return xr.open_mfdataset(
+            ds: xr.Dataset = xr.open_mfdataset(
                 filtered_uris, decode_coords="all", preprocess=preprocessor, **options
             )
         else:
             raise ValueError(
                 f"Unknown extension for RasterDatasetXarrayDriver: {first_ext} "
             )
+        for variable in ds.data_vars:
+            if ds[variable].size == 0:
+                _exec_nodata_strat(
+                    f"No data from driver: '{self.name}' for variable: '{variable}'"
+                )
+        return ds
 
     def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
         """

@@ -54,7 +54,7 @@ class GeoDataFrameSource(DataSource):
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> gpd.GeoDataFrame:
+    ) -> Optional[gpd.GeoDataFrame]:
         """Use the driver and data adapter to read and harmonize the data."""
         self._used = True
         if bbox is not None or (mask is not None and buffer > 0):

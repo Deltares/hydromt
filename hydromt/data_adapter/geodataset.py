@@ -16,7 +16,6 @@ from hydromt._typing import (
     Variables,
     _exec_nodata_strat,
 )
-from hydromt._typing.error import NoDataException
 from hydromt._typing.type_def import Number
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import (
@@ -40,7 +39,7 @@ class GeoDatasetAdapter(DataAdapterBase):
 
     def transform(
         self,
-        maybe_ds: Optional[xr.Dataset],
+        ds: xr.Dataset,
         metadata: SourceMetadata,
         *,
         mask: Optional[Geom] = None,
@@ -56,43 +55,35 @@ class GeoDatasetAdapter(DataAdapterBase):
         For a detailed description see:
         :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
         """
-        if maybe_ds is None:
-            return None
-        try:
-            maybe_ds = _rename_vars(maybe_ds, self.rename)
-            maybe_ds = GeoDatasetAdapter._validate_spatial_coords(maybe_ds)
-            maybe_ds = GeoDatasetAdapter._set_crs(
-                maybe_ds, crs=metadata.crs, logger=logger
-            )
-            maybe_ds = _set_vector_nodata(maybe_ds, metadata)
-            maybe_ds = shift_dataset_time(
-                dt=self.unit_add.get("time", 0), ds=maybe_ds, logger=logger
-            )
-            maybe_ds = GeoDatasetAdapter._apply_unit_conversion(
-                maybe_ds,
-                unit_mult=self.unit_mult,
-                unit_add=self.unit_add,
-                logger=logger,
-            )
-            maybe_ds = _set_metadata(maybe_ds, metadata=metadata)
-            maybe_ds = GeoDatasetAdapter._slice_data(
-                maybe_ds,
-                variables=variables,
-                mask=mask,
-                predicate=predicate,
-                time_range=time_range,
-                logger=logger,
-            )
+        ds = _rename_vars(ds, self.rename)
+        ds = GeoDatasetAdapter._validate_spatial_coords(ds)
+        ds = GeoDatasetAdapter._set_crs(ds, crs=metadata.crs, logger=logger)
+        ds = _set_vector_nodata(ds, metadata)
+        ds = shift_dataset_time(dt=self.unit_add.get("time", 0), ds=ds, logger=logger)
+        ds = GeoDatasetAdapter._apply_unit_conversion(
+            ds,
+            unit_mult=self.unit_mult,
+            unit_add=self.unit_add,
+            logger=logger,
+        )
+        ds = _set_metadata(ds, metadata=metadata)
+        ds = GeoDatasetAdapter._slice_data(
+            ds,
+            variables=variables,
+            mask=mask,
+            predicate=predicate,
+            time_range=time_range,
+            logger=logger,
+        )
 
-            if has_no_data(maybe_ds):
-                raise NoDataException()
-            return _single_var_as_array(maybe_ds, single_var_as_array, variables)
-        except NoDataException:
+        if has_no_data(ds):
             _exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,
             )
+            return None  # if handle_nodata ignore
+        return _single_var_as_array(ds, single_var_as_array, variables)
 
     @staticmethod
     def _validate_spatial_coords(

@@ -41,10 +41,10 @@ class DataFrameSource(DataSource):
         *,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        predicate: str = "intersects",
+        predicate: str = "intersects",  # TODO: https://github.com/Deltares/hydromt/issues/983
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> pd.DataFrame:
+    ) -> Optional[pd.DataFrame]:
         """Use the driver and data adapter to read and harmonize the data."""
         self.mark_as_used()
         df: pd.DataFrame = self.driver.read(
