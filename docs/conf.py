@@ -22,10 +22,8 @@ from distutils.dir_util import copy_tree
 
 import numpy as np
 import sphinx_autosummary_accessors
-from click.testing import CliRunner
 
 import hydromt
-from hydromt.cli.main import main as hydromt_cli
 import hydromt.plugins
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
@@ -148,18 +146,6 @@ with open("_generated/predefined_catalogs.rst", "w") as f:
     f.writelines(
         [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
     )
-
-# -- Generate cli help docs ----------------------------------------------
-
-# FIXME: replace with sphinx-click ?
-# cli_build = CliRunner().invoke(hydromt_cli, ["build", "--help"])
-# cli2rst(cli_build.output, r"_generated/cli_build.rst")
-
-# cli_update = CliRunner().invoke(hydromt_cli, ["update", "--help"])
-# cli2rst(cli_update.output, r"_generated/cli_update.rst")
-
-# cli_clip = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
-# cli2rst(cli_clip.output, r"_generated/cli_clip.rst")
 
 # -- General configuration ------------------------------------------------
 

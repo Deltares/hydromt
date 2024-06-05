@@ -63,13 +63,11 @@ Note that no .yaml file is used here but instead the methods and options are def
 
 **Overview of options**
 
-To check all options do:
+To check all options see :ref:`the CLI API <update_api>`, or do:
 
 .. code-block:: console
 
     hydromt update --help
-
-.. include:: ../_generated/cli_update.rst
 
 
 .. _python_update:
