@@ -21,22 +21,22 @@ from hydromt import (
     raster,
     vector,
 )
+from hydromt.gis.raster_utils import affine_to_coords
 from hydromt.plugins import Plugins
 
 dask_config.set(scheduler="single-threaded")
 
 from hydromt._typing import SourceMetadata
-from hydromt.components.config import ConfigComponent
-from hydromt.components.spatial import SpatialModelComponent
-from hydromt.components.vector import VectorComponent
-from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
-from hydromt.data_adapter.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog import DataCatalog
-from hydromt.drivers import GeoDataFrameDriver, RasterDatasetDriver
-from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
-from hydromt.gis import utils
-from hydromt.metadata_resolver import MetaDataResolver
-from hydromt.root import ModelRoot
+from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
+from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
+from hydromt.data_catalog.drivers import GeoDataFrameDriver, RasterDatasetDriver
+from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.data_catalog.uri_resolvers import MetaDataResolver
+from hydromt.model.components.config import ConfigComponent
+from hydromt.model.components.spatial import SpatialModelComponent
+from hydromt.model.components.vector import VectorComponent
+from hydromt.model.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
@@ -55,7 +55,7 @@ def _local_catalog_eps(monkeypatch, PLUGINS) -> dict:
     cat_root = Path(__file__).parent.parent / "data" / "catalogs"
     for name, cls in PLUGINS.catalog_plugins.items():
         monkeypatch.setattr(
-            f"hydromt.predefined_catalog.{cls.__name__}.base_url",
+            f"hydromt.data_catalog.predefined_catalog.{cls.__name__}.base_url",
             str(cat_root / name),
         )
 
@@ -303,7 +303,7 @@ def flwda(flwdir):
         name="flwdir",
         data=flwdir.to_array("d8"),
         dims=("y", "x"),
-        coords=utils.affine_to_coords(flwdir.transform, flwdir.shape),
+        coords=affine_to_coords(flwdir.transform, flwdir.shape),
         attrs=dict(_FillValue=247),
     )
     # NOTE epsg 3785 is deprecated https://epsg.io/3785

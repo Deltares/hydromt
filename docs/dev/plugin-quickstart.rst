@@ -427,7 +427,7 @@ input data using an external workflow from hydromt core is:
             variables=["landuse"],
         )
         # 2. Do some transformation or processing
-        ds_out = hydromt.workflows.grid.grid_from_rasterdataset(
+        ds_out = hydromt.model.processes.grid.grid_from_rasterdataset(
             grid_like=self.grid,
             ds=da_landuse,
             fill_method="nearest",

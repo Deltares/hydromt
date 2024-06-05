@@ -14,10 +14,13 @@ from geopandas import GeoDataFrame, GeoSeries
 from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
 
-from hydromt.gis import raster, utils
+from hydromt.gis import raster
+from hydromt.gis.vector_utils import filter_gdf
 
 logger = logging.getLogger(__name__)
 GDAL_VERSION = gdal_version()
+
+__all__ = ["GeoDataArray", "GeoDataset"]
 
 
 class GeoBase(raster.XGeoBase):
@@ -527,7 +530,7 @@ class GeoBase(raster.XGeoBase):
         da: xarray.DataArray
             Clipped DataArray
         """
-        idx = utils.filter_gdf(self.geometry, geom=geom, predicate=predicate)
+        idx = filter_gdf(self.geometry, geom=geom, predicate=predicate)
         return self._obj.isel({self.index_dim: idx})
 
     def clip_bbox(self, bbox, crs=None, buffer=None) -> Union[xr.DataArray, xr.Dataset]:
@@ -551,9 +554,7 @@ class GeoBase(raster.XGeoBase):
             bbox = np.atleast_1d(bbox)
             bbox[:2] -= buffer
             bbox[2:] += buffer
-        idx = utils.filter_gdf(
-            self.geometry, bbox=bbox, crs=crs, predicate="intersects"
-        )
+        idx = filter_gdf(self.geometry, bbox=bbox, crs=crs, predicate="intersects")
         return self._obj.isel({self.index_dim: idx})
 
     ## wrap GeoSeries functions

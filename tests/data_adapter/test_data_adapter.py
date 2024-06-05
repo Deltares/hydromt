@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Tests for the hydromt.data_adapter submodule."""
+"""Tests for the hydromt.data_catalog.adapters submodule."""
 
 import glob
 from os.path import abspath, dirname, join
@@ -12,11 +12,11 @@ import xarray as xr
 from pystac import Catalog as StacCatalog
 
 from hydromt import _compat as compat
-from hydromt.data_adapter import (
+from hydromt.data_catalog import DataCatalog
+from hydromt.data_catalog.adapters import (
     DatasetAdapter,
 )
-from hydromt.data_catalog import DataCatalog
-from hydromt.data_source import RasterDatasetSource
+from hydromt.data_catalog.sources import RasterDatasetSource
 
 TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")

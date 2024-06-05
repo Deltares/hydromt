@@ -13,9 +13,9 @@ import xarray as xr
 import xugrid as xu
 from pytest_mock import MockerFixture
 
-from hydromt.components.mesh import MeshComponent, _check_UGrid
-from hydromt.models import Model
-from hydromt.root import ModelRoot
+from hydromt.model import Model
+from hydromt.model.components.mesh import MeshComponent, _check_UGrid
+from hydromt.model.root import ModelRoot
 
 DATADIR = join(dirname(dirname(abspath(__file__))), "data")
 
@@ -101,7 +101,7 @@ def test_set_raises_errors(mocker: MockerFixture, mock_model):
     data = mocker.create_autospec(xu.UgridDataset)
     data.name = "fakedata"
     data.ugrid.grids = [1, 2]
-    mock_check_Ugrid = mocker.patch("hydromt.components.mesh._check_UGrid")
+    mock_check_Ugrid = mocker.patch("hydromt.model.components.mesh._check_UGrid")
     mock_check_Ugrid.return_value = data
     with pytest.raises(
         ValueError,
@@ -129,7 +129,7 @@ def test_create(mock_model, mocker: MockerFixture):
     test_data = xu.data.elevation_nl().to_dataset()
     test_data.grid.crs = crs
     mock_create_mesh2d = mocker.patch(
-        "hydromt.components.mesh.create_mesh2d_from_region"
+        "hydromt.model.components.mesh.create_mesh2d_from_region"
     )
     mock_create_mesh2d.return_value = test_data
     mesh_component.create_2d_from_region(region=region, res=res, crs=crs)
@@ -241,7 +241,7 @@ def test_add_2d_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixtur
         )
 
     mock_mesh2d_from_rasterdataset = mocker.patch(
-        "hydromt.components.mesh.mesh2d_from_rasterdataset"
+        "hydromt.model.components.mesh.mesh2d_from_rasterdataset"
     )
     mock_mesh2d_from_rasterdataset.return_value = mock_data
 
@@ -288,7 +288,7 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
     mesh_component.data_catalog.get_rasterdataset.return_value = xr.DataArray()
     mesh_component.data_catalog.get_dataframe.return_value = pd.DataFrame()
     mock_mesh2d_from_rasterdataset = mocker.patch(
-        "hydromt.components.mesh.mesh2d_from_raster_reclass"
+        "hydromt.model.components.mesh.mesh2d_from_raster_reclass"
     )
 
     mock_mesh2d_from_rasterdataset.return_value = mock_data

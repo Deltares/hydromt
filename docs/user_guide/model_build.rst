@@ -58,13 +58,11 @@ in the ``grid_model_config.yaml`` file and the data sources in the ``data_catalo
 
 **Overview of options**
 
-To check all options do:
+To check all options see :ref:`the CLI API <build_api>`, or do:
 
 .. code-block:: console
 
     hydromt build --help
-
-.. include:: ../_generated/cli_build.rst
 
 .. _python_build:
 

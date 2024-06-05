@@ -7,9 +7,9 @@ import pytest
 from shapely import box
 
 from hydromt._typing import Bbox, NoDataException
-from hydromt.drivers import PyogrioDriver
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
-from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.drivers import PyogrioDriver
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
 
 
 class TestPyogrioDriver:

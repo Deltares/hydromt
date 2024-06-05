@@ -40,13 +40,23 @@ from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
 from hydromt import _compat
-from hydromt._utils import elevation2rgba, rgba2elevation
-from hydromt.gis import utils
+from hydromt._utils import _elevation2rgba, _rgba2elevation
+from hydromt.gis import gis_utils, raster_utils
+from hydromt.gis._gdal_drivers import GDAL_EXT_CODE_MAP
+from hydromt.gis.create_vrt import create_vrt
 
 logger = logging.getLogger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
 YDIMS = ("y", "latitude", "lat")
 GEO_MAP_COORD = "spatial_ref"
+
+__all__ = [
+    "RasterDataArray",
+    "RasterDataset",
+    "full",
+    "full_like",
+    "full_from_transform",
+]
 
 
 def full_like(
@@ -190,7 +200,7 @@ def full_from_transform(
         raise ValueError("Only 2D and 3D data arrays supported.")
     if not isinstance(transform, Affine):
         transform = Affine(*transform)
-    coords = utils.affine_to_coords(transform, shape[-2:], x_dim="x", y_dim="y")
+    coords = raster_utils.affine_to_coords(transform, shape[-2:], x_dim="x", y_dim="y")
     dims = ("y", "x")
     if len(shape) == 3:
         coords = {"dim0": ("dim0", np.arange(shape[0], dtype=int)), **coords}
@@ -210,7 +220,7 @@ def full_from_transform(
     return da
 
 
-def tile_window_xyz(shape, px):
+def _tile_window_xyz(shape, px):
     """Yield (left, upper, width, height)."""
     nr, nc = shape
     lu = product(range(0, nc, px), range(0, nr, px))
@@ -444,7 +454,7 @@ class XRasterBase(XGeoBase):
         if self.crs is None:
             raise ValueError("CRS is missing. Use set_crs function to resolve.")
         _da = self._obj
-        x_dim, y_dim, x_attrs, y_attrs = utils.axes_attrs(self.crs)
+        x_dim, y_dim, x_attrs, y_attrs = gis_utils.axes_attrs(self.crs)
         if rename_dims and (x_dim != self.x_dim or y_dim != self.y_dim):
             _da = _da.rename({self.x_dim: x_dim, self.y_dim: y_dim})
             _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
@@ -757,7 +767,7 @@ class XRasterBase(XGeoBase):
             transform = obj_out.raster.transform
         else:
             transform = self.transform
-        x_dim, y_dim, x_attrs, y_attrs = utils.axes_attrs(crs)
+        x_dim, y_dim, x_attrs, y_attrs = gis_utils.axes_attrs(crs)
         if rename_dims:
             obj_out = obj_out.rename({self.x_dim: x_dim, self.y_dim: y_dim})
         else:
@@ -1461,7 +1471,9 @@ class XRasterBase(XGeoBase):
 
         # find the best UTM CRS for area computation
         if gdf_intersect.crs.is_geographic:
-            crs_utm = utils.parse_crs("utm", gdf_intersect.to_crs(4326).total_bounds)
+            crs_utm = gis_utils.parse_crs(
+                "utm", gdf_intersect.to_crs(4326).total_bounds
+            )
         else:
             crs_utm = gdf_intersect.crs
 
@@ -1590,7 +1602,7 @@ class XRasterBase(XGeoBase):
                 xs, ys = transform * (np.array([i, i]), np.array([0, nrow]))
                 geoms.append(LineString(zip(xs, ys)))
         elif geom_type.lower().startswith("point"):
-            x, y = utils.affine_to_meshgrid(transform, (nrow, ncol))
+            x, y = raster_utils.affine_to_meshgrid(transform, (nrow, ncol))
             geoms = gpd.points_from_xy(x.ravel(), y.ravel())
         else:
             raise ValueError(f"geom_type {geom_type} not recognized")
@@ -1609,7 +1621,7 @@ class XRasterBase(XGeoBase):
                 "area_grid has not yet been implemented for rotated grids."
             )
         if self.crs.is_geographic:
-            data = utils.reggrid_area(self.ycoords.values, self.xcoords.values)
+            data = raster_utils.reggrid_area(self.ycoords.values, self.xcoords.values)
         elif self.crs.is_projected:
             ucf = rasterio.crs.CRS.from_user_input(self.crs).linear_units_factor[1]
             data = np.full(self.shape, abs(self.res[0] * self.res[0]) * ucf**2)
@@ -1688,7 +1700,7 @@ class XRasterBase(XGeoBase):
             return dst_crs
         elif dst_crs == "utm":
             # make sure bounds are in EPSG:4326
-            dst_crs = utils.utm_crs(self.transform_bounds(4326))
+            dst_crs = gis_utils.utm_crs(self.transform_bounds(4326))
         elif dst_crs is not None:
             dst_crs = CRS.from_user_input(dst_crs)
         else:
@@ -1755,7 +1767,7 @@ class XRasterBase(XGeoBase):
             crs_from=dst_crs, crs_to=self.crs, always_xy=True
         )
         # Create destination coordinate pairs in source CRS.
-        dst_xx, dst_yy = utils.affine_to_meshgrid(
+        dst_xx, dst_yy = raster_utils.affine_to_meshgrid(
             dst_transform, (dst_height, dst_width)
         )
         dst_yy, dst_xx = dst_yy.ravel(), dst_xx.ravel()
@@ -1785,7 +1797,7 @@ class XRasterBase(XGeoBase):
         index = xr.DataArray(
             data=indices.reshape((dst_height, dst_width)),
             dims=(self.y_dim, self.x_dim),
-            coords=utils.affine_to_coords(
+            coords=raster_utils.affine_to_coords(
                 transform=dst_transform,
                 shape=(dst_height, dst_width),
                 x_dim=self.x_dim,
@@ -1843,7 +1855,7 @@ class RasterDataArray(XRasterBase):
         da = xr.DataArray(
             data,
             dims=dims,
-            coords=utils.affine_to_coords(transform, (nrow, ncol)),
+            coords=raster_utils.affine_to_coords(transform, (nrow, ncol)),
         )
         da.raster.set_spatial_dims(x_dim="x", y_dim="y")
         da.raster.set_nodata(nodata=nodata)  # set  _FillValue attr
@@ -1949,7 +1961,7 @@ class RasterDataArray(XRasterBase):
             for d in self._obj.dims
             if d not in [self.x_dim, self.y_dim]
         }
-        coords = utils.affine_to_coords(
+        coords = raster_utils.affine_to_coords(
             dst_transform, (dst_height, dst_width), y_dim=self.y_dim, x_dim=self.x_dim
         )
         dst_coords.update(coords)
@@ -2084,7 +2096,7 @@ class RasterDataArray(XRasterBase):
                 for d in self._obj.dims
                 if d not in [self.x_dim, self.y_dim]
             }
-            coords = utils.affine_to_coords(
+            coords = raster_utils.affine_to_coords(
                 dst_transform,
                 (dst_height, dst_width),
                 x_dim=self.x_dim,
@@ -2378,7 +2390,7 @@ class RasterDataArray(XRasterBase):
             sd = join(root, f"{zl}")
             os.makedirs(sd, exist_ok=True)
             fns = []
-            for l, u, w, h in tile_window_xyz(obj.shape, pxzl):
+            for l, u, w, h in _tile_window_xyz(obj.shape, pxzl):
                 col = int(np.ceil(l / pxzl))
                 row = int(np.ceil(u / pxzl))
                 ssd = join(sd, f"{col}")
@@ -2416,8 +2428,8 @@ class RasterDataArray(XRasterBase):
                     path = join(ssd, f"{row}.nc")
                     temp = temp.raster.gdal_compliant()
                     temp.to_netcdf(path, engine="netcdf4", **kwargs)
-                elif driver in utils.GDAL_EXT_CODE_MAP:
-                    ext = utils.GDAL_EXT_CODE_MAP.get(driver)
+                elif driver in GDAL_EXT_CODE_MAP:
+                    ext = GDAL_EXT_CODE_MAP.get(driver)
                     path = join(ssd, f"{row}.{ext}")
                     temp.raster.to_raster(path, driver=driver, **kwargs)
                 else:
@@ -2428,7 +2440,7 @@ class RasterDataArray(XRasterBase):
 
             # Create a vrt using GDAL
             vrt_fn = join(root, f"{mName}_zl{zl}.vrt")
-            utils.create_vrt(vrt_fn, files=fns)
+            create_vrt(vrt_fn, files=fns)
             prev = zl
             zls.update({zl: float(dst_res)})
             del obj
@@ -2646,7 +2658,7 @@ class RasterDataArray(XRasterBase):
                                 os.remove(fn_bin)  # clean up
                             else:
                                 im = np.array(Image.open(fn))
-                                data = rgba2elevation(im, nodata=nodata, dtype=dtype)
+                                data = _rgba2elevation(im, nodata=nodata, dtype=dtype)
                             temp[yslice, xslice] = data
                     # coarsen the data using mean
                     temp = np.ma.masked_values(temp.reshape((pxs, 2, pxs, 2)), nodata)
@@ -2673,7 +2685,7 @@ class RasterDataArray(XRasterBase):
                         rgba = cmap(norm(dst_data), bytes=True)
                     else:
                         # Create RGBA bands from the data and save it as png
-                        rgba = elevation2rgba(dst_data, nodata=nodata)
+                        rgba = _elevation2rgba(dst_data, nodata=nodata)
                     Image.fromarray(rgba).save(fn_out, **kwargs)
                 elif ldriver == "netcdf4":
                     # write the data to netcdf
@@ -2687,7 +2699,7 @@ class RasterDataArray(XRasterBase):
             # Write files to txt and create a vrt using GDAL
             if write_vrt:
                 vrt_fn = Path(root, f"lvl{zl}.vrt")
-                utils.create_vrt(vrt_fn, files=fns)
+                create_vrt(vrt_fn, files=fns)
 
         # Write a quick yaml for the database
         if write_vrt:
@@ -3156,9 +3168,9 @@ class RasterDataset(XRasterBase):
             logger will be used.
 
         """
-        if driver not in utils.GDAL_EXT_CODE_MAP:
+        if driver not in GDAL_EXT_CODE_MAP:
             raise ValueError(f"Extension unknown for driver: {driver}")
-        ext = utils.GDAL_EXT_CODE_MAP.get(driver)
+        ext = GDAL_EXT_CODE_MAP.get(driver)
         os.makedirs(root, exist_ok=True)
         for var in self.vars:
             if "/" in var:

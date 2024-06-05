@@ -3,11 +3,11 @@ from pathlib import Path
 
 import pytest
 
-from hydromt.components.config import ConfigComponent
-from hydromt.io.path import make_config_paths_abs, make_config_paths_relative
+from hydromt._utils.path import _make_config_paths_abs, _make_config_paths_relative
 from hydromt.io.readers import configread, read_yaml
 from hydromt.io.writers import write_yaml
-from hydromt.models import Model
+from hydromt.model import Model
+from hydromt.model.components.config import ConfigComponent
 
 ABS_PATH = Path(abspath(__name__))
 
@@ -90,7 +90,7 @@ def test_make_config_abs(tmpdir, test_config_dict):
         pass
     test_config_dict["section2"]["path"] = p
     test_config_dict["section2"]["path2"] = abspath(p)
-    parsed_config = make_config_paths_abs(test_config_dict, tmpdir)
+    parsed_config = _make_config_paths_abs(test_config_dict, tmpdir)
     assert all(
         [isabs(p) for p in parsed_config["section2"].values() if isinstance(p, Path)]
     ), parsed_config["section2"]
@@ -103,7 +103,7 @@ def test_make_rel_abs(tmpdir, test_config_dict):
         pass
     test_config_dict["section2"]["path"] = p
     test_config_dict["section2"]["path2"] = abspath(p)
-    parsed_config = make_config_paths_relative(test_config_dict, tmpdir)
+    parsed_config = _make_config_paths_relative(test_config_dict, tmpdir)
     assert all(
         [
             not isabs(p)
