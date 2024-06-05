@@ -272,7 +272,7 @@ def test_setup_region_grid(grid_model, demda, tmpdir):
     assert np.all(demda.raster.bounds == grid_model.region.total_bounds)
 
 
-@pytest.mark.skip(reason="TODO")
+@pytest.mark.skip(reason="needs fix with hydrography_fn?")
 def test_setup_region_basin(model):
     # basin
     model.grid.create_from_region({"basin": [12.2, 45.833333333333329]})
@@ -318,21 +318,41 @@ def test_maps_setup():
     assert len(mod.maps.data["hydrography"].data_vars) == 2
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_gridmodel(tmpdir, demda):
+@pytest.mark.integration()
+def test_gridmodel(demda, tmpdir):
     grid_model = Model(
-        components={"grid": {"type": GridComponent.__name__}},
         root=str(tmpdir),
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
         mode="w",
+    )
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model.grid.create_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        crs=4326,
+    )
+    grid_model.grid.add_data_from_constant(
+        constant=0.01,
+        name="c1",
+        nodata=-99.0,
     )
     # grid specific attributes
     assert np.all(grid_model.grid.res == grid_model.grid.data.raster.res)
     assert np.all(grid_model.grid.bounds == grid_model.grid.data.raster.bounds)
     assert np.all(grid_model.grid.transform == grid_model.grid.data.raster.transform)
+
     # write model
     grid_model.write()
     # read model
-    model1 = Model(str(tmpdir), mode="r")
+    model1 = Model(
+        root=str(tmpdir),
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+        mode="r",
+    )
     model1.read()
     # check if equal
     equal, errors = grid_model.test_equal(model1)
@@ -342,11 +362,19 @@ def test_gridmodel(tmpdir, demda):
     grid_model.root.set(str(join(tmpdir, "update")), mode="w")
     grid_model.write()
 
-    model1 = Model(str(join(tmpdir, "update")), mode="r+")
+    update_root = str(join(grid_model.root.path, "update"))
+    makedirs(update_root, exist_ok=True)
+    makedirs(update_root.join("grid"), exist_ok=True)
+    model1 = Model(
+        root=update_root,
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+        mode="r+",
+    )
     model1.grid.set(demda, name="testdata")
     model1.grid.write()
-    assert "testdata" in model1.grid
-    assert "elevtn" in model1.grid
+    assert "testdata" in model1.grid.data
 
 
 def test_setup_grid_from_wrong_kind(grid_model):
