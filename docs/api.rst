@@ -284,6 +284,7 @@ PandasDriver
    :toctree: _generated
 
    drivers.dataframe.pandas_driver.PandasDriver
+   drivers.dataframe.pandas_driver.PandasDriver.read
    drivers.dataframe.pandas_driver.PandasDriver.read_data
    drivers.dataframe.pandas_driver.PandasDriver.write
 
@@ -308,6 +309,7 @@ General
    :toctree: _generated
 
    data_adapter.DataAdapter
+   data_adapter.DataAdapter.transform
 
 RasterDataset
 -------------
@@ -325,15 +327,7 @@ GeoDataset
    :toctree: _generated
 
    data_adapter.GeoDatasetAdapter
-   data_adapter.GeoDatasetAdapter.summary
-   data_adapter.GeoDatasetAdapter.get_data
-   data_adapter.GeoDatasetAdapter.to_dict
-   data_adapter.GeoDatasetAdapter.to_file
-   data_adapter.GeoDatasetAdapter.get_bbox
-   data_adapter.GeoDatasetAdapter.get_time_range
-   data_adapter.GeoDatasetAdapter.detect_bbox
-   data_adapter.GeoDatasetAdapter.detect_time_range
-   data_adapter.GeoDatasetAdapter.to_stac_catalog
+   data_adapter.GeoDatasetAdapter.transform
 
 GeoDataFrame
 ------------

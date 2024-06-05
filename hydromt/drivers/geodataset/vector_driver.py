@@ -2,13 +2,13 @@
 
 from copy import copy
 from logging import Logger, getLogger
-from typing import Callable, List, Optional
+from typing import Callable, ClassVar, List, Optional
 
-from xarray import DataArray, Dataset
+import xarray as xr
 
 from hydromt._typing import CRS, SourceMetadata
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
-from hydromt._typing.type_def import Geom, Predicate, TimeRange
+from hydromt._typing.type_def import Geom, Predicate, StrPath, TimeRange
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.drivers.preprocessing import PREPROCESSORS
@@ -20,7 +20,7 @@ logger = getLogger(__name__)
 class GeoDatasetVectorDriver(GeoDatasetDriver):
     """VectorGeodatasetDriver for vector data."""
 
-    name = "geodataset_vector"
+    name: ClassVar[str] = "geodataset_vector"
 
     def read_data(
         self,
@@ -35,7 +35,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> Dataset:
+    ) -> xr.Dataset:
         """
         Read tabular datafiles like csv or parquet into to an xarray DataSet.
 
@@ -78,14 +78,14 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         else:
             out = preprocessor(data)
 
-        if isinstance(out, DataArray):
+        if isinstance(out, xr.DataArray):
             if out.size == 0:
                 exec_nodata_strat(
                     f"No data from driver {self}'.",
                     strategy=handle_nodata,
                     logger=logger,
                 )
-            return out.to_dataset()
+                return out.to_dataset()
         else:
             for variable in out.data_vars:
                 if out[variable].size == 0:
@@ -96,6 +96,11 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                     )
             return out
 
-    def write(self):
+    def write(
+        self,
+        path: StrPath,
+        ds: xr.Dataset,
+        **kwargs,
+    ) -> xr.Dataset:
         """Not implemented."""
         raise NotImplementedError("GeodatasetVectorDriver does not support writing. ")

@@ -19,6 +19,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.data_source.geodataframe import GeoDataFrameSource
 from hydromt.drivers import GeoDataFrameDriver, PyogrioDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
+from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 
 class TestGeoDataFrameSource:
@@ -241,6 +242,27 @@ class TestGeoDataFrameSource:
         # make sure we are not changing the state
         assert id(new_source) != id(source)
         assert id(driver2) == id(new_source.driver)
+
+    def test_to_file_defaults(
+        self, tmp_dir: Path, geodf: gpd.GeoDataFrame, mock_resolver: MetaDataResolver
+    ):
+        class NotWritableDriver(GeoDataFrameDriver):
+            name: ClassVar[str] = "test_to_file_defaults"
+
+            def read_data(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
+                return geodf
+
+        old_path: Path = tmp_dir / "test.geojson"
+        new_path: Path = tmp_dir / "temp.geojson"
+
+        new_source: GeoDataFrameSource = GeoDataFrameSource(
+            name="test",
+            uri=str(old_path),
+            driver=NotWritableDriver(metadata_resolver=mock_resolver),
+        ).to_file(new_path)
+        assert new_path.is_file()
+        assert new_source.root is None
+        assert new_source.driver.filesystem.protocol == ("file", "local")
 
     def test_geodataframe_unit_attrs(self, artifact_data: DataCatalog):
         source = artifact_data.get_source("gadm_level1")
