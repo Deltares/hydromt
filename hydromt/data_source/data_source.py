@@ -47,7 +47,8 @@ class DataSource(BaseModel, ABC):
     data_adapter: DataAdapterBase
     driver: BaseDriver
     data_type: ClassVar[DataType]
-    fallback_driver: ClassVar[str]
+    _fallback_driver_read: ClassVar[str]
+    _fallback_driver_write: ClassVar[str]
     root: Optional[str] = Field(
         default=None, exclude=True
     )  # root is already in the catalog.
