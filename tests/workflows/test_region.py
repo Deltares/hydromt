@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import geopandas as gpd
 import numpy as np
 import pytest
@@ -59,25 +61,23 @@ def test_region_from_grid(rioda):
     xr.testing.assert_equal(region, rioda)
 
 
-@pytest.mark.skip("new driver implementation causes validation error")
-def test_region_from_grid_file(tmpdir, rioda):
-    fn_grid = str(tmpdir.join("grid.tif"))
-    rioda.raster.to_raster(fn_grid)
-    region = parse_region_grid({"grid": fn_grid}, data_catalog=DataCatalog())
+def test_region_from_grid_file(tmp_dir: Path, rioda: xr.Dataset):
+    uri_grid = str(tmp_dir / "grid.tif")
+    rioda.raster.to_raster(uri_grid)
+    region = parse_region_grid({"grid": uri_grid}, data_catalog=DataCatalog())
     xr.testing.assert_equal(region, rioda)
 
 
-@pytest.mark.skip(reason="Needs Rasterdataset impl")
-def test_region_from_grid_cat(tmpdir, rioda):
-    fn_grid = str(tmpdir.join("grid.tif"))
-    rioda.raster.to_raster(fn_grid)
+def test_region_from_grid_cat(tmp_dir: Path, rioda: xr.Dataset):
+    uri_grid = str(tmp_dir / "grid.tif")
+    rioda.raster.to_raster(uri_grid)
     cat = DataCatalog()
     cat.from_dict(
         {
             "grid": {
-                "path": fn_grid,
+                "uri": uri_grid,
                 "data_type": "RasterDataset",
-                "driver": "raster",
+                "driver": "rasterio",
             },
         }
     )
@@ -85,7 +85,6 @@ def test_region_from_grid_cat(tmpdir, rioda):
     xr.testing.assert_equal(region, rioda)
 
 
-@pytest.mark.skip(reason="Needs Rasterdataset impl")
 def test_region_from_basin_ids():
     region = {"basin": [1001, 1002, 1003, 1004, 1005]}
     region = parse_region_basin(
@@ -97,7 +96,6 @@ def test_region_from_basin_ids():
     assert region.get("basid") == [1001, 1002, 1003, 1004, 1005]
 
 
-@pytest.mark.skip(reason="Needs Rasterdataset impl")
 def test_region_from_basin_id():
     region = {"basin": 101}
     region = parse_region_basin(
@@ -109,7 +107,6 @@ def test_region_from_basin_id():
     assert region.get("basid") == 101
 
 
-@pytest.mark.skip(reason="Needs Rasterdataset impl")
 def test_region_from_subbasin():
     region = {"subbasin": [1.0, -1.0], "uparea": 5.0, "bounds": [0.0, -5.0, 3.0, 0.0]}
     region = parse_region_basin(
@@ -122,7 +119,6 @@ def test_region_from_subbasin():
     assert "bounds" in region
 
 
-@pytest.mark.skip(reason="Needs Rasterdataset impl")
 def test_region_from_basin_xy():
     region = {"basin": [[1.0, 1.5], [0.0, -1.0]]}
     region = parse_region_basin(
@@ -134,7 +130,6 @@ def test_region_from_basin_xy():
     assert "xy" in region
 
 
-@pytest.mark.skip(reason="Needs Rasterdataset impl")
 def test_region_from_inter_basin(geodf):
     region = {"interbasin": geodf}
     region = parse_region_basin(
@@ -177,7 +172,6 @@ def test_region_value_cat():
     assert kwarg.get("root") == root
 
 
-@pytest.mark.skip(reason="Needs Rasterdataset impl")
 def test_region_mesh(griduda):
     mesh = parse_region_mesh({"mesh": griduda})
     assert mesh == griduda
