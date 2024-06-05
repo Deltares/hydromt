@@ -38,7 +38,9 @@ class GeoDatasetSource(DataSource):
     """DataSource class for the GeoDatasetSource type."""
 
     data_type: ClassVar[Literal["GeoDataset"]] = "GeoDataset"
-    fallback_driver: ClassVar[str] = "geodataset_vector"
+    _fallback_driver_read: ClassVar[str] = "geodataset_vector"
+    _fallback_driver_write: ClassVar[str] = "geodataset_xarray"
+
     driver: GeoDatasetDriver
     data_adapter: GeoDatasetAdapter = Field(default_factory=GeoDatasetAdapter)
 
@@ -104,10 +106,23 @@ class GeoDatasetSource(DataSource):
 
         args:
         """
-        if not self.driver.supports_writing:
-            raise RuntimeError(
-                f"driver {self.driver.__class__.__name__} does not support writing. please use a differnt driver "
+        if driver_override is None and not self.driver.supports_writing:
+            # default to fallback driver.
+            driver: GeoDatasetDriver = GeoDatasetDriver.model_validate(
+                self._fallback_driver_write
             )
+        elif driver_override:
+            if not driver_override.supports_writing:
+                raise RuntimeError(
+                    f"driver: '{driver_override.name}' does not support writing data."
+                )
+            driver: GeoDatasetDriver = driver_override
+        else:
+            # use local filesystem
+            driver: GeoDatasetDriver = self.driver.model_copy(
+                update={"filesystem": filesystem("local")}
+            )
+
         if bbox is not None or (mask is not None and buffer > 0):
             mask = parse_geom_bbox_buffer(mask, bbox, buffer)
         ds: Optional[Union[xr.Dataset, xr.DataArray]] = self.read_data(
@@ -123,16 +138,7 @@ class GeoDatasetSource(DataSource):
             return None
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": file_path}
-
-        if driver_override:
-            driver: GeoDatasetDriver = driver_override
-        else:
-            # use local filesystem
-            driver: GeoDatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
-            )
-        update.update({"driver": driver})
+        update: Dict[str, Any] = {"uri": file_path, "root": None, "driver": driver}
 
         driver.write(
             file_path,
