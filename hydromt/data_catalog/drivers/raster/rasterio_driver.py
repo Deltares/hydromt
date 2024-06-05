@@ -1,8 +1,9 @@
 """Driver using rasterio for RasterDataset."""
 
+from functools import partial
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 import xarray as xr
@@ -15,9 +16,11 @@ from hydromt._typing import (
     Variables,
     ZoomLevel,
 )
-from hydromt._typing.error import NoDataStrategy
-from hydromt._utils import _cache_vrt_tiles, _strip_scheme
+from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
+from hydromt._utils.caching import _cache_vrt_tiles
+from hydromt._utils.temp_env import temp_env
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
+from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.io.readers import open_mfraster
@@ -88,10 +91,31 @@ class RasterioDriver(RasterDatasetDriver):
 
         if mask is not None:
             kwargs.update({"mosaic_kwargs": {"mask": mask}})
-        ds = open_mfraster(uris, logger=logger, **kwargs)
+
+        # rasterio uses specific environment variable for s3 access.
+        _open: Callable = partial(open_mfraster, uris, logger=logger, **kwargs)
+        try:
+            anon: str = self.filesystem.anon
+        except AttributeError:
+            anon: str = ""
+
+        if anon:
+            with temp_env(**{"AWS_NO_SIGN_REQUEST": "true"}):
+                ds = _open()
+        else:
+            ds = _open()
+
         # rename ds with single band if single variable is requested
         if variables is not None and len(variables) == 1 and len(ds.data_vars) == 1:
             ds = ds.rename({list(ds.data_vars.keys())[0]: list(variables)[0]})
+
+        for variable in ds.data_vars:
+            if ds[variable].size == 0:
+                exec_nodata_strat(
+                    f"No data from driver: '{self.name}' for variable: '{variable}'",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
         return ds
 
     def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:

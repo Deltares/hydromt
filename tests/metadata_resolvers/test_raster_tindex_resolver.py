@@ -6,6 +6,7 @@ import pytest
 from fsspec import AbstractFileSystem
 from shapely.geometry import box
 
+from hydromt._typing import NoDataException
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
@@ -117,7 +118,7 @@ class TestRasterTindexResolver:
         resolver = RasterTindexResolver()
         options = {"tileindex": "file"}
         geom = gpd.GeoDataFrame(geometry=[box(4, 52, 5, 53)], crs=4326)
-        with pytest.raises(IOError, match="No intersecting tiles found."):
+        with pytest.raises(NoDataException, match="found no intersecting tiles."):
             resolver.resolve(
                 uri=raster_tindex, fs=AbstractFileSystem(), mask=geom, options=options
             )

@@ -13,7 +13,7 @@ from hydromt._typing import (
     NoDataStrategy,
     SourceMetadata,
 )
-from hydromt._typing.error import NoDataException, _exec_nodata_strat
+from hydromt._typing.error import NoDataException, exec_nodata_strat
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.gis.vector_utils import filter_gdf
 
@@ -46,7 +46,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
                 variables=variables,
                 mask=mask,
                 predicate=predicate,
-                handle_nodata=handle_nodata,
                 logger=logger,
             )
             # uniformize
@@ -55,7 +54,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
                 gdf = self._set_metadata(gdf, metadata)
             return gdf
         except NoDataException:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,
@@ -86,7 +85,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
         variables: Optional[Union[str, List[str]]] = None,
         mask: Optional[Geom] = None,
         predicate: str = "intersects",  # TODO: enum available predicates
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,  # TODO: review NoDataStrategy + axes
         logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
         """Return a clipped GeoDataFrame (vector).
@@ -131,9 +129,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
             gdf = gdf.iloc[idxs]
 
         if np.all(gdf.is_empty):
-            _exec_nodata_strat(
-                "No data was read from source", strategy=handle_nodata, logger=logger
-            )
             gdf = None
         return gdf
 

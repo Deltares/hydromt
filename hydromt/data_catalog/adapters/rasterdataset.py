@@ -25,7 +25,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     Variables,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from hydromt._utils import (
     _has_no_data,
@@ -148,15 +148,16 @@ class RasterDatasetAdapter(DataAdapterBase):
         metadata: SourceMetadata,
         *,
         mask: Optional[Geom] = None,
-        zoom_level: Optional[int] = None,
+        zoom_level: Optional[
+            int
+        ] = None,  # TODO: https://github.com/Deltares/hydromt/issues/984
         align: Optional[bool] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
-        cache_root: Optional[StrPath] = None,
         logger: Logger = logger,
-    ):
+    ) -> Optional[xr.Dataset]:
         """Return a clipped, sliced and unified RasterDataset.
 
         For a detailed description see:
@@ -191,7 +192,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             # return array if single var and single_var_as_array
             return _single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from shapely import box
 
-from hydromt._typing import Bbox
+from hydromt._typing import Bbox, NoDataException
 from hydromt.data_catalog.drivers import PyogrioDriver
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
@@ -69,7 +69,7 @@ class TestPyogrioDriver:
 
     @pytest.mark.usefixtures("_raise_gdal_warnings")
     def test_read_no_file_found(self, driver: PyogrioDriver):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(NoDataException):
             driver.read("no_data.geojson")
 
     def test_read_multiple_uris(self):
