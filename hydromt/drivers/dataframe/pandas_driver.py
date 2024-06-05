@@ -12,7 +12,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     Variables,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.dataframe import DataFrameDriver
@@ -37,49 +37,52 @@ class PandasDriver(DataFrameDriver):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
         """Read in any compatible data source to a pandas `DataFrame`."""
-        if len(uris) > 1:
-            raise ValueError(
-                "DataFrame: Reading multiple files with the "
-                f"{self.__class__.__name__} driver is not supported."
-            )
         warn_on_unused_kwargs(
             self.__class__.__name__,
             {"time_range": time_range, "metadata": metadata},
             logger,
         )
-        uri = uris[0]
-        extension: str = uri.split(".")[-1]
-        logger.info(f"Reading using {self.name} driver from {uri}")
-        if extension == "csv":
-            variables = self._unify_variables_and_pandas_kwargs(
-                uri, pd.read_csv, variables
+        if len(uris) > 1:
+            raise ValueError(
+                "DataFrame: Reading multiple files with the "
+                f"{self.__class__.__name__} driver is not supported."
             )
-            df = pd.read_csv(
-                uri,
-                usecols=variables,
-                **self.options,
-            )
-        elif extension == "parquet":
-            df = pd.read_parquet(uri, columns=variables, **self.options)
-        elif extension in ["xls", "xlsx"]:
-            variables = self._unify_variables_and_pandas_kwargs(
-                uri, pd.read_excel, variables
-            )
-            df = pd.read_excel(
-                uri,
-                usecols=variables,
-                engine="openpyxl",
-                **self.options,
-            )
-        elif extension in ["fwf", "txt"]:
-            warn_on_unused_kwargs(
-                self.__class__.__name__, {"variables": variables}, logger
-            )
-            df = pd.read_fwf(uri, **self.options)
+        elif len(uris) == 0:
+            df = pd.DataFrame()
         else:
-            raise IOError(f"DataFrame: extension {extension} unknown.")
+            uri = uris[0]
+            extension: str = uri.split(".")[-1]
+            logger.info(f"Reading using {self.name} driver from {uri}")
+            if extension == "csv":
+                variables = self._unify_variables_and_pandas_kwargs(
+                    uri, pd.read_csv, variables
+                )
+                df = pd.read_csv(
+                    uri,
+                    usecols=variables,
+                    **self.options,
+                )
+            elif extension == "parquet":
+                df = pd.read_parquet(uri, columns=variables, **self.options)
+            elif extension in ["xls", "xlsx"]:
+                variables = self._unify_variables_and_pandas_kwargs(
+                    uri, pd.read_excel, variables
+                )
+                df = pd.read_excel(
+                    uri,
+                    usecols=variables,
+                    engine="openpyxl",
+                    **self.options,
+                )
+            elif extension in ["fwf", "txt"]:
+                warn_on_unused_kwargs(
+                    self.__class__.__name__, {"variables": variables}, logger
+                )
+                df = pd.read_fwf(uri, **self.options)
+            else:
+                raise IOError(f"DataFrame: extension {extension} unknown.")
         if df.index.size == 0:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 f"No data from driver {self}'.",
                 strategy=handle_nodata,
                 logger=logger,

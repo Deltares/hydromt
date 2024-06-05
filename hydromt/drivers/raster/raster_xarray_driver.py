@@ -16,7 +16,7 @@ from hydromt._typing import (
     Variables,
     ZoomLevel,
 )
-from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
+from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.preprocessing import PREPROCESSORS
 from hydromt.drivers.raster.raster_dataset_driver import RasterDatasetDriver
@@ -101,7 +101,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             )
         for variable in ds.data_vars:
             if ds[variable].size == 0:
-                _exec_nodata_strat(
+                exec_nodata_strat(
                     f"No data from driver: '{self.name}' for variable: '{variable}'"
                 )
         return ds

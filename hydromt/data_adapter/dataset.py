@@ -21,7 +21,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     Variables,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from hydromt.data_adapter import DataAdapter
 from hydromt.data_adapter.utils import has_no_data, shift_dataset_time
@@ -227,7 +227,7 @@ class DatasetAdapter(DataAdapter):
             # return array if single var and single_var_as_array
             return self._single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 "No data to export", strategy=handle_nodata, logger=logger
             )
             return None

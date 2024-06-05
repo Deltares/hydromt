@@ -14,7 +14,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
 )
-from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
+from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import Predicate
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
@@ -100,7 +100,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             )
         for variable in ds.data_vars:
             if ds[variable].size == 0:
-                _exec_nodata_strat(
+                exec_nodata_strat(
                     f"No data from driver: '{self.name}' for variable: '{variable}'"
                 )
         return ds

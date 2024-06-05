@@ -17,7 +17,7 @@ from hydromt._typing import (
     NoDataStrategy,
     TimeRange,
     ZoomLevel,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 
@@ -159,11 +159,11 @@ class ConventionResolver(MetaDataResolver):
             )
         )
         if not uris:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 f"resolver '{self.name}' found no files.",
                 strategy=handle_nodata,
                 logger=logger,
             )
+            return []  # if ignore
 
-            raise FileNotFoundError(f"No files found for: {uri_expanded}")
         return uris

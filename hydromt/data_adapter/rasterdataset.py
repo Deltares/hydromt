@@ -25,7 +25,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     Variables,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 from hydromt.data_adapter.utils import (
@@ -191,7 +191,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             # return array if single var and single_var_as_array
             return _single_var_as_array(ds, single_var_as_array, variables)
         except NoDataException:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,

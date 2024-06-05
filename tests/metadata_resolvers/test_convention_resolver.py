@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterator
 import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
+from hydromt._typing import NoDataException
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 
 
@@ -56,7 +57,7 @@ class TestConventionResolver:
     def test_raises_not_found(self, test_filesystem: MemoryFileSystem):
         uri = "/some_other_key/files/*"
         resolver = ConventionResolver()
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(NoDataException):
             resolver.resolve(uri, test_filesystem)
 
     def test_uri_without_wildcard(self, test_filesystem: MemoryFileSystem):

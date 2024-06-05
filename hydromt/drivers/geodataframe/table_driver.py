@@ -7,7 +7,7 @@ import pandas as pd
 from pyproj import CRS
 
 from hydromt._typing import Geom
-from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
+from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.metadata import SourceMetadata
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataframe.geodataframe_driver import GeoDataFrameDriver
@@ -58,7 +58,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             crs=metadata.crs,
         )
         if gdf.index.size == 0:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 f"No data from driver {self}'.",
                 strategy=handle_nodata,
                 logger=logger,

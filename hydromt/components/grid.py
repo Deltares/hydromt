@@ -12,7 +12,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt import hydromt_step
-from hydromt._typing.error import NoDataStrategy, _exec_nodata_strat
+from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose, Number
 from hydromt.components.base import ModelComponent
 from hydromt.components.spatial import SpatialModelComponent
@@ -162,9 +162,9 @@ class GridComponent(SpatialModelComponent):
         self.write_region(**region_options)
 
         if len(self.data) == 0:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 msg="No grid data found, skip writing.",
-                strategy=NoDataStrategy.IGNORE,
+                strategy=NoDataStrategy.WARN,
                 logger=self.logger,
             )
             return None
@@ -325,9 +325,9 @@ class GridComponent(SpatialModelComponent):
         """Returns the resolution of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.res
-        _exec_nodata_strat(
+        exec_nodata_strat(
             msg="No grid data found for deriving resolution",
-            strategy=NoDataStrategy.IGNORE,
+            strategy=NoDataStrategy.WARN,
             logger=self.logger,
         )
         return None
@@ -337,9 +337,9 @@ class GridComponent(SpatialModelComponent):
         """Returns spatial transform of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.transform
-        _exec_nodata_strat(
+        exec_nodata_strat(
             msg="No grid data found for deriving transform",
-            strategy=NoDataStrategy.IGNORE,
+            strategy=NoDataStrategy.WARN,
             logger=self.logger,
         )
         return None
@@ -348,16 +348,16 @@ class GridComponent(SpatialModelComponent):
     def crs(self) -> Optional[CRS]:
         """Returns coordinate reference system embedded in the model grid."""
         if self.data.raster is None:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 msg="No grid data found for deriving crs",
-                strategy=NoDataStrategy.IGNORE,
+                strategy=NoDataStrategy.WARN,
                 logger=self.logger,
             )
             return None
         if self.data.raster.crs is None:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 msg="No crs found in grid data",
-                strategy=NoDataStrategy.IGNORE,
+                strategy=NoDataStrategy.WARN,
                 logger=self.logger,
             )
             return None
@@ -368,9 +368,9 @@ class GridComponent(SpatialModelComponent):
         """Returns the bounding box of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.bounds
-        _exec_nodata_strat(
+        exec_nodata_strat(
             msg="No grid data found for deriving bounds",
-            strategy=NoDataStrategy.IGNORE,
+            strategy=NoDataStrategy.WARN,
             logger=self.logger,
         )
         return None
@@ -383,9 +383,9 @@ class GridComponent(SpatialModelComponent):
             if crs is not None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
-        _exec_nodata_strat(
+        exec_nodata_strat(
             msg="No grid data found for deriving region",
-            strategy=NoDataStrategy.IGNORE,
+            strategy=NoDataStrategy.WARN,
             logger=self.logger,
         )
         return None
@@ -667,9 +667,9 @@ class GridComponent(SpatialModelComponent):
             vector_fn, geom=self.region, dst_crs=self.crs
         )
         if gdf is None or gdf.empty:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 f"No shapes of {vector_fn} found within region, skipping {self.add_data_from_geodataframe.__name__}.",
-                NoDataStrategy.IGNORE,
+                NoDataStrategy.WARN,
                 self.logger,
             )
             return None

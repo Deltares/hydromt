@@ -13,7 +13,7 @@ from hydromt._typing import (
     NoDataStrategy,
     SourceMetadata,
 )
-from hydromt._typing.error import NoDataException, _exec_nodata_strat
+from hydromt._typing.error import NoDataException, exec_nodata_strat
 from hydromt.gis import utils
 
 from .data_adapter_base import DataAdapterBase
@@ -55,7 +55,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
                 gdf = self._set_metadata(gdf, metadata)
             return gdf
         except NoDataException:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,

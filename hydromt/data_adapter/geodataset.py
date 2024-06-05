@@ -14,7 +14,7 @@ from hydromt._typing import (
     SourceMetadata,
     TimeRange,
     Variables,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from hydromt._typing.type_def import Number
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
@@ -77,7 +77,7 @@ class GeoDatasetAdapter(DataAdapterBase):
         )
 
         if has_no_data(ds):
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
                 logger=logger,

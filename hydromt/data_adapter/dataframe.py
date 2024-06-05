@@ -11,7 +11,7 @@ from hydromt._typing import (
     SourceMetadata,
     TimeRange,
     Variables,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 
@@ -37,7 +37,7 @@ class DataFrameAdapter(DataAdapterBase):
         # slice data
         df = DataFrameAdapter._slice_data(df, variables, time_range)
         if df is None:
-            _exec_nodata_strat(
+            exec_nodata_strat(
                 "DataFrame has no data after slicing.", handle_nodata, logger=logger
             )
             return None
