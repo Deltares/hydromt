@@ -7,7 +7,7 @@ from typing import Callable, ClassVar, List, Optional
 import xarray as xr
 
 from hydromt._typing import CRS, SourceMetadata
-from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import Geom, Predicate, StrPath, TimeRange
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataset.geodataset_driver import GeoDatasetDriver
@@ -79,8 +79,21 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
             out = preprocessor(data)
 
         if isinstance(out, xr.DataArray):
-            return out.to_dataset()
+            if out.size == 0:
+                exec_nodata_strat(
+                    f"No data from driver {self}'.",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
+                return out.to_dataset()
         else:
+            for variable in out.data_vars:
+                if out[variable].size == 0:
+                    exec_nodata_strat(
+                        f"No data from driver {self}' for variable {variable}.",
+                        strategy=handle_nodata,
+                        logger=logger,
+                    )
             return out
 
     def write(

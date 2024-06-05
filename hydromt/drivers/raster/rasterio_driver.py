@@ -22,7 +22,7 @@ from hydromt._typing import (
     Variables,
     ZoomLevel,
 )
-from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.temp_env import temp_env
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt._utils.uris import strip_scheme
@@ -114,6 +114,14 @@ class RasterioDriver(RasterDatasetDriver):
         # rename ds with single band if single variable is requested
         if variables is not None and len(variables) == 1 and len(ds.data_vars) == 1:
             ds = ds.rename({list(ds.data_vars.keys())[0]: list(variables)[0]})
+
+        for variable in ds.data_vars:
+            if ds[variable].size == 0:
+                exec_nodata_strat(
+                    f"No data from driver: '{self.name}' for variable: '{variable}'",
+                    strategy=handle_nodata,
+                    logger=logger,
+                )
         return ds
 
     def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:

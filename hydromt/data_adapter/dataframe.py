@@ -11,7 +11,7 @@ from hydromt._typing import (
     SourceMetadata,
     TimeRange,
     Variables,
-    _exec_nodata_strat,
+    exec_nodata_strat,
 )
 from hydromt.data_adapter.data_adapter_base import DataAdapterBase
 
@@ -35,17 +35,12 @@ class DataFrameAdapter(DataAdapterBase):
         df = self._rename_vars(df)
         df = self._set_nodata(df, metadata)
         # slice data
-        df: Optional[pd.DataFrame] = DataFrameAdapter._slice_data(
-            df,
-            variables,
-            time_range,
-        )
-
+        df = DataFrameAdapter._slice_data(df, variables, time_range)
         if df is None:
-            _exec_nodata_strat(
-                "DataFrame has no data after slicing.", handle_nodata, logger
+            exec_nodata_strat(
+                "DataFrame has no data after slicing.", handle_nodata, logger=logger
             )
-
+            return None
         # uniformize data
         df = self._apply_unit_conversion(df)
         df = self._set_metadata(df, metadata)

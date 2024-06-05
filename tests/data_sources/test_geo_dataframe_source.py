@@ -12,7 +12,7 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt._typing import SourceMetadata, StrPath
+from hydromt._typing import NoDataException, SourceMetadata, StrPath
 from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_adapter.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog import DataCatalog
@@ -149,7 +149,7 @@ class TestGeoDataFrameSource:
             data_adapter=GeoDataFrameAdapter(),
             driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
         )
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(NoDataException):
             source.read_data()
 
     def test_instantiate_directly(

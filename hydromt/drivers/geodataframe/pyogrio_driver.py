@@ -1,14 +1,15 @@
 """Driver to read geodataframes using Pyogrio."""
 
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import geopandas as gpd
+import pandas as pd
 from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom, SourceMetadata, StrPath
-from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import warn_on_unused_kwargs
 from hydromt.drivers.geodataframe.geodataframe_driver import GeoDataFrameDriver
 
@@ -47,12 +48,27 @@ class PyogrioDriver(GeoDataFrameDriver):
                 "DataFrame: Reading multiple files with the "
                 f"{self.__class__.__name__} driver is not supported."
             )
-        _uri = uris[0]
-        if mask is not None:
-            bbox = bbox_from_file_and_mask(_uri, mask=mask)
+        elif len(uris) == 0:
+            gdf = gpd.GeoDataFrame()
         else:
-            bbox = None
-        return read_dataframe(_uri, bbox=bbox, columns=variables, **self.options)
+            _uri = uris[0]
+            if mask is not None:
+                bbox = bbox_from_file_and_mask(_uri, mask=mask)
+            else:
+                bbox = None
+            gdf: Union[pd.DataFrame, gpd.GeoDataFrame] = read_dataframe(
+                _uri, bbox=bbox, columns=variables, **self.options
+            )
+        if not isinstance(gdf, gpd.GeoDataFrame):
+            raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
+
+        if gdf.index.size == 0:
+            exec_nodata_strat(
+                f"No data from driver {self}'.",
+                strategy=handle_nodata,
+                logger=logger,
+            )
+        return gdf
 
     def write(
         self,

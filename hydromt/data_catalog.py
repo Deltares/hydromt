@@ -35,7 +35,7 @@ from pystac import CatalogType, MediaType
 
 from hydromt import __version__
 from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
-from hydromt._typing.error import NoDataException, NoDataStrategy, _exec_nodata_strat
+from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import partition_dictionaries
 from hydromt.data_adapter import (
@@ -1116,7 +1116,7 @@ class DataCatalog(object):
                                 logger=self.logger,
                             )
                         except NoDataException as e:
-                            _exec_nodata_strat(
+                            exec_nodata_strat(
                                 f"{key} file contains no data: {e}",
                                 handle_nodata,
                                 logger,
@@ -1270,7 +1270,7 @@ class DataCatalog(object):
                 logger=self.logger,
             )
             if data_like is None:
-                _exec_nodata_strat(
+                exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
                     logger=logger,
@@ -1397,7 +1397,7 @@ class DataCatalog(object):
                 logger=self.logger,
             )
             if data_like is None:
-                _exec_nodata_strat(
+                exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
                     logger=logger,
@@ -1521,7 +1521,7 @@ class DataCatalog(object):
                 logger=self.logger,
             )
             if data_like is None:
-                _exec_nodata_strat(
+                exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
                     logger=logger,
@@ -1608,7 +1608,7 @@ class DataCatalog(object):
                 logger=self.logger,
             )
             if data_like is None:
-                _exec_nodata_strat(
+                exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
                     logger=logger,
@@ -1692,7 +1692,7 @@ class DataCatalog(object):
         elif isinstance(data_like, pd.DataFrame):
             df = DataFrameAdapter._slice_data(data_like, variables, time_range)
             if df is None:
-                _exec_nodata_strat(
+                exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
                     logger=logger,

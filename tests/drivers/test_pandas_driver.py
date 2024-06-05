@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from hydromt._typing import NoDataException
 from hydromt.drivers.dataframe import PandasDriver
 from hydromt.metadata_resolver.convention_resolver import ConventionResolver
 from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
@@ -73,7 +74,7 @@ class TestPandasDriver:
         pd.testing.assert_frame_equal(df, new_df)
 
     def test_read_nodata(self, driver: PandasDriver):
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(NoDataException):
             driver.read("no_data.geojson")
 
     def test_read_multiple_uris(self):
