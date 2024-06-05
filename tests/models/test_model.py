@@ -619,20 +619,26 @@ def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
     assert "zs" not in vector3
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_meshmodel(mesh_model, tmpdir):
-    MeshModel = PLUGINS.model_plugins["mesh_model"]
-    assert "mesh" in mesh_model.api
-    non_compliant = mesh_model._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
+def test_empty_mesh_model(tmpdir):
+    mesh_model = Model(
+        data_libs=["artifact_data"],
+        components={"mesh": {"type": "MeshComponent"}},
+        region_component="mesh",
+    )
+
     # write model
     mesh_model.root.set(str(tmpdir), mode="w")
     mesh_model.write()
     # read model
-    model1 = MeshModel(str(tmpdir), mode="r")
-    model1.read()
+    mesh_model2 = Model(
+        data_libs=["artifact_data"],
+        components={"mesh": {"type": "MeshComponent"}},
+        region_component="mesh",
+        mode="r",
+    )
+    mesh_model2.read()
     # check if equal
-    equal, errors = mesh_model.test_equal(model1)
+    equal, errors = mesh_model.test_equal(mesh_model2)
     assert equal, errors
 
 

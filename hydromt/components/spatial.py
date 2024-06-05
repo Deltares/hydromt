@@ -141,12 +141,14 @@ class SpatialModelComponent(ModelComponent, ABC):
         other_region = cast(SpatialModelComponent, other)
 
         try:
-            gpd.testing.assert_geodataframe_equal(
-                self.region,
-                other_region.region,
-                check_like=True,
-                check_less_precise=True,
-            )
+            # empty components are still equal
+            if self.region is not None or other.region is not None:
+                gpd.testing.assert_geodataframe_equal(
+                    self.region,
+                    other_region.region,
+                    check_like=True,
+                    check_less_precise=True,
+                )
         except AssertionError as e:
             errors["data"] = str(e)
 

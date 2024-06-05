@@ -444,8 +444,8 @@ class Model(object, metaclass=ABCMeta):
             return False, {
                 "__class__": f"f{other.__class__} does not inherit from {self.__class__}."
             }
-        components = list(self.components.keys())
-        components_other = list(other.components.keys())
+        components = sorted(list(self.components.keys()))
+        components_other = sorted(list(other.components.keys()))
         if components != components_other:
             return False, {
                 "components": f"Components do not match: {components} != {components_other}"
