@@ -8,8 +8,8 @@ import xugrid as xu
 from pytest_mock import MockerFixture
 
 from hydromt import DataCatalog
-from hydromt.models.model import Model
-from hydromt.workflows.region import (
+from hydromt.model.model import Model
+from hydromt.model.processes.region import (
     _parse_region_value,
     parse_region_basin,
     parse_region_geom,
@@ -143,7 +143,7 @@ def test_region_from_inter_basin(geodf):
 
 def test_region_from_model(tmpdir, world, mocker: MockerFixture):
     model = mocker.Mock(spec=Model, region=world)
-    plugins = mocker.patch("hydromt.workflows.region.PLUGINS")
+    plugins = mocker.patch("hydromt.model.processes.region.PLUGINS")
     plugins.model_plugins = {"Model": mocker.Mock(return_value=model)}
     region = {Model.__name__: tmpdir}
     read_model = parse_region_other_model(region=region)
@@ -180,9 +180,9 @@ def test_region_mesh(griduda):
 def test_parse_region_mesh_path(mocker: MockerFixture):
     ugrid_mock = mocker.Mock(spec_set=xu.UgridDataset)
     xu_open_dataset_mock = mocker.patch(
-        "hydromt.workflows.region.xu.open_dataset", return_value=ugrid_mock
+        "hydromt.model.processes.region.xu.open_dataset", return_value=ugrid_mock
     )
-    mocker.patch("hydromt.workflows.region.isfile", return_value=True)
+    mocker.patch("hydromt.model.processes.region.isfile", return_value=True)
     mesh = parse_region_mesh({"mesh": "path/to/mesh.nc"})
     xu_open_dataset_mock.assert_called_once_with("path/to/mesh.nc")
     assert mesh is ugrid_mock

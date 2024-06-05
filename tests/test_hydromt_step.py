@@ -1,4 +1,4 @@
-from hydromt import hydromt_step
+from hydromt.model import hydromt_step
 
 
 def test_hydromt_step_adds_ishydromtstep_attribute():

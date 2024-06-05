@@ -22,10 +22,9 @@ from distutils.dir_util import copy_tree
 
 import numpy as np
 import sphinx_autosummary_accessors
-from click.testing import CliRunner
 
 import hydromt
-from hydromt.cli.main import main as hydromt_cli
+import hydromt.plugins
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
@@ -60,7 +59,7 @@ def write_panel(f, name, content="", level=0, item="dropdown"):
 
 
 def write_nested_dropdown(name, data_cat, note="", categories=[]):
-    df = data_cat.to_dataframe().sort_index().drop_duplicates("path")
+    df = data_cat.to_dataframe().sort_index().drop_duplicates("uri")
     with open(f"_generated/{name}.rst", mode="w") as f:
         write_panel(f, name, note, level=0)
         write_panel(f, "", level=1, item="tab-set")
@@ -72,7 +71,7 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
             if len(sources) > 0:
                 write_panel(f, category, level=2, item="tab-item")
             for source in sources:
-                items = data_cat[source].summary().items()
+                items = data_cat.get_source(source).summary().items()
                 summary = "\n".join(
                     [f":{k}: {clean_str(v)}" for k, v in items if k != "category"]
                 )
@@ -80,7 +79,7 @@ def write_nested_dropdown(name, data_cat, note="", categories=[]):
 
         write_panel(f, "all", level=2, item="tab-item")
         for source in df.index.values:
-            items = data_cat[source].summary()
+            items = data_cat.get_source(source).summary()
             items = {k: clean_str(v) for (k, v) in items.items()}.items()
             summary = "\n".join([f":{k}: {v}" for k, v in items])
             write_panel(f, source, summary, level=3)
@@ -110,10 +109,11 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-if os.path.isdir("_examples"):
-    remove_dir_content("_examples")
-os.makedirs("_examples")
-copy_tree("../examples", "_examples")
+# FIXME: examples are not yet working see #796
+# if os.path.isdir("_examples"):
+#     remove_dir_content("_examples")
+# os.makedirs("_examples")
+# copy_tree("../examples", "_examples")
 
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
@@ -131,8 +131,9 @@ categories = [
     "climate",
     "other",
 ]
+
 data_cat = hydromt.DataCatalog()
-predefined_catalogs = data_cat.predefined_catalogs
+predefined_catalogs = hydromt.plugins.PLUGINS.catalog_plugins
 for name in predefined_catalogs:
     try:
         data_cat.from_predefined_catalogs(name)
@@ -145,17 +146,6 @@ with open("_generated/predefined_catalogs.rst", "w") as f:
     f.writelines(
         [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
     )
-
-# -- Generate cli help docs ----------------------------------------------
-
-cli_build = CliRunner().invoke(hydromt_cli, ["build", "--help"])
-cli2rst(cli_build.output, r"_generated/cli_build.rst")
-
-cli_update = CliRunner().invoke(hydromt_cli, ["update", "--help"])
-cli2rst(cli_update.output, r"_generated/cli_update.rst")
-
-cli_clip = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
-cli2rst(cli_clip.output, r"_generated/cli_clip.rst")
 
 # -- General configuration ------------------------------------------------
 
@@ -239,7 +229,7 @@ doc_version = bare_version[: bare_version.find("dev") - 1]
 html_static_path = ["_static"]
 html_css_files = ["theme-deltares.css"]
 html_theme_options = {
-    "show_nav_level": 2,
+    "show_nav_level": 1,
     "navbar_align": "content",
     "use_edit_page_button": True,
     "icon_links": [

@@ -7,7 +7,9 @@ from fsspec import AbstractFileSystem
 from shapely.geometry import box
 
 from hydromt._typing import NoDataException
-from hydromt.metadata_resolver.raster_tindex_resolver import RasterTindexResolver
+from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
+    RasterTindexResolver,
+)
 
 
 class TestRasterTindexResolver:

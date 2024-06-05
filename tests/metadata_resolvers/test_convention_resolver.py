@@ -6,7 +6,7 @@ import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
 from hydromt._typing import NoDataException
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 
 
 class TestConventionResolver:
