@@ -295,6 +295,8 @@ class MeshComponent(SpatialModelComponent):
             data_catalog=self.data_catalog,
         )
         self.set(mesh2d, grid_name=grid_name)
+        if self.crs is None:
+            self._crs = crs
         return mesh2d
 
     @property
@@ -322,8 +324,7 @@ class MeshComponent(SpatialModelComponent):
     def crs(self) -> Optional[CRS]:
         """Returns model mesh crs."""
         if len(self.data) > 0:
-            for _, v in self.data.ugrid.crs.items():
-                return v
+            return next(iter(self.data.ugrid.crs.values()))
         return None
 
     @property

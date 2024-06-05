@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.models module of HydroMT."""
 
-from os import listdir
+from os import listdir, makedirs
 from os.path import abspath, dirname, isfile, join
 from pathlib import Path
 from typing import Any, List, cast
@@ -24,7 +24,6 @@ from hydromt.components.tables import TablesComponent
 from hydromt.components.vector import VectorComponent
 from hydromt.data_catalog import DataCatalog
 from hydromt.models import Model
-from hydromt.plugins import PLUGINS
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 DC_PARAM_PATH = join(DATADIR, "parameters_data.yml")
@@ -638,75 +637,110 @@ def test_empty_mesh_model(mesh_model):
     assert equal, errors
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_setup_mesh(tmpdir, griduda):
-    MeshModel = PLUGINS.model_plugins["mesh_model"]
-    # Initialize model
-    model = MeshModel(
-        root=join(tmpdir, "mesh_model"),
-        data_libs=["artifact_data"],
-        mode="w",
-    )
-    # wrong region kind
-    with pytest.raises(ValueError, match="Region for mesh must be of kind "):
-        model.setup_mesh2d(
+def test_setup_mesh_from_wrong_kind(mesh_model):
+    with pytest.raises(
+        ValueError, match="Unsupported region kind 'basin' found in grid creation."
+    ):
+        mesh_model.mesh.create_2d_from_region(
             region={"basin": [12.5, 45.5]},
             res=0.05,
         )
-    # bbox
+
+
+def test_setup_mesh_from_bbox(mesh_model):
     bbox = [12.05, 45.30, 12.85, 45.65]
-    with pytest.raises(
-        ValueError, match="res argument required for kind 'bbox', 'geom'"
-    ):
-        model.setup_mesh2d({"bbox": bbox})
-    model.setup_mesh2d(
+    with pytest.raises(ValueError, match="res argument required for kind bbox"):
+        mesh_model.mesh.create_2d_from_region({"bbox": bbox})
+
+    mesh_model.mesh.create_2d_from_region(
         region={"bbox": bbox},
         res=0.05,
         crs=4326,
         grid_name="mesh2d",
     )
-    assert "mesh2d" in model.mesh_names
-    assert model.crs.to_epsg() == 4326
-    assert np.all(np.round(model.region.total_bounds, 3) == bbox)
-    assert model.mesh.ugrid.grid.n_node == 136
-    model._mesh = None  # remove old mesh
+    # need to add some data to it before checks will work
+    mesh_model.mesh.add_2d_data_from_rasterdataset(
+        "vito", grid_name="mesh2d", resampling_method="mode"
+    )
 
-    # geom
-    region = model._geoms.pop("region")
-    model.setup_mesh2d(
+    assert "vito" in mesh_model.mesh.data
+    assert mesh_model.crs.to_epsg() == 4326
+    assert np.all(np.round(mesh_model.region.total_bounds, 3) == bbox)
+    assert mesh_model.mesh.data.ugrid.grid.n_node == 136
+
+
+def test_setup_mesh_from_geom(mesh_model, tmpdir):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    dummy_mesh_model = Model(
+        root=str(tmpdir),
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"mesh": {"type": "MeshComponent"}},
+        region_component="mesh",
+    )
+    dummy_mesh_model.mesh.create_2d_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        crs=4326,
+        grid_name="mesh2d",
+    )
+    # need to add some data to it before checks will work
+    dummy_mesh_model.mesh.add_2d_data_from_rasterdataset(
+        "vito", grid_name="mesh2d", resampling_method="mode"
+    )
+    region = dummy_mesh_model.mesh.region
+    mesh_model.mesh.create_2d_from_region(
         region={"geom": region},
         res=10000,
         crs="utm",
         grid_name="mesh2d",
     )
-    assert model.crs.to_epsg() == 32633
-    assert model.mesh.ugrid.grid.n_node == 35
-    model._mesh = None  # remove old mesh
+    assert mesh_model.crs.to_epsg() == 32633
+    assert mesh_model.mesh.data.ugrid.grid.n_node == 35
 
-    # mesh
-    # create mesh file
-    mesh_fn = str(tmpdir.join("mesh2d.nc"))
+
+def test_setup_mesh_from_mesh(mesh_model, griduda):
+    mesh_fn = str(mesh_model.root.path / "mesh" / "mesh.nc")
+    makedirs(mesh_model.root.path / "mesh", exist_ok=True)
     gridda = griduda.ugrid.to_dataset()
     gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
     gridda.to_netcdf(mesh_fn)
 
-    model.setup_mesh2d(
+    mesh_model.mesh.create_2d_from_region(
         region={"mesh": mesh_fn},
         grid_name="mesh2d",
     )
-    assert np.all(griduda.ugrid.total_bounds == model.region.total_bounds)
-    assert model.mesh.ugrid.grid.n_node == 169
-    model._mesh = None  # remove old mesh
+    # need to add some data to it before checks will work
+    mesh_model.mesh.add_2d_data_from_rasterdataset(
+        "vito", grid_name="mesh2d", resampling_method="mode"
+    )
 
-    # mesh with bounds
+    assert np.all(griduda.ugrid.total_bounds == mesh_model.mesh.region.total_bounds)
+    assert mesh_model.mesh.data.ugrid.grid.n_node == 169
+
+
+def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda):
+    mesh_fn = str(mesh_model.root.path / "mesh" / "mesh.nc")
+    makedirs(mesh_model.root.path / "mesh", exist_ok=True)
+    gridda = griduda.ugrid.to_dataset()
+    gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
+    gridda.to_netcdf(mesh_fn)
+
+    mesh_model.mesh.create_2d_from_region(
+        region={"mesh": mesh_fn},
+        grid_name="mesh2d",
+    )
     bounds = [12.095, 46.495, 12.10, 46.50]
-    model.setup_mesh2d(
+    mesh_model.mesh.create_2d_from_region(
         {"mesh": mesh_fn, "bounds": bounds},
         grid_name="mesh1",
     )
-    assert "mesh1" in model.mesh_names
-    assert model.mesh.ugrid.grid.n_node == 49
-    assert np.all(np.round(model.region.total_bounds, 3) == bounds)
+    # need to add some data to it before checks will work
+    mesh_model.mesh.add_2d_data_from_rasterdataset(
+        "vito", grid_name="mesh1", resampling_method="mode"
+    )
+    assert "vito" in mesh_model.mesh.data, mesh_model.mesh.data
+    assert mesh_model.mesh.data.ugrid.grid.n_node == 49
+    assert np.all(np.round(mesh_model.region.total_bounds, 3) == bounds)
 
 
 @pytest.mark.skip("needs oracle")
