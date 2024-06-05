@@ -13,7 +13,6 @@ import pandas as pd
 import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
-from shapely.geometry import box
 
 from hydromt.components.base import ModelComponent
 from hydromt.components.config import ConfigComponent
@@ -212,49 +211,78 @@ def test_model_build_update(tmpdir, demda, obsda):
     model.add_component("geoms", geoms_component)
     model_out = str(tmpdir.join("update"))
     makedirs(model_out, exist_ok=True)
-    model.update(model_out=model_out, steps={})  # write only
+    model.update(model_out=model_out, steps=[])  # write only
     assert isdir(join(model_out, "grid")), listdir(model_out)
     assert isfile(join(model_out, "grid", "grid_region.geojson")), listdir(model_out)
 
 
 @pytest.mark.integration()
-@pytest.mark.skip(reason="needs method/yaml validation")
 def test_model_build_update_with_data(tmpdir, demda, obsda):
     # Build model with some data
     bbox = [12.05, 45.30, 12.85, 45.65]
-    geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
-    model = Model(root=str(tmpdir), mode="w+")
-    model.name = "model"
-    model.build(
-        region={"bbox": bbox},
-        steps={
-            "setup_config": {"input": {"dem": "elevtn", "prec": "precip"}},
-            "set_geoms": {"geom": geom, "name": "geom1"},
-            "set_maps": {"data": demda, "name": "elevtn"},
-            "set_forcing": {"data": obsda, "name": "precip"},
+    model = Model(
+        root=str(tmpdir),
+        components={
+            "grid": {"type": "GridComponent"},
+            "maps": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
+            "forcing": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
+            "geoms": {"type": "GeomsComponent"},
         },
+        region_component="grid",
+        mode="w+",
+    )
+    model.build(
+        steps=[
+            {
+                "grid.create_from_region": {
+                    "region": {"bbox": bbox},
+                    "res": 0.01,
+                    "crs": 4326,
+                }
+            },
+            {
+                "maps.set": {
+                    "data": demda,
+                    "name": "elevtn",
+                }
+            },
+            {
+                "forcing.set": {
+                    "data": obsda,
+                    "name": "precip",
+                }
+            },
+        ],
     )
     # Now update the model
-    model = Model(root=str(tmpdir), mode="r+")
+    model = Model(
+        root=str(tmpdir),
+        components={
+            "grid": {"type": "GridComponent"},
+            "maps": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
+            "forcing": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
+            "forcing2": {
+                "type": "SpatialDatasetsComponent",
+                "region_component": "grid",
+            },
+            "geoms": {"type": "GeomsComponent"},
+        },
+        region_component="grid",
+        mode="r+",
+    )
     model.update(
-        steps={
-            "setup_config": {"input.dem2": "elevtn2", "input.temp": "temp"},
-            "set_geoms": {"geom": geom, "name": "geom2"},
-            "set_maps": {"data": demda, "name": "elevtn2"},
-            "set_forcing": {"data": obsda, "name": "temp"},
-            "set_forcing2": {"data": obsda * 0.2, "name": "precip"},
-        }
+        steps=[
+            {"maps.set": {"data": demda, "name": "elevtn2"}},
+            {"forcing.set": {"data": obsda, "name": "temp"}},
+            {"forcing2.set": {"data": obsda * 0.2, "name": "precip"}},
+        ]
     )
     assert len(model._defered_file_closes) == 0
     # Check that variables from build AND update are present
-    assert "dem" in model.config["input"]
-    assert "dem2" in model.config["input"]
-    assert "geom1" in model.geoms
-    assert "geom2" in model.geoms
-    assert "elevtn" in model.maps
-    assert "elevtn2" in model.maps
-    assert "precip" in model.forcing
-    assert "temp" in model.forcing
+    assert "elevtn" in model.maps.data
+    assert "elevtn2" in model.maps.data
+    assert "precip" in model.forcing.data
+    assert "temp" in model.forcing.data
 
 
 def test_setup_region_geom(grid_model, bbox):

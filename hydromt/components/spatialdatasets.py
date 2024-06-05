@@ -97,6 +97,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             " the model."
         )
 
+    # @hydromt_step
     def set(
         self,
         data: Union[Dataset, DataArray],
