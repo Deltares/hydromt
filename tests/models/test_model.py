@@ -4,7 +4,7 @@
 from os import listdir, makedirs
 from os.path import abspath, dirname, isfile, join
 from pathlib import Path
-from typing import Any, List, cast
+from typing import List, cast
 from unittest.mock import Mock
 
 import geopandas as gpd
@@ -349,90 +349,115 @@ def test_gridmodel(tmpdir, demda):
     assert "elevtn" in model1.grid
 
 
-@pytest.mark.skip(reason="Needs implementation of new Model class with GridComponent.")
-def test_setup_grid(tmpdir, demda):
-    # Initialize model
-    GridModel: Any = ...  # bypass ruff
-    model = GridModel(
-        root=join(tmpdir, "grid_model"),
-        data_libs=["artifact_data"],
-        mode="w",
-    )
-    # wrong region kind
+def test_setup_grid_from_wrong_kind(grid_model):
     with pytest.raises(ValueError, match="Region for grid must be of kind"):
-        model.setup_grid({"vector_model": "test_model"})
-    # bbox
+        grid_model.grid.create_from_region({"vector_model": "test_model"})
+
+
+def test_setup_grid_from_bbox_aligned(grid_model):
     bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(
         ValueError, match="res argument required for kind 'bbox', 'geom'"
     ):
-        model.setup_grid({"bbox": bbox})
-    model.setup_grid(
+        grid_model.grid.create_from_region({"bbox": bbox})
+
+    grid_model.grid.create_from_region(
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
     )
-    assert "mask" not in model.grid
-    assert model.crs.to_epsg() == 4326
-    assert model.grid.raster.dims == ("y", "x")
-    assert model.grid.raster.shape == (7, 16)
-    assert np.all(np.round(model.grid.raster.bounds, 2) == bbox)
-    grid = model.grid
-    model._grid = xr.Dataset()  # remove old grid
+    grid_model.grid.add_data_from_constant(
+        constant=0.01,
+        name="c1",
+        nodata=-99.0,
+    )
+    assert "mask" not in grid_model.grid.data
+    assert grid_model.crs.to_epsg() == 4326
+    assert grid_model.grid.data.raster.dims == ("y", "x")
+    assert grid_model.grid.data.raster.shape == (7, 16)
+    assert np.all(np.round(grid_model.grid.data.raster.bounds, 2) == bbox)
 
-    # geom
-    region = model._geoms.pop("region")
-    model.setup_grid(
+
+def test_setup_grid_from_wrong_kind_no_mask(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model_tmp = Model(
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+    )
+    grid_model_tmp.grid.create_from_region(
+        region={"bbox": bbox}, res=0.05, add_mask=False, align=True, crs=4326
+    )
+    grid_model_tmp.grid.add_data_from_constant(
+        constant=0.01,
+        name="c1",
+        nodata=-99.0,
+    )
+
+    region = grid_model_tmp.region
+    grid = grid_model_tmp.grid.data
+    grid_model.grid.create_from_region(
         region={"geom": region},
         res=0.05,
         add_mask=False,
     )
-    gpd.testing.assert_geodataframe_equal(region, model.region)
-    xr.testing.assert_allclose(grid, model.grid)
-    model._grid = xr.Dataset()  # remove old grid
+    grid_model.grid.add_data_from_constant(
+        constant=0.01,
+        name="c1",
+        nodata=-99.0,
+    )
+    gpd.testing.assert_geodataframe_equal(region, grid_model.region)
+    xr.testing.assert_allclose(grid, grid_model.grid.data)
 
-    model.setup_grid(
+
+@pytest.mark.skip("utm is not a valid crs?")
+def test_setup_grid_from_geodataframe(grid_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    grid_model_tmp = Model(
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+    )
+    grid_model_tmp.grid.create_from_region(
+        region={"bbox": bbox}, res=0.05, add_mask=False, align=True, crs=4326
+    )
+    grid_model_tmp.grid.add_data_from_constant(
+        constant=0.01,
+        name="c1",
+        nodata=-99.0,
+    )
+    region = grid_model_tmp.region
+    grid_model.grid.create_from_region(
         region={"geom": region},
         res=10000,
         crs="utm",
         add_mask=True,
     )
-    assert "mask" in model.grid
-    assert model.crs.to_epsg() == 32633
-    assert model.grid.raster.res == (10000, -10000)
-    model._grid = xr.Dataset()  # remove old grid
+    assert "mask" in grid_model.grid.data
+    assert grid_model.crs.to_epsg() == 32633
+    assert grid_model.grid.data.raster.res == (10000, -10000)
 
-    # bbox rotated
-    model.setup_grid(
+
+def test_setup_grid_from_bbox_rotated(grid_model):
+    grid_model.grid.create_from_region(
         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
         res=0.05,
         crs=4326,
         rotated=True,
         add_mask=True,
     )
-    assert "xc" in model.grid.coords
-    assert model.grid.raster.y_dim == "y"
-    assert np.isclose(model.grid.raster.res[0], 0.05)
-    model._grid = xr.Dataset()  # remove old grid
+    assert "xc" in grid_model.grid.data.coords
+    assert grid_model.grid.data.raster.y_dim == "y"
+    assert np.isclose(grid_model.grid.data.raster.res[0], 0.05)
 
+
+def test_setup_grid_from_grid(grid_model, demda):
     # grid
-    grid_fn = str(tmpdir.join("grid.tif"))
+    grid_fn = str(grid_model.root.path / "grid.tif")
     demda.raster.to_raster(grid_fn)
-    model.setup_grid({"grid": grid_fn})
-    assert np.all(demda.raster.bounds == model.region.bounds)
-    model._grid = xr.Dataset()  # remove old grid
-
-    # basin
-    model.setup_grid(
-        region={"subbasin": [12.319, 46.320], "uparea": 50},
-        res=1000,
-        crs="utm",
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
-    )
-    assert not np.all(model.grid["mask"].values is True)
-    assert model.grid.raster.shape == (47, 61)
+    grid_model.grid.create_from_region({"grid": grid_fn})
+    assert np.all(demda.raster.bounds == grid_model.region.bounds)
 
 
 def test_grid_model_subbasin(grid_model):
