@@ -102,7 +102,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         for variable in ds.data_vars:
             if ds[variable].size == 0:
                 exec_nodata_strat(
-                    f"No data from driver: '{self.name}' for variable: '{variable}'"
+                    f"No data from driver: '{self.name}' for variable: '{variable}'",
+                    strategy=handle_nodata,
+                    logger=logger,
                 )
         return ds
 
