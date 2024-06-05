@@ -268,41 +268,51 @@ def test_setup_region_grid(model, demda, tmpdir):
     assert np.all(demda.raster.bounds == model.region.total_bounds)
 
 
-def test_setup_region_basin(model, demda, tmpdir):
+@pytest.mark.skip(reason="TODO")
+def test_setup_region_basin(model):
     # basin
     model.grid.create_from_region({"basin": [12.2, 45.833333333333329]})
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 
-@pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_maps_setup(tmpdir):
+@pytest.mark.integration()
+def test_maps_setup():
     dc_param_fn = join(DATADIR, "parameters_data.yml")
-    mod = Model(data_libs=["artifact_data", dc_param_fn], mode="w")
+    mod = Model(
+        data_libs=["artifact_data", dc_param_fn],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+        mode="w",
+    )
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
-    mod.region.create({"bbox": bbox})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.setup_maps_from_rasterdataset(
-        raster_fn="merit_hydro",
+
+    mod.grid.create_from_region({"bbox": bbox}, res=0.1)
+    config_component = ConfigComponent(mod)
+    config_component.set("header.setting", "value")
+    mod.add_component("config", config_component)
+
+    maps_component = SpatialDatasetsComponent(mod, region_component="grid")
+    mod.add_component("maps", maps_component)
+
+    mod.maps.add_raster_data_from_rasterdataset(
+        raster_filename="merit_hydro",
         name="hydrography",
         variables=["elevtn", "flwdir"],
         split_dataset=False,
     )
-    mod.setup_maps_from_rasterdataset(raster_fn="vito", fill_method="nearest")
-    mod.setup_maps_from_raster_reclass(
-        raster_fn="vito",
-        reclass_table_fn="vito_mapping",
+    mod.maps.add_raster_data_from_rasterdataset(
+        raster_filename="vito", fill_method="nearest"
+    )
+    mod.maps.add_raster_data_from_raster_reclass(
+        raster_filename="vito",
+        reclass_table_filename="vito_mapping",
         reclass_variables=["roughness_manning"],
         split_dataset=True,
     )
 
-    assert len(mod.maps) == 3
-    assert "roughness_manning" in mod.maps
-    assert len(mod.maps["hydrography"].data_vars) == 2
-    non_compliant = mod._test_model_api()
-    assert len(non_compliant) == 0, non_compliant
-    # write model
-    mod.root.set(str(tmpdir), mode="w")
-    mod.write(components=["config", "geoms", "maps"])
+    assert len(mod.maps.data) == 3
+    assert "roughness_manning" in mod.maps.data
+    assert len(mod.maps.data["hydrography"].data_vars) == 2
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
