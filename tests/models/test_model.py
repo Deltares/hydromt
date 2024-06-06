@@ -210,7 +210,6 @@ def test_model_build_update(tmpdir, demda, obsda):
     geoms_component = GeomsComponent(model)
     model.add_component("geoms", geoms_component)
     model_out = str(tmpdir.join("update"))
-    makedirs(model_out, exist_ok=True)
     model.update(model_out=model_out, steps=[])  # write only
     assert isdir(join(model_out, "grid")), listdir(model_out)
     assert isfile(join(model_out, "grid", "grid_region.geojson")), listdir(model_out)
@@ -418,9 +417,7 @@ def test_gridmodel(demda, tmpdir):
     grid_model.root.set(str(join(tmpdir, "update")), mode="w")
     grid_model.write()
 
-    update_root = str(join(grid_model.root.path, "update"))
-    makedirs(update_root, exist_ok=True)
-    makedirs(update_root.join("grid"), exist_ok=True)
+    update_root = str(join(tmpdir, "update"))
     model1 = Model(
         root=update_root,
         data_libs=["artifact_data", DC_PARAM_PATH],
