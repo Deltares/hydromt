@@ -92,10 +92,9 @@ def test_add_raster_data_from_rasterdataset(demda, tmpdir, mocker: MockerFixture
     xr.testing.assert_equal(model.maps.data["elevation"], demda)
 
 
-@pytest.mark.skip(reason="needs working artifact data")
-def test_add_raster_data_from_rasterdataset_reclass(tmpdir, demda):
+def test_add_raster_data_from_raster_reclass(tmpdir, demda, lulcda):
     dc_param_fn = join(DATADIR, "parameters_data.yml")
-    model = Model(root=tmpdir, data_libs=["artifact_data", dc_param_fn], mode="w")
+    model = Model(root=tmpdir, data_libs=[dc_param_fn], mode="w")
 
     # add a grid and spatial component
     model.add_component("grid", GridComponent(model))
@@ -107,8 +106,8 @@ def test_add_raster_data_from_rasterdataset_reclass(tmpdir, demda):
         "maps", SpatialDatasetsComponent(model, region_component="grid")
     )
 
-    model.maps.add_raster_data_from_rasterdataset_reclass(
-        raster_filename="vito",
+    model.maps.add_raster_data_from_raster_reclass(
+        raster_filename=lulcda,
         reclass_table_filename="vito_mapping",
         reclass_variables=["roughness_manning"],
         split_dataset=True,
