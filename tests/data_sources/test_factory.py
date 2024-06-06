@@ -1,8 +1,8 @@
 import pytest
 
-from hydromt.data_adapter import GeoDataFrameAdapter
-from hydromt.data_source import DataSource, GeoDataFrameSource, create_source
-from hydromt.drivers import GeoDataFrameDriver
+from hydromt.data_catalog.adapters import GeoDataFrameAdapter
+from hydromt.data_catalog.drivers import GeoDataFrameDriver
+from hydromt.data_catalog.sources import DataSource, GeoDataFrameSource, create_source
 
 
 class TestCreateSource:

@@ -1,89 +1,46 @@
 """Utility functions for hydromt that have no other home."""
 
-from typing import Optional, Union
-
-import geopandas as gpd
-import numpy as np
-import pandas as pd
-import xarray as xr
-
-from .log import add_filehandler, logged, setuplog
+from .caching import _cache_vrt_tiles, _copyfile
+from .dataset import (
+    _rename_vars,
+    _set_metadata,
+    _shift_dataset_time,
+    _single_var_as_array,
+    _slice_temporal_dimension,
+)
+from .dictionaries import _partition_dictionaries
+from .elevation import _elevation2rgba, _rgba2elevation
+from .nodata import _has_no_data, _set_raster_nodata, _set_vector_nodata
+from .path import _make_config_paths_abs, _make_config_paths_relative
+from .rgetattr import _rgetattr
+from .steps_validator import _validate_steps
+from .unused_kwargs import _warn_on_unused_kwargs
+from .uris import _is_valid_url, _strip_scheme
 
 __all__ = [
-    "setuplog",
-    "add_filehandler",
-    "logged",
-    "partition_dictionaries",
-    "elevation2rgba",
-    "rgba2elevation",
+    "_cache_vrt_tiles",
+    "_copyfile",
+    "_rename_vars",
+    "_set_metadata",
+    "_shift_dataset_time",
+    "_single_var_as_array",
+    "_slice_temporal_dimension",
+    "_partition_dictionaries",
+    "_elevation2rgba",
+    "_rgba2elevation",
+    "_has_no_data",
+    "_set_raster_nodata",
+    "_set_vector_nodata",
+    "_rgetattr",
+    "_validate_steps",
+    "_warn_on_unused_kwargs",
+    "_is_valid_url",
+    "_strip_scheme",
+    "_make_config_paths_abs",
+    "_make_config_paths_relative",
 ]
 
 
 class _classproperty(property):
     def __get__(self, owner_self, owner_cls):
         return self.fget(owner_cls)
-
-
-def partition_dictionaries(left, right):
-    """Calculate a partitioning of the two dictionaries.
-
-    given dictionaries A and B this function will the follwing partition:
-    (A ∩ B, A - B, B - A)
-    """
-    common = {}
-    left_less_right = {}
-    right_less_left = {}
-    key_union = set(left.keys()) | set(right.keys())
-
-    for key in key_union:
-        value_left = left.get(key, None)
-        value_right = right.get(key, None)
-        if isinstance(value_left, dict) and isinstance(value_right, dict):
-            (
-                common_children,
-                unique_left_children,
-                unique_right_children,
-            ) = partition_dictionaries(value_left, value_right)
-            common[key] = common_children
-            if unique_left_children != unique_right_children:
-                left_less_right[key] = unique_left_children
-                right_less_left[key] = unique_right_children
-        elif value_left == value_right:
-            common[key] = value_left
-        else:
-            if value_left is not None:
-                left_less_right[key] = value_left
-            if value_right is not None:
-                right_less_left[key] = value_right
-
-    return common, left_less_right, right_less_left
-
-
-def elevation2rgba(val, nodata=np.nan):
-    """Convert elevation to rgb tuple."""
-    val += 32768
-    r = np.floor(val / 256).astype(np.uint8)
-    g = np.floor(val % 256).astype(np.uint8)
-    b = np.floor((val - np.floor(val)) * 256).astype(np.uint8)
-    mask = np.isnan(val) if np.isnan(nodata) else val == nodata
-    a = np.where(mask, 0, 255).astype(np.uint8)
-    return np.stack((r, g, b, a), axis=2)
-
-
-def rgba2elevation(rgba: np.ndarray, nodata=np.nan, dtype=np.float32):
-    """Convert rgb tuple to elevation."""
-    r, g, b, a = np.split(rgba, 4, axis=2)
-    val = (r * 256 + g + b / 256) - 32768
-    return np.where(a == 0, nodata, val).squeeze().astype(dtype)
-
-
-def has_no_data(
-    data: Optional[Union[pd.DataFrame, gpd.GeoDataFrame, xr.Dataset, xr.DataArray]],
-) -> bool:
-    """Check whether various data containers are empty."""
-    if data is None:
-        return True
-    elif isinstance(data, xr.Dataset):
-        return all([v.size == 0 for v in data.data_vars.values()])
-    else:
-        return len(data) == 0

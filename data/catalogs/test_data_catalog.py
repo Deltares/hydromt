@@ -26,7 +26,7 @@ from dask.distributed import Client
 from pydantic_core import ValidationError
 
 from hydromt import DataCatalog
-from hydromt.log import setuplog
+from hydromt.utils import setuplog
 from hydromt.validators.data_catalog import DataCatalogValidator
 
 

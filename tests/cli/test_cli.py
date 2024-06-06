@@ -8,7 +8,7 @@ from click.testing import CliRunner
 from hydromt import __version__
 from hydromt._typing import NoDataException
 from hydromt.cli.main import main as hydromt_cli
-from hydromt.components.grid import GridComponent
+from hydromt.model.components.grid import GridComponent
 
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
 

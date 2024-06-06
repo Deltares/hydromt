@@ -7,10 +7,11 @@ import xarray as xr
 from pydantic import ValidationError
 
 from hydromt._typing import SourceMetadata, StrPath
-from hydromt.data_adapter import RasterDatasetAdapter
-from hydromt.data_source import RasterDatasetSource
-from hydromt.drivers import RasterDatasetDriver
-from hydromt.gis.utils import to_geographic_bbox
+from hydromt.data_catalog.adapters import RasterDatasetAdapter
+from hydromt.data_catalog.drivers import RasterDatasetDriver
+from hydromt.data_catalog.sources import RasterDatasetSource
+from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
+from hydromt.gis.gis_utils import to_geographic_bbox
 
 
 @pytest.fixture()
@@ -161,6 +162,28 @@ class TestRasterDatasetSource:
         # make sure we are not changing the state
         assert id(new_source) != id(writable_source)
         assert id(driver) == id(new_source.driver)
+
+    def test_to_file_defaults(
+        self, tmp_dir: Path, raster_ds: xr.Dataset, mock_resolver: MetaDataResolver
+    ):
+        class NotWritableDriver(RasterDatasetDriver):
+            name: ClassVar[str] = "test_to_file_defaults"
+
+            def read_data(self, uri: str, **kwargs) -> xr.Dataset:
+                return raster_ds
+
+        old_path: Path = tmp_dir / "test.zarr"
+        new_path: Path = tmp_dir / "temp.zarr"
+
+        new_source: RasterDatasetSource = RasterDatasetSource(
+            name="test",
+            uri=str(old_path),
+            driver=NotWritableDriver(metadata_resolver=mock_resolver),
+            metadata={"crs": 4326},  # raster_ds has no crs
+        ).to_file(new_path)
+        assert new_path.is_dir()  # zarr creates dir
+        assert new_source.root is None
+        assert new_source.driver.filesystem.protocol == ("file", "local")
 
     def test_detect_extent(
         self, writable_source: RasterDatasetSource, rioda: xr.DataArray

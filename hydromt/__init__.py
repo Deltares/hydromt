@@ -8,19 +8,35 @@ __version__ = "1.0.0-alpha"
 # We have to make sure that netcdf4 is imported before
 # numpy is imported for the first time, e.g. also via
 # importing xarray
+import warnings
+
 import netCDF4  # noqa: F401
 
-# required for accessor style documentation
-from xarray import DataArray, Dataset  # noqa: F401
-
-from hydromt.hydromt_step import hydromt_step
-
-from . import cli, gis, stats, workflows
-from .data_catalog import *
-
 # submodules
-from .gis import raster, vector
-from .io import *
+from . import data_catalog, gis, io, model, stats, utils
 
 # high-level methods
-from .models import *
+from .data_catalog import DataCatalog
+from .gis import raster, vector
+from .model import Model, hydromt_step
+from .plugins import PLUGINS
+
+__all__ = [
+    # high-level classes
+    "DataCatalog",
+    "Model",
+    # submodules
+    "data_catalog",
+    "gis",
+    "io",
+    "model",
+    "stats",
+    "utils",
+    # raster and vector accessor
+    "raster",
+    "vector",
+    # high-level functions
+    "hydromt_step",
+    # plugins
+    "PLUGINS",
+]

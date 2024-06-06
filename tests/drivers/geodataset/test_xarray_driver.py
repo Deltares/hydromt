@@ -8,16 +8,16 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from xarray import open_mfdataset
 
-from hydromt.drivers.geodataset.xarray_driver import GeoDatasetXarrayDriver
-from hydromt.drivers.preprocessing import round_latlon
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
-from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.drivers.geodataset.xarray_driver import GeoDatasetXarrayDriver
+from hydromt.data_catalog.drivers.preprocessing import round_latlon
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
 
 
 class TestGeoDatasetXarrayDriver:
     def test_calls_preprocess(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.geodataset.xarray_driver.xr.open_mfdataset",
+            "hydromt.data_catalog.drivers.geodataset.xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -67,7 +67,7 @@ class TestGeoDatasetXarrayDriver:
 
     def test_calls_zarr_with_zarr_ext(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.geodataset.xarray_driver.xr.open_zarr",
+            "hydromt.data_catalog.drivers.geodataset.xarray_driver.xr.open_zarr",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()
@@ -83,7 +83,7 @@ class TestGeoDatasetXarrayDriver:
 
     def test_calls_nc_func_with_nc_ext(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.raster.raster_xarray_driver.xr.open_mfdataset",
+            "hydromt.data_catalog.drivers.raster.raster_xarray_driver.xr.open_mfdataset",
             spec=open_mfdataset,
         )
         mock_xr_open.return_value = xr.Dataset()

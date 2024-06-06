@@ -79,7 +79,7 @@ dev = [
   "twine",       # needed to publish to pypi
 ]
 test = [
-  "pytest>=2.7.3",  # testing framework
+  "pytest>=8",  # testing framework
   "pytest-cov",     # test coverage
   "pytest-mock",    # mocking
   "pytest-timeout", # darn hanging tests
@@ -110,16 +110,16 @@ Source = "https://github.com/Deltares/hydromt"
 hydromt = "hydromt.cli.main:main"
 
 [project.entry-points."hydromt.components"]
-core = "hydromt.components"
+core = "hydromt.model.components"
 
 [project.entry-points."hydromt.drivers"]
-core = "hydromt.drivers"
+core = "hydromt.data_catalog.drivers"
 
 [project.entry-points."hydromt.models"]
-core = "hydromt.models"
+core = "hydromt.model.model"
 
 [project.entry-points."hydromt.catalogs"]
-core = "hydromt.predefined_catalog"
+core = "hydromt.data_catalog.predefined_catalog"
 
 [tool.setuptools.dynamic]
 description = { file = "hydromt/__init__.py" }
@@ -155,8 +155,12 @@ testpaths = ["tests"]
 markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
-  # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
+  "error",
+# "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
   "ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
+  "ignore::ResourceWarning", # upstream issue with aoihttp, can remove once aoihttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
+  "ignore::pytest.PytestUnraisableExceptionWarning", # combine with the above: https://github.com/pytest-dev/pytest/issues/9825
+  'ignore:pathlib\.Path\.__enter__:DeprecationWarning',  # xugrid in python 3.11
 ]
 
 [tool.mypy]

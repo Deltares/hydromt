@@ -8,23 +8,23 @@ import pytest
 from pytest_mock import MockerFixture
 from xarray import Dataset
 
-from hydromt.drivers import GeoDatasetVectorDriver
+from hydromt.data_catalog.drivers import GeoDatasetVectorDriver
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
 from hydromt.gis import vector
 from hydromt.io.readers import open_geodataset
-from hydromt.metadata_resolver.convention_resolver import ConventionResolver
-from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
 
 
 class TestGeoDatasetVectorDriver:
     def test_calls_preprocess(self, mocker: MockerFixture):
         mock_geods_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.geodataset.vector_driver.open_geodataset",
+            "hydromt.data_catalog.drivers.geodataset.vector_driver.open_geodataset",
             spec=open_geodataset,
         )
         mock_geods_open.return_value = Dataset()
 
         mock_preprocess: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.geodataset.vector_driver.PREPROCESSORS",
+            "hydromt.data_catalog.drivers.geodataset.vector_driver.PREPROCESSORS",
             spec=dict,
         )
 
@@ -53,7 +53,7 @@ class TestGeoDatasetVectorDriver:
     def test_write_raises(self):
         driver = GeoDatasetVectorDriver()
         with pytest.raises(NotImplementedError):
-            driver.write()  # type: ignore
+            driver.write("fake_path.zarr", MagicMock())  # type: ignore
 
     @pytest.fixture()
     def example_vector_geods(self, geodf, tmp_dir: Path) -> Path:
@@ -79,7 +79,7 @@ class TestGeoDatasetVectorDriver:
 
     def test_calls_open_geodataset(self, mocker: MockerFixture):
         mock_geods_open: mocker.MagicMock = mocker.patch(
-            "hydromt.drivers.geodataset.vector_driver.open_geodataset",
+            "hydromt.data_catalog.drivers.geodataset.vector_driver.open_geodataset",
             spec=open_geodataset,
         )
         mock_geods_open.return_value = Dataset()

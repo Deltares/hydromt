@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from hydromt.predefined_catalog import (
+from hydromt.data_catalog.predefined_catalog import (
     ArtifactDataCatalog,
     PredefinedCatalog,
     create_registry_file,

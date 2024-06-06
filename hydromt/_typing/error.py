@@ -20,6 +20,7 @@ class NoDataStrategy(Enum):
     """Strategy to handle nodata values."""
 
     RAISE = "raise"
+    WARN = "warn"
     IGNORE = "ignore"
 
 
@@ -36,12 +37,14 @@ class NoDataException(Exception):
         super().__init__(self.message)
 
 
-def _exec_nodata_strat(msg: str, strategy: NoDataStrategy, logger: Logger) -> None:
+def exec_nodata_strat(msg: str, strategy: NoDataStrategy, logger: Logger) -> None:
     """Execute nodata strategy."""
     if strategy == NoDataStrategy.RAISE:
         raise NoDataException(msg)
-    elif strategy == NoDataStrategy.IGNORE:
+    elif strategy == NoDataStrategy.WARN:
         logger.warning(msg)
+    elif strategy == NoDataStrategy.IGNORE:
+        pass
     else:
         raise NotImplementedError(f"NoDataStrategy '{strategy}' not implemented.")
 
