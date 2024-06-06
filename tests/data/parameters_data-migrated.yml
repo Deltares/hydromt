@@ -3,8 +3,7 @@ vito_mapping:
   uri: vito_mapping.csv
   driver:
     options:
-      kwargs:
-        index_col: 0
+      index_col: 0
     name: pandas
   metadata:
     category: landuse

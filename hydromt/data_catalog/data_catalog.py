@@ -1253,7 +1253,7 @@ class DataCatalog(object):
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            if geom or bbox:
+            if geom is not None or bbox is not None:
                 mask = parse_geom_bbox_buffer(geom, bbox, buffer)
             else:
                 mask = None
