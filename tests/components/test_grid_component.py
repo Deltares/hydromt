@@ -9,9 +9,9 @@ import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
 
-from hydromt.components.grid import GridComponent
-from hydromt.models.model import Model
-from hydromt.root import ModelRoot
+from hydromt.model.components.grid import GridComponent
+from hydromt.model.model import Model
+from hydromt.model.root import ModelRoot
 
 logger = logging.getLogger(__name__)
 logger.propagate = True
@@ -76,7 +76,7 @@ def test_read(tmpdir, mock_model, hydds, mocker: MockerFixture):
         grid_component.read()
     mock_model.root = ModelRoot(path=tmpdir, mode="r+")
     grid_component = GridComponent(model=mock_model)
-    mocker.patch("hydromt.components.grid.read_nc", return_value={"grid": hydds})
+    mocker.patch("hydromt.model.components.grid.read_nc", return_value={"grid": hydds})
     grid_component.read()
     assert grid_component.data == hydds
 
@@ -190,7 +190,7 @@ def test_add_data_from_constant(mock_model, demda, mocker: MockerFixture):
     grid_component = GridComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
     demda.name = "demda"
-    mocker.patch("hydromt.components.grid.grid_from_constant", return_value=demda)
+    mocker.patch("hydromt.model.components.grid.grid_from_constant", return_value=demda)
     name = grid_component.add_data_from_constant(constant=0.01, name="demda")
     assert name == ["demda"]
     assert grid_component.data == demda
@@ -201,7 +201,7 @@ def test_add_data_from_rasterdataset(demda, caplog, mock_model, mocker: MockerFi
     demda.name = "demda"
     demda = demda.to_dataset()
     mock_grid_from_rasterdataset = mocker.patch(
-        "hydromt.components.grid.grid_from_rasterdataset"
+        "hydromt.model.components.grid.grid_from_rasterdataset"
     )
     grid_component = GridComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
@@ -240,7 +240,7 @@ def test_add_data_from_raster_reclass(caplog, demda, mock_model, mocker: MockerF
     grid_component.data_catalog.get_rasterdataset.return_value = demda
     grid_component.data_catalog.get_dataframe.return_value = pd.DataFrame()
     mock_grid_from_raster_reclass = mocker.patch(
-        "hydromt.components.grid.grid_from_raster_reclass"
+        "hydromt.model.components.grid.grid_from_raster_reclass"
     )
     mock_grid_from_raster_reclass.return_value = demda.to_dataset()
 
@@ -286,7 +286,7 @@ def test_add_data_from_geodataframe(
     demda.name = "name"
     grid_component.data_catalog.get_geodataframe.return_value = geodf
     mock_grid_from_geodataframe = mocker.patch(
-        "hydromt.components.grid.grid_from_geodataframe"
+        "hydromt.model.components.grid.grid_from_geodataframe"
     )
     mock_grid_from_geodataframe.return_value = demda.to_dataset()
     vector_fn = "hydro_lakes"

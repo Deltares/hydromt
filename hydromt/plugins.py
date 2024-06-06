@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Type, TypedDict, cas
 from importlib_metadata import entry_points
 
 if TYPE_CHECKING:
-    from hydromt.components import ModelComponent
-    from hydromt.drivers import BaseDriver
-    from hydromt.models import Model
-    from hydromt.predefined_catalog import PredefinedCatalog
+    from hydromt.data_catalog.drivers import BaseDriver
+    from hydromt.data_catalog.predefined_catalog import PredefinedCatalog
+    from hydromt.model import Model
+    from hydromt.model.components import ModelComponent
 
 __all__ = ["PLUGINS"]
 
@@ -107,7 +107,7 @@ class PluginGroup:
 
 class ComponentPlugins(PluginGroup):
     group = "hydromt.components"
-    base_module = "hydromt.components"
+    base_module = "hydromt.model.components"
     base_class = "ModelComponent"
 
     @property
@@ -123,7 +123,7 @@ class ComponentPlugins(PluginGroup):
 
 class DriverPlugins(PluginGroup):
     group = "hydromt.drivers"
-    base_module = "hydromt.drivers"
+    base_module = "hydromt.data_catalog.drivers"
     base_class = "BaseDriver"
 
     @property
@@ -139,7 +139,7 @@ class DriverPlugins(PluginGroup):
 
 class ModelPlugins(PluginGroup):
     group = "hydromt.models"
-    base_module = "hydromt.models"
+    base_module = "hydromt.model.model"
     base_class = "Model"
 
     @property
@@ -155,7 +155,7 @@ class ModelPlugins(PluginGroup):
 
 class CatalogPlugins(PluginGroup):
     group = "hydromt.catalogs"
-    base_module = "hydromt.predefined_catalog"
+    base_module = "hydromt.data_catalog.predefined_catalog"
     base_class = "PredefinedCatalog"
 
     @property

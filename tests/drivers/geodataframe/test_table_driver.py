@@ -5,8 +5,10 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 
-from hydromt.drivers.geodataframe.table_driver import GeoDataFrameTableDriver
-from hydromt.metadata_resolver.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.drivers.geodataframe.table_driver import (
+    GeoDataFrameTableDriver,
+)
+from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
 
 
 class TestGeoDataFrameTableDriver:

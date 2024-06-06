@@ -16,13 +16,13 @@ from pydantic import ValidationError
 
 from hydromt import __version__
 from hydromt._typing.error import NoDataStrategy
-from hydromt._utils import log
 from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt._validators.region import validate_region
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
+from hydromt.utils import log
 
 logger = logging.getLogger(__name__)
 

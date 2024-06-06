@@ -6,7 +6,7 @@ import xarray as xr
 
 import hydromt._compat as compat
 from hydromt.gis.raster import full_from_transform
-from hydromt.workflows.forcing import pet, precip
+from hydromt.model.processes.meteo import pet, precip
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
