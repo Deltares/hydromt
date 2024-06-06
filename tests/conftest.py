@@ -290,6 +290,22 @@ def demda():
 
 
 @pytest.fixture()
+def lulcda():
+    """Imitate VITO land use land cover data."""
+    np.random.seed(11)
+    da = xr.DataArray(
+        # vito lulc classes
+        data=np.random.choice([20, 30, 40, 110], size=(15, 10)),
+        dims=("y", "x"),
+        coords={"y": -np.arange(0, 1500, 100), "x": np.arange(0, 1000, 100)},
+        attrs=dict(_FillValue=255),
+    )
+    # NOTE epsg 3785 is deprecated https://epsg.io/3785
+    da.raster.set_crs(3857)
+    return da
+
+
+@pytest.fixture()
 def flwdir(demda):
     # NOTE: single basin!
     return pyflwdir.from_dem(
