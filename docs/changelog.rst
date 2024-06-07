@@ -43,6 +43,12 @@ Removed
 - `staticmaps` and `staticgeoms` attributes on the `Model` object have been removed. (#845)
 - Code refering to the unimplemented Network Model type has been removed (#871)
 - Removed `_API`, `.api` property, `test_api` and other `Model` level conventions as they are now handled by the components. (#894)
+- support for using aliases in the DataCatalog has been removed. (#987)
+- support for `storage_options` in the DataCatalog and adapters has been removed. (#987)
+- The function `hydromt.gis.flw.guagemap` has been removed in favour of `hydromt.gis.flw.guage_map`. (#987)
+- The function `hydromt.gis.flw.basinmap` has been removed in favour of `hydromt.gis.flw.basin_map`. (#987)
+- Support for using the `within` predicate in the function `get_basin_geometry` has been removed. (#987)
+
 
 
 Unreleased

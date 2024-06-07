@@ -10,7 +10,6 @@ from typing import Any, Dict, Optional, Union
 
 import click
 
-from hydromt._typing.error import DeprecatedError
 from hydromt.io import configread
 
 logger = logging.getLogger(__name__)
@@ -67,10 +66,6 @@ def parse_json(ctx, param, value: str) -> Dict[str, Any]:
     if isfile(value):
         with open(value, "r") as f:
             kwargs = json.load(f)
-
-    # Catch old keyword for resulution "-r"
-    elif type(literal_eval(value)) in (float, int):
-        raise DeprecatedError("'-r' is used for region, resolution is deprecated")
     else:
         if value.strip("{").startswith("'"):
             value = value.replace("'", '"')

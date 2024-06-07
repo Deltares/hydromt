@@ -55,34 +55,6 @@ def test_geodataframe_entry_validation():
     assert entry.path == Path("hydrography/hydro_atlas/basin_atlas_v10.gpkg")
 
 
-def test_valid_catalog_with_alias():
-    d = {
-        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
-        "chelsa": {"alias": "chelsa_v1.2"},
-        "chelsa_v1.2": {
-            "crs": 4326,
-            "data_type": "RasterDataset",
-            "driver": "raster",
-            "kwargs": {
-                "chunks": {
-                    "x": 3600,
-                    "y": 3600,
-                }
-            },
-            "meta": {
-                "category": "meteo",
-                "paper_doi": "10.1038/sdata.2017.122",
-                "paper_ref": "Karger et al. (2017)",
-                "source_license": "CC BY 4.0",
-                "source_url": "https://chelsa-climate.org/downloads/",
-                "source_version": "1.2",
-            },
-            "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
-        },
-    }
-    _ = DataCatalogValidator.from_dict(d)
-
-
 def test_valid_catalog_variants():
     d = {
         "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
@@ -122,16 +94,6 @@ def test_valid_catalog_variants():
     _ = DataCatalogValidator.from_dict(d)
 
 
-def test_dangling_alias_catalog_entry():
-    d = {
-        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
-        "chelsa": {"alias": "chelsa_v1.2"},
-    }
-
-    with pytest.raises(AssertionError):
-        _ = DataCatalogValidator.from_dict(d)
-
-
 def test_no_hydrmt_version_loggs_warning(caplog):
     d = {
         "meta": {"roots": [""]},
@@ -139,22 +101,6 @@ def test_no_hydrmt_version_loggs_warning(caplog):
 
     _ = DataCatalogValidator.from_dict(d)
     assert "No hydromt version" in caplog.text
-
-
-def test_valid_alias_catalog_entry():
-    d = {
-        "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
-        "chelsa": {"alias": "chelsa_v1.2"},
-        "chelsa_v1.2": {
-            "crs": 4326,
-            "data_type": "RasterDataset",
-            "driver": "raster",
-            "path": ".",
-        },
-    }
-    entry = DataCatalogValidator.from_dict(d)
-
-    assert entry.aliases == {"chelsa": "chelsa_v1.2"}
 
 
 def test_catalog_metadata_validation():

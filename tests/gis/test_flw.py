@@ -1,4 +1,5 @@
 """Test hydromt.flw submodule."""
+
 import geopandas as gpd
 import numpy as np
 import pytest
@@ -121,15 +122,6 @@ def test_clip_basins(hydds, flwdir):
     assert hydds_clipped.where(hydds_clipped["mask"]).max() == upa0
 
 
-def test_basin_shape(hydds, flwdir):
-    # simple test because deprecated
-    with pytest.warns(DeprecationWarning, match="basin_shape is deprecated"):
-        gdf = flw.basin_shape(hydds, flwdir)
-        assert isinstance(gdf, gpd.GeoDataFrame)
-        with pytest.raises(ValueError, match="flwdir and ds dimensions do not match"):
-            flw.basin_shape(hydds.isel(x=slice(1, -1)), flwdir)
-
-
 def test_gauge_map(hydds, flwdir):
     # test with idxs at outlet
     idx0 = np.argmax(hydds["uparea"].values.ravel())
@@ -150,9 +142,6 @@ def test_gauge_map(hydds, flwdir):
     # test warning
     with pytest.warns(UserWarning, match="Snapping distance"):
         flw.gauge_map(hydds, flwdir=flwdir, stream=stream, xy=xy, max_dist=0)
-    # deprecation warning old method
-    with pytest.warns(DeprecationWarning, match='The "gaugemap" method is deprecated'):
-        flw.gaugemap(hydds, idxs=[idx0])
 
 
 def test_outlet_map(hydds, flwdir):
