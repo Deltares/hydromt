@@ -1,6 +1,6 @@
 
 ---
-modeltype: Model
+modeltype: model
 global:
   components:
     grid:
