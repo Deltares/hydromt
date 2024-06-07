@@ -1094,10 +1094,10 @@ class DataCatalog(object):
                         # read slice of source and write to file
                         self.logger.debug(f"Exporting {key}.")
                         if not unit_conversion:
-                            unit_mult = source.unit_mult
-                            unit_add = source.unit_add
-                            source.unit_mult = {}
-                            source.unit_add = {}
+                            unit_mult = source.data_adapter.unit_mult
+                            unit_add = source.data_adapter.unit_add
+                            source.data_adapter.unit_mult = {}
+                            source.data_adapter.unit_add = {}
                         try:
                             fn_out, driver, driver_kwargs = source.to_file(
                                 file_path=Path(data_root) / source.uri,

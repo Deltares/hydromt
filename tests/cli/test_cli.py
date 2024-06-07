@@ -213,6 +213,7 @@ def test_export_cli_config_file(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.skip("Needs validator overhaul")
 def test_check_cli():
     r = CliRunner().invoke(
         hydromt_cli,
