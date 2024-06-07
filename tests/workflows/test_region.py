@@ -6,6 +6,7 @@ import pytest
 import xarray as xr
 import xugrid as xu
 from pytest_mock import MockerFixture
+from shapely import box
 
 from hydromt import DataCatalog
 from hydromt.model.model import Model
@@ -24,30 +25,44 @@ def test_region_from_geom(world):
     assert world is region
 
 
-@pytest.mark.skip("Needs new driver implementation")
-def test_region_from_file(tmpdir, world):
-    fn_gdf = str(tmpdir.join("world.geojson"))
-    world.to_file(fn_gdf, driver="GeoJSON")
-    region = parse_region_geom({"geom": fn_gdf}, crs=None, data_catalog=DataCatalog())
+def create_new_world(world: gpd.GeoDataFrame):
+    rename = {
+        "NAME": "name",
+        "CONTINENT": "continent",
+        "ISO_A3": "iso_a3",
+        "POP_EST": "pop_est",
+        "GDP_MD": "gdp_md_est",
+    }
+    new_world = world[list(rename.keys()) + ["geometry"]].rename(rename, axis=1)
+    new_world.to_file(
+        Path(__name__).absolute().parents[0] / "tests" / "data" / "world_new.gpkg",
+        driver="GPKG",
+    )
+
+
+def test_region_from_file(tmp_dir: Path, world: gpd.GeoDataFrame):
+    uri_gdf = tmp_dir / "world.gpkg"
+    world.to_file(uri_gdf, driver="GPKG")
+    gpd.testing.assert_geodataframe_equal(gpd.read_file(uri_gdf), world)
+    region = parse_region_geom({"geom": uri_gdf}, crs=None, data_catalog=DataCatalog())
     gpd.testing.assert_geodataframe_equal(world, region)
 
 
-@pytest.mark.skip("new driver implementation causes validation error")
 def test_geom_from_cat(tmpdir, world):
-    fn_gdf = str(tmpdir.join("world.geojson"))
-    world.to_file(fn_gdf, driver="GeoJSON")
+    uri_gdf = str(tmpdir.join("world.geojson"))
+    world.to_file(uri_gdf, driver="GeoJSON")
     cat = DataCatalog()
     cat.from_dict(
         {
             "world": {
-                "path": fn_gdf,
+                "uri": uri_gdf,
                 "data_type": "GeoDataFrame",
-                "driver": "vector",
+                "driver": "pyogrio",
             },
         }
     )
     region = parse_region_geom({"geom": "world"}, crs=None, data_catalog=cat)
-    assert isinstance(region["geom"], gpd.GeoDataFrame)
+    assert isinstance(region, gpd.GeoDataFrame)
 
 
 def test_geom_from_points_fails(geodf):
@@ -86,59 +101,69 @@ def test_region_from_grid_cat(tmp_dir: Path, rioda: xr.Dataset):
 
 
 def test_region_from_basin_ids():
-    region = {"basin": [1001, 1002, 1003, 1004, 1005]}
+    basin_ids = [210000018, 210000030, 210000039]
+    region = {"basin": basin_ids}
     region = parse_region_basin(
         region,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert region.get("basid") == [1001, 1002, 1003, 1004, 1005]
+    assert set(map(lambda x: int(x), region["value"])) == set(basin_ids)
 
 
 def test_region_from_basin_id():
-    region = {"basin": 101}
+    basin_id = 210000018
+    region = {"basin": basin_id}
     region = parse_region_basin(
         region,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert region.get("basid") == 101
+    assert set(region["value"]) == {basin_id}
 
 
 def test_region_from_subbasin():
-    region = {"subbasin": [1.0, -1.0], "uparea": 5.0, "bounds": [0.0, -5.0, 3.0, 0.0]}
-    region = parse_region_basin(
-        region,
+    region_dict = {
+        "subbasin": [12.3, 46.2],
+        "uparea": 5.0,
+        "bounds": [12.0, 46.0, 12.5, 46.5],
+    }
+    region: gpd.GeoDataFrame = parse_region_basin(
+        region_dict,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert "xy" in region
-    assert "bounds" in region
+    # area should have something to do with our region
+    assert box(*region_dict["bounds"]).intersects(region.loc[0].geometry)
+    assert region.shape == (1, 2)
 
 
 def test_region_from_basin_xy():
-    region = {"basin": [[1.0, 1.5], [0.0, -1.0]]}
+    region = {"basin": [[12.0, 46.0], [12.3, 46.5]]}
     region = parse_region_basin(
         region,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert "xy" in region
+    assert region.shape == (4, 2)
 
 
-def test_region_from_inter_basin(geodf):
-    region = {"interbasin": geodf}
+def test_region_from_inter_basin():
+    region = {
+        "interbasin": [[12.0, 46.0], [12.3, 46.5]],
+        "bbox": [12.0, 46.0, 12.5, 46.5],
+    }
     region = parse_region_basin(
         region,
         data_catalog=DataCatalog(),
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert "xy" in region
+    assert region.shape == (4, 2)
 
 
 def test_region_from_model(tmpdir, world, mocker: MockerFixture):
@@ -174,7 +199,7 @@ def test_region_value_cat():
 
 def test_region_mesh(griduda):
     mesh = parse_region_mesh({"mesh": griduda})
-    assert mesh == griduda
+    assert np.all(mesh == griduda)
 
 
 def test_parse_region_mesh_path(mocker: MockerFixture):

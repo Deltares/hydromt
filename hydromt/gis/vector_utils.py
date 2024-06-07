@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """GIS related vector convenience functions."""
+
 from __future__ import annotations
 
 import logging
@@ -32,7 +33,7 @@ def nearest_merge(
 ) -> gpd.GeoDataFrame:
     """Merge attributes of gdf2 with the nearest feature of gdf1.
 
-    Output is optionally bounded by a maximumum distance `max_dist`.
+    Output is optionally bounded by a maximum distance `max_dist`.
     Unless `overwrite = True`, gdf2 values are only
     merged where gdf1 has missing values.
 
@@ -57,27 +58,46 @@ def nearest_merge(
     gpd.GeoDataFrame
         Merged GeoDataFrames
     """
+    # Get nearest index right
     idx_nn, dst = nearest(gdf1, gdf2)
     if not inplace:
         gdf1 = gdf1.copy()
     valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
+    # Get relevant columns
     columns = gdf2.columns if columns is None else columns
+    # Set matching index right
     gdf1["distance_right"] = dst
     gdf1["index_right"] = -1
     gdf1.loc[valid, "index_right"] = idx_nn[valid]
+
+    # get matching rows
+    matching_rows_right = gdf2.loc[
+        list(filter(lambda x: x != -1, gdf1["index_right"])), :
+    ]
+    # all left rows should have geometry, so skip
     skip = ["geometry"]
-    for col in columns:
-        if col in skip or col not in gdf2:
-            if col not in gdf2:
-                logger.warning(f"Column {col} not found in gdf2 and skipped.")
-            continue
-        new_vals = gdf2.loc[idx_nn[valid], col].values
-        if col in gdf1 and not overwrite:
-            old_vals = gdf1.loc[valid, col]
-            replace = np.logical_or(old_vals.isnull(), old_vals.eq(""))
-            new_vals = np.where(replace, new_vals, old_vals)
-        gdf1.loc[valid, col] = new_vals
-    return gdf1
+    matching_rows_right = matching_rows_right.drop(skip, axis=1)
+
+    left = gdf1.where(gdf1 != "")  # also replace ""
+
+    # join matching rows, duplicate columns get suffix
+    rsuffix = "__right"
+    joined = left.join(matching_rows_right, on="index_right", rsuffix=rsuffix)
+
+    # merge duplicate columns based on overwrite
+    joined_cols = list(filter(lambda col: col.endswith(rsuffix), joined.columns))
+    orig_cols = list(map(lambda col: col.rstrip(rsuffix), joined_cols))
+    if joined_cols:
+        if not overwrite:
+            joined[orig_cols] = joined.where(
+                joined[orig_cols].notna(), joined[joined_cols]
+            )
+        else:
+            joined[orig_cols] = joined.where(
+                not joined[joined_cols].isna(), joined[orig_cols]
+            )
+
+    return joined
 
 
 def nearest(

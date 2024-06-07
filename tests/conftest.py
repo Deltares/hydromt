@@ -243,9 +243,8 @@ def geodf(df):
 
 
 @pytest.fixture(scope="session")
-def world():
-    world = gpd.read_file(join(DATADIR, "naturalearth_lowres.geojson"))
-    return world
+def world() -> gpd.GeoDataFrame:
+    return gpd.read_file(Path(DATADIR) / "world.gpkg")
 
 
 @pytest.fixture()
