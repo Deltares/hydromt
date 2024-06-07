@@ -249,6 +249,8 @@ def build(
     try:
         # initialize model and create folder structure
         mode = "w+" if fo else "w"
+        if modeltype not in PLUGINS.model_plugins:
+            raise ValueError("Unknown model")
         mod = PLUGINS.model_plugins[modeltype](
             root=model_root,
             mode=mode,
@@ -343,6 +345,8 @@ def update(
     opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     modeltype = opt.pop("modeltype", model)
+    if modeltype not in PLUGINS.model_plugins:
+        raise ValueError("Unknown model")
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
