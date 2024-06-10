@@ -154,7 +154,7 @@ def test_region_from_basin_xy():
 
 def test_region_from_inter_basin():
     region = {
-        "interbasin": [[12.0, 46.0], [12.3, 46.5]],
+        "interbasin": [[12.0, 46.0], [12.3, 46.3]],
         "bbox": [12.0, 46.0, 12.5, 46.5],
     }
     region = parse_region_basin(
