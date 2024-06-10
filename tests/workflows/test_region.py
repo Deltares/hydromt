@@ -40,8 +40,8 @@ def create_new_world(world: gpd.GeoDataFrame):
     )
 
 
-def test_region_from_file(tmp_dir: Path, world: gpd.GeoDataFrame):
-    uri_gdf = tmp_dir / "world.gpkg"
+def test_region_from_file(tmp_path: Path, world: gpd.GeoDataFrame):
+    uri_gdf = tmp_path / "world.gpkg"
     world.to_file(uri_gdf, driver="GPKG")
     gpd.testing.assert_geodataframe_equal(gpd.read_file(uri_gdf), world)
     region = parse_region_geom({"geom": uri_gdf}, crs=None, data_catalog=DataCatalog())
@@ -76,15 +76,15 @@ def test_region_from_grid(rioda):
     xr.testing.assert_equal(region, rioda)
 
 
-def test_region_from_grid_file(tmp_dir: Path, rioda: xr.Dataset):
-    uri_grid = str(tmp_dir / "grid.tif")
+def test_region_from_grid_file(tmp_path: Path, rioda: xr.Dataset):
+    uri_grid = str(tmp_path / "grid.tif")
     rioda.raster.to_raster(uri_grid)
     region = parse_region_grid({"grid": uri_grid}, data_catalog=DataCatalog())
     xr.testing.assert_equal(region, rioda)
 
 
-def test_region_from_grid_cat(tmp_dir: Path, rioda: xr.Dataset):
-    uri_grid = str(tmp_dir / "grid.tif")
+def test_region_from_grid_cat(tmp_path: Path, rioda: xr.Dataset):
+    uri_grid = str(tmp_path / "grid.tif")
     rioda.raster.to_raster(uri_grid)
     cat = DataCatalog()
     cat.from_dict(
