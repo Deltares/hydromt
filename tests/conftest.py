@@ -15,6 +15,7 @@ import xugrid as xu
 import zarr
 from dask import config as dask_config
 from pytest_mock import MockerFixture
+from shapely.geometry import box
 
 from hydromt import (
     Model,
@@ -34,13 +35,16 @@ from hydromt.data_catalog.drivers import GeoDataFrameDriver, RasterDatasetDriver
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 from hydromt.model.components.config import ConfigComponent
+from hydromt.model.components.geoms import GeomsComponent
 from hydromt.model.components.spatial import SpatialModelComponent
+from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
 from hydromt.model.components.vector import VectorComponent
 from hydromt.model.root import ModelRoot
 
 dask_config.set(scheduler="single-threaded")
 
 DATADIR = join(dirname(abspath(__file__)), "data")
+DC_PARAM_PATH = join(DATADIR, "parameters_data.yml")
 
 
 @pytest.fixture()
@@ -285,6 +289,22 @@ def demda():
 
 
 @pytest.fixture()
+def lulcda():
+    """Imitate VITO land use land cover data."""
+    np.random.seed(11)
+    da = xr.DataArray(
+        # vito lulc classes
+        data=np.random.choice([20, 30, 40, 110], size=(15, 10)),
+        dims=("y", "x"),
+        coords={"y": -np.arange(0, 1500, 100), "x": np.arange(0, 1000, 100)},
+        attrs=dict(_FillValue=255),
+    )
+    # NOTE epsg 3785 is deprecated https://epsg.io/3785
+    da.raster.set_crs(3857)
+    return da
+
+
+@pytest.fixture()
 def flwdir(demda):
     # NOTE: single basin!
     return pyflwdir.from_dem(
@@ -394,16 +414,53 @@ def griduda():
 
 
 @pytest.fixture()
-def model(demda, world, obsda):
-    mod = Model(data_libs=["artifact_data"])
-    mod.region.create({"geom": demda.raster.box})
-    mod.setup_config(**{"header": {"setting": "value"}})
-    mod.set_geoms(world, "world")
-    mod.set_maps(demda, "elevtn")
-    mod.set_forcing(obsda, "waterlevel")
-    mod.set_states(demda, "zsini")
-    mod.set_results(obsda, "zs")
+def bbox():
+    bbox = [12.05, 45.30, 12.85, 45.65]
+    return gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
+
+
+@pytest.fixture()
+def grid_model(demda, world, obsda, tmpdir):
+    mod = Model(
+        root=str(tmpdir),
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"grid": {"type": "GridComponent"}},
+        region_component="grid",
+    )
+
+    geoms_component = GeomsComponent(mod)
+    geoms_component.set(world, "world")
+    mod.add_component("geoms", geoms_component)
+
+    config_component = ConfigComponent(mod)
+    config_component.set("header.setting", "value")
+    mod.add_component("config", config_component)
+
+    forcing_component = SpatialDatasetsComponent(mod, region_component="geoms")
+    forcing_component.set(obsda, "waterlevel")
+    mod.add_component("forcing", forcing_component)
+
+    maps_component = SpatialDatasetsComponent(mod, region_component="geoms")
+    maps_component.set(demda, "elevtn")
+    mod.add_component("maps", maps_component)
+
+    states_component = SpatialDatasetsComponent(mod, region_component="geoms")
+    states_component.set(demda, "zsini")
+    mod.add_component("states", states_component)
+
     return mod
+
+
+@pytest.fixture()
+def mesh_model(tmpdir):
+    mesh_model = Model(
+        root=str(tmpdir),
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"mesh": {"type": "MeshComponent"}},
+        region_component="mesh",
+    )
+
+    return mesh_model
 
 
 def _create_vector_model(

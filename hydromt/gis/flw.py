@@ -438,35 +438,6 @@ def reproject_hydrography_like(
 ### hydrography maps ###
 
 
-def gaugemap(
-    ds: xr.Dataset,
-    idxs: Optional[np.ndarray] = None,
-    xy: Optional[Tuple] = None,
-    ids: Optional[np.ndarray] = None,
-    mask: Optional[xr.DataArray] = None,
-    flwdir: Optional[pyflwdir.FlwdirRaster] = None,
-    logger=logger,
-) -> xr.DataArray:
-    """Return map with unique gauge IDs.
-
-    This method is deprecated. See :py:meth:`~hydromt.flw.gauge_map`.
-    """
-    warnings.warn(
-        'The "gaugemap" method is deprecated, use  "hydromt.flw.gauge_map" instead.',
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return gauge_map(
-        ds=ds,
-        idxs=idxs,
-        xy=xy,
-        ids=ids,
-        stream=mask,
-        flwdir=flwdir,
-        logger=logger,
-    )
-
-
 def gauge_map(
     ds: Union[xr.Dataset, xr.DataArray],
     idxs: Optional[np.ndarray] = None,
@@ -676,38 +647,6 @@ def basin_map(
     if idxs is not None:
         xy = flwdir.xy(idxs)
     return da_basins, xy
-
-
-def basin_shape(
-    ds: xr.Dataset,
-    flwdir: pyflwdir.FlwdirRaster,
-    basin_name: str = "basins",
-    mask: bool = True,
-    **kwargs,
-) -> gpd.GeoDataFrame:
-    """Generate basins from a given dataset and flow direction raster.
-
-    This method is be deprecated. Use :py:meth:`~hydromt.flw.basin_map` in combination
-    with :py:meth:`~hydromt.raster.RasterDataArray.vectorize` instead.
-    """
-    warnings.warn(
-        "basin_shape is deprecated, use a combination of hydromt.flw.basin_map"
-        " and hydromt.raster.RasterDataArray.vectorize instead.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    if basin_name not in ds:
-        ds[basin_name] = basin_map(ds, flwdir, **kwargs)[0]
-    elif not np.all(flwdir.shape == ds.raster.shape):
-        raise ValueError("flwdir and ds dimensions do not match")
-    da_basins = ds[basin_name]
-    nodata = da_basins.raster.nodata
-    if mask and "mask" in da_basins.coords and nodata is not None:
-        da_basins = da_basins.where(da_basins.coords["mask"] != 0, nodata)
-        da_basins.raster.set_nodata(nodata)
-    gdf = da_basins.raster.vectorize().set_index("value").sort_index()
-    gdf.index.name = basin_name
-    return gdf
 
 
 def clip_basins(

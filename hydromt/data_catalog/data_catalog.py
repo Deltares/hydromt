@@ -104,8 +104,6 @@ class DataCatalog(object):
             Currently only implemented for tiled rasterdatasets, by default False.
         cache_dir: str, Path, optional
             Folder root path to cach data to, by default ~/.hydromt_data
-        artifact_keys:
-            Deprecated from version v0.5
         logger : logger object, optional
             The logger object used for logging messages. If not provided, the default
             logger will be used.
@@ -1253,7 +1251,7 @@ class DataCatalog(object):
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
-            if geom or bbox:
+            if geom is not None or bbox is not None:
                 mask = parse_geom_bbox_buffer(geom, bbox, buffer)
             else:
                 mask = None
@@ -1774,7 +1772,7 @@ def _process_dict(d: Dict, logger=logger) -> Dict:
 def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
     """Return a flat list of with data name, dictionary of input data_dict.
 
-    Expand possible versions, aliases and variants in data_dict.
+    Expand possible versions and variants in data_dict.
     """
     data_list = []
     for name, source in data_dict.items():

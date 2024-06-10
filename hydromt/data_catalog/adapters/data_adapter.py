@@ -125,14 +125,6 @@ class DataAdapter(object, metaclass=ABCMeta):
                 str(path).split(".")[-1].lower(), self._DEFAULT_DRIVER
             )
         self.driver = driver
-        if "storage_options" in driver_kwargs:
-            warnings.warn(
-                "storage_options should be provided as a separate argument, "
-                "not as part of driver_kwargs",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            storage_options.update(driver_kwargs.pop("storage_options"))
         self.driver_kwargs = driver_kwargs
         self.storage_options = storage_options
         # get filesystem

@@ -181,7 +181,6 @@ class DataCatalogValidator(BaseModel):
 
     meta: Optional[DataCatalogMetaData] = None
     sources: Dict[str, DataCatalogItem] = Field(default_factory=dict)
-    aliases: Dict[str, str] = Field(default_factory=dict)
 
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True,
@@ -197,22 +196,12 @@ class DataCatalogValidator(BaseModel):
             meta = input_dict.pop("meta", None)
             catalog_meta = DataCatalogMetaData.from_dict(meta)
             catalog_entries = {}
-            catalog_aliases = {}
             for entry_name, entry_dict in input_dict.items():
-                if "alias" in entry_dict.keys():
-                    catalog_aliases[entry_name] = entry_dict["alias"]
-                else:
-                    catalog_entries[entry_name] = DataCatalogItem.from_dict(
-                        entry_dict, name=entry_name
-                    )
+                catalog_entries[entry_name] = DataCatalogItem.from_dict(
+                    entry_dict, name=entry_name
+                )
 
-            for src, dst in catalog_aliases.items():
-                assert (
-                    dst in catalog_entries.keys()
-                ), f"{src} references unfound entry {dst}"
-            return DataCatalogValidator(
-                meta=catalog_meta, sources=catalog_entries, aliases=catalog_aliases
-            )
+            return DataCatalogValidator(meta=catalog_meta, sources=catalog_entries)
 
     @staticmethod
     def from_yml(path: str):

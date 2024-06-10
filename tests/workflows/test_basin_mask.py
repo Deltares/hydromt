@@ -133,13 +133,6 @@ def test_basin(caplog):
     )
     assert gdf_bas.index.size == 13
 
-    msg = (
-        'kind="outlets" has been deprecated, use outlets=True in combination with'
-        + ' kind="basin" or kind="interbasin" instead.'
-    )
-    with pytest.warns(DeprecationWarning, match=msg):
-        gdf_bas, gdf_out = get_basin_geometry(ds, kind="outlet")
-
     with pytest.raises(ValueError, match="Unknown kind: watershed,"):
         gdf_bas, gdf_out = get_basin_geometry(ds, kind="watershed")
 

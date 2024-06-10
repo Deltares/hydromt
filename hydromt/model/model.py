@@ -423,6 +423,9 @@ class Model(object, metaclass=ABCMeta):
             cat.from_yml(path)
         # update data catalog with new used sources
         for name, source in self.data_catalog.list_sources(used_only=used_only):
+            # don't have to re add sources we already know
+            if source.name in cat.get_source_names():
+                continue
             cat.add_source(name, source)
         # write data catalog
         if cat.sources:
@@ -451,8 +454,8 @@ class Model(object, metaclass=ABCMeta):
             return False, {
                 "__class__": f"f{other.__class__} does not inherit from {self.__class__}."
             }
-        components = list(self.components.keys())
-        components_other = list(other.components.keys())
+        components = sorted(list(self.components.keys()))
+        components_other = sorted(list(other.components.keys()))
         if components != components_other:
             return False, {
                 "components": f"Components do not match: {components} != {components_other}"
