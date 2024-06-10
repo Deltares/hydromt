@@ -1,4 +1,4 @@
-"""GeoDatasetDriver for zarr data."""
+"""DatasetDriver for zarr data."""
 
 from copy import copy
 from functools import partial
@@ -9,33 +9,29 @@ from typing import Callable, ClassVar, List, Optional
 import xarray as xr
 
 from hydromt._typing import (
-    Geom,
     SourceMetadata,
     StrPath,
     TimeRange,
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
-from hydromt._typing.type_def import Predicate
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
 
 logger: Logger = getLogger(__name__)
 
 
-class GeoDatasetXarrayDriver(GeoDatasetDriver):
-    """GeoDatasetXarrayDriver."""
+class DatasetXarrayDriver(DatasetDriver):
+    """DatasetXarrayDriver."""
 
-    name: ClassVar[str] = "geodataset_xarray"
+    name: ClassVar[str] = "dataset_xarray"
     supports_writing = True
 
     def read_data(
         self,
         uris: List[str],
         *,
-        mask: Optional[Geom] = None,
         metadata: Optional[SourceMetadata] = None,
-        predicate: Predicate = "intersects",
         time_range: Optional[TimeRange] = None,
         variables: Optional[List[str]] = None,
         logger: Logger = logger,
@@ -50,10 +46,9 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         _warn_on_unused_kwargs(
             self.__class__.__name__,
             {
-                "mask": mask,
                 "time_range": time_range,
                 "variables": variables,
-                "predicate": predicate,
+                "metadata": metadata,
             },
             logger,
         )
@@ -94,9 +89,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 filtered_uris, decode_coords="all", preprocess=preprocessor, **options
             )
         else:
-            raise ValueError(
-                f"Unknown extention for GeoDatasetXarrayDriver: {first_ext} "
-            )
+            raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext} ")
         for variable in ds.data_vars:
             if ds[variable].size == 0:
                 exec_nodata_strat(
@@ -108,14 +101,14 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
     def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
         """
-        Write the GeoDataset to a local file using zarr.
+        Write the Dataset to a local file using zarr.
 
         args:
         """
         ext = splitext(path)[-1]
         if ext == ".zarr":
-            ds.vector.to_zarr(path, **kwargs)
+            ds.to_zarr(path, **kwargs)
         elif ext in [".nc", ".netcdf"]:
-            ds.vector.to_netcdf(path, **kwargs)
+            ds.to_netcdf(path, **kwargs)
         else:
-            raise ValueError(f"Unknown extension for GeoDatasetXarrayDriver: {ext} ")
+            raise ValueError(f"Unknown extension for DatasetXarrayDriver: {ext} ")

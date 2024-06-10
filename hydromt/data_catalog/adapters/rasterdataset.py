@@ -20,7 +20,6 @@ from hydromt._typing import (
     Geom,
     NoDataException,
     NoDataStrategy,
-    RasterDatasetSource,
     SourceMetadata,
     StrPath,
     TimeRange,
@@ -40,7 +39,7 @@ from hydromt.gis.raster_utils import cellres, meridian_offset
 
 logger = getLogger(__name__)
 
-__all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
+__all__ = ["RasterDatasetAdapter"]
 
 
 class RasterDatasetAdapter(DataAdapterBase):
