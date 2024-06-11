@@ -16,13 +16,10 @@ from pystac import Item as StacItem
 from pystac import MediaType
 
 from hydromt._typing import (
-    Bbox,
     ErrorHandleMethod,
-    Geom,
     NoDataStrategy,
     StrPath,
     TimeRange,
-    ZoomLevel,
 )
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
@@ -81,11 +78,7 @@ class DatasetSource(DataSource):
         file_path: StrPath,
         *,
         driver_override: Optional[DatasetDriver] = None,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
-        buffer: float = 0.0,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
         **kwargs,
@@ -133,6 +126,35 @@ class DatasetSource(DataSource):
 
     def get_time_range(
         self,
+        detect: bool = True,
+    ) -> TimeRange:
+        """Detect the time range of the dataset.
+
+        if the time range is not set and detect is True,
+        :py:meth:`hydromt.GeoDatasetAdapter.detect_time_range` will be used
+        to detect it.
+
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            whether to detect the time range if it is not set. If False, and it's not
+            set None will be returned.
+
+        Returns
+        -------
+        range: Tuple[np.datetime64, np.datetime64]
+            A tuple containing the start and end of the time dimension. Range is
+            inclusive on both sides.
+        """
+        time_range = self.metadata.extent.get("time_range", None)
+        if time_range is None and detect:
+            time_range = self.detect_time_range()
+
+        return time_range
+
+    def detect_time_range(
+        self,
         ds: Union[xr.DataArray, xr.Dataset] = None,
     ) -> TimeRange:
         """Get the temporal range of a dataset.
@@ -152,7 +174,7 @@ class DatasetSource(DataSource):
             inclusive on both sides.
         """
         if ds is None:
-            ds = self.get_data()
+            ds = self.read_data()
 
         try:
             return (ds.time[0].values, ds.time[-1].values)
@@ -181,12 +203,10 @@ class DatasetSource(DataSource):
           if the dataset was skipped.
         """
         try:
-            bbox, crs = self.get_bbox(detect=True)
-            bbox = list(bbox)
             start_dt, end_dt = self.get_time_range(detect=True)
             start_dt = pd.to_datetime(start_dt)
             end_dt = pd.to_datetime(end_dt)
-            props = {**self.metadata.model_dump(exclude_none=True), "crs": crs}
+            props = {**self.metadata.model_dump(exclude_none=True, exclude_unset=True)}
             ext = splitext(self.full_uri)[-1]
             if ext == ".nc" or ext == ".vrt":
                 media_type = MediaType.HDF5
@@ -208,8 +228,7 @@ class DatasetSource(DataSource):
                 )
                 return
             elif on_error == ErrorHandleMethod.COERCE:
-                bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.data_adapter.meta
+                props = self.metadata.model_dump(exclude_none=True, exclude_unset=True)
                 start_dt = datetime(1, 1, 1)
                 end_dt = datetime(1, 1, 1)
                 media_type = MediaType.JSON
@@ -225,7 +244,7 @@ class DatasetSource(DataSource):
             stac_item = StacItem(
                 self.name,
                 geometry=None,
-                bbox=list(bbox),
+                bbox=None,
                 properties=props,
                 datetime=None,
                 start_datetime=start_dt,

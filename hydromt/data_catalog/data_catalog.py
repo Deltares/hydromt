@@ -52,6 +52,7 @@ from hydromt.data_catalog.predefined_catalog import (
 )
 from hydromt.data_catalog.sources import (
     DataFrameSource,
+    DatasetSource,
     DataSource,
     GeoDataFrameSource,
     GeoDatasetSource,
@@ -1536,10 +1537,12 @@ class DataCatalog(object):
 
     def get_dataset(
         self,
-        data_like: Union[str, SourceSpecDict, Path, xr.Dataset, xr.DataArray],
+        data_like: Union[
+            str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, DatasetSource
+        ],
         variables: Optional[List] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        time_tuple: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1562,7 +1565,7 @@ class DataCatalog(object):
             {'name', 'provider', 'version'}.
             If a path to a file is provided it will be added
             to the catalog with its based on the file basename.
-        time_tuple : tuple of str, datetime, optional
+        time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         single_var_as_array: bool, optional
@@ -1587,16 +1590,16 @@ class DataCatalog(object):
                 source = self.get_source(name, provider=provider, version=version)
             else:
                 if "provider" not in kwargs:
-                    kwargs.update({"provider": "local"})
-                source = DatasetAdapter(path=str(data_like), **kwargs)
+                    kwargs.update({"provider": "user"})
                 name = basename(data_like)
+                source = DatasetSource(uri=str(data_like), name=name, **kwargs)
                 self.add_source(name, source)
 
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             data_like = DatasetAdapter._slice_data(
                 data_like,
                 variables,
-                time_tuple,
+                time_range,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1605,19 +1608,18 @@ class DataCatalog(object):
                     strategy=handle_nodata,
                     logger=logger,
                 )
-            return DatasetAdapter._single_var_as_array(
-                data_like, single_var_as_array, variables
-            )
+            return _single_var_as_array(data_like, single_var_as_array, variables)
         else:
             raise ValueError(f'Unknown data type "{type(data_like).__name__}"')
 
-        obj = source.get_data(
+        obj = source.read_data(
             variables=variables,
-            time_tuple=time_tuple,
-            single_var_as_array=single_var_as_array,
+            time_range=time_range,
             handle_nodata=handle_nodata,
         )
-        return obj
+        return _single_var_as_array(
+            obj, single_var_as_array=single_var_as_array, variable_name=variables
+        )
 
     def get_dataframe(
         self,

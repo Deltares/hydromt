@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import ClassVar, List, Type
 
 import pytest
-import rioxarray  # noqa
 import xarray as xr
 from pydantic import ValidationError
+from pystac import Catalog as StacCatalog
 
 from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_catalog.adapters import DatasetAdapter
@@ -164,3 +164,16 @@ class TestDatasetSource:
         assert new_path.is_file()
         assert new_source.root is None
         assert new_source.driver.filesystem.protocol == ("file", "local")
+
+    def test_dataset_to_stac_catalog(self, tmp_path: Path, timeseries_ds: xr.Dataset):
+        path = tmp_path / "test.nc"
+        timeseries_ds.to_netcdf(path)
+        source_name = "timeseries_dataset"
+        dataset_adapter = DatasetSource(
+            uri=str(path), driver="dataset_xarray", name=source_name
+        )
+
+        stac_catalog = dataset_adapter.to_stac_catalog()
+        assert isinstance(stac_catalog, StacCatalog)
+        stac_item = next(stac_catalog.get_items(source_name), None)
+        assert list(stac_item.assets.keys())[0] == "test.nc"

@@ -161,8 +161,6 @@ class DatasetAdapter(DataAdapterBase):
         ):
             logger.debug(f"Slicing time dim {time_range}")
             ds = ds.sel(time=slice(*time_range))
-            if ds.time.size == 0:
-                raise IndexError("Dataset: Time slice out of range.")
         if _has_no_data(ds):
             return None
         else:
