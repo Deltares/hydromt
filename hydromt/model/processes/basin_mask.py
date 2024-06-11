@@ -5,7 +5,6 @@ Based on pre-cooked basin index files, basin maps or flow direction maps.
 """
 
 import logging
-import warnings
 
 import geopandas as gpd
 import numpy as np
@@ -92,13 +91,6 @@ def get_basin_geometry(
     if kind not in kind_lst:
         msg = f"Unknown kind: {kind}, select from {kind_lst}."
         raise ValueError(msg)
-    if bool(stream_kwargs.pop("within", False)):
-        warnings.warn(
-            '"within" stream argument has been deprecated.',
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
     # check variables
     dvars = [flwdir_name] + [v for v in stream_kwargs]
     for name in dvars:

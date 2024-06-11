@@ -185,6 +185,15 @@ def test_interbasin_outlets(basin_files):
     )
     assert gdf_bas.index.size == 13
 
+    gdf_bas, gdf_out = get_basin_geometry(
+        ds,
+        kind="basin",
+        basin_index=gdf_bas_index,
+        bbox=[12.8, 45.55, 12.9, 45.65],
+        outlets=True,
+    )
+    assert gdf_bas.index.size == 13
+
 
 def test_rejects_unknown_kind(basin_files):
     _, ds, _, _ = basin_files
