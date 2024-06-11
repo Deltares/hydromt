@@ -17,10 +17,7 @@ from hydromt._typing import (
     Variables,
     exec_nodata_strat,
 )
-from hydromt._utils import (
-    _has_no_data,
-    _shift_dataset_time,
-)
+from hydromt._utils import _has_no_data, _set_metadata, _shift_dataset_time
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 
 logger = getLogger(__name__)
@@ -59,7 +56,7 @@ class DatasetAdapter(DataAdapterBase):
                 raise NoDataException()
             # uniformize
             ds = self._apply_unit_conversion(ds, logger=logger)
-            ds = self._set_metadata(ds, metadata)
+            ds = _set_metadata(ds, metadata)
             # return array if single var and single_var_as_array
             return ds
         except NoDataException:
@@ -70,17 +67,6 @@ class DatasetAdapter(DataAdapterBase):
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
         ds = ds.rename(rm)
-        return ds
-
-    def _set_metadata(self, ds: Data, metadata: SourceMetadata) -> Data:
-        if self.attrs:
-            if isinstance(ds, xr.DataArray):
-                ds.attrs.update(metadata.attrs[ds.name])
-            else:
-                for k in metadata.attrs:
-                    ds[k].attrs.update(metadata.attrs[k])
-
-        ds.attrs.update(metadata.model_dump(exclude="attrs"))
         return ds
 
     def _set_nodata(self, ds: Data, metadata: SourceMetadata) -> Data:

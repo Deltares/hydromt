@@ -27,7 +27,6 @@ from hydromt._typing import (
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.gis.gis_utils import parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 
@@ -45,9 +44,6 @@ class DatasetSource(DataSource):
     def read_data(
         self,
         *,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
-        buffer: float = 0,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -59,8 +55,6 @@ class DatasetSource(DataSource):
         Args:
         """
         self._used = True
-        if bbox is not None or (mask is not None and buffer > 0):
-            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
 
         # Transform time_range and variables to match the data source
         tr = self.data_adapter.to_source_timerange(time_range)
@@ -68,7 +62,6 @@ class DatasetSource(DataSource):
 
         ds: xr.Dataset = self.driver.read(
             self.full_uri,
-            mask=mask,
             time_range=tr,
             variables=vrs,
             metadata=self.metadata,
@@ -78,7 +71,6 @@ class DatasetSource(DataSource):
         return self.data_adapter.transform(
             ds,
             self.metadata,
-            mask=mask,
             variables=variables,
             time_range=time_range,
             logger=logger,

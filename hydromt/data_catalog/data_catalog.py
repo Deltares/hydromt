@@ -40,7 +40,6 @@ from hydromt._typing.type_def import StrPath
 from hydromt._utils import _partition_dictionaries, _single_var_as_array
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
-    DataAdapter,
     DataFrameAdapter,
     DatasetAdapter,
     GeoDataFrameAdapter,
@@ -83,7 +82,7 @@ class DataCatalog(object):
         cache: Optional[bool] = False,
         cache_dir: Optional[str] = None,
     ) -> None:
-        """Catalog of DataAdapter sources.
+        """Catalog of sources.
 
         Helps to easily read from different files and keep track of
         files which have been accessed.
@@ -414,10 +413,10 @@ class DataCatalog(object):
 
         Parameters
         ----------
-        source : str
+        name: str
             Name of the data source.
-        adapter : DataAdapter
-            DataAdapter object.
+        source: DataSource
+            DataSource object.
         """
         if not isinstance(source, DataSource):
             raise ValueError("Value must be DataSource")
@@ -482,7 +481,7 @@ class DataCatalog(object):
 
         return sources
 
-    def __iter__(self) -> Iterator[Tuple[str, DataAdapter]]:
+    def __iter__(self) -> Iterator[Tuple[str, DataSource]]:
         """Iterate over sources."""
         return iter(self.list_sources())
 
