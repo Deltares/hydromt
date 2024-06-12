@@ -1181,50 +1181,49 @@ class DataCatalog(object):
         will be returned as :py:class:`xarray.DataArray` rather than
         :py:class:`xarray.Dataset`.
 
-        Arguments
-        ---------
-        data_like: str, Path, Dict, xr.Dataset, xr.Datarray
-            DataCatalog key, path to raster file or raster xarray data object.
+        Parameters
+        ----------
+        data_like : Union[ str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, RasterDatasetSource ]
+            Data catalog key, path to RasterDataset file, a RasterDatasetSource object,
+            or RasterDataset xarray object.
             The catalog key can be a string or a dictionary with the following keys:
             {'name', 'provider', 'version'}.
-            If a path to a raster file is provided it will be added
+            If a path to a file is provided it will be added
             to the catalog with its based on the file basename.
-        bbox : array-like of floats
+        bbox : Optional[List], optional
             (xmin, ymin, xmax, ymax) bounding box of area of interest
-            (in WGS84 coordinates).
-        geom : geopandas.GeoDataFrame/Series,
-            A geometry defining the area of interest.
-        zoom_level : int, tuple, optional
-            Zoom level of the xyz tile dataset (0 is base level)
-            Using a tuple the zoom level can be specified as
-            (<zoom_resolution>, <unit>), e.g., (1000, 'meter')
-        buffer : int, optional
-            Buffer around the `bbox` or `geom` area of interest in pixels. By default 0.
-        handle_nodata: NoDataStrategy, optional
-            What to do if no data can be found.
-        variables : str or list of str, optional.
-            Names of RasterDataset variables to return. By default all dataset variables
-            are returned.
-        time_tuple : tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
-        single_var_as_array: bool, optional
-            If True, return a DataArray if the dataset consists of a single variable.
-            If False, always return a Dataset. By default True.
-        provider: str, optional
-            Data source provider. If None (default) the last added provider is used.
-        version: str, optional
-            Data source version. If None (default) the newest version is used.
+            (in WGS84 coordinates), by default None
+        geom : Optional[gpd.GeoDataFrame], optional
+            A geometry defining the area of interest, by default None
+        buffer : Union[float, int], optional
+            Buffer around the `bbox` or `geom` area of interest in meters, by default 0
+        handle_nodata : NoDataStrategy, optional
+            How to react when no data is found, by default NoDataStrategy.RAISE
+        variables : Optional[List], optional
+            Names of RasterDataset variables to return, or all if None, by default None
+        time_range : Optional[TimeRange], optional
+            Start and end date of period of interest, or entire period if None, by default None
+        single_var_as_array : bool, optional
+            Wether to return a xr.DataArray if the dataset consists of a single variable,
+            by default True
+        provider : Optional[str], optional
+            Specifies a data provider, by default None
+        version : Optional[str], optional
+            Specifies a data version, by default None
         **kwargs:
-            Additional keyword arguments that are passed to the `RasterDatasetAdapter`
-            function. Only used if `data_like` is a path to a raster file.
+            Extra keyword arguments passed to the RasterDatasetSource construction
 
         Returns
         -------
-        obj: xarray.Dataset or xarray.DataArray
-            RasterDataset. If no data is found and handle_nodata is set to IGNORE None
-            will be returned. if it is set to RAISE and exception will be raised in that
-            situation
+        xr.Dataset
+            a clipped, sliced and unified RasterDataset
+
+        Raises
+        ------
+        ValueError
+            If `data_like` is of an unknown type
+        NoDataException
+            If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if isinstance(variables, str):
             variables = [variables]
@@ -1315,48 +1314,53 @@ class DataCatalog(object):
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` argument.
-        To return only the dataframe columns of interest provide the
+        To return only the GeoDataFrame columns of interest provide the
         `variables` argument.
 
-        Arguments
-        ---------
-        data_like: str, Path, gpd.GeoDataFrame
-            Data catalog key, path to vector file or a vector geopandas object.
+        Parameters
+        ----------
+        data_like : Union[ str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDataFrameSource ]
+            Data catalog key, path to vector file, a GeoDataFrameSource object,
+             or a vector geopandas object.
             The catalog key can be a string or a dictionary with the following keys:
             {'name', 'provider', 'version'}.
             If a path to a vector file is provided it will be added
             to the catalog with its based on the file basename.
-        bbox : array-like of floats
+        bbox : Optional[List], optional
             (xmin, ymin, xmax, ymax) bounding box of area of interest
-            (in WGS84 coordinates).
-        geom : geopandas.GeoDataFrame/Series,
-            A geometry defining the area of interest.
-        buffer : float, optional
-            Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
+            (in WGS84 coordinates), by default None
+        geom : Optional[gpd.GeoDataFrame], optional
+            A geometry defining the area of interest, by default None
+        buffer : Union[float, int], optional
+            Buffer around the `bbox` or `geom` area of interest in meters, by default 0
         handle_nodata : NoDataStrategy, optional
-            How to handle no data values, by default NoDataStrategy.RAISE
-        predicate : optional
-            If predicate is provided, the GeoDataFrame is filtered by testing
+            How to react when no data is found, by default NoDataStrategy.RAISE
+        variables : Optional[List], optional
+            Names of GeoDataFrame variables to return, or all if None, by default None
+        predicate : str, optional
+            If predicate is provided, the GeoDataSet is filtered by testing
             the predicate function against each item. Requires bbox or mask.
-            By default 'intersects' options are:
+            options are:
             {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
-        variables : str or list of str, optional.
-            Names of GeoDataFrame columns to return. By default all columns are
-            returned.
-        provider: str, optional
-            Data source provider. If None (default) the last added provider is used.
-        version: str, optional
-            Data source version. If None (default) the newest version is used.
+            by default 'intersects'
+        provider : Optional[str], optional
+            Specifies a data provider, by default None
+        version : Optional[str], optional
+            Specifies a data version, by default None
         **kwargs:
-            Additional keyword arguments that are passed to the `GeoDataFrameAdapter`
-            function. Only used if `data_like` is a path to a vector file.
+            Extra keyword arguments passed to the GeoDataFrameSource construction
 
         Returns
         -------
-        gdf: Optional[geopandas.GeoDataFrame]
-            GeoDataFrame. If no data is found and handle_nodata is set to IGNORE None
-            will be returned. if it is set to RAISE and exception will be raised in that
-            situation
+        gpd.GeoDataFrame
+            a clipped, sliced and unified GeoDataFrame
+
+        Raises
+        ------
+        ValueError
+            If `data_like` is of an unknown type
+        NoDataException
+            If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if geom is not None or bbox is not None:
             mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
@@ -1438,45 +1442,55 @@ class DataCatalog(object):
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than Dataset.
 
-        Arguments
-        ---------
-        data_like: str, Path, xr.Dataset, xr.DataArray
-            Data catalog key, path to geodataset file or geodataset xarray object.
+        Parameters
+        ----------
+        data_like : Union[ str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDatasetSource ]
+            Data catalog key, path to GeoDataset file, a GeoDatasetSource object,
+            or GeoDataset xarray object.
             The catalog key can be a string or a dictionary with the following keys:
             {'name', 'provider', 'version'}.
             If a path to a file is provided it will be added
             to the catalog with its based on the file basename.
-        bbox : array-like of floats
+        bbox : Optional[List], optional
             (xmin, ymin, xmax, ymax) bounding box of area of interest
-            (in WGS84 coordinates).
-        geom : geopandas.GeoDataFrame/Series,
-            A geometry defining the area of interest.
-        buffer : float, optional
-            Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
-        handle_nodata: NoDataStrategy Optional
-            what should happen if the requested data set is empty. RAISE by default
-        predicate : optional
-            If predicate is provided, the GeoDataFrame is filtered by testing
+            (in WGS84 coordinates), by default None
+        geom : Optional[gpd.GeoDataFrame], optional
+            A geometry defining the area of interest, by default None
+        buffer : Union[float, int], optional
+            Buffer around the `bbox` or `geom` area of interest in meters, by default 0
+        handle_nodata : NoDataStrategy, optional
+            How to react when no data is found, by default NoDataStrategy.RAISE
+        predicate : str, optional
+            If predicate is provided, the GeoDataSet is filtered by testing
             the predicate function against each item. Requires bbox or mask.
-            By default 'intersects' options are:
+            options are:
             {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
-        variables : str or list of str, optional.
-            Names of GeoDataset variables to return. By default all dataset variables
-            are returned.
-        time_range: tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
-        single_var_as_array: bool, optional
-            If True, return a DataArray if the dataset consists of a single variable.
-            If False, always return a Dataset. By default True.
+            by default 'intersects'
+        variables : Optional[List], optional
+            Names of GeoDataset variables to return, or all if None, by default None
+        time_range : Optional[TimeRange], optional
+            Start and end date of period of interest, or entire period if None, by default None
+        single_var_as_array : bool, optional
+            Wether to return a xr.DataArray if the dataset consists of a single variable,
+            by default True
+        provider : Optional[str], optional
+            Specifies a data provider, by default None
+        version : Optional[str], optional
+            Specifies a data version, by default None
         **kwargs:
-            Additional keyword arguments that are passed to the `GeoDatasetSource`
-            function. Only used if `data_like` is a path to a geodataset file.
+            Extra keyword arguments passed to the GeoDatasetSource construction
 
         Returns
         -------
-        obj: xarray.Dataset or xarray.DataArray
-            GeoDataset
+        xr.Dataset
+            a clipped, sliced and unified GeoDataset
+
+        Raises
+        ------
+        ValueError
+            If `data_like` is of an unknown type
+        NoDataException
+            If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if geom is not None or bbox is not None:
             mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
@@ -1551,34 +1565,48 @@ class DataCatalog(object):
         """Return a clipped, sliced and unified Dataset.
 
         To slice the data to the time period of interest, provide the
-        `time_tuple` argument. To return only the dataset variables
+        `time_range` argument. To return only the dataset variables
         of interest provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source
         will be returned as xarray.DataArray rather than a xarray.Dataset.
 
-        Arguments
-        ---------
-        data_like: str, Path, xr.Dataset, xr.DataArray, SourceSpecDict
-            Data catalog key, path to geodataset file or geodataset xarray object.
+        Parameters
+        ----------
+        data_like : Union[ str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, DatasetSource ]
+            Data catalog key, path to Dataset file, DatasetSource or Dataset
+            xarray object.
             The catalog key can be a string or a dictionary with the following keys:
             {'name', 'provider', 'version'}.
             If a path to a file is provided it will be added
             to the catalog with its based on the file basename.
-        time_range: tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
-        single_var_as_array: bool, optional
-            If True, return a DataArray if the dataset consists of a single variable.
-            If False, always return a Dataset. By default True.
+        variables : Optional[List], optional
+            Names of Dataset variables to return, or all if None, by default None
+        handle_nodata : NoDataStrategy, optional
+            How to react when no data is found, by default NoDataStrategy.RAISE
+        time_range : Optional[TimeRange], optional
+            Start and end date of period of interest, or entire period if None, by default None
+        single_var_as_array : bool, optional
+            Wether to return a xr.DataArray if the dataset consists of a single variable,
+            by default True
+        provider : Optional[str], optional
+            Specifies a data provider, by default None
+        version : Optional[str], optional
+            Specifies a data version, by default None
         **kwargs:
-            Additional keyword arguments that are passed to the `DatasetAdapter`
-            function. Only used if `data_like` is a path to a geodataset file.
+            Extra keyword arguments passed to the DatasetSource construction
 
         Returns
         -------
-        obj: xarray.Dataset or xarray.DataArray
-            Dataset
+        xr.Dataset
+            a clipped, sliced and unified Dataset
+
+        Raises
+        ------
+        ValueError
+            If `data_like` is of an unknown type
+        NoDataException
+            If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1630,35 +1658,42 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         **kwargs,
-    ):
-        """Return a unified and sliced DataFrame.
+    ) -> pd.DataFrame:
+        """Return a clipped, sliced and unified DataFrame.
 
         Parameters
         ----------
-        data_like : str, Path, pd.DataFrame
-            Data catalog key, path to tabular data file or tabular pandas dataframe.
+        data_like : Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource]
+            Data catalog key, path to tabular data file, DataFrameSource object
+            or tabular pandas dataframe.
             The catalog key can be a string or a dictionary with the following keys:
             {'name', 'provider', 'version'}.
             If a path to a tabular data file is provided it will be added
             to the catalog with its based on the file basename.
-        variables : str or list of str, optional.
-            Names of GeoDataset variables to return. By default all dataset variables
-            are returned.
-        time_range : tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
-        handle_nodata: NoDataStrategy Optional
-            what should happen if the requested data set is empty. RAISE by default
+        variables : Optional[List], optional
+            Names of DataFrame variables to return, or all if None, by default None
+        time_range : Optional[TimeRange], optional
+            Start and end date of period of interest, or entire period if None, by default None
+        handle_nodata : NoDataStrategy, optional
+            How to react when no data is found, by default NoDataStrategy.RAISE
+        provider : Optional[str], optional
+            Specifies a data provider, by default None
+        version : Optional[str], optional
+            Specifies a data version, by default None
         **kwargs:
-            Additional keyword arguments that are passed to the `DataframeAdapter`
-            function. Only used if `data_like` is a path to a tabular data file.
+            Extra keyword arguments passed to the DataFrameSource construction
 
         Returns
         -------
         pd.DataFrame
-            Tabular data. If no data is found and handle_nodata is set to IGNORE None
-            will be returned. if it is set to RAISE and exception will be raised in that
-            situation
+            A unified and sliced DataFrame
+
+        Raises
+        ------
+        ValueError
+            On unknown type of `data_like`
+        NoDataException
+            If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
