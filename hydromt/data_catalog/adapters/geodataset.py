@@ -50,10 +50,40 @@ class GeoDatasetAdapter(DataAdapterBase):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
-        """Return a clipped, sliced and unified RasterDataset.
+        """Return a clipped, sliced and harmonized RasterDataset.
 
-        For a detailed description see:
-        :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+        Parameters
+        ----------
+        ds : xr.Dataset
+            input GeoDataset
+        metadata : SourceMetadata
+            source metadata
+        mask : Optional[gpd.GeoDataFrame], optional
+            mask to filter by geometry, by default None
+        predicate : str, optional
+            predicate to use for the mask filter, by default "intersects"
+        variables : Optional[List[str]], optional
+            variable filter, by default None
+        time_range : Optional[TimeRange], optional
+            filter start and end times, by default None
+        single_var_as_array : bool, optional
+            whether to return a xr.DataArray if only a single variable is present, by default True
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
+        logger : Logger, optional
+            logger to use, by default logger
+
+        Returns
+        -------
+        Optional[Union[xr.Dataset, xr.DataArray]]
+            The filtered and harmonized GeoDataset, or None if no data was available
+
+        Raises
+        ------
+        ValueError
+            if not all variables are found in the data
+        NoDataException
+            if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
         """
         ds = _rename_vars(ds, self.rename)
         ds = GeoDatasetAdapter._validate_spatial_coords(ds)
@@ -134,34 +164,35 @@ class GeoDatasetAdapter(DataAdapterBase):
         time_range: Optional[TimeRange] = None,
         logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
-        """Slice the dataset in space and time.
+        """Filter the GeoDataset.
 
-        Arguments
-        ---------
-        ds : xarray.Dataset or xarray.DataArray
-            The GeoDataset to slice.
-        variables : str or list of str, optional.
-            Names of variables to return.
-        geom : geopandas.GeoDataFrame/Series,
-            A geometry defining the area of interest.
-        bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest
-            (in WGS84 coordinates).
-        buffer : float, optional
-            Buffer distance [m] applied to the geometry or bbox. By default 0 m.
+        Parameters
+        ----------
+        ds : Optional[Union[xr.Dataset, xr.DataArray]]
+            input dataset
+        variables : Optional[List[str]], optional
+            variable filter, by default None
+        mask : Optional[gpd.GeoDataFrame], optional
+            mask to filter by geometry, by default None
         predicate : str, optional
-            Predicate used to filter the GeoDataFrame, see
-            :py:func:`hydromt.gis.vector_utils.filter_gdf` for details.
-        handle_nodata : NoDataStrategy, optional
-            How to handle no data values. By default NoDataStrategy.RAISE.
-        time_tuple : tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
+            predicate to use for the mask filter, by default "intersects"
+        time_range : Optional[TimeRange], optional
+            filter start and end times, by default None
+        logger : Logger, optional
+            logger to use, by default logger
 
         Returns
         -------
-        ds : xarray.Dataset
-            The sliced GeoDataset.
+        Optional[xr.Dataset]
+            the filtered GeoDataSet
+
+        Raises
+        ------
+        ValueError
+            if not all variables are found in the data
+        NoDataException
+            if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
+
         """
         if isinstance(ds, xr.DataArray):
             if ds.name is None:
