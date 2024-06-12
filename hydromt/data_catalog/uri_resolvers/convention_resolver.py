@@ -80,6 +80,7 @@ class ConventionResolver(MetaDataResolver):
         keys: List[str],
         time_range: TimeRange,
     ) -> pd.PeriodIndex:
+        """Obtain the dates the user is searching for."""
         t_range: pd.DatetimeIndex = pd.to_datetime(list(time_range))
         freq: str = "M" if "month" in keys else "Y"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
@@ -88,6 +89,8 @@ class ConventionResolver(MetaDataResolver):
     def _resolve_wildcards(
         self, uris: Iterable[str], fs: AbstractFileSystem
     ) -> Set[str]:
+        """Expand on the wildcards in the uris based on the filesystem."""
+
         def split_and_glob(uri: str) -> Tuple[Optional[str], List[str]]:
             protocol, _ = split_protocol(uri)
             return (protocol, fs.glob(uri))
@@ -131,7 +134,39 @@ class ConventionResolver(MetaDataResolver):
         logger: Logger = logger,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
-        """Resolve the placeholders in the URI."""
+        """Resolve the placeholders in the URI using naming conventions.
+
+        Parameters
+        ----------
+        uri : str
+            Unique Resource Identifier
+        fs : AbstractFileSystem
+            fsspec filesystem used to resolve wildcards in the uri
+        time_range : Optional[TimeRange], optional
+            left-inclusive start end time of the data, by default None
+        mask : Optional[Geom], optional
+            A geometry defining the area of interest, by default None
+        zoom_level : Optional[ZoomLevel], optional
+            zoom_level of the dataset, by default None
+        variables : Optional[List[str]], optional
+            Names of variables to return, or all if None, by default None
+        handle_nodata : NoDataStrategy, optional
+            how to react when no data is found, by default NoDataStrategy.RAISE
+        logger : Logger, optional
+            logger to use, by default logger
+        options : Optional[Dict[str, Any]], optional
+            extra options for this resolver, by default None
+
+        Returns
+        -------
+        List[str]
+            a list of expanded uris
+
+        Raises
+        ------
+        NoDataException
+            when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`
+        """
         _warn_on_unused_kwargs(
             self.__class__.__name__, {"mask": mask, "zoom_level": zoom_level}, logger
         )
