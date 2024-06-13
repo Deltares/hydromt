@@ -1160,20 +1160,20 @@ def test_get_geodataset_unknown_keys(data_catalog):
         data_catalog.get_geodataset({"name": "test"})
 
 
-def test_get_dataset(timeseries_df, data_catalog):
-    test_dataset = timeseries_df.to_xarray()
+def test_get_dataset(timeseries_df: pd.DataFrame, data_catalog: DataCatalog):
+    test_dataset: xr.Dataset = timeseries_df.to_xarray()
     subset_timeseries = timeseries_df.iloc[[0, len(timeseries_df) // 2]]
-    time_tuple = (
+    time_range = (
         subset_timeseries.index[0].to_pydatetime(),
         subset_timeseries.index[1].to_pydatetime(),
     )
-    ds = data_catalog.get_dataset(test_dataset, time_tuple=time_tuple)
+    ds = data_catalog.get_dataset(test_dataset, time_range=time_range)
     assert isinstance(ds, xr.Dataset)
     assert ds.time[-1].values == subset_timeseries.index[1].to_datetime64()
 
 
-def test_get_dataset_variables(timeseries_df, data_catalog):
-    test_dataset = timeseries_df.to_xarray()
+def test_get_dataset_variables(timeseries_df: pd.DataFrame, data_catalog: DataCatalog):
+    test_dataset: xr.Dataset = timeseries_df.to_xarray()
     ds = data_catalog.get_dataset(test_dataset, variables=["col1"])
     assert isinstance(ds, xr.DataArray)
     assert ds.name == "col1"

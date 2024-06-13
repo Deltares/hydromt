@@ -89,7 +89,7 @@ def _set_metadata(
             for k in metadata.attrs:
                 ds[k].attrs.update(metadata.attrs[k])
 
-    ds.attrs.update(metadata)
+    ds.attrs.update(metadata.model_dump(exclude_unset=True, exclude="attrs"))
     return ds
 
 
