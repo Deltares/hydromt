@@ -210,7 +210,9 @@ class TestDatasetSource:
         )
 
     def test_to_stac_catalog_skip(self, dataset_source_no_timerange: DatasetSource):
-        catalog: Optional[StacCatalog] = dataset_source_no_timerange.to_stac_catalog()
+        catalog: Optional[StacCatalog] = dataset_source_no_timerange.to_stac_catalog(
+            on_error=ErrorHandleMethod.SKIP
+        )
         assert catalog is None
 
     def test_to_stac_catalog_coerce(self, dataset_source_no_timerange: DatasetSource):
