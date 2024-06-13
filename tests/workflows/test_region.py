@@ -26,21 +26,6 @@ def test_region_from_geom(world):
     assert world is region
 
 
-def create_new_world(world: gpd.GeoDataFrame):
-    rename = {
-        "NAME": "name",
-        "CONTINENT": "continent",
-        "ISO_A3": "iso_a3",
-        "POP_EST": "pop_est",
-        "GDP_MD": "gdp_md_est",
-    }
-    new_world = world[list(rename.keys()) + ["geometry"]].rename(rename, axis=1)
-    new_world.to_file(
-        Path(__name__).absolute().parents[0] / "tests" / "data" / "world_new.gpkg",
-        driver="GPKG",
-    )
-
-
 def test_region_from_file(tmp_path: Path, world: gpd.GeoDataFrame):
     uri_gdf = tmp_path / "world.gpkg"
     world.to_file(uri_gdf, driver="GPKG")
