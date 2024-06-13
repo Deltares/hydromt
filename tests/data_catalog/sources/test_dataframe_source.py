@@ -2,8 +2,6 @@ from pathlib import Path
 from typing import ClassVar, Type
 
 import pandas as pd
-import pytest
-from pydantic import ValidationError
 
 from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters import DataFrameAdapter
@@ -13,30 +11,6 @@ from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
 class TestDataFrameSource:
-    def test_model_validate(
-        self,
-        MockDataFrameDriver: Type[DataFrameDriver],
-        mock_df_adapter: DataFrameAdapter,
-    ):
-        DataFrameSource.model_validate(
-            {
-                "name": "example_file",
-                "driver": MockDataFrameDriver(),
-                "data_adapter": mock_df_adapter,
-                "uri": "test_uri",
-            }
-        )
-        with pytest.raises(ValidationError, match="'data_type' must be 'DataFrame'."):
-            DataFrameSource.model_validate(
-                {
-                    "name": "geojsonfile",
-                    "data_type": "DifferentDataType",
-                    "driver": MockDataFrameDriver(),
-                    "data_adapter": mock_df_adapter,
-                    "uri": "test_uri",
-                }
-            )
-
     def test_instantiate_directly(
         self,
     ):

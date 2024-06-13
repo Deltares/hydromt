@@ -1,5 +1,6 @@
 from typing import List, Type
 
+import geopandas as gpd
 import pandas as pd
 import pytest
 import xarray as xr
@@ -11,7 +12,11 @@ from hydromt.data_catalog.adapters import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_catalog.drivers import DataFrameDriver, DatasetDriver
+from hydromt.data_catalog.drivers import (
+    DataFrameDriver,
+    DatasetDriver,
+    GeoDataFrameDriver,
+)
 
 # DataFrame
 
@@ -71,6 +76,25 @@ def MockDatasetDriver(timeseries_ds: xr.Dataset) -> Type[DatasetDriver]:
             return timeseries_ds
 
     return MockDatasetDriver
+
+
+# GeoDataFrame
+@pytest.fixture()
+def MockGeoDataFrameDriver(geodf: gpd.GeoDataFrame) -> Type[GeoDataFrameDriver]:
+    class MockGeoDataFrameDriver(GeoDataFrameDriver):
+        name = "mock_geodf_driver"
+        supports_writing = True
+
+        def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
+            pass
+
+        def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
+            return self.read_data([uri], **kwargs)
+
+        def read_data(self, *args, **kwargs) -> gpd.GeoDataFrame:
+            return geodf
+
+    return MockGeoDataFrameDriver
 
 
 # GeoDataset

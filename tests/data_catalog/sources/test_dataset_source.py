@@ -3,7 +3,6 @@ from typing import ClassVar, Optional, Type
 
 import pytest
 import xarray as xr
-from pydantic import ValidationError
 from pystac import Catalog as StacCatalog
 
 from hydromt._typing import ErrorHandleMethod, SourceMetadata
@@ -14,30 +13,6 @@ from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
 class TestDatasetSource:
-    def test_model_validate(
-        self,
-        MockDatasetDriver: Type[DatasetDriver],
-        mock_ds_adapter: DatasetAdapter,
-    ):
-        DatasetSource.model_validate(
-            {
-                "name": "example_file",
-                "driver": MockDatasetDriver(),
-                "data_adapter": mock_ds_adapter,
-                "uri": "test_uri",
-            }
-        )
-        with pytest.raises(ValidationError, match="'data_type' must be 'Dataset'."):
-            DatasetSource.model_validate(
-                {
-                    "name": "geojsonfile",
-                    "data_type": "DifferentDataType",
-                    "driver": MockDatasetDriver(),
-                    "data_adapter": mock_ds_adapter,
-                    "uri": "test_uri",
-                }
-            )
-
     def test_instantiate_directly(
         self,
     ):

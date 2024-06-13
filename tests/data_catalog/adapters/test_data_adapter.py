@@ -27,7 +27,7 @@ def test_gcs_cmip6():
     ds = data_catalog.get_rasterdataset(
         "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
         variables=["precip", "temp"],
-        time_tuple=(("1990-01-01", "1990-03-01")),
+        time_range=(("1990-01-01", "1990-03-01")),
     )
     # Check reading and some preprocess
     assert "precip" in ds
