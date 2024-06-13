@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 import geopandas as gpd
@@ -154,8 +155,8 @@ def test_region_from_basin_xy():
 
 def test_region_from_inter_basin():
     region = {
-        "interbasin": [[12.0, 46.0], [12.3, 46.3]],
-        "bbox": [12.0, 46.0, 12.5, 46.5],
+        "interbasin": [12.0, 46.0, 12.5, 46.5],
+        "xy": [12.0, 46.0],
     }
     region = parse_region_basin(
         region,
@@ -163,7 +164,23 @@ def test_region_from_inter_basin():
         hydrography_fn="merit_hydro",
         basin_index_fn="merit_hydro_index",
     )
-    assert region.shape == (4, 2)
+    assert region.shape == (1, 2)
+
+
+def test_raise_wrong_region_value_for_interbasin():
+    region = {"interbasin": [12.0, 46.0]}
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            r"Region value '[12.0, 46.0]' for kind=interbasin not understood, provide one of geom,bbox"
+        ),
+    ):
+        region = parse_region_basin(
+            region,
+            data_catalog=DataCatalog(),
+            hydrography_fn="merit_hydro",
+            basin_index_fn="merit_hydro_index",
+        )
 
 
 def test_region_from_model(tmpdir, world, mocker: MockerFixture):
