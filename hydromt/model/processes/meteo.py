@@ -1,7 +1,10 @@
 """Implementaion of forcing workflows."""
+
 import logging
 import re
-from typing import Union
+from datetime import timedelta
+from logging import Logger
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -102,14 +105,14 @@ def precip(
 # use dem_model (from staticmaps) and dem_forcing (meteo) in config file
 def temp(
     temp,
-    dem_model,
-    dem_forcing=None,
-    lapse_correction=True,
-    freq=None,
-    reproj_method="nearest_index",
-    lapse_rate=-0.0065,
-    resample_kwargs=None,
-    logger=logger,
+    dem_model: xr.DataArray,
+    dem_forcing: Optional[xr.DataArray] = None,
+    lapse_correction: Optional[bool] = True,
+    freq: Optional[Union[str, timedelta]] = None,
+    reproj_method: Optional[str] = "nearest_index",
+    lapse_rate: Optional[float] = -0.0065,
+    resample_kwargs: Optional[dict] = None,
+    logger: Optional[Logger] = logger,
 ):
     """Return lazy reprojection of temperature to model grid.
 
@@ -123,18 +126,18 @@ def temp(
     dem_model: xarray.DataArray
         DataArray of the target resolution and projection, contains elevation
         data
-    dem_forcing: xarray.DataArray
+    dem_forcing: xarray.DataArray, optional
         DataArray of elevation at forcing resolution. If provided this is used
         with `dem_model` to correct the temperature downscaling using a lapse rate
     lapse_correction : bool, optional
         If True, temperature is correctured based on lapse rate, by default True.
-    freq: str, Timedelta
+    freq: str, Timedelta, optional
         output frequency of timedimension
     reproj_method: str, optional
         Method for spatital reprojection of precip, by default 'nearest_index'
     lapse_rate: float, optional
         lapse rate of temperature [C m-1] (default: -0.0065)
-    resample_kwargs:
+    resample_kwargs: dict, optional
         Additional key-word arguments (e.g. label, closed) for time resampling method
     logger:
         The logger to use.
@@ -182,15 +185,15 @@ def temp(
 
 
 def press(
-    press,
-    dem_model,
-    lapse_correction=True,
-    freq=None,
-    reproj_method="nearest_index",
-    lapse_rate=-0.0065,
-    resample_kwargs=None,
-    logger=logger,
-):
+    press: xr.DataArray,
+    dem_model: xr.DataArray,
+    lapse_correction: Optional[bool] = True,
+    freq: Optional[Union[str, timedelta]] = None,
+    reproj_method: Optional[str] = "nearest_index",
+    lapse_rate: Optional[float] = -0.0065,
+    resample_kwargs: Optional[dict] = None,
+    logger: Optional[Logger] = logger,
+) -> xr.DataArray:
     """Return lazy reprojection of pressure to model grid.
 
     Resample time dimension to frequency.
@@ -422,11 +425,11 @@ def pet(
         logger.info("Calculating Penman-Monteith ref evaporation")
         # Add wind
         # compute wind from u and v components at 10m (for era5)
-        if ("wind10_u" in ds.data_vars) & ("wind10_v" in ds.data_vars):
+        if ("u10" in ds.data_vars) & ("v10" in ds.data_vars):
             ds["wind"] = wind(
                 da_model=dem_model,
-                wind_u=ds["wind10_u"],
-                wind_v=ds["wind10_v"],
+                wind_u=ds["u10"],
+                wind_v=ds["v10"],
                 altitude=wind_altitude,
                 altitude_correction=wind_correction,
             )
@@ -577,7 +580,13 @@ def pet_debruin(
     return pet
 
 
-def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
+def pet_makkink(
+    temp: xr.DataArray,
+    press: xr.DataArray,
+    k_in: xr.DataArray,
+    timestep: Optional[int] = 86400,
+    cp: Optional[float] = 1005.0,
+) -> xr.DataArray:
     """Determnines Makkink reference evapotranspiration.
 
     Parameters
