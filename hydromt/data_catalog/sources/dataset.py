@@ -208,16 +208,12 @@ class DatasetSource(DataSource):
             end_dt = pd.to_datetime(end_dt)
             props = {**self.metadata.model_dump(exclude_none=True, exclude_unset=True)}
             ext = splitext(self.full_uri)[-1]
-            if ext == ".nc" or ext == ".vrt":
+            if ext == ".nc":
                 media_type = MediaType.HDF5
-            elif ext == ".tiff":
-                media_type = MediaType.TIFF
-            elif ext == ".cog":
-                media_type = MediaType.COG
-            elif ext == ".png":
-                media_type = MediaType.PNG
+            elif ext == ".zarr":
+                raise ValueError("STAC does not support zarr datasets")
             else:
-                raise RuntimeError(
+                raise ValueError(
                     f"Unknown extension: {ext} cannot determine media type"
                 )
         except (IndexError, KeyError, CRSError) as e:
@@ -235,24 +231,22 @@ class DatasetSource(DataSource):
             else:
                 raise e
 
-        else:
-            # else makes type checkers a bit happier
-            stac_catalog = StacCatalog(
-                self.name,
-                description=self.name,
-            )
-            stac_item = StacItem(
-                self.name,
-                geometry=None,
-                bbox=None,
-                properties=props,
-                datetime=None,
-                start_datetime=start_dt,
-                end_datetime=end_dt,
-            )
-            stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
-            base_name = basename(self.full_uri)
-            stac_item.add_asset(base_name, stac_asset)
+        stac_catalog = StacCatalog(
+            self.name,
+            description=self.name,
+        )
+        stac_item = StacItem(
+            self.name,
+            geometry=None,
+            bbox=None,
+            properties=props,
+            datetime=None,
+            start_datetime=start_dt,
+            end_datetime=end_dt,
+        )
+        stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
+        base_name = basename(self.full_uri)
+        stac_item.add_asset(base_name, stac_asset)
 
-            stac_catalog.add_item(stac_item)
-            return stac_catalog
+        stac_catalog.add_item(stac_item)
+        return stac_catalog
