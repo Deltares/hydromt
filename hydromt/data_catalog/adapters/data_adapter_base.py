@@ -21,12 +21,17 @@ class DataAdapterBase(BaseModel):
         self,
         time_range: Optional[TimeRange],
     ) -> Optional[TimeRange]:
-        """
-        Tranform a DataSource timerange to the source-native timerange.
+        """Transform a DataSource timerange to the source-native timerange.
 
-        args:
-            time_range: TimeRange
-                start and end datetime.
+        Parameters
+        ----------
+        time_range : Optional[TimeRange]
+            start and end datetime
+
+        Returns
+        -------
+        Optional[TimeRange]
+            time_range in source format
         """
         if time_range is None:
             return None
@@ -39,12 +44,17 @@ class DataAdapterBase(BaseModel):
     def to_source_variables(
         self, variables: Optional[List[str]]
     ) -> Optional[List[str]]:
-        """
-        Transform DataSource variables to the source-native names.
+        """Transform DataSource variables to the source-native names.
 
-        args:
-            variables: Optional[Variables]
-                name(s) of the variables in the data.
+        Parameters
+        ----------
+        variables : Optional[List[str]]
+            name(s) of the variables in the data.
+
+        Returns
+        -------
+        Optional[List[str]]
+            _description_
         """
         if variables:
             inverse_rename_mapping: dict[str, str] = {

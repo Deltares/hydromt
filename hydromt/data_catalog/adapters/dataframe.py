@@ -30,7 +30,33 @@ class DataFrameAdapter(DataAdapterBase):
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
-        """Read transform data to HydroMT standards."""
+        """Transform data to HydroMT standards.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            input DataFrame
+        metadata : Optional[SourceMetadata], optional
+            MetaData of the source, by default None
+        variables : Optional[Variables], optional
+            filter for variables, by default None
+        time_range : Optional[TimeRange], optional
+            filter for start and end times, by default None
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
+
+        Returns
+        -------
+        pd.DataFrame
+            filtered and harmonized DataFrame
+
+        Raises
+        ------
+        ValueError
+            if not all variables are found in the data
+        NoDataException
+            if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
+        """
         # rename variables and parse nodata
         df = self._rename_vars(df)
         df = self._set_nodata(df, metadata)
@@ -73,22 +99,28 @@ class DataFrameAdapter(DataAdapterBase):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
     ) -> Optional[pd.DataFrame]:
-        """Return a sliced DataFrame.
+        """Filter the DataFrame.
 
         Parameters
         ----------
         df : pd.DataFrame
-            the dataframe to be sliced.
-        variables : list of str, optional
-            Names of DataFrame columns to include in the output. By default all columns
-        time_tuple : tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
+            input DataFrame
+        variables : Optional[Variables], optional
+            variables to include, or all if None, by default None
+        time_range : Optional[TimeRange], optional
+            start and end times to include, or all if None, by default None
 
         Returns
         -------
-        pd.DataFrame
-            Tabular data
+        Optional[pd.DataFrame]
+            filtered DataFrame
+
+        Raises
+        ------
+        ValueError
+            if a variable filter is given which does not match the variables available
+        NoDataException
+            if no data remains after slicing and handle_nodata == NoDataStrategy.RAISE
         """
         if variables is not None:
             variables = np.atleast_1d(variables).tolist()
