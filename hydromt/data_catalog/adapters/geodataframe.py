@@ -34,7 +34,37 @@ class GeoDataFrameAdapter(DataAdapterBase):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
-        """Read transform data to HydroMT standards."""
+        """Read transform data to HydroMT standards.
+
+        Parameters
+        ----------
+        gdf : gpd.GeoDataFrame
+            input GeoDataFrame
+        metadata : SourceMetadata
+            source metadata
+        mask : Optional[gpd.GeoDataFrame], optional
+            mask to filter by geometry, by default None
+        variables : Optional[List[str]], optional
+            variable filter, by default None
+        predicate : str, optional
+            predicate to use for the mask filter, by default "intersects"
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
+        logger : Logger, optional
+            logger to use, by default logger
+
+        Returns
+        -------
+        Optional[gpd.GeoDataFrame]
+            filtered and harmonized GeoDataFrame
+
+        Raises
+        ------
+        ValueError
+            if not all variables are found in the data
+        NoDataException
+            if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
+        """
         # rename variables and parse crs & nodata
         try:
             gdf = self._rename_vars(gdf)
@@ -87,30 +117,30 @@ class GeoDataFrameAdapter(DataAdapterBase):
         predicate: str = "intersects",  # TODO: enum available predicates
         logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
-        """Return a clipped GeoDataFrame (vector).
+        """Filter the GeoDataFrame.
 
-        Arguments
-        ---------
-        gdf: gpd.GeoDataFrame
-            GeoDataFrame to slice.
-        variables : str or list of str, optional.
-            Names of GeoDataFrame columns to return.
-        mask: geopandas.GeoDataFrame/Series, optional
-            A geometry defining the area of interest.
-        handle_nodata : NoDataStrategy, optional
-            Strategy to handle no data values. By default NoDataStrategy.RAISE.
+        Parameters
+        ----------
+        gdf : gpd.GeoDataFrame
+            _description_
+        variables : Optional[Union[str, List[str]]], optional
+            variables to include, all when None, by default None
+        mask : Optional[Geom], optional
+            filter by geometry, or keep all if None, by default None
         predicate : str, optional
-            Predicate used to filter the GeoDataFrame, see
-            :py:func:`hydromt.gis_utils.filter_gdf` for details.
-        handle_nodata: NoDataStrategy
-            Strategy to use when resulting GeoDataFrame has no data.
-        logger: Logging.Logger
-            Python logger to use.
+            predicate to use for the geometry filter, by default "intersects"
 
         Returns
         -------
-        gdf: geopandas.GeoDataFrame
-            GeoDataFrame
+        Optional[gpd.GeoDataFrame]
+            filtered GeoDataFrame, or None if no data remains
+
+        Raises
+        ------
+        ValueError
+            if not all variables are found in the data
+        NoDataException
+            if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
         """
         if variables is not None:
             variables = np.atleast_1d(variables).tolist()

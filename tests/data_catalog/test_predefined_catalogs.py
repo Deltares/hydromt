@@ -11,7 +11,7 @@ from hydromt.data_catalog.predefined_catalog import (
 
 @pytest.fixture()
 def cat_root() -> Path:
-    return Path(__file__).parent.parent / "data/catalogs"
+    return Path(__file__).parents[2] / "data/catalogs"
 
 
 @pytest.fixture()
