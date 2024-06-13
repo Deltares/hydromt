@@ -1,3 +1,4 @@
+import numpy as np
 import xarray as xr
 
 from hydromt.data_catalog.drivers.preprocessing import (
@@ -17,4 +18,4 @@ def test_round_latlon():
 
     ds: xr.Dataset = da.to_dataset(name="test")
     res: xr.Dataset = round_latlon(ds, decimals=3)
-    assert round(res.x.data[0], 3) == 0.5
+    assert np.equal(np.round(res.x.data[0], 3), 0.5)

@@ -157,10 +157,40 @@ class RasterDatasetAdapter(DataAdapterBase):
         single_var_as_array: bool = True,
         logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
-        """Return a clipped, sliced and unified RasterDataset.
+        """Filter and harmonize the input RasterDataset.
 
-        For a detailed description see:
-        :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
+        Parameters
+        ----------
+        ds : xr.Dataset
+            input RasterDataset
+        metadata : SourceMetadata
+            source metadata
+        mask : Optional[gpd.GeoDataFrame], optional
+            mask to filter by geometry, by default None
+        zoom_level : Optional[ int ], optional
+            zoom level to filter on, by default None
+        variables : Optional[List[str]], optional
+            variable filter, by default None
+        time_range : Optional[TimeRange], optional
+            filter start and end times, by default None
+        handle_nodata : NoDataStrategy, optional
+            how to handle no data being present in the result, by default NoDataStrategy.RAISE
+        single_var_as_array : bool, optional
+            whether to return a xr.DataArray if only a single variable is present, by default True
+        logger : Logger, optional
+            logger to use, by default logger
+
+        Returns
+        -------
+        Optional[xr.Dataset]
+            The filtered and harmonized RasterDataset, or None if no data was available
+
+        Raises
+        ------
+        ValueError
+            if not all variables are found in the data
+        NoDataException
+            if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
         """
         try:
             if _has_no_data(ds):
@@ -235,30 +265,38 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds: Data,
         variables: Optional[List] = None,
         mask: Optional[Geom] = None,
-        align: Optional[bool] = None,
+        align: Optional[float] = None,
         time_tuple: Optional[TimeRange] = None,
         logger: Logger = logger,
-    ):
-        """Return a RasterDataset sliced in both spatial and temporal dimensions.
+    ) -> Optional[xr.Dataset]:
+        """Filter the RasterDataset.
 
-        Arguments
-        ---------
-        ds : xarray.Dataset or xarray.DataArray
-            The RasterDataset to slice.
-        variables : list of str, optional
-            Names of variables to return. By default all dataset variables
-        mask: geopandas.GeoDataFrame/Series, optional
-            A geometry defining the area of interest.
-        align : float, optional
-            Resolution to align the bounding box, by default None
-        time_tuple : Tuple of datetime, optional
-            A tuple consisting of the lower and upper bounds of time that the
-            result should contain
+        Parameters
+        ----------
+        ds : xr.Dataset
+            input Dataset.
+        variables : Optional[List[str]], optional
+            variable filter, by default None
+        mask : Optional[gpd.GeoDataFrame], optional
+            mask to filter by geometry, by default None
+        align : Optional[float], optional
+            resolution to align the bounding box, by default None
+        time_range : Optional[TimeRange], optional
+            filter start and end times, by default None
+        logger : Logger, optional
+            logger to use, by default logger
 
         Returns
         -------
-        ds : xarray.Dataset
-            The sliced RasterDataset.
+        Optional[Union[xr.Dataset, xr.DataArray]]
+            The filtered and harmonized RasterDataset, or None if no data was available
+
+        Raises
+        ------
+        ValueError
+            if not all variables are found in the data
+        NoDataException
+            if no data in left after slicing and handle_nodata is NoDataStrategy.RAISE
         """
         if isinstance(ds, xr.DataArray):  # xr.DataArray has no variables
             if ds.name is None:
@@ -296,7 +334,7 @@ class RasterDatasetAdapter(DataAdapterBase):
     def _slice_spatial_dimensions(
         ds: Data,
         mask: Optional[Geom] = None,
-        align: Optional[bool] = None,
+        align: Optional[float] = None,
         logger: Logger = logger,
     ):
         # make sure bbox is in data crs
