@@ -44,8 +44,8 @@ from hydromt.data_catalog.sources import (
 from hydromt.gis.gis_utils import to_geographic_bbox
 from hydromt.io.writers import write_xy
 
-CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
-DATADIR = join(dirname(abspath(__file__)), "data")
+CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
+DATADIR = join(dirname(abspath(__file__)), "..", "data")
 
 
 def test_errors_on_no_root_found(tmpdir):
