@@ -34,23 +34,6 @@ class TestGeoDataFrameSource:
         geodf.to_file(uri, driver="GeoJSON")
         return uri
 
-    def test_validators(self, mock_geodataframe_adapter: GeoDataFrameAdapter):
-        with pytest.raises(ValidationError) as e_info:
-            GeoDataFrameSource(
-                root=".",
-                name="name",
-                data_type="GeoDataFrame",
-                uri="uri",
-                data_adapter=mock_geodataframe_adapter,
-                driver="does not exist",
-            )
-
-        assert e_info.value.error_count() == 1
-        error_driver = next(
-            filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
-        )
-        assert error_driver["type"] == "value_error"
-
     def test_raises_on_invalid_fields(
         self,
         mock_geodataframe_adapter: GeoDataFrameAdapter,

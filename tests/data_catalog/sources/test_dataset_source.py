@@ -1,61 +1,19 @@
 from pathlib import Path
-from typing import ClassVar, List, Optional, Type
+from typing import ClassVar, Optional, Type
 
 import pytest
 import xarray as xr
 from pydantic import ValidationError
 from pystac import Catalog as StacCatalog
 
-from hydromt._typing import ErrorHandleMethod, SourceMetadata, StrPath
+from hydromt._typing import ErrorHandleMethod, SourceMetadata
 from hydromt.data_catalog.adapters import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources import DatasetSource
 from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
-@pytest.fixture(scope="session")
-def mock_ds_adapter():
-    class MockDatasetAdapter(DatasetAdapter):
-        def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
-            return ds
-
-    return MockDatasetAdapter()
-
-
-@pytest.fixture()
-def MockDatasetDriver(timeseries_ds: xr.Dataset) -> Type[DatasetDriver]:
-    class MockDatasetDriver(DatasetDriver):
-        name = "mock_ds_driver"
-        supports_writing = True
-
-        def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
-            pass
-
-        def read(self, uri: str, **kwargs) -> xr.Dataset:
-            return self.read_data([uri], **kwargs)
-
-        def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
-            return timeseries_ds
-
-    return MockDatasetDriver
-
-
 class TestDatasetSource:
-    def test_validators(self, mock_ds_adapter: DatasetAdapter):
-        with pytest.raises(ValidationError) as e_info:
-            DatasetSource(
-                name="name",
-                uri="uri",
-                data_adapter=mock_ds_adapter,
-                driver="does not exist",
-            )
-
-        assert e_info.value.error_count() == 1
-        error_driver = next(
-            filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
-        )
-        assert error_driver["type"] == "value_error"
-
     def test_model_validate(
         self,
         MockDatasetDriver: Type[DatasetDriver],

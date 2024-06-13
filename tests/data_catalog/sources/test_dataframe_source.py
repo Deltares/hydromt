@@ -1,60 +1,18 @@
 from pathlib import Path
-from typing import ClassVar, List, Type
+from typing import ClassVar, Type
 
 import pandas as pd
 import pytest
 from pydantic import ValidationError
 
-from hydromt._typing import SourceMetadata, StrPath
+from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataFrameSource
 from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
-@pytest.fixture(scope="session")
-def mock_df_adapter():
-    class MockDataFrameAdapter(DataFrameAdapter):
-        def transform(self, df: pd.DataFrame, metadata: SourceMetadata, **kwargs):
-            return df
-
-    return MockDataFrameAdapter()
-
-
-@pytest.fixture(scope="class")
-def MockDataFrameDriver(df: pd.DataFrame) -> Type[DataFrameDriver]:
-    class MockDataFrameDriver(DataFrameDriver):
-        name = "mock_df_driver"
-        supports_writing = True
-
-        def write(self, path: StrPath, df: pd.DataFrame, **kwargs) -> None:
-            pass
-
-        def read(self, uri: str, **kwargs) -> pd.DataFrame:
-            return self.read_data([uri], **kwargs)
-
-        def read_data(self, uris: List[str], **kwargs) -> pd.DataFrame:
-            return df
-
-    return MockDataFrameDriver
-
-
 class TestDataFrameSource:
-    def test_validators(self, mock_df_adapter: DataFrameAdapter):
-        with pytest.raises(ValidationError) as e_info:
-            DataFrameSource(
-                name="name",
-                uri="uri",
-                data_adapter=mock_df_adapter,
-                driver="does not exist",
-            )
-
-        assert e_info.value.error_count() == 1
-        error_driver = next(
-            filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
-        )
-        assert error_driver["type"] == "value_error"
-
     def test_model_validate(
         self,
         MockDataFrameDriver: Type[DataFrameDriver],

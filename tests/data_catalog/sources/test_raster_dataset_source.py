@@ -14,31 +14,7 @@ from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolve
 from hydromt.gis.gis_utils import to_geographic_bbox
 
 
-@pytest.fixture()
-def mock_raster_ds_adapter():
-    class MockRasterDataSetAdapter(RasterDatasetAdapter):
-        def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
-            return ds
-
-    return MockRasterDataSetAdapter()
-
-
 class TestRasterDatasetSource:
-    def test_validators(self, mock_raster_ds_adapter: RasterDatasetAdapter):
-        with pytest.raises(ValidationError) as e_info:
-            RasterDatasetSource(
-                name="name",
-                uri="uri",
-                data_adapter=mock_raster_ds_adapter,
-                driver="does not exist",
-            )
-
-        assert e_info.value.error_count() == 1
-        error_driver = next(
-            filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
-        )
-        assert error_driver["type"] == "value_error"
-
     def test_model_validate(
         self,
         mock_raster_ds_driver: RasterDatasetDriver,

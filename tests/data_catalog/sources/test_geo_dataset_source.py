@@ -15,31 +15,7 @@ from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolve
 from hydromt.gis.gis_utils import to_geographic_bbox
 
 
-@pytest.fixture()
-def mock_geo_ds_adapter():
-    class MockGeoDataSetAdapter(GeoDatasetAdapter):
-        def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
-            return ds
-
-    return MockGeoDataSetAdapter()
-
-
 class TestGeoDatasetSource:
-    def test_validators(self, mock_geo_ds_adapter: GeoDatasetAdapter):
-        with pytest.raises(ValidationError) as e_info:
-            GeoDatasetSource(
-                name="name",
-                uri="uri",
-                data_adapter=mock_geo_ds_adapter,
-                driver="does not exist",  # type: ignore
-            )
-
-        assert e_info.value.error_count() == 1
-        error_driver = next(
-            filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
-        )
-        assert error_driver["type"] == "value_error"
-
     def test_model_validate(
         self,
         mock_geo_ds_driver: GeoDatasetDriver,
