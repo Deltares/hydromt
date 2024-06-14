@@ -15,24 +15,6 @@ from hydromt.gis.gis_utils import to_geographic_bbox
 
 
 class TestGeoDatasetSource:
-    def test_instantiate_directly(
-        self,
-    ):
-        datasource = GeoDatasetSource(
-            name="test",
-            uri="points.zarr",
-            driver={"name": "geodataset_vector", "metadata_resolver": "convention"},
-            data_adapter={"unit_add": {"geoattr": 1.0}},
-        )
-        assert isinstance(datasource, GeoDatasetSource)
-
-    def test_instantiate_directly_minimal_kwargs(self):
-        GeoDatasetSource(
-            name="test",
-            uri="points.zarr",
-            driver={"name": "geodataset_vector"},
-        )
-
     def test_read_data(
         self,
         geoda: xr.DataArray,

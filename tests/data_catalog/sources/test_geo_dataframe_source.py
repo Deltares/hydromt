@@ -49,33 +49,6 @@ class TestGeoDataFrameSource:
                 foo="bar",
             )
 
-    def test_model_validate(
-        self,
-        mock_geodf_driver: GeoDataFrameDriver,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
-    ):
-        GeoDataFrameSource.model_validate(
-            {
-                "name": "geojsonfile",
-                "data_type": "GeoDataFrame",
-                "driver": mock_geodf_driver,
-                "data_adapter": mock_geodataframe_adapter,
-                "uri": "test_uri",
-            }
-        )
-        with pytest.raises(
-            ValidationError, match="'data_type' must be 'GeoDataFrame'."
-        ):
-            GeoDataFrameSource.model_validate(
-                {
-                    "name": "geojsonfile",
-                    "data_type": "DifferentDataType",
-                    "driver": mock_geodf_driver,
-                    "data_adapter": mock_geodataframe_adapter,
-                    "uri": "test_uri",
-                }
-            )
-
     def test_get_data_query_params(
         self,
         geodf: gpd.GeoDataFrame,
@@ -133,16 +106,6 @@ class TestGeoDataFrameSource:
         )
         with pytest.raises(NoDataException):
             source.read_data()
-
-    def test_instantiate_directly(
-        self,
-    ):
-        GeoDataFrameSource(
-            name="test",
-            uri="points.geojson",
-            driver={"name": "pyogrio", "metadata_resolver": "convention"},
-            data_adapter={"unit_add": {"geoattr": 1.0}},
-        )
 
     def test_instantiate_mixed_objects(self):
         GeoDataFrameSource(

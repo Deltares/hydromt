@@ -13,17 +13,6 @@ from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
 class TestDatasetSource:
-    def test_instantiate_directly(
-        self,
-    ):
-        datasource = DatasetSource(
-            name="test",
-            uri="points.nc",
-            driver={"name": "dataset_xarray", "metadata_resolver": "convention"},
-            data_adapter={"unit_add": {"geoattr": 1.0}},
-        )
-        assert isinstance(datasource, DatasetSource)
-
     def test_instantiate_directly_minimal_kwargs(self):
         DatasetSource(
             name="test",

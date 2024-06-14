@@ -11,17 +11,6 @@ from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
 class TestDataFrameSource:
-    def test_instantiate_directly(
-        self,
-    ):
-        datasource = DataFrameSource(
-            name="test",
-            uri="points.csv",
-            driver={"name": "pandas", "metadata_resolver": "convention"},
-            data_adapter={"unit_add": {"geoattr": 1.0}},
-        )
-        assert isinstance(datasource, DataFrameSource)
-
     def test_instantiate_directly_minimal_kwargs(self):
         DataFrameSource(
             name="test",

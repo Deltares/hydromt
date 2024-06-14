@@ -85,3 +85,26 @@ class TestValidators:
                     "uri": "test_uri",
                 }
             )
+
+    @pytest.mark.parametrize(
+        "source_cls,driver_name",  # noqa: PT006
+        [
+            (DataFrameSource, "pandas"),
+            (DatasetSource, "dataset_xarray"),
+            (GeoDataFrameSource, "pyogrio"),
+            (GeoDatasetSource, "geodataset_xarray"),
+            (RasterDatasetSource, "raster_xarray"),
+        ],
+    )
+    def test_instantiate_directly(
+        self,
+        source_cls: Type[DataSource],
+        driver_name: str,
+    ):
+        datasource = source_cls(
+            name="test",
+            uri="data.format",
+            driver={"name": driver_name, "metadata_resolver": "convention"},
+            data_adapter={"unit_add": {"geoattr": 1.0}},
+        )
+        assert isinstance(datasource, source_cls)
