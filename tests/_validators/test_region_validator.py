@@ -34,10 +34,10 @@ def test_unknown_region_type_validator():
 
 
 def test_geom_validator():
-    b = {"geom": "tests/data/naturalearth_lowres.geojson"}
+    b = {"geom": "tests/data/world.gpkg"}
 
     region = validate_region(b)
-    assert region == PathRegion(path=Path("tests/data/naturalearth_lowres.geojson"))
+    assert region == PathRegion(path=Path("tests/data/world.gpkg"))
 
 
 def test_geom_non_existant_path_validator():

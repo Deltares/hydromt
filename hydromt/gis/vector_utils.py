@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """GIS related vector convenience functions."""
+
 from __future__ import annotations
 
 import logging
@@ -32,7 +33,7 @@ def nearest_merge(
 ) -> gpd.GeoDataFrame:
     """Merge attributes of gdf2 with the nearest feature of gdf1.
 
-    Output is optionally bounded by a maximumum distance `max_dist`.
+    Output is optionally bounded by a maximum distance `max_dist`.
     Unless `overwrite = True`, gdf2 values are only
     merged where gdf1 has missing values.
 
@@ -57,27 +58,22 @@ def nearest_merge(
     gpd.GeoDataFrame
         Merged GeoDataFrames
     """
+    # Get nearest index right
     idx_nn, dst = nearest(gdf1, gdf2)
     if not inplace:
         gdf1 = gdf1.copy()
     valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
-    columns = gdf2.columns if columns is None else columns
     gdf1["distance_right"] = dst
     gdf1["index_right"] = -1
     gdf1.loc[valid, "index_right"] = idx_nn[valid]
-    skip = ["geometry"]
-    for col in columns:
-        if col in skip or col not in gdf2:
-            if col not in gdf2:
-                logger.warning(f"Column {col} not found in gdf2 and skipped.")
-            continue
-        new_vals = gdf2.loc[idx_nn[valid], col].values
-        if col in gdf1 and not overwrite:
-            old_vals = gdf1.loc[valid, col]
-            replace = np.logical_or(old_vals.isnull(), old_vals.eq(""))
-            new_vals = np.where(replace, new_vals, old_vals)
-        gdf1.loc[valid, col] = new_vals
-    return gdf1
+
+    if not overwrite:
+        new_cols = [c for c in gdf2.columns if c not in gdf1.columns]
+        gdf1.loc[:, new_cols] = np.nan
+        return gdf1.combine_first(gdf2)
+    else:
+        left_only_cols = [c for c in gdf1.columns if c not in gdf2.columns]
+        return gdf1[:, left_only_cols].join(gdf2, join="left")
 
 
 def nearest(

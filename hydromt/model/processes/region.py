@@ -122,9 +122,12 @@ def parse_region_basin(
     kwargs = _parse_region_value(value0, data_catalog=data_catalog)
     kwargs.update(var_thresh_kwargs)
 
-    expected_keys = (
-        ["basid", "geom", "bbox", "xy"] if kind == "basin" else ["geom", "bbox", "xy"]
-    )
+    if kind == "basin":
+        expected_keys = ["basid", "geom", "bbox", "xy"]
+    elif kind == "interbasin":
+        expected_keys = ["geom", "bbox"]
+    else:
+        expected_keys = ["geom", "bbox", "xy"]
     _assert_parsed_values(
         key=next(iter(kwargs)), region_value=value0, kind=kind, expected=expected_keys
     )
