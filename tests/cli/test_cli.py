@@ -161,7 +161,7 @@ def test_cli_build_override(tmpdir):
     ]
     _ = CliRunner().invoke(hydromt_cli, cmd)
     # test force overwrite
-    with pytest.raises(IOError, match="Model dir already exists"):
+    with pytest.raises(IOError, match="File.*already exists"):
         _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
 
     r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])

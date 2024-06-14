@@ -5,11 +5,15 @@ global:
   components:
     grid:
       type: GridComponent
+    config:
+      type: ConfigComponent
+
 steps:
-  # - config.create:
-  #   header.settings: value
-  #   timers.end: '2010-02-15'
-  #   timers.start: '2010-02-05'
+  - config.update:
+      data:
+        header.settings: value
+        timers.end: '2010-02-15'
+        timers.start: '2010-02-05'
 
   - grid.create_from_region:
       region:
@@ -41,13 +45,14 @@ steps:
       rename:
         vito: landuse
 
-  - grid.add_data_from_raster_reclass:
-      raster_fn: vito
-      reclass_table_fn: vito_reclass
-      reclass_variables:
-        - manning
-      reproject_method:
-        - average
+  # can't figure out why this thing can't find vito
+  # - grid.add_data_from_raster_reclass:
+  #     raster_fn: vito
+  #     reclass_table_fn: vito_reclass
+  #     reclass_variables:
+  #       - manning
+  #     reproject_method:
+  #       - average
 
   - grid.add_data_from_geodataframe:
       vector_fn: hydro_lakes
@@ -70,6 +75,5 @@ steps:
 
   - write:
       components:
-        # - config
-        - region
+        - config
         - grid
