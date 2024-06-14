@@ -161,6 +161,7 @@ filterwarnings = [
   "ignore::ResourceWarning", # upstream issue with aoihttp, can remove once aoihttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
   "ignore::pytest.PytestUnraisableExceptionWarning", # combine with the above: https://github.com/pytest-dev/pytest/issues/9825
   'ignore:pathlib\.Path\.__enter__:DeprecationWarning',  # xugrid in python 3.11
+#   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
 ]
 
 [tool.mypy]
