@@ -63,41 +63,17 @@ def nearest_merge(
     if not inplace:
         gdf1 = gdf1.copy()
     valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
-    # Get relevant columns
-    columns = gdf2.columns if columns is None else columns
-    # Set matching index right
     gdf1["distance_right"] = dst
     gdf1["index_right"] = -1
     gdf1.loc[valid, "index_right"] = idx_nn[valid]
 
-    # get matching rows
-    matching_rows_right = gdf2.loc[
-        list(filter(lambda x: x != -1, gdf1["index_right"])), :
-    ]
-    # all left rows should have geometry, so skip
-    skip = ["geometry"]
-    matching_rows_right = matching_rows_right.drop(skip, axis=1)
-
-    left = gdf1.where(gdf1 != "")  # also replace ""
-
-    # join matching rows, duplicate columns get suffix
-    rsuffix = "__right"
-    joined = left.join(matching_rows_right, on="index_right", rsuffix=rsuffix)
-
-    # merge duplicate columns based on overwrite
-    joined_cols = list(filter(lambda col: col.endswith(rsuffix), joined.columns))
-    orig_cols = list(map(lambda col: col.rstrip(rsuffix), joined_cols))
-    if joined_cols:
-        if not overwrite:
-            joined[orig_cols] = joined.where(
-                joined[orig_cols].notna(), joined[joined_cols]
-            )
-        else:
-            joined[orig_cols] = joined.where(
-                not joined[joined_cols].isna(), joined[orig_cols]
-            )
-
-    return joined
+    if not overwrite:
+        new_cols = [c for c in gdf2.columns if c not in gdf1.columns]
+        gdf1.loc[:, new_cols] = np.nan
+        return gdf1.combine_first(gdf2)
+    else:
+        left_only_cols = new_cols = [c for c in gdf1.columns if c not in gdf2.columns]
+        return gdf1[:, left_only_cols].join(gdf2, join="left")
 
 
 def nearest(
