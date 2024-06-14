@@ -578,8 +578,6 @@ def export(
     data_catalog = DataCatalog(data_libs=data_libs)
     _ = data_catalog.sources  # initialise lazy loading
 
-    bbox = None
-
     if time_range:
         if isinstance(time_range, str):
             tup = literal_eval(time_range)
