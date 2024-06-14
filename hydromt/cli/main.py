@@ -11,7 +11,6 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import click
 import numpy as np
-from geopandas import GeoDataFrame
 from pydantic import ValidationError
 
 from hydromt import __version__
@@ -505,7 +504,7 @@ def export(
     export_dest_path: Path,
     source: Optional[str],
     time_range: Optional[str],
-    bbox: Tuple[float, float, float, float],
+    bbox: Optional[Tuple[float, float, float, float]],
     config: Optional[Path],
     region: Optional[Dict[Any, Any]],
     data: Optional[List[Path]],
@@ -579,22 +578,7 @@ def export(
     data_catalog = DataCatalog(data_libs=data_libs)
     _ = data_catalog.sources  # initialise lazy loading
 
-    if region:
-        if "bbox" in region:
-            bbox = region["bbox"]
-        elif "geom" in region:
-            bbox = GeoDataFrame.from_file(region["geom"]).total_bounds
-        else:
-            raise NotImplementedError(
-                f"Only bbox and geom are supported for export. recieved {region}"
-            )
-
-        if not set(region.keys()).issubset({"bbox", "geom"}):
-            logger.warning(
-                "Found unsupported arguments for region in addition to bbox or geom. these will be ignored"
-            )
-    else:
-        bbox = None
+    bbox = None
 
     if time_range:
         if isinstance(time_range, str):
