@@ -3,7 +3,7 @@
 from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, cast
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
 
 import pandas as pd
 import xarray as xr
@@ -53,9 +53,10 @@ class RasterDatasetSource(DataSource):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
+        single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         logger: Logger = logger,
-    ) -> Optional[xr.Dataset]:
+    ) -> Union[xr.Dataset, xr.DataArray]:
         """
         Read data from this source.
 
@@ -86,6 +87,7 @@ class RasterDatasetSource(DataSource):
             variables=variables,
             time_range=time_range,
             zoom_level=zoom_level,
+            single_var_as_array=single_var_as_array,
             logger=logger,
         )
 

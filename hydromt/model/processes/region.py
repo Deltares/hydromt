@@ -15,6 +15,7 @@ from shapely import box
 from hydromt._typing import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
+from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.gis import gis_utils
 from hydromt.model.processes.basin_mask import get_basin_geometry
 from hydromt.plugins import PLUGINS
@@ -281,7 +282,7 @@ def parse_region_grid(
         value0,
         handle_nodata=NoDataStrategy.RAISE,
         single_var_as_array=True,
-        driver_kwargs=kwargs,
+        driver={"name": RasterDatasetSource._fallback_driver_read, "options": kwargs},
     )
 
     return da

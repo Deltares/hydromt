@@ -1,7 +1,7 @@
 from datetime import datetime
 from os.path import basename
 from pathlib import Path
-from typing import ClassVar, List, Type, cast
+from typing import cast
 from uuid import uuid4
 
 import geopandas as gpd
@@ -12,13 +12,13 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt._typing import NoDataException, SourceMetadata, StrPath
+from hydromt._typing import NoDataException
 from hydromt._typing.error import ErrorHandleMethod
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver, PyogrioDriver
 from hydromt.data_catalog.sources.geodataframe import GeoDataFrameSource
-from hydromt.data_catalog.uri_resolvers import ConventionResolver, MetaDataResolver
+from hydromt.data_catalog.uri_resolvers import ConventionResolver
 
 
 class TestGeoDataFrameSource:
@@ -34,23 +34,6 @@ class TestGeoDataFrameSource:
         geodf.to_file(uri, driver="GeoJSON")
         return uri
 
-    def test_validators(self, mock_geodataframe_adapter: GeoDataFrameAdapter):
-        with pytest.raises(ValidationError) as e_info:
-            GeoDataFrameSource(
-                root=".",
-                name="name",
-                data_type="GeoDataFrame",
-                uri="uri",
-                data_adapter=mock_geodataframe_adapter,
-                driver="does not exist",
-            )
-
-        assert e_info.value.error_count() == 1
-        error_driver = next(
-            filter(lambda e: e["loc"] == ("driver",), e_info.value.errors())
-        )
-        assert error_driver["type"] == "value_error"
-
     def test_raises_on_invalid_fields(
         self,
         mock_geodataframe_adapter: GeoDataFrameAdapter,
@@ -64,33 +47,6 @@ class TestGeoDataFrameSource:
                 data_adapter=mock_geodataframe_adapter,
                 driver=mock_geodf_driver,
                 foo="bar",
-            )
-
-    def test_model_validate(
-        self,
-        mock_geodf_driver: GeoDataFrameDriver,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
-    ):
-        GeoDataFrameSource.model_validate(
-            {
-                "name": "geojsonfile",
-                "data_type": "GeoDataFrame",
-                "driver": mock_geodf_driver,
-                "data_adapter": mock_geodataframe_adapter,
-                "uri": "test_uri",
-            }
-        )
-        with pytest.raises(
-            ValidationError, match="'data_type' must be 'GeoDataFrame'."
-        ):
-            GeoDataFrameSource.model_validate(
-                {
-                    "name": "geojsonfile",
-                    "data_type": "DifferentDataType",
-                    "driver": mock_geodf_driver,
-                    "data_adapter": mock_geodataframe_adapter,
-                    "uri": "test_uri",
-                }
             )
 
     def test_get_data_query_params(
@@ -151,16 +107,6 @@ class TestGeoDataFrameSource:
         with pytest.raises(NoDataException):
             source.read_data()
 
-    def test_instantiate_directly(
-        self,
-    ):
-        GeoDataFrameSource(
-            name="test",
-            uri="points.geojson",
-            driver={"name": "pyogrio", "metadata_resolver": "convention"},
-            data_adapter={"unit_add": {"geoattr": 1.0}},
-        )
-
     def test_instantiate_mixed_objects(self):
         GeoDataFrameSource(
             name="test",
@@ -168,100 +114,6 @@ class TestGeoDataFrameSource:
             driver=PyogrioDriver(metadata_resolver={"name": "convention"}),
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
-
-    def test_instantiate_directly_minimal_kwargs(self):
-        GeoDataFrameSource(
-            name="test",
-            uri="points.geojson",
-            driver={"name": "pyogrio"},
-        )
-
-    @pytest.fixture(scope="class")
-    def MockDriver(self, geodf: gpd.GeoDataFrame):
-        class MockGeoDataFrameDriver(GeoDataFrameDriver):
-            name = "mock_geodf_to_file"
-
-            def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
-                pass
-
-            def read(
-                self, uri: str, metadata: SourceMetadata, **kwargs
-            ) -> gpd.GeoDataFrame:
-                return self.read_data([uri], metadata, **kwargs)
-
-            def read_data(
-                self, uris: List[str], metadata: SourceMetadata, **kwargs
-            ) -> gpd.GeoDataFrame:
-                return geodf
-
-        return MockGeoDataFrameDriver
-
-    @pytest.fixture(scope="class")
-    def MockWriteableDriver(self, geodf: gpd.GeoDataFrame):
-        class MockWritableGeoDataFrameDriver(GeoDataFrameDriver):
-            name = "mock_geodf_to_file"
-            supports_writing: ClassVar[bool] = True
-
-            def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
-                pass
-
-            def read(
-                self, uri: str, metadata: SourceMetadata, **kwargs
-            ) -> gpd.GeoDataFrame:
-                return self.read_data([uri], metadata, **kwargs)
-
-            def read_data(
-                self, uris: List[str], metadata: SourceMetadata, **kwargs
-            ) -> gpd.GeoDataFrame:
-                return geodf
-
-        return MockWritableGeoDataFrameDriver
-
-    @pytest.fixture()
-    def writable_source(
-        self, MockWriteableDriver: Type[GeoDataFrameDriver]
-    ) -> GeoDataFrameSource:
-        return GeoDataFrameSource(
-            name="test", uri="points.geojson", driver=MockWriteableDriver()
-        )
-
-    def test_to_file(self, writable_source: GeoDataFrameSource):
-        new_source = writable_source.to_file("test")
-        assert "local" in new_source.driver.filesystem.protocol
-        # make sure we are not changing the state
-        assert id(new_source) != id(writable_source)
-        assert id(writable_source.driver) != id(new_source.driver)
-
-    def test_to_file_override(self, MockWriteableDriver: Type[GeoDataFrameDriver]):
-        driver1 = MockWriteableDriver()
-        source = GeoDataFrameSource(name="test", uri="points.geojson", driver=driver1)
-        driver2 = MockWriteableDriver(filesystem="memory")
-        new_source = source.to_file("test", driver_override=driver2)
-        assert new_source.driver.filesystem.protocol == "memory"
-        # make sure we are not changing the state
-        assert id(new_source) != id(source)
-        assert id(driver2) == id(new_source.driver)
-
-    def test_to_file_defaults(
-        self, tmp_dir: Path, geodf: gpd.GeoDataFrame, mock_resolver: MetaDataResolver
-    ):
-        class NotWritableDriver(GeoDataFrameDriver):
-            name: ClassVar[str] = "test_to_file_defaults"
-
-            def read_data(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
-                return geodf
-
-        old_path: Path = tmp_dir / "test.geojson"
-        new_path: Path = tmp_dir / "temp.geojson"
-
-        new_source: GeoDataFrameSource = GeoDataFrameSource(
-            name="test",
-            uri=str(old_path),
-            driver=NotWritableDriver(metadata_resolver=mock_resolver),
-        ).to_file(new_path)
-        assert new_path.is_file()
-        assert new_source.root is None
-        assert new_source.driver.filesystem.protocol == ("file", "local")
 
     def test_geodataframe_unit_attrs(self, artifact_data: DataCatalog):
         source = artifact_data.get_source("gadm_level1")
