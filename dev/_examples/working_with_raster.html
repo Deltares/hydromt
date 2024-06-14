@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.9.5';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.10.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <link rel="icon" href="../_static/hydromt-icon.svg"/>
@@ -543,9 +543,9 @@ document.write(`
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-05-23 08:21:25,410 - raster data - log - INFO - HydroMT version: 0.9.5.dev0
-2024-05-23 08:21:25,431 - raster data - data_catalog - INFO - Reading data catalog artifact_data v0.0.8
-2024-05-23 08:21:25,432 - raster data - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
+2024-06-14 08:45:56,953 - raster data - log - INFO - HydroMT version: 0.10.0.dev0
+2024-06-14 08:45:56,985 - raster data - data_catalog - INFO - Reading data catalog artifact_data v0.0.8
+2024-06-14 08:45:56,985 - raster data - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt_data/artifact_data/v0.0.8/data_catalog.yml
 </pre></div></div>
 </div>
 <p>Here, we illustrate some common GIS problems and how the functionality of the DataArray/Dataset <a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#raster-methods">raster</a> accessor can be used. The data is accessed using the HydroMT <a class="reference external" href="https://deltares.github.io/hydromt/latest/api.html#data-catalog">DataCatalog</a>. For more information see the <a class="reference external" href="https://deltares.github.io/hydromt/latest/_examples/reading_raster_data.html">Reading raster data</a> example.</p>
@@ -569,7 +569,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-05-23 08:21:26,031 - raster data - rasterdataset - INFO - Reading ghs_pop_2015 raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/ghs_pop_2015.tif
+2024-06-14 08:45:57,585 - raster data - rasterdataset - INFO - Reading ghs_pop_2015 raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/ghs_pop_2015.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -578,7 +578,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f92d7910450&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f62526c5490&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -713,7 +713,7 @@ Error: 0.036%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f92dc382390&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f625331db90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -754,7 +754,7 @@ Error: 0.036%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-05-23 08:21:27,440 - raster data - geodataframe - INFO - Reading gadm_level3 vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/gadm_level3.gpkg
+2024-06-14 08:45:58,965 - raster data - geodataframe - INFO - Reading gadm_level3 vector data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/gadm_level3.gpkg
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -883,9 +883,9 @@ valid values surrounding the data gaps is build using voronoi triangulation. The
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-05-23 08:21:42,911 - raster data - rasterdataset - INFO - Reading soilgrids raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/soilgrids/{variable}.tif
-2024-05-23 08:21:42,928 - raster data - rasterdataset - DEBUG - Clip to [12.700, 45.600, 13.000, 45.800] (epsg:4326))
-2024-05-23 08:21:42,929 - raster data - rasterdataset - DEBUG - Convert units for 1 variables.
+2024-06-14 08:46:14,023 - raster data - rasterdataset - INFO - Reading soilgrids raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/soilgrids/{variable}.tif
+2024-06-14 08:46:14,040 - raster data - rasterdataset - DEBUG - Clip to [12.700, 45.600, 13.000, 45.800] (epsg:4326))
+2024-06-14 08:46:14,041 - raster data - rasterdataset - DEBUG - Convert units for 1 variables.
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -894,7 +894,7 @@ valid values surrounding the data gaps is build using voronoi triangulation. The
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f92bd518d90&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f62345a5810&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -919,7 +919,7 @@ valid values surrounding the data gaps is build using voronoi triangulation. The
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f92bd545210&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f623453d2d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -962,12 +962,12 @@ valid values surrounding the data gaps is build using voronoi triangulation. The
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2024-05-23 08:21:43,326 - raster data - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/merit_hydro/{variable}.tif
-2024-05-23 08:21:43,342 - raster data - rasterdataset - DEBUG - Clip to [12.200, 45.300, 13.000, 45.800] (epsg:4326))
+2024-06-14 08:46:14,430 - raster data - rasterdataset - INFO - Reading merit_hydro raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/merit_hydro/{variable}.tif
+2024-06-14 08:46:14,445 - raster data - rasterdataset - DEBUG - Clip to [12.200, 45.300, 13.000, 45.800] (epsg:4326))
 resolution MERIT Hydro: 0.00083
-2024-05-23 08:21:43,347 - raster data - rasterdataset - INFO - Reading gebco raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/gebco.tif
+2024-06-14 08:46:14,449 - raster data - rasterdataset - INFO - Reading gebco raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/gebco.tif
 resolution GEBCO: 0.00417
-2024-05-23 08:21:43,362 - raster data - rasterdataset - INFO - Reading mdt_cnes_cls18 raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/mdt_cnes_cls18.tif
+2024-06-14 08:46:14,464 - raster data - rasterdataset - INFO - Reading mdt_cnes_cls18 raster data from /home/runner/.hydromt_data/artifact_data/v0.0.8/data.tar/mdt_cnes_cls18.tif
 resolution MDT: 0.12500
 </pre></div></div>
 </div>
@@ -977,7 +977,7 @@ resolution MDT: 0.12500
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f92bc371b90&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f623442a390&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1014,7 +1014,7 @@ resolution reprojected GEBCO: 0.00083
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f92bc246c90&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f62342f6c90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
