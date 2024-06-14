@@ -16,6 +16,8 @@ from hydromt.data_catalog.drivers import (
     DataFrameDriver,
     DatasetDriver,
     GeoDataFrameDriver,
+    GeoDatasetDriver,
+    RasterDatasetDriver,
 )
 
 # DataFrame
@@ -101,6 +103,24 @@ def MockGeoDataFrameDriver(geodf: gpd.GeoDataFrame) -> Type[GeoDataFrameDriver]:
 
 
 @pytest.fixture()
+def MockGeoDatasetDriver(geoda: xr.Dataset):
+    class MockGeoDatasetDriver(GeoDatasetDriver):
+        name = "mock_geods_driver"
+
+        def read(self, uri: str, **kwargs) -> xr.Dataset:
+            kinda_ds = self.read_data([uri], **kwargs)
+            if isinstance(kinda_ds, xr.DataArray):
+                return kinda_ds.to_dataset()
+            else:
+                return kinda_ds
+
+        def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
+            return geoda
+
+    return MockGeoDatasetDriver
+
+
+@pytest.fixture()
 def mock_geo_ds_adapter():
     class MockGeoDataSetAdapter(GeoDatasetAdapter):
         def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
@@ -110,6 +130,23 @@ def mock_geo_ds_adapter():
 
 
 # RasterDataset
+
+
+@pytest.fixture()
+def MockRasterDatasetDriver(raster_ds: xr.Dataset):
+    class MockRasterDatasetDriver(RasterDatasetDriver):
+        name = "mock_rasterds_driver"
+
+        def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+            pass
+
+        def read(self, uri: str, **kwargs) -> xr.Dataset:
+            return self.read_data([uri], **kwargs)
+
+        def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
+            return raster_ds
+
+    return MockRasterDatasetDriver
 
 
 @pytest.fixture()

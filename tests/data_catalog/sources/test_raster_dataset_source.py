@@ -4,7 +4,6 @@ from typing import ClassVar, List, Type
 import numpy as np
 import pytest
 import xarray as xr
-from pydantic import ValidationError
 
 from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_catalog.adapters import RasterDatasetAdapter
@@ -15,32 +14,6 @@ from hydromt.gis.gis_utils import to_geographic_bbox
 
 
 class TestRasterDatasetSource:
-    def test_model_validate(
-        self,
-        mock_raster_ds_driver: RasterDatasetDriver,
-        mock_raster_ds_adapter: RasterDatasetAdapter,
-    ):
-        RasterDatasetSource.model_validate(
-            {
-                "name": "zarrfile",
-                "driver": mock_raster_ds_driver,
-                "data_adapter": mock_raster_ds_adapter,
-                "uri": "test_uri",
-            }
-        )
-        with pytest.raises(
-            ValidationError, match="'data_type' must be 'RasterDataset'."
-        ):
-            RasterDatasetSource.model_validate(
-                {
-                    "name": "geojsonfile",
-                    "data_type": "DifferentDataType",
-                    "driver": mock_raster_ds_driver,
-                    "data_adapter": mock_raster_ds_adapter,
-                    "uri": "test_uri",
-                }
-            )
-
     def test_instantiate_directly(
         self,
     ):
@@ -75,22 +48,6 @@ class TestRasterDatasetSource:
             uri=str(tmp_dir / "rasterds.zarr"),
         )
         assert raster_ds == source.read_data()
-
-    @pytest.fixture()
-    def MockDriver(self, raster_ds: xr.Dataset):
-        class MockRasterDatasetDriver(RasterDatasetDriver):
-            name = "mock_rasterds_to_file"
-
-            def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
-                pass
-
-            def read(self, uri: str, **kwargs) -> xr.Dataset:
-                return self.read_data([uri], **kwargs)
-
-            def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
-                return raster_ds
-
-        return MockRasterDatasetDriver
 
     @pytest.fixture()
     def MockWritableDriver(self, raster_ds: xr.Dataset):

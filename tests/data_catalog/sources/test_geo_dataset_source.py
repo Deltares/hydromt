@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import pytest
 import xarray as xr
-from pydantic import ValidationError
 
 from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_catalog.adapters import GeoDatasetAdapter
@@ -16,30 +15,6 @@ from hydromt.gis.gis_utils import to_geographic_bbox
 
 
 class TestGeoDatasetSource:
-    def test_model_validate(
-        self,
-        mock_geo_ds_driver: GeoDatasetDriver,
-        mock_geo_ds_adapter: GeoDatasetAdapter,
-    ):
-        GeoDatasetSource.model_validate(
-            {
-                "name": "zarrfile",
-                "driver": mock_geo_ds_driver,
-                "data_adapter": mock_geo_ds_adapter,
-                "uri": "test_uri",
-            }
-        )
-        with pytest.raises(ValidationError, match="'data_type' must be 'GeoDataset'."):
-            GeoDatasetSource.model_validate(
-                {
-                    "name": "geojsonfile",
-                    "data_type": "DifferentDataType",
-                    "driver": mock_geo_ds_driver,
-                    "data_adapter": mock_geo_ds_adapter,
-                    "uri": "test_uri",
-                }
-            )
-
     def test_instantiate_directly(
         self,
     ):
@@ -75,23 +50,6 @@ class TestGeoDatasetSource:
         )
         read_data = source.read_data()
         assert read_data.equals(geoda)
-
-    @pytest.fixture()
-    def MockDriver(self, geoda: xr.Dataset):
-        class MockGeoDatasetDriver(GeoDatasetDriver):
-            name = "mock_geods_to_file"
-
-            def read(self, uri: str, **kwargs) -> xr.Dataset:
-                kinda_ds = self.read_data([uri], **kwargs)
-                if isinstance(kinda_ds, xr.DataArray):
-                    return kinda_ds.to_dataset()
-                else:
-                    return kinda_ds
-
-            def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
-                return geoda
-
-        return MockGeoDatasetDriver
 
     @pytest.fixture()
     def MockWritableDriver(self, geoda: xr.Dataset):
@@ -168,9 +126,9 @@ class TestGeoDatasetSource:
         assert new_source.driver.filesystem.protocol == ("file", "local")
 
     def test_raises_on_write_with_incapable_driver(
-        self, MockDriver: Type[GeoDatasetDriver]
+        self, MockGeoDatasetDriver: Type[GeoDatasetDriver]
     ):
-        mock_driver = MockDriver()
+        mock_driver = MockGeoDatasetDriver()
         source = GeoDatasetSource(
             name="test",
             uri="geoda.zarr",

@@ -53,6 +53,8 @@ class TestValidators:
             (DataFrameSource, "MockDataFrameDriver", "mock_df_adapter"),
             (DatasetSource, "MockDatasetDriver", "mock_ds_adapter"),
             (GeoDataFrameSource, "MockGeoDataFrameDriver", "mock_geodataframe_adapter"),
+            (GeoDatasetSource, "MockGeoDatasetDriver", "mock_geo_ds_adapter"),
+            (RasterDatasetSource, "MockRasterDatasetDriver", "mock_raster_ds_adapter"),
         ],
     )
     def test_model_validates_correctly(
