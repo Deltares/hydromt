@@ -150,6 +150,24 @@ def test_export_cli_no_data_ignore(tmpdir):
         )
 
 
+def test_cli_build_override(tmpdir):
+    root = str(tmpdir.join("grid_model_region"))
+    cmd = [
+        "build",
+        "test_model",
+        root,
+        "-i",
+        "tests/data/test_model_config.yml",
+    ]
+    _ = CliRunner().invoke(hydromt_cli, cmd)
+    # test force overwrite
+    with pytest.raises(IOError, match="Model dir already exists"):
+        _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+
+    r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
+    assert r.exit_code == 0
+
+
 @pytest.mark.skip(
     "Needs implementation of https://github.com/Deltares/hydromt/issues/886"
 )

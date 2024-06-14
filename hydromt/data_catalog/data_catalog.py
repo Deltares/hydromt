@@ -1092,7 +1092,7 @@ class DataCatalog(object):
         # export data and update sources
         for key, available_variants in sources.items():
             for provider, available_versions in available_variants.items():
-                for source in available_versions.values():
+                for version, source in available_versions.items():
                     try:
                         # read slice of source and write to file
                         self.logger.debug(f"Exporting {key}.")
@@ -1147,7 +1147,7 @@ class DataCatalog(object):
                         if provider not in sources_out[key]:
                             sources_out[key][provider] = {}
 
-                        # sources_out[key][provider][version] = source
+                        sources_out[key][provider][version] = source
                     except FileNotFoundError:
                         self.logger.warning(f"{key} file not found at {source.path}")
 

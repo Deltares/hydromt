@@ -260,7 +260,7 @@ def build(
         )
         mod.data_catalog.cache = cache
         # build model
-        mod.build(opt=opt)
+        mod.build(steps=opt["steps"])
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
