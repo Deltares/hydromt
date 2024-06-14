@@ -7,7 +7,7 @@ from datetime import datetime
 from json import loads as json_decode
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import click
 import numpy as np
@@ -482,8 +482,13 @@ def check(
 )
 @click.option(
     "-t",
-    "--time-tuple",
+    "--time-range",
     help="Time tuple as a list of two strings, e.g. ['2010-01-01', '2022-12-31']",
+)
+@click.option(
+    "-b",
+    "--bbox",
+    help="a bbox in EPSG:4236 designating the region of which to export the data",
 )
 @region_opt
 @export_dest_path
@@ -499,7 +504,8 @@ def export(
     ctx: click.Context,
     export_dest_path: Path,
     source: Optional[str],
-    time_tuple: Optional[str],
+    time_range: Optional[str],
+    bbox: Tuple[float, float, float, float],
     config: Optional[Path],
     region: Optional[Dict[Any, Any]],
     data: Optional[List[Path]],
@@ -559,7 +565,7 @@ def export(
         config_dict = _utils.parse_config(config)["export_data"]
         if "data_libs" in config_dict.keys():
             data_libs = data_libs + config_dict.pop("data_libs")
-        time_tuple = config_dict.pop("time_tuple", None)
+        time_range = config_dict.pop("time_range", None)
         region = region or config_dict.pop("region", None)
         if isinstance(region, str):
             region = json_decode(region)
@@ -590,11 +596,11 @@ def export(
     else:
         bbox = None
 
-    if time_tuple:
-        if isinstance(time_tuple, str):
-            tup = literal_eval(time_tuple)
+    if time_range:
+        if isinstance(time_range, str):
+            tup = literal_eval(time_range)
         else:
-            tup = time_tuple
+            tup = time_range
         time_start = datetime.strptime(tup[0], "%Y-%m-%d")
         time_end = datetime.strptime(tup[1], "%Y-%m-%d")
         time_tup = (time_start, time_end)
@@ -606,11 +612,12 @@ def export(
             export_dest_path,
             source_names=sources,
             bbox=bbox,
-            time_tuple=time_tup,
+            time_range=time_tup,
             unit_conversion=unit_conversion,
             meta=meta,
             append=append,
             handle_nodata=handle_nodata,
+            forced_overwrite=fo,
         )
 
     except Exception as e:

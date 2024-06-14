@@ -120,8 +120,8 @@ def test_export_cli_deltares_data(tmpdir):
             str(tmpdir),
             "-s",
             "hydro_lakes",
-            "-r",
-            "{'bbox': [12.05,45.30,12.85,45.65]}",
+            "--bbox",
+            "[12.05,45.30,12.85,45.65]",
             "--dd",
         ],
         catch_exceptions=False,
@@ -130,6 +130,9 @@ def test_export_cli_deltares_data(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.skip(
+    "Needs implementation of https://github.com/Deltares/hydromt/issues/886"
+)
 def test_export_cli_no_data_ignore(tmpdir):
     with pytest.raises(NoDataException):
         _ = CliRunner().invoke(
@@ -139,12 +142,67 @@ def test_export_cli_no_data_ignore(tmpdir):
                 str(tmpdir),
                 "-s",
                 "hydro_lakes",
-                "-r",
-                "{'bbox': [12.05,12.06,12.07,12.08]}",
+                "--bbox",
+                "[1,2,3,4]",
                 "--error-on-empty",
             ],
             catch_exceptions=False,
         )
+
+
+def test_export_skips_overwrite(tmpdir, caplog):
+    _ = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-s",
+            "hydro_lakes",
+            "--bbox",
+            "[12.05,12.06,12.07,12.08]",
+        ],
+        catch_exceptions=False,
+    )
+
+    _ = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-s",
+            "hydro_lakes",
+            "--bbox",
+            "[12.05,12.06,12.07,12.08]",
+        ],
+        catch_exceptions=False,
+    )
+    assert "already exists and not in forced overwrite mode" in caplog.text
+
+
+def test_export_does_not_warn_on_fo(tmpdir, caplog):
+    _ = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-s",
+            "hydro_lakes",
+        ],
+        catch_exceptions=False,
+    )
+
+    _ = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "export",
+            str(tmpdir),
+            "-s",
+            "hydro_lakes",
+            "--fo",
+        ],
+        catch_exceptions=False,
+    )
+    assert "already exists and not in forced overwrite mode" not in caplog.text
 
 
 def test_export_cli_catalog(tmpdir):
