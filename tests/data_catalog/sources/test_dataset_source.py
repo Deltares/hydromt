@@ -13,13 +13,6 @@ from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
 class TestDatasetSource:
-    def test_instantiate_directly_minimal_kwargs(self):
-        DatasetSource(
-            name="test",
-            uri="points.nc",
-            driver={"name": "dataset_xarray"},
-        )
-
     def test_read_data(
         self,
         MockDatasetDriver: Type[DatasetDriver],

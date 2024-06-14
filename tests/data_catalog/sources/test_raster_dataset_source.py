@@ -14,13 +14,6 @@ from hydromt.gis.gis_utils import to_geographic_bbox
 
 
 class TestRasterDatasetSource:
-    def test_instantiate_directly_minimal_kwargs(self):
-        RasterDatasetSource(
-            name="test",
-            uri="points.zarr",
-            driver={"name": "raster_xarray"},
-        )
-
     def test_read_data(
         self,
         raster_ds: xr.Dataset,

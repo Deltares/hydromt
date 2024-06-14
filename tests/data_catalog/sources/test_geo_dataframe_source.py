@@ -115,13 +115,6 @@ class TestGeoDataFrameSource:
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
 
-    def test_instantiate_directly_minimal_kwargs(self):
-        GeoDataFrameSource(
-            name="test",
-            uri="points.geojson",
-            driver={"name": "pyogrio"},
-        )
-
     @pytest.fixture(scope="class")
     def MockDriver(self, geodf: gpd.GeoDataFrame):
         class MockGeoDataFrameDriver(GeoDataFrameDriver):

@@ -11,13 +11,6 @@ from hydromt.data_catalog.uri_resolvers import MetaDataResolver
 
 
 class TestDataFrameSource:
-    def test_instantiate_directly_minimal_kwargs(self):
-        DataFrameSource(
-            name="test",
-            uri="points.csv",
-            driver={"name": "pandas"},
-        )
-
     def test_read_data(
         self,
         MockDataFrameDriver: Type[DataFrameDriver],

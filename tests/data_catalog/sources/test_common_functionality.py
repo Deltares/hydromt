@@ -108,3 +108,22 @@ class TestValidators:
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
         assert isinstance(datasource, source_cls)
+
+    @pytest.mark.parametrize(
+        "source_cls,driver_name",  # noqa: PT006
+        [
+            (DataFrameSource, "pandas"),
+            (DatasetSource, "dataset_xarray"),
+            (GeoDataFrameSource, "pyogrio"),
+            (GeoDatasetSource, "geodataset_xarray"),
+            (RasterDatasetSource, "raster_xarray"),
+        ],
+    )
+    def test_instantiate_directly_minimal_kwargs(
+        self, source_cls: Type[DataSource], driver_name: str
+    ):
+        source_cls(
+            name="test",
+            uri="points.csv",
+            driver=driver_name,
+        )
