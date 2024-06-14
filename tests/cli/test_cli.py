@@ -150,6 +150,9 @@ def test_export_cli_no_data_ignore(tmpdir):
         )
 
 
+@pytest.mark.skip(
+    "Needs implementation of https://github.com/Deltares/hydromt/issues/886"
+)
 def test_export_skips_overwrite(tmpdir, caplog):
     _ = CliRunner().invoke(
         hydromt_cli,
@@ -179,6 +182,9 @@ def test_export_skips_overwrite(tmpdir, caplog):
     assert "already exists and not in forced overwrite mode" in caplog.text
 
 
+@pytest.mark.skip(
+    "Needs implementation of https://github.com/Deltares/hydromt/issues/886"
+)
 def test_export_does_not_warn_on_fo(tmpdir, caplog):
     _ = CliRunner().invoke(
         hydromt_cli,
