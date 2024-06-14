@@ -6,9 +6,11 @@ import xarray as xr
 
 from hydromt.gis.raster import full_from_transform
 from hydromt.model.processes.meteo import (
+    PET_METHODS,
     pet,
     pet_debruin,
     pet_makkink,
+    pm_fao56,
     precip,
     press,
     press_correction,
@@ -20,7 +22,9 @@ from hydromt.model.processes.meteo import (
 
 @pytest.fixture()
 def era5_data(data_catalog):
-    return data_catalog.get_rasterdataset("era5_daily_zarr")
+    era5 = data_catalog.get_rasterdataset("era5_daily_zarr")
+    era5 = era5.rename({"v10": "wind10_v", "u10": "wind10_u"})
+    return era5
 
 
 @pytest.fixture()
@@ -85,20 +89,38 @@ def test_wind(era5_data, era5_dem):
     ):
         wind(era5_dem)
     with pytest.raises(ValueError, match='First wind dim should be "time", not test'):
-        wind(era5_dem, era5_data["u10"].rename({"time": "test"}))
+        wind(era5_dem, era5_data["wind10_u"].rename({"time": "test"}))
 
     wind_out = wind(
-        era5_dem, wind_u=era5_data["u10"], wind_v=era5_data["v10"], freq="h"
+        era5_dem, wind_u=era5_data["wind10_u"], wind_v=era5_data["wind10_v"], freq="h"
     )
     assert wind_out.name == "wind"
     assert wind_out.attrs.get("unit") == "m s-1"
     assert wind_out.sizes["time"] == 313
 
 
+def test_pet_makkink_debruin_methods(era5_data, era5_dem):
+    peto = pet(era5_data, era5_data["temp"], era5_dem, method="makkink")
+    assert isinstance(peto, xr.DataArray)
+    assert peto.raster.shape == era5_dem.raster.shape
+    assert peto.name == "pet"
+    np.testing.assert_almost_equal(peto.mean(), 0.71128, decimal=4)
+
+    peto = pet(era5_data, era5_data["temp"], era5_dem, method="debruin")
+    assert peto.raster.shape == era5_dem.raster.shape
+    np.testing.assert_almost_equal(peto.mean(), 0.8539, decimal=4)
+
+    with pytest.raises(
+        ValueError,
+        match=f"Unknown pet method 'makking', select from {','.join(PET_METHODS)}",
+    ):
+        pet(era5_data, era5_data["temp"], era5_dem, method="makking")
+
+
 @pytest.mark.skip(
     reason="era5 in v1 artifact_data is missing variables needed for this test"
 )
-def test_pet(era5_data, era5_dem):
+def test_pet_penman_monteith_method(era5_data, era5_dem):
     peto = pet(era5_data, era5_data, era5_dem, method="penman-monteith_tdew")
 
     assert peto.raster.shape == era5_dem.raster.shape
@@ -117,8 +139,7 @@ def test_temp_correction(era5_dem):
     np.testing.assert_almost_equal(temp_cor.mean(), -4.5743, decimal=4)
 
 
-def test_pet_debruin(data_catalog):
-    era5_data = data_catalog.get_rasterdataset("era5_daily_zarr")
+def test_pet_debruin(era5_data):
     pet = pet_debruin(
         era5_data["temp"], era5_data["press_msl"], era5_data["kin"], era5_data["kout"]
     )
@@ -126,8 +147,26 @@ def test_pet_debruin(data_catalog):
     np.testing.assert_almost_equal(pet.mean(), 0.8540, decimal=4)
 
 
-def test_pet_makkink(data_catalog):
-    era5_data = data_catalog.get_rasterdataset("era5_daily_zarr")
+def test_pet_makkink(era5_data):
     pet = pet_makkink(era5_data["temp"], era5_data["press_msl"], era5_data["kin"])
     assert isinstance(pet, xr.DataArray)
     np.testing.assert_almost_equal(pet.mean(), 0.7113, decimal=4)
+
+
+def test_pm_fao56(era5_data, era5_dem):
+    fake_dew = era5_data["temp"] - 2
+    wind_out = wind(
+        era5_dem, wind_u=era5_data["wind10_u"], wind_v=era5_data["wind10_v"]
+    )
+    pet = pm_fao56(
+        era5_data["temp"],
+        era5_data["temp_max"],
+        era5_data["temp_min"],
+        era5_data["press_msl"],
+        era5_data["kin"],
+        wind_out,
+        fake_dew,
+        era5_dem,
+    )
+    assert isinstance(pet, xr.DataArray)
+    np.testing.assert_almost_equal(pet.mean(), 0.4720, decimal=4)

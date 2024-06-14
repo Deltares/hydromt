@@ -3,7 +3,7 @@
 import logging
 import re
 from logging import Logger
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -28,6 +28,20 @@ __all__ = [
     "pet_debruin",
     "pet_makkink",
     "pm_fao56",
+]
+
+PET_METHODS = [
+    "debruin",
+    "makkink",
+    "penman-monteith_rh_simple",
+    "penman-monteith_tdew",
+]
+
+PetMethods = Literal[
+    "debruin",
+    "makking",
+    "penman-monteith_rh_simple",
+    "penman-monteith_tdew",
 ]
 
 
@@ -318,7 +332,7 @@ def pet(
     ds: xarray.Dataset,
     temp: xarray.DataArray,
     dem_model: xarray.DataArray,
-    method: str = "debruin",
+    method: PetMethods = "debruin",
     press_correction: bool = False,
     wind_correction: bool = True,
     wind_altitude: float = 10,
@@ -372,6 +386,10 @@ def pet(
     pet_out : xarray.DataArray (lazy)
         reference evapotranspiration
     """
+    if method not in PET_METHODS:
+        raise ValueError(
+            f"Unknown pet method '{method}', select from {','.join(PET_METHODS)}"
+        )
     # # resample in time
     if resample_kwargs is None:
         resample_kwargs = {}
@@ -424,11 +442,11 @@ def pet(
         logger.info("Calculating Penman-Monteith ref evaporation")
         # Add wind
         # compute wind from u and v components at 10m (for era5)
-        if ("u10" in ds.data_vars) & ("v10" in ds.data_vars):
+        if ("wind10_u" in ds.data_vars) & ("wind10_v" in ds.data_vars):
             ds["wind"] = wind(
                 da_model=dem_model,
-                wind_u=ds["u10"],
-                wind_v=ds["v10"],
+                wind_u=ds["wind10_u"],
+                wind_v=ds["wind10_v"],
                 altitude=wind_altitude,
                 altitude_correction=wind_correction,
             )
@@ -463,14 +481,6 @@ def pet(
                 dem_model,
                 "temp_dew",
             )
-        else:
-            methods = [
-                "debruin",
-                "makking",
-                "penman-monteith_rh_simple",
-                "penman-monteith_tdew",
-            ]
-            raise ValueError(f"Unknown pet method, select from {methods}")
 
     # resample in time
     pet_out.name = "pet"
