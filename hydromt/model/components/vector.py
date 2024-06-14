@@ -340,6 +340,7 @@ class VectorComponent(SpatialModelComponent):
                 filename,
                 engine="netcdf4",
                 root=self.root.path,
+                force_overwrite=self.root.mode.is_override_mode(),
                 logger=self.logger,
                 **kwargs,
             )

@@ -589,6 +589,9 @@ def export(
     else:
         time_tup = None
 
+    if isinstance(bbox, str):
+        bbox = literal_eval(bbox)
+
     try:
         data_catalog.export_data(
             export_dest_path,

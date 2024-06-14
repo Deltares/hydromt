@@ -159,11 +159,11 @@ def test_grid_model_append(demda, df, tmpdir):
     model.add_component("grid", grid_component)
 
     maps_component = SpatialDatasetsComponent(model, region_component="grid")
-    maps_component.set(demda, name="dem")
+    maps_component.set(demda, name="maps")
     model.add_component("maps", maps_component)
 
     forcing_component = SpatialDatasetsComponent(model, region_component="grid")
-    forcing_component.set(demda, name="dem")
+    forcing_component.set(demda, name="forcing")
     model.add_component("forcing", forcing_component)
 
     tables_component = TablesComponent(model)
@@ -185,11 +185,11 @@ def test_grid_model_append(demda, df, tmpdir):
     model2.add_component("grid", grid_component)
 
     maps_component = SpatialDatasetsComponent(model2, region_component="grid")
-    maps_component.set(demda, name="dem")
+    maps_component.set(demda, name="maps")
     model2.add_component("maps", maps_component)
 
     forcing_component = SpatialDatasetsComponent(model2, region_component="grid")
-    forcing_component.set(demda, name="dem")
+    forcing_component.set(demda, name="forcing")
     model2.add_component("forcing", forcing_component)
 
     tables_component = TablesComponent(model2)
@@ -203,10 +203,10 @@ def test_grid_model_append(demda, df, tmpdir):
     assert "dem" in model2.grid.data
 
     model2.maps.set(demda, name="dem1")
-    assert "dem" in model2.maps.data
+    assert "maps" in model2.maps.data
 
     model2.forcing.set(demda, name="dem1")
-    assert "dem" in model2.forcing.data
+    assert "forcing" in model2.forcing.data
 
     model2.forcing.set(df, name="df1", split_dataset=False)
     assert "df1" in model2.forcing.data

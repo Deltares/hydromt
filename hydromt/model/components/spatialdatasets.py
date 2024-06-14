@@ -226,6 +226,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             logger=self.logger,
             rename_dims=rename_dims,
             force_sn=force_sn,
+            force_overwrite=self.root.mode.is_override_mode(),
             **kwargs,
         )
 
