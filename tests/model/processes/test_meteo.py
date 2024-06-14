@@ -11,8 +11,21 @@ from hydromt.model.processes.meteo import (
     pet_makkink,
     precip,
     press,
+    press_correction,
     temp,
+    temp_correction,
+    wind,
 )
+
+
+@pytest.fixture()
+def era5_data(data_catalog):
+    return data_catalog.get_rasterdataset("era5_daily_zarr")
+
+
+@pytest.fixture()
+def era5_dem(data_catalog):
+    return data_catalog.get_rasterdataset("era5_orography").squeeze("time", drop=True)
 
 
 def test_precip(data_catalog):
@@ -44,54 +57,77 @@ def test_precip(data_catalog):
     assert pout_freq.sizes["time"] == 313
 
 
-def test_temp(data_catalog, demda):
-    et_data = data_catalog.get_rasterdataset("era5_daily_zarr")
-    t = et_data["temp"]
+def test_temp(era5_data, era5_dem):
+    t = era5_data["temp"]
     with pytest.raises(ValueError, match='First temp dim should be "time", not hours'):
-        temp(t.rename({"time": "hours"}), demda)
+        temp(t.rename({"time": "hours"}), era5_dem)
 
-    t_resampled = temp(t, demda)
+    t_resampled = temp(t, era5_dem)
     assert isinstance(t_resampled, xr.DataArray)
     assert t_resampled.name == "temp"
     assert t_resampled.attrs.get("unit") == "degree C."
 
 
-def test_press(data_catalog, demda):
-    et_data = data_catalog.get_rasterdataset("era5_daily_zarr")
-    p = et_data["press_msl"]
+def test_press(era5_data, era5_dem):
+    p = era5_data["press_msl"]
     with pytest.raises(ValueError, match='First press dim should be "time", not hours'):
-        press(p.rename({"time": "hours"}), demda)
+        press(p.rename({"time": "hours"}), era5_dem)
 
-    p_resampled = press(p, demda)
+    p_resampled = press(p, era5_dem)
     assert isinstance(p_resampled, xr.DataArray)
     assert p_resampled.name == "press"
     assert p_resampled.attrs.get("unit") == "hPa"
 
 
+def test_wind(era5_data, era5_dem):
+    with pytest.raises(
+        ValueError, match="Either wind or wind_u and wind_v variables must be supplied."
+    ):
+        wind(era5_dem)
+    with pytest.raises(ValueError, match='First wind dim should be "time", not test'):
+        wind(era5_dem, era5_data["u10"].rename({"time": "test"}))
+
+    wind_out = wind(
+        era5_dem, wind_u=era5_data["u10"], wind_v=era5_data["v10"], freq="h"
+    )
+    assert wind_out.name == "wind"
+    assert wind_out.attrs.get("unit") == "m s-1"
+    assert wind_out.sizes["time"] == 313
+
+
 @pytest.mark.skip(
     reason="era5 in v1 artifact_data is missing variables needed for this test"
 )
-def test_pet(data_catalog):
-    et_data = data_catalog.get_rasterdataset("era5_daily_zarr")
-    dem = data_catalog.get_rasterdataset("era5_orography").squeeze("time", drop=True)
+def test_pet(era5_data, era5_dem):
+    peto = pet(era5_data, era5_data, era5_dem, method="penman-monteith_tdew")
 
-    peto = pet(et_data, et_data, dem, method="penman-monteith_tdew")
-
-    assert peto.raster.shape == dem.raster.shape
+    assert peto.raster.shape == era5_dem.raster.shape
     np.testing.assert_almost_equal(peto.mean(), 0.57746, decimal=4)
 
 
+def test_press_correction(era5_dem):
+    press_cor = press_correction(era5_dem)
+    assert isinstance(press_cor, xr.DataArray)
+    np.testing.assert_almost_equal(press_cor.mean(), 0.9219, decimal=4)
+
+
+def test_temp_correction(era5_dem):
+    temp_cor = temp_correction(era5_dem)
+    assert isinstance(temp_cor, xr.DataArray)
+    np.testing.assert_almost_equal(temp_cor.mean(), -4.5743, decimal=4)
+
+
 def test_pet_debruin(data_catalog):
-    et_data = data_catalog.get_rasterdataset("era5_daily_zarr")
+    era5_data = data_catalog.get_rasterdataset("era5_daily_zarr")
     pet = pet_debruin(
-        et_data["temp"], et_data["press_msl"], et_data["kin"], et_data["kout"]
+        era5_data["temp"], era5_data["press_msl"], era5_data["kin"], era5_data["kout"]
     )
     assert isinstance(pet, xr.DataArray)
     np.testing.assert_almost_equal(pet.mean(), 0.8540, decimal=4)
 
 
 def test_pet_makkink(data_catalog):
-    et_data = data_catalog.get_rasterdataset("era5_daily_zarr")
-    pet = pet_makkink(et_data["temp"], et_data["press_msl"], et_data["kin"])
+    era5_data = data_catalog.get_rasterdataset("era5_daily_zarr")
+    pet = pet_makkink(era5_data["temp"], era5_data["press_msl"], era5_data["kin"])
     assert isinstance(pet, xr.DataArray)
     np.testing.assert_almost_equal(pet.mean(), 0.7113, decimal=4)

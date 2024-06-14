@@ -295,7 +295,7 @@ def wind(
     if wind_u is not None and wind_v is not None:
         wind = np.sqrt(np.power(wind_u, 2) + np.power(wind_v, 2))
     elif wind is None:
-        raise ValueError("Either wind or wind_u and wind_v varibales must be supplied.")
+        raise ValueError("Either wind or wind_u and wind_v variables must be supplied.")
 
     if wind.raster.dim0 != "time":
         raise ValueError(f'First wind dim should be "time", not {wind.raster.dim0}')
