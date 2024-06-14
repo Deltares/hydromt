@@ -72,7 +72,7 @@ def nearest_merge(
         gdf1.loc[:, new_cols] = np.nan
         return gdf1.combine_first(gdf2)
     else:
-        left_only_cols = new_cols = [c for c in gdf1.columns if c not in gdf2.columns]
+        left_only_cols = [c for c in gdf1.columns if c not in gdf2.columns]
         return gdf1[:, left_only_cols].join(gdf2, join="left")
 
 
