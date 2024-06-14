@@ -1163,7 +1163,7 @@ class DataCatalog(object):
         buffer: Union[float, int] = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
-        time_tuple: Optional[Tuple] = None,
+        time_range: Optional[Tuple] = None,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1173,7 +1173,7 @@ class DataCatalog(object):
 
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` argument.
-        To slice the data to the time period of interest, provide the `time_tuple`
+        To slice the data to the time period of interest, provide the `time_range`
         argument. To return only the dataset variables of interest provide the
         `variables` argument.
 
@@ -1246,7 +1246,7 @@ class DataCatalog(object):
                 )
                 name = basename(data_like)
                 source = RasterDatasetSource(
-                    name=name, uri=str(data_like), driver=driver
+                    name=name, uri=str(data_like), driver=driver, **kwargs
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
@@ -1258,7 +1258,7 @@ class DataCatalog(object):
                 ds=data_like,
                 variables=variables,
                 mask=mask,
-                time_tuple=time_tuple,
+                time_range=time_range,
                 logger=self.logger,
             )
             if data_like is None:
@@ -1267,33 +1267,27 @@ class DataCatalog(object):
                     strategy=handle_nodata,
                     logger=logger,
                 )
-            ds = _single_var_as_array(
+            return _single_var_as_array(
                 maybe_ds=data_like,
                 single_var_as_array=single_var_as_array,
                 variable_name=variables,
             )
-            return ds
         elif isinstance(data_like, RasterDatasetSource):
             source = data_like
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
-        obj = source.read_data(
+        return source.read_data(
             bbox=bbox,
             mask=geom,
             buffer=buffer,
             zoom_level=zoom_level,
             variables=variables,
-            time_range=time_tuple,
+            time_range=time_range,
             handle_nodata=handle_nodata,
+            single_var_as_array=single_var_as_array,
             logger=self.logger,
         )
-        obj = _single_var_as_array(
-            maybe_ds=obj,
-            single_var_as_array=single_var_as_array,
-            variable_name=variables,
-        )
-        return obj
 
     def get_geodataframe(
         self,
@@ -1539,7 +1533,7 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown geo data type "{type(data_like).__name__}"')
 
-        obj = source.read_data(
+        return source.read_data(
             mask=mask,
             handle_nodata=handle_nodata,
             predicate=predicate,
@@ -1547,7 +1541,6 @@ class DataCatalog(object):
             time_range=time_range,
             single_var_as_array=single_var_as_array,
         )
-        return obj
 
     def get_dataset(
         self,
@@ -1640,13 +1633,11 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown data type "{type(data_like).__name__}"')
 
-        obj = source.read_data(
+        return source.read_data(
             variables=variables,
             time_range=time_range,
+            single_var_as_array=single_var_as_array,
             handle_nodata=handle_nodata,
-        )
-        return _single_var_as_array(
-            obj, single_var_as_array=single_var_as_array, variable_name=variables
         )
 
     def get_dataframe(

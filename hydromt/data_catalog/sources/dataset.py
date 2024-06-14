@@ -44,8 +44,9 @@ class DatasetSource(DataSource):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        single_var_as_array: bool = True,
         logger: Logger = logger,
-    ) -> Optional[xr.Dataset]:
+    ) -> Union[xr.Dataset, xr.DataArray]:
         """
         Read data from this source.
 
@@ -70,6 +71,7 @@ class DatasetSource(DataSource):
             self.metadata,
             variables=variables,
             time_range=time_range,
+            single_var_as_array=single_var_as_array,
             logger=logger,
         )
 

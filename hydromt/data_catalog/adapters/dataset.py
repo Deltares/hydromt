@@ -17,7 +17,12 @@ from hydromt._typing import (
     Variables,
     exec_nodata_strat,
 )
-from hydromt._utils import _has_no_data, _set_metadata, _shift_dataset_time
+from hydromt._utils import (
+    _has_no_data,
+    _set_metadata,
+    _shift_dataset_time,
+    _single_var_as_array,
+)
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 
 logger = getLogger(__name__)
@@ -36,6 +41,7 @@ class DatasetAdapter(DataAdapterBase):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        single_var_as_array: bool = True,
         logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
         """Return a clipped, sliced and unified Dataset.
@@ -58,6 +64,7 @@ class DatasetAdapter(DataAdapterBase):
             ds = self._apply_unit_conversion(ds, logger=logger)
             ds = _set_metadata(ds, metadata)
             # return array if single var and single_var_as_array
+            ds = _single_var_as_array(ds, single_var_as_array, variable_name=variables)
             return ds
         except NoDataException:
             exec_nodata_strat(
