@@ -1,11 +1,11 @@
 from pathlib import Path
-from typing import ClassVar, Optional, Type
+from typing import Optional, Type
 
 import pytest
 import xarray as xr
 from pystac import Catalog as StacCatalog
 
-from hydromt._typing import ErrorHandleMethod, SourceMetadata
+from hydromt._typing import ErrorHandleMethod
 from hydromt.data_catalog.adapters import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources import DatasetSource
@@ -29,56 +29,6 @@ class TestDatasetSource:
             uri=str(tmp_dir / "test.nc"),
         )
         xr.testing.assert_equal(timeseries_ds, source.read_data())
-
-    def test_to_file(self, MockDatasetDriver: Type[DatasetDriver]):
-        mock_ds_driver = MockDatasetDriver()
-        source = DatasetSource(
-            name="test",
-            uri="source.nc",
-            driver=mock_ds_driver,
-            metadata=SourceMetadata(crs=4326),
-        )
-        new_source = source.to_file("test.nc")
-        assert "local" in new_source.driver.filesystem.protocol
-        # make sure we are not changing the state
-        assert id(new_source) != id(source)
-        assert id(mock_ds_driver) != id(new_source.driver)
-
-    def test_to_file_override(self, MockDatasetDriver: Type[DatasetDriver]):
-        driver1 = MockDatasetDriver()
-        source = DatasetSource(
-            name="test",
-            uri="ds.nc",
-            driver=driver1,
-            metadata=SourceMetadata(category="test"),
-        )
-        driver2 = MockDatasetDriver(filesystem="memory")
-        new_source = source.to_file("test", driver_override=driver2)
-        assert new_source.driver.filesystem.protocol == "memory"
-        # make sure we are not changing the state
-        assert id(new_source) != id(source)
-        assert id(driver2) == id(new_source.driver)
-
-    def test_to_file_defaults(
-        self, tmp_dir: Path, timeseries_ds: xr.Dataset, mock_resolver: MetaDataResolver
-    ):
-        class NotWritableDriver(DatasetDriver):
-            name: ClassVar[str] = "test_to_file_defaults"
-
-            def read_data(self, uri: str, **kwargs) -> xr.Dataset:
-                return timeseries_ds
-
-        old_path: Path = tmp_dir / "test.nc"
-        new_path: Path = tmp_dir / "temp.nc"
-
-        new_source: DatasetSource = DatasetSource(
-            name="test",
-            uri=str(old_path),
-            driver=NotWritableDriver(metadata_resolver=mock_resolver),
-        ).to_file(new_path)
-        assert new_path.is_file()
-        assert new_source.root is None
-        assert new_source.driver.filesystem.protocol == ("file", "local")
 
     def test_to_stac_catalog(self, tmp_path: Path, timeseries_ds: xr.Dataset):
         path = tmp_path / "test.nc"
