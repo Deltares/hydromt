@@ -56,21 +56,6 @@ Unreleased
 
 New
 ---
-
-Changed
--------
-
-Fixed
------
-
-Deprecated
-----------
-
-v0.10.0 (2024-06-14)
-====================
-
-New
----
 - New `PredefinedCatalog` class to handle predefined catalog version based on pooch registry files. (#849)
 
 
@@ -84,17 +69,20 @@ Changed
 Fixed
 -----
 - Bug in `raster.transform` with lazy coordinates. (#801)
-- Bug in `workflows.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
+- Bug in `model.processes.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
 - Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
 - Bug in `raster.clip_bbox` when bbox doesn't overlap with raster. (#860)
 - Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 - Fixed incorrect renaming of single variable raster datasets (#883)
 - Provide better error message for 0D geometry arrays in GeoDataset (#885)
-- Fixed index error when the number of peaks varies between stations in get_hydrographs method (#933)
 
 Deprecated
 ----------
 - The `DataCatalog.from_archive` method is deprecated. Use `DataCatalog.from_yml` with the root pointing to the archive instead. (#849)
+- Bug in `model.processes.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
+- Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
+- Bug in `raster.clip_bbox` when bbox doesn't overlap with raster. (#860)
+- Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 
 v0.9.4 (2024-02-26)
 ===================
