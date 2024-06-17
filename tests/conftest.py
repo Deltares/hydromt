@@ -53,15 +53,15 @@ def PLUGINS() -> Plugins:
     return Plugins()
 
 
-# @pytest.fixture(autouse=True)
-# def _local_catalog_eps(monkeypatch, PLUGINS) -> dict:
-#     """Set entrypoints to local predefined catalogs."""
-#     cat_root = Path(__file__).parent.parent / "data" / "catalogs"
-#     for name, cls in PLUGINS.catalog_plugins.items():
-#         monkeypatch.setattr(
-#             f"hydromt.data_catalog.predefined_catalog.{cls.__name__}.base_url",
-#             str(cat_root / name),
-#         )
+@pytest.fixture(autouse=True)
+def _local_catalog_eps(monkeypatch, PLUGINS) -> dict:
+    """Set entrypoints to local predefined catalogs."""
+    cat_root = Path(__file__).parent.parent / "data" / "catalogs"
+    for name, cls in PLUGINS.catalog_plugins.items():
+        monkeypatch.setattr(
+            f"hydromt.data_catalog.predefined_catalog.{cls.__name__}.base_url",
+            str(cat_root / name),
+        )
 
 
 @pytest.fixture()
@@ -506,6 +506,18 @@ def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
         geodf=geodf,
         mocker=mocker,
     )
+
+
+# @pytest.fixture()
+# def mesh_model(griduda):
+#     mod = MODELS.load("mesh_model")()
+#     region = gpd.GeoDataFrame(
+#         geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
+#     )
+#     mod.region.create({"geom": region})
+#     mod.setup_config(**{"header": {"setting": "value"}})
+#     mod.set_mesh(griduda, "elevtn")
+#     return mod
 
 
 @pytest.fixture()

@@ -29,14 +29,7 @@ jobs:
           pip install tomli flit twine
 
       - name: Build artifacts
-        run: |
-            python -m pip install --upgrade pip
-            python -m pip install flit wheel twine
-            git clean -xdf
-            git restore -SW .
-            flit build
-            python -m twine check dist/*
-
+        run: make pypi
 
       - uses: actions/upload-artifact@v3
         with:
