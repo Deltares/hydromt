@@ -106,11 +106,17 @@ class ModelRoot:
         makedirs(self.path, exist_ok=True)
 
         log_level = 20  # default, but overwritten by the level of active loggers
-        for i, h in enumerate(self.logger.handlers):
-            log_level = h.level
-            if isinstance(h, FileHandler):
-                if dirname(h.baseFilename) != self.path:
-                    self.logger.handlers.pop(i).close()
+        for handler in self.logger.handlers:
+            # for i, h in enumerate(self.logger.handlers):
+            log_level = handler.level
+            if isinstance(handler, FileHandler):
+                if dirname(handler.baseFilename) != self.path:
+                    # first remove so no new logs come in
+                    self.logger.removeHandler(handler)
+                    # wait for all messages to be processed
+                    handler.flush()
+                    # close the handler
+                    handler.close()
                 break
 
         if overwrite and exists(new_path):
