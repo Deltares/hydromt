@@ -13,6 +13,17 @@ FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 __all__ = ["setuplog"]
 
 
+def wait_and_remove_handlers(logger: logging.Logger):
+    for handler in logger.handlers[:]:
+        # remove handler first, as otherwise new calls to the logger may open the
+        # same filename again.
+        logger.removeHandler(handler)
+        # wait for all messages to be processed
+        handler.flush()
+        # then close the handler
+        handler.close()
+
+
 def setuplog(
     name: str = "hydromt",
     path: str = None,

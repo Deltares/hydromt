@@ -257,21 +257,19 @@ def build(
             data_libs=data_libs,
             **kwargs,
         )
-        mod.data_catalog.cache = cache
-        # build model
-        mod.build(steps=opt["steps"])
+        try:
+            mod.data_catalog.cache = cache
+            # build model
+            mod.build(steps=opt["steps"])
+        finally:
+            # id(mod.root.logger) != id(logger)!
+            log.wait_and_remove_handlers(mod.root.logger)
+
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            # remove handler first, as otherwise new calls to the logger may open the
-            # same filename again.
-            logger.removeHandler(handler)
-            # wait for all messages to be processed
-            handler.flush()
-            # then close the handler
-            handler.close()
+        log.wait_and_remove_handlers(logger)
 
 
 ## UPDATE
