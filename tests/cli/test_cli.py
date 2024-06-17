@@ -4,7 +4,7 @@ from os.path import abspath, dirname, join
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 
 from hydromt import __version__
 from hydromt._typing import NoDataException
@@ -167,10 +167,11 @@ def test_cli_build_override(tmpdir):
         / "data"
         / "vito_reclass.yml",  # for reclass data
     ]
-    _ = CliRunner().invoke(hydromt_cli, cmd)
+    res: Result = CliRunner().invoke(hydromt_cli, cmd)
+    assert not res.exception
     # test force overwrite
     with pytest.raises(IOError, match="File.*already exists"):
-        _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+        CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
 
     r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
     assert r.exit_code == 0
