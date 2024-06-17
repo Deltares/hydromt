@@ -156,7 +156,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         logger: Logger = logger,
-    ) -> Optional[xr.Dataset]:
+    ) -> Union[xr.Dataset, xr.DataArray, None]:
         """Filter and harmonize the input RasterDataset.
 
         Parameters
@@ -266,7 +266,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         variables: Optional[List] = None,
         mask: Optional[Geom] = None,
         align: Optional[float] = None,
-        time_tuple: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
         """Filter the RasterDataset.
@@ -311,10 +311,10 @@ class RasterDatasetAdapter(DataAdapterBase):
                 if any(mvars):
                     raise NoDataException(f"RasterDataset: variables not found {mvars}")
                 ds = ds[variables]
-        if time_tuple is not None:
+        if time_range is not None:
             ds = _slice_temporal_dimension(
                 ds,
-                time_tuple,
+                time_range,
                 logger=logger,
             )
         if mask is not None:
