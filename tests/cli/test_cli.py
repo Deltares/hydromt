@@ -1,5 +1,6 @@
 """Tests for the cli submodule."""
 
+import logging
 from os.path import abspath, dirname, join
 from pathlib import Path
 
@@ -151,6 +152,14 @@ def test_export_cli_no_data_ignore(tmpdir):
         )
 
 
+def reset_logging():
+    # Reset logging after cli run.
+    from importlib import reload
+
+    logging.shutdown()
+    reload(logging)
+
+
 def test_cli_build_override(tmpdir):
     root = str(tmpdir.join("grid_model_region"))
     cmd = [
@@ -169,9 +178,16 @@ def test_cli_build_override(tmpdir):
     ]
     res: Result = CliRunner().invoke(hydromt_cli, cmd)
     assert not res.exception
+
+    # to prevent logging file exception on windows, reset logging module.
+    reset_logging()
+
     # test force overwrite
     with pytest.raises(IOError, match="File.*already exists"):
         CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+
+    # to prevent logging file exception on windows, reset logging module.
+    reset_logging()
 
     r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
     assert r.exit_code == 0
