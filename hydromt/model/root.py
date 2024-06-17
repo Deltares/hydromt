@@ -59,10 +59,10 @@ class ModelRoot:
         return self.path
 
     def _close_logs(self):
-        for _ in range(len(self.logger.handlers)):
-            l = self.logger.handlers.pop()
-            l.flush()
-            l.close()
+        for handler in self.logger.handlers:
+            self.logger.removeHandler(handler)
+            handler.flush()
+            handler.close()
 
     def _assert_write_mode(self) -> None:
         if not self.mode.is_writing_mode():
