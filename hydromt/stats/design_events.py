@@ -111,7 +111,7 @@ def hydrograph_1d(
     n = ts.size
     d0 = int(np.floor(wdw_size / 2))
     d1 = wdw_size - d0
-    for i in range(n0):
+    for i in range(min(n0, idxs.size)):
         idx = idxs[seq[i]]
         idx0 = idx - d0
         idx1 = idx + d1
