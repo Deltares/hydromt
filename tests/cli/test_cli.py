@@ -1,6 +1,7 @@
 """Tests for the cli submodule."""
 
 from os.path import abspath, dirname, join
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -158,6 +159,13 @@ def test_cli_build_override(tmpdir):
         root,
         "-i",
         "tests/data/test_model_config.yml",
+        "-d",
+        "artifact_data",
+        "-d",
+        Path(__name__).absolute().parents[0]
+        / "examples"
+        / "data"
+        / "vito_reclass.yml",  # for reclass data
     ]
     _ = CliRunner().invoke(hydromt_cli, cmd)
     # test force overwrite
