@@ -257,19 +257,16 @@ def build(
             data_libs=data_libs,
             **kwargs,
         )
-        try:
-            mod.data_catalog.cache = cache
-            # build model
-            mod.build(steps=opt["steps"])
-        finally:
-            # id(mod.root.logger) != id(logger)!
-            log.wait_and_remove_handlers(mod.root.logger)
+        mod.data_catalog.cache = cache
+        # build model
+        mod.build(steps=opt["steps"])
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
     finally:
         log.wait_and_remove_handlers(logger)
+        log.wait_and_remove_handlers(logging.getLogger("hydromt.model.root"))
 
 
 ## UPDATE

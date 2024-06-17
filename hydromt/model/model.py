@@ -35,7 +35,6 @@ from hydromt.model.components import (
 )
 from hydromt.model.root import ModelRoot
 from hydromt.plugins import PLUGINS
-from hydromt.utils.log import wait_and_remove_handlers
 
 __all__ = ["Model"]
 
@@ -107,35 +106,28 @@ class Model(object, metaclass=ABCMeta):
         data_libs = data_libs or []
 
         self.logger = logger
-        # make sure to remove handlers before erroring out
-        try:
-            # link to data
-            self.data_catalog = DataCatalog(
-                data_libs=data_libs, logger=self.logger, **catalog_keys
-            )
-            """DataCatalog for data access"""
 
-            # file system
-            self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
-            """Model root"""
+        # link to data
+        self.data_catalog = DataCatalog(
+            data_libs=data_libs, logger=self.logger, **catalog_keys
+        )
+        """DataCatalog for data access"""
 
-            self.components: Dict[str, ModelComponent] = {}
-            self._add_components(components)
+        # file system
+        self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
+        """Model root"""
 
-            self._defered_file_closes: List[DeferedFileClose] = []
+        self.components: Dict[str, ModelComponent] = {}
+        self._add_components(components)
 
-            model_metadata = cast(Dict[str, str], PLUGINS.model_metadata[self.name])
-            self.logger.info(
-                f"Initializing {self.name} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
-            )
+        self._defered_file_closes: List[DeferedFileClose] = []
 
-            self._region_component_name = self._determine_region_component(
-                region_component
-            )
+        model_metadata = cast(Dict[str, str], PLUGINS.model_metadata[self.name])
+        self.logger.info(
+            f"Initializing {self.name} model from {model_metadata['plugin_name']} (v{model_metadata['version']})."
+        )
 
-        except:
-            wait_and_remove_handlers(self.logger)
-            raise
+        self._region_component_name = self._determine_region_component(region_component)
 
     def _determine_region_component(self, region_component: Optional[str]) -> str:
         if region_component is not None:
