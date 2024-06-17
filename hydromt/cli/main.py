@@ -265,8 +265,13 @@ def build(
         raise
     finally:
         for handler in logger.handlers[:]:
-            handler.close()
+            # remove handler first, as otherwise new calls to the logger may open the
+            # same filename again.
             logger.removeHandler(handler)
+            # wait for all messages to be processed
+            handler.flush()
+            # then close the handler
+            handler.close()
 
 
 ## UPDATE
