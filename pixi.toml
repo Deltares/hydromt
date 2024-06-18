@@ -1,149 +1,149 @@
-[project]
-name = "hydromt"
-version = "0.1.0"
-description = "Add a short description here"
-authors = ["Sam Vente <savente93@gmail.com>"]
-channels = ["conda-forge"]
-platforms = ["linux-64", "win-64"]
+	[project]
+	name = "hydromt"
+	version = "0.1.0"
+	description = "Add a short description here"
+	authors = ["Sam Vente <savente93@gmail.com>"]
+	channels = ["conda-forge"]
+	platforms = ["linux-64", "win-64"]
 
-[tasks]
+	[tasks]
 
-install = { depends_on = ["install-hydromt", "install-pre-commit"] }
-install-hydromt = "pip install --no-deps --editable ."
-install-pre-commit = "pre-commit install"
+	install = { depends_on = ["install-hydromt", "install-pre-commit"] }
+	install-hydromt = "pip install --no-deps --editable ."
+	install-pre-commit = "pre-commit install"
 
-lint = { cmd = ["pre-commit", "run", "--all"] }
+	lint = { cmd = ["pre-commit", "run", "--all"] }
 
-docker-build-min = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:min",
-  "--target=min",
-  "--build-arg",
-  "PIXIENV=min-py311",
-  ".",
-] }
-docker-build-full = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:full",
-  "--target=full",
-  "--build-arg",
-  "PIXIENV=full-py311",
-  ".",
-] }
-docker-build-slim = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:slim",
-  "--target=slim",
-  "--build-arg",
-  "PIXIENV=slim-py311",
-  ".",
-] }
-docker-build-latest = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:latest",
-  "--target=slim",
-  "--build-arg",
-  "PIXIENV=slim-py311",
-  ".",
-] }
+	docker-build-min = { cmd = [
+	  "docker",
+	  "build",
+	  "-t",
+	  "deltares/hydromt:min",
+	  "--target=min",
+	  "--build-arg",
+	  "PIXIENV=min-py311",
+	  ".",
+	] }
+	docker-build-full = { cmd = [
+	  "docker",
+	  "build",
+	  "-t",
+	  "deltares/hydromt:full",
+	  "--target=full",
+	  "--build-arg",
+	  "PIXIENV=full-py311",
+	  ".",
+	] }
+	docker-build-slim = { cmd = [
+	  "docker",
+	  "build",
+	  "-t",
+	  "deltares/hydromt:slim",
+	  "--target=slim",
+	  "--build-arg",
+	  "PIXIENV=slim-py311",
+	  ".",
+	] }
+	docker-build-latest = { cmd = [
+	  "docker",
+	  "build",
+	  "-t",
+	  "deltares/hydromt:latest",
+	  "--target=slim",
+	  "--build-arg",
+	  "PIXIENV=slim-py311",
+	  ".",
+	] }
 
-docker-publish-min = { cmd = [
-  "docker",
-  "push",
-  "deltares/hydromt:min",
-], depends_on = [
-  "docker-build-min",
-] }
-docker-publish-slim = { cmd = [
-  "docker",
-  "push",
-  "deltares/hydromt:slim",
-], depends_on = [
-  "docker-build-slim",
-] }
-docker-publish-latest = { cmd = [
-  "docker",
-  "push",
-  "deltares/hydromt:latest",
-], depends_on = [
-  "docker-build-latest",
-] }
-docker-publish-full = { cmd = [
-  "docker",
-  "push",
-  "deltares/hydromt:full",
-], depends_on = [
-  "docker-build-full",
-] }
-docker-publish = { depends_on = [
-  "docker-publish-min",
-  "docker-publish-slim",
-  "docker-publish-latest",
-  "docker-publish-full",
-] }
-docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
+	docker-publish-min = { cmd = [
+	  "docker",
+	  "push",
+	  "deltares/hydromt:min",
+	], depends_on = [
+	  "docker-build-min",
+	] }
+	docker-publish-slim = { cmd = [
+	  "docker",
+	  "push",
+	  "deltares/hydromt:slim",
+	], depends_on = [
+	  "docker-build-slim",
+	] }
+	docker-publish-latest = { cmd = [
+	  "docker",
+	  "push",
+	  "deltares/hydromt:latest",
+	], depends_on = [
+	  "docker-build-latest",
+	] }
+	docker-publish-full = { cmd = [
+	  "docker",
+	  "push",
+	  "deltares/hydromt:full",
+	], depends_on = [
+	  "docker-build-full",
+	] }
+	docker-publish = { depends_on = [
+	  "docker-publish-min",
+	  "docker-publish-slim",
+	  "docker-publish-latest",
+	  "docker-publish-full",
+	] }
+	docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
 
-html = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build", "-W"] }
-docs = { depends_on = ["html"] }
-doc = { depends_on = ["html"] }
-serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
+	html = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build", "-W"] }
+	docs = { depends_on = ["html"] }
+	doc = { depends_on = ["html"] }
+	serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
 
 
-pypi = { depends_on = [
-  "pypi-git-clean",
-  "pypi-git-restore",
-  "pypi-flit-build",
-  "pypi-twine",
-] }
-pypi-git-clean = { cmd = ["git", "clean", "-xdf"] }
-pypi-git-resore = { cmd = ["git", "restore", "-SW", "."] }
-pypi-flit-build = { cmd = ["flit", "build"] }
-pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
+	pypi = { depends_on = [
+	  "pypi-git-clean",
+	  "pypi-git-restore",
+	  "pypi-flit-build",
+	  "pypi-twine",
+	] }
+	pypi-git-clean = { cmd = ["git", "clean", "-xdf"] }
+	pypi-git-resore = { cmd = ["git", "restore", "-SW", "."] }
+	pypi-flit-build = { cmd = ["flit", "build"] }
+	pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
 
-# clean
-clean = { depends_on = [
-  # "clean-env-files",
-  "clean-dist",
-  "clean-docs-generated",
-  "clean-docs-build",
-  "clean-docs-exmaples",
-] }
-# clean-env-files = { cmd = ["rm", "-f", "*environment.yml"] }
-clean-dist = { cmd = ["rm", "-rf", "dist"] }
-clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
-clean-docs-build = { cmd = ["rm", "-rf", "docs/_build"] }
-clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
+	# clean
+	clean = { depends_on = [
+	  # "clean-env-files",
+	  "clean-dist",
+	  "clean-docs-generated",
+	  "clean-docs-build",
+	  "clean-docs-exmaples",
+	] }
+	# clean-env-files = { cmd = ["rm", "-f", "*environment.yml"] }
+	clean-dist = { cmd = ["rm", "-rf", "dist"] }
+	clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
+	clean-docs-build = { cmd = ["rm", "-rf", "docs/_build"] }
+	clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
-test = { cmd = ["pytest"] }
-test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
-test-cov = { cmd = [
-  "pytest",
-  "--verbose",
-  "--cov=hydromt",
-  "--cov-report",
-  "xml",
-] }
+	test = { cmd = ["pytest"] }
+	test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
+	test-cov = { cmd = [
+	  "pytest",
+	  "--verbose",
+	  "--cov=hydromt",
+	  "--cov-report",
+	  "xml",
+	] }
 
-[dependencies]
-affine = "*"
-bottleneck = "*"
-click = "*"
-dask = "*"
-fsspec = "*"
-geopandas = ">=0.10"
-importlib_metadata = "*"
-mercantile = "*"
-netcdf4 = "*"
-numba = "*"
-numpy = ">=1.23"
+	[dependencies]
+	affine = "*"
+	bottleneck = "*"
+	click = "*"
+	dask = "*"
+	fsspec = "*"
+	geopandas = ">=0.10"
+	importlib_metadata = "*"
+	mercantile = "*"
+	netcdf4 = "*"
+	numba = "*"
+	numpy = ">=1.23, <2"
 packaging = "*"
 pandas = "*"
 pip = "*"
