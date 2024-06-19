@@ -1,8 +1,7 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
 
-import logging
 import os
-from logging import Logger
+from logging import Logger, getLogger
 from os import makedirs
 from os.path import dirname, exists, isdir, isfile, join
 from pathlib import Path
@@ -17,7 +16,7 @@ from yaml import dump as dump_yaml
 
 from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
 
-_logger = logging.getLogger(__name__)
+logger: Logger = getLogger(__name__)
 
 
 def write_yaml(path: StrPath, data: Dict[str, Any]):
@@ -129,7 +128,6 @@ def write_nc(
     rename_dims: bool = False,
     force_sn: bool = False,
     force_overwrite: bool = False,
-    logger: Logger = _logger,
     **kwargs,
 ) -> Optional[DeferedFileClose]:
     """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
@@ -200,7 +198,6 @@ def write_region(
     region: gpd.GeoDataFrame,
     *,
     filename: StrPath,
-    logger: Logger = _logger,
     root_path: StrPath,
     to_wgs84=False,
     **write_kwargs,

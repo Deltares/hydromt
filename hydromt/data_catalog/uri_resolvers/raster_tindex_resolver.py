@@ -29,7 +29,6 @@ class RasterTindexResolver(MetaDataResolver):
         mask: Optional[gpd.GeoDataFrame] = None,
         variables: Union[int, tuple[float, str], None] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Optional[Logger] = logger,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve URIs of a raster tindex file.
@@ -50,8 +49,6 @@ class RasterTindexResolver(MetaDataResolver):
             Names of variables to return, or all if None, by default None
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
-        logger : Logger, optional
-            logger to use, by default logger
         options : Optional[Dict[str, Any]], optional
             extra options for this resolver, by default None
 
@@ -78,7 +75,6 @@ class RasterTindexResolver(MetaDataResolver):
             exec_nodata_strat(
                 f"resolver '{self.name}' found no intersecting tiles.",
                 strategy=handle_nodata,
-                logger=logger,
             )
             return []  # in case of ignore
 

@@ -1,5 +1,6 @@
 """Grid Component."""
 
+from logging import Logger, getLogger
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
@@ -30,6 +31,8 @@ if TYPE_CHECKING:
     from hydromt.model.model import Model
 
 __all__ = ["GridComponent"]
+
+logger: Logger = getLogger(__name__)
 
 
 class GridComponent(SpatialModelComponent):
@@ -119,7 +122,7 @@ class GridComponent(SpatialModelComponent):
             for dvar in data.data_vars:
                 if dvar in self._data:
                     if self.root.is_reading_mode():
-                        self.logger.warning(f"Replacing grid map: {dvar}")
+                        logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
     @hydromt_step
@@ -165,7 +168,6 @@ class GridComponent(SpatialModelComponent):
             exec_nodata_strat(
                 msg="No grid data found, skip writing.",
                 strategy=NoDataStrategy.WARN,
-                logger=self.logger,
             )
             return None
         self.write_region()
@@ -176,7 +178,6 @@ class GridComponent(SpatialModelComponent):
             root=self.model.root.path,
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
-            logger=self.logger,
             force_overwrite=self.root.mode.is_override_mode(),
             force_sn=force_sn,
             **kwargs,
@@ -215,7 +216,6 @@ class GridComponent(SpatialModelComponent):
         loaded_nc_files = read_nc(
             filename or self._filename,
             self.root.path,
-            logger=self.logger,
             single_var_as_array=False,
             mask_and_scale=mask_and_scale,
             **kwargs,
@@ -296,7 +296,7 @@ class GridComponent(SpatialModelComponent):
         grid : xr.DataArray
             Generated grid mask.
         """
-        self.logger.info("Preparing 2D grid.")
+        logger.info("Preparing 2D grid.")
 
         # Check if this component's region is a reference to another component
         if self._region_component is not None:
@@ -317,7 +317,6 @@ class GridComponent(SpatialModelComponent):
             align=align,
             dec_origin=dec_origin,
             dec_rotation=dec_rotation,
-            logger=self.logger,
         )
         self.set(grid)
         return grid
@@ -330,7 +329,6 @@ class GridComponent(SpatialModelComponent):
         exec_nodata_strat(
             msg="No grid data found for deriving resolution",
             strategy=NoDataStrategy.WARN,
-            logger=self.logger,
         )
         return None
 
@@ -342,7 +340,6 @@ class GridComponent(SpatialModelComponent):
         exec_nodata_strat(
             msg="No grid data found for deriving transform",
             strategy=NoDataStrategy.WARN,
-            logger=self.logger,
         )
         return None
 
@@ -353,14 +350,12 @@ class GridComponent(SpatialModelComponent):
             exec_nodata_strat(
                 msg="No grid data found for deriving crs",
                 strategy=NoDataStrategy.WARN,
-                logger=self.logger,
             )
             return None
         if self.data.raster.crs is None:
             exec_nodata_strat(
                 msg="No crs found in grid data",
                 strategy=NoDataStrategy.WARN,
-                logger=self.logger,
             )
             return None
         return CRS(self.data.raster.crs)
@@ -373,7 +368,6 @@ class GridComponent(SpatialModelComponent):
         exec_nodata_strat(
             msg="No grid data found for deriving bounds",
             strategy=NoDataStrategy.WARN,
-            logger=self.logger,
         )
         return None
 
@@ -386,9 +380,7 @@ class GridComponent(SpatialModelComponent):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
         exec_nodata_strat(
-            msg="No grid data found for deriving region",
-            strategy=NoDataStrategy.WARN,
-            logger=self.logger,
+            msg="No grid data found for deriving region", strategy=NoDataStrategy.WARN
         )
         return None
 
@@ -497,7 +489,7 @@ class GridComponent(SpatialModelComponent):
             Names of added model map layers
         """
         rename = rename or {}
-        self.logger.info(f"Preparing grid data from raster source {raster_fn}")
+        logger.info(f"Preparing grid data from raster source {raster_fn}")
         # Read raster data and select variables
         ds = self.data_catalog.get_rasterdataset(
             raster_fn,
@@ -578,7 +570,7 @@ class GridComponent(SpatialModelComponent):
             Names of added model grid layers
         """  # noqa: E501
         rename = rename or dict()
-        self.logger.info(
+        logger.info(
             f"Preparing grid data by reclassifying the data in {raster_fn} based "
             f"on {reclass_table_fn}"
         )
@@ -664,7 +656,7 @@ class GridComponent(SpatialModelComponent):
             Names of added model grid layers
         """  # noqa: E501
         rename = rename or dict()
-        self.logger.info(f"Preparing grid data from vector '{vector_fn}'.")
+        logger.info(f"Preparing grid data from vector '{vector_fn}'.")
         gdf = self.data_catalog.get_geodataframe(
             vector_fn, geom=self.region, dst_crs=self.crs
         )
@@ -672,7 +664,6 @@ class GridComponent(SpatialModelComponent):
             exec_nodata_strat(
                 f"No shapes of {vector_fn} found within region, skipping {self.add_data_from_geodataframe.__name__}.",
                 NoDataStrategy.WARN,
-                self.logger,
             )
             return None
         # Data resampling

@@ -232,9 +232,7 @@ def build(
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog(
-        "build", join(model_root, "hydromt.log"), log_level=log_level, append=False
-    )
+    log.setuplog(join(model_root, "hydromt.log"), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
     opt = _utils.parse_config(config, opt_cli=opt)
@@ -253,7 +251,6 @@ def build(
         mod = PLUGINS.model_plugins[modeltype](
             root=model_root,
             mode=mode,
-            logger=logger,
             data_libs=data_libs,
             **kwargs,
         )
@@ -334,7 +331,7 @@ def update(
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog("update", join(model_out, "hydromt.log"), log_level=log_level)
+    log.setuplog(join(model_out, "hydromt.log"), log_level=log_level)
     logger.info(f"Updating {model} model at {model_root} ({mode}).")
     logger.info(f"Output dir: {model_out}")
     # parse settings
@@ -357,7 +354,6 @@ def update(
             root=model_root,
             mode=mode,
             data_libs=data_libs,
-            logger=logger,
             **kwargs,
         )
         mod.data_catalog.cache = cache
@@ -421,7 +417,7 @@ def check(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog("check", join(".", "hydromt.log"), log_level=log_level)
+    log.setuplog(join(".", "hydromt.log"), log_level=log_level)
     try:
         all_exceptions = []
         for cat_path in data:
@@ -530,9 +526,7 @@ def export(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog(
-        "export", join(export_dest_path, "hydromt.log"), log_level=log_level
-    )
+    log.setuplog(join(export_dest_path, "hydromt.log"), log_level=log_level)
     logger.info(f"Output dir: {export_dest_path}")
 
     if error_on_empty:
@@ -657,16 +651,14 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog(
-        "clip", join(model_destination, "hydromt-clip.log"), log_level=log_level
-    )
+    log.setuplog(join(model_destination, "hydromt-clip.log"), log_level=log_level)
     logger.info(f"Clipping instance of {model} model.")
     logger.info(f"Region: {region}")
 
     if model != "wflow":
         raise NotImplementedError("Clip function only implemented for wflow model.")
     try:
-        mod = PLUGINS.model_plugins[model](root=model_root, mode="r", logger=logger)
+        mod = PLUGINS.model_plugins[model](root=model_root, mode="r")
         logger.info("Reading model to clip")
         mod.read()
         mod.root.set(model_destination, mode="w")

@@ -1,5 +1,6 @@
 """Spatial Xarrays component."""
 
+from logging import Logger, getLogger
 from pathlib import Path
 from shutil import move
 from typing import (
@@ -26,6 +27,8 @@ from hydromt.model.hydromt_step import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
+
+logger: Logger = getLogger(__name__)
 
 
 class SpatialDatasetsComponent(SpatialModelComponent):
@@ -137,7 +140,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
 
         for name, d in ds.items():
             if name in self._data:
-                self.logger.warning(f"Replacing xarray: {name}")
+                logger.warning(f"Replacing xarray: {name}")
             self._data[name] = d
 
     @hydromt_step
@@ -214,7 +217,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            self.logger.debug("No data found, skiping writing.")
+            logger.debug("No data found, skiping writing.")
             return
 
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
@@ -223,7 +226,6 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             filename_template=filename or self._filename,
             root=self.root.path,
             gdal_compliant=gdal_compliant,
-            logger=self.logger,
             rename_dims=rename_dims,
             force_sn=force_sn,
             force_overwrite=self.root.mode.is_override_mode(),
@@ -252,7 +254,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             close_handle = self._defered_file_closes.pop()
             if close_handle["close_attempts"] > max_close_attempts:
                 # already tried to close this to many times so give up
-                self.logger.error(
+                logger.error(
                     f"Max write attempts to file {close_handle['org_fn']}"
                     " exceeded. Skipping..."
                     f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
@@ -264,7 +266,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             try:
                 move(close_handle["tmp_fn"], close_handle["org_fn"])
             except PermissionError:
-                self.logger.error(
+                logger.error(
                     f"Could not write to destination file {close_handle['org_fn']} "
                     "because the following error was raised: {e}"
                 )
@@ -320,7 +322,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             Names of added model map layers
         """
         rename = rename or {}
-        self.logger.info(f"Preparing dataset data from raster source {raster_filename}")
+        logger.info(f"Preparing dataset data from raster source {raster_filename}")
         # Read raster data and select variables
         ds = self.data_catalog.get_rasterdataset(
             raster_filename,
@@ -404,7 +406,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             Names of added model map layers
         """  # noqa: E501
         rename = rename or {}
-        self.logger.info(
+        logger.info(
             f"Preparing map data by reclassifying the data in {raster_filename} based"
             f" on {reclass_table_filename}"
         )

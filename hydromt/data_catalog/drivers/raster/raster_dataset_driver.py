@@ -35,7 +35,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -64,7 +63,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
             variables=variables,
             zoom_level=zoom_level,
             metadata=metadata,
-            logger=logger,
             handle_nodata=handle_nodata,
         )
 
@@ -78,7 +76,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:
         """

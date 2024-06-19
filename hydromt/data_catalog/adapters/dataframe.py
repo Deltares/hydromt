@@ -63,9 +63,7 @@ class DataFrameAdapter(DataAdapterBase):
         # slice data
         df = DataFrameAdapter._slice_data(df, variables, time_range)
         if df is None:
-            exec_nodata_strat(
-                "DataFrame has no data after slicing.", handle_nodata, logger=logger
-            )
+            exec_nodata_strat("DataFrame has no data after slicing.", handle_nodata)
             return None
         # uniformize data
         df = self._apply_unit_conversion(df)

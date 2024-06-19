@@ -608,7 +608,6 @@ def mock_model(tmpdir, mocker: MockerFixture):
     model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
     model.root.path.return_value = tmpdir
     model.data_catalog = mocker.create_autospec(DataCatalog)
-    model.logger = logger
     return model
 
 

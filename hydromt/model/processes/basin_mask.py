@@ -32,7 +32,6 @@ def get_basin_geometry(
     basins_name="basins",
     flwdir_name="flwdir",
     ftype="infer",
-    logger=logger,
     buffer=10,
     **stream_kwargs,
 ):
@@ -285,7 +284,7 @@ def get_basin_geometry(
     return basin_geom, outlet_geom
 
 
-def _check_size(ds, logger=logger, threshold=12e3**2):
+def _check_size(ds, threshold=12e3**2):
     # warning for large domain
     if (
         np.multiply(*ds.raster.shape) > threshold

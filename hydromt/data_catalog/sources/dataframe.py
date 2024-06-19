@@ -44,7 +44,6 @@ class DataFrameSource(DataSource):
         time_range: Optional[TimeRange] = None,
         predicate: str = "intersects",  # TODO: https://github.com/Deltares/hydromt/issues/983
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
     ) -> Optional[pd.DataFrame]:
         """Use the driver and data adapter to read and harmonize the data."""
         self.mark_as_used()
@@ -54,7 +53,6 @@ class DataFrameSource(DataSource):
             time_range=time_range,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
         return self.data_adapter.transform(
             df,
@@ -72,7 +70,6 @@ class DataFrameSource(DataSource):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
         **kwargs,
     ) -> "DataFrameSource":
         """
@@ -95,10 +92,7 @@ class DataFrameSource(DataSource):
                 update={"filesystem": filesystem("local")}
             )
         df: Optional[pd.DataFrame] = self.read_data(
-            variables=variables,
-            time_range=time_range,
-            handle_nodata=handle_nodata,
-            logger=logger,
+            variables=variables, time_range=time_range, handle_nodata=handle_nodata
         )
         if df is None:  # handle_nodata == ignore
             return None

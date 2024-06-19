@@ -1,7 +1,6 @@
 """Implementation for grid based workflows."""
 
-import logging
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -22,7 +21,7 @@ from hydromt.model.processes.region import (
     parse_region_grid,
 )
 
-_logger = logging.getLogger(__name__)
+logger: Logger = getLogger(__name__)
 
 __all__ = [
     "create_grid_from_region",
@@ -49,7 +48,6 @@ def create_grid_from_region(
     align: bool = True,
     dec_origin: int = 0,
     dec_rotation: int = 3,
-    logger: Logger = _logger,
 ) -> xr.DataArray:
     """Create a 2D regular grid or reads an existing grid.
 
@@ -121,7 +119,6 @@ def create_grid_from_region(
                 region,
                 crs=region_crs,
                 data_catalog=data_catalog,
-                logger=logger,
             )
             if crs is not None:
                 geom = geom.to_crs(crs)
@@ -161,7 +158,6 @@ def create_grid_from_region(
         geom = parse_region_basin(
             region,
             data_catalog=data_catalog,
-            logger=logger,
             hydrography_fn=hydrography_fn,
             basin_index_fn=basin_index_fn,
         )
@@ -172,7 +168,6 @@ def create_grid_from_region(
             crs=crs,
             align=align,
             data_catalog=data_catalog,
-            logger=logger,
         )
         grid = _create_non_rotated_grid(xcoords, ycoords, crs=crs)
     else:
@@ -658,9 +653,8 @@ def _extract_coords_from_basin(
     crs: Optional[int],
     align: bool,
     data_catalog: DataCatalog,
-    logger: Logger,
 ) -> Tuple[np.typing.ArrayLike, np.typing.ArrayLike, CRS]:
-    da_hyd = data_catalog.get_rasterdataset(hydrography_fn, geom=geom, logger=logger)
+    da_hyd = data_catalog.get_rasterdataset(hydrography_fn, geom=geom)
 
     if not res:
         logger.info(
