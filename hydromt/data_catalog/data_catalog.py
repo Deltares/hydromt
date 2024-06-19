@@ -1006,10 +1006,11 @@ class DataCatalog(object):
         self,
         data_root: Union[Path, str],
         bbox: Optional[Bbox] = None,
-        time_tuple: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         source_names: Optional[List] = None,
         unit_conversion: bool = True,
         meta: Optional[Dict] = None,
+        forced_overwrite: bool = False,
         append: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ) -> None:
@@ -1035,6 +1036,8 @@ class DataCatalog(object):
         meta: dict, optional
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
+        forced_overwrite: bool
+            override any existing files if True. False by default.
         append: bool, optional
             If True, append to existing data catalog, by default False.
         """
@@ -1094,17 +1097,22 @@ class DataCatalog(object):
                         # read slice of source and write to file
                         self.logger.debug(f"Exporting {key}.")
                         if not unit_conversion:
-                            unit_mult = source.unit_mult
-                            unit_add = source.unit_add
-                            source.unit_mult = {}
-                            source.unit_add = {}
+                            unit_mult = source.data_adapter.unit_mult
+                            unit_add = source.data_adapter.unit_add
+                            source.data_adapter.unit_mult = {}
+                            source.data_adapter.unit_add = {}
                         try:
+                            p = cast(Path, Path(data_root) / source.uri)
+                            if not forced_overwrite and isfile(p):
+                                logger.warning(
+                                    f"File {p} already exists and not in forced overwrite mode. skipping..."
+                                )
+                                continue
                             fn_out, driver, driver_kwargs = source.to_file(
-                                file_path=Path(data_root) / source.uri,
-                                data_name=key,
+                                file_path=p,
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
-                                time_tuple=time_tuple,
+                                time_tuple=time_range,
                                 handle_nodata=NoDataStrategy.RAISE,
                                 logger=self.logger,
                             )

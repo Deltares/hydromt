@@ -4,7 +4,7 @@ import logging
 import os
 from logging import Logger
 from os import makedirs
-from os.path import dirname, exists, isdir, join
+from os.path import dirname, exists, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Union, cast
@@ -128,6 +128,7 @@ def write_nc(
     gdal_compliant: bool = False,
     rename_dims: bool = False,
     force_sn: bool = False,
+    force_overwrite: bool = False,
     logger: Logger = _logger,
     **kwargs,
 ) -> Optional[DeferedFileClose]:
@@ -171,6 +172,8 @@ def write_nc(
             continue
         logger.debug(f"Writing file {filename_template.format(name=name)}")
         _fn = join(root, filename_template.format(name=name))
+        if isfile(_fn) and not force_overwrite:
+            raise IOError(f"File {_fn} already exists")
         if not isdir(dirname(_fn)):
             os.makedirs(dirname(_fn))
         if gdal_compliant:
