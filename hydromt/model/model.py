@@ -7,6 +7,7 @@ import typing
 from abc import ABCMeta
 from inspect import _empty, signature
 from os.path import isabs, isfile, join
+from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -25,6 +26,7 @@ from hydromt._typing.type_def import DeferedFileClose
 from hydromt._utils import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
+from hydromt.io.readers import read_yaml
 from hydromt.model import hydromt_step
 from hydromt.model.components import (
     DatasetsComponent,
@@ -183,6 +185,24 @@ class Model(object, metaclass=ABCMeta):
     def __getattr__(self, name: str) -> ModelComponent:
         """Get a component from the model. Will raise an error if the component does not exist."""
         return self.get_component(name)
+
+    @staticmethod
+    def from_dict(model_dict: Dict[str, Any]) -> "Model":
+        """Construct a model with the components and other init arguments in the yaml file located at `path`."""
+        model_type = model_dict.pop("modeltype", "Model")
+        model_config = model_dict.pop("global", {})
+        if model_type not in PLUGINS.model_plugins:
+            raise ValueError(
+                f"Unknown model type: {model_type}, options are: [{', '.join(PLUGINS.model_plugins)}]"
+            )
+        else:
+            return cast("Model", PLUGINS.model_plugins[model_type](**model_config))
+
+    @staticmethod
+    def from_yml(path: Path) -> "Model":
+        """Construct a model with the components and other init arguments in the yaml file located at `path`."""
+        file_contents = read_yaml(path)
+        return Model.from_dict(file_contents)
 
     @property
     def region(self) -> Optional[gdp.GeoDataFrame]:

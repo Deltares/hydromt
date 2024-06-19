@@ -197,6 +197,7 @@ class DatasetsComponent(ModelComponent):
         write_nc(
             self.data,
             filename_template=filename or self._filename,
+            force_overwrite=self.root.mode.is_override_mode(),
             root=self.root.path,
             gdal_compliant=gdal_compliant,
             logger=self.logger,

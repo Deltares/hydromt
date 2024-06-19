@@ -7,11 +7,10 @@ from datetime import datetime
 from json import loads as json_decode
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import click
 import numpy as np
-from geopandas import GeoDataFrame
 from pydantic import ValidationError
 
 from hydromt import __version__
@@ -249,6 +248,8 @@ def build(
     try:
         # initialize model and create folder structure
         mode = "w+" if fo else "w"
+        if modeltype not in PLUGINS.model_plugins:
+            raise ValueError("Unknown model")
         mod = PLUGINS.model_plugins[modeltype](
             root=model_root,
             mode=mode,
@@ -258,14 +259,14 @@ def build(
         )
         mod.data_catalog.cache = cache
         # build model
-        mod.build(opt=opt)
+        mod.build(steps=opt["steps"])
+
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_handlers(logger)
+        log.wait_and_remove_handlers(logging.getLogger("hydromt.model.root"))
 
 
 ## UPDATE
@@ -343,6 +344,8 @@ def update(
     opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     modeltype = opt.pop("modeltype", model)
+    if modeltype not in PLUGINS.model_plugins:
+        raise ValueError("Unknown model")
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -478,8 +481,13 @@ def check(
 )
 @click.option(
     "-t",
-    "--time-tuple",
+    "--time-range",
     help="Time tuple as a list of two strings, e.g. ['2010-01-01', '2022-12-31']",
+)
+@click.option(
+    "-b",
+    "--bbox",
+    help="a bbox in EPSG:4236 designating the region of which to export the data",
 )
 @region_opt
 @export_dest_path
@@ -495,7 +503,8 @@ def export(
     ctx: click.Context,
     export_dest_path: Path,
     source: Optional[str],
-    time_tuple: Optional[str],
+    time_range: Optional[str],
+    bbox: Optional[Tuple[float, float, float, float]],
     config: Optional[Path],
     region: Optional[Dict[Any, Any]],
     data: Optional[List[Path]],
@@ -555,7 +564,7 @@ def export(
         config_dict = _utils.parse_config(config)["export_data"]
         if "data_libs" in config_dict.keys():
             data_libs = data_libs + config_dict.pop("data_libs")
-        time_tuple = config_dict.pop("time_tuple", None)
+        time_range = config_dict.pop("time_range", None)
         region = region or config_dict.pop("region", None)
         if isinstance(region, str):
             region = json_decode(region)
@@ -569,44 +578,31 @@ def export(
     data_catalog = DataCatalog(data_libs=data_libs)
     _ = data_catalog.sources  # initialise lazy loading
 
-    if region:
-        if "bbox" in region:
-            bbox = region["bbox"]
-        elif "geom" in region:
-            bbox = GeoDataFrame.from_file(region["geom"]).total_bounds
+    if time_range:
+        if isinstance(time_range, str):
+            tup = literal_eval(time_range)
         else:
-            raise NotImplementedError(
-                f"Only bbox and geom are supported for export. recieved {region}"
-            )
-
-        if not set(region.keys()).issubset({"bbox", "geom"}):
-            logger.warning(
-                "Found unsupported arguments for region in addition to bbox or geom. these will be ignored"
-            )
-    else:
-        bbox = None
-
-    if time_tuple:
-        if isinstance(time_tuple, str):
-            tup = literal_eval(time_tuple)
-        else:
-            tup = time_tuple
+            tup = time_range
         time_start = datetime.strptime(tup[0], "%Y-%m-%d")
         time_end = datetime.strptime(tup[1], "%Y-%m-%d")
         time_tup = (time_start, time_end)
     else:
         time_tup = None
 
+    if isinstance(bbox, str):
+        bbox = literal_eval(bbox)
+
     try:
         data_catalog.export_data(
             export_dest_path,
             source_names=sources,
             bbox=bbox,
-            time_tuple=time_tup,
+            time_range=time_tup,
             unit_conversion=unit_conversion,
             meta=meta,
             append=append,
             handle_nodata=handle_nodata,
+            forced_overwrite=fo,
         )
 
     except Exception as e:

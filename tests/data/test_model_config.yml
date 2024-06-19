@@ -1,18 +1,24 @@
 
 ---
-modeltype: Model
+modeltype: model
 global:
   components:
     grid:
       type: GridComponent
-steps:
-  # - config.create:
-  #   header.settings: value
-  #   timers.end: '2010-02-15'
-  #   timers.start: '2010-02-05'
+    config:
+      type: ConfigComponent
 
-  - grid.create:
-      res: 0.05
+steps:
+  - config.update:
+      data:
+        header.settings: value
+        timers.end: '2010-02-15'
+        timers.start: '2010-02-05'
+
+  - grid.create_from_region:
+      region:
+        bbox: [12.05, 45.30, 12.85, 45.65]
+      res: 0.01
       crs: 4326
       basin_index_fn: merit_hydro_index
       hydrography_fn: merit_hydro
@@ -68,6 +74,5 @@ steps:
 
   - write:
       components:
-        # - config
-        - region
+        - config
         - grid

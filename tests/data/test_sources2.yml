@@ -1,0 +1,31 @@
+meta:
+  roots:
+  - d:/hydromt_testdata
+  - ~/.hydromt_testdata
+  hydromt_version: '>=1.0a, <2.0'
+  version: v1.0.0
+gtsmv3_eu_era5:
+  data_type: GeoDataset
+  uri: water_level\reanalysis-waterlevel-{year}-m{month:02d}.nc
+  driver:
+    name: geodataset_xarray
+    options:
+      chunks:
+        stations: 100
+        time: 1500
+      concat_dim: time
+      decode_times: true
+      combine: by_coords
+      parallel: true
+  metadata:
+    category: ocean
+    paper_doi: 10.24381/cds.8c59054f
+    paper_ref: Copernicus Climate Change Service 2019
+    url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview
+    version: GTSM v3.0
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    crs: 4326
+  data_adapter:
+    rename:
+      station_x_coordinate: lon
+      station_y_coordinate: lat

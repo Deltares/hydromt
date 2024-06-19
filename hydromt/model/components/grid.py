@@ -177,6 +177,7 @@ class GridComponent(SpatialModelComponent):
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
             logger=self.logger,
+            force_overwrite=self.root.mode.is_override_mode(),
             force_sn=force_sn,
             **kwargs,
         )
