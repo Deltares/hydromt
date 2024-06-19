@@ -127,6 +127,11 @@ description = { file = "hydromt/__init__.py" }
 [tool.ruff]
 line-length = 88
 target-version = "py39"
+
+# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
+select = ["E", "F", "I", "PT", "D", "B"]
+ignore-init-module-imports = true
+ignore = ["D211", "D213", "D206", "E501", "E741", "D105", "E712", "B904"]
 exclude = ["docs"]
 
 [tool.ruff.lint]
