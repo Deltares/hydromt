@@ -1,7 +1,9 @@
 """Implementaion of forcing workflows."""
+
 import logging
 import re
-from typing import Union
+from logging import Logger
+from typing import Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -28,16 +30,30 @@ __all__ = [
     "pm_fao56",
 ]
 
+PET_METHODS = [
+    "debruin",
+    "makkink",
+    "penman-monteith_rh_simple",
+    "penman-monteith_tdew",
+]
+
+PetMethods = Literal[
+    "debruin",
+    "makking",
+    "penman-monteith_rh_simple",
+    "penman-monteith_tdew",
+]
+
 
 def precip(
-    precip,
-    da_like,
-    clim=None,
-    freq=None,
-    reproj_method="nearest_index",
-    resample_kwargs=None,
-    logger=logger,
-):
+    precip: xr.DataArray,
+    da_like: Union[xr.DataArray, xr.Dataset],
+    clim: Optional[xr.DataArray] = None,
+    freq: Optional[Union[str, pd.Timedelta]] = None,
+    reproj_method: str = "nearest_index",
+    resample_kwargs: Optional[dict] = None,
+    logger: Logger = logger,
+) -> xr.DataArray:
     """Return the lazy reprojection of precipitation to model.
 
       Applies the projection to the grid and resampling of time dimension to frequency.
@@ -102,15 +118,15 @@ def precip(
 # use dem_model (from staticmaps) and dem_forcing (meteo) in config file
 def temp(
     temp,
-    dem_model,
-    dem_forcing=None,
-    lapse_correction=True,
-    freq=None,
-    reproj_method="nearest_index",
-    lapse_rate=-0.0065,
-    resample_kwargs=None,
-    logger=logger,
-):
+    dem_model: xr.DataArray,
+    dem_forcing: Optional[xr.DataArray] = None,
+    lapse_correction: bool = True,
+    freq: Optional[Union[str, pd.Timedelta]] = None,
+    reproj_method: str = "nearest_index",
+    lapse_rate: float = -0.0065,
+    resample_kwargs: Optional[dict] = None,
+    logger: Logger = logger,
+) -> xr.DataArray:
     """Return lazy reprojection of temperature to model grid.
 
     Use lapse_rate for downscaling, and resampling of time
@@ -123,18 +139,18 @@ def temp(
     dem_model: xarray.DataArray
         DataArray of the target resolution and projection, contains elevation
         data
-    dem_forcing: xarray.DataArray
+    dem_forcing: xarray.DataArray, optional
         DataArray of elevation at forcing resolution. If provided this is used
         with `dem_model` to correct the temperature downscaling using a lapse rate
     lapse_correction : bool, optional
         If True, temperature is correctured based on lapse rate, by default True.
-    freq: str, Timedelta
+    freq: str, Timedelta, optional
         output frequency of timedimension
     reproj_method: str, optional
         Method for spatital reprojection of precip, by default 'nearest_index'
     lapse_rate: float, optional
         lapse rate of temperature [C m-1] (default: -0.0065)
-    resample_kwargs:
+    resample_kwargs: dict, optional
         Additional key-word arguments (e.g. label, closed) for time resampling method
     logger:
         The logger to use.
@@ -182,15 +198,15 @@ def temp(
 
 
 def press(
-    press,
-    dem_model,
-    lapse_correction=True,
-    freq=None,
-    reproj_method="nearest_index",
-    lapse_rate=-0.0065,
-    resample_kwargs=None,
-    logger=logger,
-):
+    press: xr.DataArray,
+    dem_model: xr.DataArray,
+    lapse_correction: bool = True,
+    freq: Optional[Union[str, pd.Timedelta]] = None,
+    reproj_method: str = "nearest_index",
+    lapse_rate: float = -0.0065,
+    resample_kwargs: Optional[dict] = None,
+    logger: Logger = logger,
+) -> xr.DataArray:
     """Return lazy reprojection of pressure to model grid.
 
     Resample time dimension to frequency.
@@ -244,16 +260,16 @@ def press(
 
 def wind(
     da_model: Union[xr.DataArray, xr.Dataset],
-    wind: xr.DataArray = None,
-    wind_u: xr.DataArray = None,
-    wind_v: xr.DataArray = None,
+    wind: Optional[xr.DataArray] = None,
+    wind_u: Optional[xr.DataArray] = None,
+    wind_v: Optional[xr.DataArray] = None,
     altitude: float = 10,
     altitude_correction: bool = False,
-    freq: pd.Timedelta = None,
+    freq: Optional[pd.Timedelta] = None,
     reproj_method: str = "nearest_index",
-    resample_kwargs: dict = None,
-    logger=logger,
-):
+    resample_kwargs: Optional[dict] = None,
+    logger: Logger = logger,
+) -> xr.DataArray:
     """Return lazy reprojection of wind speed to model grid.
 
     Resample time dimension to frequency. Either provides wind speed directly
@@ -261,16 +277,16 @@ def wind(
 
     Parameters
     ----------
+    da_model: xarray.DataArray
+        DataArray of the target resolution and projection
     wind: xarray.DataArray
         DataArray of wind speed forcing [m s-1]
     wind_u: xarray.DataArray
         DataArray of U component of wind speed forcing [m s-1]
     wind_v: xarray.DataArray
         DataArray of V component of wind speed forcing [m s-1]
-    da_model: xarray.DataArray
-        DataArray of the target resolution and projection
     altitude: float, optional
-        ALtitude of wind speed data. By default 10m.
+        Altitude of wind speed data. By default 10m.
     altitude_correction: str, optional
        If True wind speed is re-calculated to wind speed at 2 meters using
        original `altitude`.
@@ -293,7 +309,7 @@ def wind(
     if wind_u is not None and wind_v is not None:
         wind = np.sqrt(np.power(wind_u, 2) + np.power(wind_v, 2))
     elif wind is None:
-        raise ValueError("Either wind or wind_u and wind_v varibales must be supplied.")
+        raise ValueError("Either wind or wind_u and wind_v variables must be supplied.")
 
     if wind.raster.dim0 != "time":
         raise ValueError(f'First wind dim should be "time", not {wind.raster.dim0}')
@@ -316,14 +332,14 @@ def pet(
     ds: xarray.Dataset,
     temp: xarray.DataArray,
     dem_model: xarray.DataArray,
-    method: str = "debruin",
+    method: PetMethods = "debruin",
     press_correction: bool = False,
     wind_correction: bool = True,
     wind_altitude: float = 10,
     reproj_method: str = "nearest_index",
-    freq: str = None,
-    resample_kwargs: dict = None,
-    logger=logger,
+    freq: Optional[str] = None,
+    resample_kwargs: Optional[dict] = None,
+    logger: Logger = logger,
 ) -> xarray.DataArray:
     """Determine reference evapotranspiration.
 
@@ -370,6 +386,10 @@ def pet(
     pet_out : xarray.DataArray (lazy)
         reference evapotranspiration
     """
+    if method not in PET_METHODS:
+        raise ValueError(
+            f"Unknown pet method '{method}', select from {','.join(PET_METHODS)}"
+        )
     # # resample in time
     if resample_kwargs is None:
         resample_kwargs = {}
@@ -461,14 +481,6 @@ def pet(
                 dem_model,
                 "temp_dew",
             )
-        else:
-            methods = [
-                "debruin",
-                "makking",
-                "penman-monteith_rh_simple",
-                "penman-monteith_tdew",
-            ]
-            raise ValueError(f"Unknown pet method, select from {methods}")
 
     # resample in time
     pet_out.name = "pet"
@@ -480,8 +492,12 @@ def pet(
 
 
 def press_correction(
-    dem_model, g=9.80665, R_air=8.3144621, Mo=0.0289644, lapse_rate=-0.0065
-):
+    dem_model: xr.DataArray,
+    g: float = 9.80665,
+    R_air: float = 8.3144621,
+    Mo: float = 0.0289644,
+    lapse_rate: float = -0.0065,
+) -> xr.DataArray:
     """Pressure correction based on elevation lapse_rate.
 
     Parameters
@@ -508,7 +524,7 @@ def press_correction(
     return press_fact
 
 
-def temp_correction(dem, lapse_rate=-0.0065):
+def temp_correction(dem: xr.DataArray, lapse_rate: float = -0.0065) -> xr.DataArray:
     """Temperature correction based on elevation data.
 
     Parameters
@@ -529,8 +545,15 @@ def temp_correction(dem, lapse_rate=-0.0065):
 
 
 def pet_debruin(
-    temp, press, k_in, k_ext, timestep=86400, cp=1005.0, beta=20.0, Cs=110.0
-):
+    temp: xr.DataArray,
+    press: xr.DataArray,
+    k_in: xr.DataArray,
+    k_ext: xr.DataArray,
+    timestep: int = 86400,
+    cp: float = 1005.0,
+    beta: float = 20.0,
+    Cs: float = 110.0,
+) -> xr.DataArray:
     """Determine De Bruin (2016) reference evapotranspiration.
 
     Parameters
@@ -577,7 +600,13 @@ def pet_debruin(
     return pet
 
 
-def pet_makkink(temp, press, k_in, timestep=86400, cp=1005.0):
+def pet_makkink(
+    temp: xr.DataArray,
+    press: xr.DataArray,
+    k_in: xr.DataArray,
+    timestep: int = 86400,
+    cp: float = 1005.0,
+) -> xr.DataArray:
     """Determnines Makkink reference evapotranspiration.
 
     Parameters
@@ -715,15 +744,15 @@ def pm_fao56(
 
 
 def resample_time(
-    da,
-    freq,
-    label="right",
-    closed="right",
-    upsampling="bfill",
-    downsampling="mean",
-    conserve_mass=True,
-    logger=logger,
-):
+    da: xr.DataArray,
+    freq: Union[str, pd.Timedelta],
+    label: str = "right",
+    closed: str = "right",
+    upsampling: str = "bfill",
+    downsampling: str = "mean",
+    conserve_mass: bool = True,
+    logger: Logger = logger,
+) -> xr.DataArray:
     """Resample data to destination frequency.
 
     Skip if input data already at output frequency.
@@ -732,7 +761,7 @@ def resample_time(
     ----------
     da: xarray.DataArray
         Input data
-    freq: str, pd.timedelta
+    freq: str, pd.Timedelta
         Output frequency.
     label: {'left', 'right'}, optional
         Side of each interval to use for labeling. By default 'right'.
@@ -769,7 +798,10 @@ def resample_time(
     return da_out
 
 
-def delta_freq(da_or_freq, da_or_freq1):
+def delta_freq(
+    da_or_freq: Union[Union[str, pd.Timedelta], xr.DataArray],
+    da_or_freq1: Union[Union[str, pd.Timedelta], xr.DataArray],
+) -> pd.Timedelta:
     """Return relative difference between dataset mean timestep and destination freq.
 
     <1 : upsampling
@@ -779,7 +811,9 @@ def delta_freq(da_or_freq, da_or_freq1):
     return to_timedelta(da_or_freq1) / to_timedelta(da_or_freq)
 
 
-def to_timedelta(da_or_freq):
+def to_timedelta(
+    da_or_freq: Union[Union[str, pd.Timedelta], xr.DataArray],
+) -> pd.Timedelta:
     """Convert time dimension or frequency to timedelta."""
     if isinstance(da_or_freq, (xr.DataArray, xr.Dataset)):
         freq = da_to_timedelta(da_or_freq)
@@ -788,12 +822,12 @@ def to_timedelta(da_or_freq):
     return freq
 
 
-def da_to_timedelta(da):
+def da_to_timedelta(da: xr.DataArray) -> pd.Timedelta:
     """Convert time dimenstion in dataset to timedelta."""
     return pd.to_timedelta(np.diff(da.time).mean())
 
 
-def freq_to_timedelta(freq):
+def freq_to_timedelta(freq: Union[str, pd.Timedelta]) -> pd.Timedelta:
     """Convert frequency to timedelta."""
     # Add '1' to freq that doesn't have any digit
     if isinstance(freq, str) and not bool(re.search(r"\d", freq)):
