@@ -3,58 +3,8 @@ meta:
   version: v1.0.0
   name: deltares_data
   hydromt_version: '>1.0a,<2'
-basin_atlas_level12_v10:
-  data_type: GeoDataFrame
-  uri: hydrography/hydro_atlas/basin_atlas_v10.gpkg
-  driver:
-    name: pyogrio
-    options:
-      layer: BasinATLAS_v10_lev12
-  metadata:
-    category: hydrography
-    notes: renaming and units might require some revision
-    paper_doi: 10.1038/s41597-019-0300-6
-    paper_ref: Linke et al. (2019)
-    url: https://www.hydrosheds.org/hydroatlas
-    version: 10
-    license: CC BY 4.0
-    crs: 4326
-river_atlas_v10:
-  data_type: GeoDataFrame
-  uri: hydrography/hydro_atlas/river_atlas_v10.gpkg
-  driver:
-    name: pyogrio
-  metadata:
-    category: hydrography
-    notes: renaming and units might require some revision
-    paper_doi: 10.1038/s41597-019-0300-6
-    paper_ref: Linke et al. (2019)
-    url: https://www.hydrosheds.org/hydroatlas
-    version: 10
-    license: CC BY 4.0
-    crs: 4326
-  data_adapter:
-    rename:
-      dis_m3_pyr: Dis_avg
-lake_atlas_pol_v10:
-  data_type: GeoDataFrame
-  uri: hydrography/hydro_atlas/lake_atlas_v10.gpkg
-  driver:
-    name: pyogrio
-    options:
-      layer: LakeATLAS_v10_pol
-  metadata:
-    category: hydrography
-    notes: renaming and units might require some revision
-    paper_doi: 10.1038/s41597-022-01425-z
-    paper_ref: Lehner et al. (2022)
-    url: https://www.hydrosheds.org/hydroatlas
-    version: 10
-    license: CC BY 4.0
-    crs: 4326
-  data_adapter:
-    rename:
-      dis_m3_pyr: Dis_avg
+
+
 chelsa:
   data_type: RasterDataset
   uri: meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif
@@ -67,11 +17,17 @@ chelsa:
   metadata:
     category: meteo
     paper_doi: 10.1038/sdata.2017.122
+    crs: 4326
+    version: 1.2
     paper_ref: Karger et al. (2017)
     url: http://chelsa-climate.org/downloads/
-    version: 1.2
     license: CC BY 4.0
-    crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 84.0
+
 chirps:
   data_type: RasterDataset
   uri: meteo/chirps_africa_daily_v2.0/CHIRPS_rainfall_{year}.nc
@@ -87,17 +43,26 @@ chirps:
       parallel: true
   metadata:
     category: meteo
+    crs: 4326
+    version: v2.0
     paper_doi: 10.1038/sdata.2015.66
     paper_ref: Funk et al (2015)
     url: https://www.chc.ucsb.edu/data/chirps
-    version: v2.0
     license: CC
-    crs: 4326
+    temporal_extent:
+      start: '1981-01-02'
+      end: '2022-04-01'
+    spatial_extent:
+      West: -20.0
+      South: -40.0
+      East: 55.0
+      North: 40.0
   data_adapter:
     unit_add:
       time: 86400
     rename:
       precipitation: precip
+
 chirps_global:
   data_type: RasterDataset
   uri: meteo/chirps_global_daily_v2.0/chirps-v2.0.{year}.days_p05.nc
@@ -112,18 +77,27 @@ chirps_global:
       decode_times: true
       parallel: true
   metadata:
+    crs: 4326
+    version: v2.0
     category: meteo
     paper_doi: 10.3133/ds832
     paper_ref: Funk et al (2014)
     url: https://www.chc.ucsb.edu/data/chirps
-    version: v2.0
     license: CC
-    crs: 4326
+    temporal_extent:
+      start: '1981-01-02'
+      end: '2023-02-01'
+    spatial_extent:
+      West: -180.0
+      South: -50.0
+      East: 180.0
+      North: 50.0
   data_adapter:
     unit_add:
       time: 86400
     rename:
       precipitation: precip
+
 copdem30:
   data_type: RasterDataset
   uri: topography/copdem/copdem.vrt
@@ -136,12 +110,18 @@ copdem30:
   metadata:
     category: topography
     url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    version: '2021_1'
     license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+    version: 2021.1
     nodata: -9999
+    spatial_extent:
+      West: -180.001
+      South: -90.0
+      East: 180.0
+      North: 84.0
   data_adapter:
     rename:
       copdem: elevtn
+
 copdem30_mask:
   data_type: RasterDataset
   uri: topography/copdem/copdem_mask.vrt
@@ -154,12 +134,18 @@ copdem30_mask:
   metadata:
     category: topography
     url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    version: '2021_1'
+    version: 2021.1
     license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
     nodata: -1
+    spatial_extent:
+      West: -180.001
+      South: -90.0
+      East: 180.0
+      North: 84.0
   data_adapter:
     rename:
       copdem_mask: mask
+
 copdem30_masked:
   data_type: RasterDataset
   uri: topography/copdem/copdem_masked.vrt
@@ -172,11 +158,17 @@ copdem30_masked:
   metadata:
     category: topography
     url: https://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
-    version: '2021_1'
+    version: 2021.1
     license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA_ESA_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+    spatial_extent:
+      West: -180.001
+      South: -90.0
+      East: 180.0
+      North: 84.0
   data_adapter:
     rename:
       copdem_masked: elevtn
+
 corine:
   data_type: RasterDataset
   uri: landuse/corine/CLC2018_CLC2018_V2018_20.tif
@@ -192,6 +184,12 @@ corine:
     author: European Environment Agency
     version: v.2020_20u1
     license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
+    spatial_extent:
+      West: 900000.0
+      South: 900000.0
+      East: 7400000.0
+      North: 5500000.0
+
 dtu10mdt:
   data_type: RasterDataset
   uri: topography/dtu10mdt/DTU10MDT_1min_float32.tif
@@ -209,6 +207,12 @@ dtu10mdt:
     url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
     version: 2010
     crs: 4326
+    spatial_extent:
+      West: -179.992
+      South: -89.992
+      East: 179.992
+      North: 89.992
+
 dtu10mdt_egm96:
   data_type: RasterDataset
   uri: topography/dtu10mdt/DTU10MDT_1min_egm96.tif
@@ -226,6 +230,12 @@ dtu10mdt_egm96:
     url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
     version: 2010
     crs: 4326
+    spatial_extent:
+      West: -179.992
+      South: -89.985
+      East: 179.995
+      North: 89.992
+
 eobs:
   data_type: RasterDataset
   uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
@@ -247,6 +257,14 @@ eobs:
     version: 22.0e
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     crs: 4326
+    temporal_extent:
+      start: '1950-01-02'
+      end: '2022-01-01'
+    spatial_extent:
+      West: -25.0
+      South: 25.0
+      East: 45.5
+      North: 71.5
   data_adapter:
     unit_add:
       time: 86400
@@ -255,123 +273,44 @@ eobs:
       qq: kin
       rr: precip
       tg: temp
-eobs_v23.1e:
-  data_type: RasterDataset
-  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-        time: 100
-      combine: by_coords
-      parallel: true
-      preprocess: round_latlon
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 23.1e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    unit_add:
-      time: 86400
-    rename:
-      pp: press_msl
-      qq: kin
-      rr: precip
-      tg: temp
-eobs_v24.0e:
-  data_type: RasterDataset
-  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-        time: 100
-      combine: by_coords
-      parallel: true
-      preprocess: round_latlon
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 24.0e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    unit_add:
-      time: 86400
-    rename:
-      pp: press_msl
-      qq: kin
-      rr: precip
-      tg: temp
-eobs_v25.0e:
-  data_type: RasterDataset
-  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-        time: 100
-      combine: by_coords
-      parallel: true
-      preprocess: round_latlon
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 25.0e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    unit_add:
-      time: 86400
-    rename:
-      pp: press_msl
-      qq: kin
-      rr: precip
-      tg: temp
-eobs_v29.0e:
-  data_type: RasterDataset
-  uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-        time: 100
-      combine: by_coords
-      parallel: true
-      preprocess: round_latlon
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 29.0e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    unit_add:
-      time: 86400
-    rename:
-      pp: press_msl
-      qq: kin
-      rr: precip
-      tg: temp
-eobs_orography_v20.0e:
+  variants:
+  - version: 22.0e
+    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
+    meta:
+      temporal_extent:
+        start: '1950-01-02'
+        end: '2020-07-01'
+  - version: 23.1e
+    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
+    meta:
+      temporal_extent:
+        start: '1950-01-02'
+        end: '2021-01-01'
+  - version: 24.0e
+    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
+    meta:
+      processing_script: meteo/eobs/scripts/v24.0e_fix_qq_dims_and_match_extent.py
+      processing_notes: correct lat/lon dimension for variable qq to match the grid of the other variables
+      temporal_extent:
+        start: '1950-01-02'
+        end: '2021-07-01'
+  - version: 25.0e
+    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
+    meta:
+      processing_script: v25.0e_fix_qq_dims_and_match_extent.py
+      processing_notes: correct lat/lon dimension for variable qq to match the grid of the other variables
+      temporal_extent:
+        start: '1950-01-02'
+        end: '2022-01-01'
+  - version: 29.0e
+    uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
+    meta:
+      processing_script: meteo/eobs/scripts/v29.0e_fix_qq_dims_and_match_extent.py
+      temporal_extent:
+        start: '1950-01-01'
+        end: '2024-02-01'
+
+eobs_orography:
   data_type: RasterDataset
   uri: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
   driver:
@@ -388,109 +327,30 @@ eobs_orography_v20.0e:
     version: 20.0e
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     crs: 4326
+    spatial_extent:
+      West: -25.0
+      South: 25.0
+      East: 45.5
+      North: 71.5
   data_adapter:
     rename:
       elevation: elevtn
-eobs_orography:
-  data_type: RasterDataset
-  uri: meteo/eobs/elev_ens_0.1deg_reg_v22.0e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 22.0e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    rename:
-      elevation: elevtn
-eobs_orography_v23.1e:
-  data_type: RasterDataset
-  uri: meteo/eobs/elev_ens_0.1deg_reg_v23.1e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 23.1e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    rename:
-      elevation: elevtn
-eobs_orography_v24.0e:
-  data_type: RasterDataset
-  uri: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 24.0e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    rename:
-      elevation: elevtn
-eobs_orography_v25.0e:
-  data_type: RasterDataset
-  uri: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 25.0e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    rename:
-      elevation: elevtn
-eobs_orography_v29.0e:
-  data_type: RasterDataset
-  uri: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
-  driver:
-    name: raster_xarray
-    options:
-      chunks:
-        latitude: 100
-        longitude: 100
-  metadata:
-    category: meteo
-    paper_doi: 10.1029/2017JD028200
-    paper_ref: Cornes et al (2018)
-    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    version: 29.0e
-    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    crs: 4326
-  data_adapter:
-    rename:
-      elevation: elevtn
+  variants:
+  - version: 20.0e
+    uri: meteo/eobs/elev_ens_0.1deg_reg_v20.0e.nc
+  - version: 22.0e
+    uri: meteo/eobs/elev_ens_0.1deg_reg_v22.0e.nc
+  - version: 23.1e
+    uri: meteo/eobs/elev_ens_0.1deg_reg_v23.1e.nc
+  - version: 24.0e
+    uri: meteo/eobs/elev_ens_0.1deg_reg_v24.0e.nc
+  - version: 25.0e
+    uri: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
+  - version: 29.0e
+    uri: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
+  rename:
+    elevation: elevtn
+
 era5:
   data_type: RasterDataset
   variants:
@@ -522,6 +382,14 @@ era5:
     version: ERA5 daily data on pressure levels
     license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     crs: 4326
+    temporal_extent:
+      start: '1950-01-02'
+      end: '2023-11-30'
+    spatial_extent:
+      West: -0.125
+      South: -90.125
+      East: 359.875
+      North: 90.125
   data_adapter:
     unit_add:
       temp: -273.15
@@ -544,6 +412,7 @@ era5:
       tp: precip
       u10: wind10_u
       v10: wind10_v
+
 era5_hourly:
   data_type: RasterDataset
   variants:
@@ -574,6 +443,14 @@ era5_hourly:
     version: ERA5 hourly data on single levels from 1940 to present
     license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     crs: 4326
+    temporal_extent:
+      start: '1950-01-01'
+      end: '2023-03-01'
+    spatial_extent:
+      West: -0.125
+      South: -90.125
+      East: 359.875
+      North: 90.125
   data_adapter:
     unit_add:
       temp: -273.15
@@ -593,6 +470,7 @@ era5_hourly:
       tp: precip
       u10: wind10_u
       v10: wind10_v
+
 era5_ocean:
   data_type: RasterDataset
   uri: ocean/era5/{variable}/era5_{variable}_{year}_hourly.nc
@@ -614,6 +492,15 @@ era5_ocean:
     url: https://doi.org/10.24381/cds.bd0915c6
     license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     crs: 4326
+    temporal_extent:
+      start: '1979-01-01'
+      end: '2022-04-08'
+    spatial_extent:
+      West: -0.25
+      South: -90.25
+      East: 359.75
+      North: 90.25
+
 era5_orography:
   data_type: RasterDataset
   uri: meteo/era5/meta/era5_orography_2018.nc
@@ -631,11 +518,20 @@ era5_orography:
     url: https://apps.ecmwf.int/codes/grib/param-db?id=129
     license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     crs: 4326
+    temporal_extent:
+      start: '2018-01-01'
+      end: '2018-01-01'
+    spatial_extent:
+      West: -0.125
+      South: -90.125
+      East: 359.875
+      North: 90.125
   data_adapter:
     unit_mult:
       elevtn: 0.10197162129779283
     rename:
       z: elevtn
+
 esa_worldcover:
   data_type: RasterDataset
   uri: landuse/esa_worldcover/esa-worldcover.vrt
@@ -647,10 +543,20 @@ esa_worldcover:
         y: 36000
   metadata:
     category: landuse
+    processing_notes: prepare vrt file with gdalbuildvrt
     url: https://doi.org/10.5281/zenodo.5571936
     version: v100
     license: CC BY 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 84.0
+    temporal_extent:
+      start: '2020-01-01'
+      end: '2020-12-31'
+
 fabdem:
   data_type: RasterDataset
   uri: topography/fabdem/fabdem.vrt
@@ -668,6 +574,11 @@ fabdem:
     version: 1.0
     license: CC BY-NC-SA 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
   data_adapter:
     rename:
       fabdem: elevtn
@@ -685,6 +596,12 @@ gadm:
     version: 4.1
     license: https://gadm.org/license.html
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.658
+
 gadm_level1:
   data_type: GeoDataFrame
   uri: geography/gadm/version4_1/gadm_level1.fgb
@@ -699,6 +616,12 @@ gadm_level1:
     version: 4.1
     license: https://gadm.org/license.html
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.658
+
 gadm_level2:
   data_type: GeoDataFrame
   uri: geography/gadm/version4_1/gadm_level2.fgb
@@ -713,6 +636,12 @@ gadm_level2:
     version: 4.1
     license: https://gadm.org/license.html
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.658
+
 gadm_level3:
   data_type: GeoDataFrame
   uri: geography/gadm/version4_1/gadm_level3.fgb
@@ -727,6 +656,12 @@ gadm_level3:
     version: 4.1
     license: https://gadm.org/license.html
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.658
+
 gcn250:
   data_type: RasterDataset
   uri: landuse/gcn250/GCN250_*.tif
@@ -744,11 +679,17 @@ gcn250:
     version: v1
     license: CC BY 4.0
     nodata: 255
+    spatial_extent:
+      West: -180.0
+      South: -56.0
+      East: 180.0
+      North: 84.0
   data_adapter:
     rename:
       GCN250_ARCI: cn_dry
       GCN250_ARCII: cn_avg
       GCN250_ARCIII: cn_wet
+
 gdp_world:
   data_type: GeoDataFrame
   uri: socio_economic/gdp_world/World_countries_GDPpcPPP.fgb
@@ -756,17 +697,23 @@ gdp_world:
     name: pyogrio
   metadata:
     category: socio-economic
-    notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
+    processing_notes: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
       and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     author: Wilfred Altena
     version: 1.0
     license: CC BY-4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.665
   data_adapter:
     unit_mult:
       gdp: 0.001
     rename:
       GDP: gdp
+
 gebco:
   data_type: RasterDataset
   uri: bathymetry/gebco/gebco.vrt
@@ -785,10 +732,17 @@ gebco:
     version: 2020
     license: https://www.gebco.net/data_and_products/gridded_bathymetry_data/#a1
     crs: 4326
+    processing_script: bathymetry/gebco/gebco_tiles.ipynb
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   data_adapter:
     rename:
       gebco: elevtn
-ghs_pop:
+
+ghs_pop_2015:
   data_type: RasterDataset
   uri: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_4326_9ss_V1_0.tif
   driver:
@@ -806,7 +760,13 @@ ghs_pop:
     version: R2019A_v1.0
     license: https://data.jrc.ec.europa.eu/licence/com_reuse
     crs: 4326
-ghs_pop_2015_54009_v2019a:
+    spatial_extent:
+      West: -180.0
+      South: -59.485
+      East: 180.0
+      North: 83.628
+
+ghs_pop_2015_54009:
   data_type: RasterDataset
   uri: socio_economic/ghs/GHS_POP_E2015_GLOBE_R2019A_54009_250_V1_0.tif
   driver:
@@ -822,7 +782,13 @@ ghs_pop_2015_54009_v2019a:
     url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
     license: CC BY 4.0
     crs: ESRI:54009
-ghs_smod:
+    spatial_extent:
+      West: -18041000.0
+      South: -9000000.0
+      East: 18041000.0
+      North: 9000000.0
+
+ghs_smod_2015:
   data_type: RasterDataset
   uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
   driver:
@@ -839,24 +805,24 @@ ghs_smod:
     version: R2016A_v1.0
     license: https://data.jrc.ec.europa.eu/licence/com_reuse
     crs: ESRI:54009
-ghs_smod_2015_54009_v2019a:
-  data_type: RasterDataset
-  uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
-  driver:
-    name: rasterio
-    options:
-      chunks:
-        x: 3600
-        y: 3600
-  metadata:
-    category: socio-economic
-    paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
-    paper_ref: Pesaresi et al (2019)
-    url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
-    author: JRC-ISPRA EC
-    version: R2019A_v2.0
-    license: https://data.jrc.ec.europa.eu/licence/com_reuse
-    crs: ESRI:54009
+    spatial_extent:
+      West: -18041000.0
+      South: -9000000.0
+      East: 18041000.0
+      North: 9000000.0
+  variants:
+  - version: R2016A_v1.0
+    uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
+    meta:
+      paper_ref: Pesaresi and Freire (2016)
+      url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
+  - version: R2019A_v2.0
+    uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
+    meta:
+      paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+      paper_ref: Pesaresi et al (2019)
+      url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+
 globcover:
   data_type: RasterDataset
   uri: landuse/globcover/GLOBCOVER_L4_200901_200912_V2.3.tif
@@ -874,7 +840,13 @@ globcover:
     version: v2.3
     license: CC-BY-3.0
     crs: 4326
-glofas_era5_v31:
+    spatial_extent:
+      West: -180.001
+      South: -64.999
+      East: 179.999
+      North: 90.001
+
+glofas_era5:
   data_type: RasterDataset
   variants:
   - provider: normal
@@ -914,6 +886,16 @@ glofas_era5_v31:
     version: v31
     license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
     crs: 4326
+    processing_script: hydro/glofas_era5/glofas_cds_get.py
+    temporal_extent:
+      start: '1980-01-01'
+      end: '2021-05-31'
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 90.0
+
 glw_buffaloes:
   data_type: RasterDataset
   uri: socio_economic/glw/5_Bf_2010_Da.tif
@@ -929,9 +911,16 @@ glw_buffaloes:
     paper_ref: Gilbert at al (2018)
     url: https://dataverse.harvard.edu/dataverse/glw_3
     author: glw (Gridded Livestock of World 3 Dataverse)
-    version: GLW 3, last downloaded 2020-06-11
+    notes: last downloaded 2020-06-11
+    version: 3
     license: CC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 glw_cattle:
   data_type: RasterDataset
   uri: socio_economic/glw/5_Ct_2010_Da.tif
@@ -947,9 +936,16 @@ glw_cattle:
     paper_ref: Gilbert at al (2018)
     url: https://dataverse.harvard.edu/dataverse/glw_3
     author: glw (Gridded Livestock of World 3 Dataverse)
-    version: GLW 3, last downloaded 2020-06-11
+    notes : last downloaded 2020-06-11
+    version: 3
     license: CC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 glw_chicken:
   data_type: RasterDataset
   uri: socio_economic/glw/5_Ch_2010_Da.tif
@@ -965,9 +961,16 @@ glw_chicken:
     paper_ref: Gilbert at al (2018)
     url: https://dataverse.harvard.edu/dataverse/glw_3
     author: glw (Gridded Livestock of World 3 Dataverse)
-    version: GLW 3, last downloaded 2020-06-11
+    notes: last downloaded 2020-06-11
+    version: 3
     license: CC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 glw_ducks:
   data_type: RasterDataset
   uri: socio_economic/glw/5_Dk_2010_Da.tif
@@ -983,9 +986,16 @@ glw_ducks:
     paper_ref: Gilbert at al (2018)
     url: https://dataverse.harvard.edu/dataverse/glw_3
     author: glw (Gridded Livestock of World 3 Dataverse)
-    version: GLW 3, last downloaded 2020-06-11
+    notes: last downloaded 2020-06-11
+    version: 3
     license: CC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 glw_goats:
   data_type: RasterDataset
   uri: socio_economic/glw/5_Gt_2010_Da.tif
@@ -1001,9 +1011,16 @@ glw_goats:
     paper_ref: Gilbert at al (2018)
     url: https://dataverse.harvard.edu/dataverse/glw_3
     author: glw (Gridded Livestock of World 3 Dataverse)
-    version: GLW 3, last downloaded 2020-06-11
+    notes: last downloaded 2020-06-11
+    version: 3
     license: CC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 glw_horses:
   data_type: RasterDataset
   uri: socio_economic/glw/5_Ho_2010_Da.tif
@@ -1019,9 +1036,16 @@ glw_horses:
     paper_ref: Gilbert at al (2018)
     url: https://dataverse.harvard.edu/dataverse/glw_3
     author: glw (Gridded Livestock of World 3 Dataverse)
-    version: GLW 3, last downloaded 2020-06-11
+    notes: last downloaded 2020-06-11
+    version: 3
     license: CC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 glw_pigs:
   data_type: RasterDataset
   uri: socio_economic/glw/5_Pg_2010_Da.tif
@@ -1037,9 +1061,16 @@ glw_pigs:
     paper_ref: Gilbert at al (2018)
     url: https://dataverse.harvard.edu/dataverse/glw_3
     author: glw (Gridded Livestock of World 3 Dataverse)
-    version: GLW 3, last downloaded 2020-06-11
+    notes: last downloaded 2020-06-11
+    version: 3
     license: CC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 glw_sheeps:
   data_type: RasterDataset
   uri: socio_economic/glw/5_Sh_2010_Da.tif
@@ -1055,9 +1086,16 @@ glw_sheeps:
     paper_ref: Gilbert at al (2018)
     url: https://dataverse.harvard.edu/dataverse/glw_3
     author: glw (Gridded Livestock of World 3 Dataverse)
-    version: GLW 3, last downloaded 2020-06-11
+    notes: last downloaded 2020-06-11
+    version: 3
     license: CC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 grdc:
   data_type: GeoDataFrame
   uri: hydro/grdc/GRDC_Stations.csv
@@ -1074,6 +1112,7 @@ grdc:
   data_adapter:
     rename:
       area: uparea
+
 grip_roads:
   data_type: GeoDataFrame
   uri: infrastructure/grip/GRIP4_world.fgb
@@ -1087,10 +1126,17 @@ grip_roads:
     version: v4
     license: CC0-1.0
     crs: 4326
+    processing_script: infrastructure/grip/merge.ipynb
+    spatial_extent:
+      West: -179.999
+      South: -55.055
+      East: 180.0
+      North: 73.836
   data_adapter:
     rename:
       GP_RTP: road_type
       GP_RCY: country_code
+
 grwl:
   data_type: GeoDataFrame
   uri: hydrography/grwl/GRWL_vector_V01.01/grwl.fgb
@@ -1103,6 +1149,12 @@ grwl:
     url: https://doi.org/10.5281/zenodo.1297434
     version: 1.01
     license: CC BY 4.0
+    spatial_extent:
+      West: -180.0
+      South: -54.31
+      East: 180.0
+      North: 82.311
+
 grwl_mask:
   data_type: RasterDataset
   uri: hydrography/grwl/tindex.gpkg
@@ -1137,35 +1189,14 @@ gswo:
     paper_doi: 10.1038/nature20584
     paper_ref: Pekel et al. (2016)
     url: https://global-surface-water.appspot.com/download
-    version: v1_1_2019
+    version: 1.1
     nodata: 255
-gtsm_codec_reanalysis_{freq}_v1:
-  data_type: GeoDataset
-  placeholders:
-    freq:
-    - 10min
-    - hourly
-    - dailymax
-  uri: p:/11205028-c3s_435/01_data/01_Timeseries/timeseries2/{variable}/reanalysis_{variable}_{freq}_{year}_{month:02d}_v1.nc
-  driver:
-    name: geodataset_xarray
-    options:
-      chunks:
-        stations: 10
-        time: -1
-  metadata:
-    category: ocean
-    paper_doi: 10.3389/fmars.2020.00263
-    paper_ref: Muis at al (2020)
-    url: https://doi.org/10.24381/cds.8c59054f
-    version: v1
-    license: https://cds.climate.copernicus.eu/api/v2/terms/static/licence-to-use-copernicus-products.pdf
-    crs: 4326
-  data_adapter:
-    rename:
-      station_x_coordinate: lon
-      station_y_coordinate: lat
-      stations: index
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
+
 guf_bld_2012:
   data_type: RasterDataset
   uri: infrastructure/guf/GUF04_DLR_v02.vrt
@@ -1182,6 +1213,12 @@ guf_bld_2012:
     url: http://www.dlr.de/guf
     license: https://www.dlr.de/eoc/en/PortalData/60/Resources/dokumente/guf/DLR-GUF_LicenseAgreement-and-OrderForm.pdf
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -65.0
+      East: 180.0
+      North: 85.0
+
 hydro_lakes:
   data_type: GeoDataFrame
   uri: hydrography/lakes/lake-db.fgb
@@ -1193,6 +1230,11 @@ hydro_lakes:
     author: Arjen Haag
     version: 1.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -55.865
+      East: 180.0
+      North: 83.576
   data_adapter:
     unit_mult:
       Area_avg: 1000000.0
@@ -1204,6 +1246,54 @@ hydro_lakes:
       Pour_lat: yout
       Pour_long: xout
       Vol_total: Vol_avg
+
+hydro_basin_atlas_level12:
+  data_type: GeoDataFrame
+  uri: hydrography/hydro_atlas/basin_atlas_v10.gpkg
+  driver:
+    name: pyogrio
+    options:
+      layer: BasinATLAS_v10_lev12
+  metadata:
+    category: hydrography
+    crs: 4326
+    version: 10
+    notes: renaming and units might require some revision
+    paper_doi: 10.1038/s41597-019-0300-6
+    paper_ref: Linke et al. (2019)
+    url: https://www.hydrosheds.org/hydroatlas
+    license: CC BY 4.0
+    spatial_extent:
+      West: -180.0
+      South: -55.988
+      East: 180.001
+      North: 83.626
+
+hydro_lake_atlas_pol:
+  crs: 4326
+  data_type: GeoDataFrame
+  version: 10
+  uri: hydrography/hydro_atlas/lake_atlas_v10.gpkg
+  driver:
+    name: pyogrio
+    options:
+      layer: LakeATLAS_v10_pol
+  metadata:
+    category: hydrography
+    notes: renaming and units might require some revision
+    paper_doi: 10.1038/s41597-022-01425-z
+    paper_ref: Lehner et al. (2022)
+    url: https://www.hydrosheds.org/hydroatlas
+    license: CC BY 4.0
+    spatial_extent:
+      West: -180.0
+      South: -55.865
+      East: 180.0
+      North: 83.576
+  data_adapter:
+    rename:
+      dis_m3_pyr: Dis_avg
+
 hydro_reservoirs:
   data_type: GeoDataFrame
   uri: hydrography/reservoirs/reservoir-db.fgb
@@ -1216,6 +1306,11 @@ hydro_reservoirs:
     version: 1.0
     nodata: -99
     crs: 4326
+    spatial_extent:
+      West: -153.059
+      South: -45.881
+      East: 176.825
+      North: 70.396
   data_adapter:
     unit_mult:
       Area_avg: 1000000.0
@@ -1236,6 +1331,54 @@ hydro_reservoirs:
       Pour_lat: yout
       Pour_long: xout
       Vol_total: Vol_avg
+
+hydro_river_atlas:
+  data_type: GeoDataFrame
+  uri: hydrography/hydro_atlas/river_atlas_v10.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: hydrography
+    crs: 4326
+    version: 10
+    notes: renaming and units might require some revision
+    paper_doi: 10.1038/s41597-019-0300-6
+    paper_ref: Linke et al. (2019)
+    url: https://www.hydrosheds.org/hydroatlas
+    license: CC BY 4.0
+    spatial_extent:
+      West: -179.998
+      South: -55.877
+      East: 179.998
+      North: 83.59
+  data_adapter:
+    rename:
+      dis_m3_pyr: Dis_avg
+
+hydro_rivers_lin2019:
+  data_type: GeoDataFrame
+  uri: hydrography/rivers_lin2019/rivers_ge30m.fgb
+  driver:
+    name: pyogrio
+  metadata:
+    category: hydrography
+    notes: renaming and units might require some revision
+    paper_doi: 10.5281/zenodo.3552776
+    paper_ref: Lin et al. (2019)
+    url: https://zenodo.org/record/3552776#.YVbOrppByUk
+    version: 1
+    license: CC-BY-NC 4.0
+    crs: 4326
+    spatial_extent:
+      West: -179.998
+      South: -55.877
+      East: 179.998
+      North: 83.59
+  data_adapter:
+    rename:
+      width_m: rivwth
+      Q2: qbankfull
+
 koppen_geiger:
   data_type: RasterDataset
   uri: meteo/climate_classification_v2017/Map_KG-Global.tif
@@ -1252,6 +1395,12 @@ koppen_geiger:
     url: http://koeppen-geiger.vu-wien.ac.at/present.htm
     version: 2017
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 mdt_cnes_cls18:
   data_type: RasterDataset
   uri: topography/mdt_cnes_cls18/MDT_CNES_CLS18_global_filled.tif
@@ -1269,6 +1418,13 @@ mdt_cnes_cls18:
     url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
     version: 18
     crs: 4326
+    processing_script: topography/mdt_cnes_cls18/convert_lon_fill_mdt.ipynb
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
 merit:
   data_type: RasterDataset
   uri: topography/merit/merit.nc
@@ -1287,9 +1443,15 @@ merit:
     version: 1.0.3
     license: CC-BY-NC 4.0 or ODbL 1.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   data_adapter:
     rename:
       elevation: elevtn
+
 merit_hydro:
   data_type: RasterDataset
   uri: topography/merit_hydro/*.vrt
@@ -1307,6 +1469,11 @@ merit_hydro:
     version: 1.0
     license: CC-BY-NC 4.0 or ODbL 1.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 85.0
   data_adapter:
     rename:
       bas: basins
@@ -1317,6 +1484,7 @@ merit_hydro:
       upa: uparea
       upg: upgrid
       wth: rivwth
+
 merit_hydro_ihu:
   data_type: RasterDataset
   uri: topography/merit_hydro_ihu/30sec/*.tif
@@ -1330,11 +1498,17 @@ merit_hydro_ihu:
     category: topography
     paper_doi: 10.5194/hess-2020-582
     paper_ref: Eilander et al. (2021)
-    source_doi: 10.5281/zenodo.5166932
+    doi: 10.5281/zenodo.5166932
     url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
     version: 1.0
     license: ODC-By 1.0
+    processing_notes: topography/merit_hydro_ihu/README
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 85.0
   data_adapter:
     rename:
       30sec_basids: basins
@@ -1344,6 +1518,7 @@ merit_hydro_ihu:
       30sec_uparea: uparea
       30sec_rivlen: rivlen
       30sec_rivslp: rivslp
+
 merit_hydro_ihu_index:
   data_type: GeoDataFrame
   uri: topography/merit_hydro_ihu/30sec/basins.gpkg
@@ -1355,7 +1530,14 @@ merit_hydro_ihu_index:
     paper_ref: Eilander et al. (2021)
     url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
     license: CC-BY-NC 4.0
+    processing_notes: topography/merit_hydro_ihu/README
     crs: 4326
+    spatial_extent:
+      West: -180.025
+      South: -59.467
+      East: 190.35
+      North: 83.683
+
 merit_hydro_index:
   data_type: GeoDataFrame
   uri: topography/merit_hydro/basin_index.fgb
@@ -1367,6 +1549,12 @@ merit_hydro_index:
     paper_ref: Eilander et al. (2021)
     license: CC-BY-NC 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.028
+      South: -59.46
+      East: 190.338
+      North: 83.661
+
 merit_hydro_patch:
   data_type: RasterDataset
   uri: topography/merit_hydro/patches/*.vrt
@@ -1384,6 +1572,13 @@ merit_hydro_patch:
     version: 1.0 Deltares patch
     license: CC-BY-NC 4.0 or ODbL 1.0
     crs: 4326
+    processing_script: topography/merit_hydro/patches/scripts
+    processing_notes: local corrections of flow direction raster and re-derive the related maps (basins, uparea, strord)
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 85.0
   data_adapter:
     rename:
       bas: basins
@@ -1394,6 +1589,7 @@ merit_hydro_patch:
       upa: uparea
       upg: upgrid
       wth: rivwth
+
 modis_lai:
   data_type: RasterDataset
   uri: landuse/modis/MODIS_MCD15A3H_LAI/*.tif
@@ -1414,9 +1610,20 @@ modis_lai:
     version: MCD15A3H V006
     license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
     crs: 4326
+    processing_notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H')
+      for the period '2003-01-01', '2017-12-31'
+    processing_script:
+      GEE_script: landuse/modis/MODIS_MCD15A3H_LAI/GEE_MODIS_LAI.js
+      merge_script: landuse/modis/MODIS_MCD15A3H_LAI/merge_rasters_GEE_LAI.py
+    spatial_extent:
+      West: -180.004
+      South: -90.002
+      East: 180.004
+      North: 90.002
   data_adapter:
     unit_mult:
       LAI: 0.1
+
 osm_coastlines:
   data_type: GeoDataFrame
   uri: geography/osm/osm_coastlines-db.fgb
@@ -1430,9 +1637,15 @@ osm_coastlines:
     version: 1.0
     license: ODbL
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -78.733
+      East: 180.0
+      North: 90.0
   data_adapter:
     rename:
       fid: coastline_id
+
 osm_landareas:
   data_type: GeoDataFrame
   uri: geography/osm/osm_landareas-db.fgb
@@ -1446,9 +1659,15 @@ osm_landareas:
     version: 1.0
     license: ODbL
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 83.666
   data_adapter:
     rename:
       fid: land_id
+
 pcr_globwb:
   data_type: RasterDataset
   variants:
@@ -1471,7 +1690,11 @@ pcr_globwb:
     paper_ref: Sutanudjaja, E. H., et al (2017)
     processing_script: hydro/pcr_globwb/prep_glob.py
     url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
-    version: 2017.11b1
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
     nodata: -9999
     crs: 4326
   data_adapter:
@@ -1489,6 +1712,7 @@ pcr_globwb:
       industryGrossDemand: ind_gross
       livestockNettoDemand: lsk_net
       livestockGrossDemand: lsk_gross
+
 rgi:
   data_type: GeoDataFrame
   uri: hydrography/rgi/rgi.fgb
@@ -1503,28 +1727,18 @@ rgi:
     version: 6.0
     license: CC BY 4.0
     crs: 4326
+    spatial_extent:
+      West: -179.921
+      South: -78.309
+      East: 179.751
+      North: 83.608
   data_adapter:
     rename:
       C3S_ID: C3S_id
       GLIMSID: GLIMS_id
       ID: simple_id
       RGIID: RGI_id
-rivers_lin2019_v1:
-  data_type: GeoDataFrame
-  uri: hydrography/rivers_lin2019/rivers_ge30m.fgb
-  driver:
-    name: pyogrio
-  metadata:
-    category: hydrography
-    paper_doi: 10.5281/zenodo.3552776
-    paper_ref: Lin et al. (2019)
-    url: https://zenodo.org/record/3552776#.YVbOrppByUk
-    version: 1
-    license: CC-BY-NC 4.0
-  data_adapter:
-    rename:
-      width_m: rivwth
-      Q2: qbankfull
+
 simard:
   data_type: RasterDataset
   uri: landuse/simard/sdat_10023_canopy_height_simard.tif
@@ -1540,7 +1754,13 @@ simard:
     paper_ref: Simard et al (2011)
     url: https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023
     crs: 4326
-SM2RAIN_ASCAT_monthly_025_v1.4:
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
+
+SM2RAIN_ASCAT_monthly_025:
   data_type: RasterDataset
   uri: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_025_2007_2020.nc
   driver:
@@ -1559,10 +1779,20 @@ SM2RAIN_ASCAT_monthly_025_v1.4:
     url: https://zenodo.org/record/4570192#.YueKJWNByUl
     license: https://creativecommons.org/licenses/by/4.0/legalcode
     crs: 4326
+    version: 1.4
+    temporal_extent:
+      start: '2007-01-01'
+      end: '2020-12-01'
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   data_adapter:
     rename:
       rainfall: precip
-SM2RAIN_ASCAT_monthly_05_v1.4:
+
+SM2RAIN_ASCAT_monthly_05:
   data_type: RasterDataset
   uri: meteo/sm2rain_ascat/SM2RAIN_ASCAT_monthly_05_2007_2020.nc
   driver:
@@ -1580,10 +1810,20 @@ SM2RAIN_ASCAT_monthly_05_v1.4:
     paper_ref: Brocca et al. (2019)
     url: https://zenodo.org/record/4570192#.YueKJWNByUl
     license: https://creativecommons.org/licenses/by/4.0/legalcode
+    version: 1.4
     crs: 4326
+    temporal_extent:
+      start: '2007-01-01'
+      end: '2020-12-01'
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   data_adapter:
     rename:
       rainfall: precip
+
 soilgrids:
   data_type: RasterDataset
   uri: soil/soilgrids_v1.0/*_250m_ll.tif
@@ -1608,6 +1848,13 @@ soilgrids:
     version: 2017
     license: ODbL
     crs: 4326
+    processing_notes: "soilthickness is based on 1) soilgrids (global, depth to bedrock - BDRICM variable) and 2) dataset for Eurasia"
+    processing_script: p:/wflow_global/static_data/wflow_sbm_parameters/
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90
   data_adapter:
     unit_mult:
       bd_sl1: 0.001
@@ -1676,6 +1923,7 @@ soilgrids:
       SNDPPT_M_sl7_250m_ll: sndppt_sl7
       SoilThickness_250m_ll: soilthickness
       TAXOUSDA_250m_ll: tax_usda
+
 soilgrids_2020:
   data_type: RasterDataset
   uri: soil/soilgrids_v2.0/*/*_mean.vrt
@@ -1699,6 +1947,11 @@ soilgrids_2020:
     url: https://www.isric.org/explore/soilgrids/faq-soilgrids
     version: 2020
     license: CC BY 4.0
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90
   data_adapter:
     unit_mult:
       bd_sl1: 0.01
@@ -1782,7 +2035,8 @@ soilgrids_2020:
       sand_100-200cm_mean: sndppt_sl6
       SoilThickness_250_mean: soilthickness
       TAXOUSDA_250_mean: tax_usda
-vito:
+
+vito_2015:
   data_type: RasterDataset
   uri: landuse/vito/ProbaV_LC100_epoch2015_global_v2.0.2_discrete-classification_EPSG-4326.tif
   driver:
@@ -1796,9 +2050,15 @@ vito:
     paper_doi: 10.5281/zenodo.3939038
     paper_ref: Buchhorn et al (2020)
     url: https://land.copernicus.eu/global/products/lc
-    version: v2.0.2
+    version: 2.0.2
     crs: 4326
-vito_2016_v3.0.1:
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
+
+vito_2016:
   data_type: RasterDataset
   uri: landuse/vito/PROBAV_LC100_global_v3.0.1_2016-conso_Discrete-Classification-map_EPSG-4326.tif
   driver:
@@ -1812,9 +2072,15 @@ vito_2016_v3.0.1:
     paper_doi: 10.5281/zenodo.3518026
     paper_ref: Buchhorn et al (2020)
     url: https://land.copernicus.eu/global/products/lc
-    version: v3.0.1
+    version: 3.0.1
     crs: 4326
-vito_2017_v3.0.1:
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
+
+vito_2017:
   data_type: RasterDataset
   uri: landuse/vito/PROBAV_LC100_global_v3.0.1_2017-conso_Discrete-Classification-map_EPSG-4326.tif
   driver:
@@ -1828,9 +2094,15 @@ vito_2017_v3.0.1:
     paper_doi: 10.5281/zenodo.3518036
     paper_ref: Buchhorn et al (2020)
     url: https://land.copernicus.eu/global/products/lc
-    version: v3.0.1
+    version: 3.0.1
     crs: 4326
-vito_2018_v3.0.1:
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
+
+vito_2018:
   data_type: RasterDataset
   uri: landuse/vito/PROBAV_LC100_global_v3.0.1_2018-conso_Discrete-Classification-map_EPSG-4326.tif
   driver:
@@ -1844,9 +2116,15 @@ vito_2018_v3.0.1:
     paper_doi: 10.5281/zenodo.3518038
     paper_ref: Buchhorn et al (2020)
     url: https://land.copernicus.eu/global/products/lc
-    version: v3.0.1
+    version: 3.0.1
     crs: 4326
-vito_2019_v3.0.1:
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
+
+vito_2019:
   data_type: RasterDataset
   uri: landuse/vito/ProbaV_LC100_global_v3.0.1_2019-nrt_discrete-classification-map_EPSG-4326.tif
   driver:
@@ -1860,8 +2138,14 @@ vito_2019_v3.0.1:
     paper_doi: 10.5281/zenodo.3939050
     paper_ref: Buchhorn et al (2020)
     url: https://land.copernicus.eu/global/products/lc
-    version: v3.0.1
+    version: 3.0.1
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0
+
 wb_countries:
   data_type: GeoDataFrame
   uri: geography/wb/WB_countries_Admin0.fgb
@@ -1874,6 +2158,11 @@ wb_countries:
     author: World Bank
     license: CC-BY 4.0
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -59.473
+      East: 180.0
+      North: 83.634
   data_adapter:
     unit_mult:
       gdp_pc: 1000
@@ -1883,6 +2172,7 @@ wb_countries:
       POP_EST: population
       GDP_MD_EST: gdp_pc
       GDP_kD_PPP: gdp
+
 worldclim:
   data_type: RasterDataset
   uri: meteo/worldclim_v2.0/wc2.0_30s_prec.nc
@@ -1900,9 +2190,15 @@ worldclim:
     url: https://www.worldclim.org/data/worldclim21.html
     version: 2
     crs: 4326
+    spatial_extent:
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   data_adapter:
     rename:
       prec: precip
+
 worldpop_2020_constrained:
   data_type: RasterDataset
   variants:
@@ -1925,8 +2221,15 @@ worldpop_2020_constrained:
     paper_doi: 10.1371/journal.pone.0107042
     paper_ref: Stevens et al. (2015)
     url: https://www.worldpop.org/doi/10.5258/SOTON/WP00684
+    processing_script: socio_economic/worldpop/src/
     license: CC BY 4.0
     nodata: -99999
+    spatial_extent:
+      West: -180.0
+      South: -55.985
+      East: 180.0
+      North: 83.628
+
 wsf_bld_2015:
   data_type: RasterDataset
   uri: infrastructure/wsf/WSF2015_v1_EPSG4326.vrt
@@ -1943,3 +2246,9 @@ wsf_bld_2015:
     url: https://un-spider.org/links-and-resources/data-sources/world-settlement-footprint-2015-wsf-dlr-eoc
     license: CC0 1.0
     crs: 4326
+    version: 1
+    spatial_extent:
+      West: -180.0
+      South: -60.0
+      East: 180.0
+      North: 80.0

@@ -1751,10 +1751,10 @@ soilgrids:
     processing_notes: "soilthickness is based on 1) soilgrids (global, depth to bedrock - BDRICM variable) and 2) dataset for Eurasia"
     processing_script: p:/wflow_global/static_data/wflow_sbm_parameters/
     source_spatial_extent:
-      West: -19949000.0
-      South: -6147500.0
-      East: 19861750.0
-      North: 8361000.0
+      West: -180.0
+      South: -90.0
+      East: 180.0
+      North: 90.0
   version: 1.0
   path: soil/soilgrids_v1.0/*_250m_ll.tif
   rename:
