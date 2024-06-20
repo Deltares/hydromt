@@ -93,6 +93,8 @@ class DataCatalogItemMetadata(BaseModel):
     source_url: Optional[AnyUrl] = None
     source_version: Optional[str] = None
     notes: Optional[str] = None
+    temporal_extent: Optional[dict] = None
+    spatial_extent: Optional[dict] = None
 
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True, coerce_numbers_to_str=True

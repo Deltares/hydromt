@@ -257,9 +257,6 @@ eobs:
     version: 22.0e
     license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     crs: 4326
-    temporal_extent:
-      start: '1950-01-02'
-      end: '2022-01-01'
     spatial_extent:
       West: -25.0
       South: 25.0
@@ -276,19 +273,19 @@ eobs:
   variants:
   - version: 22.0e
     uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v22.0e.nc
-    meta:
+    metadata:
       temporal_extent:
         start: '1950-01-02'
         end: '2020-07-01'
   - version: 23.1e
     uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v23.1e.nc
-    meta:
+    metadata:
       temporal_extent:
         start: '1950-01-02'
         end: '2021-01-01'
   - version: 24.0e
     uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v24.0e.nc
-    meta:
+    metadata:
       processing_script: meteo/eobs/scripts/v24.0e_fix_qq_dims_and_match_extent.py
       processing_notes: correct lat/lon dimension for variable qq to match the grid of the other variables
       temporal_extent:
@@ -296,7 +293,7 @@ eobs:
         end: '2021-07-01'
   - version: 25.0e
     uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v25.0e.nc
-    meta:
+    metadata:
       processing_script: v25.0e_fix_qq_dims_and_match_extent.py
       processing_notes: correct lat/lon dimension for variable qq to match the grid of the other variables
       temporal_extent:
@@ -304,7 +301,7 @@ eobs:
         end: '2022-01-01'
   - version: 29.0e
     uri: meteo/eobs/*/{variable}_ens_mean_0.1deg_reg_v29.0e.nc
-    meta:
+    metadata:
       processing_script: meteo/eobs/scripts/v29.0e_fix_qq_dims_and_match_extent.py
       temporal_extent:
         start: '1950-01-01'
@@ -348,8 +345,6 @@ eobs_orography:
     uri: meteo/eobs/elev_ens_0.1deg_reg_v25.0e.nc
   - version: 29.0e
     uri: meteo/eobs/elev_ens_0.1deg_reg_v29.0e.nc
-  rename:
-    elevation: elevtn
 
 era5:
   data_type: RasterDataset
@@ -813,12 +808,12 @@ ghs_smod_2015:
   variants:
   - version: R2016A_v1.0
     uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2016A_54009_1k_v1_0.tif
-    meta:
+    metadata:
       paper_ref: Pesaresi and Freire (2016)
       url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
   - version: R2019A_v2.0
     uri: socio_economic/ghs/GHS_SMOD_POP2015_GLOBE_R2019A_54009_1K_V2_0.tif
-    meta:
+    metadata:
       paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
       paper_ref: Pesaresi et al (2019)
       url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
@@ -1270,7 +1265,6 @@ hydro_basin_atlas_level12:
       North: 83.626
 
 hydro_lake_atlas_pol:
-  crs: 4326
   data_type: GeoDataFrame
   version: 10
   uri: hydrography/hydro_atlas/lake_atlas_v10.gpkg
@@ -1285,6 +1279,7 @@ hydro_lake_atlas_pol:
     paper_ref: Lehner et al. (2022)
     url: https://www.hydrosheds.org/hydroatlas
     license: CC BY 4.0
+    crs: 4326
     spatial_extent:
       West: -180.0
       South: -55.865
