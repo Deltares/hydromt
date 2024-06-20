@@ -6,6 +6,51 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+V1
+==
+
+Added
+-----
+- Added Driver class for customizable io
+- Added entrypoints for Driver Plugins as "hydromt.drivers"
+- Added entrypoints for ModelComponent Plugins as "hydromt.components"
+- Added entrypoints for PredefinedCatalog Plugins as "hydromt.catalogs"
+- Added MetaDataResolver class for customizable metadata discovery
+- Added DataSource class to represent and validate DataCatalog entries.
+- Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
+- A Github action now checks whether the migration guide is updated (#829)
+- Added a `ConfigComponent` to write configurations for kernels/simulations. (#863)
+- Added a `GeomsComponent` to manage geo-spatial geometry data of a model. (#867)
+- Added a `DatasetsComponent` to manage multidimensional data of a model. (#894)
+- Added a `GeoDatasetDriver` to read vector data from tabular formats. (#912)
+- Added a `GeoDatasetSource` to handle vector data from tabular formats. (#912)
+- Added `RasterTindexResolver` to handle URIs in raster tindex files. (#928)
+
+Changed
+-------
+- The data catalog format has been refactored to better represent the individual v1 components. (#912)
+- The `root` meta key of data catalogs yaml files has become `roots` (#786)
+- The model region is no longer a subset of the `geoms` but rather it's own component class. See the migration guide for more info (#810)
+- The model class has been moved to a component architecture. See the migration guide for more info (#845)
+- Changed the `GeoDatasetAdapter` to transform vector data from tabular formats. (#912)
+
+
+Removed
+-------
+- support for `**artifact_keys` when initializing the DataCatalog has been removed. (#786)
+- support for dictionary like features on the DataCatalog have been removed. (#790)
+- Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
+- `staticmaps` and `staticgeoms` attributes on the `Model` object have been removed. (#845)
+- Code refering to the unimplemented Network Model type has been removed (#871)
+- Removed `_API`, `.api` property, `test_api` and other `Model` level conventions as they are now handled by the components. (#894)
+- support for using aliases in the DataCatalog has been removed. (#987)
+- support for `storage_options` in the DataCatalog and adapters has been removed. (#987)
+- The function `hydromt.gis.flw.guagemap` has been removed in favour of `hydromt.gis.flw.guage_map`. (#987)
+- The function `hydromt.gis.flw.basinmap` has been removed in favour of `hydromt.gis.flw.basin_map`. (#987)
+- Support for using the `within` predicate in the function `get_basin_geometry` has been removed. (#987)
+
+
+
 Unreleased
 ==========
 
@@ -21,20 +66,24 @@ Changed
 - Improved `flw.d8_from_dem` method with different options to use river vector data to aid the flow direction derivation. (#305)
 - DataCatalog.predefined_catalogs retrieves predefined_catalogs specified in predefined_catalogs.py. There is no need for setting the predefined_catalogs anymore. (#844)
 
-
 Fixed
 -----
 - Bug in `raster.transform` with lazy coordinates. (#801)
-- Bug in `workflows.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
+- Bug in `model.processes.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
 - Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
 - Bug in `raster.clip_bbox` when bbox doesn't overlap with raster. (#860)
 - Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 - Fixed incorrect renaming of single variable raster datasets (#883)
 - Provide better error message for 0D geometry arrays in GeoDataset (#885)
+- Fixed index error when the number of peaks varies between stations in get_hydrographs method (#933)
 
 Deprecated
 ----------
 - The `DataCatalog.from_archive` method is deprecated. Use `DataCatalog.from_yml` with the root pointing to the archive instead. (#849)
+- Bug in `model.processes.mesh.mesh2d_from_rasterdataset` with multi-dimensional coordinates. (#843)
+- Bug in `MeshModel.get_mesh` after xugrid update to 0.9.0. (#848)
+- Bug in `raster.clip_bbox` when bbox doesn't overlap with raster. (#860)
+- Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 
 v0.9.4 (2024-02-26)
 ===================
@@ -48,7 +97,7 @@ Fixed
 
 v0.9.3 (2024-02-08)
 ===================
-This release fixes several bugs. Most notably the `NoDataSrategy` is available in much more data reading methods so plugins can use it more directly. Additionally there are some bug fixes relating to reading shapefiles and reading COGs.
+This release fixes several bugs. Most notably the `NoDataStrategy` is available in much more data reading methods so plugins can use it more directly. Additionally there are some bug fixes relating to reading shapefiles and reading COGs.
 
 Added
 -----
@@ -152,7 +201,7 @@ Data
 
 Model
 ^^^^^
-- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
+- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwriting updated netcdf files. (PR #460)
 - Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
 - ``set_forcing`` can now add pandas.DataFrame object to forcing. (PR #534)
 

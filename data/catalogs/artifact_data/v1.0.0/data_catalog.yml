@@ -1,0 +1,797 @@
+meta:
+  version: v1.0.0
+  root: https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.9/data.tar.gz
+  name: artifact_data
+  hydromt_version: '>1.0a,<2'
+chelsa:
+  data_type: RasterDataset
+  uri: chelsa.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: meteo
+    paper_doi: 10.1038/sdata.2017.122
+    paper_ref: Karger et al. (2017)
+    url: http://chelsa-climate.org/downloads/
+    version: 1.2
+    license: CC BY 4.0
+    crs: 4326
+chirps_global:
+  data_type: RasterDataset
+  uri: chirps_global.nc
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    paper_doi: 10.3133/ds832
+    paper_ref: Funk et al (2014)
+    url: https://www.chc.ucsb.edu/data/chirps
+    version: v2.0
+    license: CC
+    crs: 4326
+  data_adapter:
+    unit_add:
+      time: 86400
+corine:
+  data_type: RasterDataset
+  uri: corine.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: landuse & landcover
+    url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
+    author: European Environment Agency
+    version: v.2020_20u1
+    license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
+dtu10mdt:
+  data_type: RasterDataset
+  uri: dtu10mdt.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: topography
+    paper_doi: 10.1029/2008JC005179
+    paper_ref: Andersen and Knudsen (2009)
+    unit: m+EGM2008
+    url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
+    version: 2010
+    crs: 4326
+dtu10mdt_egm96:
+  data_type: RasterDataset
+  uri: dtu10mdt_egm96.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: topography
+    paper_doi: 10.1029/2008JC005179
+    paper_ref: Andersen and Knudsen (2009)
+    unit: m+EGM96
+    url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
+    version: 2010
+    crs: 4326
+eobs:
+  data_type: RasterDataset
+  uri: eobs.nc
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 22.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    crs: 4326
+  data_adapter:
+    unit_add:
+      time: 86400
+eobs_orography:
+  data_type: RasterDataset
+  uri: eobs_orography.nc
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    paper_doi: 10.1029/2017JD028200
+    paper_ref: Cornes et al (2018)
+    url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    version: 22.0e
+    license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
+    crs: 4326
+era5:
+  data_type: RasterDataset
+  uri: era5.nc
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    history: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    version: ERA5 daily data on pressure levels
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      precip: 1000
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
+      temp_max: -273.15
+      temp_min: -273.15
+      time: 86400
+era5_hourly:
+  data_type: RasterDataset
+  uri: era5_hourly.nc
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    history: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    version: ERA5 hourly data on pressure levels
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      precip: 1000
+      press_msl: 0.01
+    unit_add:
+      temp: -273.15
+era5_daily_zarr:
+  data_type: RasterDataset
+  uri: era5_daily_zarr.zarr
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    history: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    version: ERA5 daily data on pressure levels
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    crs: 4326
+era5_hourly_zarr:
+  data_type: RasterDataset
+  uri: era5_hourly_zarr.zarr
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    history: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    version: ERA5 hourly data on pressure levels
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    crs: 4326
+era5_orography:
+  data_type: RasterDataset
+  uri: era5_orography.nc
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    history: Extracted from Copernicus Climate Data Store
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    version: ERA5 hourly data on pressure levels
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      elevtn: 0.10197162129779283
+gadm_level1:
+  data_type: GeoDataFrame
+  uri: gadm_level1.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: geography
+    notes: last downloaded 2020-10-19; license required for commercial use
+    url: https://gadm.org/download_world.html
+    author: gadm
+    version: 1.0
+    license: https://gadm.org/license.html
+    crs: 4326
+gadm_level2:
+  data_type: GeoDataFrame
+  uri: gadm_level2.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: geography
+    notes: last downloaded 2020-10-19; license required for commercial use
+    url: https://gadm.org/download_world.html
+    author: gadm
+    version: 1.0
+    license: https://gadm.org/license.html
+    crs: 4326
+gadm_level3:
+  data_type: GeoDataFrame
+  uri: gadm_level3.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: geography
+    notes: last downloaded 2020-10-19; license required for commercial use
+    url: https://gadm.org/download_world.html
+    author: gadm
+    version: 1.0
+    license: https://gadm.org/license.html
+    crs: 4326
+gcn250:
+  data_type: RasterDataset
+  uri: gcn250/{variable}.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: soil
+    paper_doi: 10.1038/s41597-019-0155-x
+    paper_ref: Jaafar et al. (2019)
+    url: https://doi.org/10.6084/m9.figshare.7756202.v1
+    version: v1
+    license: CC BY 4.0
+    nodata: 255
+gdp_world:
+  data_type: GeoDataFrame
+  uri: gdp_world.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: socio economic
+    author: Wilfred Altena
+    version: 1.0
+    license: CC BY-4.0
+    info: data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
+      and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
+    crs: 4326
+gebco:
+  data_type: RasterDataset
+  uri: gebco.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: topography
+    paper_doi: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9
+    paper_ref: Weatherall et al (2020)
+    unit: m+MSL
+    url: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2020/geotiff/
+    version: 2020
+    license: https://www.gebco.net/data_and_products/gridded_bathymetry_data/#a1
+    crs: 4326
+ghs-smod_2015_v2:
+  data_type: RasterDataset
+  uri: ghs-smod_2015_v2.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+    paper_ref: Pesaresi et al (2019)
+    url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+    author: JRC-ISPRA EC
+    version: R2019A_v2.0
+    license: https://data.jrc.ec.europa.eu/licence/com_reuse
+    crs: 54009
+ghs_pop_2015:
+  data_type: RasterDataset
+  uri: ghs_pop_2015.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.2905/0C6B9751-A71F-4062-830B-43C9F432370F
+    paper_ref: Schiavina et al (2019)
+    url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
+    author: JRC-ISPRA EC
+    version: R2019A_v1.0
+    license: https://data.jrc.ec.europa.eu/licence/com_reuse
+    crs: 4326
+ghs_pop_2015_54009:
+  data_type: RasterDataset
+  uri: ghs_pop_2015_54009.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.2760/062975
+    paper_ref: Florczyk et al (2019)
+    url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
+    license: CC BY 4.0
+    crs: 54009
+ghs_smod_2015:
+  data_type: RasterDataset
+  uri: ghs_smod_2015.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_ref: Pesaresi and Freire (2016)
+    url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
+    author: JRC-ISPRA EC
+    version: R2016A_v1.0
+    license: https://data.jrc.ec.europa.eu/licence/com_reuse
+    crs: 54009
+globcover:
+  data_type: RasterDataset
+  uri: globcover.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: landuse & landcover
+    paper_doi: 10.1594/PANGAEA.787668
+    paper_ref: Arino et al (2012)
+    url: http://due.esrin.esa.int/page_globcover.php
+    license: CC-BY-3.0
+    crs: 4326
+glw_buffaloes:
+  data_type: RasterDataset
+  uri: glw_buffaloes.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.7910/DVN/5U8MWI
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+    crs: 4326
+glw_cattle:
+  data_type: RasterDataset
+  uri: glw_cattle.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.7910/DVN/GIVQ75
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+    crs: 4326
+glw_chicken:
+  data_type: RasterDataset
+  uri: glw_chicken.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.7910/DVN/SUFASB
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+    crs: 4326
+glw_ducks:
+  data_type: RasterDataset
+  uri: glw_ducks.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.7910/DVN/ICHCBH
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+    crs: 4326
+glw_goats:
+  data_type: RasterDataset
+  uri: glw_goats.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.7910/DVN/OCPH42
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+    crs: 4326
+glw_horses:
+  data_type: RasterDataset
+  uri: glw_horses.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.7910/DVN/7Q52MV
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+    crs: 4326
+glw_pigs:
+  data_type: RasterDataset
+  uri: glw_pigs.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.7910/DVN/33N0JG
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+    crs: 4326
+glw_sheep:
+  data_type: RasterDataset
+  uri: glw_sheep.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.7910/DVN/BLWPZN
+    paper_ref: Gilbert at al (2018)
+    url: https://dataverse.harvard.edu/dataverse/glw_3
+    author: glw (Gridded Livestock of World 3 Dataverse)
+    version: GLW 3, last downloaded 2020-06-11
+    license: CC 4.0
+    crs: 4326
+grdc:
+  data_type: GeoDataFrame
+  uri: grdc.csv
+  driver:
+    name: geodataframe_table
+  metadata:
+    category: observed data
+    url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
+    license: https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
+    info: GRDC-Station Catalogue, last downloaded 2020-07-16
+    crs: 4326
+grip_roads:
+  data_type: GeoDataFrame
+  uri: grip_roads.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: road
+    paper_doi: 10.1088/1748-9326/aabd42
+    paper_ref: Meijer et al, 2018
+    url: https://www.globio.info/download-grip-dataset
+    version: v4
+    license: CC0-1.0
+    crs: 4326
+grwl:
+  data_type: GeoDataFrame
+  uri: grwl.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: surface water
+    paper_doi: 10.1126/science.aat0636
+    paper_ref: Allen and Pavelsky (2018)
+    url: https://doi.org/10.5281/zenodo.1297434
+    version: 1.01
+    license: CC BY 4.0
+grwl_mask:
+  data_type: RasterDataset
+  uri: grwl_tindex.gpkg
+  driver:
+    name: rasterio
+    metadata_resolver: raster_tindex
+    options:
+      chunks:
+        x: 3000
+        y: 3000
+      mosaic_kwargs:
+        method: nearest
+      tileindex: location
+  metadata:
+    paper_doi: 10.1126/science.aat0636
+    paper_ref: Allen and Pavelsky (2018)
+    url: https://doi.org/10.5281/zenodo.1297434
+    version: 1.01
+    license: CC BY 4.0
+gswo:
+  data_type: RasterDataset
+  uri: gswo.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: surface water
+    paper_doi: 10.1038/nature20584
+    paper_ref: Pekel et al. (2016)
+    url: https://global-surface-water.appspot.com/download
+    version: v1_1_2019
+    nodata: 255
+gtsmv3_eu_era5:
+  data_type: GeoDataset
+  uri: gtsmv3_eu_era5.nc
+  driver:
+    name: geodataset_xarray
+  metadata:
+    category: ocean
+    paper_doi: 10.24381/cds.8c59054f
+    paper_ref: Copernicus Climate Change Service 2019
+    url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview
+    version: GTSM v3.0
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    crs: 4326
+guf_bld_2012:
+  data_type: RasterDataset
+  uri: guf_bld_2012.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: socio economic
+    paper_doi: 10.1016/j.isprsjprs.2017.10.012
+    paper_ref: Esch et al (2017)
+    url: http://www.dlr.de/guf
+    license: https://www.dlr.de/eoc/en/PortalData/60/Resources/dokumente/guf/DLR-GUF_LicenseAgreement-and-OrderForm.pdf
+    crs: 4326
+hydro_lakes:
+  data_type: GeoDataFrame
+  uri: hydro_lakes.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: surface water
+    author: Arjen Haag
+    version: 1.0
+    info: HydroLAKES.v10_extract
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      Area_avg: 1000000.0
+hydro_reservoirs:
+  data_type: GeoDataFrame
+  uri: hydro_reservoirs.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: surface water
+    author: Alessia Matano
+    version: 1.0
+    info: GRanD.v1.1_HydroLAKES.v10_JRC.2016
+    crs: 4326
+    nodata: -99
+  data_adapter:
+    unit_mult:
+      Area_avg: 1000000.0
+      Capacity_max: 1000000.0
+      Capacity_min: 1000000.0
+      Capacity_norm: 1000000.0
+      Vol_avg: 1000000.0
+koppen_geiger:
+  data_type: RasterDataset
+  uri: koppen_geiger.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: meteo
+    paper_doi: 10.1127/0941-2948/2006/0130
+    paper_ref: Kottek et al. (2006)
+    url: http://koeppen-geiger.vu-wien.ac.at/present.htm
+    version: 2017
+    crs: 4326
+mdt_cnes_cls18:
+  data_type: RasterDataset
+  uri: mdt_cnes_cls18.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: topography
+    paper_doi: 10.5194/os-17-789-2021
+    paper_ref: Mulet et al (2021)
+    unit: m+GOCO05S
+    url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
+    version: 18
+    crs: 4326
+merit_hydro:
+  data_type: RasterDataset
+  uri: merit_hydro/{variable}.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: topography
+    paper_doi: 10.1029/2019WR024873
+    paper_ref: Yamazaki et al. (2019)
+    url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
+    version: 1.0
+    license: CC-BY-NC 4.0 or ODbL 1.0
+    crs: 4326
+merit_hydro_1k:
+  data_type: RasterDataset
+  uri: merit_hydro_1k/{variable}.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: topography
+    paper_doi: 10.5194/hess-2020-582
+    paper_ref: Eilander et al. (in review)
+    url: https://doi.org/10.5281/zenodo.4138776
+    version: 0.1
+    license: CC-BY-NC 4.0
+    crs: 4326
+merit_hydro_index:
+  data_type: GeoDataFrame
+  uri: merit_hydro_index.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: topography
+    paper_doi: 10.5194/hess-2020-582
+    paper_ref: Eilander et al. (in review)
+    license: CC-BY-NC 4.0
+    crs: 4326
+modis_lai:
+  data_type: RasterDataset
+  uri: modis_lai.nc
+  driver:
+    name: raster_xarray
+  metadata:
+    category: landuse & landcover
+    notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the
+      period '2003-01-01', '2017-12-31'
+    paper_doi: 10.5067/MODIS/MCD15A3H.006
+    paper_ref: Myneni et al (2015)
+    url: https://lpdaac.usgs.gov/products/mcd15a3hv006/
+    version: MCD15A3H V006
+    license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      LAI: 0.1
+osm_coastlines:
+  data_type: GeoDataFrame
+  uri: osm_coastlines.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: geography
+    url: https://osmdata.openstreetmap.de/data/coastlines.html
+    author: OpenStreetMap
+    version: 1.0
+    license: ODbL
+    info: OpenStreetMap coastlines water polygons, last updated 2020-01-09T05:29
+    crs: 4326
+osm_landareas:
+  data_type: GeoDataFrame
+  uri: osm_landareas.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: geography
+    url: https://osmdata.openstreetmap.de/data/coastlines.html
+    author: OpenStreetMap
+    version: 1.0
+    license: ODbL
+    info: OpenStreetMap coastlines land polygons, last updated 2020-01-09T05:29
+    crs: 4326
+rgi:
+  data_type: GeoDataFrame
+  uri: rgi.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: surface water
+    paper_doi: 10.3189/2014JoG13J176
+    paper_ref: Pfeffer et al. (2014)
+    url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
+    version: 6.0
+    license: CC BY 4.0
+    info: Randolph Glacier Inventory
+    crs: 4326
+rivers_lin2019_v1:
+  data_type: GeoDataFrame
+  uri: rivers_lin2019_v1.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    category: hydrography
+    paper_doi: 10.5281/zenodo.3552776
+    paper_ref: Lin et al. (2019)
+    url: https://zenodo.org/record/3552776#.YVbOrppByUk
+    version: 1
+    license: CC-BY-NC 4.0
+simard:
+  data_type: RasterDataset
+  uri: simard.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: landuse & landcover
+    paper_doi: 10.1029/2011JG001708
+    paper_ref: Simard et al (2011)
+    url: https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023
+    crs: 4326
+soilgrids:
+  data_type: RasterDataset
+  uri: soilgrids/{variable}.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: soil
+    notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
+      \ (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database\
+      \ distribution version 2.0, european commission and the European soil bureau\
+      \ network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van\
+      \ Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre:\
+      \ Response to european policy support  and public data requirements. Land Use\
+      \ Policy 29 (2), 329\xE2\u20AC\u201C338. \n"
+    paper_doi: 10.1371/journal.pone.0169748
+    paper_ref: Hengl et al. (2017)
+    url: https://www.isric.org/explore/soilgrids/faq-soilgrids-2017
+    version: 2017
+    license: ODbL
+    crs: 4326
+  data_adapter:
+    unit_mult:
+      bd_sl1: 0.001
+      bd_sl2: 0.001
+      bd_sl3: 0.001
+      bd_sl4: 0.001
+      bd_sl5: 0.001
+      bd_sl6: 0.001
+      bd_sl7: 0.001
+      oc_sl1: 0.1
+      oc_sl2: 0.1
+      oc_sl3: 0.1
+      oc_sl4: 0.1
+      oc_sl5: 0.1
+      oc_sl6: 0.1
+      oc_sl7: 0.1
+      ph_sl1: 0.1
+      ph_sl2: 0.1
+      ph_sl3: 0.1
+      ph_sl4: 0.1
+      ph_sl5: 0.1
+      ph_sl6: 0.1
+      ph_sl7: 0.1
+vito:
+  data_type: RasterDataset
+  uri: vito.tif
+  driver:
+    name: rasterio
+  metadata:
+    category: landuse & landcover
+    paper_doi: 10.5281/zenodo.3939038
+    paper_ref: Buchhorn et al (2020)
+    url: https://land.copernicus.eu/global/products/lc
+    version: v2.0.2
+    crs: 4326
+wb_countries:
+  data_type: GeoDataFrame
+  uri: wb_countries.gpkg
+  driver:
+    name: pyogrio
+  metadata:
+    author: World Bank
+    category: socio-economic
+    timestamp: February 2020
+    url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
+    license: CC-BY 4.0
+    crs: 4326
+worldclim:
+  data_type: RasterDataset
+  uri: worldclim.nc
+  driver:
+    name: raster_xarray
+  metadata:
+    category: meteo
+    paper_doi: 10.1002/joc.5086
+    paper_ref: Fick and Hijmans (2017)
+    url: https://www.worldclim.org/data/worldclim21.html
+    version: 2
+    crs: 4326

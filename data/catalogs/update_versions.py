@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from hydromt.predefined_catalog import create_registry_file
+from hydromt.data_catalog.predefined_catalog import create_registry_file
 
 if __name__ == "__main__":
     root = Path(__file__).parent

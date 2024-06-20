@@ -39,14 +39,11 @@ of the Wflow model.
 
 **Overview of options**
 
-To check all options do:
+To check all options see :ref:`the CLI API <clip_api>`, or do:
 
 .. code-block:: console
 
     hydromt clip --help
-
-.. include:: ../_generated/cli_clip.rst
-
 
 .. _python_clip:
 
@@ -63,7 +60,8 @@ From Python
 
     from hydromt_wflow import WflowModel
     mod = WflowModel(r'/path/to/model_root', mode='r')  # initialize model with default logger in read mode
-    mod.clip_staticmaps(region={'subbasin': [-7.24, 62.09], 'wflow_streamorder': 4})
+    mod.read()
+    mod.clip_grid(region={'subbasin': [-7.24, 62.09], 'wflow_streamorder': 4})
     mod.clip_forcing()
-    mod.set_root(r'path/to/model_destination')  # change root to output directory
+    mod.root.set(r'path/to/model_destination')  # change root to output directory
     mod.write()

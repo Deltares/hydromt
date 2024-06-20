@@ -7,9 +7,9 @@ on:
       - main
       - v1
     paths:
-      - tests/*
-      - hydromt/*
-      - data/*
+      - tests/**/*
+      - hydromt/**/*
+      - data/**/*
       - pyproject.toml
       - pixi.lock
       - pixi.toml
@@ -19,9 +19,9 @@ on:
       - main
       - v1
     paths:
-      - tests/*
-      - hydromt/*
-      - data/*
+      - tests/**/*
+      - hydromt/**/*
+      - data/**/*
       - pyproject.toml
       - pixi.lock
       - pixi.toml

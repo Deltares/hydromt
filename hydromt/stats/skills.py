@@ -1,12 +1,8 @@
 """Implementation of necessary statistical methods."""
 
-import warnings
-
 import bottleneck
 import numpy as np
 import xarray as xr
-
-warnings.filterwarnings("ignore")
 
 
 # PERFORMANCE METRICS
