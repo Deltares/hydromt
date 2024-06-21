@@ -123,7 +123,7 @@ class MeshComponent(SpatialModelComponent):
         self,
         filename: Optional[str] = None,
         *,
-        region_options: Optional[Dict] = None,
+        region_options: Optional[Dict[str, Any]] = None,
         write_optional_ugrid_attributes: bool = False,
         **kwargs,
     ) -> None:
@@ -454,10 +454,10 @@ class MeshComponent(SpatialModelComponent):
         raster_filename: Union[str, Path, xr.DataArray, xr.Dataset],
         *,
         grid_name: str = "mesh2d",
-        variables: Optional[list] = None,
+        variables: Optional[List[str]] = None,
         fill_method: Optional[str] = None,
         resampling_method: Optional[Union[str, List]] = "centroid",
-        rename: Optional[Dict] = None,
+        rename: Optional[Dict[str, str]] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_filename`` to 2D ``grid_name`` in mesh object.
 
@@ -529,12 +529,12 @@ class MeshComponent(SpatialModelComponent):
         self,
         raster_filename: Union[str, Path, xr.DataArray],
         reclass_table_filename: Union[str, Path, pd.DataFrame],
-        reclass_variables: list,
+        reclass_variables: List[str],
         grid_name: str = "mesh2d",
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
-        resampling_method: Optional[Union[str, list]] = "centroid",
-        rename: Optional[Dict] = None,
+        resampling_method: Optional[Union[str, List[str]]] = "centroid",
+        rename: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to 2D ``grid_name`` in mesh object by reclassifying the data in ``raster_filename`` based on ``reclass_table_filename``.
@@ -670,7 +670,7 @@ class MeshComponent(SpatialModelComponent):
                             f"Overwriting grid {grid_name} and the corresponding"
                             " data variables in mesh."
                         )
-                        grids = [
+                        grids: List[xr.Dataset] = [
                             self.mesh_datasets[g].ugrid.to_dataset(
                                 optional_attributes=True
                             )
@@ -682,7 +682,7 @@ class MeshComponent(SpatialModelComponent):
                         self._data = xu.UgridDataset(grids)
             # Check again mesh_names, could have changed if overwrite_grid=True
             if grid_name in self.mesh_names:
-                grids = [
+                grids: List[xr.Dataset] = [
                     self.mesh_datasets[g].ugrid.to_dataset(optional_attributes=True)
                     for g in self.mesh_names
                 ]
