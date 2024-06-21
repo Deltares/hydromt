@@ -446,11 +446,11 @@ class GridComponent(SpatialModelComponent):
     def add_data_from_rasterdataset(
         self,
         raster_data: Union[str, Path, xr.DataArray, xr.Dataset],
-        variables: Optional[List] = None,
+        variables: Optional[List[str]] = None,
         fill_method: Optional[str] = None,
-        reproject_method: Optional[Union[List, str]] = "nearest",
+        reproject_method: Optional[Union[List[str], str]] = "nearest",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
+        rename: Optional[Dict[str, str]] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_data`` to grid component.
 
@@ -498,6 +498,7 @@ class GridComponent(SpatialModelComponent):
             variables=variables,
             single_var_as_array=False,
         )
+        assert ds is not None
         # Data resampling
         ds_out = grid_from_rasterdataset(
             grid_like=self._get_grid_data(),
@@ -518,12 +519,12 @@ class GridComponent(SpatialModelComponent):
         self,
         raster_data: Union[str, Path, xr.DataArray],
         reclass_table_data: Union[str, Path, pd.DataFrame],
-        reclass_variables: List,
+        reclass_variables: List[str],
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
-        reproject_method: Optional[Union[List, str]] = "nearest",
+        reproject_method: Optional[Union[List[str], str]] = "nearest",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
+        rename: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to grid component by reclassifying the data in ``raster_data`` based on ``reclass_table_data``.
@@ -606,11 +607,11 @@ class GridComponent(SpatialModelComponent):
     def add_data_from_geodataframe(
         self,
         vector_data: Union[str, Path, gpd.GeoDataFrame],
-        variables: Optional[Union[List, str]] = None,
-        nodata: Optional[Union[List, int, float]] = -1,
+        variables: Optional[Union[List[str], str]] = None,
+        nodata: Optional[Union[List[Union[int, float]], int, float]] = -1,
         rasterize_method: Optional[str] = "value",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
+        rename: Optional[Dict[str, str]] = None,
         all_touched: Optional[bool] = True,
     ) -> Optional[List[str]]:
         """HYDROMT CORE METHOD: Add data variable(s) to grid component by rasterizing the data from ``vector_data``.
