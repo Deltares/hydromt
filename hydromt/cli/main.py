@@ -15,6 +15,7 @@ from pydantic import ValidationError
 
 from hydromt import __version__
 from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.type_def import StrPath
 from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt._validators.region import validate_region
@@ -416,7 +417,7 @@ def check(
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log.setuplog(join(".", "hydromt.log"), log_level=log_level)
     try:
-        all_exceptions = []
+        all_exceptions: List[Exception] = []
         for cat_path in data:
             logger.info(f"Validating catalog at {cat_path}")
             try:
@@ -498,7 +499,7 @@ def export(
     bbox: Optional[Tuple[float, float, float, float]],
     config: Optional[Path],
     region: Optional[Dict[Any, Any]],
-    data: Optional[List[Path]],
+    data: Optional[List[StrPath]],
     dd: bool,
     fo: bool,
     error_on_empty: bool,
@@ -529,13 +530,9 @@ def export(
     else:
         handle_nodata = NoDataStrategy.IGNORE
 
-    if data:
-        data_libs = list(data)  # add data catalogs from cli
-    else:
-        data_libs = []
-
+    data_libs: List[StrPath] = list(data) if data else []
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
-        data_libs = ["deltares_data"] + data_libs  # prepend!
+        data_libs.insert(0, "deltares_data")
 
     sources: List[str] = []
     if source:
