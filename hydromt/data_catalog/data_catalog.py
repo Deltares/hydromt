@@ -114,15 +114,15 @@ class DataCatalog(object):
 
         data_libs = cast(list, data_libs)
 
-        self._sources = {}  # dictionary of DataSource
+        self._sources: Dict[str, DataSource] = {}
         self._catalogs: Dict[str, PredefinedCatalog] = {}
-        self.root = None
+        self.root: Optional[StrPath] = None
         self._fallback_lib = fallback_lib
 
         # caching
         self.cache = bool(cache)
         if cache_dir is not None:
-            self._cache_dir = cache_dir
+            self._cache_dir = Path(cache_dir)
 
         for name_or_path in data_libs:
             if str(name_or_path).split(".")[-1] in ["yml", "yaml"]:  # user defined
@@ -768,7 +768,7 @@ class DataCatalog(object):
 
     def from_dict(
         self,
-        data_dict: Dict,
+        data_dict: Dict[str, Any],
         catalog_name: str = "",
         root: Optional[StrPath] = None,
         category: Optional[str] = None,
@@ -868,9 +868,9 @@ class DataCatalog(object):
         self,
         path: Union[str, Path],
         root: str = "auto",
-        source_names: Optional[List] = None,
+        source_names: Optional[List[str]] = None,
         used_only: bool = False,
-        meta: Optional[Dict] = None,
+        meta: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Write data catalog to yaml format.
 
@@ -891,7 +891,7 @@ class DataCatalog(object):
             key-value pairs to add to the data catalog meta section, such as 'version',
             by default empty.
         """
-        meta = meta or []
+        meta = meta or {}
         yml_dir = os.path.dirname(abspath(path))
         if root == "auto":
             root = yml_dir
@@ -908,11 +908,11 @@ class DataCatalog(object):
 
     def to_dict(
         self,
-        source_names: Optional[List] = None,
-        root: Union[Path, str] = None,
-        meta: Optional[dict] = None,
+        source_names: Optional[List[str]] = None,
+        root: Optional[StrPath] = None,
+        meta: Optional[Dict[str, Any]] = None,
         used_only: bool = False,
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Export the data catalog to a dictionary.
 
         Parameters
@@ -934,7 +934,7 @@ class DataCatalog(object):
             data catalog dictionary
         """
         meta = meta or {}
-        sources_out = dict()
+        sources_out: Dict[str, Any] = dict()
         if root is None:
             root = str(self.root)
         meta.update(**{"root": root})
@@ -945,7 +945,7 @@ class DataCatalog(object):
                 continue
             source_dict = source.model_dump(
                 exclude_defaults=True,  # keeps catalog as clean as possible
-                exclude=["name"],  # name is already in the key
+                exclude={"name"},  # name is already in the key
                 round_trip=True,
             )
 
@@ -1005,9 +1005,9 @@ class DataCatalog(object):
         data_root: Union[Path, str],
         bbox: Optional[Bbox] = None,
         time_range: Optional[TimeRange] = None,
-        source_names: Optional[List] = None,
+        source_names: Optional[List[str]] = None,
         unit_conversion: bool = True,
-        meta: Optional[Dict] = None,
+        meta: Optional[Dict[str, Any]] = None,
         forced_overwrite: bool = False,
         append: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
@@ -1161,13 +1161,13 @@ class DataCatalog(object):
         data_like: Union[
             str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, RasterDatasetSource
         ],
-        bbox: Optional[List] = None,
+        bbox: Optional[Bbox] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom_level: Optional[Union[int, tuple]] = None,
         buffer: Union[float, int] = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
-        time_range: Optional[Tuple] = None,
+        time_range: Optional[TimeRange] = None,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1411,12 +1411,12 @@ class DataCatalog(object):
         data_like: Union[
             str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDatasetSource
         ],
-        bbox: Optional[List] = None,
+        bbox: Optional[Bbox] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         buffer: Union[float, int] = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
-        variables: Optional[List] = None,
+        variables: Optional[List[str]] = None,
         time_range: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
