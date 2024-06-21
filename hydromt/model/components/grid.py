@@ -133,7 +133,7 @@ class GridComponent(SpatialModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
-        region_options: Optional[Dict] = None,
+        region_options: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Optional[DeferedFileClose]:
         """Write model grid data to netcdf file at <root>/<fn>.

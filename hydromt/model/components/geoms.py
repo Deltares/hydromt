@@ -216,9 +216,7 @@ class GeomsComponent(SpatialModelComponent):
                 kwargs.get("driver") == "GeoJSON"
                 or str(write_path).lower().endswith(".geojson")
             ):
-                # no idea why pyright complains about the next line
-                # so just ignoring it
-                gdf.to_crs(epsg=4326, inplace=True)  # type: ignore
+                gdf.to_crs(epsg=4326, inplace=True)
 
             gdf.to_file(write_path, **kwargs)
 
