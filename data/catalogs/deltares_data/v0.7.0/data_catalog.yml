@@ -403,7 +403,7 @@ era5:
         combine: by_coords
         decode_times: true
         parallel: true
-      path: meteo/era5_daily/nc_merged/era5_{year}*_daily.nc
+      path: meteo/era5_daily/nc_merged/era5_{year}_daily.nc
     - provider: zarr
       driver: zarr
       driver_kwargs:
@@ -458,7 +458,7 @@ era5_hourly:
         combine: by_coords
         decode_times: true
         parallel: true
-      path: meteo/era5/{variable}/era5_{variable}_{year}*_hourly.nc
+      path: meteo/era5/{variable}/era5_{variable}_{year}_hourly.nc
     - provider: zarr
       driver: zarr
       kwargs:
