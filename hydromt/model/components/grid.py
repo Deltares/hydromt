@@ -16,7 +16,6 @@ from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose, Number
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
-from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.processes.grid import (
@@ -26,6 +25,7 @@ from hydromt.model.processes.grid import (
     grid_from_raster_reclass,
     grid_from_rasterdataset,
 )
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model

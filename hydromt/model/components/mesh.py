@@ -15,7 +15,6 @@ from shapely.geometry import box
 
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import read_nc
-from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.processes.mesh import (
@@ -23,6 +22,7 @@ from hydromt.model.processes.mesh import (
     mesh2d_from_raster_reclass,
     mesh2d_from_rasterdataset,
 )
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model import Model

@@ -16,9 +16,9 @@ from shapely.geometry import box
 from hydromt.gis.vector import GeoDataset
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
-from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
