@@ -1,0 +1,46 @@
+
+name: Finalise a new release
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  publish-docker:
+    if: github.event.review.state == 'APPROVED'
+    name: Finish release
+    runs-on: ubuntu-24.04 # latest LTS release
+    concurrency:
+      group: NEW_RELEASE
+      cancel-in-progress: false # don't abort while we might be creating a PR or something
+    steps:
+
+      - uses: actions/checkout@v4
+        name: Checkout code
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: hydromt-docker-image
+      - name: Display structure of downloaded files
+        run: ls -R ~
+
+
+      # - name: setup release PR
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+      #   run: |
+
+      #     set -e
+      #     PR_ID=$(gh pr list --state "open" --author "app/github-actions" --search "release"  --json "number" --jq '. | first | .number')
+      #     gh pr merge $PR_ID
+      #     git pull
+      #     git checkout main
+      #     export NEW_VERSION=$(grep "version" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+      #     git tag v$NEW_VERSION
+
+      #     # TODO:
+      #     # - create tag
+      #     # - publish to pypi, docker, conda
+      #     # - create gh release
+      #     # - publish docs
+      #     # - make new commit with new `Unreleased` header in changelog, and set version back to dev

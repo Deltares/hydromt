@@ -1,0 +1,128 @@
+
+name: Create release artifacts
+on:
+  workflow_dispatch:
+  # running this when PR opens we'll do in prep-release manually, see that file for more details
+  push:
+    branches:
+      - 'release/**'
+
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.upload-pypi-release-artifacts.outputs.artifact-url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        name: Install Python
+        with:
+          python-version: '3.11'
+
+      - name: generate env
+        run: |
+          pip install tomli flit twine
+
+      - name: Build artifacts
+        run: |
+          git clean -xdf
+          git restore -SW .
+          flit build
+          python -m twine check dist/*
+
+      - uses: actions/upload-artifact@v4
+        id: upload-pypi-release-artifacts
+        with:
+          name: pypi-release-artifacts
+          path: dist
+  docs:
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.upload-docs-release-artifacts.outputs.artifact-url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: prefix-dev/setup-pixi@v0.6.0
+        with:
+          pixi-version: "v0.21.1"
+          environments: full-py311
+
+      - name: Generate docs
+        run: |
+          pixi run --locked -e full-py311 html
+
+      - uses: actions/upload-artifact@v4
+        id: upload-docs-release-artifacts
+        with:
+          name: docs-release-artifacts
+          path: docs/_build
+
+
+  docker:
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.upload-docker-release-artifacts.outputs.artifact-url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and export
+        uses: docker/build-push-action@v6
+        with:
+          outputs: type=docker,dest=/tmp/hydromt-docker-image.tar
+          tags: hydromt
+
+      - name: Run Tests
+        run: |
+          docker load --input /tmp/hydromt-docker-image.tar
+          docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt
+
+      - name: Test Binder integration with repo2docker
+        run: |
+          pip install jupyter-repo2docker
+          repo2docker . echo 'success!'
+
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        id: upload-docker-release-artifacts
+        with:
+          name: hydromt-docker-image
+          path: /tmp/hydromt-docker-image.tar
+
+  notify:
+    needs:
+      - pypi
+      - docs
+      - docker
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+
+      - name: Add comment to PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          pypi_url: ${{needs.pypi.outputs.url}}
+          docker_url: ${{needs.docker.outputs.url}}
+          docs_url: ${{needs.docs.outputs.url}}
+        run: |
+          echo "The new release artifacts have been generated. You can download and inspect them by using the links below: " > comment.txt
+          echo "    - pypi: $pypi_url" >> comment.txt
+          echo "    - docker: $docker_url" >> comment.txt
+          echo "    - docs: $docs_url" >> comment.txt
+
+          gh pr comment ${{ steps.extract_branch.outputs.branch }} --body-file comment.txt

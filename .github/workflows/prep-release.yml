@@ -1,0 +1,146 @@
+name: Create a new release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: minor
+        description: "Is this a Major, Minor, or Patch release?"
+      target:
+        type: choice
+        description: "What branch should we merge to after the release?"
+        default: main
+        options:
+          - main
+          - v1
+          - release/v1-alpha
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: bash -l {0}
+    name: Setup release PR
+    runs-on: ubuntu-24.04 # latest LTS release
+    concurrency:
+      group: NEW_RELEASE
+      cancel-in-progress: false # don't abort while we might be creating a PR or something
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: setup release PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+
+          set -e
+          # parsing of current version
+          export CURRENT_VERSION=$(grep "version" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+          export CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d'.' -f 1)
+          export CURRENT_MINOR=$(echo $CURRENT_VERSION | cut -d'.' -f 2)
+          export CURRENT_PATHCH=$(echo $CURRENT_VERSION | cut -d'.' -f 3)
+
+          BUMP="minor"
+
+          ## calculate new release number
+          case $BUMP in
+
+          "patch")
+          	export NEW_VERSION="$CURRENT_MAJOR.$CURRENT_MINOR.$((CURRENT_PATHCH + 1))"
+          	;;
+
+          "minor")
+          	export NEW_VERSION="$CURRENT_MAJOR.$(($CURRENT_MINOR + 1)).0"
+          	;;
+
+          "major")
+          	export NEW_VERSION="$((CURRENT_MAJOR + 1)).0.0"
+          	;;
+
+          *)
+          	echo "invalid bump"
+          	exit 1
+          	;;
+          esac
+
+          ## seting up git
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
+          # check if PR already exists
+          if [[ $(gh pr list --state "open" --author "app/github-actions" --search "release" --jq='.|length' --json "id") -gt 0 ]]; then
+            echo "another relase PR was found. exiting..."
+            exit 1;
+          fi
+
+          # # create release branch
+          git pull # make sure git doesn't reject our push becasue of unknown refs
+          git checkout -b "release/v$NEW_VERSION"
+
+          # update version in python file
+          sed -i "s/.*__version__.*/__version__ = \"$NEW_VERSION\"/" hydromt/__init__.py
+
+          export NEW_CHANGELOG_HEADER="v$NEW_VERSION ($(date -I))"
+          export NEW_HEADER_UNDERLINE=$(printf '=%.0s' $(seq 1 $(echo $NEW_CHANGELOG_HEADER | awk '{print length}')))
+
+          # update chagnelog with new header
+          sed -i "/Unreleased/{s/Unreleased/$NEW_CHANGELOG_HEADER/;n;s/=*/$NEW_HEADER_UNDERLINE/}" docs/changelog.rst
+
+          # update switcher.json while maintianing the correct order with some black jq incantations. I'll try and explain below
+          cat docs/switcher.json | jq "map(select(.version != \"latest\")) | . + [{\"name\":\"v$NEW_VERSION\",\"version\":\"$NEW_VERSION\",\"url\":\"https://deltares.github.io/hydromt/v$NEW_VERSION/\"}] | sort_by(.version|split(\".\")|map(tonumber)) | . + [{\"name\":\"latest\",\"version\":\"latest\",\"url\":\"https://deltares.github.io/hydromt/latest/\"}]" >tmp.json
+
+          # map(select(.version != \"latest\"))
+          # removes the "latest" entry, since we'll need to sort numerically by number in a later step
+
+          #| . +
+          # take the result of the previous operation and add the following array to it
+
+          # [{\"name\":\"v$NEW_VERSION\",\"version\":\"$NEW_VERSION\",\"url\":\"https://deltares.github.io/hydromt/v$NEW_VERSION/\"}]
+          # an array with the new entry we want to add
+
+          # sort_by(.version|split(\".\")|map(tonumber))
+          # take the array, split the version field by the "." char and make numbers out of the components. then sort the whole array by these numbers
+          # this is why we had to remove the latest field earlier,
+          # otherwise the number conversion would fail here.
+
+          #| . + [{\"name\":\"latest\",\"version\":\"latest\",\"url\":\"https://deltares.github.io/hydromt/latest\"}]
+          # add teh latest field back in at the end
+
+          # avoid race conditions by using a tmp file
+          mv tmp.json docs/switcher.json
+
+          git add .
+          git commit -m "prepare for release v$NEW_VERSION"
+          git push --set-upstream origin "release/v$NEW_VERSION"
+
+          # gh cli should return the url of the pr it just created. we'll store that so we can access it later
+          export PR_URL=$( gh pr create -B "main" -H "release/v$NEW_VERSION" -t "Release v$NEW_VERSION" -b "Hi there! This is an automated PR made for your release. If everything has gone well, all tests should now be running. Please check that the PR is as you would like it to be, and feel free to push any changes to this branch before merging.  Once you're happy with the state of the PR, someone just needs to approve it, and I'll take care of the rest!" )
+          gh co "release/v$NEW_VERSION"
+
+          # not fetched by default
+          git fetch --tags
+          export LAST_RELEASE=$(git tag  | head -n 1)
+          export PYPROJ_DIFF=$(git diff "$LAST_RELEASE" -- pyproject.toml)
+
+          if [[ -z $PYPROJ_DIFF ]]; then
+            gh pr comment "$PR_URL" --body "I've detected the latest tag was \`$LAST_RELEASE\`. No dependency or project config changes have been made since then. You should be able to release to conda without updating the receipt."
+          else
+            echo "I've detected the latest tag was \`$LAST_RELEASE\`. Here are the changes made to the \`pyproject.toml\` since then:" > comment.txt
+            echo $'\n\n```diff\n' >> comment.txt
+            echo "$PYPROJ_DIFF" >> comment.txt
+            echo $'\n\n```\n' >> comment.txt
+            echo "(you might have to update the receipt to update to reflect these changes when releasing to conda)"
+            gh pr comment "$PR_URL" --body-file comment.txt
+
+          fi
+
+          echo "Github does not allow workflows to be triggered from other workflows, so I can't start those for you" > comment.txt
+          echo "However, you can trigger them by executing the following commands:" >> comment.txt
+            echo "\`git fetch && git checkout release/v$NEW_VERSION && git commit --allow-empty -m \"Trigger artifact creation\" && git push\`. " >> comment.txt
+          gh pr comment "$PR_URL" --body-file comment.txt
