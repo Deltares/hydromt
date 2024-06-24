@@ -2,15 +2,7 @@
 
 from logging import Logger, getLogger
 from shutil import move
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import xarray as xr
 from pandas import DataFrame
@@ -20,7 +12,7 @@ from hydromt._typing.type_def import DeferedFileClose, XArrayDict
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
-from hydromt.model.hydromt_step import hydromt_step
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model

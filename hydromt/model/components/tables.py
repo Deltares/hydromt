@@ -4,18 +4,12 @@ import glob
 import os
 from logging import Logger, getLogger
 from os.path import basename, dirname, join
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    Optional,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import pandas as pd
 
 from hydromt.model.components.base import ModelComponent
-from hydromt.model.hydromt_step import hydromt_step
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model

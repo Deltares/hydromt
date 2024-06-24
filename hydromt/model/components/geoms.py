@@ -5,14 +5,7 @@ from glob import glob
 from logging import Logger, getLogger
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -23,7 +16,7 @@ from shapely.geometry import box
 from hydromt.data_catalog.uri_resolvers import ConventionResolver
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
-from hydromt.model.hydromt_step import hydromt_step
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
