@@ -151,7 +151,6 @@ def test_export_cli_no_data_ignore(tmpdir):
         )
 
 
-@pytest.mark.skip(reason="Waiting for https://github.com/Deltares/hydromt/issues/1006")
 def test_cli_build_override(tmpdir):
     root = str(tmpdir.join("grid_model_region"))
     cmd = [

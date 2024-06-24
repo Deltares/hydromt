@@ -33,6 +33,7 @@ Changed
 - The model region is no longer a subset of the `geoms` but rather it's own component class. See the migration guide for more info (#810)
 - The model class has been moved to a component architecture. See the migration guide for more info (#845)
 - Changed the `GeoDatasetAdapter` to transform vector data from tabular formats. (#912)
+- Changed the logging in HydroMT to canonical logging using logging hierarchy (#1006)
 
 
 Removed
