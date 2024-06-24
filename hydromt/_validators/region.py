@@ -1,8 +1,11 @@
 """Pydantic models for the validation of region specifications."""
+
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, model_validator
+
+from hydromt._typing.type_def import Bbox
 
 
 class PathRegion(BaseModel):
@@ -35,7 +38,7 @@ class BoundingBoxRegion(BaseModel):
 
     @staticmethod
     def from_list(
-        input: Union[Tuple[float, float, float, float], List[float]]
+        input: Union[Tuple[float, float, float, float], List[float]],
     ) -> "BoundingBoxRegion":
         """Create a region specification from a [xmin,ymin,xmax,ymax] list."""
         xmin, ymin, xmax, ymax = input
@@ -47,7 +50,7 @@ class BoundingBoxRegion(BaseModel):
         )
 
     @staticmethod
-    def from_dict(input_dict: Dict) -> "BoundingBoxRegion":
+    def from_dict(input_dict: Dict[str, Bbox]) -> "BoundingBoxRegion":
         """Create a region specification from dictionary specifying values for xmin, ymin, xmax, ymax."""
         xmin, ymin, xmax, ymax = input_dict["bbox"]
 
@@ -60,7 +63,7 @@ class BoundingBoxRegion(BaseModel):
 
     @model_validator(mode="after")
     def _check_bounds_ordering(self) -> "BoundingBoxRegion":
-        # pydantic will turn these asserion errors into validation errors for us
+        # pydantic will turn these assertion errors into validation errors for us
         assert self.xmin <= self.xmax
         assert self.ymin <= self.ymax
         return self
@@ -80,6 +83,8 @@ def validate_region(input: Dict[str, Any]) -> Optional[Region]:
             return BoundingBoxRegion.from_list(val)
         elif isinstance(val, dict):
             return BoundingBoxRegion.from_dict(val)
+        else:
+            raise ValueError(f"bbox value {val} is not a list or dict")
     elif "geom" in input:
         val = input["geom"]
         return PathRegion.from_path(val)
@@ -87,7 +92,6 @@ def validate_region(input: Dict[str, Any]) -> Optional[Region]:
         for region_type in ["grid", "mesh", "basin", "subbasin", "interbasin"]:
             if region_type in input:
                 raise NotImplementedError(
-                    f"region kind {region_type} is not supported in region validation yet, but is recognised by HydroMT."
+                    f"region kind {region_type} is not supported in region validation yet, but is recognized by HydroMT."
                 )
-
         raise NotImplementedError(f"Unknown region kind: {input}")
