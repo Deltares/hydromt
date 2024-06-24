@@ -5,9 +5,9 @@ from typing import Optional
 
 import dask
 import numpy as np
-import numpy.typing as npt
 import xarray as xr
 from numba import njit
+from numpy.typing import NDArray
 from scipy import stats
 
 __all__ = [
@@ -19,7 +19,7 @@ __all__ = [
     "fit_extremes",
 ]
 
-_RPS: npt.NDArray[np.int_] = np.array([2, 5, 10, 25, 50, 100, 250, 500])  # years
+_RPS: NDArray[np.int_] = np.array([2, 5, 10, 25, 50, 100, 250, 500])  # years
 _DISTS = {
     "POT": ["exp", "gpd"],
     "BM": ["gumb", "gev"],
@@ -36,7 +36,7 @@ def eva(
     period: str = "365.25D",
     min_sample_size: int = 0,
     distribution: Optional[str] = None,
-    rps: npt.NDArray[np.int_] = _RPS,
+    rps: NDArray[np.int_] = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
     """Return Extreme Value Analysis.
@@ -100,7 +100,7 @@ def eva_block_maxima(
     min_dist: int = 0,
     min_sample_size: int = 0,
     distribution: Optional[str] = None,
-    rps: npt.NDArray[np.int_] = _RPS,
+    rps: NDArray[np.int_] = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
     """Return EVA based on block maxima.
@@ -158,7 +158,7 @@ def eva_peaks_over_threshold(
     min_sample_size: int = 0,
     period: str = "365.25D",
     distribution: Optional[str] = None,
-    rps: npt.NDArray[np.int_] = _RPS,
+    rps: NDArray[np.int_] = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
     """Return EVA based on peaks over threshold.
@@ -295,7 +295,7 @@ def get_peaks(
 
 def get_return_value(
     da_params: xr.DataArray,
-    rps: npt.NDArray[np.int_] = _RPS,
+    rps: NDArray[np.int_] = _RPS,
     extremes_rate: float = 1.0,
 ) -> xr.DataArray:
     """Return return value based on EVA.
@@ -458,11 +458,11 @@ def fit_extremes(
 ## PEAKS
 @njit
 def local_max_1d(
-    arr: npt.NDArray[np.number],
-    bins: Optional[npt.NDArray[np.int_]] = None,
+    arr: NDArray[np.number],
+    bins: Optional[NDArray[np.int_]] = None,
     min_dist: int = 0,
     min_sample_size: int = 0,
-) -> npt.NDArray[np.bool_]:
+) -> NDArray[np.bool_]:
     """Return boolean index of local maxima in `arr` which are `min_dist` apart.
 
     Parameters
@@ -582,7 +582,7 @@ def _bic(x, params, distribution: str):
 
 
 def _get_return_values(
-    params, distribution: str, rps: npt.NDArray[np.int_] = _RPS, extremes_rate=1.0
+    params, distribution: str, rps: NDArray[np.int_] = _RPS, extremes_rate=1.0
 ):
     q = 1 / rps / extremes_rate
     return get_frozen_dist(params, distribution).isf(q)
@@ -629,7 +629,7 @@ def plot_return_values(
     a: Optional[float] = 0,
     alpha: Optional[float] = 0.9,
     nsample: int = 1000,
-    rps: npt.NDArray[np.int_] = _RPS,
+    rps: NDArray[np.int_] = _RPS,
     extremes_rate: float = 1.0,
 ):
     # TODO: add description to this function Dirk - done very simply now

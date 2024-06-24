@@ -4,9 +4,9 @@ import math as math
 from typing import Optional
 
 import numpy as np
-import numpy.typing as npt
 import xarray as xr
 from numba import njit
+from numpy.typing import NDArray
 
 __all__ = [
     "get_peak_hydrographs",
@@ -76,12 +76,12 @@ def get_peak_hydrographs(
 
 @njit
 def hydrograph_1d(
-    ts: npt.NDArray[np.float_],
-    peaks: npt.NDArray[np.bool_],
+    ts: NDArray[np.float_],
+    peaks: NDArray[np.bool_],
     wdw_size: int,
     n_peaks: Optional[int] = None,
     normalize: bool = True,
-) -> npt.NDArray[np.float_]:
+) -> NDArray[np.float_]:
     """Return hydrograph 1D.
 
     Return 2D array of shape (`n_peaks`, `wdw_size`) with normalized hydrographs
