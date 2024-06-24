@@ -54,7 +54,7 @@ def PLUGINS() -> Plugins:
 
 
 @pytest.fixture(autouse=True)
-def _local_catalog_eps(monkeypatch, PLUGINS) -> dict:
+def _local_catalog_eps(monkeypatch, PLUGINS):
     """Set entrypoints to local predefined catalogs."""
     cat_root = Path(__file__).parent.parent / "data" / "catalogs"
     for name, cls in PLUGINS.catalog_plugins.items():
@@ -95,7 +95,7 @@ def example_zarr_file(tmp_dir: Path) -> Path:
 
 
 @pytest.fixture()
-def data_catalog() -> DataCatalog:
+def data_catalog(_local_catalog_eps) -> DataCatalog:
     """DataCatalog instance that points to local predefined catalogs."""
     return DataCatalog("artifact_data=v1.0.0")
 
@@ -506,18 +506,6 @@ def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
         geodf=geodf,
         mocker=mocker,
     )
-
-
-# @pytest.fixture()
-# def mesh_model(griduda):
-#     mod = MODELS.load("mesh_model")()
-#     region = gpd.GeoDataFrame(
-#         geometry=[box(*griduda.ugrid.grid.bounds)], crs=griduda.ugrid.grid.crs
-#     )
-#     mod.region.create({"geom": region})
-#     mod.setup_config(**{"header": {"setting": "value"}})
-#     mod.set_mesh(griduda, "elevtn")
-#     return mod
 
 
 @pytest.fixture()
