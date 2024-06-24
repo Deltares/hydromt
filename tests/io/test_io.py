@@ -24,9 +24,7 @@ from hydromt.io.readers import (
 from hydromt.io.writers import write_xy
 
 
-@pytest.mark.parametrize("engine", ["fiona", "pyogrio"])
-def test_open_vector(engine, tmpdir, df, geodf, world):
-    gpd.io_engine = engine
+def test_open_vector(tmpdir, df, geodf, world):
     fn_csv = str(tmpdir.join("test.csv"))
     fn_parquet = str(tmpdir.join("test.parquet"))
     fn_xy = str(tmpdir.join("test.xy"))
@@ -58,7 +56,7 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
     gdf1 = open_vector(fn_xy, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
     # read shapefile
-    gdf1 = hydromt.io.open_vector(fn_shp, bbox=list(geodf.total_bounds))
+    gdf1 = hydromt.io.open_vector(fn_shp, bbox=tuple(geodf.total_bounds))
     assert np.all(gdf1 == geodf)
     mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
     gdf1 = hydromt.io.open_vector(fn_shp, geom=mask)
@@ -104,7 +102,7 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
 def test_open_vector_s3(geodf: gpd.GeoDataFrame):
     m = MagicMock()
     m.return_value = geodf
-    with patch("geopandas.io.file._read_file_fiona", m):
+    with patch("geopandas.io.file._read_file_pyogrio", m):
         df = hydromt.io.open_vector(UPath("s3://fake_url/file.geojson"))
     assert np.all(geodf == df)
 

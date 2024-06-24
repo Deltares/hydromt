@@ -242,7 +242,7 @@ def create_rotated_grid_from_geom(
     xr.DataArray
         A rotated grid based on the geometry.
     """
-    geomu = geom.unary_union
+    geomu = geom.union_all()
     x0, y0, mmax, nmax, rot = rotated_grid(
         geomu, res, dec_origin=dec_origin, dec_rotation=dec_rotation
     )
