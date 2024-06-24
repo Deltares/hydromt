@@ -668,10 +668,10 @@ class GridComponent(SpatialModelComponent):
             )
             return None
         # Data resampling
-        if vector_data in rename.keys():
-            # In case of choosing a new name with area or fraction method pass
-            # the name directly
-            rename = rename[vector_data]
+        # In case of choosing a new name with area or fraction method pass the name directly
+        renames = (
+            rename.get(vector_data, rename) if isinstance(vector_data, str) else rename
+        )
         ds = grid_from_geodataframe(
             grid_like=self._get_grid_data(),
             gdf=gdf,
@@ -679,7 +679,7 @@ class GridComponent(SpatialModelComponent):
             nodata=nodata,
             rasterize_method=rasterize_method,
             mask_name=mask_name,
-            rename=rename,
+            rename=renames,
             all_touched=all_touched,
         )
         # Add to grid
