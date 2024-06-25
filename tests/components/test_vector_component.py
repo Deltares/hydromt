@@ -1,3 +1,5 @@
+from logging import DEBUG
+
 import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
@@ -22,6 +24,6 @@ def test_write_empty_data(
     model.root = mocker.Mock(set=ModelRoot)
     model.root.path = tmpdir
     vector = VectorComponent(model)
-    vector.write()
-    # model.logger.debug.assert_called_once_with("No vector data found, skip writing.")
-    any(filter(lambda record: record, caplog.records))
+    with caplog.at_level(DEBUG):
+        vector.write()
+    assert "No vector data found, skip writing." in caplog.text
