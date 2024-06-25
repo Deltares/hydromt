@@ -9,7 +9,7 @@ from hydromt._typing import ErrorHandleMethod
 from hydromt.data_catalog.adapters import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources import DatasetSource
-from hydromt.data_catalog.uri_resolvers import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers import URIResolver
 
 
 class TestDatasetSource:
@@ -44,10 +44,10 @@ class TestDatasetSource:
         assert list(stac_item.assets.keys())[0] == "test.nc"
 
     def test_to_stac_catalog_zarr(
-        self, mock_resolver: MetaDataResolver, MockDatasetDriver: Type[DatasetDriver]
+        self, mock_resolver: URIResolver, MockDatasetDriver: Type[DatasetDriver]
     ):
         source_name = "timeseries_dataset_zarr"
-        driver = MockDatasetDriver(metadata_resolver=mock_resolver)
+        driver = MockDatasetDriver(uri_resolver=mock_resolver)
         with pytest.raises(ValueError, match="does not support zarr"):
             DatasetSource(
                 uri="test.zarr",
@@ -58,7 +58,7 @@ class TestDatasetSource:
     @pytest.fixture()
     def dataset_source_no_timerange(
         self,
-        mock_resolver: MetaDataResolver,
+        mock_resolver: URIResolver,
         MockDatasetDriver: Type[DatasetDriver],
         monkeypatch: pytest.MonkeyPatch,
     ) -> DatasetSource:
@@ -66,7 +66,7 @@ class TestDatasetSource:
             raise IndexError("no timerange found.")
 
         source_name = "timeseries_dataset_nc"
-        driver = MockDatasetDriver(metadata_resolver=mock_resolver)
+        driver = MockDatasetDriver(uri_resolver=mock_resolver)
         monkeypatch.setattr(DatasetSource, name="get_time_range", value=_get_time_range)
         return DatasetSource(
             uri="test.nc",

@@ -42,7 +42,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         if bbox is not None or (mask is not None and buffer > 0):
             mask = parse_geom_bbox_buffer(mask, bbox, buffer)
         # Merge static kwargs from the catalog with dynamic kwargs from the query.
-        uris = self.metadata_resolver.resolve(
+        uris = self.uri_resolver.resolve(
             uri,
             fs=self.filesystem,
             time_range=time_range,

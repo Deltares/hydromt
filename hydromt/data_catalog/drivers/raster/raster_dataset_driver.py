@@ -46,7 +46,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
                 in the same CRS.
         """
         # Merge static kwargs from the catalog with dynamic kwargs from the query.
-        uris = self.metadata_resolver.resolve(
+        uris = self.uri_resolver.resolve(
             uri,
             self.filesystem,
             mask=mask,

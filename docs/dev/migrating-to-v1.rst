@@ -538,7 +538,7 @@ reading phase, see below, the data catalog yaml file is updated accordingly:
 		driver:
 			name: netcdf
 			filesystem: local
-			metadata_resolver: convention
+			uri_resolver: convention
 			options:
 				chunks:
 					latitude: 250
@@ -565,7 +565,7 @@ Where there are a few changes from the previous versions:
 - `driver` is it's own class and can be specified:
 	- by string, implying default arguments
 	- using a YAML object, with a mandatory `name` plus kwargs.
-- `metadata_resolver` hangs under driver and can be specified:
+- `uri_resolver` hangs under driver and can be specified:
 	- by string, implying default arguments
 	- using a YAML object, with a mandatory `name` plus kwargs.
 - `filesystem` is moved to driver, and can be specified:
@@ -641,17 +641,17 @@ the data.
 Per HydroMT data type (e.g. `RasterDataset`, `GeoDataFrame`), HydroMT has one
 `DataSource`, e.g. `RasterDatasetSource`, `GeoDataFrameSource`.
 
-MetaDataResolver
+URIResolver
 ^^^^^^^^^^^^^^^^
 
-The `MetaDataResolver` takes a single `uri` and the query parameters from the model,
+The `URIResolver` takes a single `uri` and the query parameters from the model,
 such as the region, or the time range, and returns multiple absolute paths, or `uri`s,
 that can be read into a single python representation (e.g. `xarray.Dataset`). This
 functionality was previously covered in the `resolve_paths` function. However, there
-are more ways than to resolve a single uri, so the `MetaDataResolver` makes this
-behavior extendable. Plugins or other code can subclass the Abstract `MetaDataResolver`
+are more ways than to resolve a single uri, so the `URIResolver` makes this
+behavior extendable. Plugins or other code can subclass the Abstract `URIResolver`
 class to implement their own conventions for data discovery.
-The `MetaDataResolver` is injected into the `Driver` objects and can be used there.
+The `URIResolver` is injected into the `Driver` objects and can be used there.
 
 Driver
 ^^^^^^
@@ -659,7 +659,7 @@ Driver
 The `Driver` class is responsible for deserializing/reading a set of file types, like
 a geojson or zarr file, into their python in-memory representations:
 `geopandas.DataFrame` or `xarray.Dataset` respectively. To find the relevant files based
-on a single `uri` in the `DataCatalog`, a `MetaDataResolver` is used.
+on a single `uri` in the `DataCatalog`, a `URIResolver` is used.
 The driver has a `read` method. This method accepts a `uri`, a
 unique identifier for a single data source. It also accepts different query parameters,
 such a the region, time range or zoom level of the query from the model.

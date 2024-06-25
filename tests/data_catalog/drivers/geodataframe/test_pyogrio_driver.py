@@ -9,7 +9,7 @@ from shapely import box
 from hydromt._typing import Bbox, NoDataException
 from hydromt.data_catalog.drivers import PyogrioDriver
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
-from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 
 class TestPyogrioDriver:
@@ -39,7 +39,7 @@ class TestPyogrioDriver:
 
     @pytest.fixture(scope="class")
     def driver(self):
-        return PyogrioDriver(metadata_resolver=ConventionResolver())
+        return PyogrioDriver(uri_resolver=ConventionResolver())
 
     # lazy-fixtures not maintained:
     # https://github.com/TvoroG/pytest-lazy-fixture/issues/65#issuecomment-1914527162
@@ -74,12 +74,12 @@ class TestPyogrioDriver:
 
     def test_read_multiple_uris(self):
         # Create Resolver that returns multiple uris
-        class FakeResolver(MetaDataResolver):
+        class FakeResolver(URIResolver):
             def resolve(self, uri: str, *args, **kwargs):
                 return ["more", "than", "one"]
 
         driver: PyogrioDriver = PyogrioDriver(
-            metadata_resolver=FakeResolver(),
+            uri_resolver=FakeResolver(),
         )
         with pytest.raises(ValueError, match="not supported"):
             driver.read("uri_{variable}", variables=["more", "than", "one"])

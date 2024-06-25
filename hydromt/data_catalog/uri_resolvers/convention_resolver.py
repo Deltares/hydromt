@@ -1,4 +1,4 @@
-"""MetaDataResolver using HydroMT naming conventions."""
+"""URIResolver using HydroMT naming conventions."""
 
 from functools import reduce
 from itertools import chain, product
@@ -21,13 +21,13 @@ from hydromt._typing import (
 )
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 
-from .metadata_resolver import MetaDataResolver
+from .uri_resolver import URIResolver
 
 logger: Logger = getLogger(__name__)
 
 
-class ConventionResolver(MetaDataResolver):
-    """MetaDataResolver using HydroMT naming conventions."""
+class ConventionResolver(URIResolver):
+    """URIDataResolver using HydroMT naming conventions."""
 
     _uri_placeholders = frozenset({"year", "month", "variable", "name"})
     name = "convention"

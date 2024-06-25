@@ -32,7 +32,7 @@ from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver, RasterDatasetDriver
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
-from hydromt.data_catalog.uri_resolvers import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers import URIResolver
 from hydromt.model.components.config import ConfigComponent
 from hydromt.model.components.geoms import GeomsComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -508,14 +508,14 @@ def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
 
 
 @pytest.fixture()
-def mock_resolver() -> MetaDataResolver:
-    class MockMetaDataResolver(MetaDataResolver):
+def mock_resolver() -> URIResolver:
+    class MockURIResolver(URIResolver):
         name = "mock_resolver"
 
         def resolve(self, uri, *args, **kwargs):
             return [uri]
 
-    resolver = MockMetaDataResolver()
+    resolver = MockURIResolver()
     return resolver
 
 
@@ -541,7 +541,7 @@ def mock_geo_ds_adapter():
 
 @pytest.fixture()
 def mock_geodf_driver(
-    geodf: gpd.GeoDataFrame, mock_resolver: MetaDataResolver
+    geodf: gpd.GeoDataFrame, mock_resolver: URIResolver
 ) -> GeoDataFrameDriver:
     class MockGeoDataFrameDriver(GeoDataFrameDriver):
         name = "mock_geodf_driver"
@@ -549,12 +549,12 @@ def mock_geodf_driver(
         def read_data(self, *args, **kwargs) -> gpd.GeoDataFrame:
             return geodf
 
-    return MockGeoDataFrameDriver(metadata_resolver=mock_resolver)
+    return MockGeoDataFrameDriver(uri_resolver=mock_resolver)
 
 
 @pytest.fixture()
 def mock_raster_ds_driver(
-    raster_ds: xr.Dataset, mock_resolver: MetaDataResolver
+    raster_ds: xr.Dataset, mock_resolver: URIResolver
 ) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
         name = "mock_raster_ds_driver"
@@ -563,12 +563,12 @@ def mock_raster_ds_driver(
         def read_data(self, *args, **kwargs) -> xr.Dataset:
             return raster_ds
 
-    return MockRasterDatasetDriver(metadata_resolver=mock_resolver)
+    return MockRasterDatasetDriver(uri_resolver=mock_resolver)
 
 
 @pytest.fixture()
 def mock_geo_ds_driver(
-    geoda: xr.DataArray, mock_resolver: MetaDataResolver
+    geoda: xr.DataArray, mock_resolver: URIResolver
 ) -> GeoDatasetDriver:
     class MockGeoDatasetDriver(GeoDatasetDriver):
         name = "mock_geo_ds_driver"
@@ -577,7 +577,7 @@ def mock_geo_ds_driver(
         def read_data(self, *args, **kwargs) -> xr.Dataset:
             return geoda.to_dataset()
 
-    return MockGeoDatasetDriver(metadata_resolver=mock_resolver)
+    return MockGeoDatasetDriver(uri_resolver=mock_resolver)
 
 
 @pytest.fixture()

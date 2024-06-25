@@ -36,7 +36,7 @@ class DatasetDriver(BaseDriver, ABC):
 
         args:
         """
-        uris = self.metadata_resolver.resolve(
+        uris = self.uri_resolver.resolve(
             uri,
             self.filesystem,
             time_range=time_range,

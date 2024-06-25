@@ -1,4 +1,4 @@
-"""Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
+"""URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
@@ -17,8 +17,8 @@ from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
 logger: Logger = getLogger(__name__)
 
 
-class MetaDataResolver(BaseModel, ABC):
-    """Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
+class URIResolver(BaseModel, ABC):
+    """URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
     model_config = ConfigDict(extra="forbid")
     name: ClassVar[str]
