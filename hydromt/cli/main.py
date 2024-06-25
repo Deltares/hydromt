@@ -262,8 +262,7 @@ def build(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log.wait_and_remove_handlers(logger)
-        log.wait_and_remove_handlers(logging.getLogger("hydromt.model.root"))
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## UPDATE
@@ -367,9 +366,7 @@ def update(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 @main.command(
@@ -458,11 +455,9 @@ def check(
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
-        raise e
+        raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## Export
@@ -603,9 +598,7 @@ def export(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## CLIP
@@ -672,9 +665,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 if __name__ == "__main__":

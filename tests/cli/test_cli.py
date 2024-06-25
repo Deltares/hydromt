@@ -1,7 +1,9 @@
 """Tests for the cli submodule."""
 
+from logging import NOTSET, Logger, getLogger
 from os.path import abspath, dirname, join
 from pathlib import Path
+from typing import Generator
 
 import pytest
 from click.testing import CliRunner, Result
@@ -61,6 +63,14 @@ def test_cli_clip_help():
     )
 
 
+@pytest.fixture()
+def _reset_log_level() -> Generator[None, None, None]:
+    yield
+    main_logger: Logger = getLogger("hydromt")
+    main_logger.setLevel(NOTSET)  # Most verbose so all messages get passed
+
+
+@pytest.mark.usefixtures("_reset_log_level")
 def test_cli_build_grid_model(tmpdir):
     root = str(tmpdir.join("grid_model_region"))
     cmd = [
@@ -74,6 +84,7 @@ def test_cli_build_grid_model(tmpdir):
     _ = CliRunner().invoke(hydromt_cli, cmd)
 
 
+@pytest.mark.usefixtures("_reset_log_level")
 def test_cli_build_unknown_model(tmpdir):
     with pytest.raises(ValueError, match="Unknown model"):
         _ = CliRunner().invoke(
@@ -87,6 +98,7 @@ def test_cli_build_unknown_model(tmpdir):
         )
 
 
+@pytest.mark.usefixtures("_reset_log_level")
 def test_cli_update_unknown_model(tmpdir):
     with pytest.raises(ValueError, match="Unknown model"):
         _ = CliRunner().invoke(
@@ -104,6 +116,7 @@ def test_cli_update_unknown_model(tmpdir):
         )
 
 
+@pytest.mark.usefixtures("_reset_log_level")
 def test_cli_clip_unknown_model(tmpdir):
     with pytest.raises(NotImplementedError):
         _ = CliRunner().invoke(
@@ -113,6 +126,7 @@ def test_cli_clip_unknown_model(tmpdir):
         )
 
 
+@pytest.mark.usefixtures("_reset_log_level")
 def test_export_cli_deltares_data(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -151,6 +165,7 @@ def test_export_cli_no_data_ignore(tmpdir):
         )
 
 
+@pytest.mark.usefixtures("_reset_log_level")
 def test_cli_build_override(tmpdir):
     root = str(tmpdir.join("grid_model_region"))
     cmd = [
@@ -181,7 +196,7 @@ def test_cli_build_override(tmpdir):
 @pytest.mark.skip(
     "Needs implementation of https://github.com/Deltares/hydromt/issues/886"
 )
-def test_export_skips_overwrite(tmpdir, caplog):
+def test_export_skips_overwrite(tmpdir, caplog: pytest.LogCaptureFixture):
     _ = CliRunner().invoke(
         hydromt_cli,
         [
@@ -239,6 +254,7 @@ def test_export_does_not_warn_on_fo(tmpdir, caplog):
     assert "already exists and not in forced overwrite mode" not in caplog.text
 
 
+@pytest.mark.usefixtures("_reset_log_level")
 def test_export_cli_catalog(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -255,6 +271,7 @@ def test_export_cli_catalog(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.usefixtures("_reset_log_level")
 def test_export_multiple_sources(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
@@ -275,6 +292,7 @@ def test_export_multiple_sources(tmpdir):
     assert r.exit_code == 0, r.output
 
 
+@pytest.mark.usefixtures("_reset_log_level")
 def test_export_cli_config_file(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,

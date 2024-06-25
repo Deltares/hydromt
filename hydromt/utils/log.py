@@ -1,9 +1,15 @@
 """Implementations related to logging."""
 
-import logging
-import logging.handlers
 import os
 import sys
+from logging import (
+    FileHandler,
+    Formatter,
+    Logger,
+    StreamHandler,
+    captureWarnings,
+    getLogger,
+)
 
 from hydromt import __version__
 
@@ -12,15 +18,16 @@ FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 __all__ = ["setuplog"]
 
 
-def wait_and_remove_handlers(logger: logging.Logger):
-    for handler in logger.handlers[:]:
-        # remove handler first, as otherwise new calls to the logger may open the
-        # same filename again.
-        logger.removeHandler(handler)
-        # wait for all messages to be processed
-        handler.flush()
-        # then close the handler
-        handler.close()
+def wait_and_remove_file_handlers(logger: Logger):
+    for handler in logger.handlers:
+        if isinstance(handler, FileHandler):
+            # remove handler first, as otherwise new calls to the logger may open the
+            # same filename again.
+            logger.removeHandler(handler)
+            # wait for all messages to be processed
+            handler.flush()
+            # then close the handler
+            handler.close()
 
 
 def setuplog(
@@ -43,13 +50,13 @@ def setuplog(
         Whether to append (True) or overwrite (False) to a logfile at path,
         by default True
     """
-    main_logger = logging.getLogger("hydromt")
-    wait_and_remove_handlers(main_logger)
-    logging.captureWarnings(True)
+    main_logger: Logger = getLogger("hydromt")
+    wait_and_remove_file_handlers(main_logger)
+    captureWarnings(True)
     main_logger.setLevel(log_level)
-    console = logging.StreamHandler(sys.stdout)
+    console = StreamHandler(sys.stdout)
     console.setLevel(log_level)
-    console.setFormatter(logging.Formatter(fmt))
+    console.setFormatter(Formatter(fmt))
     main_logger.addHandler(console)
     if path is not None:
         if append is False and os.path.isfile(path):
@@ -63,8 +70,8 @@ def add_filehandler(logger, path, log_level=20, fmt=FMT):
     if not os.path.isdir(os.path.dirname(path)):
         os.makedirs(os.path.dirname(path))
     isfile = os.path.isfile(path)
-    ch = logging.FileHandler(path)
-    ch.setFormatter(logging.Formatter(fmt))
+    ch = FileHandler(path)
+    ch.setFormatter(Formatter(fmt))
     ch.setLevel(log_level)
     logger.addHandler(ch)
     if isfile:
