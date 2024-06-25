@@ -45,7 +45,6 @@ class DatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
-        logger: Logger = logger,
     ) -> Union[xr.Dataset, xr.DataArray]:
         """
         Read data from this source.
@@ -63,7 +62,6 @@ class DatasetSource(DataSource):
             time_range=tr,
             variables=vrs,
             metadata=self.metadata,
-            logger=logger,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
@@ -72,7 +70,6 @@ class DatasetSource(DataSource):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
-            logger=logger,
         )
 
     def to_file(
@@ -82,7 +79,6 @@ class DatasetSource(DataSource):
         driver_override: Optional[DatasetDriver] = None,
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
         **kwargs,
     ) -> "DatasetSource":
         """
@@ -110,7 +106,6 @@ class DatasetSource(DataSource):
         ds: Optional[xr.Dataset] = self.read_data(
             time_range=time_range,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
         if ds is None:  # handle_nodata == ignore
             return None

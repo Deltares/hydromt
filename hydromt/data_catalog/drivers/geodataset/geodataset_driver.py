@@ -1,7 +1,7 @@
 """Driver for handling IO of GeoDatasets."""
 
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
+from logging import getLogger
 from typing import List, Optional
 
 import xarray as xr
@@ -29,7 +29,6 @@ class GeoDatasetDriver(BaseDriver, ABC):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> Optional[xr.Dataset]:
@@ -58,7 +57,6 @@ class GeoDatasetDriver(BaseDriver, ABC):
             variables=variables,
             time_range=time_range,
             metadata=metadata,
-            logger=logger,
             handle_nodata=handle_nodata,
         )
 
@@ -72,7 +70,6 @@ class GeoDatasetDriver(BaseDriver, ABC):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
     ) -> Optional[xr.Dataset]:

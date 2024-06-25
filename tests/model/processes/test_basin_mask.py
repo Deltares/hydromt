@@ -13,8 +13,6 @@ from hydromt.model.processes.basin_mask import (
     get_basin_geometry,
 )
 
-logger = logging.getLogger(__name__)
-
 
 def reproject_to_utm_crs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     utm = gdf.geometry.estimate_utm_crs()
@@ -62,7 +60,7 @@ def test_no_basid(basin_files):
         )
 
 
-def test_crs_mismatch(basin_files, caplog):
+def test_crs_mismatch(basin_files, caplog: pytest.LogCaptureFixture):
     _, ds, gdf_bas, _ = basin_files
     caplog.set_level(logging.WARNING)
     gdf_bas.to_crs(epsg=6875, inplace=True)
@@ -150,7 +148,7 @@ def test_subbasin_stord(basin_files):
     assert np.isclose(gdf_out.geometry.x[0], 12.29583333333333)
 
 
-def test_subbasin_with_bounds(basin_files, caplog):
+def test_subbasin_with_bounds(basin_files, caplog: pytest.LogCaptureFixture):
     _, ds, _, _ = basin_files
     caplog.set_level(logging.WARNING)
     gdf_bas, gdf_out = get_basin_geometry(

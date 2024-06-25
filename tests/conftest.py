@@ -1,4 +1,3 @@
-import logging
 from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
@@ -590,13 +589,10 @@ def artifact_data():
 
 @pytest.fixture()
 def mock_model(tmpdir, mocker: MockerFixture):
-    logger = logging.getLogger(__name__)
-    logger.propagate = True
     model = mocker.create_autospec(Model)
     model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
     model.root.path.return_value = tmpdir
     model.data_catalog = mocker.create_autospec(DataCatalog)
-    model.logger = logger
     return model
 
 

@@ -28,7 +28,6 @@ class DatasetDriver(BaseDriver, ABC):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -50,7 +49,6 @@ class DatasetDriver(BaseDriver, ABC):
             time_range=time_range,
             variables=variables,
             metadata=metadata,
-            logger=logger,
             handle_nodata=handle_nodata,
         )
 
@@ -62,7 +60,6 @@ class DatasetDriver(BaseDriver, ABC):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:
         """

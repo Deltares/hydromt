@@ -32,7 +32,6 @@ class PyogrioDriver(GeoDataFrameDriver):
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """
@@ -43,7 +42,6 @@ class PyogrioDriver(GeoDataFrameDriver):
         _warn_on_unused_kwargs(
             self.__class__.__name__,
             {"predicate": predicate, "metadata": metadata},
-            logger,
         )
         if len(uris) > 1:
             raise ValueError(
@@ -65,11 +63,7 @@ class PyogrioDriver(GeoDataFrameDriver):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
 
         if gdf.index.size == 0:
-            exec_nodata_strat(
-                f"No data from driver {self}'.",
-                strategy=handle_nodata,
-                logger=logger,
-            )
+            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
         return gdf
 
     def write(

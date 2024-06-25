@@ -36,7 +36,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         self,
         uris: List[str],
         *,
-        logger: Logger = logger,
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
@@ -59,7 +58,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 "zoom_level": zoom_level,
                 "metadata": metadata,
             },
-            logger,
         )
         options = copy(self.options)
         preprocessor: Optional[Callable] = None
@@ -106,7 +104,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 exec_nodata_strat(
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
         return ds
 

@@ -1,11 +1,12 @@
 """Utilities for logging unused kwargs."""
-from logging import Logger
+
+from logging import Logger, getLogger
 from typing import Any, Dict
 
+logger: Logger = getLogger(__name__)
 
-def _warn_on_unused_kwargs(
-    obj_name: str, name_value_dict: Dict[str, Any], logger: Logger
-):
+
+def _warn_on_unused_kwargs(obj_name: str, name_value_dict: Dict[str, Any]):
     """Warn on unused kwargs."""
     for name, value in name_value_dict.items():
         if value is not None:

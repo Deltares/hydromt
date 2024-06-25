@@ -131,7 +131,6 @@ class ConventionResolver(MetaDataResolver):
         zoom_level: Optional[ZoomLevel] = None,
         variables: Optional[List[str]] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve the placeholders in the URI using naming conventions.
@@ -152,8 +151,6 @@ class ConventionResolver(MetaDataResolver):
             Names of variables to return, or all if None, by default None
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
-        logger : Logger, optional
-            logger to use, by default logger
         options : Optional[Dict[str, Any]], optional
             extra options for this resolver, by default None
 
@@ -168,7 +165,7 @@ class ConventionResolver(MetaDataResolver):
             when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`
         """
         _warn_on_unused_kwargs(
-            self.__class__.__name__, {"mask": mask, "zoom_level": zoom_level}, logger
+            self.__class__.__name__, {"mask": mask, "zoom_level": zoom_level}
         )
 
         uri_expanded, keys, _ = self._expand_uri_placeholders(
@@ -195,9 +192,7 @@ class ConventionResolver(MetaDataResolver):
         )
         if not uris:
             exec_nodata_strat(
-                f"resolver '{self.name}' found no files.",
-                strategy=handle_nodata,
-                logger=logger,
+                f"resolver '{self.name}' found no files.", strategy=handle_nodata
             )
             return []  # if ignore
 

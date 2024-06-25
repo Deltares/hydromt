@@ -18,9 +18,7 @@ logger: Logger = getLogger(__name__)
 
 
 # TODO: fully implement in https://github.com/Deltares/hydromt/issues/875
-def _get_zoom_levels_and_crs(
-    uri: StrPath, logger=logger
-) -> Tuple[int, Dict[int, float]]:
+def _get_zoom_levels_and_crs(uri: StrPath) -> Tuple[int, Dict[int, float]]:
     """Get zoom levels and crs from adapter or detect from tif file if missing."""
     zoom_levels = {}
     crs = None
@@ -46,7 +44,6 @@ def _parse_zoom_level(
     geom: Optional[Geom] = None,
     zls_dict: Optional[Dict[int, float]] = None,
     dst_crs: Optional[CRS] = None,
-    logger=logger,
 ) -> Optional[int]:
     """Return overview level of data corresponding to zoom level.
 

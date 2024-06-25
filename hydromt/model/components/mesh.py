@@ -1,6 +1,7 @@
 """Mesh Component."""
 
 import os
+from logging import Logger, getLogger
 from os.path import dirname, isdir, join
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
@@ -27,6 +28,9 @@ if TYPE_CHECKING:
     from hydromt.model import Model
 
 __all__ = ["MeshComponent"]
+
+
+logger: Logger = getLogger(__name__)
 
 
 class MeshComponent(SpatialModelComponent):
@@ -147,7 +151,7 @@ class MeshComponent(SpatialModelComponent):
         self.write_region(**region_options)
 
         if len(self.data) < 1:
-            self.logger.debug("No mesh data found, skip writing.")
+            logger.debug("No mesh data found, skip writing.")
             return
 
         # filename
@@ -155,7 +159,7 @@ class MeshComponent(SpatialModelComponent):
         _filename = join(self.root.path, filename)
         if not isdir(dirname(_filename)):
             os.makedirs(dirname(_filename), exist_ok=True)
-        self.logger.debug(f"Writing file {filename}")
+        logger.debug(f"Writing file {filename}")
         ds_out = self.data.ugrid.to_dataset(
             optional_attributes=write_optional_ugrid_attributes,
         )
@@ -196,7 +200,6 @@ class MeshComponent(SpatialModelComponent):
             filename,
             root=self.root.path,
             single_var_as_array=False,
-            logger=self.logger,
             **kwargs,
         ).values()
         if len(files) > 0:
@@ -212,7 +215,7 @@ class MeshComponent(SpatialModelComponent):
                     )
                 else:
                     uds = xu.UgridDataset(ds)
-                    self.logger.info(
+                    logger.info(
                         "no crs is found in the file, assigning from user input."
                     )
             # Reading ugrid data adds nNodes coordinates to grid and makes it not
@@ -278,7 +281,7 @@ class MeshComponent(SpatialModelComponent):
         mesh2d : xu.UgridDataset
             Generated mesh2d.
         """
-        self.logger.info("Preparing 2D mesh.")
+        logger.info("Preparing 2D mesh.")
 
         # Check if this component's region is a reference to another component
         if self._region_component is not None:
@@ -292,7 +295,6 @@ class MeshComponent(SpatialModelComponent):
             crs=crs,
             region_crs=region_crs,
             align=align,
-            logger=self.logger,
             data_catalog=self.data_catalog,
         )
         self.set(mesh2d, grid_name=grid_name)
@@ -495,7 +497,7 @@ class MeshComponent(SpatialModelComponent):
         list
             List of variables added to mesh.
         """  # noqa: E501
-        self.logger.info(f"Preparing mesh data from raster source {raster_filename}")
+        logger.info(f"Preparing mesh data from raster source {raster_filename}")
         # Get the grid from the mesh or the reference one
         mesh_like = self._get_mesh_grid_data(grid_name=grid_name)
 
@@ -516,7 +518,6 @@ class MeshComponent(SpatialModelComponent):
             fill_method=fill_method,
             resampling_method=resampling_method,
             rename=rename,
-            logger=self.logger,
         )
 
         self.set(uds_sample, grid_name=grid_name, overwrite_grid=False)
@@ -592,7 +593,7 @@ class MeshComponent(SpatialModelComponent):
         ValueError
             If `raster_filename` is not a single variable raster.
         """  # noqa: E501
-        self.logger.info(
+        logger.info(
             f"Preparing mesh data by reclassifying the data in {raster_filename} "
             f"based on {reclass_table_filename}."
         )
@@ -624,9 +625,7 @@ class MeshComponent(SpatialModelComponent):
             fill_method=fill_method,
             resampling_method=resampling_method,
             rename=rename,
-            logger=self.logger,
         )
-
         self.set(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
         return list(uds_sample.data_vars.keys())
@@ -667,7 +666,7 @@ class MeshComponent(SpatialModelComponent):
                         )
                     else:
                         # Remove grid and all corresponding data variables from mesh
-                        self.logger.warning(
+                        logger.warning(
                             f"Overwriting grid {grid_name} and the corresponding"
                             " data variables in mesh."
                         )
@@ -690,7 +689,7 @@ class MeshComponent(SpatialModelComponent):
                 grids = xr.merge(objects=grids)
                 for dvar in data.data_vars:
                     if dvar in self._data:
-                        self.logger.warning(f"Replacing mesh parameter: {dvar}")
+                        logger.warning(f"Replacing mesh parameter: {dvar}")
                     # The xugrid check on grid equal does not work properly compared to
                     # our _grid_is_equal method. Add to xarray Dataset and convert back
                     grids[dvar] = data.ugrid.to_dataset()[dvar]

@@ -1,6 +1,6 @@
 """Implementation for the geodataset DataAdapter."""
 
-from logging import Logger, getLogger
+from logging import getLogger
 from typing import Dict, List, Optional, Union, cast
 
 import numpy as np
@@ -48,7 +48,6 @@ class GeoDatasetAdapter(DataAdapterBase):
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """Return a clipped, sliced and harmonized RasterDataset.
 
@@ -70,8 +69,6 @@ class GeoDatasetAdapter(DataAdapterBase):
             whether to return a xr.DataArray if only a single variable is present, by default True
         handle_nodata : NoDataStrategy, optional
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
-        logger : Logger, optional
-            logger to use, by default logger
 
         Returns
         -------
@@ -87,14 +84,13 @@ class GeoDatasetAdapter(DataAdapterBase):
         """
         ds = _rename_vars(ds, self.rename)
         ds = GeoDatasetAdapter._validate_spatial_coords(ds)
-        ds = GeoDatasetAdapter._set_crs(ds, crs=metadata.crs, logger=logger)
+        ds = GeoDatasetAdapter._set_crs(ds, crs=metadata.crs)
         ds = _set_vector_nodata(ds, metadata)
-        ds = _shift_dataset_time(dt=self.unit_add.get("time", 0), ds=ds, logger=logger)
+        ds = _shift_dataset_time(dt=self.unit_add.get("time", 0), ds=ds)
         ds = GeoDatasetAdapter._apply_unit_conversion(
             ds,
             unit_mult=self.unit_mult,
             unit_add=self.unit_add,
-            logger=logger,
         )
         ds = _set_metadata(ds, metadata=metadata)
         ds = GeoDatasetAdapter._slice_data(
@@ -103,14 +99,12 @@ class GeoDatasetAdapter(DataAdapterBase):
             mask=mask,
             predicate=predicate,
             time_range=time_range,
-            logger=logger,
         )
 
         if _has_no_data(ds):
             exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
-                logger=logger,
             )
             return None  # if handle_nodata ignore
         return _single_var_as_array(ds, single_var_as_array, variables)
@@ -139,7 +133,6 @@ class GeoDatasetAdapter(DataAdapterBase):
     def _set_crs(
         ds: Optional[xr.Dataset],
         crs: Union[str, int, None] = None,
-        logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
         if ds is None:
             return None
@@ -162,7 +155,6 @@ class GeoDatasetAdapter(DataAdapterBase):
         mask: Optional[Geom] = None,
         predicate: Predicate = "intersects",
         time_range: Optional[TimeRange] = None,
-        logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
         """Filter the GeoDataset.
 
@@ -178,8 +170,6 @@ class GeoDatasetAdapter(DataAdapterBase):
             predicate to use for the mask filter, by default "intersects"
         time_range : Optional[TimeRange], optional
             filter start and end times, by default None
-        logger : Logger, optional
-            logger to use, by default logger
 
         Returns
         -------
@@ -210,13 +200,12 @@ class GeoDatasetAdapter(DataAdapterBase):
                 ds = ds[variables]
         maybe_ds: Optional[xr.Dataset] = ds
         if time_range is not None:
-            maybe_ds = _slice_temporal_dimension(ds, time_range, logger=logger)
+            maybe_ds = _slice_temporal_dimension(ds, time_range)
         if mask is not None:
             maybe_ds = GeoDatasetAdapter._slice_spatial_dimension(
                 maybe_ds,
                 mask=mask,
                 predicate=predicate,
-                logger=logger,
             )
         if _has_no_data(maybe_ds):
             return None
@@ -228,7 +217,6 @@ class GeoDatasetAdapter(DataAdapterBase):
         ds: Optional[xr.Dataset],
         mask: Geom,
         predicate: Predicate,
-        logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
         if ds is None:
             return None
@@ -247,7 +235,6 @@ class GeoDatasetAdapter(DataAdapterBase):
         ds: Optional[xr.Dataset],
         unit_mult: Dict[str, Number],
         unit_add: Dict[str, Number],
-        logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
         if ds is None:
             return None

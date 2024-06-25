@@ -1,7 +1,6 @@
 """Provides the base class for model components."""
 
 from abc import ABC, abstractmethod
-from logging import Logger
 from typing import TYPE_CHECKING, Dict, cast
 from weakref import ReferenceType, ref
 
@@ -37,11 +36,6 @@ class ModelComponent(ABC):
     def data_catalog(self) -> DataCatalog:
         """Return the data catalog of the model this component is associated with."""
         return self.model.data_catalog
-
-    @property
-    def logger(self) -> Logger:
-        """Return the logger of the model this component is associated with."""
-        return self.model.logger
 
     @property
     def root(self) -> "ModelRoot":

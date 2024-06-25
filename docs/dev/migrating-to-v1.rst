@@ -712,6 +712,19 @@ The following changes are required in your code:
 | hydromt.gis_utils        | hydromt.gis.utils                    |
 +--------------------------+--------------------------------------+
 
+Logging
+=======
+
+**Rationale**
+Previous versions of HydroMT passed the logger around a lot. The Logging module is based on
+singleton classes and log propagation using a naming convention. Due to some bugs in the
+previous version of the code, the logger passing has been removed and the `"hydromt"` logger
+now governs the logging output.
+
+**Changes required**
+Remove the `logger` keywords from your HydroMT functions, methods and classes. If you want to
+influence HydroMT logging, change the `"hydromt"` logger: `logger = logging.getLogger("hydromt")`.
+
 Plugins
 =======
 

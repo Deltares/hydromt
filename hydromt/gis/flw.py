@@ -34,7 +34,6 @@ def flwdir_from_da(
     ftype: str = "infer",
     check_ftype: bool = True,
     mask: Union[xr.DataArray, bool, None] = None,
-    logger=logger,
 ):
     """Parse dataarray to flow direction raster object.
 
@@ -96,7 +95,6 @@ def d8_from_dem(
     gdf_riv: Optional[gpd.GeoDataFrame] = None,
     riv_burn_method: Literal["fixed", "rivdph", "uparea"] = "fixed",
     riv_depth: float = 5,
-    logger=logger,
     **kwargs,
 ) -> xr.DataArray:
     """Derive D8 flow directions grid from an elevation grid.
@@ -210,7 +208,6 @@ def upscale_flwdir(
     method: str = "com2",
     uparea_name: Optional[str] = None,
     flwdir_name: str = "flwdir",
-    logger=logger,
     **kwargs,
 ) -> Tuple[xr.DataArray, pyflwdir.FlwdirRaster]:
     """Upscale flow direction network to lower resolution.
@@ -302,7 +299,6 @@ def reproject_hydrography_like(
     river_len: float = 1e3,
     uparea_name: str = "uparea",
     flwdir_name: str = "flwdir",
-    logger=logger,
     **kwargs,
 ) -> xr.Dataset:
     """Reproject flow direction and upstream area data to the `da_elv` crs and grid.
@@ -446,7 +442,6 @@ def gauge_map(
     stream: Optional[xr.DataArray] = None,
     flwdir: Optional[pyflwdir.FlwdirRaster] = None,
     max_dist: float = 10e3,
-    logger=logger,
 ) -> Tuple[xr.DataArray, np.ndarray, np.ndarray]:
     """Return map with unique gauge IDs.
 
@@ -703,7 +698,6 @@ def dem_adjust(
     flwdir: Optional[pyflwdir.FlwdirRaster] = None,
     connectivity: int = 4,
     river_d8: bool = False,
-    logger=logger,
 ) -> xr.DataArray:
     """Return hydrologically conditioned elevation.
 

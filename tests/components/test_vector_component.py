@@ -1,5 +1,6 @@
-from logging import Logger
+from logging import DEBUG
 
+import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
 
@@ -16,11 +17,13 @@ def test_empty_data(tmpdir, mocker: MockerFixture):
     xr.testing.assert_identical(vector.data, xr.Dataset())
 
 
-def test_write_empty_data(tmpdir, mocker: MockerFixture):
+def test_write_empty_data(
+    tmpdir, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
+):
     model = mocker.Mock(set=Model)
     model.root = mocker.Mock(set=ModelRoot)
     model.root.path = tmpdir
-    model.logger = mocker.Mock(spec_set=Logger)
     vector = VectorComponent(model)
-    vector.write()
-    model.logger.debug.assert_called_once_with("No vector data found, skip writing.")
+    with caplog.at_level(DEBUG):
+        vector.write()
+    assert "No vector data found, skip writing." in caplog.text

@@ -34,7 +34,6 @@ class DatasetXarrayDriver(DatasetDriver):
         metadata: Optional[SourceMetadata] = None,
         time_range: Optional[TimeRange] = None,
         variables: Optional[List[str]] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -50,7 +49,6 @@ class DatasetXarrayDriver(DatasetDriver):
                 "variables": variables,
                 "metadata": metadata,
             },
-            logger,
         )
         options = copy(self.options)
         preprocessor: Optional[Callable] = None
@@ -95,7 +93,6 @@ class DatasetXarrayDriver(DatasetDriver):
                 exec_nodata_strat(
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
         return ds
 
