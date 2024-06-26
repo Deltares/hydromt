@@ -52,13 +52,13 @@ def test_ogr(tmpdir, gdf):
     assert len(oc.Roman) == 2
 
     # Write and load
-    fn = str(tmpdir.join("dummy_ogr.nc"))
-    ds.vector.to_netcdf(fn, ogr_compliant=True)
-    ds1 = GeoDataset.from_netcdf(fn)
+    path = str(tmpdir.join("dummy_ogr.nc"))
+    ds.vector.to_netcdf(path, ogr_compliant=True)
+    ds1 = GeoDataset.from_netcdf(path)
     assert np.all(ds.vector.geometry == ds1.vector.geometry)
 
     # open from xarray object
-    ds2 = xr.open_dataset(fn)
+    ds2 = xr.open_dataset(path)
     ds2 = GeoDataset.from_netcdf(ds2)
     assert np.all(ds.vector.geometry == ds2.vector.geometry)
 
@@ -91,9 +91,9 @@ def test_single_geom_vector(geoda, tmp_dir):
 
     geom1 = geoda.isel(index=[0]).vector.geometry
     assert isinstance(geom1, GeoSeries)
-    fn_nc = tmp_dir / "test.nc"
-    geoda.isel(index=[0]).vector.to_netcdf(fn_nc)
-    assert fn_nc.is_file()
+    netcdf_path = tmp_dir / "test.nc"
+    geoda.isel(index=[0]).vector.to_netcdf(netcdf_path)
+    assert netcdf_path.is_file()
 
 
 def test_from_gdf(geoda, geodf):

@@ -60,14 +60,14 @@ Using HydroMT generic methods, for your user, the build configuration file would
 .. code-block:: yaml
 
   setup_grid_from_rasterdataset:
-    raster_fn: vito
+    raster_data: vito
     fill_method: nearest
     reproject_method: mode
     rename:
       vito: landuse
 
   setup_grid_from_raster_reclass:
-    raster_fn: vito
+    raster_data: vito
     reclass_table_fn: vito_reclass
     reclass_variables:
       - manning

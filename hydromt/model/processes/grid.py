@@ -43,8 +43,8 @@ def create_grid_from_region(
     crs: Optional[int] = None,
     region_crs: int = 4326,
     rotated: bool = False,
-    hydrography_fn: Optional[str] = None,
-    basin_index_fn: Optional[str] = None,
+    hydrography_path: Optional[str] = None,
+    basin_index_path: Optional[str] = None,
     add_mask: bool = True,
     align: bool = True,
     dec_origin: int = 0,
@@ -53,7 +53,7 @@ def create_grid_from_region(
 ) -> xr.DataArray:
     """Create a 2D regular grid or reads an existing grid.
 
-    A 2D regular grid will be created from a geometry (geom_fn) or bbox. If an
+    A 2D regular grid will be created from a geometry (geom_path) or bbox. If an
     existing grid is given, then no new grid will be generated.
 
     Parameters
@@ -79,7 +79,7 @@ def create_grid_from_region(
     rotated : bool
         if True, a minimum rotated rectangular grid is fitted around the region,
         by default False. Only applies if region is of kind 'bbox', 'geom'
-    hydrography_fn : str, optional
+    hydrography_path : str, optional
         Name of data source for hydrography data. Required if region is of kind
             'basin', 'subbasin' or 'interbasin'.
 
@@ -89,9 +89,9 @@ def create_grid_from_region(
         * Optional variables: ['basins'] if the `region` is based on a
             (sub)(inter)basins without a 'bounds' argument.
 
-    basin_index_fn : str, optional
+    basin_index_path : str, optional
         Name of data source with basin (bounding box) geometries associated with
-        the 'basins' layer of `hydrography_fn`. Only required if the `region` is
+        the 'basins' layer of `hydrography_path`. Only required if the `region` is
         based on a (sub)(inter)basins without a 'bounds' argument.
     add_mask : bool
         Add mask variable to grid object, by default True.
@@ -162,12 +162,12 @@ def create_grid_from_region(
             region,
             data_catalog=data_catalog,
             logger=logger,
-            hydrography_fn=hydrography_fn,
-            basin_index_fn=basin_index_fn,
+            hydrography_path=hydrography_path,
+            basin_index_path=basin_index_path,
         )
         xcoords, ycoords, crs = _extract_coords_from_basin(
             geom,
-            hydrography_fn=hydrography_fn,
+            hydrography_path=hydrography_path,
             res=res,
             crs=crs,
             align=align,
@@ -284,7 +284,7 @@ def grid_from_constant(
     nodata: int, float, optional
         Nodata value. By default infered from dtype.
     mask_name: str, optional
-        Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+        Name of mask in self.grid to use for masking raster_data. By default 'mask'.
         Use None to disable masking.
 
     Returns
@@ -332,7 +332,7 @@ def grid_from_rasterdataset(
     ds: xr.DataArray, xr.Dataset
         Dataset with raster data.
     variables: list, optional
-        List of variables to add to grid from raster_fn. By default all.
+        List of variables to add to grid from raster_data. By default all.
     fill_method : str, optional
         If specified, fills nodata values using fill_nodata method.
         Available methods are {'linear', 'nearest', 'cubic', 'rio_idw'}.
@@ -340,11 +340,11 @@ def grid_from_rasterdataset(
         See rasterio.warp.reproject for existing methods, by default 'nearest'.
         Can provide a list corresponding to ``variables``.
     mask_name: str, optional
-        Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+        Name of mask in self.grid to use for masking raster_data. By default 'mask'.
         Use None to disable masking.
     rename: dict, optional
-        Dictionary to rename variable names in raster_fn before adding to grid
-        {'name_in_raster_fn': 'name_in_grid'}. By default empty.
+        Dictionary to rename variable names in raster_data before adding to grid
+        {'name_in_raster_data': 'name_in_grid'}. By default empty.
 
     Returns
     -------
@@ -401,17 +401,17 @@ def grid_from_raster_reclass(
     reclass_table: pd.DataFrame
         Tabular pandas dataframe object for the reclassification table of `da`.
     reclass_variables: list
-        List of reclass_variables from reclass_table_fn table to add to maps.
-        Index column should match values in `raster_fn`.
+        List of reclass_variables from reclass_table_data table to add to maps.
+        Index column should match values in `raster_data`.
     fill_method : str, optional
-        If specified, fills nodata values in `raster_fn` using fill_nodata method
+        If specified, fills nodata values in `raster_data` using fill_nodata method
         before reclassifying. Available methods are
         {'linear', 'nearest', 'cubic', 'rio_idw'}.
     reproject_method: str, optional
         See rasterio.warp.reproject for existing methods, by default "nearest".
         Can provide a list corresponding to ``reclass_variables``.
     mask_name: str, optional
-        Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+        Name of mask in self.grid to use for masking raster_data. By default 'mask'.
         Use None to disable masking.
     rename: dict, optional
         Dictionary to rename variable names in reclass_variables before adding to grid
@@ -480,19 +480,19 @@ def grid_from_geodataframe(
     gdf : gpd.GeoDataFrame
         geopandas object to rasterize.
     variables : List, str, optional
-        List of variables to add to grid from vector_fn. Required if
+        List of variables to add to grid from vector_data. Required if
         rasterize_method is "value", by default None.
     nodata : List, int, float, optional
         No data value to use for rasterization, by default -1. If a list is provided,
         it should have the same length has variables.
     rasterize_method : str, optional
         Method to rasterize the vector data. Either {"value", "fraction", "area"}.
-        If "value", the value from the variables columns in vector_fn are used
+        If "value", the value from the variables columns in vector_data are used
         directly in the raster. If "fraction", the fraction of the grid cell covered
         by the vector file is returned. If "area", the area of the grid cell covered
         by the vector file is returned.
     mask_name: str, optional
-        Name of mask in self.grid to use for masking raster_fn. By default 'mask'.
+        Name of mask in self.grid to use for masking raster_data. By default 'mask'.
         Use None to disable masking.
     rename: dict or str, optional
         Dictionary to rename variable names in variables before adding to grid
@@ -506,7 +506,7 @@ def grid_from_geodataframe(
     Returns
     -------
     ds_out: xr.Dataset
-        Dataset with data from vector_fn resampled to grid_like.
+        Dataset with data from vector_data resampled to grid_like.
     """  # noqa: E501
     # Check which method is used
     rename = rename or dict()
@@ -653,14 +653,14 @@ def _extract_coords_from_geom(
 def _extract_coords_from_basin(
     geom: gpd.GeoDataFrame,
     *,
-    hydrography_fn: str,
+    hydrography_path: str,
     res: Optional[float],
     crs: Optional[int],
     align: bool,
     data_catalog: DataCatalog,
     logger: Logger,
 ) -> Tuple[np.typing.ArrayLike, np.typing.ArrayLike, CRS]:
-    da_hyd = data_catalog.get_rasterdataset(hydrography_fn, geom=geom, logger=logger)
+    da_hyd = data_catalog.get_rasterdataset(hydrography_path, geom=geom, logger=logger)
 
     if not res:
         logger.info(

@@ -171,7 +171,7 @@ class DatasetsComponent(ModelComponent):
         ----------
         nc_dict: dict
             Dictionary of xarray.Dataset and/or xarray.DataArray to write
-        fn: str
+        path: str
             filename relative to model root and should contain a {name} placeholder
         gdal_compliant: bool, optional
             If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
@@ -228,24 +228,26 @@ class DatasetsComponent(ModelComponent):
             if close_handle["close_attempts"] > max_close_attempts:
                 # already tried to close this to many times so give up
                 self.logger.error(
-                    f"Max write attempts to file {close_handle['org_fn']}"
+                    f"Max write attempts to file {close_handle['original_path']}"
                     " exceeded. Skipping..."
-                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
+                    f"Instead data was written to tmpfile: {close_handle['temp_path']}"
                 )
                 continue
 
             if forceful_overwrite:
                 close_handle["ds"].close()
             try:
-                move(close_handle["tmp_fn"], close_handle["org_fn"])
+                move(close_handle["temp_path"], close_handle["original_path"])
             except PermissionError:
                 self.logger.error(
-                    f"Could not write to destination file {close_handle['org_fn']} "
+                    f"Could not write to destination file {close_handle['original_path']} "
                     "because the following error was raised: {e}"
                 )
                 close_handle["close_attempts"] += 1
                 self._defered_file_closes.append(close_handle)
-                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
+                failed_closes.append(
+                    (close_handle["original_path"], close_handle["temp_path"])
+                )
 
         return list(set(failed_closes))
 

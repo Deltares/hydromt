@@ -89,8 +89,8 @@ class RasterTindexResolver(MetaDataResolver):
         else:
             root = dirname(uri)
             paths = []
-            for fn in gdf[tileindex]:
-                path = Path(str(fn))
+            for p in gdf[tileindex]:
+                path = Path(str(p))
                 if not path.is_absolute():
-                    paths.append(str(Path(abspath(join(root, fn)))))
+                    paths.append(str(Path(abspath(join(root, p)))))
         return paths

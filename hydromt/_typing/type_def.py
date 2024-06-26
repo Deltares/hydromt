@@ -89,8 +89,8 @@ DeferedFileClose = TypedDict(
     "DeferedFileClose",
     {
         "ds": Union[Dataset, DataArray],
-        "org_fn": str,
-        "tmp_fn": str,
+        "original_path": str,
+        "temp_path": str,
         "close_attempts": int,
     },
 )

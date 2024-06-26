@@ -69,15 +69,15 @@ class TablesComponent(ModelComponent):
     def write(self, filename: Optional[str] = None, **kwargs) -> None:
         """Write tables at provided or default filepath if none is provided."""
         self.root._assert_write_mode()
-        fn = filename or self._filename
+        p = filename or self._filename
         if len(self.data) > 0:
             self.model.logger.info("Writing table files.")
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
             for name in self.data:
-                fn_out = join(self.root.path, fn.format(name=name))
-                os.makedirs(dirname(fn_out), exist_ok=True)
-                self.data[name].to_csv(fn_out, **local_kwargs)
+                write_path = join(self.root.path, p.format(name=name))
+                os.makedirs(dirname(write_path), exist_ok=True)
+                self.data[name].to_csv(write_path, **local_kwargs)
         else:
             self.model.logger.debug("No tables found, skip writing.")
 
@@ -87,12 +87,12 @@ class TablesComponent(ModelComponent):
         self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         self.model.logger.info("Reading model table files.")
-        fn = filename or self._filename
-        filenames = glob.glob(join(self.root.path, fn.format(name="*")))
+        path = filename or self._filename
+        filenames = glob.glob(join(self.root.path, path.format(name="*")))
         if len(filenames) > 0:
-            for fn in filenames:
-                name = basename(fn).split(".")[0]
-                tbl = pd.read_csv(fn, **kwargs)
+            for path in filenames:
+                name = basename(path).split(".")[0]
+                tbl = pd.read_csv(path, **kwargs)
                 self.set(tbl, name=name)
 
     def set(

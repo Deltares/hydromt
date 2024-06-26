@@ -70,9 +70,7 @@ class RasterioDriver(RasterDatasetDriver):
             )
             uris_cached = []
             for uri in uris:
-                cached_uri: str = _cache_vrt_tiles(
-                    uri, geom=mask, cache_dir=cache_dir, logger=logger
-                )
+                cached_uri: str = _cache_vrt_tiles(uri, geom=mask, cache_dir=cache_dir)
                 uris_cached.append(cached_uri)
             uris = uris_cached
 

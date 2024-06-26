@@ -1006,7 +1006,7 @@ class DataCatalog(object):
         self,
         data_root: Union[Path, str],
         bbox: Optional[Bbox] = None,
-        time_tuple: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         source_names: Optional[List] = None,
         unit_conversion: bool = True,
         meta: Optional[Dict] = None,
@@ -1079,10 +1079,10 @@ class DataCatalog(object):
             sources = copy.deepcopy(self.sources)
 
         # read existing data catalog if it exists
-        fn = join(data_root, "data_catalog.yml")
-        if isfile(fn) and append:
-            self.logger.info(f"Appending existing data catalog {fn}")
-            sources_out = DataCatalog(fn).sources
+        catalog_path = join(data_root, "data_catalog.yml")
+        if isfile(catalog_path) and append:
+            self.logger.info(f"Appending existing data catalog {catalog_path}")
+            sources_out = DataCatalog(catalog_path).sources
         else:
             sources_out = {}
 
@@ -1099,12 +1099,12 @@ class DataCatalog(object):
                             source.unit_mult = {}
                             source.unit_add = {}
                         try:
-                            fn_out, driver, driver_kwargs = source.to_file(
+                            write_path, driver, driver_kwargs = source.to_file(
                                 file_path=Path(data_root) / source.uri,
                                 data_name=key,
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
-                                time_tuple=time_tuple,
+                                time_tuple=time_range,
                                 handle_nodata=NoDataStrategy.RAISE,
                                 logger=self.logger,
                             )
@@ -1123,7 +1123,7 @@ class DataCatalog(object):
                         else:
                             source.unit_mult = unit_mult
                             source.unit_add = unit_add
-                        source.path = fn_out
+                        source.path = write_path
                         source.driver = driver
                         source.filesystem = "local"
                         source.driver_kwargs = {}
@@ -1150,7 +1150,7 @@ class DataCatalog(object):
                 for _version, adapter in available_versions.items():
                     data_catalog_out.add_source(key, adapter)
 
-        data_catalog_out.to_yml(fn, root="auto", meta=meta)
+        data_catalog_out.to_yml(catalog_path, root="auto", meta=meta)
 
     def get_rasterdataset(
         self,

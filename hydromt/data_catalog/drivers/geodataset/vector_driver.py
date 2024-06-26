@@ -68,7 +68,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
 
         crs: Optional[CRS] = metadata.crs if metadata else None
         data = open_geodataset(
-            fn_locs=uri, geom=mask, logger=logger, crs=crs, **options
+            location_data_path=uri, geom=mask, logger=logger, crs=crs, **options
         )
 
         if preprocessor is None:

@@ -324,7 +324,7 @@ def update(
     --------------
 
     Update (overwrite!) landuse-landcover based maps in a Wflow model:
-    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
+    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_data=vito -d /path/to/data_catalog.yml -v
 
     Update Wflow model components outlined in an .yml configuration file and
     write the model to a directory:
@@ -602,7 +602,7 @@ def export(
             export_dest_path,
             source_names=sources,
             bbox=bbox,
-            time_tuple=time_tup,
+            time_range=time_tup,
             unit_conversion=unit_conversion,
             meta=meta,
             append=append,
