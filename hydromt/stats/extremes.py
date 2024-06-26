@@ -1,4 +1,5 @@
 """Functions for extreme value analysis."""
+
 import math as math
 from typing import Optional
 
@@ -6,6 +7,7 @@ import dask
 import numpy as np
 import xarray as xr
 from numba import njit
+from numpy.typing import NDArray
 from scipy import stats
 
 __all__ = [
@@ -17,7 +19,7 @@ __all__ = [
     "fit_extremes",
 ]
 
-_RPS = np.array([2, 5, 10, 25, 50, 100, 250, 500])  # years
+_RPS: NDArray[np.int_] = np.array([2, 5, 10, 25, 50, 100, 250, 500])  # years
 _DISTS = {
     "POT": ["exp", "gpd"],
     "BM": ["gumb", "gev"],
@@ -34,7 +36,7 @@ def eva(
     period: str = "365.25D",
     min_sample_size: int = 0,
     distribution: Optional[str] = None,
-    rps: np.ndarray = _RPS,
+    rps: NDArray[np.int_] = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
     """Return Extreme Value Analysis.
@@ -98,7 +100,7 @@ def eva_block_maxima(
     min_dist: int = 0,
     min_sample_size: int = 0,
     distribution: Optional[str] = None,
-    rps: np.ndarray = _RPS,
+    rps: NDArray[np.int_] = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
     """Return EVA based on block maxima.
@@ -156,7 +158,7 @@ def eva_peaks_over_threshold(
     min_sample_size: int = 0,
     period: str = "365.25D",
     distribution: Optional[str] = None,
-    rps: np.ndarray = _RPS,
+    rps: NDArray[np.int_] = _RPS,
     criterium: str = "AIC",
 ) -> xr.Dataset:
     """Return EVA based on peaks over threshold.
@@ -292,7 +294,9 @@ def get_peaks(
 
 
 def get_return_value(
-    da_params: xr.DataArray, rps: np.ndarray = _RPS, extremes_rate=1.0
+    da_params: xr.DataArray,
+    rps: NDArray[np.int_] = _RPS,
+    extremes_rate: float = 1.0,
 ) -> xr.DataArray:
     """Return return value based on EVA.
 
@@ -454,11 +458,11 @@ def fit_extremes(
 ## PEAKS
 @njit
 def local_max_1d(
-    arr: np.ndarray,
-    bins: np.ndarray = None,
+    arr: NDArray[np.number],
+    bins: Optional[NDArray[np.int_]] = None,
     min_dist: int = 0,
     min_sample_size: int = 0,
-) -> np.ndarray:
+) -> NDArray[np.bool_]:
     """Return boolean index of local maxima in `arr` which are `min_dist` apart.
 
     Parameters
@@ -484,7 +488,7 @@ def local_max_1d(
     bsize = 0
     min_sample_size = 0 if bins is None else min_sample_size
     up = False  # sign of difference between subsequent values
-    out = np.array([bool(0) for _ in range(arr.size)])
+    out = np.array([bool(0) for _ in range(arr.size)], np.bool_)
     for i in range(arr.size):
         a1 = arr[i]
         if not np.isfinite(a1):
@@ -516,7 +520,7 @@ def local_max_1d(
 ## LINK TO SCIPY.STATS
 
 
-def get_dist(distribution):
+def get_dist(distribution: str) -> stats.rv_continuous:
     """Return scipy.stats distribution."""
     _DISTS = {
         "gev": "genextreme",
@@ -531,7 +535,7 @@ def get_dist(distribution):
     return dist
 
 
-def get_frozen_dist(params, distribution):
+def get_frozen_dist(params, distribution: str):
     """Return frozen distribution.
 
     Returns scipy.stats frozen distribution, i.e.: with set parameters.
@@ -546,7 +550,7 @@ def get_frozen_dist(params, distribution):
 # ks = stats.kstest(x, frozen_dist.cdf)
 
 
-def _aic(x, params, distribution):
+def _aic(x, params, distribution: str):
     """Return Akaike Information Criterion for a frozen distribution."""
     k = len(params)
     nll = get_frozen_dist(params, distribution).logpdf(x).sum()
@@ -554,7 +558,7 @@ def _aic(x, params, distribution):
     return aic
 
 
-def _aicc(x, params, distribution):
+def _aicc(x, params, distribution: str):
     """Return AICC.
 
     Return Akaike Information Criterion with correction for small sample size
@@ -566,7 +570,7 @@ def _aicc(x, params, distribution):
     return aicc
 
 
-def _bic(x, params, distribution):
+def _bic(x, params, distribution: str):
     """Return Bayesian Information Criterion for a frozen distribution."""
     k = len(params)
     nll = get_frozen_dist(params, distribution).logpdf(x).sum()
@@ -577,7 +581,9 @@ def _bic(x, params, distribution):
 ## TRANSFORMATIONS
 
 
-def _get_return_values(params, distribution, rps=_RPS, extremes_rate=1.0):
+def _get_return_values(
+    params, distribution: str, rps: NDArray[np.int_] = _RPS, extremes_rate=1.0
+):
     q = 1 / rps / extremes_rate
     return get_frozen_dist(params, distribution).isf(q)
 
@@ -622,8 +628,8 @@ def plot_return_values(
     color: Optional[str] = "k",
     a: Optional[float] = 0,
     alpha: Optional[float] = 0.9,
-    nsample: Optional[int] = 1000,
-    rps: Optional[np.ndarray] = _RPS,
+    nsample: int = 1000,
+    rps: NDArray[np.int_] = _RPS,
     extremes_rate: float = 1.0,
 ):
     # TODO: add description to this function Dirk - done very simply now
@@ -650,7 +656,7 @@ def plot_return_values(
         Float for the Gringorten position. By default a = 0
     alpha : float, optional
         alpha value for the confidence interval of the EV fit. By default, alpha = 0.9
-    nsample : int, optional
+    nsample : int
         number of samples used to calculate the confidence interval. By default,
         nsample = 1000
     rps : np.ndarray, optional

@@ -8,15 +8,7 @@ from abc import ABCMeta
 from inspect import _empty, signature
 from os.path import isabs, isfile, join
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 
 import geopandas as gdp
 from pyproj import CRS
@@ -27,13 +19,13 @@ from hydromt._utils import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
 from hydromt.io.readers import read_yaml
-from hydromt.model import hydromt_step
 from hydromt.model.components import (
     DatasetsComponent,
     ModelComponent,
     SpatialModelComponent,
 )
 from hydromt.model.root import ModelRoot
+from hydromt.model.steps import hydromt_step
 from hydromt.plugins import PLUGINS
 
 __all__ = ["Model"]

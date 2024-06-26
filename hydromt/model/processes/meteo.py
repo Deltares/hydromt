@@ -2,7 +2,7 @@
 
 import logging
 import re
-from typing import Literal, Optional, Union
+from typing import Dict, Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -38,7 +38,7 @@ PET_METHODS = [
 
 PetMethods = Literal[
     "debruin",
-    "makking",
+    "makkink",
     "penman-monteith_rh_simple",
     "penman-monteith_tdew",
 ]
@@ -50,7 +50,7 @@ def precip(
     clim: Optional[xr.DataArray] = None,
     freq: Optional[Union[str, pd.Timedelta]] = None,
     reproj_method: str = "nearest_index",
-    resample_kwargs: Optional[dict] = None,
+    resample_kwargs: Optional[Dict[str, str]] = None,
 ) -> xr.DataArray:
     """Return the lazy reprojection of precipitation to model.
 
@@ -93,6 +93,7 @@ def precip(
             raise ValueError("Precip climatology does not contain 12 months.")
         # set missings to NaN
         clim = clim.raster.mask_nodata()
+        assert clim is not None
         # calculate downscaling multiplication factor
         clim_coarse = clim.raster.reproject_like(
             precip, method="average"
@@ -106,7 +107,6 @@ def precip(
     p_out.attrs.update(unit="mm")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="sum")
-
         p_out = resample_time(p_out, freq, conserve_mass=True, **resample_kwargs)
     return p_out
 
@@ -120,7 +120,7 @@ def temp(
     freq: Optional[Union[str, pd.Timedelta]] = None,
     reproj_method: str = "nearest_index",
     lapse_rate: float = -0.0065,
-    resample_kwargs: Optional[dict] = None,
+    resample_kwargs: Optional[Dict[str, str]] = None,
 ) -> xr.DataArray:
     """Return lazy reprojection of temperature to model grid.
 
@@ -170,8 +170,10 @@ def temp(
         else:
             # assume nans in dem_forcing occur above the ocean only -> set to zero
             dem_forcing = dem_forcing.raster.mask_nodata().fillna(0)
+            assert dem_forcing is not None
             dem_forcing = dem_forcing.raster.reproject_like(temp, "average")
         # compute temperature at quasi MSL
+        assert dem_forcing is not None
         t_add_sea_level = temp_correction(dem_forcing, lapse_rate=lapse_rate)
         temp = temp - t_add_sea_level
     # downscale temperature (lazy) and add zeros with mask to mask areas outside AOI
@@ -186,7 +188,9 @@ def temp(
     t_out.attrs.update(unit="degree C.")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean")
-        t_out = resample_time(t_out, freq, conserve_mass=False, **resample_kwargs)
+        t_out = resample_time(
+            t_out, freq, conserve_mass=False, logger=logger, **resample_kwargs
+        )
     return t_out
 
 
@@ -197,7 +201,7 @@ def press(
     freq: Optional[Union[str, pd.Timedelta]] = None,
     reproj_method: str = "nearest_index",
     lapse_rate: float = -0.0065,
-    resample_kwargs: Optional[dict] = None,
+    resample_kwargs: Optional[Dict[str, str]] = None,
 ) -> xr.DataArray:
     """Return lazy reprojection of pressure to model grid.
 
@@ -243,7 +247,7 @@ def press(
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="mean")
         press_out = resample_time(
-            press_out, freq, conserve_mass=False, **resample_kwargs
+            press_out, freq, conserve_mass=False, logger=logger, **resample_kwargs
         )
     return press_out
 
@@ -257,7 +261,7 @@ def wind(
     altitude_correction: bool = False,
     freq: Optional[pd.Timedelta] = None,
     reproj_method: str = "nearest_index",
-    resample_kwargs: Optional[dict] = None,
+    resample_kwargs: Optional[Dict[str, str]] = None,
 ) -> xr.DataArray:
     """Return lazy reprojection of wind speed to model grid.
 
@@ -291,13 +295,13 @@ def wind(
     wind_out: xarray.DataArray (lazy)
         processed wind forcing
     """
-    if resample_kwargs is None:
-        resample_kwargs = {}
+    resample_kwargs = resample_kwargs or {}
     if wind_u is not None and wind_v is not None:
         wind = np.sqrt(np.power(wind_u, 2) + np.power(wind_v, 2))
     elif wind is None:
         raise ValueError("Either wind or wind_u and wind_v variables must be supplied.")
 
+    assert wind is not None
     if wind.raster.dim0 != "time":
         raise ValueError(f'First wind dim should be "time", not {wind.raster.dim0}')
 
@@ -305,6 +309,7 @@ def wind(
     if altitude_correction:
         wind = wind * (4.87 / np.log((67.8 * altitude) - 5.42))
     # downscale wind (lazy)
+    assert wind is not None
     wind_out = wind.raster.reproject_like(da_model, method=reproj_method)
     # resample time
     wind_out.name = "wind"
@@ -325,7 +330,7 @@ def pet(
     wind_altitude: float = 10,
     reproj_method: str = "nearest_index",
     freq: Optional[str] = None,
-    resample_kwargs: Optional[dict] = None,
+    resample_kwargs: Optional[Dict[str, str]] = None,
 ) -> xarray.DataArray:
     """Determine reference evapotranspiration.
 
@@ -374,9 +379,8 @@ def pet(
         raise ValueError(
             f"Unknown pet method '{method}', select from {','.join(PET_METHODS)}"
         )
-    # # resample in time
-    if resample_kwargs is None:
-        resample_kwargs = {}
+    # resample in time
+    resample_kwargs = resample_kwargs or {}
     if temp.raster.dim0 != "time" or ds.raster.dim0 != "time":
         raise ValueError('First dimension of input variables should be "time"')
     # make sure temp and ds align both temporally and spatially
@@ -471,7 +475,9 @@ def pet(
     pet_out.attrs.update(unit="mm")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="sum")
-        pet_out = resample_time(pet_out, freq, conserve_mass=True, **resample_kwargs)
+        pet_out = resample_time(
+            pet_out, freq, conserve_mass=True, logger=logger, **resample_kwargs
+        )
     return pet_out
 
 
@@ -557,7 +563,7 @@ def pet_debruin(
     beta : float, default 20.0
         correction constant [W m-2]
     Cs : float, default 110.0
-        emperical constant [W m-2]
+        empirical constant [W m-2]
 
     Returns
     -------

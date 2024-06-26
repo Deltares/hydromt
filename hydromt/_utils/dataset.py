@@ -1,9 +1,13 @@
+import typing
 from logging import getLogger
 from typing import Dict, Optional, cast
 
 import numpy as np
 import pandas as pd
 import xarray as xr
+
+if typing.TYPE_CHECKING:
+    from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices
 
 from hydromt._typing.metadata import SourceMetadata
 from hydromt._typing.type_def import TimeRange, Variables
@@ -20,7 +24,9 @@ __all__ = [
 
 
 def _shift_dataset_time(
-    dt: int, ds: Optional[xr.Dataset], time_unit: str = "s"
+    dt: int,
+    ds: Optional[xr.Dataset],
+    time_unit: "TimeDeltaUnitChoices" = "s",
 ) -> Optional[xr.Dataset]:
     """Shifts time of a xarray dataset.
 
@@ -55,9 +61,7 @@ def _shift_dataset_time(
 
 
 def _slice_temporal_dimension(
-    ds: Optional[xr.Dataset],
-    time_range: Optional[TimeRange],
-    # TODO: https://github.com/Deltares/hydromt/issues/802
+    ds: Optional[xr.Dataset], time_range: TimeRange
 ) -> Optional[xr.Dataset]:
     if ds is None:
         return None
@@ -88,7 +92,7 @@ def _set_metadata(
             for k in metadata.attrs:
                 ds[k].attrs.update(metadata.attrs[k])
 
-    ds.attrs.update(metadata.model_dump(exclude_unset=True, exclude="attrs"))
+    ds.attrs.update(metadata.model_dump(exclude_unset=True, exclude={"attrs"}))
     return ds
 
 

@@ -270,10 +270,10 @@ def create_mesh2d_from_geom(
 def mesh2d_from_rasterdataset(
     ds: Union[xr.DataArray, xr.Dataset],
     mesh2d: Union[xu.UgridDataArray, xu.Ugrid2d],
-    variables: Optional[List] = None,
+    variables: Optional[List[str]] = None,
     fill_method: Optional[str] = None,
-    resampling_method: Optional[Union[str, List]] = "centroid",
-    rename: Optional[Dict] = None,
+    resampling_method: Optional[Union[str, List[str]]] = "centroid",
+    rename: Optional[Dict[str, str]] = None,
 ) -> xu.UgridDataset:
     """
     Resamples data in ds to mesh2d.
@@ -384,11 +384,11 @@ def mesh2d_from_raster_reclass(
     da: xr.DataArray,
     df_vars: pd.DataFrame,
     mesh2d: Union[xu.UgridDataArray, xu.Ugrid2d],
-    reclass_variables: list,
+    reclass_variables: List[str],
     fill_method: Optional[str] = None,
-    resampling_method: Optional[Union[str, list]] = "centroid",
-    rename: Optional[Dict] = None,
-) -> List[str]:
+    resampling_method: Optional[Union[str, List[str]]] = "centroid",
+    rename: Optional[Dict[str, str]] = None,
+) -> xu.UgridDataset:
     """Resample data to ``mesh2d`` grid by reclassifying the data in ``da`` based on ``df_vars``.
 
     The reclassified raster data

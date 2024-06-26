@@ -55,7 +55,7 @@ class DataCatalogMetaData(BaseModel):
     version: Optional[Union[str, Number]] = None
     hydromt_version: Optional[str] = None
     name: Optional[str] = None
-    model_config: ConfigDict = ConfigDict(
+    model_config = ConfigDict(
         str_strip_whitespace=True,
         extra="allow",
     )
@@ -78,7 +78,7 @@ class DataCatalogMetaData(BaseModel):
             )
 
     @staticmethod
-    def from_dict(input_dict: Dict) -> "DataCatalogMetaData":
+    def from_dict(input_dict: Dict[str, Any]) -> "DataCatalogMetaData":
         """Convert a dictionary into a validated data catalog metadata item."""
         return DataCatalogMetaData(**input_dict)
 
@@ -94,9 +94,7 @@ class DataCatalogItemMetadata(BaseModel):
     source_version: Optional[str] = None
     notes: Optional[str] = None
 
-    model_config: ConfigDict = ConfigDict(
-        str_strip_whitespace=True, coerce_numbers_to_str=True
-    )
+    model_config = ConfigDict(str_strip_whitespace=True, coerce_numbers_to_str=True)
 
     @staticmethod
     def from_dict(input_dict):
@@ -142,7 +140,7 @@ class DataCatalogItem(BaseModel):
     variants: Optional[List[SourceVariant]] = None
     version: Optional[Union[str, Number]] = None
 
-    model_config: ConfigDict = ConfigDict(
+    model_config = ConfigDict(
         str_strip_whitespace=True,
         extra="forbid",
     )
@@ -182,7 +180,7 @@ class DataCatalogValidator(BaseModel):
     meta: Optional[DataCatalogMetaData] = None
     sources: Dict[str, DataCatalogItem] = Field(default_factory=dict)
 
-    model_config: ConfigDict = ConfigDict(
+    model_config = ConfigDict(
         str_strip_whitespace=True,
         extra="forbid",
     )
@@ -205,6 +203,6 @@ class DataCatalogValidator(BaseModel):
 
     @staticmethod
     def from_yml(path: str):
-        """Create a validated datacatalog loaded from the provided path."""
+        """Create a validated data catalog loaded from the provided path."""
         yml_dict = _yml_from_uri_or_path(path)
         return DataCatalogValidator.from_dict(yml_dict)
