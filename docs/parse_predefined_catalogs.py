@@ -53,7 +53,7 @@ def write_nested_dropdown(name, df_dict: dict, note: str=""):
     with open(path, mode="w") as f:
         write_panel(f, name, note, level=0)
         for i, version in enumerate(df_dict):
-            df = df_dict[version]#.reset_index().set_index(["name", "provider", "version"])
+            df = df_dict[version]
             df = df.sort_index()
             name_str = f"{version}"
             if i == len(df_dict)-1:
@@ -73,7 +73,6 @@ def write_nested_dropdown(name, df_dict: dict, note: str=""):
             write_panel(f, "all", level=3, item="tab-item")
             write_sources_panel(f, df, level=4)
 
-    # return relative path
     return path.relative_to(FILE_ROOT)
 
 def write_sources_panel(f, df, level, sources=None):
