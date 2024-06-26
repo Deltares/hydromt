@@ -659,9 +659,6 @@ def open_vector(
             gdf = read_dataframe(str(fn), bbox=bbox_reader, **kwargs)
         else:
             if isinstance(bbox, list):
-                DeprecationWarning(
-                    "Using a list as argument for bbox in geopandas.read_file() has been deprecated. Use tuple instead."
-                )
                 bbox = tuple(bbox)
             gdf = gpd.read_file(str(fn), bbox=bbox, mask=geom, **kwargs)
 

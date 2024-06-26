@@ -906,7 +906,7 @@ class GeoDataset(GeoBase):
         ---------
         gdf: geopandas GeoDataFrame
             Spatial coordinates. The index should match the df index and the geometry
-            column may only contain Point geometries. Additional columns are also
+            column may only contain Polygon, MultiPolygon, and Point geometries. Additional columns are also
             parsed to the xarray DataArray coordinates.
         data_vars: dict-like, DataArray or Dataset
             A mapping from variable names to `xarray.DataArray` objects.
