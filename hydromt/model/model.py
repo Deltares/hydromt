@@ -271,7 +271,7 @@ class Model(object, metaclass=ABCMeta):
             }
             merged = {**params, **kwargs}
             for k, v in merged.items():
-                logger.info(f"{method}.{k}: {v}")
+                logger.info(f"{method.__name__}.{k}: {v}")
             method(**kwargs)
 
         # If there are any write options included in the steps,

@@ -132,3 +132,6 @@ pyrightconfig.json
 
 # Pixi
 .pixi
+
+# documentation example output
+examples/yaml_config_model
