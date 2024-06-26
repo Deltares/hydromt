@@ -19,6 +19,7 @@ from hydromt.gis.vector_utils import filter_gdf
 
 logger = logging.getLogger(__name__)
 GDAL_VERSION = gdal_version()
+GEO_MAP_COORD = "spatial_ref"
 
 __all__ = ["GeoDataArray", "GeoDataset"]
 
@@ -339,7 +340,7 @@ class GeoBase(raster.XGeoBase):
                 geom_name = self.attrs.get("geom_name", "geometry")
             elif self.geom_name != geom_name:
                 drop_vars.append(self.geom_name)
-            coords = {geom_name: (index_dim, geometry.values)}
+            coords = {geom_name: (index_dim, [p for p in geometry.values])}
         elif geom_format == "wkt":
             if geom_name is None:
                 geom_name = self.attrs.get("geom_name", "ogc_wkt")
