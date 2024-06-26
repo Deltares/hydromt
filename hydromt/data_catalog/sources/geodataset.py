@@ -53,7 +53,6 @@ class GeoDatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """
         Read data from this source.
@@ -82,7 +81,6 @@ class GeoDatasetSource(DataSource):
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
 
     def to_file(
@@ -98,7 +96,6 @@ class GeoDatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
         **kwargs,
     ) -> Optional["GeoDatasetSource"]:
         """
@@ -132,7 +129,6 @@ class GeoDatasetSource(DataSource):
             single_var_as_array=single_var_as_array,
             time_range=time_range,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
         if ds is None:  # handle_nodata == ignore
             return None

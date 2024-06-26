@@ -125,7 +125,7 @@ GeoDataset
    sources.GeoDatasetSource.get_bbox
    sources.GeoDatasetSource.detect_bbox
 
-MetaDataResolver
+URIResolver
 ================
 
 General
@@ -134,8 +134,8 @@ General
 .. autosummary::
    :toctree: ../_generated
 
-   uri_resolvers.MetaDataResolver
-   uri_resolvers.MetaDataResolver.resolve
+   uri_resolvers.URIResolver
+   uri_resolvers.URIResolver.resolve
 
 ConventionResolver
 ------------------

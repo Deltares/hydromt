@@ -15,7 +15,7 @@ from pydantic import (
 )
 
 from hydromt._typing import FS
-from hydromt.data_catalog.uri_resolvers import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers import URIResolver
 from hydromt.data_catalog.uri_resolvers.resolver_plugin import RESOLVERS
 from hydromt.plugins import PLUGINS
 
@@ -28,39 +28,35 @@ class BaseDriver(BaseModel, ABC):
 
     name: ClassVar[str]
     supports_writing: ClassVar[bool] = False
-    metadata_resolver: MetaDataResolver = Field(default_factory=RESOLVERS["convention"])
+    uri_resolver: URIResolver = Field(default_factory=RESOLVERS["convention"])
     filesystem: FS = Field(default=LocalFileSystem())
     options: Dict[str, Any] = Field(default_factory=dict)
 
     model_config: ConfigDict = ConfigDict(extra="forbid")
 
-    @field_validator("metadata_resolver", mode="before")
+    @field_validator("uri_resolver", mode="before")
     @classmethod
-    def _validate_metadata_resolver(cls, v: Any):
+    def _validate_uri_resolver(cls, v: Any):
         if isinstance(v, str):
             if v not in RESOLVERS:
-                raise ValueError(f"unknown MetaDataResolver: '{v}'.")
+                raise ValueError(f"unknown URIResolver: '{v}'.")
             return RESOLVERS[v]()
         elif isinstance(v, dict):
             try:
                 name: str = v.pop("name")
                 if name not in RESOLVERS:
-                    raise ValueError(f"unknown MetaDataResolver: '{name}'.")
+                    raise ValueError(f"unknown URIResolver: '{name}'.")
                 return RESOLVERS[name].model_validate(v)
             except KeyError:
                 # return default when name is missing
-                return cls.model_fields["metadata_resolver"].default_factory(**v)
+                return cls.model_fields["uri_resolver"].default_factory(**v)
 
         elif v is None:  # let default factory handle it
             return None
-        elif hasattr(
-            v, MetaDataResolver.resolve.__name__
-        ):  # MetaDataResolver duck-typing
+        elif hasattr(v, URIResolver.resolve.__name__):  # URIResolver duck-typing
             return v
         else:
-            raise ValueError(
-                "metadata_resolver should be string, dict or MetaDataResolver."
-            )
+            raise ValueError("uri_resolver should be string, dict or URIResolver.")
 
     @model_validator(mode="wrap")
     @classmethod

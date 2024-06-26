@@ -1,10 +1,12 @@
 """All of the types for handeling errors within HydroMT."""
+
 from enum import Enum
-from logging import Logger
+from logging import Logger, getLogger
+
+logger: Logger = getLogger(__name__)
 
 
 class DeprecatedError(Exception):
-
     """Simple custom class to raise an error for something that is now deprecated."""
 
     def __init__(self, msg: str):
@@ -37,7 +39,7 @@ class NoDataException(Exception):
         super().__init__(self.message)
 
 
-def exec_nodata_strat(msg: str, strategy: NoDataStrategy, logger: Logger) -> None:
+def exec_nodata_strat(msg: str, strategy: NoDataStrategy) -> None:
     """Execute nodata strategy."""
     if strategy == NoDataStrategy.RAISE:
         raise NoDataException(msg)

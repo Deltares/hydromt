@@ -1,6 +1,7 @@
 """Model Region class."""
 
 from abc import ABC, abstractmethod
+from logging import Logger, getLogger
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, cast
 
 import geopandas as gpd
@@ -13,6 +14,9 @@ from hydromt.model.components.base import ModelComponent
 
 if TYPE_CHECKING:
     from hydromt.model import Model
+
+
+logger: Logger = getLogger(__name__)
 
 
 class SpatialModelComponent(ModelComponent, ABC):
@@ -104,20 +108,19 @@ class SpatialModelComponent(ModelComponent, ABC):
         """
         self.root._assert_write_mode()
         if self._region_component is not None:
-            self.logger.info(
+            logger.info(
                 "Region is a reference to another component. Skipping writing..."
             )
             return
 
         if self.region is None:
-            self.logger.info("No region data available to write.")
+            logger.info("No region data available to write.")
             return
 
         write_region(
             self.region,
             filename=filename or self._region_filename,
             to_wgs84=to_wgs84,
-            logger=self.logger,
             root_path=self.root.path,
             **write_kwargs,
         )

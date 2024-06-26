@@ -2,7 +2,6 @@
 
 import logging
 import re
-from logging import Logger
 from typing import Literal, Optional, Union
 
 import numpy as np
@@ -52,7 +51,6 @@ def precip(
     freq: Optional[Union[str, pd.Timedelta]] = None,
     reproj_method: str = "nearest_index",
     resample_kwargs: Optional[dict] = None,
-    logger: Logger = logger,
 ) -> xr.DataArray:
     """Return the lazy reprojection of precipitation to model.
 
@@ -75,8 +73,6 @@ def precip(
         Additional key-word arguments (e.g. label, closed) for time resampling method
     kwargs:
         Additional arguments to pass through to underlying methods.
-    logger:
-        The logger to use
 
     Returns
     -------
@@ -109,7 +105,7 @@ def precip(
     p_out.name = "precip"
     p_out.attrs.update(unit="mm")
     if freq is not None:
-        resample_kwargs.update(upsampling="bfill", downsampling="sum", logger=logger)
+        resample_kwargs.update(upsampling="bfill", downsampling="sum")
 
         p_out = resample_time(p_out, freq, conserve_mass=True, **resample_kwargs)
     return p_out
@@ -125,7 +121,6 @@ def temp(
     reproj_method: str = "nearest_index",
     lapse_rate: float = -0.0065,
     resample_kwargs: Optional[dict] = None,
-    logger: Logger = logger,
 ) -> xr.DataArray:
     """Return lazy reprojection of temperature to model grid.
 
@@ -152,8 +147,6 @@ def temp(
         lapse rate of temperature [C m-1] (default: -0.0065)
     resample_kwargs: dict, optional
         Additional key-word arguments (e.g. label, closed) for time resampling method
-    logger:
-        The logger to use.
 
     Returns
     -------
@@ -192,7 +185,7 @@ def temp(
     t_out.name = "temp"
     t_out.attrs.update(unit="degree C.")
     if freq is not None:
-        resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
+        resample_kwargs.update(upsampling="bfill", downsampling="mean")
         t_out = resample_time(t_out, freq, conserve_mass=False, **resample_kwargs)
     return t_out
 
@@ -205,7 +198,6 @@ def press(
     reproj_method: str = "nearest_index",
     lapse_rate: float = -0.0065,
     resample_kwargs: Optional[dict] = None,
-    logger: Logger = logger,
 ) -> xr.DataArray:
     """Return lazy reprojection of pressure to model grid.
 
@@ -228,8 +220,6 @@ def press(
         lapse rate of temperature [C m-1] (default: -0.0065)
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
-    logger:
-        The logger to use.
 
     Returns
     -------
@@ -251,7 +241,7 @@ def press(
     press_out.name = "press"
     press_out.attrs.update(unit="hPa")
     if freq is not None:
-        resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
+        resample_kwargs.update(upsampling="bfill", downsampling="mean")
         press_out = resample_time(
             press_out, freq, conserve_mass=False, **resample_kwargs
         )
@@ -268,7 +258,6 @@ def wind(
     freq: Optional[pd.Timedelta] = None,
     reproj_method: str = "nearest_index",
     resample_kwargs: Optional[dict] = None,
-    logger: Logger = logger,
 ) -> xr.DataArray:
     """Return lazy reprojection of wind speed to model grid.
 
@@ -296,8 +285,6 @@ def wind(
         Method for spatital reprojection of precip, by default 'nearest_index'
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
-    logger:
-        The logger to use.
 
     Returns
     -------
@@ -323,7 +310,7 @@ def wind(
     wind_out.name = "wind"
     wind_out.attrs.update(unit="m s-1")
     if freq is not None:
-        resample_kwargs.update(upsampling="bfill", downsampling="mean", logger=logger)
+        resample_kwargs.update(upsampling="bfill", downsampling="mean")
         wind_out = resample_time(wind_out, freq, conserve_mass=False, **resample_kwargs)
     return wind_out
 
@@ -339,7 +326,6 @@ def pet(
     reproj_method: str = "nearest_index",
     freq: Optional[str] = None,
     resample_kwargs: Optional[dict] = None,
-    logger: Logger = logger,
 ) -> xarray.DataArray:
     """Determine reference evapotranspiration.
 
@@ -378,8 +364,6 @@ def pet(
         output frequency of timedimension
     resample_kwargs:
         Additional key-word arguments (e.g. label, closed) for time resampling method
-    logger:
-        The logger to use.
 
     Returns
     -------
@@ -486,7 +470,7 @@ def pet(
     pet_out.name = "pet"
     pet_out.attrs.update(unit="mm")
     if freq is not None:
-        resample_kwargs.update(upsampling="bfill", downsampling="sum", logger=logger)
+        resample_kwargs.update(upsampling="bfill", downsampling="sum")
         pet_out = resample_time(pet_out, freq, conserve_mass=True, **resample_kwargs)
     return pet_out
 
@@ -751,7 +735,6 @@ def resample_time(
     upsampling: str = "bfill",
     downsampling: str = "mean",
     conserve_mass: bool = True,
-    logger: Logger = logger,
 ) -> xr.DataArray:
     """Resample data to destination frequency.
 
@@ -772,8 +755,6 @@ def resample_time(
         to input frequency.
     conserve_mass: bool, optional
         If True multiply output with relative change in frequency to conserve mass
-    logger:
-        The logger to use.
 
     Returns
     -------

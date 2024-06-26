@@ -2,7 +2,6 @@
 """Utils for parsing cli options and arguments."""
 
 import json
-import logging
 from ast import literal_eval
 from os.path import isfile
 from pathlib import Path
@@ -11,8 +10,6 @@ from typing import Any, Dict, Optional, Union
 import click
 
 from hydromt.io import configread
-
-logger = logging.getLogger(__name__)
 
 __all__ = ["parse_json", "parse_config", "parse_opt"]
 

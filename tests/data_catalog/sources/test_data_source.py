@@ -62,7 +62,7 @@ class TestGetNestedVar:
             def read_data(self, **kwargs):
                 pass
 
-        mock_geodf_driver = FakeGeoDfDriver(metadata_resolver={"name": "convention"})
+        mock_geodf_driver = FakeGeoDfDriver(uri_resolver={"name": "convention"})
 
         submodel: DataSource = create_source(
             {

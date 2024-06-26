@@ -1,4 +1,5 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
+
 from logging import Logger, getLogger
 from typing import ClassVar, List, Optional, Set
 
@@ -34,7 +35,6 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         predicate: str = "intersects",
         variables: Optional[List[str]] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """Read tabular data using a combination of the pandas and geopandas libraries."""
@@ -43,7 +43,6 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         _warn_on_unused_kwargs(
             self.__class__.__name__,
             {"mask": mask, "predicate": predicate, "variables": variables},
-            logger=logger,
         )
         if len(uris) > 1:
             raise ValueError(
@@ -63,7 +62,6 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             exec_nodata_strat(
                 f"No data from driver {self}'.",
                 strategy=handle_nodata,
-                logger=logger,
             )
         return gdf
 

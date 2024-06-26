@@ -55,7 +55,6 @@ class RasterDatasetSource(DataSource):
         zoom_level: Optional[ZoomLevel] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
     ) -> Union[xr.Dataset, xr.DataArray]:
         """
         Read data from this source.
@@ -77,7 +76,6 @@ class RasterDatasetSource(DataSource):
             variables=vrs,
             zoom_level=zoom_level,
             metadata=self.metadata,
-            logger=logger,
             handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
@@ -88,7 +86,6 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             zoom_level=zoom_level,
             single_var_as_array=single_var_as_array,
-            logger=logger,
         )
 
     def to_file(
@@ -102,7 +99,6 @@ class RasterDatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[ZoomLevel] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
         **kwargs,
     ) -> "RasterDatasetSource":
         """
@@ -134,7 +130,6 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             zoom_level=zoom_level,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
         if ds is None:  # handle_nodata == ignore
             return None

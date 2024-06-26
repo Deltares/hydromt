@@ -1,4 +1,4 @@
-"""Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
+"""URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
@@ -17,8 +17,8 @@ from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
 logger: Logger = getLogger(__name__)
 
 
-class MetaDataResolver(BaseModel, ABC):
-    """Metadata Resolver responsible for finding the data using the URI in the Data Catalog."""
+class URIResolver(BaseModel, ABC):
+    """URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
     model_config = ConfigDict(extra="forbid")
     name: ClassVar[str]
@@ -41,7 +41,6 @@ class MetaDataResolver(BaseModel, ABC):
         variables: Optional[List[str]] = None,
         zoom_level: Optional[ZoomLevel] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Optional[Logger] = logger,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve a single uri to multiple uris.
@@ -62,8 +61,6 @@ class MetaDataResolver(BaseModel, ABC):
             Names of variables to return, or all if None, by default None
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
-        logger : Logger, optional
-            logger to use, by default logger
         options : Optional[Dict[str, Any]], optional
             extra options for this resolver, by default None
 

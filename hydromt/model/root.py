@@ -23,15 +23,13 @@ class ModelRoot:
         self,
         path: StrPath,
         mode: ModeLike = "w",
-        logger: Logger = logger,
     ):
-        self.set(path, mode, logger)
+        self.set(path, mode)
 
     def set(
         self,
         path: StrPath,
         mode: Optional[ModeLike] = None,
-        logger: Logger = logger,
     ) -> Path:
         """Set the path of the root, and create the necessary loggers."""
         if hasattr(self, "path"):
@@ -39,8 +37,7 @@ class ModelRoot:
         else:
             old_path = None
 
-        self.logger = logger
-        self.logger.info(f"setting root to {path}")
+        logger.info(f"setting root to {path}")
 
         self.path = Path(path)
 
@@ -57,12 +54,6 @@ class ModelRoot:
 
         self._update_logger_filehandler(old_path, is_override)
         return self.path
-
-    def _close_logs(self):
-        for handler in self.logger.handlers:
-            self.logger.removeHandler(handler)
-            handler.flush()
-            handler.close()
 
     def _assert_write_mode(self) -> None:
         if not self.mode.is_writing_mode():
@@ -105,14 +96,15 @@ class ModelRoot:
 
         makedirs(self.path, exist_ok=True)
 
+        main_logger: Logger = getLogger("hydromt")
+
         log_level = 20  # default, but overwritten by the level of active loggers
-        for handler in self.logger.handlers:
-            # for i, h in enumerate(self.logger.handlers):
+        for handler in main_logger.handlers:
             log_level = handler.level
             if isinstance(handler, FileHandler):
                 if dirname(handler.baseFilename) != self.path:
                     # first remove so no new logs come in
-                    self.logger.removeHandler(handler)
+                    main_logger.removeHandler(handler)
                     # wait for all messages to be processed
                     handler.flush()
                     # close the handler
@@ -130,7 +122,7 @@ class ModelRoot:
                 except SameFileError:
                     pass
 
-        add_filehandler(self.logger, new_path, log_level)
+        add_filehandler(main_logger, new_path, log_level)
 
     def __repr__(self):
         return f"ModelRoot(path={self.path}, mode={self._mode})"

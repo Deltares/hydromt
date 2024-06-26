@@ -489,7 +489,7 @@ grwl_mask:
   uri: grwl_tindex.gpkg
   driver:
     name: rasterio
-    metadata_resolver: raster_tindex
+    uri_resolver: raster_tindex
     options:
       chunks:
         x: 3000

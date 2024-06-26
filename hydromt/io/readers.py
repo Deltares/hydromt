@@ -177,7 +177,6 @@ def open_raster(
     mask_nodata: bool = False,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
     nodata: Union[int, float, None] = None,
-    logger: Logger = logger,
     **kwargs,
 ) -> xr.DataArray:
     """Open a gdal-readable file with rasterio based on.
@@ -447,7 +446,6 @@ def open_geodataset(
     crs=None,
     bbox=None,
     geom=None,
-    logger=logger,
     **kwargs,
 ) -> xr.Dataset:
     """Open and combine geometry location GIS file and timeseries file in a xr.Dataset.
@@ -505,9 +503,7 @@ def open_geodataset(
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
     # read timeseries file
     if fn_data is not None and isfile(fn_data):
-        da_ts = open_timeseries_from_table(
-            fn_data, name=var_name, index_dim=index_dim, logger=logger
-        )
+        da_ts = open_timeseries_from_table(fn_data, name=var_name, index_dim=index_dim)
         ds = vector.GeoDataset.from_gdf(gdf, da_ts)
     elif fn_data is not None:
         raise IOError(f"GeoDataset data file not found: {fn_data}")
@@ -516,9 +512,7 @@ def open_geodataset(
     return ds.chunk(chunks)
 
 
-def open_timeseries_from_table(
-    fn, name=None, index_dim="index", logger=logger, **kwargs
-):
+def open_timeseries_from_table(fn, name=None, index_dim="index", **kwargs):
     """Open timeseries csv or parquet file and parse to xarray.DataArray.
 
     Accepts files with time index on one dimension and numeric location index on the
@@ -871,7 +865,6 @@ def parse_values(
 def read_nc(
     filename_template: StrPath,
     root: Path,
-    logger: logging.Logger = logger,
     mask_and_scale: bool = False,
     single_var_as_array: bool = True,
     load: bool = False,

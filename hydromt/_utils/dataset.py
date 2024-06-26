@@ -1,4 +1,4 @@
-from logging import Logger, getLogger
+from logging import getLogger
 from typing import Dict, Optional, cast
 
 import numpy as np
@@ -20,7 +20,7 @@ __all__ = [
 
 
 def _shift_dataset_time(
-    dt: int, ds: Optional[xr.Dataset], logger: Logger, time_unit: str = "s"
+    dt: int, ds: Optional[xr.Dataset], time_unit: str = "s"
 ) -> Optional[xr.Dataset]:
     """Shifts time of a xarray dataset.
 
@@ -57,7 +57,6 @@ def _shift_dataset_time(
 def _slice_temporal_dimension(
     ds: Optional[xr.Dataset],
     time_range: Optional[TimeRange],
-    logger: Logger = logger,
     # TODO: https://github.com/Deltares/hydromt/issues/802
 ) -> Optional[xr.Dataset]:
     if ds is None:

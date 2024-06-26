@@ -54,7 +54,6 @@ class GeoDataFrameSource(DataSource):
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
         """Use the driver and data adapter to read and harmonize the data."""
         self._used = True
@@ -67,7 +66,6 @@ class GeoDataFrameSource(DataSource):
             variables=variables,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
         return self.data_adapter.transform(
             gdf,
@@ -76,7 +74,6 @@ class GeoDataFrameSource(DataSource):
             predicate=predicate,
             variables=variables,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
 
     def to_file(
@@ -90,7 +87,6 @@ class GeoDataFrameSource(DataSource):
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
         **kwargs,
     ) -> "GeoDataFrameSource":
         """
@@ -122,7 +118,6 @@ class GeoDataFrameSource(DataSource):
             variables=variables,
             predicate=predicate,
             handle_nodata=handle_nodata,
-            logger=logger,
         )
         if gdf is None:  # handle_nodata == ignore
             return None
