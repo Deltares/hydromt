@@ -501,7 +501,7 @@ def open_geodataset(
     if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
         kwargs.update(assert_gtype="Point")
     # read geometry file
-    polygon: Polygon = box(*bbox) if bbox else None
+    polygon: Optional[Polygon] = box(*bbox) if bbox else None
     gdf = open_vector(loc_path, crs=crs, bbox=polygon, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
