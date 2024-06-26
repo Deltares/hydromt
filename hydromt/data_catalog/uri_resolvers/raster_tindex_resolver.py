@@ -1,4 +1,4 @@
-"""MetaDataResolver for raster tindex files."""
+"""URIResolver for raster tindex files."""
 
 from logging import Logger, getLogger
 from os.path import abspath, dirname, join
@@ -9,13 +9,13 @@ import geopandas as gpd
 from fsspec import AbstractFileSystem
 
 from hydromt._typing import NoDataStrategy, TimeRange, ZoomLevel, exec_nodata_strat
-from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 logger: Logger = getLogger(__name__)
 
 
-class RasterTindexResolver(MetaDataResolver):
-    """Implementation of the MetaDataResolver for raster tindex files."""
+class RasterTindexResolver(URIResolver):
+    """Implementation of the URIResolver for raster tindex files."""
 
     name = "raster_tindex"
 

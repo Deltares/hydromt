@@ -1813,7 +1813,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 name_copy = name
                 for k, v in zip(options.keys(), combination):
                     name_copy = name_copy.replace("{" + k + "}", v)
-                    # TODO: seems like the job for a MetaDataResolver?
+                    # TODO: seems like the job for a URIResolver?
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:

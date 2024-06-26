@@ -11,7 +11,7 @@ from xarray import open_mfdataset
 from hydromt.data_catalog.drivers.geodataset.xarray_driver import GeoDatasetXarrayDriver
 from hydromt.data_catalog.drivers.preprocessing import round_latlon
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
-from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 
 class TestGeoDatasetXarrayDriver:
@@ -22,13 +22,13 @@ class TestGeoDatasetXarrayDriver:
         )
         mock_xr_open.return_value = xr.Dataset()
 
-        class FakeMetadataResolver(MetaDataResolver):
+        class FakeURIResolver(URIResolver):
             def resolve(self, uri: str, *args, **kwargs):
                 return [uri]
 
         uri: str = "file.netcdf"
         driver = GeoDatasetXarrayDriver(
-            metadata_resolver=FakeMetadataResolver(),
+            uri_resolver=FakeURIResolver(),
             options={"preprocess": "round_latlon"},
         )
         res: xr.Dataset = driver.read(
@@ -52,7 +52,7 @@ class TestGeoDatasetXarrayDriver:
 
     def test_zarr_read(self, example_zarr_file: Path):
         res: xr.Dataset = GeoDatasetXarrayDriver(
-            metadata_resolver=ConventionResolver()
+            uri_resolver=ConventionResolver()
         ).read(str(example_zarr_file))
         assert list(res.data_vars.keys()) == ["variable"]
         assert res["variable"].shape == (10, 10)
@@ -72,12 +72,12 @@ class TestGeoDatasetXarrayDriver:
         )
         mock_xr_open.return_value = xr.Dataset()
 
-        class FakeMetadataResolver(MetaDataResolver):
+        class FakeURIResolver(URIResolver):
             def resolve(self, uri: str, *args, **kwargs):
                 return [uri]
 
         uri: str = "file.zarr"
-        driver = GeoDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
+        driver = GeoDatasetXarrayDriver(uri_resolver=FakeURIResolver())
         _ = driver.read(uri)
         assert mock_xr_open.call_count == 1
 
@@ -88,11 +88,11 @@ class TestGeoDatasetXarrayDriver:
         )
         mock_xr_open.return_value = xr.Dataset()
 
-        class FakeMetadataResolver(MetaDataResolver):
+        class FakeURIResolver(URIResolver):
             def resolve(self, uri: str, *args, **kwargs):
                 return [uri]
 
         uri: str = "file.netcdf"
-        driver = GeoDatasetXarrayDriver(metadata_resolver=FakeMetadataResolver())
+        driver = GeoDatasetXarrayDriver(uri_resolver=FakeURIResolver())
         _ = driver.read(uri)
         assert mock_xr_open.call_count == 1

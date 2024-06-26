@@ -1108,7 +1108,7 @@ grwl_mask:
   uri: hydrography/grwl/tindex.gpkg
   driver:
     name: rasterio
-    metadata_resolver: raster_tindex
+    uri_resolver: raster_tindex
     options:
       chunks:
         x: 3000

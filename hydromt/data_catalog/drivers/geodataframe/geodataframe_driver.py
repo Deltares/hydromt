@@ -34,7 +34,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             mask: Optional[Geom]. Mask for features to match the predicate, preferably
                 in the same CRS.
         """
-        uris = self.metadata_resolver.resolve(
+        uris = self.uri_resolver.resolve(
             uri,
             self.filesystem,
             mask=mask,
