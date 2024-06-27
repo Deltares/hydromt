@@ -122,7 +122,7 @@ def parse_config(
 def parse_export_config_yaml(ctx, param, value) -> Dict:
     if value:
         with open(value, "r") as stream:
-            yml = yaml.load(stream, Loader=yaml.FullLoader)
+            yml = yaml.load(stream, Loader=yaml.SafeLoader)
         return yml
     else:
         return {}
