@@ -19,7 +19,7 @@ from hydromt.gis.vector_utils import filter_gdf
 
 logger = logging.getLogger(__name__)
 GDAL_VERSION = gdal_version()
-GEO_MAP_COORD = "spatial_ref"
+
 
 __all__ = ["GeoDataArray", "GeoDataset"]
 
