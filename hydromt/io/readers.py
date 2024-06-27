@@ -4,7 +4,6 @@ import logging
 from ast import literal_eval
 from glob import glob
 from io import IOBase
-from logging import Logger
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
@@ -590,7 +589,6 @@ def open_vector(
     geom: Optional[Union[gpd.GeoDataFrame, gpd.GeoSeries]] = None,
     assert_gtype: Optional[Union[Point, LineString, Polygon]] = None,
     predicate: OPEN_VECTOR_PREDICATE = "intersects",
-    logger: Logger = logger,
     **kwargs,
 ):
     """Open fiona-compatible geometry, csv, parquet, excel or xy file and parse it.
@@ -627,9 +625,6 @@ def open_vector(
         By default 'intersects'
     **kwargs:
         Keyword args to be passed to the driver method when opening the file
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
 
     Returns
     -------
