@@ -340,7 +340,7 @@ class GeoBase(raster.XGeoBase):
                 geom_name = self.attrs.get("geom_name", "geometry")
             elif self.geom_name != geom_name:
                 drop_vars.append(self.geom_name)
-            coords = {geom_name: (index_dim, [p for p in geometry.values])}
+            coords = {geom_name: (index_dim, geometry.values.to_numpy())}
         elif geom_format == "wkt":
             if geom_name is None:
                 geom_name = self.attrs.get("geom_name", "ogc_wkt")
