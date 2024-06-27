@@ -32,7 +32,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
         """Read transform data to HydroMT standards.
 
@@ -50,8 +49,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
             predicate to use for the mask filter, by default "intersects"
         handle_nodata : NoDataStrategy, optional
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
-        logger : Logger, optional
-            logger to use, by default logger
 
         Returns
         -------
@@ -68,7 +65,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         # rename variables and parse crs & nodata
         try:
             gdf = self._rename_vars(gdf)
-            gdf = self._set_crs(gdf, metadata.crs, logger=logger)
+            gdf = self._set_crs(gdf, metadata.crs)
             gdf = self._set_nodata(gdf, metadata)
             # slice
             gdf: Optional[gpd.GeoDataFrame] = GeoDataFrameAdapter._slice_data(
@@ -76,18 +73,16 @@ class GeoDataFrameAdapter(DataAdapterBase):
                 variables=variables,
                 mask=mask,
                 predicate=predicate,
-                logger=logger,
             )
             # uniformize
             if gdf is not None:
-                gdf = self._apply_unit_conversions(gdf, logger=logger)
+                gdf = self._apply_unit_conversions(gdf)
                 gdf = self._set_metadata(gdf, metadata)
             return gdf
         except NoDataException:
             exec_nodata_strat(
                 "No data was read from source",
                 strategy=handle_nodata,
-                logger=logger,
             )
 
     def _rename_vars(self, gdf: gpd.GeoDataFrame):
@@ -97,7 +92,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
             gdf = gdf.rename(columns=rename)
         return gdf
 
-    def _set_crs(self, gdf: gpd.GeoDataFrame, crs: Optional[CRS], logger=logger):
+    def _set_crs(self, gdf: gpd.GeoDataFrame, crs: Optional[CRS]):
         if crs is not None and gdf.crs is None:
             gdf.set_crs(crs, inplace=True)
         elif gdf.crs is None:
@@ -115,7 +110,6 @@ class GeoDataFrameAdapter(DataAdapterBase):
         variables: Optional[Union[str, List[str]]] = None,
         mask: Optional[Geom] = None,
         predicate: str = "intersects",  # TODO: enum available predicates
-        logger: Logger = logger,
     ) -> Optional[gpd.GeoDataFrame]:
         """Filter the GeoDataFrame.
 
@@ -178,7 +172,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
                     gdf[c] = np.where(is_nodata, np.nan, gdf[c])
         return gdf
 
-    def _apply_unit_conversions(self, gdf: gpd.GeoDataFrame, logger: Logger = logger):
+    def _apply_unit_conversions(self, gdf: gpd.GeoDataFrame):
         # unit conversion
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in gdf.columns]

@@ -1,4 +1,5 @@
 """Caching mechanisms used in HydroMT."""
+
 import logging
 import os
 import shutil
@@ -42,7 +43,6 @@ def _cache_vrt_tiles(
     vrt_fn: str,
     geom: Optional[gpd.GeoSeries] = None,
     cache_dir: str = SETTINGS.cache_root,
-    logger=logger,
 ) -> str:
     """Cache vrt tiles that intersect with geom.
 
@@ -56,8 +56,6 @@ def _cache_vrt_tiles(
         geometry to intersect tiles with
     cache_dir: str, Path
         path of the root folder where
-    logger: Logger
-        Logger to write logs to
 
     Returns
     -------

@@ -79,7 +79,6 @@ class DataCatalog(object):
         self,
         data_libs: Optional[Union[List, str]] = None,
         fallback_lib: Optional[str] = "artifact_data",
-        logger=logger,
         cache: Optional[bool] = False,
         cache_dir: Optional[str] = None,
     ) -> None:
@@ -119,7 +118,6 @@ class DataCatalog(object):
         self._catalogs: Dict[str, PredefinedCatalog] = {}
         self.root = None
         self._fallback_lib = fallback_lib
-        self.logger = logger
 
         # caching
         self.cache = bool(cache)
@@ -285,7 +283,7 @@ class DataCatalog(object):
             if strict:
                 raise e
             else:
-                self.logger.warning(
+                logger.warning(
                     f"Source of type {type(s)} does not support detecting spatial"
                     "extents. skipping..."
                 )
@@ -329,7 +327,7 @@ class DataCatalog(object):
             if strict:
                 raise e
             else:
-                self.logger.warning(
+                logger.warning(
                     f"Source of type {type(s)} does not support detecting"
                     " temporalextents. skipping..."
                 )
@@ -596,7 +594,7 @@ class DataCatalog(object):
         # cache and get path to data_datalog.yml file of the <name> catalog with <version>
         catalog_path = self.predefined_catalogs[name].get_catalog_file(version)
         # read catalog
-        self.logger.info(f"Reading data catalog {name} {version}")
+        logger.info(f"Reading data catalog {name} {version}")
         self.from_yml(catalog_path, catalog_name=name)
 
     def _cache_archive(
@@ -710,7 +708,7 @@ class DataCatalog(object):
         DataCatalog
             DataCatalog object with parsed yaml file added.
         """
-        self.logger.info(f"Parsing data catalog from {urlpath}")
+        logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
         # parse metadata
         meta = dict()
@@ -839,7 +837,7 @@ class DataCatalog(object):
         elif "roots" in meta:
             self.root = self._determine_catalog_root(meta)
 
-        self.logger.info(f"Data Catalog is using root: {self.root}")
+        logger.info(f"Data Catalog is using root: {self.root}")
 
         if self.root is not None and splitext(self.root)[-1] in ["gz", "zip"]:
             # if root is an archive, unpack it at the cache dir
@@ -906,7 +904,7 @@ class DataCatalog(object):
             with open(path, "w") as f:
                 yaml.dump(data_dict, f, default_flow_style=False, sort_keys=False)
         else:
-            self.logger.info("The data catalog is empty, no yml file is written.")
+            logger.info("The data catalog is empty, no yml file is written.")
 
     def to_dict(
         self,
@@ -952,7 +950,7 @@ class DataCatalog(object):
             )
 
             # remove non serializable entries to prevent errors
-            source_dict = _process_dict(source_dict, logger=self.logger)
+            source_dict = _process_dict(source_dict)
             source_dict["root"] = root
             if name in sources_out:
                 existing = sources_out.pop(name)
@@ -1084,7 +1082,7 @@ class DataCatalog(object):
         # read existing data catalog if it exists
         fn = join(data_root, "data_catalog.yml")
         if isfile(fn) and append:
-            self.logger.info(f"Appending existing data catalog {fn}")
+            logger.info(f"Appending existing data catalog {fn}")
             sources_out = DataCatalog(fn).sources
         else:
             sources_out = {}
@@ -1095,7 +1093,7 @@ class DataCatalog(object):
                 for version, source in available_versions.items():
                     try:
                         # read slice of source and write to file
-                        self.logger.debug(f"Exporting {key}.")
+                        logger.debug(f"Exporting {key}.")
                         if not unit_conversion:
                             unit_mult = source.data_adapter.unit_mult
                             unit_add = source.data_adapter.unit_add
@@ -1114,13 +1112,11 @@ class DataCatalog(object):
                                 bbox=bbox,
                                 time_tuple=time_range,
                                 handle_nodata=NoDataStrategy.RAISE,
-                                logger=self.logger,
                             )
                         except NoDataException as e:
                             exec_nodata_strat(
                                 f"{key} file contains no data: {e}",
                                 handle_nodata,
-                                logger,
                             )
                             continue
                         # update path & driver and remove kwargs
@@ -1139,7 +1135,7 @@ class DataCatalog(object):
                             source.driver_kwargs.update(driver_kwargs)
                         source.rename = {}
                         if key in sources_out:
-                            self.logger.warning(
+                            logger.warning(
                                 f"{key} already exists in data catalog, overwriting..."
                             )
                         if key not in sources_out:
@@ -1149,7 +1145,7 @@ class DataCatalog(object):
 
                         sources_out[key][provider][version] = source
                     except FileNotFoundError:
-                        self.logger.warning(f"{key} file not found at {source.path}")
+                        logger.warning(f"{key} file not found at {source.path}")
 
         # write data catalog to yml
         data_catalog_out = DataCatalog()
@@ -1267,13 +1263,11 @@ class DataCatalog(object):
                 variables=variables,
                 mask=mask,
                 time_range=time_range,
-                logger=self.logger,
             )
             if data_like is None:
                 exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
             return _single_var_as_array(
                 maybe_ds=data_like,
@@ -1294,7 +1288,6 @@ class DataCatalog(object):
             time_range=time_range,
             handle_nodata=handle_nodata,
             single_var_as_array=single_var_as_array,
-            logger=self.logger,
         )
 
     def get_geodataframe(
@@ -1393,13 +1386,11 @@ class DataCatalog(object):
                 variables=variables,
                 mask=mask,
                 predicate=predicate,
-                logger=self.logger,
             )
             if data_like is None:
                 exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
             return data_like
         elif isinstance(data_like, GeoDataFrameSource):
@@ -1412,7 +1403,6 @@ class DataCatalog(object):
             handle_nodata=handle_nodata,
             predicate=predicate,
             variables=variables,
-            logger=self.logger,
         )
         return gdf
 
@@ -1527,13 +1517,11 @@ class DataCatalog(object):
                 mask=mask,
                 predicate=predicate,
                 time_range=time_range,
-                logger=self.logger,
             )
             if data_like is None:
                 exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
         elif isinstance(data_like, GeoDatasetSource):
@@ -1629,13 +1617,11 @@ class DataCatalog(object):
                 data_like,
                 variables,
                 time_range,
-                logger=self.logger,
             )
             if data_like is None:
                 exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
         else:
@@ -1723,7 +1709,6 @@ class DataCatalog(object):
                 exec_nodata_strat(
                     "No data was left after slicing.",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
             return df
         else:
@@ -1733,7 +1718,6 @@ class DataCatalog(object):
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,
-            logger=self.logger,
         )
         return obj
 
@@ -1793,7 +1777,7 @@ def _parse_data_source_dict(
     return create_source(source)
 
 
-def _process_dict(d: Dict, logger=logger) -> Dict:
+def _process_dict(d: Dict) -> Dict:
     """Recursively change dict values to keep only python literal structures."""
     for k, v in d.items():
         _check_key = isinstance(k, str)
@@ -1829,7 +1813,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 name_copy = name
                 for k, v in zip(options.keys(), combination):
                     name_copy = name_copy.replace("{" + k + "}", v)
-                    # TODO: seems like the job for a MetaDataResolver?
+                    # TODO: seems like the job for a URIResolver?
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:

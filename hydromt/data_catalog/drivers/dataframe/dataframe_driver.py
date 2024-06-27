@@ -1,4 +1,5 @@
 """Generic driver for reading and writing DataFrames."""
+
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
 from typing import ClassVar, List, Optional
@@ -29,7 +30,6 @@ class DataFrameDriver(BaseDriver, ABC):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> pd.DataFrame:
@@ -39,7 +39,7 @@ class DataFrameDriver(BaseDriver, ABC):
         args:
         """
         # Merge static kwargs from the catalog with dynamic kwargs from the query.
-        uris = self.metadata_resolver.resolve(
+        uris = self.uri_resolver.resolve(
             uri,
             self.filesystem,
             variables=variables,
@@ -48,7 +48,6 @@ class DataFrameDriver(BaseDriver, ABC):
         )
         df = self.read_data(
             uris,
-            logger=logger,
             variables=variables,
             time_range=time_range,
             metadata=metadata,
@@ -64,7 +63,6 @@ class DataFrameDriver(BaseDriver, ABC):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
         """Read in any compatible data source to a pandas `DataFrame`."""

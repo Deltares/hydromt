@@ -29,7 +29,6 @@ def nearest_merge(
     max_dist: Optional[float] = None,
     overwrite: bool = False,
     inplace: bool = False,
-    logger=logger,
 ) -> gpd.GeoDataFrame:
     """Merge attributes of gdf2 with the nearest feature of gdf1.
 

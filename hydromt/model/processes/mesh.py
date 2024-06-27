@@ -1,7 +1,6 @@
 """Implementation for mesh based workflows."""
 
-import logging
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -21,7 +20,7 @@ from hydromt.model.processes.region import (
     parse_region_mesh,
 )
 
-_logger = logging.getLogger(__name__)
+logger: Logger = getLogger(__name__)
 
 __all__ = [
     "create_mesh2d_from_region",
@@ -39,7 +38,6 @@ def create_mesh2d_from_region(
     region_crs: int = 4326,
     res: Optional[float] = None,
     align: bool = True,
-    logger: Logger = _logger,
     data_catalog: Optional[DataCatalog] = None,
 ):
     """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
@@ -93,7 +91,6 @@ def create_mesh2d_from_region(
         return create_mesh2d_from_mesh(
             uds,
             grid_name=region.get("grid_name", None),
-            logger=logger,
             crs=crs,
             bounds=region.get("bounds", None),
         )
@@ -126,7 +123,6 @@ def create_mesh2d_from_mesh(
     grid_name: Optional[str],
     crs: Optional[int],
     bounds: Optional[Tuple[float, float, float, float]] = None,
-    logger: Logger = _logger,
 ) -> xu.UgridDataset:
     """
     Create a 2D mesh from another mesh.
@@ -278,7 +274,6 @@ def mesh2d_from_rasterdataset(
     fill_method: Optional[str] = None,
     resampling_method: Optional[Union[str, List]] = "centroid",
     rename: Optional[Dict] = None,
-    logger: logging.Logger = _logger,
 ) -> xu.UgridDataset:
     """
     Resamples data in ds to mesh2d.
@@ -393,7 +388,6 @@ def mesh2d_from_raster_reclass(
     fill_method: Optional[str] = None,
     resampling_method: Optional[Union[str, list]] = "centroid",
     rename: Optional[Dict] = None,
-    logger: logging.Logger = _logger,
 ) -> List[str]:
     """Resample data to ``mesh2d`` grid by reclassifying the data in ``da`` based on ``df_vars``.
 
@@ -452,7 +446,6 @@ def mesh2d_from_raster_reclass(
         fill_method=None,
         resampling_method=resampling_method,
         rename=rename,
-        logger=logger,
     )
 
     return uds_out

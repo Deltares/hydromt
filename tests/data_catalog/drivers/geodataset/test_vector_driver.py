@@ -10,7 +10,7 @@ from xarray import Dataset
 
 from hydromt.data_catalog.drivers import GeoDatasetVectorDriver
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
-from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 from hydromt.gis import vector
 from hydromt.io.readers import open_geodataset
 
@@ -31,13 +31,13 @@ class TestGeoDatasetVectorDriver:
         mocked_function = MagicMock(return_value=Dataset())
         mock_preprocess.get.return_value = mocked_function
 
-        class FakeMetadataResolver(MetaDataResolver):
+        class FakeURIResolver(URIResolver):
             def resolve(self, uri: str, *args, **kwargs):
                 return [uri]
 
         uri: str = "file.geojson"
         driver = GeoDatasetVectorDriver(
-            metadata_resolver=FakeMetadataResolver(),
+            uri_resolver=FakeURIResolver(),
             options={"preprocess": "remove_duplicates"},
         )
         res: Optional[Dataset] = driver.read(
@@ -63,7 +63,7 @@ class TestGeoDatasetVectorDriver:
         return gdf_path
 
     def test_read(self, geodf, example_vector_geods: Path):
-        res = GeoDatasetVectorDriver(metadata_resolver=ConventionResolver()).read(
+        res = GeoDatasetVectorDriver(uri_resolver=ConventionResolver()).read(
             str(example_vector_geods)
         )
         ds = vector.GeoDataset.from_gdf(geodf)
@@ -84,11 +84,11 @@ class TestGeoDatasetVectorDriver:
         )
         mock_geods_open.return_value = Dataset()
 
-        class FakeMetadataResolver(MetaDataResolver):
+        class FakeURIResolver(URIResolver):
             def resolve(self, uri: str, *args, **kwargs):
                 return [uri]
 
         uri: str = "file.geojson"
-        driver = GeoDatasetVectorDriver(metadata_resolver=FakeMetadataResolver())
+        driver = GeoDatasetVectorDriver(uri_resolver=FakeURIResolver())
         _ = driver.read(uri)
         assert mock_geods_open.call_count == 1

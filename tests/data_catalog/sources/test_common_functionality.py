@@ -15,7 +15,7 @@ from hydromt.data_catalog.sources import (
     GeoDatasetSource,
     RasterDatasetSource,
 )
-from hydromt.data_catalog.uri_resolvers import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers import URIResolver
 
 
 class TestValidators:
@@ -107,7 +107,7 @@ class TestValidators:
         datasource = source_cls(
             name="test",
             uri="data.format",
-            driver={"name": driver_name, "metadata_resolver": "convention"},
+            driver={"name": driver_name, "uri_resolver": "convention"},
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
         assert isinstance(datasource, source_cls)
@@ -250,7 +250,7 @@ class TestValidators:
         _adapter: str,  # noqa: PT019
         path: str,
         tmp_path: Path,
-        mock_resolver: MetaDataResolver,
+        mock_resolver: URIResolver,
         request: pytest.FixtureRequest,
     ):
         driver_cls: Type[BaseDriver] = request.getfixturevalue(_driver_cls)
@@ -263,7 +263,7 @@ class TestValidators:
             name="test",
             uri=str(old_path),
             data_adapter=adapter,
-            driver=driver_cls(metadata_resolver=mock_resolver),
+            driver=driver_cls(uri_resolver=mock_resolver),
         ).to_file(new_path)
         # assert new_path.is_file()
         assert new_source.root is None

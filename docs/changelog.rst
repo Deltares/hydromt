@@ -15,7 +15,7 @@ Added
 - Added entrypoints for Driver Plugins as "hydromt.drivers"
 - Added entrypoints for ModelComponent Plugins as "hydromt.components"
 - Added entrypoints for PredefinedCatalog Plugins as "hydromt.catalogs"
-- Added MetaDataResolver class for customizable metadata discovery
+- Added `URIResolver` class for customizable metadata discovery
 - Added DataSource class to represent and validate DataCatalog entries.
 - Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
 - A Github action now checks whether the migration guide is updated (#829)
@@ -34,6 +34,8 @@ Changed
 - The model class has been moved to a component architecture. See the migration guide for more info (#845)
 - Changed the `GeoDatasetAdapter` to transform vector data from tabular formats. (#912)
 - Updated deltares_data data catalog to incorporate the newest data catalog features (#667)
+- Changed the logging in HydroMT to canonical logging using logging hierarchy (#1006)
+
 
 Removed
 -------

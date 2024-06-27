@@ -1,4 +1,4 @@
-"""MetaDataResolver for raster tindex files."""
+"""URIResolver for raster tindex files."""
 
 from logging import Logger, getLogger
 from os.path import abspath, dirname, join
@@ -9,13 +9,13 @@ import geopandas as gpd
 from fsspec import AbstractFileSystem
 
 from hydromt._typing import NoDataStrategy, TimeRange, ZoomLevel, exec_nodata_strat
-from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 logger: Logger = getLogger(__name__)
 
 
-class RasterTindexResolver(MetaDataResolver):
-    """Implementation of the MetaDataResolver for raster tindex files."""
+class RasterTindexResolver(URIResolver):
+    """Implementation of the URIResolver for raster tindex files."""
 
     name = "raster_tindex"
 
@@ -29,7 +29,6 @@ class RasterTindexResolver(MetaDataResolver):
         mask: Optional[gpd.GeoDataFrame] = None,
         variables: Union[int, tuple[float, str], None] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        logger: Optional[Logger] = logger,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve URIs of a raster tindex file.
@@ -50,8 +49,6 @@ class RasterTindexResolver(MetaDataResolver):
             Names of variables to return, or all if None, by default None
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
-        logger : Logger, optional
-            logger to use, by default logger
         options : Optional[Dict[str, Any]], optional
             extra options for this resolver, by default None
 
@@ -78,7 +75,6 @@ class RasterTindexResolver(MetaDataResolver):
             exec_nodata_strat(
                 f"resolver '{self.name}' found no intersecting tiles.",
                 strategy=handle_nodata,
-                logger=logger,
             )
             return []  # in case of ignore
 

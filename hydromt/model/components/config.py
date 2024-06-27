@@ -1,5 +1,6 @@
 """A component to write configuration files for model simulations/kernels."""
 
+from logging import Logger, getLogger
 from os import makedirs
 from os.path import abspath, dirname, isabs, isfile, join, splitext
 from pathlib import Path
@@ -13,6 +14,8 @@ from hydromt.model.hydromt_step import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model import Model
+
+logger: Logger = getLogger(__name__)
 
 
 class ConfigComponent(ModelComponent):
@@ -82,7 +85,7 @@ class ConfigComponent(ModelComponent):
             p = path or self._filename
 
             write_path = join(self.root.path, p)
-            self.logger.info(f"Writing model config to {write_path}.")
+            logger.info(f"Writing model config to {write_path}.")
             makedirs(dirname(write_path), exist_ok=True)
 
             write_data = _make_config_paths_relative(self.data, self.root.path)
@@ -95,7 +98,7 @@ class ConfigComponent(ModelComponent):
                 raise ValueError(f"Unknown file extension: {ext}")
 
         else:
-            self.logger.debug("Model config has no data, skip writing.")
+            logger.debug("Model config has no data, skip writing.")
 
     @hydromt_step
     def read(self, path: Optional[str] = None) -> None:
@@ -105,9 +108,9 @@ class ConfigComponent(ModelComponent):
         # if path is abs, join will just return path
         read_path = join(self.root.path, p)
         if isfile(read_path):
-            self.logger.info(f"Reading model config file from {read_path}.")
+            logger.info(f"Reading model config file from {read_path}.")
         else:
-            self.logger.warning(
+            logger.warning(
                 f"No default model config was found at {read_path}. "
                 "It wil be initialized as empty dictionary"
             )
@@ -253,7 +256,7 @@ class ConfigComponent(ModelComponent):
 
         template = Path(template)
         # Here directly overwrite config with template
-        self.logger.info(f"Creating model config from {prefix} template: {template}")
+        logger.info(f"Creating model config from {prefix} template: {template}")
         if template.suffix in [".yml", ".yaml"]:
             self._data = read_yaml(template)
         elif template.suffix == ".toml":
@@ -281,7 +284,7 @@ class ConfigComponent(ModelComponent):
             {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
         """
         if len(data) > 0:
-            self.logger.debug("Setting model config options.")
+            logger.debug("Setting model config options.")
         for k, v in data.items():
             self.set(k, v)
 

@@ -33,14 +33,12 @@ class PandasDriver(DataFrameDriver):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
         """Read in any compatible data source to a pandas `DataFrame`."""
         _warn_on_unused_kwargs(
             self.__class__.__name__,
             {"time_range": time_range, "metadata": metadata},
-            logger,
         )
         if len(uris) > 1:
             raise ValueError(
@@ -76,7 +74,7 @@ class PandasDriver(DataFrameDriver):
                 )
             elif extension in ["fwf", "txt"]:
                 _warn_on_unused_kwargs(
-                    self.__class__.__name__, {"variables": variables}, logger
+                    self.__class__.__name__, {"variables": variables}
                 )
                 df = pd.read_fwf(uri, **self.options)
             else:
@@ -85,7 +83,6 @@ class PandasDriver(DataFrameDriver):
             exec_nodata_strat(
                 f"No data from driver {self}'.",
                 strategy=handle_nodata,
-                logger=logger,
             )
         return df
 

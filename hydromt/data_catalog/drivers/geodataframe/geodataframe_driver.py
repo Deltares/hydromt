@@ -24,7 +24,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> gpd.GeoDataFrame:
@@ -35,7 +34,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             mask: Optional[Geom]. Mask for features to match the predicate, preferably
                 in the same CRS.
         """
-        uris = self.metadata_resolver.resolve(
+        uris = self.uri_resolver.resolve(
             uri,
             self.filesystem,
             mask=mask,
@@ -48,7 +47,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             predicate=predicate,
             variables=variables,
             metadata=metadata,
-            logger=logger,
             handle_nodata=handle_nodata,
         )
         return gdf
@@ -62,7 +60,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         predicate: str = "intersects",
         variables: Optional[List[str]] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """Read in any compatible data source to a geopandas `GeoDataFrame`."""

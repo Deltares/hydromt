@@ -1,7 +1,7 @@
 """GeoDatasetVectorDriver class for reading vector data from table like files such as csv or parquet."""
 
 from copy import copy
-from logging import Logger, getLogger
+from logging import getLogger
 from typing import Callable, ClassVar, List, Optional
 
 import xarray as xr
@@ -31,7 +31,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -48,7 +47,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                 "time_range": time_range,
                 "metadata": metadata,
             },
-            logger,
         )
         # we want to maintain a list as argument to keep the interface compatible with other drivers.
         if len(uris) > 1:
@@ -67,9 +65,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
         crs: Optional[CRS] = metadata.crs if metadata else None
-        data = open_geodataset(
-            fn_locs=uri, geom=mask, logger=logger, crs=crs, **options
-        )
+        data = open_geodataset(fn_locs=uri, geom=mask, crs=crs, **options)
 
         if preprocessor is None:
             out = data
@@ -79,9 +75,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         if isinstance(out, xr.DataArray):
             if out.size == 0:
                 exec_nodata_strat(
-                    f"No data from driver {self}'.",
-                    strategy=handle_nodata,
-                    logger=logger,
+                    f"No data from driver {self}'.", strategy=handle_nodata
                 )
                 return out.to_dataset()
         else:
@@ -90,7 +84,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                     exec_nodata_strat(
                         f"No data from driver {self}' for variable {variable}.",
                         strategy=handle_nodata,
-                        logger=logger,
                     )
             return out
 

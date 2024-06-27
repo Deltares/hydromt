@@ -107,7 +107,7 @@ def migrate_entry(
         driver_name: str = DRIVER_RENAME_MAPPING[data_type][old_driver]
         entry["driver"] = {"name": driver_name}
         if old_driver == "raster_tindex":
-            entry["driver"]["metadata_resolver"] = "raster_tindex"
+            entry["driver"]["uri_resolver"] = "raster_tindex"
 
     # move kwargs and driver_kwargs to driver options
     old_kwarg_names: Set[str] = {"kwargs", "driver_kwargs"}
