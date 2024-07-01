@@ -144,16 +144,16 @@ def test_create_vrt(tmpdir, rioda_large):
         zoom_levels=[0],
     )
     # test create_vrt
-    vrt_fn = os.path.join(path, "dummy_xyz", "vrt", "zl0.vrt")
-    files_path = os.path.join(path, "dummy_xyz", "*", "*", "*.tif")
-    create_vrt.create_vrt(vrt_fn, files_path=files_path)
-    assert os.path.isfile(vrt_fn)
-    assert isinstance(open_raster(vrt_fn).load(), xr.DataArray)  # try reading
+    vrt_path = os.path.join(path, "dummy_xyz", "vrt", "zl0.vrt")
+    tif_path_glob = os.path.join(path, "dummy_xyz", "*", "*", "*.tif")
+    create_vrt.create_vrt(vrt_path, files_path=tif_path_glob)
+    assert os.path.isfile(vrt_path)
+    assert isinstance(open_raster(vrt_path).load(), xr.DataArray)  # try reading
     with pytest.raises(ValueError, match="Either 'files' or 'files_path' is required"):
-        create_vrt.create_vrt(vrt_fn)
+        create_vrt.create_vrt(vrt_path)
     with pytest.raises(IOError, match="No files found at "):
         create_vrt.create_vrt(
-            vrt_fn, files_path=os.path.join(path, "dummy_xyz", "*.abc")
+            vrt_path, files_path=os.path.join(path, "dummy_xyz", "*.abc")
         )
 
 

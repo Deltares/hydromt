@@ -139,8 +139,8 @@ def test_create_basin_grid(tmpdir):
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
         crs="utm",
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
+        hydrography_path="merit_hydro",
+        basin_index_path="merit_hydro_index",
     )
     assert not np.all(grid_component.data["mask"].values is True)
     assert grid_component.data.raster.shape == (47, 61)
@@ -211,9 +211,9 @@ def test_add_data_from_rasterdataset(
         grid_component.data_catalog, "get_rasterdataset"
     )
     mock_get_rasterdataset.return_value = demda
-    raster_fn = "your_raster_file.tif"
+    raster_data = "your_raster_file.tif"
     result = grid_component.add_data_from_rasterdataset(
-        raster_fn=raster_fn,
+        raster_data=raster_data,
         variables=["variable1", "variable2"],
         fill_method="mean",
         reproject_method="nearest",
@@ -221,7 +221,7 @@ def test_add_data_from_rasterdataset(
         rename={"old_var": "new_var"},
     )
     # Test logging
-    assert f"Preparing grid data from raster source {raster_fn}" in caplog.text
+    assert f"Preparing grid data from raster source {raster_data}" in caplog.text
     # Test whether get_rasterdataset and grid_from_rasterdataset are called
     mock_get_rasterdataset.assert_called_once()
     mock_grid_from_rasterdataset.assert_called_once()
@@ -237,8 +237,8 @@ def test_add_data_from_raster_reclass(
     grid_component = GridComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
     caplog.set_level(logging.INFO)
-    raster_fn = "vito"
-    reclass_table_fn = "vito_mapping"
+    raster_data = "vito"
+    reclass_table_data = "vito_mapping"
     demda.name = "name"
     grid_component.data_catalog.get_rasterdataset.return_value = demda
     grid_component.data_catalog.get_dataframe.return_value = pd.DataFrame()
@@ -248,16 +248,16 @@ def test_add_data_from_raster_reclass(
     mock_grid_from_raster_reclass.return_value = demda.to_dataset()
 
     result = grid_component.add_data_from_raster_reclass(
-        raster_fn=raster_fn,
+        raster_data=raster_data,
         fill_method="nearest",
-        reclass_table_fn=reclass_table_fn,
+        reclass_table_data=reclass_table_data,
         reclass_variables=["roughness_manning"],
         reproject_method=["average"],
     )
     # Test logging
     assert (
-        f"Preparing grid data by reclassifying the data in {raster_fn} based "
-        f"on {reclass_table_fn}"
+        f"Preparing grid data by reclassifying the data in {raster_data} based "
+        f"on {reclass_table_data}"
     ) in caplog.text
     mock_grid_from_raster_reclass.assert_called_once()
     assert grid_component.data == demda
@@ -268,13 +268,13 @@ def test_add_data_from_raster_reclass(
 
     with pytest.raises(
         ValueError,
-        match=f"raster_fn {raster_fn} should be a single variable. "
+        match=f"raster_data {raster_data} should be a single variable. "
         "Please select one using the 'variable' argument",
     ):
         result = grid_component.add_data_from_raster_reclass(
-            raster_fn=raster_fn,
+            raster_data=raster_data,
             fill_method="nearest",
-            reclass_table_fn=reclass_table_fn,
+            reclass_table_data=reclass_table_data,
             reclass_variables=["roughness_manning"],
             reproject_method=["average"],
         )
@@ -292,37 +292,37 @@ def test_add_data_from_geodataframe(
         "hydromt.model.components.grid.grid_from_geodataframe"
     )
     mock_grid_from_geodataframe.return_value = demda.to_dataset()
-    vector_fn = "hydro_lakes"
+    vector_data = "hydro_lakes"
     result = grid_component.add_data_from_geodataframe(
-        vector_fn=vector_fn,
+        vector_data=vector_data,
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
         rename={
             "waterbody_id": "lake_id",
             "Depth_avg": "lake_depth",
-            vector_fn: "hydrolakes",
+            vector_data: "hydrolakes",
         },
     )
-    assert f"Preparing grid data from vector '{vector_fn}'." in caplog.text
+    assert f"Preparing grid data from vector '{vector_data}'." in caplog.text
     mock_grid_from_geodataframe.assert_called_once()
     assert grid_component.data == demda
     assert all([x in result for x in demda.to_dataset().data_vars.keys()])
     grid_component.data_catalog.get_geodataframe.return_value = gpd.GeoDataFrame()
     caplog.set_level(logging.WARNING)
     result = grid_component.add_data_from_geodataframe(
-        vector_fn=vector_fn,
+        vector_data=vector_data,
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
         rename={
             "waterbody_id": "lake_id",
             "Depth_avg": "lake_depth",
-            vector_fn: "hydrolakes",
+            vector_data: "hydrolakes",
         },
     )
     assert (
-        f"No shapes of {vector_fn} found within region,"
+        f"No shapes of {vector_data} found within region,"
         " skipping add_data_from_geodataframe."
     ) in caplog.text
     assert result is None
@@ -331,12 +331,12 @@ def test_add_data_from_geodataframe(
 @pytest.mark.integration()
 def test_grid_component_model(tmpdir):
     # Initialize model
-    dc_param_fn = join(DATADIR, "parameters_data.yml")
+    dc_param_path = join(DATADIR, "parameters_data.yml")
     root = join(tmpdir, "grid_model")
     model = Model(
         root=root,
         mode="w",
-        data_libs=["artifact_data", dc_param_fn],
+        data_libs=["artifact_data", dc_param_path],
     )
     grid_component = GridComponent(model=model)
     model.add_component(name="grid", component=grid_component)
@@ -344,8 +344,8 @@ def test_grid_component_model(tmpdir):
     model.grid.create_from_region(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=0.008333,
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
+        hydrography_path="merit_hydro",
+        basin_index_path="merit_hydro_index",
         add_mask=True,
     )
 
@@ -353,33 +353,33 @@ def test_grid_component_model(tmpdir):
     model.grid.add_data_from_constant(constant=0.01, name="c1", nodata=-99.0)
     model.grid.add_data_from_constant(constant=2, name="c2", nodata=-1, dtype=np.int8)
     model.grid.add_data_from_rasterdataset(
-        raster_fn="merit_hydro",
+        raster_data="merit_hydro",
         variables=["elevtn", "basins"],
         reproject_method=["average", "mode"],
         mask_name="mask",
     )
     model.grid.add_data_from_rasterdataset(
-        raster_fn="vito",
+        raster_data="vito",
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
     )
     model.grid.add_data_from_raster_reclass(
-        raster_fn="vito",
+        raster_data="vito",
         fill_method="nearest",
-        reclass_table_fn="vito_mapping",
+        reclass_table_data="vito_mapping",
         reclass_variables=["roughness_manning"],
         reproject_method=["average"],
     )
     model.grid.add_data_from_geodataframe(
-        vector_fn="hydro_lakes",
+        vector_data="hydro_lakes",
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
         rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
     )
     model.grid.add_data_from_geodataframe(
-        vector_fn="hydro_lakes",
+        vector_data="hydro_lakes",
         rasterize_method="fraction",
         rename={"hydro_lakes": "water_frac"},
     )

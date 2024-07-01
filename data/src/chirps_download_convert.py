@@ -73,16 +73,16 @@ def download_africa_daily(outroot, start="2020-01-01", end="2021-03-31"):
         try:
             download_file(url, outdir)
         except HTTPError:
-            fn_out = os.path.join(outdir, basename)
-            if os.path.isfile(fn_out):
-                os.unlink(fn_out)
+            write_path = os.path.join(outdir, basename)
+            if os.path.isfile(write_path):
+                os.unlink(write_path)
             try:  # without .gz
                 download_file(url[:-3], outdir)
             except HTTPError as r:
                 print(r)
-                fn_out = os.path.join(outdir, basename[:-3])
-                if os.path.isfile(fn_out):
-                    os.unlink(fn_out)
+                write_path = os.path.join(outdir, basename[:-3])
+                if os.path.isfile(write_path):
+                    os.unlink(write_path)
                 continue
 
 
@@ -100,8 +100,8 @@ def tifs_to_nc(folder, year):
     path = os.path.join(folder, str(year), f"chirps-v2.0.{year}*.tif*")
     nodata = -9999.0
     files = sorted(glob.glob(path))
-    fn_out = os.path.join(folder, f"CHIRPS_rainfall_{year}.nc")
-    if len(files) == 0 or os.path.isfile(fn_out):
+    write_path = os.path.join(folder, f"CHIRPS_rainfall_{year}.nc")
+    if len(files) == 0 or os.path.isfile(write_path):
         return
 
     for i, f in enumerate(files):
@@ -148,8 +148,10 @@ def tifs_to_nc(folder, year):
         },
         "time": {"chunksizes": [90]},
     }
-    print(f"writing to {fn_out} ..")
-    ds_img.to_netcdf(fn_out, engine="netcdf4", encoding=encoding, unlimited_dims="time")
+    print(f"writing to {write_path} ..")
+    ds_img.to_netcdf(
+        write_path, engine="netcdf4", encoding=encoding, unlimited_dims="time"
+    )
 
 
 if __name__ == "__main__":

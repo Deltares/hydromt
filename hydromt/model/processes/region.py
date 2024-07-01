@@ -39,8 +39,8 @@ def parse_region_basin(
     region: dict,
     *,
     data_catalog: DataCatalog,
-    hydrography_fn: StrPath,
-    basin_index_fn: Optional[StrPath] = None,
+    hydrography_path: StrPath,
+    basin_index_path: Optional[StrPath] = None,
 ) -> gpd.GeoDataFrame:
     """Parse a basin /subbasin / interbasin region and return the GeoDataFrame.
 
@@ -107,7 +107,7 @@ def parse_region_basin(
         DataCatalog object containing the data sources.
     hydrography_fn : strPath
         Path of the hydrography raster dataset in the data catalog.
-    basin_index_fn : strPath, optional
+    basin_index_path : StrPath, optional
         Path of the basin index raster dataset in the data catalog.
     """
     var_thresh_kwargs = region.copy()
@@ -136,9 +136,9 @@ def parse_region_basin(
         kwargs_str.update({k: v})
     logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
 
-    ds_org = data_catalog.get_rasterdataset(hydrography_fn)
-    if "bounds" not in kwargs and basin_index_fn is not None:
-        kwargs.update(basin_index=data_catalog.get_source(str(basin_index_fn)))
+    ds_org = data_catalog.get_rasterdataset(hydrography_path)
+    if "bounds" not in kwargs and basin_index_path is not None:
+        kwargs.update(basin_index=data_catalog.get_source(str(basin_index_path)))
     # get basin geometry
     geom, _ = get_basin_geometry(ds=ds_org, kind=kind, **kwargs)
 

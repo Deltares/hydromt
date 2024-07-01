@@ -35,6 +35,7 @@ Changed
 - Changed the `GeoDatasetAdapter` to transform vector data from tabular formats. (#912)
 - Updated deltares_data data catalog to incorporate the newest data catalog features (#667)
 - Changed the logging in HydroMT to canonical logging using logging hierarchy (#1006)
+- Rename variables away from the conventions `fn` and `time_tuple` (#1017)
 
 
 Removed

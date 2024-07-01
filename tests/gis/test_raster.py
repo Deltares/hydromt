@@ -110,17 +110,17 @@ def test_gdal(tmpdir):
     assert da1.raster.dims == ("latitude", "longitude")
     assert da1.raster.res[1] > 0
     # Write to netcdf and reopen with gdal
-    fn_nc = str(tmpdir.join("gdal_test.nc"))
-    da1.to_netcdf(fn_nc)
-    with rasterio.open(fn_nc) as src:
+    netcdf_path = str(tmpdir.join("gdal_test.nc"))
+    da1.to_netcdf(netcdf_path)
+    with rasterio.open(netcdf_path) as src:
         src.read()
         assert da.raster.crs == src.crs
     # # test with web mercator dataset
     da2 = da.raster.reproject(dst_crs=3857)
     ds2 = da2.to_dataset().raster.gdal_compliant(rename_dims=True, force_sn=True)
-    fn_nc = str(tmpdir.join("gdal_test_epsg3857.nc"))
-    ds2.to_netcdf(fn_nc)
-    with rasterio.open(fn_nc) as src:
+    netcdf_path = str(tmpdir.join("gdal_test_epsg3857.nc"))
+    ds2.to_netcdf(netcdf_path)
+    with rasterio.open(netcdf_path) as src:
         src.read()
         assert ds2.raster.crs == src.crs
 
@@ -543,9 +543,9 @@ def test_rotated(transform, shape, tmpdir):
     da.raster.set_crs(4326)
     da[:] = 1
     # test I/O
-    fn = str(tmpdir.join("rotated.tif"))
-    da.raster.to_raster(fn)
-    assert da.raster.identical_grid(open_raster(fn))
+    path = str(tmpdir.join("rotated.tif"))
+    da.raster.to_raster(path)
+    assert da.raster.identical_grid(open_raster(path))
     # test rasterize
     gdf = da.raster.vector_grid()
     gdf["value"] = np.arange(gdf.index.size).astype(np.float32)
@@ -628,16 +628,16 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
     assert len(_zl) == 4
     assert min(_zl) == 6
     assert max(_zl) == 9
-    fn = join(png_dir, "7", "64", "64.png")
-    im = np.array(Image.open(fn))
+    path = join(png_dir, "7", "64", "64.png")
+    im = np.array(Image.open(path))
     assert im.shape == (256, 256, 4)
     assert all(im[0, 0, :] == [128, 0, 132, 255])
 
     # test with cmap
     png_dir = join(tmpdir, "tiles_png_cmap")
     rioda_large.raster.to_slippy_tiles(png_dir, cmap="viridis", min_lvl=6, max_lvl=7)
-    fn = join(png_dir, "7", "64", "64.png")
-    im = np.array(Image.open(fn))
+    path = join(png_dir, "7", "64", "64.png")
+    im = np.array(Image.open(path))
     assert im.shape == (256, 256, 4)
     assert all(im[0, 0, :] == [32, 143, 140, 255])
 

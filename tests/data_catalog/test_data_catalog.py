@@ -235,23 +235,23 @@ def test_catalog_entry_single_variant(aws_worldcover):
 
 @pytest.fixture()
 def aws_worldcover():
-    aws_yml_fn = join(DATADIR, "aws_esa_worldcover.yml")
-    aws_data_catalog = DataCatalog(data_libs=[aws_yml_fn])
-    return (aws_yml_fn, aws_data_catalog)
+    aws_yml_path = join(DATADIR, "aws_esa_worldcover.yml")
+    aws_data_catalog = DataCatalog(data_libs=[aws_yml_path])
+    return (aws_yml_path, aws_data_catalog)
 
 
 @pytest.fixture()
 def merged_aws_worldcover():
-    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
-    merged_catalog = DataCatalog(data_libs=[merged_yml_fn])
-    return (merged_yml_fn, merged_catalog)
+    merged_yml_path = join(DATADIR, "merged_esa_worldcover.yml")
+    merged_catalog = DataCatalog(data_libs=[merged_yml_path])
+    return (merged_yml_path, merged_catalog)
 
 
 @pytest.fixture()
 def legacy_aws_worldcover():
-    legacy_yml_fn = join(DATADIR, "legacy_esa_worldcover.yml")
-    legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_fn])
-    return (legacy_yml_fn, legacy_data_catalog)
+    legacy_yml_path = join(DATADIR, "legacy_esa_worldcover.yml")
+    legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_path])
+    return (legacy_yml_path, legacy_data_catalog)
 
 
 def test_catalog_entry_single_variant_round_trip(
@@ -287,10 +287,10 @@ def test_catalog_entry_single_variant_unknown_source(aws_worldcover):
 
 
 def test_catalog_entry_warns_on_override_version(aws_worldcover):
-    aws_yml_fn, aws_data_catalog = aws_worldcover
+    aws_yml_path, aws_data_catalog = aws_worldcover
     # make sure we trigger user warning when overwriting versions
     with pytest.warns(UserWarning):
-        aws_data_catalog.from_yml(aws_yml_fn)
+        aws_data_catalog.from_yml(aws_yml_path)
 
 
 def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
@@ -319,10 +319,10 @@ def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
 
 
 def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
-    aws_yml_fn, _ = aws_worldcover
-    legacy_yml_fn, _ = legacy_aws_worldcover
+    aws_yml_path, _ = aws_worldcover
+    legacy_yml_path, _ = legacy_aws_worldcover
     # Make sure we can query for the version we want
-    aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
+    aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_path, aws_yml_path])
     assert len(aws_and_legacy_catalog) == 2
     source_aws = aws_and_legacy_catalog.get_source("esa_worldcover")
     assert source_aws.driver.filesystem.protocol[0] == "s3"
@@ -336,9 +336,9 @@ def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
 
 
 def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover):
-    aws_yml_fn, _ = aws_worldcover
-    legacy_yml_fn, _ = legacy_aws_worldcover
-    aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_fn, aws_yml_fn])
+    aws_yml_path, _ = aws_worldcover
+    legacy_yml_path, _ = legacy_aws_worldcover
+    aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_path, aws_yml_path])
     # test round trip to and from dict
     d = aws_and_legacy_catalog.to_dict()
 
@@ -391,14 +391,14 @@ def test_data_catalog_from_deltares_data():
 
 
 def test_data_catalog_hydromt_version(tmpdir):
-    fn_yml = join(tmpdir, "test.yml")
+    yml_path = join(tmpdir, "test.yml")
     data_catalog = DataCatalog()
-    data_catalog.to_yml(fn_yml, meta={"hydromt_version": "0.7.0"})
+    data_catalog.to_yml(yml_path, meta={"hydromt_version": "0.7.0"})
 
 
 def test_used_sources():
-    merged_yml_fn = join(DATADIR, "merged_esa_worldcover.yml")
-    data_catalog = DataCatalog(merged_yml_fn)
+    merged_yml_path = join(DATADIR, "merged_esa_worldcover.yml")
+    data_catalog = DataCatalog(merged_yml_path)
     source = data_catalog.get_source("esa_worldcover")
     source.mark_as_used()
     sources = data_catalog.list_sources(used_only=True)
@@ -444,8 +444,8 @@ def export_test_slice_objects(tmpdir, data_catalog):
     data_catalog._sources = {}
     data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
-    time_tuple = ("2010-02-10", "2010-02-15")
-    data_lib_fn = join(tmpdir, "data_catalog.yml")
+    time_range = ("2010-02-10", "2010-02-15")
+    data_lib_path = join(tmpdir, "data_catalog.yml")
     source_names = [
         "era5[precip,temp]",
         "grwl_mask",
@@ -456,7 +456,7 @@ def export_test_slice_objects(tmpdir, data_catalog):
         "gtsmv3_eu_era5",
     ]
 
-    return (data_catalog, bbox, time_tuple, source_names, data_lib_fn)
+    return (data_catalog, bbox, time_range, source_names, data_lib_path)
 
 
 @pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
@@ -465,19 +465,19 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
     (
         data_catalog,
         bbox,
-        time_tuple,
+        time_range,
         source_names,
-        data_lib_fn,
+        data_lib_path,
     ) = export_test_slice_objects
     data_catalog.export_data(
         tmpdir,
         bbox=bbox,
-        time_tuple=time_tuple,
+        time_range=time_range,
         source_names=source_names,
         meta={"version": 1},
         handle_nodata=NoDataStrategy.IGNORE,
     )
-    with open(data_lib_fn, "r") as f:
+    with open(data_lib_path, "r") as f:
         yml_list = f.readlines()
     assert yml_list[0].strip() == "meta:"
     assert yml_list[1].strip() == "version: 1"
@@ -489,14 +489,14 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     (
         data_catalog,
         bbox,
-        time_tuple,
+        time_range,
         source_names,
-        data_lib_fn,
+        data_lib_path,
     ) = export_test_slice_objects
     data_catalog.export_data(
         tmpdir,
         bbox=bbox,
-        time_tuple=time_tuple,
+        time_range=time_range,
         source_names=source_names,
         meta={"version": 1},
         handle_nodata=NoDataStrategy.IGNORE,
@@ -511,9 +511,9 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
         handle_nodata=NoDataStrategy.IGNORE,
     )
 
-    data_lib_fn = join(tmpdir, "data_catalog.yml")
+    data_lib_path = join(tmpdir, "data_catalog.yml")
     # check if meta is written
-    with open(data_lib_fn, "r") as f:
+    with open(data_lib_path, "r") as f:
         yml_list = f.readlines()
     assert yml_list[0].strip() == "meta:"
     assert yml_list[1].strip() == "version: 2"
@@ -524,19 +524,19 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
 @pytest.mark.integration()
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
-    fn_df = str(tmpdir.join("test.csv"))
-    fn_df_parquet = str(tmpdir.join("test.parquet"))
-    df.to_csv(fn_df)
-    df.to_parquet(fn_df_parquet)
-    fn_df_time = str(tmpdir.join("test_ts.csv"))
-    fn_df_time_parquet = str(tmpdir.join("test_ts.parquet"))
-    df_time.to_csv(fn_df_time)
-    df_time.to_parquet(fn_df_time_parquet)
+    csv_path = str(tmpdir.join("test.csv"))
+    parquet_path = str(tmpdir.join("test.parquet"))
+    df.to_csv(csv_path)
+    df.to_parquet(parquet_path)
+    csv_ts_path = str(tmpdir.join("test_ts.csv"))
+    parquet_ts_path = str(tmpdir.join("test_ts.parquet"))
+    df_time.to_csv(csv_ts_path)
+    df_time.to_parquet(parquet_ts_path)
 
     # Test to_file method (needs reading)
     data_dict = {
         "test_df": {
-            "path": fn_df,
+            "path": csv_path,
             "driver": "csv",
             "data_type": "DataFrame",
             "kwargs": {
@@ -544,7 +544,7 @@ def test_export_dataframe(tmpdir, df, df_time):
             },
         },
         "test_df_ts": {
-            "path": fn_df_time,
+            "path": csv_ts_path,
             "driver": "csv",
             "data_type": "DataFrame",
             "kwargs": {
@@ -553,12 +553,12 @@ def test_export_dataframe(tmpdir, df, df_time):
             },
         },
         "test_df_parquet": {
-            "path": fn_df_parquet,
+            "path": parquet_path,
             "driver": "parquet",
             "data_type": "DataFrame",
         },
         "test_df_ts_parquet": {
-            "path": fn_df_time_parquet,
+            "path": parquet_ts_path,
             "driver": "parquet",
             "data_type": "DataFrame",
         },
@@ -569,7 +569,7 @@ def test_export_dataframe(tmpdir, df, df_time):
 
     data_catalog.export_data(
         str(tmpdir),
-        time_tuple=("2010-02-01", "2010-02-14"),
+        time_range=("2010-02-01", "2010-02-14"),
         bbox=[11.70, 45.35, 12.95, 46.70],
         handle_nodata=NoDataStrategy.IGNORE,
     )
@@ -971,7 +971,7 @@ class TestGetGeoDataset:
     ):
         da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
             geojson_dataset,
-            driver={"name": "geodataset_vector", "options": {"fn_data": csv_dataset}},
+            driver={"name": "geodataset_vector", "options": {"data_path": csv_dataset}},
         )
         assert isinstance(da, xr.DataArray), type(da)
         da = da.sortby("index")
@@ -1015,7 +1015,7 @@ class TestGetGeoDataset:
             xy_dataset,
             driver={
                 "name": "geodataset_vector",
-                "options": {"fn_data": csv_dataset},
+                "options": {"data_path": csv_dataset},
             },
             metadata={"crs": geodf.crs},
         )
@@ -1125,7 +1125,7 @@ def test_get_geodataset_artifact_data(data_catalog):
     assert isinstance(da, xr.DataArray)
 
 
-def test_get_geodataset_bbox_time_tuple(data_catalog: DataCatalog):
+def test_get_geodataset_bbox_time_range(data_catalog: DataCatalog):
     name = "gtsmv3_eu_era5"
     uri = data_catalog.get_source(name).uri
     p = Path(data_catalog.root) / uri
@@ -1378,9 +1378,9 @@ class TestGetDataFrame:
 def test_get_dataframe(df, tmpdir, data_catalog):
     n = len(data_catalog)
     name = "test.csv"
-    fn = str(tmpdir.join(name))
-    df.to_csv(fn)
-    df = data_catalog.get_dataframe(fn)
+    csv_path = str(tmpdir.join(name))
+    df.to_csv(csv_path)
+    df = data_catalog.get_dataframe(csv_path)
     assert len(data_catalog) == n + 1
     assert isinstance(df, pd.DataFrame)
 
