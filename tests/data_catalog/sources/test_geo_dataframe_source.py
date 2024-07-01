@@ -122,8 +122,8 @@ class TestGeoDataFrameSource:
         assert gdf["NAME_0"].attrs["long_name"] == "Country names"
 
     def test_to_stac_geodataframe(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
-        fn_gdf = str(tmp_dir / "test.geojson")
-        geodf.to_file(fn_gdf, driver="GeoJSON")
+        gdf_path = str(tmp_dir / "test.geojson")
+        geodf.to_file(gdf_path, driver="GeoJSON")
         data_catalog = DataCatalog()  # read artifacts
         _ = data_catalog.sources  # load artifact data as fallback
 

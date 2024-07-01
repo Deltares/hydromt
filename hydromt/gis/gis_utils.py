@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """GIS related convenience functions."""
+
 from __future__ import annotations
 
 import logging
@@ -181,7 +182,7 @@ def to_geographic_bbox(
 
 
 def bbox_from_file_and_filters(
-    fn: str,
+    path: str,
     bbox: Optional[GpdShapeGeom] = None,
     mask: Optional[GpdShapeGeom] = None,
     crs: Optional[CRS] = None,
@@ -196,8 +197,8 @@ def bbox_from_file_and_filters(
 
     Parameters
     ----------
-    fn: IOBase,
-        opened file.
+    path: IOBase,
+        path to the opened file.
     bbox: GeoDataFrame | GeoSeries | BaseGeometry
         bounding box to filter the data while reading.
     mask: GeoDataFrame | GeoSeries | BaseGeometry
@@ -212,7 +213,7 @@ def bbox_from_file_and_filters(
         )
     if bbox is None and mask is None:
         return None
-    if source_crs_str := read_info(fn).get("crs"):
+    if source_crs_str := read_info(path).get("crs"):
         source_crs = CRS(source_crs_str)
     elif crs:
         source_crs = crs

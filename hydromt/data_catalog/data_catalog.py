@@ -1020,7 +1020,7 @@ class DataCatalog(object):
             Path to output folder
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
-        time_tuple : tuple of str, datetime, optional
+        time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         source_names: list, optional
@@ -1080,10 +1080,10 @@ class DataCatalog(object):
             sources = copy.deepcopy(self.sources)
 
         # read existing data catalog if it exists
-        fn = join(data_root, "data_catalog.yml")
-        if isfile(fn) and append:
-            logger.info(f"Appending existing data catalog {fn}")
-            sources_out = DataCatalog(fn).sources
+        path = join(data_root, "data_catalog.yml")
+        if isfile(path) and append:
+            logger.info(f"Appending existing data catalog {path}")
+            sources_out = DataCatalog(path).sources
         else:
             sources_out = {}
 
@@ -1106,11 +1106,11 @@ class DataCatalog(object):
                                     f"File {p} already exists and not in forced overwrite mode. skipping..."
                                 )
                                 continue
-                            fn_out, driver, driver_kwargs = source.to_file(
+                            write_path, driver, driver_kwargs = source.to_file(
                                 file_path=p,
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
-                                time_tuple=time_range,
+                                time_range=time_range,
                                 handle_nodata=NoDataStrategy.RAISE,
                             )
                         except NoDataException as e:
@@ -1127,7 +1127,7 @@ class DataCatalog(object):
                         else:
                             source.unit_mult = unit_mult
                             source.unit_add = unit_add
-                        source.path = fn_out
+                        source.path = write_path
                         source.driver = driver
                         source.filesystem = "local"
                         source.driver_kwargs = {}
@@ -1154,7 +1154,7 @@ class DataCatalog(object):
                 for _version, adapter in available_versions.items():
                     data_catalog_out.add_source(key, adapter)
 
-        data_catalog_out.to_yml(fn, root="auto", meta=meta)
+        data_catalog_out.to_yml(path, root="auto", meta=meta)
 
     def get_rasterdataset(
         self,
@@ -1428,7 +1428,7 @@ class DataCatalog(object):
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` argument.
         To slice the data to the time period of interest, provide the
-        `time_tuple` argument. To return only the dataset variables
+        `time_range` argument. To return only the dataset variables
         of interest provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source

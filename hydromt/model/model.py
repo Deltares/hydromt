@@ -408,19 +408,19 @@ class Model(object, metaclass=ABCMeta):
     def write_data_catalog(
         self,
         root: Optional[StrPath] = None,
-        data_lib_fn: StrPath = "hydromt_data.yml",
+        data_lib_path: StrPath = "hydromt_data.yml",
         used_only: bool = True,
         append: bool = True,
         save_csv: bool = False,
     ):
-        """Write the data catalog to data_lib_fn.
+        """Write the data catalog to data_lib_path.
 
         Parameters
         ----------
         root: str, Path, optional
             Global root for all relative paths in configuration file.
             If "auto" the data source paths are relative to the yaml output ``path``.
-        data_lib_fn: str, Path, optional
+        data_lib_path: str, Path, optional
             Path of output yml file, absolute or relative to the model root,
             by default "hydromt_data.yml".
         used_only: bool, optional
@@ -431,7 +431,11 @@ class Model(object, metaclass=ABCMeta):
             If True, save the data catalog also as an csv table. By default False.
         """
         self.root._assert_write_mode()
-        path = data_lib_fn if isabs(data_lib_fn) else join(self.root.path, data_lib_fn)
+        path = (
+            data_lib_path
+            if isabs(data_lib_path)
+            else join(self.root.path, data_lib_path)
+        )
         cat = DataCatalog(fallback_lib=None)
         # read hydromt_data yml file and add to data catalog
         if self.root.is_reading_mode() and isfile(path) and append:

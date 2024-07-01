@@ -50,7 +50,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         data_root: StrPath,
         data_name: str,
         bbox: Optional[Bbox] = None,
-        time_tuple: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         driver: Optional[str] = None,
         variables: Optional[Variables] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -66,7 +66,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             Name of output file without extension.
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
-        time_tuple : tuple of str, datetime, optional
+        time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         driver : str, optional
@@ -81,7 +81,7 @@ class RasterDatasetAdapter(DataAdapterBase):
 
         Returns
         -------
-        fn_out: str
+        write_path: str
             Absolute path to output file
         driver: str
             Name of driver to read data with, see
@@ -91,7 +91,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         """
         obj = self.get_data(
             bbox=bbox,
-            time_tuple=time_tuple,
+            time_range=time_range,
             variables=variables,
             handle_nodata=handle_nodata,
             single_var_as_array=variables is None,
@@ -109,18 +109,20 @@ class RasterDatasetAdapter(DataAdapterBase):
             dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
             if variables is None:
                 encoding = {k: {"zlib": True} for k in dvars}
-                fn_out = join(data_root, f"{data_name}.nc")
-                obj.to_netcdf(fn_out, encoding=encoding, **kwargs)
+                write_path = join(data_root, f"{data_name}.nc")
+                obj.to_netcdf(write_path, encoding=encoding, **kwargs)
             else:  # save per variable
                 if not os.path.isdir(join(data_root, data_name)):
                     os.makedirs(join(data_root, data_name))
                 for var in dvars:
-                    fn_out = join(data_root, data_name, f"{var}.nc")
-                    obj[var].to_netcdf(fn_out, encoding={var: {"zlib": True}}, **kwargs)
-                fn_out = join(data_root, data_name, "{variable}.nc")
+                    write_path = join(data_root, data_name, f"{var}.nc")
+                    obj[var].to_netcdf(
+                        write_path, encoding={var: {"zlib": True}}, **kwargs
+                    )
+                write_path = join(data_root, data_name, "{variable}.nc")
         elif driver == "zarr":
-            fn_out = join(data_root, f"{data_name}.zarr")
-            obj.to_zarr(fn_out, **kwargs)
+            write_path = join(data_root, f"{data_name}.zarr")
+            obj.to_zarr(write_path, **kwargs)
         elif driver not in GDAL_DRIVER_CODE_MAP.values():
             raise ValueError(f"RasterDataset: Driver {driver} unknown.")
         else:
@@ -128,16 +130,16 @@ class RasterDatasetAdapter(DataAdapterBase):
             if driver == "GTiff" and "compress" not in kwargs:
                 kwargs.update(compress="lzw")  # default lzw compression
             if isinstance(obj, xr.DataArray):
-                fn_out = join(data_root, f"{data_name}.{ext}")
-                obj.raster.to_raster(fn_out, driver=driver, **kwargs)
+                write_path = join(data_root, f"{data_name}.{ext}")
+                obj.raster.to_raster(write_path, driver=driver, **kwargs)
             else:
-                fn_out = join(data_root, data_name, "{variable}" + f".{ext}")
+                write_path = join(data_root, data_name, "{variable}" + f".{ext}")
                 obj.raster.to_mapstack(
                     join(data_root, data_name), driver=driver, **kwargs
                 )
             driver = "raster"
 
-        return fn_out, driver, read_kwargs
+        return write_path, driver, read_kwargs
 
     def transform(
         self,
@@ -399,17 +401,17 @@ class RasterDatasetAdapter(DataAdapterBase):
     # TODO: https://github.com/Deltares/hydromt/issues/875
     # uses rasterio and is specific to driver. Should be moved to driver
     def _get_zoom_levels_and_crs(
-        self, fn: Optional[StrPath] = None
+        self, path: Optional[StrPath] = None
     ) -> Tuple[Optional[dict], Optional[int]]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         if self.source.zoom_levels is not None and self.source.crs is not None:
             return self.zoom_levels, self.source.crs
         zoom_levels = {}
         crs = None
-        if fn is None:
-            fn = self.source.uri
+        if path is None:
+            path = self.source.uri
         try:
-            with rasterio.open(fn) as src:
+            with rasterio.open(path) as src:
                 res = abs(src.res[0])
                 crs = src.crs
                 overviews = [src.overviews(i) for i in src.indexes]

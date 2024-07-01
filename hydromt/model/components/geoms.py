@@ -152,14 +152,14 @@ class GeomsComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
         f = filename or self._filename
         read_path = self.root.path / f
-        fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
+        path_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
             str(read_path)
         )
-        fns = glob(fn_glob)
-        for fn in fns:
-            name = ".".join(regex.match(fn).groups())  # type: ignore
-            geom = cast(GeoDataFrame, gpd.read_file(fn, **kwargs))
-            logger.debug(f"Reading model file {name} at {fn}.")
+        paths = glob(path_glob)
+        for p in paths:
+            name = ".".join(regex.match(p).groups())  # type: ignore
+            geom = cast(GeoDataFrame, gpd.read_file(p, **kwargs))
+            logger.debug(f"Reading model file {name} at {p}.")
 
             self.set(geom=geom, name=name)
 

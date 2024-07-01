@@ -454,7 +454,7 @@ The path may refer to both GIS vector data such as GeoJSON with only Point geome
 or tabulated point vector data such as csv files, see earlier examples for GeoDataFrame datasets.
 Finally, certain binary formats such as parquet are also supported.
 In addition a tabulated time-series text file can be passed to be used as a variable of the GeoDataset.
-This data is added by a second file which is referred to using the ``fn_data`` key-word argument.
+This data is added by a second file which is referred to using the ``data_path`` key-word argument.
 The index of the time-series (in the columns header) and point locations must match.
 For more options see the :py:meth:`~hydromt.io.open_geodataset` method.
 
@@ -466,7 +466,7 @@ For more options see the :py:meth:`~hydromt.io.open_geodataset` method.
       driver: vector
       crs: 4326
       driver_kwargs:
-        fn_data: /path/to/stations_data.csv
+        data_path: /path/to/stations_data.csv
 
 *Tabulated time series text file*
 

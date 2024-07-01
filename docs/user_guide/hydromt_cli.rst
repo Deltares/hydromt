@@ -246,7 +246,7 @@ An example of the export file is:
             - /path/to/data_catalog.yml
         region:
             bbox: [4.68,53.19,4.69,53.20]
-        time_tuple: ['2010-01-01', '2020-12-31']
+        time_range: ['2010-01-01', '2020-12-31']
         sources:
             - hydro_lakes
             - era5
