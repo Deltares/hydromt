@@ -34,6 +34,7 @@ Changed
 - The model class has been moved to a component architecture. See the migration guide for more info (#845)
 - Changed the `GeoDatasetAdapter` to transform vector data from tabular formats. (#912)
 - Changed the logging in HydroMT to canonical logging using logging hierarchy (#1006)
+- Rename variables away from the conventions `fn` and `time_tuple` (#1017)
 
 
 Removed
