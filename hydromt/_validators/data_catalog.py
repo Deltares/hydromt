@@ -93,6 +93,8 @@ class DataCatalogItemMetadata(BaseModel):
     source_url: Optional[AnyUrl] = None
     source_version: Optional[str] = None
     notes: Optional[str] = None
+    temporal_extent: Optional[dict] = None
+    spatial_extent: Optional[dict] = None
 
     model_config: ConfigDict = ConfigDict(
         str_strip_whitespace=True, coerce_numbers_to_str=True
@@ -131,7 +133,9 @@ class DataCatalogItem(BaseModel):
     path: Optional[Path] = None
     crs: Optional[Union[int, str]] = None
     filesystem: Optional[str] = None
-    kwargs: Dict[str, Any] = Field(default_factory=dict)
+    provider: Optional[str] = None
+    driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
+    kwargs: Dict[str, Any] = Field(default_factory=dict)  # deprecated
     storage_options: Dict[str, Any] = Field(default_factory=dict)
     placeholders: Optional[Dict[str, Any]] = None
     rename: Dict[str, str] = Field(default_factory=dict)
