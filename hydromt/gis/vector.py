@@ -20,6 +20,7 @@ from hydromt.gis.vector_utils import filter_gdf
 logger = logging.getLogger(__name__)
 GDAL_VERSION = gdal_version()
 
+
 __all__ = ["GeoDataArray", "GeoDataset"]
 
 
@@ -339,7 +340,7 @@ class GeoBase(raster.XGeoBase):
                 geom_name = self.attrs.get("geom_name", "geometry")
             elif self.geom_name != geom_name:
                 drop_vars.append(self.geom_name)
-            coords = {geom_name: (index_dim, geometry.values)}
+            coords = {geom_name: (index_dim, geometry.values.to_numpy())}
         elif geom_format == "wkt":
             if geom_name is None:
                 geom_name = self.attrs.get("geom_name", "ogc_wkt")
@@ -906,7 +907,7 @@ class GeoDataset(GeoBase):
         ---------
         gdf: geopandas GeoDataFrame
             Spatial coordinates. The index should match the df index and the geometry
-            column may only contain Point geometries. Additional columns are also
+            column may only contain Polygon, MultiPolygon, and Point geometries. Additional columns are also
             parsed to the xarray DataArray coordinates.
         data_vars: dict-like, DataArray or Dataset
             A mapping from variable names to `xarray.DataArray` objects.

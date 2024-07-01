@@ -17,8 +17,9 @@ import rasterio
 import rioxarray
 import xarray as xr
 from pyogrio import read_dataframe
+from pyproj import CRS
 from requests import get as fetch
-from shapely.geometry import Polygon, box
+from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 from tomli import load as load_toml
 from yaml import safe_load as load_yaml
@@ -48,6 +49,11 @@ __all__ = [
     "read_yaml",
     "read_toml",
 ]
+
+OPEN_VECTOR_PREDICATE = Literal[
+    "intersects", "within", "contains", "overlaps", "crosses", "touches"
+]
+OPEN_VECTOR_DRIVER = Literal["csv", "xls", "xy", "vector", "parquet"]
 
 
 def open_mfcsv(
@@ -409,7 +415,7 @@ def open_raster_from_tindex(
     if geom is None:
         raise ValueError("bbox or geom required in combination with tile_index")
     gdf = gpd.read_file(tindex_path)
-    gdf = gdf.iloc[gdf.sindex.query(geom.to_crs(gdf.crs).unary_union)]
+    gdf = gdf.iloc[gdf.sindex.query(geom.to_crs(gdf.crs).union_all())]
     if gdf.index.size == 0:
         raise IOError("No intersecting tiles found.")
     elif tileindex not in gdf.columns:
@@ -582,15 +588,14 @@ def open_timeseries_from_table(path, name=None, index_dim="index", **kwargs):
 
 
 def open_vector(
-    path,
-    driver=None,
-    crs=None,
-    dst_crs=None,
-    bbox=None,
-    geom=None,
-    assert_gtype=None,
-    predicate="intersects",
-    mode="r",
+    path: StrPath,
+    driver: Optional[OPEN_VECTOR_DRIVER] = None,
+    crs: Optional[CRS] = None,
+    dst_crs: Optional[CRS] = None,
+    bbox: Optional[Tuple[float]] = None,
+    geom: Optional[Union[gpd.GeoDataFrame, gpd.GeoSeries]] = None,
+    assert_gtype: Optional[Union[Point, LineString, Polygon]] = None,
+    predicate: OPEN_VECTOR_PREDICATE = "intersects",
     **kwargs,
 ):
     """Open fiona-compatible geometry, csv, parquet, excel or xy file and parse it.
@@ -619,21 +624,14 @@ def open_vector(
         Filter for features that intersect with the mask.
         CRS mis-matches are resolved if given a GeoSeries or GeoDataFrame.
         Cannot be used with bbox.
+    assert_gtype : {Point, LineString, Polygon}, optional
+        If given, assert geometry type
     predicate : {'intersects', 'within', 'contains', 'overlaps', 'crosses', 'touches'},
         optional. If predicate is provided, the GeoDataFrame is filtered by testing
         the predicate function against each item. Requires bbox or mask.
         By default 'intersects'
-    x_dim, y_dim : str
-        Name of x, y-coordinate columns, only applicable for parquet, csv or xls tables
-    assert_gtype : {Point, LineString, Polygon}, optional
-        If given, assert geometry type
-    mode: {'r', 'a', 'w'}
-        file opening mode (fiona files only), by default 'r'
     **kwargs:
         Keyword args to be passed to the driver method when opening the file
-    logger : logger object, optional
-        The logger object used for logging messages. If not provided, the default
-        logger will be used.
 
     Returns
     -------
@@ -644,6 +642,7 @@ def open_vector(
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
         gdf = open_vector_from_table(path, driver=driver, **kwargs)
     # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
+
     else:
         if driver == "pyogrio":
             if bbox:
@@ -653,9 +652,11 @@ def open_vector(
             bbox_reader = gis_utils.bbox_from_file_and_filters(
                 str(path), bbox_shapely, geom, crs
             )
-            gdf = read_dataframe(str(path), bbox=bbox_reader, mode=mode, **kwargs)
+            gdf = read_dataframe(str(path), bbox=bbox_reader, **kwargs)
         else:
-            gdf = gpd.read_file(str(path), bbox=bbox, mask=geom, mode=mode, **kwargs)
+            if isinstance(bbox, list):
+                bbox = tuple(bbox)
+            gdf = gpd.read_file(str(path), bbox=bbox, mask=geom, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:

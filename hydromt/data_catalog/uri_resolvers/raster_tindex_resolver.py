@@ -65,7 +65,7 @@ class RasterTindexResolver(URIResolver):
         if mask is None:
             raise ValueError(f"Resolver {self.name} needs a mask")
         gdf = gpd.read_file(uri)
-        gdf = gdf.iloc[gdf.sindex.query(mask.to_crs(gdf.crs).unary_union)]
+        gdf = gdf.iloc[gdf.sindex.query(mask.to_crs(gdf.crs).union_all())]
         tileindex: Optional[str] = options.get("tileindex")
         if tileindex is None:
             raise ValueError(
