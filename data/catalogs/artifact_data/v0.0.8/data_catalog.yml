@@ -1,6 +1,6 @@
 meta:
   version: v0.0.8
-  root: https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.8/data.tar.gz
+  root: https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.7/data.tar.gz
   name: artifact_data
 
 chelsa:
@@ -13,8 +13,9 @@ chelsa:
     paper_ref: Karger et al. (2017)
     source_license: CC BY 4.0
     source_url: http://chelsa-climate.org/downloads/
-    source_version: 1.2
+  version: 1.2
   path: chelsa.tif
+
 chirps_global:
   crs: 4326
   data_type: RasterDataset
@@ -25,10 +26,11 @@ chirps_global:
     paper_ref: Funk et al (2014)
     source_license: CC
     source_url: https://www.chc.ucsb.edu/data/chirps
-    source_version: v2.0
+  version: 2.0
   path: chirps_global.nc
   unit_add:
     time: 86400
+
 corine:
   data_type: RasterDataset
   driver: raster
@@ -37,8 +39,9 @@ corine:
     source_author: European Environment Agency
     source_license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
     source_url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
-    source_version: v.2020_20u1
+  version: 2020_20u1
   path: corine.tif
+
 dtu10mdt:
   crs: 4326
   data_type: RasterDataset
@@ -48,9 +51,10 @@ dtu10mdt:
     paper_doi: 10.1029/2008JC005179
     paper_ref: Andersen and Knudsen (2009)
     source_url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
-    source_version: 2010
     unit: m+EGM2008
+  version: 2010
   path: dtu10mdt.tif
+
 dtu10mdt_egm96:
   crs: 4326
   data_type: RasterDataset
@@ -60,9 +64,10 @@ dtu10mdt_egm96:
     paper_doi: 10.1029/2008JC005179
     paper_ref: Andersen and Knudsen (2009)
     source_url: https://www.space.dtu.dk/english/research/scientific_data_and_models/global_mean_dynamic_topography
-    source_version: 2010
     unit: m+EGM96
+  version: 2010
   path: dtu10mdt_egm96.tif
+
 eobs:
   crs: 4326
   data_type: RasterDataset
@@ -73,10 +78,11 @@ eobs:
     paper_ref: Cornes et al (2018)
     source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    source_version: 22.0e
+  version: 22.0e
   path: eobs.nc
   unit_add:
     time: 86400
+
 eobs_orography:
   crs: 4326
   data_type: RasterDataset
@@ -87,8 +93,9 @@ eobs_orography:
     paper_ref: Cornes et al (2018)
     source_license: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
     source_url: https://surfobs.climate.copernicus.eu/dataaccess/access_eobs.php#datafiles
-    source_version: 22.0e
+  version: 22.0e
   path: eobs_orography.nc
+
 era5:
   crs: 4326
   data_type: RasterDataset
@@ -102,7 +109,6 @@ era5:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 daily data on pressure levels
   path: era5.nc
   unit_add:
     temp: -273.15
@@ -114,6 +120,7 @@ era5:
     kout: 0.000277778
     precip: 1000
     press_msl: 0.01
+
 era5_hourly:
   crs: 4326
   data_type: RasterDataset
@@ -125,7 +132,6 @@ era5_hourly:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 hourly data on pressure levels
   path: era5_hourly.nc
   unit_add:
     temp: -273.15
@@ -134,6 +140,7 @@ era5_hourly:
     kout: 0.000277778
     precip: 1000
     press_msl: 0.01
+
 era5_daily_zarr:
   crs: 4326
   data_type: RasterDataset
@@ -147,7 +154,6 @@ era5_daily_zarr:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 daily data on pressure levels
   path: era5_daily_zarr.zarr
   rename:
     d2m: temp_dew
@@ -157,6 +163,7 @@ era5_daily_zarr:
     temp_dew: -273.15
   unit_mult:
     ssr: 0.000277778
+
 era5_hourly_zarr:
   crs: 4326
   data_type: RasterDataset
@@ -168,7 +175,6 @@ era5_hourly_zarr:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 hourly data on pressure levels
   path: era5_hourly_zarr.zarr
   rename:
     d2m: temp_dew
@@ -178,6 +184,7 @@ era5_hourly_zarr:
     temp_dew: -273.15
   unit_mult:
     ssr: 0.000277778
+
 era5_orography:
   crs: 4326
   data_type: RasterDataset
@@ -189,10 +196,10 @@ era5_orography:
     paper_ref: Hersbach et al. (2019)
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://doi.org/10.24381/cds.bd0915c6
-    source_version: ERA5 hourly data on pressure levels
   path: era5_orography.nc
   unit_mult:
     elevtn: 0.10197162129779283
+
 gadm_level1:
   crs: 4326
   data_type: GeoDataFrame
@@ -203,8 +210,9 @@ gadm_level1:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 1.0
+  version: 1.0
   path: gadm_level1.gpkg
+
 gadm_level2:
   crs: 4326
   data_type: GeoDataFrame
@@ -215,8 +223,9 @@ gadm_level2:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 1.0
+  version: 1.0
   path: gadm_level2.gpkg
+
 gadm_level3:
   crs: 4326
   data_type: GeoDataFrame
@@ -227,8 +236,9 @@ gadm_level3:
     source_author: gadm
     source_license: https://gadm.org/license.html
     source_url: https://gadm.org/download_world.html
-    source_version: 1.0
+  version: 1.0
   path: gadm_level3.gpkg
+
 gcn250:
   data_type: RasterDataset
   driver: raster
@@ -238,9 +248,10 @@ gcn250:
     paper_ref: Jaafar et al. (2019)
     source_license: CC BY 4.0
     source_url: https://doi.org/10.6084/m9.figshare.7756202.v1
-    source_version: v1
+  version: 1
   nodata: 255
   path: gcn250/{variable}.tif
+
 gdp_world:
   crs: 4326
   data_type: GeoDataFrame
@@ -252,8 +263,9 @@ gdp_world:
       data combined from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
       and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
     source_license: CC BY-4.0
-    source_version: 1.0
+  version: 1.0
   path: gdp_world.gpkg
+
 gebco:
   crs: 4326
   data_type: RasterDataset
@@ -264,22 +276,31 @@ gebco:
     paper_ref: Weatherall et al (2020)
     source_license: https://www.gebco.net/data_and_products/gridded_bathymetry_data/#a1
     source_url: https://www.bodc.ac.uk/data/open_download/gebco/gebco_2020/geotiff/
-    source_version: 2020
     unit: m+MSL
+  version: 2020
   path: gebco.tif
-ghs-smod_2015_v2:
-  crs: 54009
+
+ghs_smod_2015:
+  crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
   meta:
     category: socio economic
-    paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
-    paper_ref: Pesaresi et al (2019)
     source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
-    source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
-    source_version: R2019A_v2.0
-  path: ghs-smod_2015_v2.tif
+  variants:
+  - version: R2016A_v1.0
+    path: ghs_smod_2015.tif
+    meta:
+      paper_ref: Pesaresi and Freire (2016)
+      source_url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
+  - version: R2019A_v2.0
+    path: ghs-smod_2015_v2.tif
+    meta:
+      paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+      paper_ref: Pesaresi et al (2019)
+      source_url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+
 ghs_pop_2015:
   crs: 4326
   data_type: RasterDataset
@@ -291,10 +312,11 @@ ghs_pop_2015:
     source_author: JRC-ISPRA EC
     source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
     source_url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
-    source_version: R2019A_v1.0
+  version: R2019A_v1.0
   path: ghs_pop_2015.tif
+
 ghs_pop_2015_54009:
-  crs: 54009
+  crs: ESRI:54009
   data_type: RasterDataset
   driver: raster
   meta:
@@ -303,19 +325,9 @@ ghs_pop_2015_54009:
     paper_ref: Florczyk et al (2019)
     source_license: CC BY 4.0
     source_url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
+  version: R2019A_v1.0
   path: ghs_pop_2015_54009.tif
-ghs_smod_2015:
-  crs: 54009
-  data_type: RasterDataset
-  driver: raster
-  meta:
-    category: socio economic
-    paper_ref: Pesaresi and Freire (2016)
-    source_author: JRC-ISPRA EC
-    source_license: https://data.jrc.ec.europa.eu/licence/com_reuse
-    source_url: https://data.jrc.ec.europa.eu/dataset/jrc-ghsl-ghs_smod_pop_globe_r2016a
-    source_version: R2016A_v1.0
-  path: ghs_smod_2015.tif
+
 globcover:
   crs: 4326
   data_type: RasterDataset
@@ -326,7 +338,9 @@ globcover:
     paper_ref: Arino et al (2012)
     source_license: CC-BY-3.0
     source_url: http://due.esrin.esa.int/page_globcover.php
+  version: 2.3
   path: globcover.tif
+
 glw_buffaloes:
   crs: 4326
   data_type: RasterDataset
@@ -338,8 +352,9 @@ glw_buffaloes:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: GLW 3, last downloaded 2020-06-11
+  version: 3
   path: glw_buffaloes.tif
+
 glw_cattle:
   crs: 4326
   data_type: RasterDataset
@@ -351,8 +366,9 @@ glw_cattle:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: GLW 3, last downloaded 2020-06-11
+  version: 3
   path: glw_cattle.tif
+
 glw_chicken:
   crs: 4326
   data_type: RasterDataset
@@ -364,8 +380,9 @@ glw_chicken:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: GLW 3, last downloaded 2020-06-11
+  version: 3
   path: glw_chicken.tif
+
 glw_ducks:
   crs: 4326
   data_type: RasterDataset
@@ -377,8 +394,9 @@ glw_ducks:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: GLW 3, last downloaded 2020-06-11
+  version: 3
   path: glw_ducks.tif
+
 glw_goats:
   crs: 4326
   data_type: RasterDataset
@@ -390,8 +408,9 @@ glw_goats:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: GLW 3, last downloaded 2020-06-11
+  version: 3
   path: glw_goats.tif
+
 glw_horses:
   crs: 4326
   data_type: RasterDataset
@@ -403,8 +422,9 @@ glw_horses:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: GLW 3, last downloaded 2020-06-11
+  version: 3
   path: glw_horses.tif
+
 glw_pigs:
   crs: 4326
   data_type: RasterDataset
@@ -416,8 +436,9 @@ glw_pigs:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: GLW 3, last downloaded 2020-06-11
+  version: 3
   path: glw_pigs.tif
+
 glw_sheep:
   crs: 4326
   data_type: RasterDataset
@@ -429,8 +450,9 @@ glw_sheep:
     source_author: glw (Gridded Livestock of World 3 Dataverse)
     source_license: CC 4.0
     source_url: https://dataverse.harvard.edu/dataverse/glw_3
-    source_version: GLW 3, last downloaded 2020-06-11
+  version: 3
   path: glw_sheep.tif
+
 grdc:
   crs: 4326
   data_type: GeoDataFrame
@@ -441,6 +463,7 @@ grdc:
     source_license: https://www.bafg.de/GRDC/EN/02_srvcs/21_tmsrs/210_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
     source_url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
   path: grdc.csv
+
 grip_roads:
   crs: 4326
   data_type: GeoDataFrame
@@ -451,8 +474,9 @@ grip_roads:
     paper_ref: Meijer et al, 2018
     source_license: CC0-1.0
     source_url: https://www.globio.info/download-grip-dataset
-    source_version: v4
+  version: 4
   path: grip_roads.gpkg
+
 grwl:
   data_type: GeoDataFrame
   driver: vector
@@ -462,12 +486,13 @@ grwl:
     paper_ref: Allen and Pavelsky (2018)
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.1297434
-    source_version: 1.01
+  version: 1.01
   path: grwl.gpkg
+
 grwl_mask:
   data_type: RasterDataset
   driver: raster_tindex
-  kwargs:
+  driver_kwargs:
     chunks:
       x: 3000
       y: 3000
@@ -479,9 +504,10 @@ grwl_mask:
     paper_ref: Allen and Pavelsky (2018)
     source_license: CC BY 4.0
     source_url: https://doi.org/10.5281/zenodo.1297434
-    source_version: 1.01
+  version: 1.01
   nodata: 0
   path: grwl_tindex.gpkg
+
 gswo:
   data_type: RasterDataset
   driver: raster
@@ -490,9 +516,10 @@ gswo:
     paper_doi: 10.1038/nature20584
     paper_ref: Pekel et al. (2016)
     source_url: https://global-surface-water.appspot.com/download
-    source_version: v1_1_2019
+  version: 1.1
   nodata: 255
   path: gswo.tif
+
 gtsmv3_eu_era5:
   crs: 4326
   data_type: GeoDataset
@@ -503,9 +530,10 @@ gtsmv3_eu_era5:
     paper_ref: Copernicus Climate Change Service 2019
     source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
     source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview
-    source_version: GTSM v3.0
+  version: 3.0
   path: gtsmv3_eu_era5.nc
-guf_bld_2012:
+
+guf:
   crs: 4326
   data_type: RasterDataset
   driver: raster
@@ -515,7 +543,9 @@ guf_bld_2012:
     paper_ref: Esch et al (2017)
     source_license: https://www.dlr.de/eoc/en/PortalData/60/Resources/dokumente/guf/DLR-GUF_LicenseAgreement-and-OrderForm.pdf
     source_url: http://www.dlr.de/guf
+  version: 2
   path: guf_bld_2012.tif
+
 hydro_lakes:
   crs: 4326
   data_type: GeoDataFrame
@@ -524,10 +554,11 @@ hydro_lakes:
     category: surface water
     source_author: Arjen Haag
     source_info: HydroLAKES.v10_extract
-    source_version: 1.0
+  version: 1.0
   path: hydro_lakes.gpkg
   unit_mult:
     Area_avg: 1000000.0
+
 hydro_reservoirs:
   crs: 4326
   data_type: GeoDataFrame
@@ -536,7 +567,7 @@ hydro_reservoirs:
     category: surface water
     source_author: Alessia Matano
     source_info: GRanD.v1.1_HydroLAKES.v10_JRC.2016
-    source_version: 1.0
+  version: 1.0
   nodata: -99
   path: hydro_reservoirs.gpkg
   unit_mult:
@@ -545,6 +576,7 @@ hydro_reservoirs:
     Capacity_min: 1000000.0
     Capacity_norm: 1000000.0
     Vol_avg: 1000000.0
+
 koppen_geiger:
   crs: 4326
   data_type: RasterDataset
@@ -554,9 +586,10 @@ koppen_geiger:
     paper_doi: 10.1127/0941-2948/2006/0130
     paper_ref: Kottek et al. (2006)
     source_url: http://koeppen-geiger.vu-wien.ac.at/present.htm
-    source_version: 2017
+  version: 2017
   nodata: 0
   path: koppen_geiger.tif
+
 mdt_cnes_cls18:
   crs: 4326
   data_type: RasterDataset
@@ -566,9 +599,10 @@ mdt_cnes_cls18:
     paper_doi: 10.5194/os-17-789-2021
     paper_ref: Mulet et al (2021)
     source_url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
-    source_version: 18
     unit: m+GOCO05S
+  version: 18
   path: mdt_cnes_cls18.tif
+
 merit_hydro:
   crs: 4326
   data_type: RasterDataset
@@ -579,8 +613,9 @@ merit_hydro:
     paper_ref: Yamazaki et al. (2019)
     source_license: CC-BY-NC 4.0 or ODbL 1.0
     source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
-    source_version: 1.0
+  version: 1.0
   path: merit_hydro/{variable}.tif
+
 merit_hydro_1k:
   crs: 4326
   data_type: RasterDataset
@@ -591,8 +626,9 @@ merit_hydro_1k:
     paper_ref: Eilander et al. (in review)
     source_license: CC-BY-NC 4.0
     source_url: https://doi.org/10.5281/zenodo.4138776
-    source_version: 0.1
+  version: 0.1
   path: merit_hydro_1k/{variable}.tif
+
 merit_hydro_index:
   crs: 4326
   data_type: GeoDataFrame
@@ -602,7 +638,9 @@ merit_hydro_index:
     paper_doi: 10.5194/hess-2020-582
     paper_ref: Eilander et al. (in review)
     source_license: CC-BY-NC 4.0
+  version: 1.0
   path: merit_hydro_index.gpkg
+
 modis_lai:
   crs: 4326
   data_type: RasterDataset
@@ -616,10 +654,11 @@ modis_lai:
     paper_ref: Myneni et al (2015)
     source_license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
     source_url: https://lpdaac.usgs.gov/products/mcd15a3hv006/
-    source_version: MCD15A3H V006
+  version: MCD15A3H V006
   path: modis_lai.nc
   unit_mult:
     LAI: 0.1
+
 osm_coastlines:
   crs: 4326
   data_type: GeoDataFrame
@@ -630,8 +669,9 @@ osm_coastlines:
     source_info: OpenStreetMap coastlines water polygons, last updated 2020-01-09T05:29
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
-    source_version: 1.0
+  version: 1.0
   path: osm_coastlines.gpkg
+
 osm_landareas:
   crs: 4326
   data_type: GeoDataFrame
@@ -642,8 +682,9 @@ osm_landareas:
     source_info: OpenStreetMap coastlines land polygons, last updated 2020-01-09T05:29
     source_license: ODbL
     source_url: https://osmdata.openstreetmap.de/data/coastlines.html
-    source_version: 1.0
+  version: 1.0
   path: osm_landareas.gpkg
+
 rgi:
   crs: 4326
   data_type: GeoDataFrame
@@ -655,9 +696,10 @@ rgi:
     source_info: Randolph Glacier Inventory
     source_license: CC BY 4.0
     source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
-    source_version: 6.0
+  version: 6.0
   path: rgi.gpkg
-rivers_lin2019_v1:
+
+hydro_rivers_lin2019:
   data_type: GeoDataFrame
   driver: vector
   meta:
@@ -666,8 +708,9 @@ rivers_lin2019_v1:
     paper_ref: Lin et al. (2019)
     source_license: CC-BY-NC 4.0
     source_url: https://zenodo.org/record/3552776#.YVbOrppByUk
-    source_version: 1
+  version: 1
   path: rivers_lin2019_v1.gpkg
+
 simard:
   crs: 4326
   data_type: RasterDataset
@@ -677,7 +720,9 @@ simard:
     paper_doi: 10.1029/2011JG001708
     paper_ref: Simard et al (2011)
     source_url: https://webmap.ornl.gov/ogc/dataset.jsp?ds_id=10023
+  version: 2011
   path: simard.tif
+
 soilgrids:
   crs: 4326
   data_type: RasterDataset
@@ -696,7 +741,7 @@ soilgrids:
     paper_ref: Hengl et al. (2017)
     source_license: ODbL
     source_url: https://www.isric.org/explore/soilgrids/faq-soilgrids-2017
-    source_version: 2017
+  version: 2017
   path: soilgrids/{variable}.tif
   unit_mult:
     bd_sl1: 0.001
@@ -720,6 +765,7 @@ soilgrids:
     ph_sl5: 0.1
     ph_sl6: 0.1
     ph_sl7: 0.1
+
 vito:
   crs: 4326
   data_type: RasterDataset
@@ -729,8 +775,9 @@ vito:
     paper_doi: 10.5281/zenodo.3939038
     paper_ref: Buchhorn et al (2020)
     source_url: https://land.copernicus.eu/global/products/lc
-    source_version: v2.0.2
+  version: 2.0.2
   path: vito.tif
+
 wb_countries:
   crs: 4326
   data_type: GeoDataFrame
@@ -741,7 +788,9 @@ wb_countries:
     source_license: CC-BY 4.0
     source_url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
     timestamp: February 2020
+  version: 2020319
   path: wb_countries.gpkg
+
 worldclim:
   crs: 4326
   data_type: RasterDataset
@@ -751,5 +800,6 @@ worldclim:
     paper_doi: 10.1002/joc.5086
     paper_ref: Fick and Hijmans (2017)
     source_url: https://www.worldclim.org/data/worldclim21.html
-    source_version: 2
+  version: 2
+  nodata: -999.0
   path: worldclim.nc
