@@ -1,10 +1,11 @@
-"""MetaDataResolvers obtain multiple URIs before being passed to Drivers."""
+"""URIResolvers obtain multiple URIs before being passed to Drivers."""
+
 from .convention_resolver import ConventionResolver
-from .metadata_resolver import MetaDataResolver
 from .raster_tindex_resolver import RasterTindexResolver
+from .uri_resolver import URIResolver
 
 __all__ = [
     "ConventionResolver",
-    "MetaDataResolver",
+    "URIResolver",
     "RasterTindexResolver",
 ]

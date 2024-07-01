@@ -56,8 +56,6 @@ def _cache_vrt_tiles(
         geometry to intersect tiles with
     cache_dir: str, Path
         path of the root folder where
-    logger: Logger
-        Logger to write logs to
 
     Returns
     -------

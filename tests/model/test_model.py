@@ -45,6 +45,51 @@ def _patch_plugin_components(
     return [type_mocks[c.__name__].return_value for c in component_classes]
 
 
+def test_from_dict_simple():
+    d = {
+        "modeltype": "model",
+        "global": {
+            "components": {
+                "grid": {"type": "GridComponent"},
+                "config": {"type": "ConfigComponent"},
+            },
+            "region_component": "grid",
+        },
+    }
+
+    model = Model.from_dict(d)
+    grid_comp = model.components["grid"]
+    assert isinstance(grid_comp, GridComponent)
+    config_comp = model.components["config"]
+    assert isinstance(config_comp, ConfigComponent)
+    assert model._region_component_name == "grid"
+
+
+def test_from_dict_multiple_spatials():
+    d = {
+        "modeltype": "model",
+        "global": {
+            "components": {
+                "grid1": {"type": "GridComponent"},
+                "grid2": {"type": "GridComponent"},
+                "forcing": {
+                    "type": "SpatialDatasetsComponent",
+                    "region_component": "grid1",
+                },
+            },
+            "region_component": "grid2",
+        },
+    }
+
+    model = Model.from_dict(d)
+    grid_comp = model.components["grid1"]
+    assert isinstance(grid_comp, GridComponent)
+    forcing_component = model.components["forcing"]
+    assert isinstance(forcing_component, SpatialDatasetsComponent)
+    assert forcing_component._region_component == "grid1"
+    assert model._region_component_name == "grid2"
+
+
 def test_write_data_catalog_no_used(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
     data_lib_path = join(model.root.path, "hydromt_data.yml")
@@ -114,11 +159,11 @@ def test_grid_model_append(demda, df, tmpdir):
     model.add_component("grid", grid_component)
 
     maps_component = SpatialDatasetsComponent(model, region_component="grid")
-    maps_component.set(demda, name="dem")
+    maps_component.set(demda, name="maps")
     model.add_component("maps", maps_component)
 
     forcing_component = SpatialDatasetsComponent(model, region_component="grid")
-    forcing_component.set(demda, name="dem")
+    forcing_component.set(demda, name="forcing")
     model.add_component("forcing", forcing_component)
 
     tables_component = TablesComponent(model)
@@ -140,11 +185,11 @@ def test_grid_model_append(demda, df, tmpdir):
     model2.add_component("grid", grid_component)
 
     maps_component = SpatialDatasetsComponent(model2, region_component="grid")
-    maps_component.set(demda, name="dem")
+    maps_component.set(demda, name="maps")
     model2.add_component("maps", maps_component)
 
     forcing_component = SpatialDatasetsComponent(model2, region_component="grid")
-    forcing_component.set(demda, name="dem")
+    forcing_component.set(demda, name="forcing")
     model2.add_component("forcing", forcing_component)
 
     tables_component = TablesComponent(model2)
@@ -158,10 +203,10 @@ def test_grid_model_append(demda, df, tmpdir):
     assert "dem" in model2.grid.data
 
     model2.maps.set(demda, name="dem1")
-    assert "dem" in model2.maps.data
+    assert "maps" in model2.maps.data
 
     model2.forcing.set(demda, name="dem1")
-    assert "dem" in model2.forcing.data
+    assert "forcing" in model2.forcing.data
 
     model2.forcing.set(df, name="df1", split_dataset=False)
     assert "df1" in model2.forcing.data

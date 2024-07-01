@@ -1,5 +1,6 @@
 """Xarrays component."""
 
+from logging import Logger, getLogger
 from shutil import move
 from typing import (
     TYPE_CHECKING,
@@ -23,6 +24,8 @@ from hydromt.model.hydromt_step import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
+
+logger: Logger = getLogger(__name__)
 
 
 class DatasetsComponent(ModelComponent):
@@ -110,7 +113,7 @@ class DatasetsComponent(ModelComponent):
 
         for name, d in ds.items():
             if name in self._data:
-                self.logger.warning(f"Replacing xarray: {name}")
+                logger.warning(f"Replacing xarray: {name}")
             self._data[name] = d
 
     @hydromt_step
@@ -171,7 +174,7 @@ class DatasetsComponent(ModelComponent):
         ----------
         nc_dict: dict
             Dictionary of xarray.Dataset and/or xarray.DataArray to write
-        path: str
+        fn: str
             filename relative to model root and should contain a {name} placeholder
         gdal_compliant: bool, optional
             If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
@@ -190,16 +193,16 @@ class DatasetsComponent(ModelComponent):
         self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            self.logger.debug("No data found, skipping writing.")
+            logger.debug("No data found, skipping writing.")
             return
 
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
         write_nc(
             self.data,
             filename_template=filename or self._filename,
+            force_overwrite=self.root.mode.is_override_mode(),
             root=self.root.path,
             gdal_compliant=gdal_compliant,
-            logger=self.logger,
             rename_dims=rename_dims,
             force_sn=force_sn,
             **kwargs,
@@ -227,27 +230,25 @@ class DatasetsComponent(ModelComponent):
             close_handle = self._defered_file_closes.pop()
             if close_handle["close_attempts"] > max_close_attempts:
                 # already tried to close this to many times so give up
-                self.logger.error(
-                    f"Max write attempts to file {close_handle['original_path']}"
+                logger.error(
+                    f"Max write attempts to file {close_handle['org_fn']}"
                     " exceeded. Skipping..."
-                    f"Instead data was written to tmpfile: {close_handle['temp_path']}"
+                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
                 )
                 continue
 
             if forceful_overwrite:
                 close_handle["ds"].close()
             try:
-                move(close_handle["temp_path"], close_handle["original_path"])
+                move(close_handle["tmp_fn"], close_handle["org_fn"])
             except PermissionError:
-                self.logger.error(
-                    f"Could not write to destination file {close_handle['original_path']} "
+                logger.error(
+                    f"Could not write to destination file {close_handle['org_fn']} "
                     "because the following error was raised: {e}"
                 )
                 close_handle["close_attempts"] += 1
                 self._defered_file_closes.append(close_handle)
-                failed_closes.append(
-                    (close_handle["original_path"], close_handle["temp_path"])
-                )
+                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
 
         return list(set(failed_closes))
 

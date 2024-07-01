@@ -1,10 +1,9 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
 
-import logging
 import os
-from logging import Logger
+from logging import Logger, getLogger
 from os import makedirs
-from os.path import dirname, exists, isdir, join
+from os.path import dirname, exists, isdir, isfile, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Union, cast
@@ -17,7 +16,7 @@ from yaml import dump as dump_yaml
 
 from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
 
-_logger = logging.getLogger(__name__)
+logger: Logger = getLogger(__name__)
 
 
 def write_yaml(path: StrPath, data: Dict[str, Any]):
@@ -32,12 +31,12 @@ def write_toml(path: StrPath, data: Dict[str, Any]):
         dump_toml(data, f)
 
 
-def write_xy(path, gdf, fmt="%.4f"):
+def write_xy(fn, gdf, fmt="%.4f"):
     """Write geopandas.GeoDataFrame with Point geometries to point xy files.
 
     Parameters
     ----------
-    path: str
+    fn: str
         Path to the output file.
     gdf: geopandas.GeoDataFrame
         GeoDataFrame to write to point file.
@@ -47,7 +46,7 @@ def write_xy(path, gdf, fmt="%.4f"):
     if not np.all(gdf.geometry.type == "Point"):
         raise ValueError("gdf should contain only Point geometries.")
     xy = np.stack((gdf.geometry.x.values, gdf.geometry.y.values)).T
-    with open(path, "w") as f:
+    with open(fn, "w") as f:
         np.savetxt(f, xy, fmt=fmt)
 
 
@@ -73,22 +72,22 @@ def netcdf_writer(
 
     Returns
     -------
-    write_path: str
+    fn_out: str
         Absolute path to output file
     """
     dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.data_vars
     if variables is None:
         encoding = {k: {encoder: True} for k in dvars}
-        write_path = join(data_root, f"{data_name}.nc")
-        obj.to_netcdf(write_path, encoding=encoding)
+        fn_out = join(data_root, f"{data_name}.nc")
+        obj.to_netcdf(fn_out, encoding=encoding)
     else:  # save per variable
         if not isdir(join(data_root, data_name)):
             os.makedirs(join(data_root, data_name))
         for var in dvars:
-            write_path = join(data_root, data_name, f"{var}.nc")
-            obj[var].to_netcdf(write_path, encoding={var: {encoder: True}})
-        write_path = join(data_root, data_name, "{variable}.nc")
-    return write_path
+            fn_out = join(data_root, data_name, f"{var}.nc")
+            obj[var].to_netcdf(fn_out, encoding={var: {encoder: True}})
+        fn_out = join(data_root, data_name, "{variable}.nc")
+    return fn_out
 
 
 def zarr_writer(
@@ -110,14 +109,14 @@ def zarr_writer(
 
     Returns
     -------
-    write_path: str
+    fn_out: str
         Absolute path to output file
     """
-    write_path = join(data_root, f"{data_name}.zarr")
+    fn_out = join(data_root, f"{data_name}.zarr")
     if isinstance(obj, xr.DataArray):
         obj = obj.to_dataset()
-    obj.to_zarr(write_path, **kwargs)
-    return write_path
+    obj.to_zarr(fn_out, **kwargs)
+    return fn_out
 
 
 def write_nc(
@@ -128,7 +127,7 @@ def write_nc(
     gdal_compliant: bool = False,
     rename_dims: bool = False,
     force_sn: bool = False,
-    logger: Logger = _logger,
+    force_overwrite: bool = False,
     **kwargs,
 ) -> Optional[DeferedFileClose]:
     """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
@@ -146,7 +145,7 @@ def write_nc(
     ----------
     nc_dict: dict
         Dictionary of xarray.Dataset and/or xarray.DataArray to write
-    path: str
+    fn: str
         filename relative to model root and should contain a {name} placeholder
     temp_data_dir: StrPath, optional
             Temporary directory to write grid to. If not given a TemporaryDirectory
@@ -170,24 +169,26 @@ def write_nc(
             logger.error(f"{name} object of type {type(ds).__name__} not recognized")
             continue
         logger.debug(f"Writing file {filename_template.format(name=name)}")
-        write_path = join(root, filename_template.format(name=name))
-        if not isdir(dirname(write_path)):
-            os.makedirs(dirname(write_path))
+        _fn = join(root, filename_template.format(name=name))
+        if isfile(_fn) and not force_overwrite:
+            raise IOError(f"File {_fn} already exists")
+        if not isdir(dirname(_fn)):
+            os.makedirs(dirname(_fn))
         if gdal_compliant:
             ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
         try:
-            ds.to_netcdf(write_path, **kwargs)
+            ds.to_netcdf(_fn, **kwargs)
         except PermissionError:
-            logger.warning(f"Could not write to file {write_path}, defering write")
+            logger.warning(f"Could not write to file {_fn}, defering write")
             temp_data_dir = TemporaryDirectory()
 
-            temp_path = join(str(temp_data_dir), f"{write_path}.tmp")
-            ds.to_netcdf(temp_path, **kwargs)
+            tmp_fn = join(str(temp_data_dir), f"{_fn}.tmp")
+            ds.to_netcdf(tmp_fn, **kwargs)
 
             return DeferedFileClose(
                 ds=ds,
-                original_path=join(str(temp_data_dir), write_path),
-                temp_path=temp_path,
+                org_fn=join(str(temp_data_dir), _fn),
+                tmp_fn=tmp_fn,
                 close_attempts=1,
             )
     return None
@@ -197,7 +198,6 @@ def write_region(
     region: gpd.GeoDataFrame,
     *,
     filename: StrPath,
-    logger: Logger = _logger,
     root_path: StrPath,
     to_wgs84=False,
     **write_kwargs,

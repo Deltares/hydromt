@@ -7,11 +7,10 @@ from datetime import datetime
 from json import loads as json_decode
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import click
 import numpy as np
-from geopandas import GeoDataFrame
 from pydantic import ValidationError
 
 from hydromt import __version__
@@ -233,9 +232,7 @@ def build(
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog(
-        "build", join(model_root, "hydromt.log"), log_level=log_level, append=False
-    )
+    log.setuplog(join(model_root, "hydromt.log"), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
     opt = _utils.parse_config(config, opt_cli=opt)
@@ -249,23 +246,23 @@ def build(
     try:
         # initialize model and create folder structure
         mode = "w+" if fo else "w"
+        if modeltype not in PLUGINS.model_plugins:
+            raise ValueError("Unknown model")
         mod = PLUGINS.model_plugins[modeltype](
             root=model_root,
             mode=mode,
-            logger=logger,
             data_libs=data_libs,
             **kwargs,
         )
         mod.data_catalog.cache = cache
         # build model
-        mod.build(opt=opt)
+        mod.build(steps=opt["steps"])
+
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## UPDATE
@@ -324,7 +321,7 @@ def update(
     --------------
 
     Update (overwrite!) landuse-landcover based maps in a Wflow model:
-    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_data=vito -d /path/to/data_catalog.yml -v
+    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
 
     Update Wflow model components outlined in an .yml configuration file and
     write the model to a directory:
@@ -333,7 +330,7 @@ def update(
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog("update", join(model_out, "hydromt.log"), log_level=log_level)
+    log.setuplog(join(model_out, "hydromt.log"), log_level=log_level)
     logger.info(f"Updating {model} model at {model_root} ({mode}).")
     logger.info(f"Output dir: {model_out}")
     # parse settings
@@ -343,6 +340,8 @@ def update(
     opt = _utils.parse_config(config, opt_cli=opt)
     kwargs = opt.pop("global", {})
     modeltype = opt.pop("modeltype", model)
+    if modeltype not in PLUGINS.model_plugins:
+        raise ValueError("Unknown model")
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -354,7 +353,6 @@ def update(
             root=model_root,
             mode=mode,
             data_libs=data_libs,
-            logger=logger,
             **kwargs,
         )
         mod.data_catalog.cache = cache
@@ -368,9 +366,7 @@ def update(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 @main.command(
@@ -418,7 +414,7 @@ def check(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog("check", join(".", "hydromt.log"), log_level=log_level)
+    log.setuplog(join(".", "hydromt.log"), log_level=log_level)
     try:
         all_exceptions = []
         for cat_path in data:
@@ -459,11 +455,9 @@ def check(
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
-        raise e
+        raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## Export
@@ -478,8 +472,13 @@ def check(
 )
 @click.option(
     "-t",
-    "--time-tuple",
+    "--time-range",
     help="Time tuple as a list of two strings, e.g. ['2010-01-01', '2022-12-31']",
+)
+@click.option(
+    "-b",
+    "--bbox",
+    help="a bbox in EPSG:4236 designating the region of which to export the data",
 )
 @region_opt
 @export_dest_path
@@ -496,6 +495,7 @@ def export(
     export_dest_path: Path,
     source: Optional[str],
     time_range: Optional[str],
+    bbox: Optional[Tuple[float, float, float, float]],
     config: Optional[Path],
     region: Optional[Dict[Any, Any]],
     data: Optional[List[Path]],
@@ -521,9 +521,7 @@ def export(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog(
-        "export", join(export_dest_path, "hydromt.log"), log_level=log_level
-    )
+    log.setuplog(join(export_dest_path, "hydromt.log"), log_level=log_level)
     logger.info(f"Output dir: {export_dest_path}")
 
     if error_on_empty:
@@ -569,23 +567,6 @@ def export(
     data_catalog = DataCatalog(data_libs=data_libs)
     _ = data_catalog.sources  # initialise lazy loading
 
-    if region:
-        if "bbox" in region:
-            bbox = region["bbox"]
-        elif "geom" in region:
-            bbox = GeoDataFrame.from_file(region["geom"]).total_bounds
-        else:
-            raise NotImplementedError(
-                f"Only bbox and geom are supported for export. recieved {region}"
-            )
-
-        if not set(region.keys()).issubset({"bbox", "geom"}):
-            logger.warning(
-                "Found unsupported arguments for region in addition to bbox or geom. these will be ignored"
-            )
-    else:
-        bbox = None
-
     if time_range:
         if isinstance(time_range, str):
             tup = literal_eval(time_range)
@@ -597,6 +578,9 @@ def export(
     else:
         time_tup = None
 
+    if isinstance(bbox, str):
+        bbox = literal_eval(bbox)
+
     try:
         data_catalog.export_data(
             export_dest_path,
@@ -607,15 +591,14 @@ def export(
             meta=meta,
             append=append,
             handle_nodata=handle_nodata,
+            forced_overwrite=fo,
         )
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## CLIP
@@ -661,16 +644,14 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    logger = log.setuplog(
-        "clip", join(model_destination, "hydromt-clip.log"), log_level=log_level
-    )
+    log.setuplog(join(model_destination, "hydromt-clip.log"), log_level=log_level)
     logger.info(f"Clipping instance of {model} model.")
     logger.info(f"Region: {region}")
 
     if model != "wflow":
         raise NotImplementedError("Clip function only implemented for wflow model.")
     try:
-        mod = PLUGINS.model_plugins[model](root=model_root, mode="r", logger=logger)
+        mod = PLUGINS.model_plugins[model](root=model_root, mode="r")
         logger.info("Reading model to clip")
         mod.read()
         mod.root.set(model_destination, mode="w")
@@ -684,9 +665,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        for handler in logger.handlers[:]:
-            handler.close()
-            logger.removeHandler(handler)
+        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 if __name__ == "__main__":

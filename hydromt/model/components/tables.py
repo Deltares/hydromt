@@ -2,6 +2,7 @@
 
 import glob
 import os
+from logging import Logger, getLogger
 from os.path import basename, dirname, join
 from typing import (
     TYPE_CHECKING,
@@ -20,6 +21,8 @@ if TYPE_CHECKING:
     from hydromt.model.model import Model
 
 __all__ = ["TablesComponent"]
+
+logger: Logger = getLogger(__name__)
 
 
 class TablesComponent(ModelComponent):
@@ -69,30 +72,30 @@ class TablesComponent(ModelComponent):
     def write(self, filename: Optional[str] = None, **kwargs) -> None:
         """Write tables at provided or default filepath if none is provided."""
         self.root._assert_write_mode()
-        p = filename or self._filename
+        fn = filename or self._filename
         if len(self.data) > 0:
-            self.model.logger.info("Writing table files.")
+            logger.info("Writing table files.")
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
             for name in self.data:
-                write_path = join(self.root.path, p.format(name=name))
-                os.makedirs(dirname(write_path), exist_ok=True)
-                self.data[name].to_csv(write_path, **local_kwargs)
+                fn_out = join(self.root.path, fn.format(name=name))
+                os.makedirs(dirname(fn_out), exist_ok=True)
+                self.data[name].to_csv(fn_out, **local_kwargs)
         else:
-            self.model.logger.debug("No tables found, skip writing.")
+            logger.debug("No tables found, skip writing.")
 
     @hydromt_step
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
         """Read tables at provided or default filepath if none is provided."""
         self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
-        self.model.logger.info("Reading model table files.")
-        path = filename or self._filename
-        filenames = glob.glob(join(self.root.path, path.format(name="*")))
+        logger.info("Reading model table files.")
+        fn = filename or self._filename
+        filenames = glob.glob(join(self.root.path, fn.format(name="*")))
         if len(filenames) > 0:
-            for path in filenames:
-                name = basename(path).split(".")[0]
-                tbl = pd.read_csv(path, **kwargs)
+            for fn in filenames:
+                name = basename(fn).split(".")[0]
+                tbl = pd.read_csv(fn, **kwargs)
                 self.set(tbl, name=name)
 
     def set(
@@ -134,7 +137,7 @@ class TablesComponent(ModelComponent):
                 if not self.root.is_writing_mode():
                     raise IOError(f"Cannot overwrite table {df_name} in read-only mode")
                 elif self.root.is_reading_mode():
-                    self.logger.warning(f"Overwriting table: {df_name}")
+                    logger.warning(f"Overwriting table: {df_name}")
 
             self._data[str(df_name)] = df
 

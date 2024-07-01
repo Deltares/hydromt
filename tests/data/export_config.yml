@@ -1,6 +1,7 @@
 export_data:
    data_libs:
-      - tests/data/test_sources.yml
+      - tests/data/test_sources1.yml
+      - tests/data/test_sources2.yml
    region:
       bbox: [4.6891,52.9750,4.9576,53.1994]
    time_range: ['2010-01-01', '2020-12-31']

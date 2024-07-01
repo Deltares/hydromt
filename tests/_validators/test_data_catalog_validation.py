@@ -94,7 +94,7 @@ def test_valid_catalog_variants():
     _ = DataCatalogValidator.from_dict(d)
 
 
-def test_no_hydrmt_version_loggs_warning(caplog):
+def test_no_hydrmt_version_loggs_warning(caplog: pytest.LogCaptureFixture):
     d = {
         "meta": {"roots": [""]},
     }

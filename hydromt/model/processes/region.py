@@ -23,7 +23,7 @@ from hydromt.plugins import PLUGINS
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-_logger = getLogger(__name__)
+logger: Logger = getLogger(__name__)
 
 __all__ = [
     "parse_region_basin",
@@ -39,9 +39,8 @@ def parse_region_basin(
     region: dict,
     *,
     data_catalog: DataCatalog,
-    hydrography_path: StrPath,
-    basin_index_path: Optional[StrPath] = None,
-    logger: Logger = _logger,
+    hydrography_fn: StrPath,
+    basin_index_fn: Optional[StrPath] = None,
 ) -> gpd.GeoDataFrame:
     """Parse a basin /subbasin / interbasin region and return the GeoDataFrame.
 
@@ -106,21 +105,19 @@ def parse_region_basin(
         * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
     data_catalog : DataCatalog
         DataCatalog object containing the data sources.
-    hydrography_path: strPath
+    hydrography_fn : strPath
         Path of the hydrography raster dataset in the data catalog.
-    basin_index_path : strPath, optional
+    basin_index_fn : strPath, optional
         Path of the basin index raster dataset in the data catalog.
-    logger : Logger, optional
-        Logger object.
     """
     var_thresh_kwargs = region.copy()
     kind = next(iter(region))
-    value = var_thresh_kwargs.pop(kind)
+    value0 = var_thresh_kwargs.pop(kind)
 
     _assert_parse_key(kind, "basin", "interbasin", "subbasin")
 
     # TODO: Make this very specific to basin.
-    kwargs = _parse_region_value(value, data_catalog=data_catalog)
+    kwargs = _parse_region_value(value0, data_catalog=data_catalog)
     kwargs.update(var_thresh_kwargs)
 
     if kind == "basin":
@@ -130,7 +127,7 @@ def parse_region_basin(
     else:
         expected_keys = ["geom", "bbox", "xy"]
     _assert_parsed_values(
-        key=next(iter(kwargs)), region_value=value, kind=kind, expected=expected_keys
+        key=next(iter(kwargs)), region_value=value0, kind=kind, expected=expected_keys
     )
     kwargs_str = dict()
     for k, v in kwargs.items():
@@ -139,21 +136,16 @@ def parse_region_basin(
         kwargs_str.update({k: v})
     logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
 
-    ds_org = data_catalog.get_rasterdataset(hydrography_path)
-    if "bounds" not in kwargs and basin_index_path is not None:
-        kwargs.update(basin_index=data_catalog.get_source(str(basin_index_path)))
+    ds_org = data_catalog.get_rasterdataset(hydrography_fn)
+    if "bounds" not in kwargs and basin_index_fn is not None:
+        kwargs.update(basin_index=data_catalog.get_source(str(basin_index_fn)))
     # get basin geometry
-    geom, _ = get_basin_geometry(ds=ds_org, kind=kind, logger=logger, **kwargs)
+    geom, _ = get_basin_geometry(ds=ds_org, kind=kind, **kwargs)
 
     return geom
 
 
-def parse_region_bbox(
-    region: dict,
-    *,
-    crs: int = 4326,
-    logger: Logger = _logger,
-) -> gpd.GeoDataFrame:
+def parse_region_bbox(region: dict, *, crs: int = 4326) -> gpd.GeoDataFrame:
     """Parse a region of kind bbox and return the GeoDataFrame.
 
     Parameters
@@ -164,8 +156,6 @@ def parse_region_bbox(
     * {'bbox': [xmin, ymin, xmax, ymax]}
     crs : CRS, optional
         CRS of the bounding box coordinates. By default EPSG 4326.
-    logger : Logger, optional
-        Logger object.
     """
     kwargs = region.copy()
     kind = next(iter(region))
@@ -191,7 +181,6 @@ def parse_region_geom(
     *,
     crs: Optional[int] = None,
     data_catalog: Optional[DataCatalog] = None,
-    logger: Logger = _logger,
 ) -> gpd.GeoDataFrame:
     """Parse a region and return the GeoDataFrame.
 
@@ -205,8 +194,6 @@ def parse_region_geom(
         CRS of the geometry in case it cannot be derived from the geometry itself.
     data_catalog : DataCatalog, optional
         DataCatalog object containing the data sources.
-    logger : Logger, optional
-        Logger object.
     """
     kwargs = region.copy()
     kind = next(iter(region))
@@ -239,7 +226,6 @@ def parse_region_grid(
     region: dict,
     *,
     data_catalog: Optional[DataCatalog],
-    logger: Logger = _logger,
 ) -> Union[xr.DataArray, xr.Dataset]:
     """Parse a region of kind grid and return the corresponding xarray object.
 
@@ -256,8 +242,6 @@ def parse_region_grid(
         * {'grid': /path/to/grid}
     data_catalog : DataCatalog
         DataCatalog object containing the data sources.
-    logger : Logger, optional
-        Logger object.
 
     Returns
     -------
@@ -288,7 +272,7 @@ def parse_region_grid(
     return da
 
 
-def parse_region_other_model(region: dict, *, logger: Logger = _logger) -> "Model":
+def parse_region_other_model(region: dict) -> "Model":
     """Parse a region with a model path and return that whole Model in read mode.
 
     Parameters
@@ -297,8 +281,6 @@ def parse_region_other_model(region: dict, *, logger: Logger = _logger) -> "Mode
         Dictionary describing region of interest.
         For a region based of another models grid:
         * {'<model_name>': root}
-    logger : Logger, optional
-        Logger object.
     """
     kwargs = region.copy()
     kind = next(iter(region))
@@ -308,7 +290,7 @@ def parse_region_other_model(region: dict, *, logger: Logger = _logger) -> "Mode
     logger.debug(f"Parsed region (kind={kind}): {str(kwargs)}")
 
     model_class = PLUGINS.model_plugins[kind]
-    return model_class(root=value0, mode="r", logger=logger)
+    return model_class(root=value0, mode="r")
 
 
 def parse_region_mesh(region: dict) -> xu.UgridDataset:

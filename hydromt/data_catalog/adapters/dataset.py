@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from logging import Logger, getLogger
+from logging import getLogger
 from typing import Optional
 
 import numpy as np
@@ -42,7 +42,6 @@ class DatasetAdapter(DataAdapterBase):
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
-        logger: Logger = logger,
     ) -> Optional[xr.Dataset]:
         """Return a clipped, sliced and unified Dataset.
 
@@ -55,21 +54,19 @@ class DatasetAdapter(DataAdapterBase):
             # rename variables and parse data and attrs
             ds = self._rename_vars(ds)
             ds = self._set_nodata(ds, metadata)
-            ds = self._shift_time(ds, logger=logger)
+            ds = self._shift_time(ds)
             # slice
-            ds = DatasetAdapter._slice_data(ds, variables, time_range, logger=logger)
+            ds = DatasetAdapter._slice_data(ds, variables, time_range)
             if ds is None:
                 raise NoDataException()
             # uniformize
-            ds = self._apply_unit_conversion(ds, logger=logger)
+            ds = self._apply_unit_conversion(ds)
             ds = _set_metadata(ds, metadata)
             # return array if single var and single_var_as_array
             ds = _single_var_as_array(ds, single_var_as_array, variable_name=variables)
             return ds
         except NoDataException:
-            exec_nodata_strat(
-                "No data to export", strategy=handle_nodata, logger=logger
-            )
+            exec_nodata_strat("No data to export", strategy=handle_nodata)
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}
@@ -88,7 +85,7 @@ class DatasetAdapter(DataAdapterBase):
                     ds[k].attrs["_FillValue"] = mv
         return ds
 
-    def _apply_unit_conversion(self, ds: Data, logger: Logger = logger) -> Data:
+    def _apply_unit_conversion(self, ds: Data) -> Data:
         unit_names = list(self.unit_mult.keys()) + list(self.unit_add.keys())
         unit_names = [k for k in unit_names if k in ds.data_vars]
         if len(unit_names) > 0:
@@ -108,16 +105,15 @@ class DatasetAdapter(DataAdapterBase):
             ds[name].attrs.update(attrs)  # set original attributes
         return ds
 
-    def _shift_time(self, ds: Data, logger: Logger = logger) -> Data:
+    def _shift_time(self, ds: Data) -> Data:
         dt = self.unit_add.get("time", 0)
-        return _shift_dataset_time(dt=dt, ds=ds, logger=logger)
+        return _shift_dataset_time(dt=dt, ds=ds)
 
     @staticmethod
     def _slice_data(
         ds: Data,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        logger: Logger = logger,
     ) -> Optional[Data]:
         """Slice the dataset in space and time.
 
@@ -148,7 +144,7 @@ class DatasetAdapter(DataAdapterBase):
                     raise ValueError(f"Dataset: variables not found {mvars}")
                 ds = ds[variables]
         if time_range is not None:
-            ds = DatasetAdapter._slice_temporal_dimension(ds, time_range, logger=logger)
+            ds = DatasetAdapter._slice_temporal_dimension(ds, time_range)
 
         if _has_no_data(ds):
             return None
@@ -159,7 +155,6 @@ class DatasetAdapter(DataAdapterBase):
     def _slice_temporal_dimension(
         ds: Data,
         time_range: TimeRange,
-        logger: Logger = logger,
     ) -> Optional[Data]:
         if (
             "time" in ds.dims

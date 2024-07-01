@@ -67,7 +67,9 @@ def test_add_mesh_errors(mock_model, mocker: MockerFixture):
         mesh_component._add_mesh(data=data, grid_name=grid_name, overwrite_grid=False)
 
 
-def test_add_mesh_logging(mocker: MockerFixture, mock_model, caplog):
+def test_add_mesh_logging(
+    mocker: MockerFixture, mock_model, caplog: pytest.LogCaptureFixture
+):
     mesh_component = MeshComponent(mock_model)
     data = xu.data.elevation_nl().to_dataset()
     mock_grid_is_equal = mocker.patch.object(MeshComponent, "_grid_is_equal")
@@ -137,7 +139,7 @@ def test_create(mock_model, mocker: MockerFixture):
     assert mesh_component.data == test_data
 
 
-def test_write(mock_model, caplog, tmpdir):
+def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmpdir):
     mesh_component = MeshComponent(mock_model)
     caplog.set_level(logging.DEBUG)
     mesh_component.root.is_reading_mode.return_value = False
@@ -224,7 +226,9 @@ def test_get_mesh(mock_model):
     assert isinstance(mesh, xu.UgridDataset)
 
 
-def test_add_2d_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixture):
+def test_add_2d_data_from_rasterdataset(
+    mock_model, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
+):
     mesh_component = MeshComponent(mock_model)
     mesh_component.data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
@@ -254,7 +258,9 @@ def test_add_2d_data_from_rasterdataset(mock_model, caplog, mocker: MockerFixtur
     assert "mesh2d" in mesh_component.mesh_names
 
 
-def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixture):
+def test_add_2d_data_from_raster_reclass(
+    mock_model, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
+):
     mesh_component = MeshComponent(mock_model)
     mesh_component.data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
@@ -309,7 +315,7 @@ def test_add_2d_data_from_raster_reclass(mock_model, caplog, mocker: MockerFixtu
 
 
 @pytest.mark.integration()
-def test_read(mock_model, caplog, tmpdir, griduda):
+def test_read(mock_model, caplog: pytest.LogCaptureFixture, tmpdir, griduda):
     mesh_component = MeshComponent(mock_model)
     mesh_component.model.root = ModelRoot(tmpdir, mode="w")
     with pytest.raises(IOError, match="Model opened in write-only mode"):

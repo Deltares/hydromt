@@ -73,7 +73,7 @@ class TestGeoDataFrameSource:
             name="test",
             uri=example_geojson,
             data_adapter=GeoDataFrameAdapter(),
-            driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
+            driver=PyogrioDriver(uri_resolver=ConventionResolver()),
         )
         gdf = source.read_data(bbox=list(geodf.total_bounds))
         assert isinstance(gdf, gpd.GeoDataFrame)
@@ -85,7 +85,7 @@ class TestGeoDataFrameSource:
             name="test",
             uri=example_geojson,
             data_adapter=GeoDataFrameAdapter(rename={"city": "ciudad"}),
-            driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
+            driver=PyogrioDriver(uri_resolver=ConventionResolver()),
         )
         gdf = source.read_data(
             bbox=list(geodf.total_bounds),
@@ -102,7 +102,7 @@ class TestGeoDataFrameSource:
             name="test",
             uri="no_file.geojson",
             data_adapter=GeoDataFrameAdapter(),
-            driver=PyogrioDriver(metadata_resolver=ConventionResolver()),
+            driver=PyogrioDriver(uri_resolver=ConventionResolver()),
         )
         with pytest.raises(NoDataException):
             source.read_data()
@@ -111,7 +111,7 @@ class TestGeoDataFrameSource:
         GeoDataFrameSource(
             name="test",
             uri="points.geojson",
-            driver=PyogrioDriver(metadata_resolver={"name": "convention"}),
+            driver=PyogrioDriver(uri_resolver={"name": "convention"}),
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
 

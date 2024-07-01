@@ -2,6 +2,7 @@
 
 import os
 from glob import glob
+from logging import Logger, getLogger
 from os.path import dirname, isdir, join
 from pathlib import Path
 from typing import (
@@ -26,6 +27,9 @@ from hydromt.model.hydromt_step import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
+
+
+logger: Logger = getLogger(__name__)
 
 
 class GeomsComponent(SpatialModelComponent):
@@ -117,7 +121,7 @@ class GeomsComponent(SpatialModelComponent):
         self._initialize()
         assert self._data is not None
         if name in self._data:
-            self.logger.warning(f"Replacing geom: {name}")
+            logger.warning(f"Replacing geom: {name}")
 
         if isinstance(geom, GeoSeries):
             geom = cast(GeoDataFrame, geom.to_frame())
@@ -148,14 +152,14 @@ class GeomsComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
         f = filename or self._filename
         read_path = self.root.path / f
-        file_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
+        fn_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
             str(read_path)
         )
-        paths = glob(file_glob)
-        for p in paths:
-            name = ".".join(regex.match(p).groups())  # type: ignore
-            geom = cast(GeoDataFrame, gpd.read_file(p, **kwargs))
-            self.logger.debug(f"Reading model file {name} at {p}.")
+        fns = glob(fn_glob)
+        for fn in fns:
+            name = ".".join(regex.match(fn).groups())  # type: ignore
+            geom = cast(GeoDataFrame, gpd.read_file(fn, **kwargs))
+            logger.debug(f"Reading model file {name} at {fn}.")
 
             self.set(geom=geom, name=name)
 
@@ -185,12 +189,12 @@ class GeomsComponent(SpatialModelComponent):
         self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            self.logger.debug("No geoms data found, skip writing.")
+            logger.debug("No geoms data found, skip writing.")
             return
 
         for name, gdf in self.data.items():
             if len(gdf) == 0:
-                self.logger.warning(f"{name} is empty. Skipping...")
+                logger.warning(f"{name} is empty. Skipping...")
                 continue
 
             geom_filename = filename or self._filename
@@ -202,7 +206,7 @@ class GeomsComponent(SpatialModelComponent):
                 )
             )
 
-            self.logger.debug(f"Writing file {write_path}")
+            logger.debug(f"Writing file {write_path}")
 
             write_folder = dirname(write_path)
             if not isdir(write_folder):

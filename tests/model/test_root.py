@@ -1,4 +1,4 @@
-from logging import FileHandler
+from logging import FileHandler, Logger, getLogger
 from os.path import abspath, exists, join
 
 import pytest
@@ -53,7 +53,7 @@ def test_errors_on_unknown_modes(mode):
         _ = ModelMode.from_str_or_mode(mode)
 
 
-def test_root_creates_logs_and_dir(tmpdir, caplog):
+def test_root_creates_logs_and_dir(tmpdir):
     p = join(tmpdir, "one")
     assert not exists(p)
     _ = ModelRoot(p)
@@ -61,13 +61,14 @@ def test_root_creates_logs_and_dir(tmpdir, caplog):
     assert exists(join(p, "hydromt.log"))
 
 
-def test_new_root_copies_old_file(tmpdir, caplog):
+def test_new_root_copies_old_file(tmpdir):
+    logger: Logger = getLogger("hydromt.fake_module")
     first_path = join(tmpdir, "one")
     assert not exists(first_path)
 
     r = ModelRoot(first_path, "w")
-    r.logger.warning("hey! this is a secret you should really remember")
-    r._close_logs()
+    logger.warning("hey! this is a secret you should really remember")
+
     assert exists(first_path)
 
     with open(join(first_path, "hydromt.log"), "r") as file:
@@ -82,13 +83,14 @@ def test_new_root_copies_old_file(tmpdir, caplog):
     assert exists(second_path)
     assert exists(join(second_path, "hydromt.log"))
 
-    r._close_logs()
     with open(join(second_path, "hydromt.log"), "r") as file:
         second_log_str = file.read()
     assert "hey!" in second_log_str, second_log_str
 
 
-def test_new_root_closes_old_log(tmpdir, caplog):
+def test_new_root_closes_old_log(tmpdir):
+    main_logger = getLogger("hydromt")
+
     first_path = join(tmpdir, "one")
     second_path = join(tmpdir, "two")
 
@@ -96,42 +98,42 @@ def test_new_root_closes_old_log(tmpdir, caplog):
     assert any(
         [
             h
-            for h in r.logger.handlers
+            for h in main_logger.handlers
             if isinstance(h, FileHandler) and h.baseFilename.startswith(first_path)
         ]
-    ), r.logger.handlers
+    ), main_logger.handlers
 
     r.set(second_path)
     assert not any(
         [
             h
-            for h in r.logger.handlers
+            for h in main_logger.handlers
             if isinstance(h, FileHandler) and h.baseFilename.startswith(first_path)
         ]
-    ), r.logger.handlers
+    ), main_logger.handlers
 
     assert any(
         [
             h
-            for h in r.logger.handlers
+            for h in main_logger.handlers
             if isinstance(h, FileHandler) and h.baseFilename.startswith(second_path)
         ]
-    ), r.logger.handlers
+    ), main_logger.handlers
 
 
-def test_root_overwrite_deletes_old_log(tmpdir, caplog):
+def test_root_overwrite_deletes_old_log(tmpdir):
+    logger: Logger = getLogger("hydromt.fake_module")
     path = join(tmpdir, "one")
     assert not exists(path)
     root = ModelRoot(path, "w")
-    root.logger.warning("hey!, this is a secret you should really remember")
-    root._close_logs()
+    logger.warning("hey!, this is a secret you should really remember")
 
     with open(join(path, "hydromt.log"), "r") as file:
         first_log_str = file.read()
 
     assert "hey!" in first_log_str, first_log_str
     root.set(path, "w+")
-    root.logger.warning("what were we talking about again?")
+    logger.warning("what were we talking about again?")
     with open(join(root.path, "hydromt.log"), "r") as file:
         second_log_str = file.read()
     assert "hey!" not in second_log_str, second_log_str

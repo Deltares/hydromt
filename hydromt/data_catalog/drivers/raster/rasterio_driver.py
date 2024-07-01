@@ -42,7 +42,6 @@ class RasterioDriver(RasterDatasetDriver):
         variables: Optional[Variables] = None,
         zoom_level: Optional[ZoomLevel] = None,
         metadata: Optional[SourceMetadata] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:
         """Read data using rasterio."""
@@ -52,7 +51,6 @@ class RasterioDriver(RasterDatasetDriver):
         _warn_on_unused_kwargs(
             self.__class__.__name__,
             {"time_range": time_range, "zoom_level": zoom_level},
-            logger=logger,
         )
         kwargs: Dict[str, Any] = {}
 
@@ -79,9 +77,9 @@ class RasterioDriver(RasterDatasetDriver):
             kwargs.update(nodata=metadata.nodata)
         # TODO: Implement zoom levels in https://github.com/Deltares/hydromt/issues/875
         # if zoom_level is not None and "{zoom_level}" not in uri:
-        #     zls_dict, crs = self._get_zoom_levels_and_crs(uris[0], logger=logger)
+        #     zls_dict, crs = self._get_zoom_levels_and_crs(uris[0])
         #     zoom_level = self._parse_zoom_level(
-        #         zoom_level, mask, zls_dict, crs, logger=logger
+        #         zoom_level, mask, zls_dict, crs
         #     )
         #     if isinstance(zoom_level, int) and zoom_level > 0:
         #         # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
@@ -91,7 +89,7 @@ class RasterioDriver(RasterDatasetDriver):
             kwargs.update({"mosaic_kwargs": {"mask": mask}})
 
         # rasterio uses specific environment variable for s3 access.
-        _open: Callable = partial(open_mfraster, uris, logger=logger, **kwargs)
+        _open: Callable = partial(open_mfraster, uris, **kwargs)
         try:
             anon: str = self.filesystem.anon
         except AttributeError:
@@ -112,7 +110,6 @@ class RasterioDriver(RasterDatasetDriver):
                 exec_nodata_strat(
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
         return ds
 

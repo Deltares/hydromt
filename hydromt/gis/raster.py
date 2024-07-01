@@ -1125,9 +1125,7 @@ class XRasterBase(XGeoBase):
 
         return ds_out
 
-    def reclassify(
-        self, reclass_table: pd.DataFrame, method: str = "exact", logger=logger
-    ):
+    def reclassify(self, reclass_table: pd.DataFrame, method: str = "exact"):
         """Reclass columns in df from raster map (DataArray).
 
         Arguments
@@ -1875,7 +1873,7 @@ class RasterDataArray(XRasterBase):
                 self.set_nodata(nodata)
         return nodata
 
-    def set_nodata(self, nodata=None, logger=logger):
+    def set_nodata(self, nodata=None):
         """Set the nodata value as CF compliant attribute of the DataArray.
 
         Arguments
@@ -1928,7 +1926,7 @@ class RasterDataArray(XRasterBase):
             _da.raster.set_nodata(fill_value)
         return _da
 
-    def mask(self, mask, logger=logger):
+    def mask(self, mask):
         """Mask cells where mask equals False with the data nodata value.
 
         A warning is raised if no the data has no nodata value.
@@ -2724,7 +2722,6 @@ class RasterDataArray(XRasterBase):
         tags=None,
         windowed=False,
         mask=False,
-        logger=logger,
         overviews: Optional[Union[list, str]] = None,
         overviews_resampling: str = "nearest",
         **profile_kwargs,
@@ -3132,7 +3129,6 @@ class RasterDataset(XRasterBase):
         mask=False,
         prefix="",
         postfix="",
-        logger=logger,
         **profile_kwargs,
     ):
         """Write the Dataset object to one gdal-writable raster files per variable.
@@ -3189,6 +3185,5 @@ class RasterDataset(XRasterBase):
                 tags=tags,
                 windowed=windowed,
                 mask=mask,
-                logger=logger,
                 **profile_kwargs,
             )

@@ -2,6 +2,7 @@
 """HydroMT VectorComponent class definition."""
 
 import os
+from logging import Logger, getLogger
 from os.path import basename, dirname, isfile, join
 from typing import TYPE_CHECKING, Optional, Union, cast
 
@@ -23,6 +24,8 @@ if TYPE_CHECKING:
     from hydromt.model.model import Model
 
 __all__ = ["VectorComponent"]
+
+logger: Logger = getLogger(__name__)
 
 
 class VectorComponent(SpatialModelComponent):
@@ -145,7 +148,7 @@ class VectorComponent(SpatialModelComponent):
                 raise ValueError("Cannot instantiate vector without geometry in data")
             else:
                 if overwrite_geom:
-                    self.logger.warning("Overwriting vector object with data")
+                    logger.warning("Overwriting vector object with data")
                 self._data = data
         # 2. self.vector has a geometry
         else:
@@ -160,7 +163,7 @@ class VectorComponent(SpatialModelComponent):
             # add data (with check on index)
             for dvar in data.data_vars:
                 if dvar in self._data:
-                    self.logger.warning(f"Replacing vector variable: {dvar}")
+                    logger.warning(f"Replacing vector variable: {dvar}")
                 # check on index coordinate before merging
                 dims = data[dvar].dims
                 if np.array_equal(
@@ -220,11 +223,7 @@ class VectorComponent(SpatialModelComponent):
             # to avoid issues with reading object dtype data
             if "chunks" not in kwargs:
                 kwargs["chunks"] = None
-            ds = xr.merge(
-                read_nc(
-                    filename, root=self.root.path, logger=self.logger, **kwargs
-                ).values()
-            )
+            ds = xr.merge(read_nc(filename, root=self.root.path, **kwargs).values())
             # check if ds is empty (default filename has a value)
             if len(ds.sizes) == 0:
                 filename = None
@@ -242,7 +241,7 @@ class VectorComponent(SpatialModelComponent):
         elif filename is not None:
             ds = GeoDataset.from_netcdf(ds)
         else:
-            self.logger.info("No vector data found, skip reading.")
+            logger.info("No vector data found, skip reading.")
             return
 
         self.set(data=ds)
@@ -293,7 +292,7 @@ class VectorComponent(SpatialModelComponent):
         """
         ds = self.data
         if len(ds) == 0:
-            self.logger.debug("No vector data found, skip writing.")
+            logger.debug("No vector data found, skip writing.")
             return
         self.root._assert_write_mode()
 
@@ -318,7 +317,7 @@ class VectorComponent(SpatialModelComponent):
                         dirname(join(self.root.path, geometry_filename)),
                         f"{basename(geometry_filename).split('.')[0]}.nc",
                     )
-                    self.logger.warning(
+                    logger.warning(
                         "2D data found in vector,"
                         f"will write data to {filename} instead."
                     )
@@ -340,7 +339,7 @@ class VectorComponent(SpatialModelComponent):
                 filename,
                 engine="netcdf4",
                 root=self.root.path,
-                logger=self.logger,
+                force_overwrite=self.root.mode.is_override_mode(),
                 **kwargs,
             )
         # write to geojson only
@@ -359,7 +358,6 @@ class VectorComponent(SpatialModelComponent):
                 {"vector": ds.drop_vars("geometry")},
                 filename,
                 root=self.root.path,
-                logger=self.logger,
                 **kwargs,
             )
 
@@ -383,7 +381,7 @@ class VectorComponent(SpatialModelComponent):
         """Returns coordinate reference system embedded in the vector."""
         if self.data.vector.crs is not None:
             return self.data.vector.crs
-        self.logger.warning("No CRS found in vector data.")
+        logger.warning("No CRS found in vector data.")
         return None
 
     def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:

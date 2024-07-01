@@ -8,7 +8,7 @@ import pytest
 from hydromt.data_catalog.drivers.geodataframe.table_driver import (
     GeoDataFrameTableDriver,
 )
-from hydromt.data_catalog.uri_resolvers.metadata_resolver import MetaDataResolver
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 
 class TestGeoDataFrameTableDriver:
@@ -75,12 +75,12 @@ class TestGeoDataFrameTableDriver:
 
     def test_read_multiple_uris(self):
         # Create Resolver that returns multiple uris
-        class FakeResolver(MetaDataResolver):
+        class FakeResolver(URIResolver):
             def resolve(self, uri: str, *args, **kwargs):
                 return ["more", "than", "one"]
 
         driver: GeoDataFrameTableDriver = GeoDataFrameTableDriver(
-            metadata_resolver=FakeResolver(),
+            uri_resolver=FakeResolver(),
         )
         with pytest.raises(ValueError, match="not supported"):
             driver.read("uri_{variable}", variables=["more", "than", "one"])

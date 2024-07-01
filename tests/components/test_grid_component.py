@@ -13,9 +13,6 @@ from hydromt.model.components.grid import GridComponent
 from hydromt.model.model import Model
 from hydromt.model.root import ModelRoot
 
-logger = logging.getLogger(__name__)
-logger.propagate = True
-
 DATADIR = join(dirname(dirname(abspath(__file__))), "data")
 
 
@@ -53,7 +50,9 @@ def test_set_raise_errors(mock_model, hydds):
         grid_component.set(ndarray, name="ndarray")
 
 
-def test_write(mock_model, tmpdir, caplog, mocker: MockerFixture):
+def test_write(
+    mock_model, tmpdir, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
+):
     grid_component = GridComponent(model=mock_model)
     grid_component.root.is_reading_mode.return_value = False
     # Test skipping writing when no grid data has been set
@@ -147,7 +146,7 @@ def test_create_basin_grid(tmpdir):
     assert grid_component.data.raster.shape == (47, 61)
 
 
-def test_properties(caplog, demda, mock_model):
+def test_properties(caplog: pytest.LogCaptureFixture, demda, mock_model):
     grid_component = GridComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
     # Test properties on empty grid
@@ -196,7 +195,9 @@ def test_add_data_from_constant(mock_model, demda, mocker: MockerFixture):
     assert grid_component.data == demda
 
 
-def test_add_data_from_rasterdataset(demda, caplog, mock_model, mocker: MockerFixture):
+def test_add_data_from_rasterdataset(
+    demda, caplog: pytest.LogCaptureFixture, mock_model, mocker: MockerFixture
+):
     caplog.set_level(logging.INFO)
     demda.name = "demda"
     demda = demda.to_dataset()
@@ -230,7 +231,9 @@ def test_add_data_from_rasterdataset(demda, caplog, mock_model, mocker: MockerFi
     assert all([x in result for x in demda.data_vars.keys()])
 
 
-def test_add_data_from_raster_reclass(caplog, demda, mock_model, mocker: MockerFixture):
+def test_add_data_from_raster_reclass(
+    caplog: pytest.LogCaptureFixture, demda, mock_model, mocker: MockerFixture
+):
     grid_component = GridComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
     caplog.set_level(logging.INFO)
@@ -278,7 +281,7 @@ def test_add_data_from_raster_reclass(caplog, demda, mock_model, mocker: MockerF
 
 
 def test_add_data_from_geodataframe(
-    caplog, geodf, demda, mock_model, mocker: MockerFixture
+    caplog: pytest.LogCaptureFixture, geodf, demda, mock_model, mocker: MockerFixture
 ):
     grid_component = GridComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False

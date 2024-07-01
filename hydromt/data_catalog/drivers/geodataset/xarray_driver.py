@@ -38,7 +38,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         predicate: Predicate = "intersects",
         time_range: Optional[TimeRange] = None,
         variables: Optional[List[str]] = None,
-        logger: Logger = logger,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
@@ -55,7 +54,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 "variables": variables,
                 "predicate": predicate,
             },
-            logger,
         )
         options = copy(self.options)
         preprocessor: Optional[Callable] = None
@@ -102,7 +100,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 exec_nodata_strat(
                     f"No data from driver: '{self.name}' for variable: '{variable}'",
                     strategy=handle_nodata,
-                    logger=logger,
                 )
         return ds
 

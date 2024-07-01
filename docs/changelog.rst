@@ -15,7 +15,7 @@ Added
 - Added entrypoints for Driver Plugins as "hydromt.drivers"
 - Added entrypoints for ModelComponent Plugins as "hydromt.components"
 - Added entrypoints for PredefinedCatalog Plugins as "hydromt.catalogs"
-- Added MetaDataResolver class for customizable metadata discovery
+- Added `URIResolver` class for customizable metadata discovery
 - Added DataSource class to represent and validate DataCatalog entries.
 - Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
 - A Github action now checks whether the migration guide is updated (#829)
@@ -33,6 +33,7 @@ Changed
 - The model region is no longer a subset of the `geoms` but rather it's own component class. See the migration guide for more info (#810)
 - The model class has been moved to a component architecture. See the migration guide for more info (#845)
 - Changed the `GeoDatasetAdapter` to transform vector data from tabular formats. (#912)
+- Changed the logging in HydroMT to canonical logging using logging hierarchy (#1006)
 
 
 Removed
@@ -75,6 +76,7 @@ Fixed
 - Allow for string format in zoom_level path, e.g. `{zoom_level:02d}` (#851)
 - Fixed incorrect renaming of single variable raster datasets (#883)
 - Provide better error message for 0D geometry arrays in GeoDataset (#885)
+- Fixed index error when the number of peaks varies between stations in get_hydrographs method (#933)
 
 Deprecated
 ----------

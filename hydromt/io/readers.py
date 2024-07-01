@@ -4,7 +4,6 @@ import logging
 from ast import literal_eval
 from glob import glob
 from io import IOBase
-from logging import Logger
 from os.path import abspath, basename, dirname, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
@@ -52,7 +51,7 @@ __all__ = [
 
 
 def open_mfcsv(
-    paths: Dict[Union[str, int], Union[str, Path]],
+    fns: Dict[Union[str, int], Union[str, Path]],
     concat_dim: str,
     driver_kwargs: Optional[Dict[str, Any]] = None,
     variable_axis: Literal[0, 1] = 1,
@@ -62,7 +61,7 @@ def open_mfcsv(
 
     Arguments
     ---------
-    paths : Dict[str | int, str | Path],
+    fns : Dict[str | int, str | Path],
         Dictionary containing a id -> filename mapping. Here the ids,
         should correspond to the values of the `concat_dim` dimension and
         the corresponding setting of `segmented_by`. I.e. if files are
@@ -104,8 +103,8 @@ def open_mfcsv(
     # we'll just pick the first one we parse
     csv_index_name = None
     dfs = []
-    for id, path in paths.items():
-        df = pd.read_csv(path, **csv_kwargs)
+    for id, fn in fns.items():
+        df = pd.read_csv(fn, **csv_kwargs)
         if variable_axis == 0:
             df = df.T
 
@@ -121,13 +120,13 @@ def open_mfcsv(
             if df.index.name is None:
                 if not csv_index_name == "index":
                     logger.warning(
-                        f"csv file {path} has inconsistent index name: {df.index.name}"
+                        f"csv file {fn} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
                     )
             else:
                 if not csv_index_name == df.index.name:
                     logger.warning(
-                        f"csv file {path} has inconsistent index name: {df.index.name}"
+                        f"csv file {fn} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
                     )
 
@@ -171,7 +170,6 @@ def open_raster(
     mask_nodata: bool = False,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
     nodata: Union[int, float, None] = None,
-    logger: Logger = logger,
     **kwargs,
 ) -> xr.DataArray:
     """Open a gdal-readable file with rasterio based on.
@@ -292,13 +290,13 @@ def open_mfraster(
     if isinstance(uris, str):
         if "*" in uris:
             prefix, postfix = basename(uris).split(".")[0].split("*")
-        uris = [p for p in glob(uris) if not p.endswith(".xml")]
+        uris = [fn for fn in glob(uris) if not fn.endswith(".xml")]
     else:
         uris = [str(p) if isinstance(p, Path) else p for p in uris]
     if len(uris) == 0:
         raise OSError("no files to open")
 
-    da_lst, index_lst, attr_file_paths = [], [], []
+    da_lst, index_lst, fn_attrs = [], [], []
     for i, uri in enumerate(uris):
         # read file
         da = open_raster(uri, chunks=chunks, **kwargs)
@@ -328,7 +326,7 @@ def open_mfraster(
             # name based on basename minus pre- & postfix
             vname = bname.split(".")[0].replace(prefix, "").replace(postfix, "")
             da.attrs.update(source_file=bname)
-        attr_file_paths.append(bname)
+        fn_attrs.append(bname)
         da.name = vname
 
         if i > 0:
@@ -353,7 +351,7 @@ def open_mfraster(
                 da.attrs.update(da_lst[0].attrs)
         else:
             da = merge(da_lst, **mosaic_kwargs)  # spatial merge
-            da.attrs.update({"source_file": "; ".join(attr_file_paths)})
+            da.attrs.update({"source_file": "; ".join(fn_attrs)})
         ds = da.to_dataset()  # dataset for consistency
     else:
         ds = xr.merge(
@@ -369,12 +367,7 @@ def open_mfraster(
 
 
 def open_raster_from_tindex(
-    tindex_path,
-    bbox=None,
-    geom=None,
-    tileindex="location",
-    mosaic_kwargs=None,
-    **kwargs,
+    fn_tindex, bbox=None, geom=None, tileindex="location", mosaic_kwargs=None, **kwargs
 ):
     """Read and merge raster tiles.
 
@@ -384,7 +377,7 @@ def open_raster_from_tindex(
 
     Arguments
     ---------
-    tindex_path: path, str
+    fn_tindex: path, str
         Path to tile index file.
     bbox : tuple of floats, optional
         (xmin, ymin, xmax, ymax) bounding box in EPGS:4326, by default None.
@@ -410,19 +403,19 @@ def open_raster_from_tindex(
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
     if geom is None:
         raise ValueError("bbox or geom required in combination with tile_index")
-    gdf = gpd.read_file(tindex_path)
+    gdf = gpd.read_file(fn_tindex)
     gdf = gdf.iloc[gdf.sindex.query(geom.to_crs(gdf.crs).unary_union)]
     if gdf.index.size == 0:
         raise IOError("No intersecting tiles found.")
     elif tileindex not in gdf.columns:
         raise IOError(f'Tile index "{tileindex}" column missing in tile index file.')
     else:
-        root = dirname(tindex_path)
+        root = dirname(fn_tindex)
         paths = []
-        for p in gdf[tileindex]:
-            path = Path(str(p))
+        for fn in gdf[tileindex]:
+            path = Path(str(fn))
             if not path.is_absolute():
-                paths.append(Path(abspath(join(root, p))))
+                paths.append(Path(abspath(join(root, fn))))
     # read & merge data
     if "dst_bounds" not in mosaic_kwargs:
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
@@ -432,38 +425,37 @@ def open_raster_from_tindex(
     )
     # clip to extent
     ds_out = ds_out.raster.clip_geom(geom)
-    name = ".".join(basename(tindex_path).split(".")[:-1])
+    name = ".".join(basename(fn_tindex).split(".")[:-1])
     ds_out = ds_out.rename({ds_out.raster.vars[0]: name})
     return ds_out  # dataset to be consitent with open_mfraster
 
 
 def open_geodataset(
-    location_data_path,
-    geospatial_data_path=None,
+    fn_locs,
+    fn_data=None,
     var_name=None,
     index_dim=None,
     chunks=None,
     crs=None,
     bbox=None,
     geom=None,
-    logger=logger,
     **kwargs,
 ) -> xr.Dataset:
     """Open and combine geometry location GIS file and timeseries file in a xr.Dataset.
 
     Arguments
     ---------
-    location_data_path: path, str
+    fn_locs: path, str
         Path to geometry location file, see :py:meth:`geopandas.read_file` for options.
         For point location, the file can also be a csv, parquet, xls(x) or xy file,
         see :py:meth:`hydromt.io.open_vector_from_table` for options.
-    geospatial_data_path: path, str
+    fn_data: path, str
         Path to data file of which the index dimension which should match the geospatial
         coordinates index.
         This can either be a csv, or parquet with datetime in the first column and the
         location index in the header row, or a netcdf with a time and index dimensions.
     var_name: str, optional
-        Name of the variable in case of a csv, or parquet file. By default,
+        Name of the variable in case of a csv, or parquet fn_data file. By default,
         None and infered from basename.
     crs: str, `pyproj.CRS`, or dict
         Source coordinate reference system, ignored for files with a native crs.
@@ -490,34 +482,30 @@ def open_geodataset(
         Dataset with geospatial coordinates.
     """
     chunks = chunks or {}
-    if not isfile(location_data_path):
-        raise IOError(f"GeoDataset point location file not found: {location_data_path}")
+    if not isfile(fn_locs):
+        raise IOError(f"GeoDataset point location file not found: {fn_locs}")
     # For filetype [], only point geometry is supported
-    filetype = str(location_data_path).split(".")[-1].lower()
+    filetype = str(fn_locs).split(".")[-1].lower()
     if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
         kwargs.update(assert_gtype="Point")
     # read geometry file
     if bbox:
         bbox: Polygon = box(*bbox)
-    gdf = open_vector(location_data_path, crs=crs, bbox=bbox, geom=geom, **kwargs)
+    gdf = open_vector(fn_locs, crs=crs, bbox=bbox, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
     # read timeseries file
-    if geospatial_data_path is not None and isfile(geospatial_data_path):
-        da_ts = open_timeseries_from_table(
-            geospatial_data_path, name=var_name, index_dim=index_dim, logger=logger
-        )
+    if fn_data is not None and isfile(fn_data):
+        da_ts = open_timeseries_from_table(fn_data, name=var_name, index_dim=index_dim)
         ds = vector.GeoDataset.from_gdf(gdf, da_ts)
-    elif geospatial_data_path is not None:
-        raise IOError(f"GeoDataset data file not found: {geospatial_data_path}")
+    elif fn_data is not None:
+        raise IOError(f"GeoDataset data file not found: {fn_data}")
     else:
         ds = vector.GeoDataset.from_gdf(gdf)  # coordinates only
     return ds.chunk(chunks)
 
 
-def open_timeseries_from_table(
-    path, name=None, index_dim="index", logger=logger, **kwargs
-):
+def open_timeseries_from_table(fn, name=None, index_dim="index", **kwargs):
     """Open timeseries csv or parquet file and parse to xarray.DataArray.
 
     Accepts files with time index on one dimension and numeric location index on the
@@ -526,10 +514,10 @@ def open_timeseries_from_table(
 
     Arguments
     ---------
-    path: path, str
+    fn: path, str
         Path to time series file
     name: str
-        variable name, derived from basename of path if None.
+        variable name, derived from basename of fn if None.
     index_dim:
         the dimension to index on.
     **kwargs:
@@ -544,13 +532,13 @@ def open_timeseries_from_table(
     da: xarray.DataArray
         DataArray
     """
-    _, ext = splitext(path)
+    _, ext = splitext(fn)
     if ext == ".csv":
         csv_kwargs = dict(index_col=0, parse_dates=False)
         csv_kwargs.update(**kwargs)
-        df = pd.read_csv(path, **csv_kwargs)
+        df = pd.read_csv(fn, **csv_kwargs)
     elif ext in [".parquet", ".pq"]:
-        df = pd.read_parquet(path, **kwargs)
+        df = pd.read_parquet(fn, **kwargs)
     else:
         raise ValueError(f"Unknown table file format: {ext}")
 
@@ -569,7 +557,7 @@ def open_timeseries_from_table(
             pd.to_datetime(first_col_name)
             df = df.T
         except ValueError:
-            raise ValueError(f"No time index found in file: {path}")
+            raise ValueError(f"No time index found in file: {fn}")
 
     if np.dtype(df.index).type != np.datetime64:
         df.index = pd.to_datetime(df.index)
@@ -580,14 +568,14 @@ def open_timeseries_from_table(
             df.columns = [int("".join(filter(str.isdigit, n))) for n in df.columns]
             assert df.columns.size == np.unique(df.columns).size
         except (ValueError, AssertionError):
-            raise ValueError(f"No numeric index found in file: {path}")
+            raise ValueError(f"No numeric index found in file: {fn}")
     df.columns.name = index_dim
-    name = name if name is not None else basename(path).split(".")[0]
+    name = name if name is not None else basename(fn).split(".")[0]
     return xr.DataArray(df, dims=("time", index_dim), name=name)
 
 
 def open_vector(
-    path,
+    fn,
     driver=None,
     crs=None,
     dst_crs=None,
@@ -596,7 +584,6 @@ def open_vector(
     assert_gtype=None,
     predicate="intersects",
     mode="r",
-    logger=logger,
     **kwargs,
 ):
     """Open fiona-compatible geometry, csv, parquet, excel or xy file and parse it.
@@ -607,7 +594,7 @@ def open_vector(
 
     Parameters
     ----------
-    path: str or Path-like,
+    fn: str or Path-like,
         path to geometry file
     driver: {'csv', 'xls', 'xy', 'vector', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
@@ -646,9 +633,9 @@ def open_vector(
     gdf : geopandas.GeoDataFrame
         Parsed geometry file
     """
-    driver = driver if driver is not None else str(path).split(".")[-1].lower()
+    driver = driver if driver is not None else str(fn).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
-        gdf = open_vector_from_table(path, driver=driver, **kwargs)
+        gdf = open_vector_from_table(fn, driver=driver, **kwargs)
     # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
     else:
         if driver == "pyogrio":
@@ -657,11 +644,11 @@ def open_vector(
             else:
                 bbox_shapely = None
             bbox_reader = gis_utils.bbox_from_file_and_filters(
-                str(path), bbox_shapely, geom, crs
+                str(fn), bbox_shapely, geom, crs
             )
-            gdf = read_dataframe(str(path), bbox=bbox_reader, mode=mode, **kwargs)
+            gdf = read_dataframe(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
         else:
-            gdf = gpd.read_file(str(path), bbox=bbox, mask=geom, mode=mode, **kwargs)
+            gdf = gpd.read_file(str(fn), bbox=bbox, mask=geom, mode=mode, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:
@@ -672,7 +659,7 @@ def open_vector(
                 f"geometry type(s) {gtype_err} unknown, select from {GEOMETRY_TYPES}"
             )
         if not np.all(np.isin(gdf.geometry.type, assert_gtype)):
-            raise ValueError(f"{path} contains other geometries than {assert_gtype}")
+            raise ValueError(f"{fn} contains other geometries than {assert_gtype}")
 
     # check if crs and filter
     if gdf.crs is None and crs is not None:
@@ -689,7 +676,7 @@ def open_vector(
 
 
 def open_vector_from_table(
-    path,
+    fn,
     driver=None,
     x_dim=None,
     y_dim=None,
@@ -714,7 +701,7 @@ def open_vector_from_table(
     crs: int, dict, or str, optional
         Coordinate reference system, accepts EPSG codes (int or str), proj (str or dict)
         or wkt (str)
-    path:
+    fn:
         The filename to read the table from.
     **kwargs
         Additional keyword arguments that are passed to the underlying drivers.
@@ -724,20 +711,20 @@ def open_vector_from_table(
     gdf: geopandas.GeoDataFrame
         Parsed and filtered point geometries
     """
-    driver = driver.lower() if driver is not None else str(path).split(".")[-1].lower()
+    driver = driver.lower() if driver is not None else str(fn).split(".")[-1].lower()
     if "index_col" not in kwargs and driver != "parquet":
         kwargs.update(index_col=0)
     if driver == "csv":
-        df = pd.read_csv(path, **kwargs)
+        df = pd.read_csv(fn, **kwargs)
     elif driver == "parquet":
-        df = pd.read_parquet(path, **kwargs)
+        df = pd.read_parquet(fn, **kwargs)
     elif driver in ["xls", "xlsx"]:
-        df = pd.read_excel(path, engine="openpyxl", **kwargs)
+        df = pd.read_excel(fn, engine="openpyxl", **kwargs)
     elif driver == "xy":
         x_dim = x_dim if x_dim is not None else "x"
         y_dim = y_dim if y_dim is not None else "y"
         kwargs.update(index_col=False, header=None, sep=r"\s+")
-        df = pd.read_csv(path, **kwargs).rename(columns={0: x_dim, 1: y_dim})
+        df = pd.read_csv(fn, **kwargs).rename(columns={0: x_dim, 1: y_dim})
     else:
         raise IOError(f"Driver {driver} unknown.")
     # infer points from table
@@ -775,7 +762,7 @@ def read_workflow_yaml(
 
 
 def configread(
-    config_file_path: Union[Path, str],
+    config_fn: Union[Path, str],
     defaults: Optional[Dict] = None,
     abs_path: bool = False,
     skip_abspath_sections: Optional[List] = None,
@@ -785,7 +772,7 @@ def configread(
 
     Parameters
     ----------
-    config_file_path : Union[Path, str]
+    config_fn : Union[Path, str]
         Path to configuration file
     defaults : dict, optional
         Nested dictionary with default options, by default dict()
@@ -808,15 +795,15 @@ def configread(
     defaults = defaults or {}
     skip_abspath_sections = skip_abspath_sections or ["setup_config"]
     # read
-    ext = splitext(config_file_path)[-1].strip()
+    ext = splitext(config_fn)[-1].strip()
     if ext in [".yaml", ".yml"]:
-        cfdict = read_yaml(config_file_path)
+        cfdict = read_yaml(config_fn)
     else:
         raise ValueError(f"Unknown extension: {ext} Hydromt only supports yaml")
 
     # parse absolute paths
     if abs_path:
-        root = Path(dirname(config_file_path))
+        root = Path(dirname(config_fn))
         cfdict = _make_config_paths_abs(cfdict, root, skip_abspath_sections)
 
     # update defaults
@@ -872,13 +859,12 @@ def parse_values(
 def read_nc(
     filename_template: StrPath,
     root: Path,
-    logger: logging.Logger = logger,
     mask_and_scale: bool = False,
     single_var_as_array: bool = True,
     load: bool = False,
     **kwargs,
 ) -> Dict[str, xr.Dataset]:
-    """Read netcdf files at <root>/<path> and return as dict of xarray.Dataset.
+    """Read netcdf files at <root>/<fn> and return as dict of xarray.Dataset.
 
     NOTE: Unless `single_var_as_array` is set to False a single-variable data source
     will be returned as :py:class:`xarray.DataArray` rather than
@@ -887,7 +873,7 @@ def read_nc(
 
     Parameters
     ----------
-    path : str
+    fn : str
         filename relative to model root, may contain wildcards
     mask_and_scale : bool, optional
         If True, replace array values equal to _FillValue with NA and scale values
