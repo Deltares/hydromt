@@ -78,9 +78,9 @@ class TablesComponent(ModelComponent):
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
             for name in self.data:
-                fn_out = join(self.root.path, fn.format(name=name))
-                os.makedirs(dirname(fn_out), exist_ok=True)
-                self.data[name].to_csv(fn_out, **local_kwargs)
+                write_path = join(self.root.path, fn.format(name=name))
+                os.makedirs(dirname(write_path), exist_ok=True)
+                self.data[name].to_csv(write_path, **local_kwargs)
         else:
             logger.debug("No tables found, skip writing.")
 

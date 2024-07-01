@@ -65,7 +65,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
         crs: Optional[CRS] = metadata.crs if metadata else None
-        data = open_geodataset(fn_locs=uri, geom=mask, crs=crs, **options)
+        data = open_geodataset(loc_path=uri, geom=mask, crs=crs, **options)
 
         if preprocessor is None:
             out = data

@@ -68,7 +68,7 @@ Using HydroMT generic methods, for your user, the build configuration file would
 
   setup_grid_from_raster_reclass:
     raster_data: vito
-    reclass_table_fn: vito_reclass
+    reclass_table_data: vito_reclass
     reclass_variables:
       - manning
       - infiltration
@@ -87,7 +87,7 @@ look like, but for the user, the same step could then look like:
 
   setup_landuse:
     landuse_fn: vito
-    reclass_table_fn: vito_reclass
+    reclass_table_data: vito_reclass
 
 Finally, with the generic methods and sub-model classes of HydroMT, we try to support a certain range of data processing
 methods. If you find that there is no method available for your case, you can always open a feature request issue
@@ -579,8 +579,8 @@ model in a proper way. If it is not the case, you can always define your own new
     if len(self.tables) > 0:
       self.logger.info("Writing table files.")
       for name in self.tables:
-        fn_out = join(self.root, f"{name}.csv")
-        self.tables[name].to_csv(fn_out, sep=",", index=False, header=True)
+        write_path = join(self.root, f"{name}.csv")
+        self.tables[name].to_csv(write_path, sep=",", index=False, header=True)
 
 4. Define a set function in order to add or update data in your component.
 

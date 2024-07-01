@@ -971,7 +971,7 @@ class TestGetGeoDataset:
     ):
         da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
             geojson_dataset,
-            driver={"name": "geodataset_vector", "options": {"fn_data": csv_dataset}},
+            driver={"name": "geodataset_vector", "options": {"data_path": csv_dataset}},
         )
         assert isinstance(da, xr.DataArray), type(da)
         da = da.sortby("index")

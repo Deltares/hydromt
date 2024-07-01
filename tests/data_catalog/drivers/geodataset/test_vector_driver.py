@@ -47,7 +47,8 @@ class TestGeoDatasetVectorDriver:
         assert res is not None
         call_args = mock_geods_open.call_args
 
-        assert call_args[1]["location_data_path"] == uri  # first arg
+        print(call_args[1])
+        assert call_args[1]["loc_path"] == uri  # first arg
         assert mocked_function.call_count == 1
 
     def test_write_raises(self):

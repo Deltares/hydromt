@@ -144,7 +144,7 @@ def test_open_geodataset(tmpdir, geodf):
     with pytest.raises(IOError, match="GeoDataset point location file not found"):
         open_geodataset("missing_file.csv")
     with pytest.raises(IOError, match="GeoDataset data file not found"):
-        open_geodataset(point_data_path, geospatial_data_path="missing_file.csv")
+        open_geodataset(point_data_path, data_path="missing_file.csv")
 
 
 def test_timeseries_io(tmpdir, ts):
