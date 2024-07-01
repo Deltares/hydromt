@@ -216,7 +216,7 @@ def test_export_cli_catalog(tmpdir):
 
 
 @pytest.mark.skip(reason="Needs implementation of all raster Drivers.")
-def test_export_time_tuple(tmpdir):
+def test_export_time_range(tmpdir):
     r = CliRunner().invoke(
         hydromt_cli,
         [

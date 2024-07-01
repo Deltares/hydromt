@@ -50,7 +50,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         data_root: StrPath,
         data_name: str,
         bbox: Optional[Bbox] = None,
-        time_tuple: Optional[TimeRange] = None,
+        time_range: Optional[TimeRange] = None,
         driver: Optional[str] = None,
         variables: Optional[Variables] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
@@ -67,7 +67,7 @@ class RasterDatasetAdapter(DataAdapterBase):
             Name of output file without extension.
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
-        time_tuple : tuple of str, datetime, optional
+        time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         driver : str, optional
@@ -92,7 +92,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         """
         obj = self.get_data(
             bbox=bbox,
-            time_tuple=time_tuple,
+            time_range=time_range,
             variables=variables,
             handle_nodata=handle_nodata,
             logger=logger,

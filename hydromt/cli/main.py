@@ -495,7 +495,7 @@ def export(
     ctx: click.Context,
     export_dest_path: Path,
     source: Optional[str],
-    time_tuple: Optional[str],
+    time_range: Optional[str],
     config: Optional[Path],
     region: Optional[Dict[Any, Any]],
     data: Optional[List[Path]],
@@ -555,7 +555,7 @@ def export(
         config_dict = _utils.parse_config(config)["export_data"]
         if "data_libs" in config_dict.keys():
             data_libs = data_libs + config_dict.pop("data_libs")
-        time_tuple = config_dict.pop("time_tuple", None)
+        time_range = config_dict.pop("time_range", None)
         region = region or config_dict.pop("region", None)
         if isinstance(region, str):
             region = json_decode(region)
@@ -586,11 +586,11 @@ def export(
     else:
         bbox = None
 
-    if time_tuple:
-        if isinstance(time_tuple, str):
-            tup = literal_eval(time_tuple)
+    if time_range:
+        if isinstance(time_range, str):
+            tup = literal_eval(time_range)
         else:
-            tup = time_tuple
+            tup = time_range
         time_start = datetime.strptime(tup[0], "%Y-%m-%d")
         time_end = datetime.strptime(tup[1], "%Y-%m-%d")
         time_tup = (time_start, time_end)

@@ -35,7 +35,7 @@ class ConventionResolver(MetaDataResolver):
     def _expand_uri_placeholders(
         self,
         uri: str,
-        time_tuple: Optional[Tuple[str, str]] = None,
+        time_range: Optional[Tuple[str, str]] = None,
         variables: Optional[List[str]] = None,
     ) -> Tuple[str, List[str], Pattern[str]]:
         """Expand known placeholders in the URI."""
@@ -52,7 +52,7 @@ class ConventionResolver(MetaDataResolver):
                 pattern += "(.*)"
                 key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
                 # remove unused fields
-                if key in ["year", "month"] and time_tuple is None:
+                if key in ["year", "month"] and time_range is None:
                     uri_expanded += "*"
                 elif key == "variable" and variables is None:
                     uri_expanded += "*"

@@ -444,7 +444,7 @@ def export_test_slice_objects(tmpdir, data_catalog):
     data_catalog._sources = {}
     data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
-    time_tuple = ("2010-02-10", "2010-02-15")
+    time_range = ("2010-02-10", "2010-02-15")
     data_lib_path = join(tmpdir, "data_catalog.yml")
     source_names = [
         "era5[precip,temp]",
@@ -456,7 +456,7 @@ def export_test_slice_objects(tmpdir, data_catalog):
         "gtsmv3_eu_era5",
     ]
 
-    return (data_catalog, bbox, time_tuple, source_names, data_lib_path)
+    return (data_catalog, bbox, time_range, source_names, data_lib_path)
 
 
 @pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
@@ -465,14 +465,14 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
     (
         data_catalog,
         bbox,
-        time_tuple,
+        time_range,
         source_names,
         data_lib_path,
     ) = export_test_slice_objects
     data_catalog.export_data(
         tmpdir,
         bbox=bbox,
-        time_tuple=time_tuple,
+        time_range=time_range,
         source_names=source_names,
         meta={"version": 1},
         handle_nodata=NoDataStrategy.IGNORE,
@@ -489,14 +489,14 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     (
         data_catalog,
         bbox,
-        time_tuple,
+        time_range,
         source_names,
         data_lib_path,
     ) = export_test_slice_objects
     data_catalog.export_data(
         tmpdir,
         bbox=bbox,
-        time_tuple=time_tuple,
+        time_range=time_range,
         source_names=source_names,
         meta={"version": 1},
         handle_nodata=NoDataStrategy.IGNORE,
@@ -1125,7 +1125,7 @@ def test_get_geodataset_artifact_data(data_catalog):
     assert isinstance(da, xr.DataArray)
 
 
-def test_get_geodataset_bbox_time_tuple(data_catalog: DataCatalog):
+def test_get_geodataset_bbox_time_range(data_catalog: DataCatalog):
     name = "gtsmv3_eu_era5"
     uri = data_catalog.get_source(name).uri
     p = Path(data_catalog.root) / uri

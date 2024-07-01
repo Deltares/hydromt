@@ -1021,7 +1021,7 @@ class DataCatalog(object):
             Path to output folder
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
-        time_tuple : tuple of str, datetime, optional
+        time_range: tuple of str, datetime, optional
             Start and end date of period of interest. By default the entire time period
             of the dataset is returned.
         source_names: list, optional
@@ -1104,7 +1104,7 @@ class DataCatalog(object):
                                 data_name=key,
                                 variables=source_vars.get(key, None),
                                 bbox=bbox,
-                                time_tuple=time_range,
+                                time_range=time_range,
                                 handle_nodata=NoDataStrategy.RAISE,
                                 logger=self.logger,
                             )
@@ -1430,7 +1430,7 @@ class DataCatalog(object):
         To clip the data to the area of interest, provide a `bbox` or `geom`,
         with optional additional `buffer` argument.
         To slice the data to the time period of interest, provide the
-        `time_tuple` argument. To return only the dataset variables
+        `time_range` argument. To return only the dataset variables
         of interest provide the `variables` argument.
 
         NOTE: Unless `single_var_as_array` is set to False a single-variable data source

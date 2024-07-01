@@ -67,7 +67,7 @@ Here is a short example of how to read data in Python using HydroMT:
     # read a geodataset with some time and space slicing
     qobs = cat.get_geodataset(
       "qobs",
-      time_tuple = ("2000-01-01", "2010-12-31"),
+      time_range = ("2000-01-01", "2010-12-31"),
       bbox = [5.0, 50.0, 6.0, 51.0]
     )
 
