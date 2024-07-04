@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """GIS related convenience functions."""
+
 from __future__ import annotations
 
 import glob
@@ -204,7 +205,7 @@ def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
         elif gdf.crs is not None and geom.crs != gdf.crs:
             geom = geom.to_crs(gdf.crs)
         # convert geopandas to geometry
-        geom = geom.unary_union
+        geom = geom.union_all()
     idx = np.sort(gdf.sindex.query(geom, predicate=predicate))
     return idx
 

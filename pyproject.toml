@@ -38,7 +38,7 @@ dependencies = [
   "tomli",                  # parsing toml files
   "tomli-w",                # writing toml files
   "universal_pathlib>=0.2", # provides path compatability between different filesystems
-  "xarray==2024.3.0",       # ndim data arrays
+  "xarray",                  # ndim data arrays
   "xmltodict",              # xml parser also used to read VRT
   "zarr",                   # zarr
 ]
