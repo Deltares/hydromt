@@ -102,7 +102,7 @@ def open_mfcsv(
             f"Unknown segmentation provided: {segmented_by}, options are ['var','id']"
         )
 
-    csv_kwargs = {"index_col": 0}
+    csv_kwargs: Dict[str, Any] = {"index_col": 0}
     if driver_kwargs is not None:
         csv_kwargs.update(**driver_kwargs)
 
@@ -214,7 +214,7 @@ def open_raster(
         logger.warning("Removing chunks to read and load remote data.")
         kwargs.pop("chunks")
     # keep only 2D DataArray
-    da = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
+    da: xr.DataArray = rioxarray.open_rasterio(uri, **kwargs).squeeze(drop=True)
     # set missing _FillValue
     if mask_nodata:
         da.raster.set_nodata(np.nan)
@@ -302,7 +302,8 @@ def open_mfraster(
     if len(uris) == 0:
         raise OSError("no files to open")
 
-    da_lst, index_lst, file_attrs = [], [], []
+    da_lst: List[xr.DataArray] = []
+    index_lst, file_attrs = [], []
     for i, uri in enumerate(uris):
         # read file
         da = open_raster(uri, chunks=chunks, **kwargs)
@@ -350,7 +351,7 @@ def open_mfraster(
 
     if concat or mosaic:
         if concat:
-            with dask.config.set(**{"array.slicing.split_large_chunks": False}):
+            with dask.config.set(kwargs={"array.slicing.split_large_chunks": False}):
                 da = xr.concat(da_lst, dim=concat_dim)
                 da.coords[concat_dim] = xr.IndexVariable(concat_dim, index_lst)
                 da = da.sortby(concat_dim).transpose(concat_dim, ...)
@@ -500,9 +501,8 @@ def open_geodataset(
     if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
         kwargs.update(assert_gtype="Point")
     # read geometry file
-    if bbox:
-        bbox: Polygon = box(*bbox)
-    gdf = open_vector(loc_path, crs=crs, bbox=bbox, geom=geom, **kwargs)
+    polygon: Optional[Polygon] = box(*bbox) if bbox else None
+    gdf = open_vector(loc_path, crs=crs, bbox=polygon, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
     # read timeseries file
@@ -535,10 +535,6 @@ def open_timeseries_from_table(path, name=None, index_dim="index", **kwargs):
         the dimension to index on.
     **kwargs:
         key-word arguments are passed to the reader method
-    logger:
-        The logger to be used. If none probided, the default will be used.
-
-
 
     Returns
     -------
@@ -771,11 +767,10 @@ def read_workflow_yaml(
 
 def configread(
     config_path: Union[Path, str],
-    defaults: Optional[Dict] = None,
+    defaults: Optional[Dict[str, Any]] = None,
     abs_path: bool = False,
-    skip_abspath_sections: Optional[List] = None,
-    **kwargs,
-) -> Dict:
+    skip_abspath_sections: Optional[List[str]] = None,
+) -> Dict[str, Any]:
     """Read configuration/workflow file and parse to (nested) dictionary.
 
     Parameters
@@ -791,13 +786,10 @@ def configread(
     skip_abspath_sections: list, optional
         These sections are not evaluated for absolute paths if abs_path=True,
         by default ['update_config']
-    **kwargs
-        Additional keyword arguments that are passed to the read_ini`
-        function.
 
     Returns
     -------
-    cfdict : dict
+    Dict[str, Any]
         Configuration dictionary.
     """
     defaults = defaults or {}
@@ -823,9 +815,9 @@ def configread(
 
 
 def parse_values(
-    cfdict: dict,
+    cfdict: Dict[str, Any],
     skip_eval: bool = False,
-    skip_eval_sections: Optional[List] = None,
+    skip_eval_sections: Optional[List[str]] = None,
 ):
     """Parse string values to python default objects.
 
@@ -840,7 +832,7 @@ def parse_values(
 
     Returns
     -------
-    cfdict : dict
+    Dict[str, Any]
         Configuration dictionary with evaluated values.
     """
     skip_eval_sections = skip_eval_sections or []
@@ -871,7 +863,7 @@ def read_nc(
     single_var_as_array: bool = True,
     load: bool = False,
     **kwargs,
-) -> Dict[str, xr.Dataset]:
+) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
     """Read netcdf files at <root>/<file> and return as dict of xarray.Dataset.
 
     NOTE: Unless `single_var_as_array` is set to False a single-variable data source
@@ -908,12 +900,14 @@ def read_nc(
     path_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
         str(path_template)
     )
-    path_glob = glob(path_glob)
-    for path in path_glob:
+    paths = glob(path_glob)
+    for path in paths:
         name = ".".join(regex.match(path).groups())  # type: ignore
-        # Load data to allow overwritting in r+ mode
+        # Load data to allow overwriting in r+ mode
         if load:
-            ds = xr.open_dataset(path, mask_and_scale=mask_and_scale, **kwargs).load()
+            ds: Union[xr.Dataset, xr.DataArray] = xr.open_dataset(
+                path, mask_and_scale=mask_and_scale, **kwargs
+            ).load()
             ds.close()
         else:
             ds = xr.open_dataset(path, mask_and_scale=mask_and_scale, **kwargs)
@@ -947,7 +941,7 @@ def read_toml(path: StrPath) -> Dict[str, Any]:
     return data
 
 
-def _yml_from_uri_or_path(uri_or_path: Union[Path, str]) -> Dict:
+def _yml_from_uri_or_path(uri_or_path: StrPath) -> Dict[str, Any]:
     if _is_valid_url(str(uri_or_path)):
         with fetch(str(uri_or_path), stream=True) as r:
             r.raise_for_status()

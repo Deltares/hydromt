@@ -75,8 +75,8 @@ def parse_json(ctx, param, value: str) -> Dict[str, Any]:
 
 ### general parsing methods ##
 def parse_config(
-    path: Optional[Union[Path, str]] = None, opt_cli: Optional[Dict] = None
-) -> Dict:
+    path: Optional[Union[Path, str]] = None, opt_cli: Optional[Dict[str, Any]] = None
+) -> Dict[str, Any]:
     """Parse config from `path` and combine with command line options `opt_cli`."""
     opt = {}
     if path is not None and isfile(path):

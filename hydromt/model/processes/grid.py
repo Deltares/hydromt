@@ -309,11 +309,11 @@ def grid_from_constant(
 def grid_from_rasterdataset(
     grid_like: Union[xr.DataArray, xr.Dataset],
     ds: Union[xr.DataArray, xr.Dataset],
-    variables: Optional[List] = None,
+    variables: Optional[List[str]] = None,
     fill_method: Optional[str] = None,
-    reproject_method: Optional[Union[List, str]] = "nearest",
+    reproject_method: Optional[Union[List[str], str]] = "nearest",
     mask_name: Optional[str] = "mask",
-    rename: Optional[Dict] = None,
+    rename: Optional[Dict[str, str]] = None,
 ) -> xr.Dataset:
     """Prepare data by resampling ds to grid_like.
 
@@ -453,11 +453,11 @@ def grid_from_raster_reclass(
 def grid_from_geodataframe(
     grid_like: Union[xr.DataArray, xr.Dataset],
     gdf: gpd.GeoDataFrame,
-    variables: Optional[Union[List, str]] = None,
-    nodata: Optional[Union[List, int, float]] = -1,
+    variables: Optional[Union[List[str], str]] = None,
+    nodata: Optional[Union[List[Union[int, float]], int, float]] = -1,
     rasterize_method: Optional[str] = "value",
     mask_name: Optional[str] = "mask",
-    rename: Optional[Union[Dict, str]] = None,
+    rename: Optional[Union[Dict[str, str], str]] = None,
     all_touched: Optional[bool] = True,
 ) -> xr.Dataset:
     """Prepare data variable(s) resampled to grid_like object by rasterizing the data from ``gdf``.

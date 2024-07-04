@@ -1,7 +1,7 @@
 """HydroMT Model API."""
 
-from .hydromt_step import hydromt_step
 from .model import Model
 from .root import ModelRoot
+from .steps import hydromt_step
 
 __all__ = ["Model", "hydromt_step", "ModelRoot"]

@@ -1,8 +1,9 @@
 import sys
+from typing import List
 
 from packaging.version import Version
 
-__all__ = []
+__all__: List[str] = []
 
 HAS_PYET = False
 HAS_GCSFS = False

@@ -16,7 +16,6 @@ from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose, Number
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
-from hydromt.model import hydromt_step
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.processes.grid import (
@@ -26,6 +25,7 @@ from hydromt.model.processes.grid import (
     grid_from_raster_reclass,
     grid_from_rasterdataset,
 )
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -133,7 +133,7 @@ class GridComponent(SpatialModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
-        region_options: Optional[Dict] = None,
+        region_options: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Optional[DeferedFileClose]:
         """Write model grid data to netcdf file at <root>/<fn>.
@@ -446,11 +446,11 @@ class GridComponent(SpatialModelComponent):
     def add_data_from_rasterdataset(
         self,
         raster_data: Union[str, Path, xr.DataArray, xr.Dataset],
-        variables: Optional[List] = None,
+        variables: Optional[List[str]] = None,
         fill_method: Optional[str] = None,
-        reproject_method: Optional[Union[List, str]] = "nearest",
+        reproject_method: Optional[Union[List[str], str]] = "nearest",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
+        rename: Optional[Dict[str, str]] = None,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) from ``raster_data`` to grid component.
 
@@ -498,6 +498,7 @@ class GridComponent(SpatialModelComponent):
             variables=variables,
             single_var_as_array=False,
         )
+        assert ds is not None
         # Data resampling
         ds_out = grid_from_rasterdataset(
             grid_like=self._get_grid_data(),
@@ -518,12 +519,12 @@ class GridComponent(SpatialModelComponent):
         self,
         raster_data: Union[str, Path, xr.DataArray],
         reclass_table_data: Union[str, Path, pd.DataFrame],
-        reclass_variables: List,
+        reclass_variables: List[str],
         variable: Optional[str] = None,
         fill_method: Optional[str] = None,
-        reproject_method: Optional[Union[List, str]] = "nearest",
+        reproject_method: Optional[Union[List[str], str]] = "nearest",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
+        rename: Optional[Dict[str, str]] = None,
         **kwargs,
     ) -> List[str]:
         """HYDROMT CORE METHOD: Add data variable(s) to grid component by reclassifying the data in ``raster_data`` based on ``reclass_table_data``.
@@ -606,11 +607,11 @@ class GridComponent(SpatialModelComponent):
     def add_data_from_geodataframe(
         self,
         vector_data: Union[str, Path, gpd.GeoDataFrame],
-        variables: Optional[Union[List, str]] = None,
-        nodata: Optional[Union[List, int, float]] = -1,
+        variables: Optional[Union[List[str], str]] = None,
+        nodata: Optional[Union[List[Union[int, float]], int, float]] = -1,
         rasterize_method: Optional[str] = "value",
         mask_name: Optional[str] = "mask",
-        rename: Optional[Dict] = None,
+        rename: Optional[Dict[str, str]] = None,
         all_touched: Optional[bool] = True,
     ) -> Optional[List[str]]:
         """HYDROMT CORE METHOD: Add data variable(s) to grid component by rasterizing the data from ``vector_data``.
@@ -667,10 +668,10 @@ class GridComponent(SpatialModelComponent):
             )
             return None
         # Data resampling
-        if vector_data in rename.keys():
-            # In case of choosing a new name with area or fraction method pass
-            # the name directly
-            rename = rename[vector_data]
+        # In case of choosing a new name with area or fraction method pass the name directly
+        renames = (
+            rename.get(vector_data, rename) if isinstance(vector_data, str) else rename
+        )
         ds = grid_from_geodataframe(
             grid_like=self._get_grid_data(),
             gdf=gdf,
@@ -678,7 +679,7 @@ class GridComponent(SpatialModelComponent):
             nodata=nodata,
             rasterize_method=rasterize_method,
             mask_name=mask_name,
-            rename=rename,
+            rename=renames,
             all_touched=all_touched,
         )
         # Add to grid

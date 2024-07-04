@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Hashable, Optional, Union
+from typing import Any, Hashable, List, Mapping, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -13,6 +13,7 @@ import xarray as xr
 from geopandas import GeoDataFrame, GeoSeries
 from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
+from xarray.core.types import DataVars
 
 from hydromt.gis import raster
 from hydromt.gis.vector_utils import filter_gdf
@@ -43,9 +44,10 @@ class GeoBase(raster.XGeoBase):
 
     def _get_geom_names_types(
         self, geom_name: Optional[str] = None
-    ) -> tuple[list, list]:
+    ) -> Tuple[List[str], List[str]]:
         """Discover coordinates with wkt/geom type data the dataset/array."""
-        names, types = [], []
+        names: List[str] = []
+        types: List[str] = []
         dvars = self._all_names if geom_name is None else [geom_name]
         for name in dvars:
             ndim = self._obj[name].ndim
@@ -894,8 +896,8 @@ class GeoDataset(GeoBase):
     @staticmethod
     def from_gdf(
         gdf: gpd.GeoDataFrame,
-        data_vars: Union[dict, xr.DataArray, xr.Dataset, None] = None,
-        coords: Optional[dict] = None,
+        data_vars: Optional[Union[DataVars, xr.DataArray, xr.Dataset]] = None,
+        coords: Optional[Mapping[Any, Any]] = None,
         index_dim: Optional[str] = None,
         keep_cols: bool = True,
         cols_as_data_vars: bool = False,
