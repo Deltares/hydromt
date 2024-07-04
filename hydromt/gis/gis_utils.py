@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 """GIS related convenience functions."""
+
 from __future__ import annotations
 
 import logging
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import geopandas as gpd
 import numpy as np
@@ -15,13 +16,15 @@ from pyproj.transformer import Transformer
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
-from hydromt._typing import Bbox, Geom, GpdShapeGeom
+from hydromt._typing import Bbox, Geom, GpdShapeGeom, Zoom
+from hydromt.gis.raster_utils import cellres
 
 __all__ = [
     "axes_attrs",
     "bbox_from_file_and_filters",
     "parse_crs",
     "parse_geom_bbox_buffer",
+    "zoom_to_overview_level",
     "to_geographic_bbox",
     "utm_crs",
 ]
@@ -228,3 +231,85 @@ def bbox_from_file_and_filters(
         bbox = gpd.GeoSeries(bbox, crs=crs)
     bbox = bbox if bbox.crs is not None else bbox.set_crs(crs)
     return tuple(bbox.to_crs(source_crs).total_bounds)
+
+
+def zoom_to_overview_level(
+    zoom: Zoom,
+    mask: Optional[Geom] = None,
+    zls_dict: Optional[Dict[int, float]] = None,
+    source_crs: Union[CRS, int, None] = None,
+) -> Optional[int]:
+    """Return overview level of data corresponding to zoom level.
+
+    Parameters
+    ----------
+    zoom: Zoom
+        Overview level or tuple with resolution and unit
+    mask: gpd.GeoSeries, optional
+        Geometry to determine res if zoom_level or source in degree
+    zls_dict: Dict[int, float], optional
+        Dictionary translating overview level to resolution.
+    source_crs: pyproj.CRS, optional
+        Source crs to determine res if zoom_level tuple is provided
+        with different unit than source_crs
+    """
+    # check zoom level
+    if zls_dict is None or len(zls_dict) == 0:
+        return None
+    elif isinstance(zoom, int):
+        overview_level = zoom
+        if overview_level not in zls_dict:
+            raise ValueError(
+                f"Overview level {overview_level} not defined."
+                f"Select from {zls_dict}."
+            )
+        dst_res = zls_dict[overview_level]
+    elif (
+        isinstance(zoom, tuple)
+        and isinstance(zoom[0], (int, float))
+        and isinstance(zoom[1], str)
+        and len(zoom) == 2
+        and source_crs is not None
+    ):
+        src_res, src_res_unit = zoom
+        # convert res if different unit than crs
+        source_crs = CRS.from_user_input(source_crs)
+        dst_crs_unit = source_crs.axis_info[0].unit_name
+        dst_res = src_res
+        if dst_crs_unit != src_res_unit:
+            known_units = ["degree", "metre", "US survey foot", "meter", "foot"]
+            if src_res_unit not in known_units:
+                raise TypeError(
+                    f"zoom_level unit {src_res_unit} not understood;"
+                    f" should be one of {known_units}"
+                )
+            if dst_crs_unit not in known_units:
+                raise NotImplementedError(
+                    f"no conversion available for {src_res_unit} to {dst_crs_unit}"
+                )
+            conversions = {
+                "foot": 0.3048,
+                "metre": 1,  # official pyproj units
+                "US survey foot": 0.3048,  # official pyproj units
+            }  # to meter
+            if src_res_unit == "degree" or dst_crs_unit == "degree":
+                lat = 0
+                if mask is not None:
+                    lat = mask.to_crs(4326).centroid.y.item()
+                conversions["degree"] = cellres(lat=lat)[1]
+            fsrc = conversions.get(src_res_unit, 1)
+            fdst = conversions.get(dst_crs_unit, 1)
+            dst_res = src_res * fsrc / fdst
+        # find nearest zoom level
+        res = list(zls_dict.values())[0] / 2
+        zls = list(zls_dict.keys())
+        smaller = [x < (dst_res + res * 0.01) for x in zls_dict.values()]
+        overview_level = (
+            zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
+        )
+    elif source_crs is None:
+        raise ValueError("No CRS defined, hence no zoom level can be determined.")
+    else:
+        raise TypeError(f"zoom_level not understood: {zoom}")
+    logger.debug(f"Using overview level {overview_level} ({dst_res:.2f})")
+    return overview_level

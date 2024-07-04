@@ -14,7 +14,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     Variables,
-    ZoomLevel,
+    Zoom,
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
@@ -39,7 +39,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom: Optional[Zoom] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -55,7 +55,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 "mask": mask,
                 "time_range": time_range,
                 "variables": variables,
-                "zoom_level": zoom_level,
+                "zoom": zoom,
                 "metadata": metadata,
             },
         )

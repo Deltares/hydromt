@@ -43,6 +43,7 @@ class DataFrameDriver(BaseDriver, ABC):
             uri,
             self.filesystem,
             variables=variables,
+            metadata=metadata,
             time_range=time_range,
             handle_nodata=handle_nodata,
         )

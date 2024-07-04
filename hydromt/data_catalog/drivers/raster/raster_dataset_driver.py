@@ -12,7 +12,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     Variables,
-    ZoomLevel,
+    Zoom,
 )
 from hydromt._typing.error import NoDataStrategy
 from hydromt.data_catalog.drivers.base_driver import BaseDriver
@@ -33,7 +33,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom: Optional[Zoom] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         # TODO: https://github.com/Deltares/hydromt/issues/802
@@ -52,16 +52,18 @@ class RasterDatasetDriver(BaseDriver, ABC):
             mask=mask,
             time_range=time_range,
             variables=variables,
-            zoom_level=zoom_level,
+            zoom=zoom,
+            metadata=metadata,
             handle_nodata=handle_nodata,
             options=self.options,
         )
+
         return self.read_data(
             uris,
             mask=mask,
             time_range=time_range,
             variables=variables,
-            zoom_level=zoom_level,
+            zoom=zoom,
             metadata=metadata,
             handle_nodata=handle_nodata,
         )
@@ -74,7 +76,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         mask: Optional[Geom] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom_level: Optional[Zoom] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:

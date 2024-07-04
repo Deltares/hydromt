@@ -41,6 +41,7 @@ class DatasetDriver(BaseDriver, ABC):
             self.filesystem,
             time_range=time_range,
             variables=variables,
+            metadata=metadata,
             handle_nodata=handle_nodata,
             options=self.options,
         )

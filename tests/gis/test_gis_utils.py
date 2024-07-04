@@ -2,6 +2,7 @@
 
 import os
 from pathlib import Path
+from typing import Any, Dict
 
 import geopandas as gpd
 import numpy as np
@@ -240,3 +241,35 @@ class TestBBoxFromFileAndFilters:
             gis_utils.bbox_from_file_and_filters(
                 vector_data_with_crs, bbox=gdf_bbox_with_crs, mask=gdf_bbox_with_crs
             )
+
+
+class TestZoomToOverviewLevel:
+    @pytest.fixture()
+    def kwargs(self) -> Dict[str, Any]:
+        return {"source_crs": 4326, "zls_dict": {0: 0.1, 1: 0.3}}
+
+    def test_none(self):
+        assert gis_utils.zoom_to_overview_level(None) is None
+
+    def test_int(self, kwargs: Dict[str, Any]):
+        assert gis_utils.zoom_to_overview_level(1, **kwargs) == 1
+
+    def test_tuple(self, kwargs: Dict[str, Any]):
+        assert gis_utils.zoom_to_overview_level((0.3, "degree"), **kwargs) == 1
+
+    def test_close(self, kwargs: Dict[str, Any]):
+        assert gis_utils.zoom_to_overview_level((0.29, "degree"), **kwargs) == 0
+
+    def test_rounds_down(self, kwargs: Dict[str, Any]):
+        assert gis_utils.zoom_to_overview_level((0.1, "degree"), **kwargs) == 0
+
+    def test_meters(self, kwargs: Dict[str, Any]):
+        assert gis_utils.zoom_to_overview_level((1, "meter"), **kwargs) == 0
+
+    def test_raises_unit_error(self, kwargs: Dict[str, Any]):
+        with pytest.raises(TypeError, match="zoom_level unit"):
+            gis_utils.zoom_to_overview_level((1, "asdf"), **kwargs)
+
+    def test_raises_not_understood_error(self, kwargs: Dict[str, Any]):
+        with pytest.raises(TypeError, match="zoom_level not understood"):
+            gis_utils.zoom_to_overview_level(zoom=(1, "asdf", "asdf"), **kwargs)

@@ -5,7 +5,7 @@ from datetime import datetime
 from os import mkdir
 from os.path import abspath, basename, dirname, join
 from pathlib import Path
-from typing import Optional, Tuple, Union, cast
+from typing import Any, Dict, Optional, Tuple, Union, cast
 from uuid import uuid4
 
 import fsspec
@@ -673,6 +673,7 @@ class TestGetRasterDataset:
         assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
         assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
+    @pytest.mark.integration()
     def test_to_stac(self, data_catalog: DataCatalog):
         # raster dataset
         name = "chirps_global"
@@ -707,51 +708,132 @@ class TestGetRasterDataset:
         )  # manually create an invalid adapter by deleting the crs
         assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
+    @pytest.fixture()
+    def zoom_dict(self, tmp_dir: Path, zoom_level_tif: str) -> Dict[str, Any]:
+        return {
+            "test_zoom": {
+                "data_type": "RasterDataset",
+                "driver": {"name": "rasterio"},
+                "uri": f"{str(tmp_dir)}/test_zl{{overview_level:d}}.tif",  # test with str format for zoom level
+                "metadata": {
+                    "crs": 4326,
+                    "zls_dict": {0: 0.1, 1: 0.3},
+                },
+            }
+        }
 
-def test_get_rasterdataset(data_catalog):
-    name = "koppen_geiger"
-    source = data_catalog.get_source(name)
-    da = data_catalog.get_rasterdataset(source)
-    assert isinstance(da, xr.DataArray)
+    @pytest.fixture()
+    def zoom_level_tif(self, rioda_large: xr.DataArray, tmp_dir: Path) -> str:
+        uri = str(tmp_dir / "test_zl1.tif")
+        # write tif with zoom level 1 in name
+        # NOTE zl 0 not written to check correct functioning
+        rioda_large.raster.to_raster(uri)  # , overviews=[0, 1])
+        return uri
 
+    @pytest.mark.integration()
+    @pytest.mark.usefixtures("zoom_level_tif")
+    def test_zoom_levels_normal_tif(
+        self, data_catalog: DataCatalog, zoom_dict: Dict[str, Any]
+    ):
+        # test zoom levels in name
+        name: str = next(iter(zoom_dict.keys()))
+        data_catalog.from_dict(zoom_dict)
+        da1 = data_catalog.get_rasterdataset(name, zoom=(0.3, "degree"))
+        assert isinstance(da1, xr.DataArray)
 
-def test_get_rasterdataset_artifact_data(data_catalog):
-    name = "koppen_geiger"
-    da = data_catalog.get_rasterdataset(name)
-    assert isinstance(da, xr.DataArray)
+    @pytest.fixture()
+    def zoom_level_cog(self, tmp_dir: Path, rioda_large: xr.DataArray) -> str:
+        # write COG
+        cog_uri = str(tmp_dir / "test_cog.tif")
+        rioda_large.raster.to_raster(cog_uri, driver="COG", overviews="auto")
+        return cog_uri
 
+    def test_zoom_levels_cog(
+        self, zoom_level_cog: str, rioda_large: xr.DataArray, data_catalog: DataCatalog
+    ):
+        # test COG zoom levels
+        # return native resolution
+        res = np.asarray(rioda_large.raster.res)
+        da = data_catalog.get_rasterdataset(zoom_level_cog, zoom=0)
+        assert np.allclose(da.raster.res, res)
 
-def test_get_rasterdataset_bbox(data_catalog):
-    name = "koppen_geiger"
-    da = data_catalog.get_rasterdataset(name)
-    bbox = [12.0, 46.0, 13.0, 46.5]
-    da = data_catalog.get_rasterdataset(da, bbox=bbox)
-    assert isinstance(da, xr.DataArray)
-    assert np.allclose(da.raster.bounds, bbox)
+    def test_zoom_levels_cog_zoom_resolution(
+        self, zoom_level_cog: str, data_catalog: DataCatalog, rioda_large: xr.DataArray
+    ):
+        # reurn zoom level 1
+        res = np.asarray(rioda_large.raster.res)
+        da1 = data_catalog.get_rasterdataset(
+            zoom_level_cog, zoom=(res[0] * 2, "degree")
+        )
+        assert np.allclose(da1.raster.res, res * 2)
 
+    @pytest.fixture()
+    def tif_no_overviews(self, tmp_dir: Path, rioda_large: xr.DataArray) -> str:
+        uri = str(tmp_dir / "test_tif_no_overviews.tif")
+        rioda_large.raster.to_raster(uri, driver="GTiff")
+        return uri
 
-def test_get_rasterdataset_s3(data_catalog: DataCatalog):
-    data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
-    # TODO: use filesystem in driver
-    da = data_catalog.get_rasterdataset(
-        data,
-        driver={
-            "name": "rasterio",
-            "filesystem": {"protocol": "s3", "anon": "true"},
-        },
-    )
-    assert isinstance(da, xr.DataArray)
+    @pytest.mark.integration()
+    def test_zoom_levels_no_overviews(
+        self,
+        tif_no_overviews: str,
+        rioda_large: xr.DataArray,
+        data_catalog: DataCatalog,
+    ):
+        # test if file hase no overviews
+        da = data_catalog.get_rasterdataset(tif_no_overviews, zoom=(0.01, "degree"))
+        xr.testing.assert_allclose(da, rioda_large)
 
+    @pytest.mark.integration()
+    def test_zoom_levels_with_variable(self, data_catalog: DataCatalog):
+        # test if file has {variable} in path
+        da = data_catalog.get_rasterdataset("merit_hydro", zoom=(0.01, "degree"))
+        assert isinstance(da, xr.Dataset)
 
-def test_get_rasterdataset_unknown_datatype(data_catalog):
-    with pytest.raises(ValueError, match='Unknown raster data type "list"'):
-        data_catalog.get_rasterdataset([])
+    @pytest.mark.integration()
+    def test_get_koppen_geiger(self, data_catalog: DataCatalog):
+        name = "koppen_geiger"
+        source = data_catalog.get_source(name)
+        da = data_catalog.get_rasterdataset(source)
+        assert isinstance(da, xr.DataArray)
 
+    @pytest.mark.integration()
+    def test_get_rasterdataset_artifact_data(self, data_catalog: DataCatalog):
+        name = "koppen_geiger"
+        da = data_catalog.get_rasterdataset(name)
+        assert isinstance(da, xr.DataArray)
 
-@pytest.mark.integration()
-def test_get_rasterdataset_unknown_file(data_catalog):
-    with pytest.raises(NoDataException):
-        data_catalog.get_rasterdataset("test1.tif")
+    @pytest.mark.integration()
+    def test_get_rasterdataset_bbox(self, data_catalog: DataCatalog):
+        name = "koppen_geiger"
+        da = data_catalog.get_rasterdataset(name)
+        bbox = [12.0, 46.0, 13.0, 46.5]
+        da = data_catalog.get_rasterdataset(da, bbox=bbox)
+        assert isinstance(da, xr.DataArray)
+        assert np.allclose(da.raster.bounds, bbox)
+
+    @pytest.mark.integration()
+    def test_get_rasterdataset_s3(self, data_catalog: DataCatalog):
+        data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
+        # TODO: use filesystem in driver
+        da = data_catalog.get_rasterdataset(
+            data,
+            driver={
+                "name": "rasterio",
+                "filesystem": {"protocol": "s3", "anon": "true"},
+            },
+        )
+
+        assert isinstance(da, xr.DataArray)
+
+    def test_get_rasterdataset_unknown_datatype(self, data_catalog: DataCatalog):
+        with pytest.raises(ValueError, match='Unknown raster data type "list"'):
+            data_catalog.get_rasterdataset([])
+
+    @pytest.mark.integration()
+    def test_unknown_file(self, data_catalog: DataCatalog):
+        with pytest.raises(NoDataException):
+            data_catalog.get_rasterdataset("test1.tif")
 
 
 def test_get_rasterdataset_unknown_key(data_catalog):

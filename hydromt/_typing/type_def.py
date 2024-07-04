@@ -79,7 +79,7 @@ TimeRange = Annotated[
     BeforeValidator(_time_tuple_from_str),
     AfterValidator(_time_range_validate),
 ]
-ZoomLevel = Union[int, Tuple[float, str]]  # level OR (scale, resolution)
+Zoom = Union[int, Tuple[float, str]]  # level OR (resolution, unit)
 Number = Union[int, float]
 SourceSpecDict = TypedDict(
     "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}

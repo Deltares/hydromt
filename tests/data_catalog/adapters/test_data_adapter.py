@@ -4,7 +4,6 @@
 import glob
 from os.path import abspath, dirname, join
 from pathlib import Path
-from typing import cast
 
 import numpy as np
 import pytest
@@ -12,7 +11,6 @@ import xarray as xr
 
 from hydromt import _compat as compat
 from hydromt.data_catalog import DataCatalog
-from hydromt.data_catalog.sources import RasterDatasetSource
 
 TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
@@ -50,64 +48,6 @@ def test_aws_worldcover():
         bbox=[12.0, 46.0, 12.5, 46.50],
     )
     assert da.name == "landuse"
-
-
-@pytest.mark.skip(
-    "Needs implementation of https://github.com/Deltares/hydromt/issues/875"
-)
-@pytest.mark.integration()
-def test_rasterdataset_zoomlevels(
-    rioda_large: xr.DataArray, tmp_dir: Path, data_catalog: DataCatalog
-):
-    # write tif with zoom level 1 in name
-    # NOTE zl 0 not written to check correct functioning
-    name = "test_zoom"
-    rioda_large.raster.to_raster(str(tmp_dir / "test_zl1.tif"))
-    yml_dict = {
-        name: {
-            "data_type": "RasterDataset",
-            "driver": {"name": "rasterio"},
-            "uri": f"{str(tmp_dir)}/test_zl{{zoom_level:d}}.tif",  # test with str format for zoom level
-            "metadata": {
-                "crs": 4326,
-            },
-            "zoom_levels": {0: 0.1, 1: 0.3},
-        }
-    }
-    # test zoom levels in name
-    data_catalog.from_dict(yml_dict)
-    rds: RasterDatasetSource = cast(RasterDatasetSource, data_catalog.get_source(name))
-    assert rds._parse_zoom_level(None) is None
-    assert rds._parse_zoom_level(zoom_level=1) == 1
-    assert rds._parse_zoom_level(zoom_level=(0.3, "degree")) == 1
-    assert rds._parse_zoom_level(zoom_level=(0.29, "degree")) == 0
-    assert rds._parse_zoom_level(zoom_level=(0.1, "degree")) == 0
-    assert rds._parse_zoom_level(zoom_level=(1, "meter")) == 0
-    with pytest.raises(TypeError, match="zoom_level unit"):
-        rds._parse_zoom_level(zoom_level=(1, "asfd"))
-    with pytest.raises(TypeError, match="zoom_level not understood"):
-        rds._parse_zoom_level(zoom_level=(1, "asfd", "asdf"))
-    da1 = data_catalog.get_rasterdataset(name, zoom_level=(0.3, "degree"))
-    assert isinstance(da1, xr.DataArray)
-    # write COG
-    cog_fn = str(tmp_dir / "test_cog.tif")
-    rioda_large.raster.to_raster(cog_fn, driver="COG", overviews="auto")
-    # test COG zoom levels
-    # return native resolution
-    res = np.asarray(rioda_large.raster.res)
-    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=0)
-    assert np.allclose(da1.raster.res, res)
-    # reurn zoom level 1
-    da1 = data_catalog.get_rasterdataset(cog_fn, zoom_level=(res[0] * 2, "degree"))
-    assert np.allclose(da1.raster.res, res * 2)
-    # test if file hase no overviews
-    tif_fn = str(tmp_dir / "test_tif_no_overviews.tif")
-    rioda_large.raster.to_raster(tif_fn, driver="GTiff")
-    da1 = data_catalog.get_rasterdataset(tif_fn, zoom_level=(0.01, "degree"))
-    xr.testing.assert_allclose(da1, rioda_large)
-    # test if file has {variable} in path
-    da1 = data_catalog.get_rasterdataset("merit_hydro", zoom_level=(0.01, "degree"))
-    assert isinstance(da1, xr.Dataset)
 
 
 @pytest.mark.skip(
