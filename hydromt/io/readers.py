@@ -302,7 +302,7 @@ def open_mfraster(
     if len(uris) == 0:
         raise OSError("no files to open")
 
-    da_lst: List[xr:DataArray] = []
+    da_lst: List[xr.DataArray] = []
     index_lst, file_attrs = [], []
     for i, uri in enumerate(uris):
         # read file
