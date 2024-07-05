@@ -20,9 +20,7 @@ import hydromt
 from hydromt import _compat, raster
 
 
-@pytest.mark.parametrize("engine", ["fiona", "pyogrio"])
-def test_open_vector(engine, tmpdir, df, geodf, world):
-    gpd.io_engine = engine
+def test_open_vector(tmpdir, df, geodf, world):
     fn_csv = str(tmpdir.join("test.csv"))
     fn_parquet = str(tmpdir.join("test.parquet"))
     fn_xy = str(tmpdir.join("test.xy"))
@@ -100,7 +98,7 @@ def test_open_vector(engine, tmpdir, df, geodf, world):
 def test_open_vector_s3(geodf: gpd.GeoDataFrame):
     m = MagicMock()
     m.return_value = geodf
-    with patch("geopandas.io.file._read_file_fiona", m):
+    with patch("geopandas.io.file._read_file_pyogrio", m):
         df = hydromt.open_vector(UPath("s3://fake_url/file.geojson"))
     assert np.all(geodf == df)
 
