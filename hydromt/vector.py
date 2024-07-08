@@ -1,4 +1,5 @@
 """Implementation of the vector workloads."""
+
 from __future__ import annotations
 
 import logging
@@ -20,7 +21,6 @@ GDAL_VERSION = gdal_version()
 
 
 class GeoBase(raster.XGeoBase):
-
     """Base accessor class for geo data."""
 
     def __init__(self, xarray_obj) -> None:
@@ -332,7 +332,7 @@ class GeoBase(raster.XGeoBase):
                 geom_name = self.attrs.get("geom_name", "geometry")
             elif self.geom_name != geom_name:
                 drop_vars.append(self.geom_name)
-            coords = {geom_name: (index_dim, geometry.values)}
+            coords = {geom_name: (index_dim, geometry.values.to_numpy())}
         elif geom_format == "wkt":
             if geom_name is None:
                 geom_name = self.attrs.get("geom_name", "ogc_wkt")
@@ -663,7 +663,6 @@ class GeoBase(raster.XGeoBase):
 
 @xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
-
     """Accessor class for vector based geo data arrays."""
 
     def __init__(self, xarray_obj):
@@ -836,7 +835,6 @@ class GeoDataArray(GeoBase):
 
 @xr.register_dataset_accessor("vector")
 class GeoDataset(GeoBase):
-
     """Implementation for a vectorased geo dataset."""
 
     def __init__(self, xarray_obj):
