@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.data_catalog.adapters submodule."""
 
-import glob
 from os.path import abspath, dirname, join
-from pathlib import Path
 
 import numpy as np
 import pytest
-import xarray as xr
 
 from hydromt import _compat as compat
 from hydromt.data_catalog import DataCatalog
@@ -38,7 +35,6 @@ def test_gcs_cmip6():
     # assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
 
 
-@pytest.mark.skip(reason="Needs implementation of all Drivers.")
 @pytest.mark.skipif(not compat.HAS_S3FS, reason="S3FS not installed.")
 def test_aws_worldcover():
     catalog_fn = join(CATALOGDIR, "aws_data", "v0.1.0", "data_catalog.yml")
@@ -48,20 +44,3 @@ def test_aws_worldcover():
         bbox=[12.0, 46.0, 12.5, 46.50],
     )
     assert da.name == "landuse"
-
-
-@pytest.mark.skip(
-    reason="Needs implementation https://github.com/Deltares/hydromt/issues/875."
-)
-def test_reads_slippy_map_output(tmp_dir: Path, rioda_large: xr.DataArray):
-    # write vrt data
-    name = "tiled"
-    root = tmp_dir / name
-    rioda_large.raster.to_xyz_tiles(
-        root=root,
-        tile_size=256,
-        zoom_levels=[0],
-    )
-    cat = DataCatalog(str(root / f"{name}.yml"), cache=True)
-    cat.get_rasterdataset(name)
-    assert len(glob.glob(join(cat._cache_dir, name, name, "*", "*", "*.tif"))) == 16

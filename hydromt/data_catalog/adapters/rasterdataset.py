@@ -370,7 +370,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         if nodata := metadata.nodata is not None:
             if not isinstance(nodata, dict):
                 no_data_values: Dict[str, Any] = {
-                    k: self.nodata for k in ds.data_vars.keys()
+                    k: metadata.nodata for k in ds.data_vars.keys()
                 }
             else:
                 no_data_values: Dict[str, Any] = nodata

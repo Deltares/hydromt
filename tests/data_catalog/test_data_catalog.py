@@ -1,5 +1,6 @@
 """Tests for the hydromt.data_catalog submodule."""
 
+import glob
 import os
 from datetime import datetime
 from os import mkdir
@@ -798,13 +799,7 @@ class TestGetRasterDataset:
         assert isinstance(da, xr.DataArray)
 
     @pytest.mark.integration()
-    def test_get_rasterdataset_artifact_data(self, data_catalog: DataCatalog):
-        name = "koppen_geiger"
-        da = data_catalog.get_rasterdataset(name)
-        assert isinstance(da, xr.DataArray)
-
-    @pytest.mark.integration()
-    def test_get_rasterdataset_bbox(self, data_catalog: DataCatalog):
+    def test_bbox(self, data_catalog: DataCatalog):
         name = "koppen_geiger"
         da = data_catalog.get_rasterdataset(name)
         bbox = [12.0, 46.0, 13.0, 46.5]
@@ -813,7 +808,7 @@ class TestGetRasterDataset:
         assert np.allclose(da.raster.bounds, bbox)
 
     @pytest.mark.integration()
-    def test_get_rasterdataset_s3(self, data_catalog: DataCatalog):
+    def test_s3(self, data_catalog: DataCatalog):
         data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
         # TODO: use filesystem in driver
         da = data_catalog.get_rasterdataset(
@@ -826,6 +821,21 @@ class TestGetRasterDataset:
 
         assert isinstance(da, xr.DataArray)
 
+    @pytest.mark.integration()
+    def test_reads_slippy_map_output(self, tmp_dir: Path, rioda_large: xr.DataArray):
+        # write vrt data
+        name = "tiled"
+        root = tmp_dir / name
+        rioda_large.raster.to_xyz_tiles(
+            root=root,
+            tile_size=256,
+            zoom_levels=[0],
+        )
+        cat = DataCatalog(str(root / f"{name}.yml"), cache=True)
+        cat.get_rasterdataset(name)
+        assert len(glob.glob(join(root, "*", "*", "*.tif"))) == 16
+
+    @pytest.mark.integration()
     def test_get_rasterdataset_unknown_datatype(self, data_catalog: DataCatalog):
         with pytest.raises(ValueError, match='Unknown raster data type "list"'):
             data_catalog.get_rasterdataset([])

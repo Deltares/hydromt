@@ -2443,12 +2443,14 @@ class RasterDataArray(XRasterBase):
 
         # Write a quick data catalog yaml
         yml = {
-            "crs": self.crs.to_epsg(),
             "data_type": "RasterDataset",
-            "driver": "raster",
-            "path": f"{mName}_zl{{zoom_level}}.vrt",
-            "zoom_levels": zls,
-            "nodata": float(nodata),
+            "driver": "rasterio",
+            "uri": f"{mName}_zl{{overview_level}}.vrt",
+            "metadata": {
+                "zls_dict": zls,
+                "crs": self.crs.to_epsg(),
+                "nodata": float(nodata),
+            },
         }
         with open(join(root, f"{mName}.yml"), "w") as f:
             yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
