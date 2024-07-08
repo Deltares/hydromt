@@ -28,9 +28,9 @@ jobs:
 
       - name: Build artifacts
         run: |
-          git clean -xdf 
-          git restore -SW . 
-          flit build 
+          git clean -xdf
+          git restore -SW .
+          flit build
           python -m twine check dist/*
 
       - name: Publish package to TestPyPI
@@ -70,7 +70,7 @@ jobs:
           name: docs-release-artifacts
           path: docs/_build
 
-          
+
   docker:
     runs-on: ubuntu-latest
     outputs:
@@ -81,7 +81,7 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Build and export
         uses: docker/build-push-action@v6
         with:
@@ -91,13 +91,13 @@ jobs:
       - name: Run Tests
         run: |
           docker load --input /tmp/hydromt-docker-image.tar
-          docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt 
+          docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt
 
       - name: Test Binder integration with repo2docker
         run: |
           pip install jupyter-repo2docker
           repo2docker . echo 'success!'
-          
+
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -105,7 +105,7 @@ jobs:
         with:
           name: hydromt-docker-image
           path: /tmp/hydromt-docker-image.tar
-    
+
   notify:
     needs:
       - pypi
@@ -134,4 +134,4 @@ jobs:
           echo "    - docker: $docker_url" >> comment.txt
           echo "    - docs: $docs_url" >> comment.txt
 
-          gh pr comment ${{ steps.extract_branch.outputs.branch }} --body-file comment.txt 
+          gh pr comment ${{ steps.extract_branch.outputs.branch }} --body-file comment.txt

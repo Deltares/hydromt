@@ -36,12 +36,12 @@ jobs:
 
       - name: check there are no pre-existing release PRs
         run: |
-          export EXISTING_RELEASE_PR_NUMBER=$(gh pr list --search "release" --json "number") 
+          export EXISTING_RELEASE_PR_NUMBER=$(gh pr list --search "release" --json "number")
           if [ $(echo $EXISTING_RELEASE_PR_NUMBER | jq '.|length') -gt 0]; then
             gh pr comment $EXISTING_RELEASE_PR_NUMBER --body "$username It looks like you tried to start a new release but this one is already started. Please either finish or close this one before continuing";
             exit 1
           fi
-        env: 
+        env:
           username: ${{ github.actor }}
 
       - name: setup release PR
@@ -149,6 +149,3 @@ jobs:
           echo "However, you can trigger them by executing the following commands:" >> comment.txt
             echo "\`git fetch && git checkout release/v$NEW_VERSION && git commit --allow-empty -m \"Trigger artifact creation\" && git push\`. " >> comment.txt
           gh pr comment "$PR_URL" --body-file comment.txt
-
-
-          

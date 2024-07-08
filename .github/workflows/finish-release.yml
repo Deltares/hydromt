@@ -20,18 +20,18 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: hydromt-docker-image
-      
+
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.TEST_DOCKERHUB_USERNAME }}
           password: ${{ secrets.TEST_DOCKERHUB_TOKEN }}
-      
+
       - name: Build and push ${{ matrix.flavour }} image
         uses: docker/build-push-action@v4
         with:
           context: .
-          target: ${{ matrix.flavour }} 
+          target: ${{ matrix.flavour }}
           push:  true
           tags: deltares/hydromt:${{ env.version }}-${{ matrix.flavour }}
 
@@ -40,10 +40,10 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          target: ${{ matrix.flavour }} 
+          target: ${{ matrix.flavour }}
           push:  true
           tags: deltares/hydromt:${{ env.version }}, deltares/hydromt:latest
-  
+
   publish-pypi:
     runs-on: ubuntu-latest
     steps:
@@ -58,7 +58,7 @@ jobs:
           password: ${{ secrets.PYPI_TOKEN }}
           verbose: true
 
-  publish-docs:    
+  publish-docs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v3
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Merge release PR
-        run: | 
+        run: |
           export PR_ID=$(gh pr list --state "open" --author "app/github-actions" --search "release"  --json "number" --jq '. | first | .number')
           if [ ! -z $PR_ID ]; then
           ## seting up git
@@ -105,6 +105,6 @@ jobs:
             sed -i "s/v$RELEASE_VERSION/Unreleased\n==========\n\nNew\n---\n\nChanged\n-------\n\nFixed\n-----\n\nDeprecated\n----------\n\nv$RELEASE_VERSION/" docs/changelog.rst
             sed -i 's/__version__.*=.*"\(.*\)".*/__version__ = "\1.dev0"/' hydromt/__init__.py
 
-            git add hydromt/__init__.py docs/changelog.rst            
+            git add hydromt/__init__.py docs/changelog.rst
             git commit -m "Post release"
             git push main origin
