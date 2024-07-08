@@ -22,7 +22,7 @@ from pystac import Item as StacItem
 from shapely import box
 from yaml import dump
 
-from hydromt._compat import HAS_OPENPYXL
+from hydromt._compat import HAS_GCSFS, HAS_OPENPYXL, HAS_S3FS
 from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
@@ -820,6 +820,36 @@ class TestGetRasterDataset:
         )
 
         assert isinstance(da, xr.DataArray)
+
+    @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
+    def test_aws_worldcover(self):
+        catalog_fn = join(CATALOGDIR, "aws_data", "v1.0.0", "data_catalog.yml")
+        data_catalog = DataCatalog(data_libs=[catalog_fn])
+        da = data_catalog.get_rasterdataset(
+            "esa_worldcover_2020_v100",
+            bbox=[12.0, 46.0, 12.5, 46.50],
+        )
+        assert da.name == "landuse"
+
+    @pytest.mark.skipif(not HAS_GCSFS, reason="GCSFS not installed.")
+    def test_gcs_cmip6(self):
+        # TODO switch to pre-defined catalogs when pushed to main
+        catalog_fn = join(CATALOGDIR, "gcs_cmip6_data", "v0.1.0", "data_catalog.yml")
+        data_catalog = DataCatalog(data_libs=[catalog_fn])
+        ds = data_catalog.get_rasterdataset(
+            "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
+            variables=["precip", "temp"],
+            time_range=(("1990-01-01", "1990-03-01")),
+        )
+        # Check reading and some preprocess
+        assert "precip" in ds
+        assert not np.any(ds[ds.raster.x_dim] > 180)
+        # Skip as I don't think this adds value to testing a gcs cloud archive
+        # Write and compare
+        # fn_nc = str(tmpdir.join("test.nc"))
+        # ds.to_netcdf(fn_nc)
+        # ds1 = data_catalog.get_rasterdataset(fn_nc)
+        # assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
 
     @pytest.mark.integration()
     def test_reads_slippy_map_output(self, tmp_dir: Path, rioda_large: xr.DataArray):
