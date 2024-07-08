@@ -93,8 +93,8 @@ def test_add_raster_data_from_rasterdataset(demda, tmpdir, mocker: MockerFixture
 
 
 def test_add_raster_data_from_raster_reclass(tmpdir, demda, lulcda):
-    dc_param_fn = join(DATADIR, "parameters_data.yml")
-    model = Model(root=tmpdir, data_libs=[dc_param_fn], mode="w")
+    dc_param_path = join(DATADIR, "parameters_data.yml")
+    model = Model(root=tmpdir, data_libs=[dc_param_path], mode="w")
 
     # add a grid and spatial component
     model.add_component("grid", GridComponent(model))

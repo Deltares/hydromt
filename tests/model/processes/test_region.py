@@ -92,8 +92,8 @@ def test_region_from_basin_ids():
     region = parse_region_basin(
         region,
         data_catalog=DataCatalog(),
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
+        hydrography_path="merit_hydro",
+        basin_index_path="merit_hydro_index",
     )
     assert set(map(lambda x: int(x), region["value"])) == set(basin_ids)
 
@@ -104,8 +104,8 @@ def test_region_from_basin_id():
     region = parse_region_basin(
         region,
         data_catalog=DataCatalog(),
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
+        hydrography_path="merit_hydro",
+        basin_index_path="merit_hydro_index",
     )
     assert set(region["value"]) == {basin_id}
 
@@ -119,8 +119,8 @@ def test_region_from_subbasin():
     region: gpd.GeoDataFrame = parse_region_basin(
         region_dict,
         data_catalog=DataCatalog(),
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
+        hydrography_path="merit_hydro",
+        basin_index_path="merit_hydro_index",
     )
     # area should have something to do with our region
     assert box(*region_dict["bounds"]).intersects(region.loc[0].geometry)
@@ -132,8 +132,8 @@ def test_region_from_basin_xy():
     region = parse_region_basin(
         region,
         data_catalog=DataCatalog(),
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
+        hydrography_path="merit_hydro",
+        basin_index_path="merit_hydro_index",
     )
     assert region.shape == (4, 2)
 
@@ -146,8 +146,8 @@ def test_region_from_inter_basin():
     region = parse_region_basin(
         region,
         data_catalog=DataCatalog(),
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
+        hydrography_path="merit_hydro",
+        basin_index_path="merit_hydro_index",
     )
     assert region.shape == (1, 2)
 
@@ -163,8 +163,8 @@ def test_raise_wrong_region_value_for_interbasin():
         region = parse_region_basin(
             region,
             data_catalog=DataCatalog(),
-            hydrography_fn="merit_hydro",
-            basin_index_fn="merit_hydro_index",
+            hydrography_path="merit_hydro",
+            basin_index_path="merit_hydro_index",
         )
 
 

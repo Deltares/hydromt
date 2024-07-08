@@ -2352,9 +2352,9 @@ class RasterDataArray(XRasterBase):
         }.get(driver.lower(), {})
         kwargs = {**kwargs0, **kwargs}
 
-        mName = os.path.normpath(os.path.basename(root))
+        normalized_root = os.path.normpath(os.path.basename(root))
 
-        vrt_fn = None
+        vrt_path = None
         prev = 0
         nodata = self.nodata
         dtype = self._obj.dtype
@@ -2365,8 +2365,8 @@ class RasterDataArray(XRasterBase):
             pxzl = tile_size * (2 ** (diff))
 
             # read data from previous zoomlevel
-            if vrt_fn is not None:
-                obj = xr.open_dataarray(vrt_fn, engine="rasterio").squeeze(
+            if vrt_path is not None:
+                obj = xr.open_dataarray(vrt_path, engine="rasterio").squeeze(
                     "band", drop=True
                 )
                 obj.raster.set_nodata(nodata)
@@ -2385,7 +2385,7 @@ class RasterDataArray(XRasterBase):
             # Write the raster paths to a text file
             sd = join(root, f"{zl}")
             os.makedirs(sd, exist_ok=True)
-            fns = []
+            paths = []
             for l, u, w, h in _tile_window_xyz(obj.shape, pxzl):
                 col = int(np.ceil(l / pxzl))
                 row = int(np.ceil(u / pxzl))
@@ -2430,13 +2430,13 @@ class RasterDataArray(XRasterBase):
                     temp.raster.to_raster(path, driver=driver, **kwargs)
                 else:
                     raise ValueError(f"Unkown file driver {driver}")
-                fns.append(path)
+                paths.append(path)
 
                 del temp
 
             # Create a vrt using GDAL
-            vrt_fn = join(root, f"{mName}_zl{zl}.vrt")
-            create_vrt(vrt_fn, files=fns)
+            vrt_path = join(root, f"{normalized_root}_zl{zl}.vrt")
+            create_vrt(vrt_path, files=paths)
             prev = zl
             zls.update({zl: float(dst_res)})
             del obj
@@ -2445,15 +2445,17 @@ class RasterDataArray(XRasterBase):
         yml = {
             "data_type": "RasterDataset",
             "driver": "rasterio",
-            "uri": f"{mName}_zl{{overview_level}}.vrt",
+            "uri": f"{normalized_root}_zl{{overview_level}}.vrt",
             "metadata": {
                 "zls_dict": zls,
                 "crs": self.crs.to_epsg(),
                 "nodata": float(nodata),
             },
         }
-        with open(join(root, f"{mName}.yml"), "w") as f:
-            yaml.dump({mName: yml}, f, default_flow_style=False, sort_keys=False)
+        with open(join(root, f"{normalized_root}.yml"), "w") as f:
+            yaml.dump(
+                {normalized_root: yml}, f, default_flow_style=False, sort_keys=False
+            )
 
     def to_slippy_tiles(
         self,
@@ -2605,7 +2607,7 @@ class RasterDataArray(XRasterBase):
         zoom_levels = {}
         logger.info(f"Producing tiles from zoomlevel {min_lvl} to {max_lvl}")
         for zl in range(max_lvl, min_lvl - 1, -1):
-            fns = []
+            paths = []
             for i, tile in enumerate(mct.tiles(*bounds_4326, zl, truncate=True)):
                 ssd = Path(root, str(zl), f"{tile.x}")
                 os.makedirs(ssd, exist_ok=True)
@@ -2635,27 +2637,29 @@ class RasterDataArray(XRasterBase):
                     # Create a temporary array, 4 times the size of a tile
                     temp = np.full((pxs * 2, pxs * 2), nodata, dtype=dtype)
                     for ic, child in enumerate(mct.children(tile)):
-                        fn = Path(root, str(child.z), str(child.x), f"{child.y}.{ext}")
+                        path = Path(
+                            root, str(child.z), str(child.x), f"{child.y}.{ext}"
+                        )
                         # Check if the file is really there, if not: it was not written
-                        if not fn.exists():
+                        if not path.exists():
                             continue
                         # order: top-left, top-right, bottom-right, bottom-left
                         yslice = slice(0, pxs) if ic in [0, 1] else slice(pxs, None)
                         xslice = slice(0, pxs) if ic in [0, 3] else slice(pxs, None)
                         if ldriver == "netcdf4":
-                            with xr.open_dataset(fn, mask_and_scale=False) as ds:
+                            with xr.open_dataset(path, mask_and_scale=False) as ds:
                                 temp[yslice, xslice] = ds[name].values
                         elif ldriver == "gtiff":
-                            with rasterio.open(fn) as src:
+                            with rasterio.open(path) as src:
                                 temp[yslice, xslice] = src.read(1)
                         elif ldriver == "png":
                             if cmap is not None:
-                                fn_bin = str(fn).replace(f".{ext}", ".bin")
-                                with open(fn_bin, "r") as f:
+                                temp_binary_path = str(path).replace(f".{ext}", ".bin")
+                                with open(temp_binary_path, "r") as f:
                                     data = np.fromfile(f, dtype).reshape((pxs, pxs))
-                                os.remove(fn_bin)  # clean up
+                                os.remove(temp_binary_path)  # clean up
                             else:
-                                im = np.array(Image.open(fn))
+                                im = np.array(Image.open(path))
                                 data = _rgba2elevation(im, nodata=nodata, dtype=dtype)
                             temp[yslice, xslice] = data
                     # coarsen the data using mean
@@ -2673,31 +2677,31 @@ class RasterDataArray(XRasterBase):
                         dst_tile.name = name
 
                 # write the data to file
-                fn_out = Path(ssd, f"{tile.y}.{ext}")
-                fns.append(fn_out)
+                write_path = Path(ssd, f"{tile.y}.{ext}")
+                paths.append(write_path)
                 if ldriver == "png":
                     if cmap is not None and zl != min_lvl:
                         # create temp bin file with data for upsampling
-                        fn_bin = str(fn_out).replace(f".{ext}", ".bin")
-                        dst_data.astype(dtype).tofile(fn_bin)
+                        temp_binary_path = str(write_path).replace(f".{ext}", ".bin")
+                        dst_data.astype(dtype).tofile(temp_binary_path)
                         rgba = cmap(norm(dst_data), bytes=True)
                     else:
                         # Create RGBA bands from the data and save it as png
                         rgba = _elevation2rgba(dst_data, nodata=nodata)
-                    Image.fromarray(rgba).save(fn_out, **kwargs)
+                    Image.fromarray(rgba).save(write_path, **kwargs)
                 elif ldriver == "netcdf4":
                     # write the data to netcdf
                     # EPSG:3857 not understood by gdal -> fix in gdal_compliant
                     dst_tile = dst_tile.raster.gdal_compliant(rename_dims=False)
-                    dst_tile.to_netcdf(fn_out, **kwargs)
+                    dst_tile.to_netcdf(write_path, **kwargs)
                 elif ldriver == "gtiff":
                     # write the data to geotiff
-                    dst_tile.raster.to_raster(fn_out, **kwargs)
+                    dst_tile.raster.to_raster(write_path, **kwargs)
 
             # Write files to txt and create a vrt using GDAL
             if write_vrt:
-                vrt_fn = Path(root, f"lvl{zl}.vrt")
-                create_vrt(vrt_fn, files=fns)
+                vrt_path = Path(root, f"lvl{zl}.vrt")
+                create_vrt(vrt_path, files=paths)
 
         # Write a quick yaml for the database
         if write_vrt:

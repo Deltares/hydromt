@@ -150,13 +150,13 @@ def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmpdir):
     with pytest.raises(IOError, match="Model opened in read-only mode"):
         mesh_component.write()
     mock_model.root = ModelRoot(path=tmpdir, mode="w")
-    fn = "mesh/fake_mesh.nc"
+    write_path = "mesh/fake_mesh.nc"
     mesh_component._data.grid.crs = 28992
-    mesh_component.write(filename=fn)
-    file_dir = join(mesh_component.root.path, dirname(fn))
-    file_path = join(tmpdir, fn)
+    mesh_component.write(filename=write_path)
+    file_dir = join(mesh_component.root.path, dirname(write_path))
+    file_path = join(tmpdir, write_path)
     assert isdir(file_dir)
-    assert f"Writing file {fn}" in caplog.text
+    assert f"Writing file {write_path}" in caplog.text
     assert isfile(file_path)
     ds = xr.open_dataset(file_path)
     assert "elevation" in ds.data_vars
@@ -278,14 +278,14 @@ def test_add_2d_data_from_raster_reclass(
             reclass_table_filename="mock_reclass_table",
             reclass_variables=["landuse", "roughness_manning"],
         )
-    raster_fn = "mock_raster"
+    raster_data = "mock_raster"
     with pytest.raises(
         ValueError,
-        match=f"raster_filename {raster_fn} should be a single variable raster. "
+        match=f"raster_filename {raster_data} should be a single variable raster. "
         "Please select one using the 'variable' argument",
     ):
         mesh_component.add_2d_data_from_raster_reclass(
-            raster_filename=raster_fn,
+            raster_filename=raster_data,
             reclass_table_filename="reclass_table",
             grid_name="mesh2d",
             reclass_variables=["landuse", "roughness_manning"],
@@ -320,18 +320,18 @@ def test_read(mock_model, caplog: pytest.LogCaptureFixture, tmpdir, griduda):
     mesh_component.model.root = ModelRoot(tmpdir, mode="w")
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         mesh_component.read()
-    fn = "test/test_mesh.nc"
-    file_dir = join(mesh_component.model.root.path, dirname(fn))
+    mesh_path = "test/test_mesh.nc"
+    file_dir = join(mesh_component.model.root.path, dirname(mesh_path))
     os.makedirs(file_dir)
     data = griduda.ugrid.to_dataset()
-    data.to_netcdf(join(mesh_component.model.root.path, fn))
+    data.to_netcdf(join(mesh_component.model.root.path, mesh_path))
     mock_model.root = ModelRoot(tmpdir, mode="r+")
     with pytest.raises(
         ValueError, match="no crs is found in the file nor passed to the reader."
     ):
-        mesh_component.read(filename=fn)
+        mesh_component.read(filename=mesh_path)
     caplog.set_level(level=logging.INFO)
-    mesh_component.read(filename=fn, crs=4326)
+    mesh_component.read(filename=mesh_path, crs=4326)
     assert "no crs is found in the file, assigning from user input." in caplog.text
     assert mesh_component._data.ugrid.crs["mesh2d"].to_epsg() == 4326
 
@@ -363,9 +363,9 @@ def test_model_mesh_workflow(tmpdir: Path):
 
 @pytest.mark.integration()
 def test_mesh_with_model(griduda, world, tmpdir):
-    dc_param_fn = join(DATADIR, "parameters_data.yml")
+    dc_param_path = join(DATADIR, "parameters_data.yml")
     root = join(tmpdir, "mesh_component1")
-    model = Model(root=root, data_libs=["artifact_data", dc_param_fn])
+    model = Model(root=root, data_libs=["artifact_data", dc_param_path])
     mesh_component = MeshComponent(model=model)
     model.add_component(name="mesh", component=mesh_component)
     region = {"geom": world[world.name == "Italy"]}
@@ -373,7 +373,7 @@ def test_mesh_with_model(griduda, world, tmpdir):
     assert model.mesh.region.crs.to_epsg() == 3857
 
     region = {"mesh": griduda}
-    model1 = Model(root=root, data_libs=["artifact_data", dc_param_fn])
+    model1 = Model(root=root, data_libs=["artifact_data", dc_param_path])
     mesh_component = MeshComponent(model=model1)
     model1.add_component(name="mesh", component=mesh_component)
     model1.mesh.create_2d_from_region(region, grid_name="mesh2d")

@@ -23,7 +23,7 @@ def test_setup_grid_from_constant_validation():
 
 def test_setup_grid_from_rasterdataset_validation():
     d = {
-        "raster_fn": "merit_hydro_1k",
+        "raster_data": "merit_hydro_1k",
         "variables": ["elevtn", "basins"],
         "reproject_method": ["average", "mode"],
     }
@@ -32,7 +32,7 @@ def test_setup_grid_from_rasterdataset_validation():
 
 def test_setup_grid_from_geodataframe_validation():
     d = {
-        "vector_fn": "hydro_lakes",
+        "vector_data": "hydro_lakes",
         "variables": ["waterbody_id", "Depth_avg"],
         "nodata": [-1, -999.0],
         "rasterize_method": "value",
@@ -43,8 +43,8 @@ def test_setup_grid_from_geodataframe_validation():
 
 def test_setup_grid_from_raster_reclass_validation():
     d = {
-        "raster_fn": "vito",
-        "reclass_table_fn": "vito_reclass",
+        "raster_data": "vito",
+        "reclass_table_data": "vito_reclass",
         "reclass_variables": ["manning"],
         "reproject_method": ["average"],
     }

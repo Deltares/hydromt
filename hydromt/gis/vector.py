@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Hashable, Optional, Union
+from typing import Any, Hashable, List, Mapping, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -13,12 +13,14 @@ import xarray as xr
 from geopandas import GeoDataFrame, GeoSeries
 from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
+from xarray.core.types import DataVars
 
 from hydromt.gis import raster
 from hydromt.gis.vector_utils import filter_gdf
 
 logger = logging.getLogger(__name__)
 GDAL_VERSION = gdal_version()
+
 
 __all__ = ["GeoDataArray", "GeoDataset"]
 
@@ -42,9 +44,10 @@ class GeoBase(raster.XGeoBase):
 
     def _get_geom_names_types(
         self, geom_name: Optional[str] = None
-    ) -> tuple[list, list]:
+    ) -> Tuple[List[str], List[str]]:
         """Discover coordinates with wkt/geom type data the dataset/array."""
-        names, types = [], []
+        names: List[str] = []
+        types: List[str] = []
         dvars = self._all_names if geom_name is None else [geom_name]
         for name in dvars:
             ndim = self._obj[name].ndim
@@ -339,7 +342,7 @@ class GeoBase(raster.XGeoBase):
                 geom_name = self.attrs.get("geom_name", "geometry")
             elif self.geom_name != geom_name:
                 drop_vars.append(self.geom_name)
-            coords = {geom_name: (index_dim, geometry.values)}
+            coords = {geom_name: (index_dim, geometry.values.to_numpy())}
         elif geom_format == "wkt":
             if geom_name is None:
                 geom_name = self.attrs.get("geom_name", "ogc_wkt")
@@ -893,8 +896,8 @@ class GeoDataset(GeoBase):
     @staticmethod
     def from_gdf(
         gdf: gpd.GeoDataFrame,
-        data_vars: Union[dict, xr.DataArray, xr.Dataset, None] = None,
-        coords: Optional[dict] = None,
+        data_vars: Optional[Union[DataVars, xr.DataArray, xr.Dataset]] = None,
+        coords: Optional[Mapping[Any, Any]] = None,
         index_dim: Optional[str] = None,
         keep_cols: bool = True,
         cols_as_data_vars: bool = False,
@@ -906,7 +909,7 @@ class GeoDataset(GeoBase):
         ---------
         gdf: geopandas GeoDataFrame
             Spatial coordinates. The index should match the df index and the geometry
-            column may only contain Point geometries. Additional columns are also
+            column may only contain Polygon, MultiPolygon, and Point geometries. Additional columns are also
             parsed to the xarray DataArray coordinates.
         data_vars: dict-like, DataArray or Dataset
             A mapping from variable names to `xarray.DataArray` objects.

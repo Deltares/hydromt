@@ -2,7 +2,7 @@
 
 import inspect
 from keyword import iskeyword
-from typing import Any, Callable, Type
+from typing import Any, Callable, Type, Union
 
 from pydantic import (
     BaseModel,
@@ -41,7 +41,7 @@ class HydromtComponentConfig(BaseModel):
 
 
 class HydromtModelStep(BaseModel):
-    fn: Callable
+    fn: Callable[..., Any]
     args: dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(
@@ -119,7 +119,7 @@ class HydromtModelSetup(BaseModel):
                 f"Invalid step name {name}. Must be in the format <component>.<function> or <function> if the function is in the model itself."
             )
 
-        function_owner: Type = modeltype
+        function_owner: Type[Union[Model, ModelComponent]] = modeltype
         if len(split_name) == 2:
             function_owner = next(x.type for x in components if x.name == split_name[0])
 

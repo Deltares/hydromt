@@ -10,6 +10,7 @@ from logging import (
     captureWarnings,
     getLogger,
 )
+from typing import Optional
 
 from hydromt import __version__
 
@@ -31,7 +32,7 @@ def wait_and_remove_file_handlers(logger: Logger):
 
 
 def setuplog(
-    path: str = None,
+    path: Optional[str] = None,
     log_level: int = 20,
     fmt: str = FMT,
     append: bool = True,
