@@ -13,7 +13,7 @@ TESTDATADIR = join(dirname(abspath(__file__)), "..", "data")
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
 
 
-@pytest.mark.skip(reason="Needs refactor from path to uri.")
+@pytest.mark.skip(reason="https://github.com/Deltares/hydromt/issues/1025")
 @pytest.mark.skipif(not compat.HAS_GCSFS, reason="GCSFS not installed.")
 def test_gcs_cmip6():
     # TODO switch to pre-defined catalogs when pushed to main
@@ -29,6 +29,7 @@ def test_gcs_cmip6():
     assert not np.any(ds[ds.raster.x_dim] > 180)
 
 
+@pytest.mark.skip(reason="https://github.com/Deltares/hydromt/issues/1025")
 @pytest.mark.skipif(not compat.HAS_S3FS, reason="S3FS not installed.")
 def test_aws_worldcover():
     catalog_path = join(CATALOGDIR, "aws_data", "v0.1.0", "data_catalog.yml")
