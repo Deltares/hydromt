@@ -5,7 +5,7 @@ import os
 import shutil
 from ast import literal_eval
 from os.path import basename, dirname, isdir, isfile, join
-from typing import Optional
+from typing import Dict, List, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -13,6 +13,7 @@ import requests
 from affine import Affine
 from pyproj import CRS
 
+from hydromt._typing.type_def import StrPath
 from hydromt._utils.uris import _is_valid_url
 from hydromt.config import SETTINGS
 
@@ -40,9 +41,9 @@ def _copyfile(src, dst, chunk_size=1024):
 
 
 def _cache_vrt_tiles(
-    vrt_fn: str,
+    vrt_path: str,
     geom: Optional[gpd.GeoSeries] = None,
-    cache_dir: str = SETTINGS.cache_root,
+    cache_dir: StrPath = SETTINGS.cache_root,
 ) -> str:
     """Cache vrt tiles that intersect with geom.
 
@@ -50,7 +51,7 @@ def _cache_vrt_tiles(
 
     Parameters
     ----------
-    vrt_fn: str, Path
+    vrt_path: str, Path
         path to source vrt
     geom: geopandas.GeoSeries, optional
         geometry to intersect tiles with
@@ -59,23 +60,25 @@ def _cache_vrt_tiles(
 
     Returns
     -------
-    dst_vrt_fn: str
+    vrt_destination_path : str
         path to cached vrt
     """
     import xmltodict as xd
 
     # cache vrt file
-    vrt_root = dirname(vrt_fn)
-    dst_vrt_fn = join(cache_dir, basename(vrt_fn))
-    if not isfile(dst_vrt_fn):
-        _copyfile(vrt_fn, dst_vrt_fn)
+    vrt_root = dirname(vrt_path)
+    vrt_destination_path = join(cache_dir, basename(vrt_path))
+    if not isfile(vrt_destination_path):
+        _copyfile(vrt_path, vrt_destination_path)
     # read vrt file
     # TODO check if this is the optimal xml parser
-    with open(dst_vrt_fn, "r") as f:
+    with open(vrt_destination_path, "r") as f:
         ds = xd.parse(f.read())["VRTDataset"]
 
-    def intersects(source: dict, affine, bbox):
-        """Check whether source interesects with bbox."""
+    def intersects(
+        source: Dict[str, Dict[str, float]], affine: Affine, bbox: List[float]
+    ):
+        """Check whether source intersects with bbox."""
         names = ["@xOff", "@yOff", "@xSize", "@ySize"]
         x0, y0, dx, dy = [float(source["DstRect"][k]) for k in names]
         xs, ys = affine * (np.array([x0, x0 + dx]), np.array([y0, y0 + dy]))
@@ -96,18 +99,18 @@ def _cache_vrt_tiles(
             geom = geom.to_crs(crs)
         bbox = geom.total_bounds
     # support multiple type of sources in vrt
-    sname = [k for k in ds["VRTRasterBand"].keys() if k.endswith("Source")][0]
+    source_name = [k for k in ds["VRTRasterBand"].keys() if k.endswith("Source")][0]
     # loop through files in VRT and check if in bbox
-    fns = []
-    for source in ds["VRTRasterBand"][sname]:
+    paths = []
+    for source in ds["VRTRasterBand"][source_name]:
         if geom is None or intersects(source, transform, bbox):
-            fn = source["SourceFilename"]["#text"]
-            dst = os.path.join(cache_dir, fn)
-            src = os.path.join(vrt_root, fn)
+            path = source["SourceFilename"]["#text"]
+            dst = os.path.join(cache_dir, path)
+            src = os.path.join(vrt_root, path)
             if not isfile(dst):
-                fns.append((src, dst))
+                paths.append((src, dst))
     # TODO multi thread download
-    logger.info(f"Downloading {len(fns)} tiles to {cache_dir}")
-    for src, dst in fns:
+    logger.info(f"Downloading {len(paths)} tiles to {cache_dir}")
+    for src, dst in paths:
         _copyfile(src, dst)
-    return dst_vrt_fn
+    return vrt_destination_path

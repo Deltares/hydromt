@@ -108,10 +108,10 @@ An example of a fictional Wflow YAML file would be:
 			res: 0.008333
 			hydrography_fn: merit_hydro
 		- grid.add_data_from_geodataframe:
-			vector_fn: administrative_areas
+			vector_data: administrative_areas
 			variables: "id_level1"
 		- grid.add_data_from_geodataframe:
-			vector_fn: administrative_areas
+			vector_data: administrative_areas
 			variables: "id_level3"
 		- setup_reservoirs:
 			reservoirs_fn: hydro_reservoirs

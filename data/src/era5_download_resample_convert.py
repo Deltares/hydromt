@@ -1,4 +1,5 @@
 """Implementaions for downloading and resampling ERA5 data."""
+
 import glob
 import os
 import shutil
@@ -78,13 +79,13 @@ daily_attrs = {
 
 
 def download_era5_year(
-    fn_out: str, variable: str, year: int, months: list = None, days: list = None
+    write_path: str, variable: str, year: int, months: list = None, days: list = None
 ) -> None:
     """Download a ERA5 variable for a single year from Copernicus Climate Data Store.
 
     Arguments
     ---------
-    fn_out: (str)
+    write_path: (str)
         The output path to save the downloaded file.
     variable: (str)
         The CDS variable name to download.
@@ -97,7 +98,7 @@ def download_era5_year(
     """
     import cdsapi
 
-    if not isfile(fn_out):
+    if not isfile(write_path):
         # Set default months, days and hours options
         _months = [f"{m:02d}" for m in range(1, 13)]
         _days = [f"{d:02d}" for d in range(1, 32)]
@@ -125,12 +126,12 @@ def download_era5_year(
                 "day": _days,
                 "time": _hrs,
             },
-            fn_out,
+            write_path,
         )
 
 
 def flatten_era5_temp(
-    fn,
+    path,
     nodata=-9999,
     chunks=None,
     dask_kwargs=None,
@@ -138,13 +139,13 @@ def flatten_era5_temp(
     """Flatten ERA5 output to remove expver dimension with ERA5T data."""
     chunks = chunks or {"time": 30, "latitude": 250, "longitude": 480}
     dask_kwargs = dask_kwargs or {}
-    with xr.open_dataset(fn, chunks=chunks) as ds:
+    with xr.open_dataset(path, chunks=chunks) as ds:
         era5t = "expver" in ds.coords
 
     if era5t:
-        print(f"flattening {basename(fn)}")
-        fn_out = fn.replace(".nc", "_flat.nc")
-        with xr.open_dataset(fn, chunks=chunks) as ds:
+        print(f"flattening {basename(path)}")
+        write_path = path.replace(".nc", "_flat.nc")
+        with xr.open_dataset(path, chunks=chunks) as ds:
             # expver5 (ERA5T) contains NaNs when out of range,
             # while expver1 might contain large odd values
             # https://confluence.ecmwf.int/display/CUSF/ERA5+CDS+requests+which+return+a+mixture+of+ERA5+and+ERA5T+data
@@ -157,13 +158,15 @@ def flatten_era5_temp(
                 "chunksizes": chunksizes,
             }
             encoding = {var: e0 for var in ds_out.data_vars}
-            obj = ds_out.to_netcdf(fn_out, encoding=encoding, mode="w", compute=False)
+            obj = ds_out.to_netcdf(
+                write_path, encoding=encoding, mode="w", compute=False
+            )
             with ProgressBar():
                 obj.compute(**dask_kwargs)
-        if isfile(fn_out):
+        if isfile(write_path):
             # replace original file
-            os.unlink(fn)
-            shutil.move(fn_out, fn)
+            os.unlink(path)
+            shutil.move(write_path, path)
 
 
 # resample variable for single year!
@@ -218,18 +221,18 @@ def resample_year(
         "chunksizes": chunksizes,
     }
 
-    fns = []
+    paths = []
     # read hourly data for year and year-1!
     for _year in [year - 1, year]:
-        fn = join(ddir, var, f"era5_{var:s}_{year:d}_hourly.nc")
-        if isfile(fn):
-            fns.append(fn)
+        path = join(ddir, var, f"era5_{var:s}_{year:d}_hourly.nc")
+        if isfile(path):
+            paths.append(path)
     kwargs = dict(
         compat="no_conflicts",
         parallel=True,
         decode_times=True,
     )
-    ds = xr.open_mfdataset(fns, chunks=chunks, **kwargs)
+    ds = xr.open_mfdataset(paths, chunks=chunks, **kwargs)
     assert "expver" not in ds.coords
     ds = ds.sel(time=slice(f"{year-1}-12-31 01:00", f"{year}-12-31 00:00"))
     if ds["time"][-1].dt.hour != 0:  # clip incomplete days
@@ -262,20 +265,20 @@ def resample_year(
         ds_out = ds_out.round(decimals=decimals)
 
     # write
-    fns = []
+    paths = []
     for var in ds_out.data_vars.keys():
         print(f"{var}: {year} - {ds_out.time.size} days")
-        fn_out = join(outdir, f"era5_{var:s}_{year:d}_daily.nc")
-        fns.append(fn_out)
-        if isfile(fn_out):
+        write_path = join(outdir, f"era5_{var:s}_{year:d}_daily.nc")
+        paths.append(write_path)
+        if isfile(write_path):
             continue
         obj = ds_out[[var]].to_netcdf(
-            fn_out, encoding={var: e0}, mode="w", compute=False
+            write_path, encoding={var: e0}, mode="w", compute=False
         )
         with ProgressBar():
             obj.compute(**dask_kwargs)
 
-    return fns
+    return paths
 
 
 def move_replace(src: str, dst: str, timeout: int = 300) -> None:
@@ -293,12 +296,12 @@ def move_replace(src: str, dst: str, timeout: int = 300) -> None:
     os.rename(src, dst)
 
 
-def get_last_timestep_nc(fns: list) -> pd.Timedelta:
+def get_last_timestep_nc(paths: list) -> pd.Timedelta:
     """Get the last timestep from a list of NetCDF files.
 
     Parameters
     ----------
-    fns : list
+    paths : list
         List of file paths or a glob pattern to match the files.
 
     Returns
@@ -311,9 +314,9 @@ def get_last_timestep_nc(fns: list) -> pd.Timedelta:
     ValueError
         If no files are found matching the provided file paths or glob pattern.
     """
-    if len(glob.glob(fns)) == 0:
-        raise ValueError(f"Files not found: {fns}")
-    with xr.open_mfdataset(fns, chunks="auto") as ds:
+    if len(glob.glob(paths)) == 0:
+        raise ValueError(f"Files not found: {paths}")
+    with xr.open_mfdataset(paths, chunks="auto") as ds:
         t0 = pd.to_datetime(ds["time"][-1].values)
     return t0
 
@@ -479,8 +482,8 @@ def update_hourly_nc(
     jobs = []
     for var in variables:
         if start_year is None:  # get last date of hourly file
-            fns = join(ddir, var, f"era5_{var}_*_hourly.nc")
-            t0 = get_last_timestep_nc(fns)
+            paths = join(ddir, var, f"era5_{var}_*_hourly.nc")
+            t0 = get_last_timestep_nc(paths)
             if (t0 > t1) or ((t1 - t0) < pd.to_timedelta(7, unit="d")):
                 continue  ## skip if last date within 7 days
             t0 = t0 - dt_era5t
@@ -488,26 +491,26 @@ def update_hourly_nc(
 
         # download complete years
         for year in years:
-            fn_out = join(outdir, f"era5_{var}_{year}_hourly.nc")
+            write_path = join(outdir, f"era5_{var}_{year}_hourly.nc")
             job = dask.delayed(download_era5_year)(
-                fn_out, era5_variables[var], year=year
+                write_path, era5_variables[var], year=year
             )
             jobs.append(job)
     dask.compute(*jobs, **dask_kwargs)
 
     # flatten if the data contains both ERA5 & ERA5T data
     for var in variables:
-        fns = glob.glob(join(outdir, f"era5_{var}_*_hourly.nc"))
-        for fn in fns:
-            flatten_era5_temp(fn, dask_kwargs=dask_kwargs)
+        paths = glob.glob(join(outdir, f"era5_{var}_*_hourly.nc"))
+        for p in paths:
+            flatten_era5_temp(p, dask_kwargs=dask_kwargs)
             # TODO make plot at random point
 
     # write files from tmpdir to ddir
     if move_to_ddir:
         for var in variables:
-            fns = glob.glob(join(outdir, f"era5_{var}_*_hourly.nc"))
-            for fn in fns:
-                move_replace(fn, join(ddir, var, basename(fn)))
+            paths = glob.glob(join(outdir, f"era5_{var}_*_hourly.nc"))
+            for p in paths:
+                move_replace(p, join(ddir, var, basename(p)))
 
 
 def update_daily_nc(
@@ -552,17 +555,17 @@ def update_daily_nc(
     if start_year:
         t0 = pd.to_datetime(f"{start_year}0101")
 
-    fn_lst = []
+    file_list = []
     for var in variables:
         if var not in daily_attrs:
             print(f'no attributes found set for daily "{var}" - skipping')
             continue
         if end_year is None:  # get last date from hourly nc files
-            fns = join(ddir_hour, var, f"era5_{var}_*_hourly.nc")
-            t1 = get_last_timestep_nc(fns)
+            paths = join(ddir_hour, var, f"era5_{var}_*_hourly.nc")
+            t1 = get_last_timestep_nc(paths)
         if start_year is None:  # get last date of daily nc files
-            fns = join(ddir_day, var, f"era5_{var}_*_daily.nc")
-            t0 = get_last_timestep_nc(fns)
+            paths = join(ddir_day, var, f"era5_{var}_*_daily.nc")
+            t0 = get_last_timestep_nc(paths)
             if (t0 > t1) or ((t1 - t0) < pd.to_timedelta(7, unit="d")):
                 continue  ## skip if last date within 7 days
             t0 = t0 - dt_era5t
@@ -570,20 +573,20 @@ def update_daily_nc(
 
         # resample to daily values
         for year in years:
-            fns0 = resample_year(
+            path_resampled = resample_year(
                 year, ddir=ddir_hour, outdir=outdir, var=var, dask_kwargs=dask_kwargs
             )
-            fn_lst.extend(fns0)
+            file_list.extend(path_resampled)
 
     # write files from outdir to ddir
     if move_to_ddir:
-        for fn in fn_lst:
-            var = basename(fn).split("_")[1]
-            move_replace(fn, join(ddir_day, var, basename(fn)))
+        for filename in file_list:
+            var = basename(filename).split("_")[1]
+            move_replace(filename, join(ddir_day, var, basename(filename)))
 
 
 def update_zarr(
-    fn_zarr: str,
+    zarr_path: str,
     ddir: str,
     variables: list,
     start_date: str = None,
@@ -596,7 +599,7 @@ def update_zarr(
 
     Parameters
     ----------
-    fn_zarr : str
+    zarr_path : str
         Zarr store path
     ddir : str
         Root of nc files with path format {ddir}/{var}/eray_{var}_*.nc
@@ -615,21 +618,21 @@ def update_zarr(
     dt_era5t : pd.Timedelta, optional
         time period of ERA5T data which is overwritten by new data, by default dt_era5t
     """
-    print(f"writing to {fn_zarr}")
+    print(f"writing to {zarr_path}")
     for var in variables:
         # get start & end dates from files
-        fns = join(ddir, var, f"era5_{var}_*.nc")
-        if len(glob.glob(fns)) == 0:
+        paths = join(ddir, var, f"era5_{var}_*.nc")
+        if len(glob.glob(paths)) == 0:
             print(f'no nc files found for "{var}" - skipping')
-        with xr.open_mfdataset(fns, chunks="auto", mode="r", autoclose=True) as ds_nc:
+        with xr.open_mfdataset(paths, chunks="auto", mode="r", autoclose=True) as ds_nc:
             t1 = pd.to_datetime(ds_nc["time"][-1].values)
             t0 = pd.to_datetime(ds_nc["time"][0].values)
             if end_date:
                 t1 = pd.to_datetime(end_date)
             if start_date:
                 t0 = pd.to_datetime(start_date)
-            elif os.path.exists(fn_zarr):
-                with xr.open_zarr(fn_zarr, consolidated=False) as ds_zarr:
+            elif os.path.exists(zarr_path):
+                with xr.open_zarr(zarr_path, consolidated=False) as ds_zarr:
                     if var in ds_zarr:
                         # check last date with valid values at single location
                         # TODO: this takes long, find alternative way with zarr library
@@ -645,8 +648,8 @@ def update_zarr(
                             continue
 
         # get zarr chunks to read and process data
-        if chunks is None and os.path.exists(fn_zarr):
-            with xr.open_zarr(fn_zarr, consolidated=False) as ds_zarr:
+        if chunks is None and os.path.exists(zarr_path):
+            with xr.open_zarr(zarr_path, consolidated=False) as ds_zarr:
                 var0 = var if var in ds_zarr else list(ds_zarr.data_vars.keys())[0]
                 chunks = {
                     dim: ds_zarr[var0].chunks[i][0]
@@ -656,8 +659,10 @@ def update_zarr(
         # process year by year a.k.a. file by file
         years = np.unique(pd.date_range(t0, t1, freq="1d").year).tolist()
         for year in years:
-            fn = glob.glob(join(ddir, var, f"era5_{var}_{year}_*.nc"))[0]
-            with xr.open_dataset(fn, chunks=chunks, mode="r", autoclose=True) as ds_nc:
+            path = glob.glob(join(ddir, var, f"era5_{var}_{year}_*.nc"))[0]
+            with xr.open_dataset(
+                path, chunks=chunks, mode="r", autoclose=True
+            ) as ds_nc:
                 ds_nc = ds_nc.sel(time=slice(t0, t1))
                 if ds_nc["time"].size > 0:
                     t0_str, t1_str = (
@@ -668,7 +673,7 @@ def update_zarr(
                     while True:
                         try:
                             append_zarr(
-                                fn_zarr,
+                                zarr_path,
                                 ds_nc,
                                 append_dim="time",
                                 chunks_out=chunks,
@@ -735,14 +740,14 @@ if __name__ == "__main__":
     if save_zarr:
         print("updating hourly zarr..")
         update_zarr(
-            fn_zarr=zarr_hour,
+            zarr_path=zarr_hour,
             ddir=ddir_hour,
             variables=variables_hour,
         )
 
         print("updating daily zarr..")
         update_zarr(
-            fn_zarr=zarr_day,
+            zarr_path=zarr_day,
             ddir=ddir_day,
             variables=variables_day,
         )

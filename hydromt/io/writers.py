@@ -31,12 +31,12 @@ def write_toml(path: StrPath, data: Dict[str, Any]):
         dump_toml(data, f)
 
 
-def write_xy(fn, gdf, fmt="%.4f"):
+def write_xy(path, gdf, fmt="%.4f"):
     """Write geopandas.GeoDataFrame with Point geometries to point xy files.
 
     Parameters
     ----------
-    fn: str
+    path: str
         Path to the output file.
     gdf: geopandas.GeoDataFrame
         GeoDataFrame to write to point file.
@@ -46,7 +46,7 @@ def write_xy(fn, gdf, fmt="%.4f"):
     if not np.all(gdf.geometry.type == "Point"):
         raise ValueError("gdf should contain only Point geometries.")
     xy = np.stack((gdf.geometry.x.values, gdf.geometry.y.values)).T
-    with open(fn, "w") as f:
+    with open(path, "w") as f:
         np.savetxt(f, xy, fmt=fmt)
 
 
@@ -72,22 +72,22 @@ def netcdf_writer(
 
     Returns
     -------
-    fn_out: str
+    write_path: str
         Absolute path to output file
     """
     dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.data_vars
     if variables is None:
         encoding = {k: {encoder: True} for k in dvars}
-        fn_out = join(data_root, f"{data_name}.nc")
-        obj.to_netcdf(fn_out, encoding=encoding)
+        write_path = join(data_root, f"{data_name}.nc")
+        obj.to_netcdf(write_path, encoding=encoding)
     else:  # save per variable
         if not isdir(join(data_root, data_name)):
             os.makedirs(join(data_root, data_name))
         for var in dvars:
-            fn_out = join(data_root, data_name, f"{var}.nc")
-            obj[var].to_netcdf(fn_out, encoding={var: {encoder: True}})
-        fn_out = join(data_root, data_name, "{variable}.nc")
-    return fn_out
+            write_path = join(data_root, data_name, f"{var}.nc")
+            obj[var].to_netcdf(write_path, encoding={var: {encoder: True}})
+        write_path = join(data_root, data_name, "{variable}.nc")
+    return write_path
 
 
 def zarr_writer(
@@ -109,14 +109,14 @@ def zarr_writer(
 
     Returns
     -------
-    fn_out: str
+    write_path: str
         Absolute path to output file
     """
-    fn_out = join(data_root, f"{data_name}.zarr")
+    write_path = join(data_root, f"{data_name}.zarr")
     if isinstance(obj, xr.DataArray):
         obj = obj.to_dataset()
-    obj.to_zarr(fn_out, **kwargs)
-    return fn_out
+    obj.to_zarr(write_path, **kwargs)
+    return write_path
 
 
 def write_nc(
@@ -145,7 +145,7 @@ def write_nc(
     ----------
     nc_dict: dict
         Dictionary of xarray.Dataset and/or xarray.DataArray to write
-    fn: str
+    path: str
         filename relative to model root and should contain a {name} placeholder
     temp_data_dir: StrPath, optional
             Temporary directory to write grid to. If not given a TemporaryDirectory
@@ -169,26 +169,26 @@ def write_nc(
             logger.error(f"{name} object of type {type(ds).__name__} not recognized")
             continue
         logger.debug(f"Writing file {filename_template.format(name=name)}")
-        _fn = join(root, filename_template.format(name=name))
-        if isfile(_fn) and not force_overwrite:
-            raise IOError(f"File {_fn} already exists")
-        if not isdir(dirname(_fn)):
-            os.makedirs(dirname(_fn))
+        _path = join(root, filename_template.format(name=name))
+        if isfile(_path) and not force_overwrite:
+            raise IOError(f"File {_path} already exists")
+        if not isdir(dirname(_path)):
+            os.makedirs(dirname(_path))
         if gdal_compliant:
             ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
         try:
-            ds.to_netcdf(_fn, **kwargs)
+            ds.to_netcdf(_path, **kwargs)
         except PermissionError:
-            logger.warning(f"Could not write to file {_fn}, defering write")
+            logger.warning(f"Could not write to file {_path}, defering write")
             temp_data_dir = TemporaryDirectory()
 
-            tmp_fn = join(str(temp_data_dir), f"{_fn}.tmp")
-            ds.to_netcdf(tmp_fn, **kwargs)
+            temp_path = join(str(temp_data_dir), f"{_path}.tmp")
+            ds.to_netcdf(temp_path, **kwargs)
 
             return DeferedFileClose(
                 ds=ds,
-                org_fn=join(str(temp_data_dir), _fn),
-                tmp_fn=tmp_fn,
+                original_path=join(str(temp_data_dir), _path),
+                temp_path=temp_path,
                 close_attempts=1,
             )
     return None

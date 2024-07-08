@@ -1,12 +1,13 @@
 """A module to handle paths from different platforms in a cross platform compatible manner."""
+
 from os.path import abspath, exists, join
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 __all__ = ["_make_config_paths_relative", "_make_config_paths_abs"]
 
 
-def _make_config_paths_relative(cfdict: dict, root: Path) -> dict:
+def _make_config_paths_relative(cfdict: Dict[str, Any], root: Path) -> Dict[str, Any]:
     """Parse string/path value to relative path if possible."""
 
     def _relpath(value, root):
@@ -30,8 +31,10 @@ def _make_config_paths_relative(cfdict: dict, root: Path) -> dict:
 
 
 def _make_config_paths_abs(
-    cfdict: dict, root: Path, skip_abspath_sections: Optional[List] = None
-) -> dict:
+    cfdict: Dict[str, Any],
+    root: Path,
+    skip_abspath_sections: Optional[List[str]] = None,
+) -> Dict[str, Any]:
     """Parse string value to absolute path from config file."""
     skip_abspath_sections = skip_abspath_sections or ["setup_config"]
 

@@ -92,31 +92,31 @@ def test_from_dict_multiple_spatials():
 
 def test_write_data_catalog_no_used(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
-    data_lib_fn = join(model.root.path, "hydromt_data.yml")
+    data_lib_path = join(model.root.path, "hydromt_data.yml")
     model.write_data_catalog()
-    assert not isfile(data_lib_fn)
+    assert not isfile(data_lib_path)
 
 
 def test_write_data_catalog_single_source(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
-    data_lib_fn = join(model.root.path, "hydromt_data.yml")
+    data_lib_path = join(model.root.path, "hydromt_data.yml")
     sources = list(model.data_catalog.sources.keys())
     model.data_catalog.get_source(sources[0]).mark_as_used()
     model.write_data_catalog()
-    assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:1]
+    assert list(DataCatalog(data_lib_path).sources.keys()) == sources[:1]
 
 
 def test_write_data_catalog_append(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
-    data_lib_fn = join(model.root.path, "hydromt_data.yml")
+    data_lib_path = join(model.root.path, "hydromt_data.yml")
     sources = list(model.data_catalog.sources.keys())
     model1 = Model(root=str(model.root.path), data_libs=["artifact_data"], mode="r+")
     model1.data_catalog.get_source(sources[1]).mark_as_used()
     model1.write_data_catalog(append=False)
-    assert list(DataCatalog(data_lib_fn).sources.keys()) == [sources[1]]
+    assert list(DataCatalog(data_lib_path).sources.keys()) == [sources[1]]
     model1.data_catalog.get_source(sources[0]).mark_as_used()
     model1.write_data_catalog(append=True)
-    assert list(DataCatalog(data_lib_fn).sources.keys()) == sources[:2]
+    assert list(DataCatalog(data_lib_path).sources.keys()) == sources[:2]
 
 
 def test_write_data_catalog_csv(tmpdir):
@@ -347,12 +347,12 @@ def test_setup_region_geom(grid_model, bbox):
 
 def test_setup_region_geom_catalog(grid_model, bbox, tmpdir):
     # geom via data catalog
-    fn_region = str(tmpdir.join("region.gpkg"))
-    bbox.to_file(fn_region, driver="GPKG")
+    region_path = str(tmpdir.join("region.gpkg"))
+    bbox.to_file(region_path, driver="GPKG")
     grid_model.data_catalog.from_dict(
         {
             "region": {
-                "uri": fn_region,
+                "uri": region_path,
                 "data_type": "GeoDataFrame",
                 "driver": "pyogrio",
             }
@@ -366,13 +366,13 @@ def test_setup_region_geom_catalog(grid_model, bbox, tmpdir):
 
 def test_setup_region_grid(grid_model, demda, tmpdir):
     # grid
-    grid_fn = str(tmpdir.join("grid.tif"))
-    demda.raster.to_raster(grid_fn)
-    grid_model.grid.create_from_region({"grid": grid_fn})
+    grid_path = str(tmpdir.join("grid.tif"))
+    demda.raster.to_raster(grid_path)
+    grid_model.grid.create_from_region({"grid": grid_path})
     assert np.all(demda.raster.bounds == grid_model.region.total_bounds)
 
 
-@pytest.mark.skip(reason="needs fix with hydrography_fn?")
+@pytest.mark.skip(reason="needs fix with hydrography_path?")
 def test_setup_region_basin(model):
     # basin
     model.grid.create_from_region({"basin": [12.2, 45.833333333333329]})
@@ -580,9 +580,9 @@ def test_setup_grid_from_bbox_rotated(grid_model):
 
 def test_setup_grid_from_grid(grid_model, demda):
     # grid
-    grid_fn = str(grid_model.root.path / "grid.tif")
-    demda.raster.to_raster(grid_fn)
-    grid_model.grid.create_from_region({"grid": grid_fn})
+    grid_path = str(grid_model.root.path / "grid.tif")
+    demda.raster.to_raster(grid_path)
+    grid_model.grid.create_from_region({"grid": grid_path})
     assert np.all(demda.raster.bounds == grid_model.region.bounds)
 
 
@@ -590,8 +590,8 @@ def test_grid_model_subbasin(grid_model):
     grid_model.grid.create_from_region(
         {"subbasin": [12.319, 46.320], "uparea": 50},
         res=0.008333,
-        hydrography_fn="merit_hydro",
-        basin_index_fn="merit_hydro_index",
+        hydrography_path="merit_hydro",
+        basin_index_path="merit_hydro_index",
         add_mask=True,
     )
     assert not np.all(grid_model.grid.data["mask"].values is True)
@@ -642,7 +642,7 @@ def test_grid_model_raster_dataset_merit_hydro(grid_model):
         align=True,
     )
     grid_model.grid.add_data_from_rasterdataset(
-        raster_fn="merit_hydro",
+        raster_data="merit_hydro",
         variables=["elevtn", "basins"],
         reproject_method=["average", "mode"],
         mask_name="mask",
@@ -659,7 +659,7 @@ def test_grid_model_raster_dataset_vito(grid_model):
         align=True,
     )
     grid_model.grid.add_data_from_rasterdataset(
-        raster_fn="vito",
+        raster_data="vito",
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
@@ -676,9 +676,9 @@ def test_grid_model_raster_reclass(grid_model):
         align=True,
     )
     grid_model.grid.add_data_from_raster_reclass(
-        raster_fn="vito",
+        raster_data="vito",
         fill_method="nearest",
-        reclass_table_fn="vito_mapping",
+        reclass_table_data="vito_mapping",
         reclass_variables=["roughness_manning"],
         reproject_method=["average"],
     )
@@ -696,7 +696,7 @@ def test_grid_model_geodataframe_value(grid_model):
         align=True,
     )
     grid_model.grid.add_data_from_geodataframe(
-        vector_fn="hydro_lakes",
+        vector_data="hydro_lakes",
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
@@ -715,7 +715,7 @@ def test_grid_model_geodataframe_fraction(grid_model):
         align=True,
     )
     grid_model.grid.add_data_from_geodataframe(
-        vector_fn="hydro_lakes",
+        vector_data="hydro_lakes",
         rasterize_method="fraction",
         rename={"hydro_lakes": "water_frac"},
     )
@@ -908,14 +908,14 @@ def test_setup_mesh_from_geom(mesh_model, tmpdir):
 
 
 def test_setup_mesh_from_mesh(mesh_model, griduda):
-    mesh_fn = str(mesh_model.root.path / "mesh" / "mesh.nc")
+    mesh_path = str(mesh_model.root.path / "mesh" / "mesh.nc")
     makedirs(mesh_model.root.path / "mesh", exist_ok=True)
     gridda = griduda.ugrid.to_dataset()
     gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
-    gridda.to_netcdf(mesh_fn)
+    gridda.to_netcdf(mesh_path)
 
     mesh_model.mesh.create_2d_from_region(
-        region={"mesh": mesh_fn},
+        region={"mesh": mesh_path},
         grid_name="mesh2d",
     )
     # need to add some data to it before checks will work
@@ -928,19 +928,19 @@ def test_setup_mesh_from_mesh(mesh_model, griduda):
 
 
 def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda):
-    mesh_fn = str(mesh_model.root.path / "mesh" / "mesh.nc")
+    mesh_path = str(mesh_model.root.path / "mesh" / "mesh.nc")
     makedirs(mesh_model.root.path / "mesh", exist_ok=True)
     gridda = griduda.ugrid.to_dataset()
     gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
-    gridda.to_netcdf(mesh_fn)
+    gridda.to_netcdf(mesh_path)
 
     mesh_model.mesh.create_2d_from_region(
-        region={"mesh": mesh_fn},
+        region={"mesh": mesh_path},
         grid_name="mesh2d",
     )
     bounds = [12.095, 46.495, 12.10, 46.50]
     mesh_model.mesh.create_2d_from_region(
-        {"mesh": mesh_fn, "bounds": bounds},
+        {"mesh": mesh_path, "bounds": bounds},
         grid_name="mesh1",
     )
     # need to add some data to it before checks will work

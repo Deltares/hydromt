@@ -2,15 +2,7 @@
 
 from logging import Logger, getLogger
 from shutil import move
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import xarray as xr
 from pandas import DataFrame
@@ -20,7 +12,7 @@ from hydromt._typing.type_def import DeferedFileClose, XArrayDict
 from hydromt.io.readers import read_nc
 from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
-from hydromt.model.hydromt_step import hydromt_step
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -95,7 +87,9 @@ class DatasetsComponent(ModelComponent):
         assert self._data is not None
         if split_dataset:
             if isinstance(data, Dataset):
-                ds = {str(name): data[name] for name in data.data_vars}
+                ds: Dict[str, Union[Dataset, DataArray]] = {
+                    str(name): data[name] for name in data.data_vars
+                }
             else:
                 raise ValueError(
                     f"Can only split dataset for Datasets not for {type(data).__name__}"
@@ -108,8 +102,6 @@ class DatasetsComponent(ModelComponent):
             raise ValueError(
                 "Either name should be set, the data needs to have a name or split_dataset should be True"
             )
-
-        ds = cast(XArrayDict, ds)
 
         for name, d in ds.items():
             if name in self._data:
@@ -208,7 +200,9 @@ class DatasetsComponent(ModelComponent):
             **kwargs,
         )
 
-    def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
+    def _cleanup(
+        self, forceful_overwrite=False, max_close_attempts=2
+    ) -> List[Tuple[str, str]]:
         """Try to close all deferred file handles.
 
         Try to overwrite the destination file with the temporary one until either the

@@ -26,6 +26,8 @@ import sphinx_autosummary_accessors
 import hydromt
 import hydromt.plugins
 
+from docs.parse_predefined_catalogs import write_predefined_catalogs_to_rst_panels
+
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
 

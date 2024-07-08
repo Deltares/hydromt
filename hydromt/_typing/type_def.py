@@ -19,7 +19,7 @@ from xarray import DataArray, Dataset
 from hydromt._typing.model_mode import ModelMode
 
 
-def _time_tuple_from_str(
+def _time_range_from_str(
     t: Tuple[Union[str, datetime], Union[str, datetime]],
 ) -> "TimeRange":
     if isinstance(t[0], str):
@@ -76,7 +76,7 @@ Crs = int
 TotalBounds = Tuple[Bbox, Crs]
 TimeRange = Annotated[
     Tuple[datetime, datetime],
-    BeforeValidator(_time_tuple_from_str),
+    BeforeValidator(_time_range_from_str),
     AfterValidator(_time_range_validate),
 ]
 Zoom = Union[int, Tuple[float, str]]  # level OR (resolution, unit)
@@ -89,8 +89,8 @@ DeferedFileClose = TypedDict(
     "DeferedFileClose",
     {
         "ds": Union[Dataset, DataArray],
-        "org_fn": str,
-        "tmp_fn": str,
+        "original_path": str,
+        "temp_path": str,
         "close_attempts": int,
     },
 )

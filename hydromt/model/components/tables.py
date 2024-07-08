@@ -4,18 +4,12 @@ import glob
 import os
 from logging import Logger, getLogger
 from os.path import basename, dirname, join
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    Optional,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import pandas as pd
 
 from hydromt.model.components.base import ModelComponent
-from hydromt.model.hydromt_step import hydromt_step
+from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -78,9 +72,9 @@ class TablesComponent(ModelComponent):
             local_kwargs = {"index": False, "header": True, "sep": ","}
             local_kwargs.update(**kwargs)
             for name in self.data:
-                fn_out = join(self.root.path, fn.format(name=name))
-                os.makedirs(dirname(fn_out), exist_ok=True)
-                self.data[name].to_csv(fn_out, **local_kwargs)
+                write_path = join(self.root.path, fn.format(name=name))
+                os.makedirs(dirname(write_path), exist_ok=True)
+                self.data[name].to_csv(write_path, **local_kwargs)
         else:
             logger.debug("No tables found, skip writing.")
 
