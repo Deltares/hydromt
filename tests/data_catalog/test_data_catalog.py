@@ -2,11 +2,12 @@
 
 import glob
 import os
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from os import mkdir
 from os.path import abspath, basename, dirname, join
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from uuid import uuid4
 
 import fsspec
@@ -24,6 +25,7 @@ from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_OPENPYXL, HAS_S3FS
 from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
+from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
     GeoDatasetAdapter,
@@ -808,6 +810,7 @@ class TestGetRasterDataset:
         assert np.allclose(da.raster.bounds, bbox)
 
     @pytest.mark.integration()
+    @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
     def test_s3(self, data_catalog: DataCatalog):
         data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
         # TODO: use filesystem in driver
@@ -822,7 +825,7 @@ class TestGetRasterDataset:
         assert isinstance(da, xr.DataArray)
 
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
-    def test_aws_worldcover(self):
+    def test_aws_worldcover(self, test_settings: Settings):
         catalog_fn = join(CATALOGDIR, "aws_data", "v1.0.0", "data_catalog.yml")
         data_catalog = DataCatalog(data_libs=[catalog_fn])
         da = data_catalog.get_rasterdataset(
@@ -830,6 +833,36 @@ class TestGetRasterDataset:
             bbox=[12.0, 46.0, 12.5, 46.50],
         )
         assert da.name == "landuse"
+
+        # check that the relevant file was cached
+        cached_files: List[Path] = list(
+            (
+                test_settings.cache_root
+                / "ESA_WorldCover_10m_2020_v100_Map_AWS"
+                / "map"
+            ).iterdir()
+        )
+        assert len(cached_files) == 1
+
+        # check that the vrt was cached and the relevant file updated
+        with (
+            test_settings.cache_root
+            / "ESA_WorldCover_10m_2020_v100_Map_AWS"
+            / "ESA_WorldCover_10m_2020_v100_Map_AWS.vrt"
+        ).open() as f:
+            tree: ET.ElementTree = ET.parse(f)
+        root: ET.Element = tree.getroot()
+        assert (
+            len(
+                list(
+                    filter(
+                        lambda el: el.text.startswith("map"),
+                        root.findall("VRTRasterBand/ComplexSource/SourceFilename"),
+                    )
+                )
+            )
+            == 1
+        )
 
     @pytest.mark.skipif(not HAS_GCSFS, reason="GCSFS not installed.")
     def test_gcs_cmip6(self):

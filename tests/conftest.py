@@ -22,6 +22,7 @@ from hydromt import (
     vector,
 )
 from hydromt._typing import SourceMetadata
+from hydromt.config import SETTINGS, Settings
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
@@ -47,6 +48,15 @@ DC_PARAM_PATH = join(DATADIR, "parameters_data.yml")
 def PLUGINS() -> Plugins:
     # make sure to start each test with a clean state
     return Plugins()
+
+
+@pytest.fixture()
+def test_settings(tmp_dir: Path) -> Generator[Settings, None, None]:
+    """Temporary sets settings for testing."""
+    cache_dir: Path = tmp_dir / "test_caching"
+    SETTINGS.cache_root = cache_dir
+    yield SETTINGS
+    SETTINGS.cache_root = SETTINGS.model_fields["cache_root"].default
 
 
 @pytest.fixture(autouse=True)

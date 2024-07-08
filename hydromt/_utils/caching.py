@@ -2,46 +2,55 @@
 
 import logging
 import os
-import shutil
+import xml.etree.ElementTree as ET
 from ast import literal_eval
-from os.path import basename, dirname, isdir, isfile, join
-from typing import Dict, List, Optional
+from os.path import basename, dirname, isabs, isdir, isfile, join
+from pathlib import Path
+from typing import List, Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
-import requests
 from affine import Affine
+from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
 
 from hydromt._typing.type_def import StrPath
-from hydromt._utils.uris import _is_valid_url
+from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
 
 logger = logging.getLogger(__name__)
 
 
-__all__ = ["_copyfile", "_cache_vrt_tiles"]
+__all__ = ["_copy_to_local", "_cache_vrt_tiles"]
 
 
-def _copyfile(src, dst, chunk_size=1024):
-    """Copy src file to dst. This method supports both online and local files."""
+def _copy_to_local(
+    src: str, dst: Path, fs: Optional[AbstractFileSystem] = None, block_size: int = 1024
+):
+    """Copy files from source uri to local file.
+
+    Parameters
+    ----------
+    src : str
+        Source URI
+    dst : str
+        Destination path
+    fs : Optional[AbstractFileSystem], optional
+        Fsspec filesystem. Will be inferred from src if not supplied.
+    block_size: int, optional
+        Block size of blocks sent over wire, by default 1024
+    """
+    if fs is None:
+        fs: AbstractFileSystem = url_to_fs(src)
     if not isdir(dirname(dst)):
         os.makedirs(dirname(dst))
-    if _is_valid_url(str(src)):
-        with requests.get(src, stream=True) as r:
-            if r.status_code != 200:
-                raise ConnectionError(
-                    f"Data download failed with status code {r.status_code}"
-                )
-            with open(dst, "wb") as f:
-                for chunk in r.iter_content(chunk_size=chunk_size):
-                    f.write(chunk)
-    else:
-        shutil.copyfile(src, dst)
+
+    fs.get(src, dst, block_size=block_size)
 
 
 def _cache_vrt_tiles(
-    vrt_path: str,
+    vrt_uri: str,
+    fs: Optional[AbstractFileSystem] = None,
     geom: Optional[gpd.GeoSeries] = None,
     cache_dir: StrPath = SETTINGS.cache_root,
 ) -> str:
@@ -51,8 +60,10 @@ def _cache_vrt_tiles(
 
     Parameters
     ----------
-    vrt_path: str, Path
+    vrt_uri: str
         path to source vrt
+    fs : Optional[AbstractFileSystem], optional
+        Fsspec filesystem. Will be inferred from src if not supplied.
     geom: geopandas.GeoSeries, optional
         geometry to intersect tiles with
     cache_dir: str, Path
@@ -63,54 +74,104 @@ def _cache_vrt_tiles(
     vrt_destination_path : str
         path to cached vrt
     """
-    import xmltodict as xd
+    if fs is None:
+        fs: AbstractFileSystem = url_to_fs(vrt_uri)
 
     # cache vrt file
-    vrt_root = dirname(vrt_path)
-    vrt_destination_path = join(cache_dir, basename(vrt_path))
+    vrt_root = dirname(vrt_uri)
+    vrt_destination_path = join(cache_dir, basename(vrt_uri))
     if not isfile(vrt_destination_path):
-        _copyfile(vrt_path, vrt_destination_path)
+        _copy_to_local(vrt_uri, vrt_destination_path, fs)
     # read vrt file
-    # TODO check if this is the optimal xml parser
     with open(vrt_destination_path, "r") as f:
-        ds = xd.parse(f.read())["VRTDataset"]
+        root = ET.fromstring(f.read())
 
-    def intersects(
-        source: Dict[str, Dict[str, float]], affine: Affine, bbox: List[float]
-    ):
+    def _overlaps(source: ET.Element, affine: Affine, bbox: List[float]):
         """Check whether source intersects with bbox."""
-        names = ["@xOff", "@yOff", "@xSize", "@ySize"]
-        x0, y0, dx, dy = [float(source["DstRect"][k]) for k in names]
+        names = ["xOff", "yOff", "xSize", "ySize"]
+        x0, y0, dx, dy = [float(source.find("DstRect").get(name)) for name in names]
+
         xs, ys = affine * (np.array([x0, x0 + dx]), np.array([y0, y0 + dy]))
+
         return (
-            max(xs) < bbox[0]
-            or max(ys) < bbox[1]
-            or min(xs) > bbox[2]
-            or min(ys) > bbox[3]
+            max(xs) > bbox[0]
+            and max(ys) > bbox[1]
+            and min(xs) < bbox[2]
+            and min(ys) < bbox[3]
         )
 
     # get vrt transform and crs
-    transform = Affine.from_gdal(*literal_eval(ds["GeoTransform"]))
-    srs = ds["SRS"]["#text"] if isinstance(ds["SRS"], dict) else ds["SRS"]
-    crs = CRS.from_string(srs)
+    geotransform_el: Optional[ET.Element] = root.find("GeoTransform")
+    if geotransform_el is None:
+        raise ValueError(f"No GeoTransform found in: {vrt_uri}")
+    transform = Affine.from_gdal(*literal_eval(geotransform_el.text))
+
+    srs_el: Optional[ET.Element] = root.find("SRS")
+    if srs_el is None:
+        raise ValueError(f"No CRS info found at: {vrt_uri}")
+
+    crs: CRS = CRS.from_string(srs_el.text)
     # get geometry bbox in vrt crs
     if geom is not None:
         if crs != geom.crs:
             geom = geom.to_crs(crs)
         bbox = geom.total_bounds
     # support multiple type of sources in vrt
-    source_name = [k for k in ds["VRTRasterBand"].keys() if k.endswith("Source")][0]
+    band_name: Optional[ET.Element] = root.find("VRTRasterBand")
+    if band_name is None:
+        raise ValueError(f"Could not find VRTRasterBand in: {vrt_uri}")
+    try:
+        source_name: str = next(
+            filter(lambda k: k.tag.endswith("Source"), band_name.iter())
+        ).tag
+    except StopIteration:
+        raise ValueError(f"No Source information found at: {vrt_uri}")
     # loop through files in VRT and check if in bbox
     paths = []
-    for source in ds["VRTRasterBand"][source_name]:
-        if geom is None or intersects(source, transform, bbox):
-            path = source["SourceFilename"]["#text"]
-            dst = os.path.join(cache_dir, path)
-            src = os.path.join(vrt_root, path)
+    for source in band_name.findall(source_name):
+        if geom is None or _overlaps(source, transform, bbox):
+            vrt_ref_el: ET.Element = source.find("SourceFilename")
+            if vrt_ref_el is None:
+                raise ValueError(f"Could not find Source File in vrt: {vrt_uri}.")
+            vrt_ref: str = vrt_ref_el.text
+
+            if isabs(vrt_ref):
+                # not relative uri, probably virtual file system https://gdal.org/user/virtual_file_systems.html
+
+                # Strip scheme from base uri and get path to directory with vrt file
+                scheme, stripped = _strip_scheme(vrt_uri)
+                # get base path vrs
+                vrs_ref: Tuple[str, ...] = Path(vrt_ref).parts[2:]
+                if scheme is None:
+                    # local path
+                    # get directory of vrt file without vrs
+                    vrt_directory: str = str(Path(stripped).parent)
+                    # Get relative uri that the vrt points to
+                    relative_uri_ref: str = str(Path(*vrs_ref)).lstrip(vrt_directory)
+                    # Set download uri to match vrt_uri
+                    src_uri: str = str(Path(*vrs_ref))
+                else:
+                    # protocol, assume path separator is "/"
+                    sep = "/"
+                    vrt_directory: str = sep.join(stripped.split(sep)[:-1])
+                    # Get relative uri that the vrt points to
+                    relative_uri_ref: str = sep.join(vrs_ref).lstrip(vrt_directory)
+                    # Set download uri to match vrt_uri
+                    src_uri: str = scheme + sep.join(vrs_ref)
+
+                # Set download dest to cache_dir and refer to it in the vrt
+                dst: Path = cache_dir / relative_uri_ref
+                vrt_ref_el.text = relative_uri_ref
+            else:
+                src_uri: str = os.path.join(vrt_root, vrt_ref)
+                dst: Path = cache_dir / vrt_ref
             if not isfile(dst):
-                paths.append((src, dst))
+                paths.append((src_uri, dst))
+
+    # Write new xml file
+    ET.ElementTree(root).write(vrt_destination_path)
     # TODO multi thread download
     logger.info(f"Downloading {len(paths)} tiles to {cache_dir}")
     for src, dst in paths:
-        _copyfile(src, dst)
+        _copy_to_local(src, dst, fs)
     return vrt_destination_path

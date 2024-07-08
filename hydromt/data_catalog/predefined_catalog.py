@@ -9,7 +9,7 @@ from typing import Callable, ClassVar, Optional
 import packaging.version
 import pooch
 
-from hydromt._utils import _copyfile, _is_valid_url
+from hydromt._utils import _copy_to_local, _is_valid_url
 from hydromt.config import SETTINGS
 
 logger = logging.getLogger(__name__)
@@ -156,7 +156,7 @@ class PredefinedCatalog(object):
         if registry_path.exists():
             registry_path.unlink()
         try:  # try to retrieve and cache the registry file
-            _copyfile(f"{self.base_url}/registry.txt", registry_path)
+            _copy_to_local(f"{self.base_url}/registry.txt", registry_path)
         except (ConnectionError, FileNotFoundError):
             logger.warning(
                 f"Failed to retrieve {self.name} versions file from {self.base_url}."

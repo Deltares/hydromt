@@ -1,6 +1,6 @@
 """Utility functions for hydromt that have no other home."""
 
-from .caching import _cache_vrt_tiles, _copyfile
+from .caching import _cache_vrt_tiles, _copy_to_local
 from .dataset import (
     _rename_vars,
     _set_metadata,
@@ -19,7 +19,7 @@ from .uris import _is_valid_url, _strip_scheme
 
 __all__ = [
     "_cache_vrt_tiles",
-    "_copyfile",
+    "_copy_to_local",
     "_rename_vars",
     "_set_metadata",
     "_shift_dataset_time",
