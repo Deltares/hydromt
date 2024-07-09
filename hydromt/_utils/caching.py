@@ -33,7 +33,7 @@ def _copy_to_local(
     ----------
     src : str
         Source URI
-    dst : str
+    dst : Path
         Destination path
     fs : Optional[AbstractFileSystem], optional
         Fsspec filesystem. Will be inferred from src if not supplied.
@@ -41,11 +41,11 @@ def _copy_to_local(
         Block size of blocks sent over wire, by default 1024
     """
     if fs is None:
-        fs: AbstractFileSystem = url_to_fs(src)
+        fs: AbstractFileSystem = url_to_fs(src)[0]
     if not isdir(dirname(dst)):
         os.makedirs(dirname(dst))
 
-    fs.get(src, dst, block_size=block_size)
+    fs.get(src, str(dst), block_size=block_size)
 
 
 def _overlaps(source: ET.Element, affine: Affine, bbox: List[float]) -> bool:
@@ -113,7 +113,7 @@ def _cache_vrt_tiles(
         path to cached vrt
     """
     if fs is None:
-        fs: AbstractFileSystem = url_to_fs(vrt_uri)
+        fs: AbstractFileSystem = url_to_fs(vrt_uri)[0]
 
     # cache vrt file
     vrt_root = dirname(vrt_uri)
