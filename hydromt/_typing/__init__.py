@@ -33,7 +33,7 @@ from .type_def import (
     TotalBounds,
     Variables,
     XArrayDict,
-    ZoomLevel,
+    Zoom,
 )
 
 __all__ = [
@@ -66,6 +66,6 @@ __all__ = [
     "DataType",
     "GeomBuffer",
     "Predicate",
-    "ZoomLevel",
+    "Zoom",
     "SourceMetadata",
 ]

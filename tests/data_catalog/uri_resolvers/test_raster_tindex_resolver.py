@@ -6,7 +6,7 @@ import pytest
 from fsspec import AbstractFileSystem
 from shapely.geometry import box
 
-from hydromt._typing import NoDataException
+from hydromt._typing import NoDataException, SourceMetadata
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
@@ -68,10 +68,15 @@ class TestRasterTindexResolver:
 
     def test_resolves_correctly(self, raster_tindex):
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
+        metadata = SourceMetadata()
         options = {"tileindex": "location"}
         resolver = RasterTindexResolver()
         paths = resolver.resolve(
-            uri=raster_tindex, fs=AbstractFileSystem(), mask=geom, options=options
+            uri=raster_tindex,
+            fs=AbstractFileSystem(),
+            metadata=metadata,
+            mask=geom,
+            options=options,
         )
         assert len(paths) == 2
         assert (
@@ -85,13 +90,18 @@ class TestRasterTindexResolver:
 
         geom = gpd.GeoDataFrame(geometry=[box(-66, 1, 65, 3)], crs=4326)
         paths = resolver.resolve(
-            uri=raster_tindex, fs=AbstractFileSystem(), mask=geom, options=options
+            uri=raster_tindex,
+            fs=AbstractFileSystem(),
+            metadata=metadata,
+            mask=geom,
+            options=options,
         )
         assert len(paths) == 1
         path = str(Path(join(dirname(raster_tindex), "GRWL_mask_V01.01/NA19.tif")))
         assert path in paths
 
     def test_raises_no_tileindex(self, raster_tindex):
+        metadata = SourceMetadata()
         resolver = RasterTindexResolver()
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
         with pytest.raises(
@@ -99,11 +109,16 @@ class TestRasterTindexResolver:
             match="RasterTindexResolver needs options specifying 'tileindex'",
         ):
             resolver.resolve(
-                uri=raster_tindex, fs=AbstractFileSystem(), mask=geom, options={}
+                uri=raster_tindex,
+                fs=AbstractFileSystem(),
+                metadata=metadata,
+                mask=geom,
+                options={},
             )
 
     def test_raises_missing_tileindex(self, raster_tindex):
         resolver = RasterTindexResolver()
+        metadata = SourceMetadata()
         options = {"tileindex": "file"}
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
         with pytest.raises(
@@ -111,14 +126,23 @@ class TestRasterTindexResolver:
             match='Tile index "file" column missing in tile index file.',
         ):
             resolver.resolve(
-                uri=raster_tindex, fs=AbstractFileSystem(), mask=geom, options=options
+                uri=raster_tindex,
+                fs=AbstractFileSystem(),
+                metadata=metadata,
+                mask=geom,
+                options=options,
             )
 
     def test_raises_no_intersecting_files(self, raster_tindex):
         resolver = RasterTindexResolver()
+        metadata = SourceMetadata()
         options = {"tileindex": "file"}
         geom = gpd.GeoDataFrame(geometry=[box(4, 52, 5, 53)], crs=4326)
         with pytest.raises(NoDataException, match="found no intersecting tiles."):
             resolver.resolve(
-                uri=raster_tindex, fs=AbstractFileSystem(), mask=geom, options=options
+                uri=raster_tindex,
+                fs=AbstractFileSystem(),
+                metadata=metadata,
+                mask=geom,
+                options=options,
             )

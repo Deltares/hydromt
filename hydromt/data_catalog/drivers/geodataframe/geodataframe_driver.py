@@ -39,6 +39,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             self.filesystem,
             mask=mask,
             variables=variables,
+            metadata=metadata,
             handle_nodata=handle_nodata,
         )
         gdf = self.read_data(

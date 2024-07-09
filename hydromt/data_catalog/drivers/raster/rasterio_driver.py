@@ -1,12 +1,14 @@
 """Driver using rasterio for RasterDataset."""
 
-from functools import partial
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import rasterio
+import rasterio.errors
 import xarray as xr
+from pyproj import CRS
 
 from hydromt._typing import (
     Geom,
@@ -14,7 +16,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     Variables,
-    ZoomLevel,
+    Zoom,
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.caching import _cache_vrt_tiles
@@ -23,6 +25,7 @@ from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers import RasterDatasetDriver
+from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.io.readers import open_mfraster
 
 logger: Logger = getLogger(__name__)
@@ -40,7 +43,7 @@ class RasterioDriver(RasterDatasetDriver):
         mask: Optional[Geom] = None,
         time_range: Optional[TimeRange] = None,
         variables: Optional[Variables] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom: Optional[Zoom] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:
@@ -50,7 +53,7 @@ class RasterioDriver(RasterDatasetDriver):
         # build up kwargs for open_raster
         _warn_on_unused_kwargs(
             self.__class__.__name__,
-            {"time_range": time_range, "zoom_level": zoom_level},
+            {"time_range": time_range},
         )
         kwargs: Dict[str, Any] = {}
 
@@ -72,24 +75,42 @@ class RasterioDriver(RasterDatasetDriver):
                 uris_cached.append(cached_uri)
             uris = uris_cached
 
-        # NoData part should be done in DataAdapter.
-        if np.issubdtype(type(metadata.nodata), np.number):
-            kwargs.update(nodata=metadata.nodata)
-        # TODO: Implement zoom levels in https://github.com/Deltares/hydromt/issues/875
-        # if zoom_level is not None and "{zoom_level}" not in uri:
-        #     zls_dict, crs = self._get_zoom_levels_and_crs(uris[0])
-        #     zoom_level = self._parse_zoom_level(
-        #         zoom_level, mask, zls_dict, crs
-        #     )
-        #     if isinstance(zoom_level, int) and zoom_level > 0:
-        #         # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
-        #         kwargs.update(overview_level=zoom_level - 1)
-
         if mask is not None:
             kwargs.update({"mosaic_kwargs": {"mask": mask}})
 
+        if np.issubdtype(type(metadata.nodata), np.number):
+            kwargs.update(nodata=metadata.nodata)
+
+        # Fix overview level
+        if zoom:
+            try:
+                zls_dict: Dict[int, float] = metadata.zls_dict
+                crs: Optional[CRS] = metadata.crs
+            except AttributeError:  # pydantic extra=allow on SourceMetadata
+                zls_dict, crs = self.get_zoom_levels_and_crs(uris[0])
+
+            overview_level: Optional[int] = zoom_to_overview_level(
+                zoom, mask, zls_dict, crs
+            )
+            if overview_level:
+                # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
+                kwargs.update(overview_level=overview_level - 1)
+
+        # If the metadata resolver has already resolved the overview level,
+        # trying to open zoom levels here will result in an error.
+        # Better would be to seperate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023
+        # Then we can implement looking for a overview level in the driver.
+        def _open() -> Union[xr.DataArray, xr.Dataset]:
+            try:
+                return open_mfraster(uris, **kwargs)
+            except rasterio.errors.RasterioIOError as e:
+                if "Cannot open overview level" in str(e):
+                    kwargs.pop("overview_level")
+                    return open_mfraster(uris, **kwargs)
+                else:
+                    raise
+
         # rasterio uses specific environment variable for s3 access.
-        _open: Callable = partial(open_mfraster, uris, **kwargs)
         try:
             anon: str = self.filesystem.anon
         except AttributeError:
@@ -112,6 +133,27 @@ class RasterioDriver(RasterDatasetDriver):
                     strategy=handle_nodata,
                 )
         return ds
+
+    @staticmethod
+    def get_zoom_levels_and_crs(uri: str) -> Tuple[Dict[int, float], int]:
+        """Get zoom levels and crs from adapter or detect from tif file if missing."""
+        zoom_levels = {}
+        crs = None
+        try:
+            with rasterio.open(uri) as src:
+                res = abs(src.res[0])
+                crs = src.crs
+                overviews = [src.overviews(i) for i in src.indexes]
+                if len(overviews[0]) > 0:  # check overviews for band 0
+                    # check if identical
+                    if not all([o == overviews[0] for o in overviews]):
+                        raise ValueError("Overviews are not identical across bands")
+                    # dict with overview level and corresponding resolution
+                    zls = [1] + overviews[0]
+                    zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
+        except rasterio.RasterioIOError as e:
+            logger.warning(f"IO error while detecting zoom levels: {e}")
+        return zoom_levels, crs
 
     def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
         """Write out a RasterDataset using rasterio."""

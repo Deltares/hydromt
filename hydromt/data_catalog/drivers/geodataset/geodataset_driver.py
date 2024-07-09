@@ -48,6 +48,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
             time_range=time_range,
             mask=mask,
             variables=variables,
+            metadata=metadata,
             handle_nodata=handle_nodata,
         )
         return self.read_data(

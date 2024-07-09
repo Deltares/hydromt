@@ -8,7 +8,13 @@ from typing import Any, Dict, List, Optional, Union
 import geopandas as gpd
 from fsspec import AbstractFileSystem
 
-from hydromt._typing import NoDataStrategy, TimeRange, ZoomLevel, exec_nodata_strat
+from hydromt._typing import (
+    NoDataStrategy,
+    SourceMetadata,
+    TimeRange,
+    Zoom,
+    exec_nodata_strat,
+)
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 logger: Logger = getLogger(__name__)
@@ -25,9 +31,10 @@ class RasterTindexResolver(URIResolver):
         fs: AbstractFileSystem,
         *,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom_level: Optional[Zoom] = None,
         mask: Optional[gpd.GeoDataFrame] = None,
         variables: Union[int, tuple[float, str], None] = None,
+        metadata: Optional[SourceMetadata],
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
@@ -47,6 +54,8 @@ class RasterTindexResolver(URIResolver):
             zoom_level of the dataset, by default None
         variables : Optional[List[str]], optional
             Names of variables to return, or all if None, by default None
+        metadata: Optional[SourceMetadata], optional
+            DataSource metadata.
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
         options : Optional[Dict[str, Any]], optional

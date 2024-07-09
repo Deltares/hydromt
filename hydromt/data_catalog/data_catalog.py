@@ -1163,7 +1163,7 @@ class DataCatalog(object):
         ],
         bbox: Optional[Bbox] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
-        zoom_level: Optional[Union[int, tuple]] = None,
+        zoom: Optional[Union[int, tuple]] = None,
         buffer: Union[float, int] = 0,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
@@ -1199,6 +1199,8 @@ class DataCatalog(object):
             (in WGS84 coordinates), by default None
         geom : Optional[gpd.GeoDataFrame], optional
             A geometry defining the area of interest, by default None
+        zoom: Optional[Zoom], optional,
+            Either an overview_level, or a tuple with the resolution and unit of the resolution.
         buffer : Union[float, int], optional
             Buffer around the `bbox` or `geom` area of interest in meters, by default 0
         handle_nodata : NoDataStrategy, optional
@@ -1283,7 +1285,7 @@ class DataCatalog(object):
             bbox=bbox,
             mask=geom,
             buffer=buffer,
-            zoom_level=zoom_level,
+            zoom=zoom,
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,

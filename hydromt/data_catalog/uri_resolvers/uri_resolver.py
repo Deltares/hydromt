@@ -12,7 +12,7 @@ from pydantic import (
     model_serializer,
 )
 
-from hydromt._typing import Geom, NoDataStrategy, TimeRange, ZoomLevel
+from hydromt._typing import Geom, NoDataStrategy, SourceMetadata, TimeRange, Zoom
 
 logger: Logger = getLogger(__name__)
 
@@ -39,7 +39,8 @@ class URIResolver(BaseModel, ABC):
         time_range: Optional[TimeRange] = None,
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom_level: Optional[Zoom] = None,
+        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
@@ -59,6 +60,8 @@ class URIResolver(BaseModel, ABC):
             zoom_level of the dataset, by default None
         variables : Optional[List[str]], optional
             Names of variables to return, or all if None, by default None
+        metadata: Optional[SourceMetadata], optional
+            Metadata of DataSource.
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
         options : Optional[Dict[str, Any]], optional

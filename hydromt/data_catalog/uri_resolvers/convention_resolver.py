@@ -15,11 +15,13 @@ from fsspec.core import split_protocol
 from hydromt._typing import (
     Geom,
     NoDataStrategy,
+    SourceMetadata,
     TimeRange,
-    ZoomLevel,
+    Zoom,
     exec_nodata_strat,
 )
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
+from hydromt.gis.gis_utils import zoom_to_overview_level
 
 from .uri_resolver import URIResolver
 
@@ -29,7 +31,9 @@ logger: Logger = getLogger(__name__)
 class ConventionResolver(URIResolver):
     """URIDataResolver using HydroMT naming conventions."""
 
-    _uri_placeholders = frozenset({"year", "month", "variable", "name"})
+    _uri_placeholders = frozenset(
+        {"year", "month", "variable", "name", "overview_level"}
+    )
     name = "convention"
 
     def _expand_uri_placeholders(
@@ -66,7 +70,7 @@ class ConventionResolver(URIResolver):
                     keys.append(key)
             uri = uri_expanded
 
-        # darn windows paths creating invalid escape sequences grrrrr
+        # windows paths creating invalid escape sequences
         try:
             regex = compile_regex(pattern)
         except regex_error:
@@ -128,8 +132,9 @@ class ConventionResolver(URIResolver):
         *,
         time_range: Optional[TimeRange] = None,
         mask: Optional[Geom] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom: Optional[Zoom] = None,
         variables: Optional[List[str]] = None,
+        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
@@ -145,10 +150,12 @@ class ConventionResolver(URIResolver):
             left-inclusive start end time of the data, by default None
         mask : Optional[Geom], optional
             A geometry defining the area of interest, by default None
-        zoom_level : Optional[ZoomLevel], optional
+        zoom: Optional[Zoom], optional
             zoom_level of the dataset, by default None
         variables : Optional[List[str]], optional
             Names of variables to return, or all if None, by default None
+        metadata: Optional[SourceMetadata], optional
+            DataSource metadata.
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
         options : Optional[Dict[str, Any]], optional
@@ -164,9 +171,10 @@ class ConventionResolver(URIResolver):
         NoDataException
             when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`
         """
-        _warn_on_unused_kwargs(
-            self.__class__.__name__, {"mask": mask, "zoom_level": zoom_level}
-        )
+        _warn_on_unused_kwargs(self.__class__.__name__, {"mask": mask})
+
+        if metadata is None:
+            metadata: SourceMetadata = SourceMetadata()
 
         uri_expanded, keys, _ = self._expand_uri_placeholders(
             uri, time_range, variables
@@ -177,11 +185,24 @@ class ConventionResolver(URIResolver):
             dates = pd.PeriodIndex(["1970-01-01"], freq="d")  # fill any valid value
         if not variables:
             variables = [""]  # fill any valid value
+        if zoom:
+            try:
+                zls_dict: Optional[Dict[int, float]] = metadata.zls_dict
+            except AttributeError:
+                zls_dict: Optional[Dict[int, float]] = None
+
+            overview_level: int = (
+                zoom_to_overview_level(zoom, mask, zls_dict, metadata.crs) or 0
+            )
+        else:
+            overview_level = 0  # fill any valid value
+
         fmts: Iterable[Dict[str, Any]] = map(
             lambda t: {
                 "year": t[0].year,
                 "month": t[0].month,
                 "variable": t[1],
+                "overview_level": overview_level,
             },
             product(dates, variables),
         )

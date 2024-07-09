@@ -5,14 +5,12 @@ from __future__ import annotations
 import os
 from logging import getLogger
 from os.path import join
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import numpy as np
 import pyproj
-import rasterio
 import xarray as xr
 from pyproj import CRS
-from rasterio.errors import RasterioIOError
 
 from hydromt._typing import (
     Bbox,
@@ -35,7 +33,7 @@ from hydromt._utils import (
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP, GDAL_EXT_CODE_MAP
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.gis.raster_utils import cellres, meridian_offset
+from hydromt.gis.raster_utils import meridian_offset
 
 logger = getLogger(__name__)
 
@@ -147,9 +145,6 @@ class RasterDatasetAdapter(DataAdapterBase):
         metadata: SourceMetadata,
         *,
         mask: Optional[Geom] = None,
-        zoom_level: Optional[
-            int
-        ] = None,  # TODO: https://github.com/Deltares/hydromt/issues/984
         align: Optional[bool] = None,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
@@ -166,8 +161,6 @@ class RasterDatasetAdapter(DataAdapterBase):
             source metadata
         mask : Optional[gpd.GeoDataFrame], optional
             mask to filter by geometry, by default None
-        zoom_level : Optional[ int ], optional
-            zoom level to filter on, by default None
         variables : Optional[List[str]], optional
             variable filter, by default None
         time_range : Optional[TimeRange], optional
@@ -379,7 +372,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         if nodata := metadata.nodata is not None:
             if not isinstance(nodata, dict):
                 no_data_values: Dict[str, Any] = {
-                    k: self.nodata for k in ds.data_vars.keys()
+                    k: metadata.nodata for k in ds.data_vars.keys()
                 }
             else:
                 no_data_values: Dict[str, Any] = nodata
@@ -397,124 +390,3 @@ class RasterDatasetAdapter(DataAdapterBase):
         # set meta data
         ds.attrs.update(metadata.model_dump(exclude=["attrs"], exclude_unset=True))
         return ds
-
-    # TODO: https://github.com/Deltares/hydromt/issues/875
-    # uses rasterio and is specific to driver. Should be moved to driver
-    def _get_zoom_levels_and_crs(
-        self, path: Optional[StrPath] = None
-    ) -> Tuple[Optional[dict], Optional[int]]:
-        """Get zoom levels and crs from adapter or detect from tif file if missing."""
-        if self.source.zoom_levels is not None and self.source.crs is not None:
-            return self.zoom_levels, self.source.crs
-        zoom_levels = {}
-        crs = None
-        if path is None:
-            path = self.source.uri
-        try:
-            with rasterio.open(path) as src:
-                res = abs(src.res[0])
-                crs = src.crs
-                overviews = [src.overviews(i) for i in src.indexes]
-                if len(overviews[0]) > 0:  # check overviews for band 0
-                    # check if identical
-                    if not all([o == overviews[0] for o in overviews]):
-                        raise ValueError("Overviews are not identical across bands")
-                    # dict with overview level and corresponding resolution
-                    zls = [1] + overviews[0]
-                    zoom_levels = {i: res * zl for i, zl in enumerate(zls)}
-        except RasterioIOError as e:
-            logger.warning(f"IO error while detecting zoom levels: {e}")
-        crs = crs if crs is not None else self.crs
-        if crs is None:
-            logger.warning("No CRS detected. Hence no zoom levels can be determined.")
-            return None, None
-        self.zoom_levels = zoom_levels
-        if self.source.crs is None:
-            self.source.crs = crs
-        return zoom_levels, crs
-
-    def _parse_zoom_level(
-        self,
-        zoom_level: Union[int, Tuple[Union[int, float], str]],
-        geom: Optional[Geom] = None,
-        bbox: Optional[Bbox] = None,
-        zls_dict: Optional[Dict[int, float]] = None,
-        dst_crs: Optional[pyproj.CRS] = None,
-    ) -> Optional[int]:
-        """Return overview level of data corresponding to zoom level.
-
-        Parameters
-        ----------
-        zoom_level: int or tuple
-            overview level or tuple with resolution and unit
-        geom: gpd.GeoSeries, optional
-            geometry to determine res if zoom_level or source in degree
-        bbox: list, optional
-            bbox to determine res if zoom_level or source in degree
-        zls_dict: dict, optional
-            dictionary with overview levels and corresponding resolution
-        dst_crs: pyproj.CRS, optional
-            destination crs to determine res if zoom_level tuple is provided
-            with different unit than dst_crs
-        """
-        # check zoom level
-        zls_dict = self.zoom_levels if zls_dict is None else zls_dict
-        dst_crs = self.source.crs if dst_crs is None else dst_crs
-        if zls_dict is None or len(zls_dict) == 0 or zoom_level is None:
-            return None
-        elif isinstance(zoom_level, int):
-            if zoom_level not in zls_dict:
-                raise ValueError(
-                    f"Zoom level {zoom_level} not defined." f"Select from {zls_dict}."
-                )
-            zl = zoom_level
-            dst_res = zls_dict[zoom_level]
-        elif (
-            isinstance(zoom_level, tuple)
-            and isinstance(zoom_level[0], (int, float))
-            and isinstance(zoom_level[1], str)
-            and len(zoom_level) == 2
-            and dst_crs is not None
-        ):
-            src_res, src_res_unit = zoom_level
-            # convert res if different unit than crs
-            dst_crs = pyproj.CRS.from_user_input(dst_crs)
-            dst_crs_unit = dst_crs.axis_info[0].unit_name
-            dst_res = src_res
-            if dst_crs_unit != src_res_unit:
-                known_units = ["degree", "metre", "US survey foot", "meter", "foot"]
-                if src_res_unit not in known_units:
-                    raise TypeError(
-                        f"zoom_level unit {src_res_unit} not understood;"
-                        f" should be one of {known_units}"
-                    )
-                if dst_crs_unit not in known_units:
-                    raise NotImplementedError(
-                        f"no conversion available for {src_res_unit} to {dst_crs_unit}"
-                    )
-                conversions = {
-                    "foot": 0.3048,
-                    "metre": 1,  # official pyproj units
-                    "US survey foot": 0.3048,  # official pyproj units
-                }  # to meter
-                if src_res_unit == "degree" or dst_crs_unit == "degree":
-                    lat = 0
-                    if bbox is not None:
-                        lat = (bbox[1] + bbox[3]) / 2
-                    elif geom is not None:
-                        lat = geom.to_crs(4326).centroid.y.item()
-                    conversions["degree"] = cellres(lat=lat)[1]
-                fsrc = conversions.get(src_res_unit, 1)
-                fdst = conversions.get(dst_crs_unit, 1)
-                dst_res = src_res * fsrc / fdst
-            # find nearest zoom level
-            res = list(zls_dict.values())[0] / 2  # org res is half of first overview
-            zls = list(zls_dict.keys())
-            smaller = [x < (dst_res + res * 0.01) for x in zls_dict.values()]
-            zl = zls[-1] if all(smaller) else zls[max(smaller.index(False) - 1, 0)]
-        elif dst_crs is None:
-            raise ValueError("No CRS defined, hence no zoom level can be determined.")
-        else:
-            raise TypeError(f"zoom_level not understood: {type(zoom_level)}")
-        logger.debug(f"Using zoom level {zl} (res: {zls_dict[zl]:.6f})")
-        return zl

@@ -24,7 +24,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
     TotalBounds,
-    ZoomLevel,
+    Zoom,
 )
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
@@ -42,7 +42,6 @@ class RasterDatasetSource(DataSource):
     _fallback_driver_write: ClassVar[str] = "raster_xarray"
     driver: RasterDatasetDriver
     data_adapter: RasterDatasetAdapter = Field(default_factory=RasterDatasetAdapter)
-    zoom_levels: Optional[Dict[int, float]] = None
 
     def read_data(
         self,
@@ -52,7 +51,7 @@ class RasterDatasetSource(DataSource):
         buffer: float = 0,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom: Optional[Zoom] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Union[xr.Dataset, xr.DataArray]:
@@ -74,7 +73,7 @@ class RasterDatasetSource(DataSource):
             mask=mask,
             time_range=tr,
             variables=vrs,
-            zoom_level=zoom_level,
+            zoom=zoom,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
@@ -84,7 +83,6 @@ class RasterDatasetSource(DataSource):
             mask=mask,
             variables=variables,
             time_range=time_range,
-            zoom_level=zoom_level,
             single_var_as_array=single_var_as_array,
         )
 
@@ -97,7 +95,7 @@ class RasterDatasetSource(DataSource):
         mask: Optional[Geom] = None,
         buffer: float = 0.0,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[ZoomLevel] = None,
+        zoom: Optional[Zoom] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
     ) -> "RasterDatasetSource":
@@ -128,7 +126,7 @@ class RasterDatasetSource(DataSource):
             mask=mask,
             buffer=buffer,
             time_range=time_range,
-            zoom_level=zoom_level,
+            zoom=zoom,
             handle_nodata=handle_nodata,
         )
         if ds is None:  # handle_nodata == ignore
