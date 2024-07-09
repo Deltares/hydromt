@@ -93,7 +93,7 @@ jobs:
 
             # # create release branch
             git pull # make sure git doesn't reject our push becasue of unknown refs
-            gh pr merge $PR_ID
+            gh pr merge $PR_ID --squash
             git pull
             git checkout main
             export RELEASE_VERSION=$(grep "version" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
