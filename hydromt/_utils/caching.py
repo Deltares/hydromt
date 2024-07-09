@@ -48,6 +48,44 @@ def _copy_to_local(
     fs.get(src, dst, block_size=block_size)
 
 
+def _overlaps(source: ET.Element, affine: Affine, bbox: List[float]) -> bool:
+    """Check whether source overlaps with bbox.
+
+    Parameters
+    ----------
+    source : ET.Element
+        Source element in .vrt
+    affine : Affine
+        Tile affine
+    bbox : List[float]
+        requested bbox
+
+    Returns
+    -------
+    bool
+        whether the tile overlaps with the requested bbox.
+
+    Raises
+    ------
+    ValueError
+        If tile bbox of tile not available as 'DstRect' sub element.
+    """
+    names = ["xOff", "yOff", "xSize", "ySize"]
+    dest_rectangle: Optional[ET.Element] = source.find("DstRect")
+    if dest_rectangle is None:
+        raise ValueError("Tile metadata missing.")
+    x0, y0, dx, dy = [float(dest_rectangle.get(name)) for name in names]
+
+    xs, ys = affine * (np.array([x0, x0 + dx]), np.array([y0, y0 + dy]))
+
+    return (
+        max(xs) > bbox[0]
+        and max(ys) > bbox[1]
+        and min(xs) < bbox[2]
+        and min(ys) < bbox[3]
+    )
+
+
 def _cache_vrt_tiles(
     vrt_uri: str,
     fs: Optional[AbstractFileSystem] = None,
@@ -86,20 +124,6 @@ def _cache_vrt_tiles(
     with open(vrt_destination_path, "r") as f:
         root = ET.fromstring(f.read())
 
-    def _overlaps(source: ET.Element, affine: Affine, bbox: List[float]):
-        """Check whether source intersects with bbox."""
-        names = ["xOff", "yOff", "xSize", "ySize"]
-        x0, y0, dx, dy = [float(source.find("DstRect").get(name)) for name in names]
-
-        xs, ys = affine * (np.array([x0, x0 + dx]), np.array([y0, y0 + dy]))
-
-        return (
-            max(xs) > bbox[0]
-            and max(ys) > bbox[1]
-            and min(xs) < bbox[2]
-            and min(ys) < bbox[3]
-        )
-
     # get vrt transform and crs
     geotransform_el: Optional[ET.Element] = root.find("GeoTransform")
     if geotransform_el is None:
@@ -108,7 +132,7 @@ def _cache_vrt_tiles(
 
     srs_el: Optional[ET.Element] = root.find("SRS")
     if srs_el is None:
-        raise ValueError(f"No CRS info found at: {vrt_uri}")
+        raise ValueError(f"No SRS info found at: {vrt_uri}")
 
     crs: CRS = CRS.from_string(srs_el.text)
     # get geometry bbox in vrt crs
@@ -126,6 +150,7 @@ def _cache_vrt_tiles(
         ).tag
     except StopIteration:
         raise ValueError(f"No Source information found at: {vrt_uri}")
+
     # loop through files in VRT and check if in bbox
     paths = []
     for source in band_name.findall(source_name):
@@ -165,7 +190,7 @@ def _cache_vrt_tiles(
             else:
                 src_uri: str = os.path.join(vrt_root, vrt_ref)
                 dst: Path = cache_dir / vrt_ref
-            if not isfile(dst):
+            if not isfile(dst):  # Skip cached files
                 paths.append((src_uri, dst))
 
     # Write new xml file

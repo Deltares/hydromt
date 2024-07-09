@@ -67,13 +67,18 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             if not preprocessor:
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
-        first_ext = splitext(uris[0])[-1]
+        ext_override: Optional[str] = options.pop("ext_override", None)
+        if ext_override is not None:
+            first_ext: str = ext_override
+        else:
+            first_ext: str = splitext(uris[0])[-1]
+
         if first_ext == ".zarr":
             opn: Callable = partial(xr.open_zarr, **options)
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
-                if ext != first_ext:
+                if ext != first_ext and not ext_override:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
                     continue
                 else:

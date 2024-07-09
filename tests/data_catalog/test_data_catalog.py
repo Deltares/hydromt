@@ -864,10 +864,13 @@ class TestGetRasterDataset:
             == 1
         )
 
+    @pytest.mark.skip(
+        reason="Waiting for: https://github.com/Deltares/hydromt/issues/492"
+    )
     @pytest.mark.skipif(not HAS_GCSFS, reason="GCSFS not installed.")
     def test_gcs_cmip6(self):
         # TODO switch to pre-defined catalogs when pushed to main
-        catalog_fn = join(CATALOGDIR, "gcs_cmip6_data", "v0.1.0", "data_catalog.yml")
+        catalog_fn = join(CATALOGDIR, "gcs_cmip6_data", "v1.0.0", "data_catalog.yml")
         data_catalog = DataCatalog(data_libs=[catalog_fn])
         ds = data_catalog.get_rasterdataset(
             "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
