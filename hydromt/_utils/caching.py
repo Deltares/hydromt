@@ -128,7 +128,7 @@ def _cache_vrt_tiles(
     geotransform_el: Optional[ET.Element] = root.find("GeoTransform")
     if geotransform_el is None:
         raise ValueError(f"No GeoTransform found in: {vrt_uri}")
-    transform = Affine.from_gdal(*literal_eval(geotransform_el.text))
+    transform = Affine.from_gdal(*literal_eval(geotransform_el.text.strip()))
 
     srs_el: Optional[ET.Element] = root.find("SRS")
     if srs_el is None:
