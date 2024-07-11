@@ -11,15 +11,6 @@ on:
           - major
         default: minor
         description: "Is this a Major, Minor, or Patch release?"
-      target:
-        type: choice
-        description: "What branch should we merge to after the release?"
-        default: main
-        options:
-          - main
-          - v1
-          - release/v1-alpha
-
 jobs:
   build:
     defaults:
@@ -47,6 +38,7 @@ jobs:
       - name: setup release PR
         env:
           GH_TOKEN: ${{ github.token }}
+          BUMP_KIND: ${{ inputs.bump }}
         run: |
 
           set -e
@@ -57,7 +49,7 @@ jobs:
           export CURRENT_MINOR=$(echo $CURRENT_VERSION | cut -d'.' -f 2)
           export CURRENT_PATHCH=$(echo $CURRENT_VERSION | cut -d'.' -f 3)
 
-          BUMP="minor"
+          BUMP=$BUMP_KIND
 
           ## calculate new release number
           case $BUMP in
@@ -75,7 +67,7 @@ jobs:
           	;;
 
           *)
-          	echo "invalid bump"
+          	echo "invalid bump: $BUMP"
           	exit 1
           	;;
           esac
@@ -98,7 +90,7 @@ jobs:
           sed -i "/Unreleased/{s/Unreleased/$NEW_CHANGELOG_HEADER/;n;s/=*/$NEW_HEADER_UNDERLINE/}" docs/changelog.rst
 
           # update switcher.json while maintianing the correct order with some black jq incantations. I'll try and explain below
-          cat docs/switcher.json | jq "map(select(.version != \"latest\")) | . + [{\"name\":\"v$NEW_VERSION\",\"version\":\"$NEW_VERSION\",\"url\":\"https://deltares.github.io/hydromt/v$NEW_VERSION/\"}] | sort_by(.version|split(\".\")|map(tonumber)) | . + [{\"name\":\"latest\",\"version\":\"latest\",\"url\":\"https://deltares.github.io/hydromt/latest/\"}]" >tmp.json
+          cat docs/_static/switcher.json | jq "map(select(.version != \"latest\")) | . + [{\"name\":\"v$NEW_VERSION\",\"version\":\"$NEW_VERSION\",\"url\":\"https://deltares.github.io/hydromt/v$NEW_VERSION/\"}] | sort_by(.version|split(\".\")|map(tonumber)) | . + [{\"name\":\"latest\",\"version\":\"latest\",\"url\":\"https://deltares.github.io/hydromt/latest/\"}]" >tmp.json
 
           # map(select(.version != \"latest\"))
           # removes the "latest" entry, since we'll need to sort numerically by number in a later step
@@ -118,7 +110,7 @@ jobs:
           # add teh latest field back in at the end
 
           # avoid race conditions by using a tmp file
-          mv tmp.json docs/switcher.json
+          mv tmp.json docs/_static/switcher.json
 
           git add .
           git commit -m "prepare for release v$NEW_VERSION"
@@ -144,8 +136,3 @@ jobs:
             gh pr comment "$PR_URL" --body-file comment.txt
 
           fi
-
-          echo "Github does not allow workflows to be triggered from other workflows, so I can't start those for you" > comment.txt
-          echo "However, you can trigger them by executing the following commands:" >> comment.txt
-            echo "\`git fetch && git checkout release/v$NEW_VERSION && git commit --allow-empty -m \"Trigger artifact creation\" && git push\`. " >> comment.txt
-          gh pr comment "$PR_URL" --body-file comment.txt

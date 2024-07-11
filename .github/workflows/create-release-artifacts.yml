@@ -6,12 +6,17 @@ on:
   push:
     branches:
       - 'release/**'
+  workflow_run:
+    workflows: [Create a new release]
+    types:
+      - completed
 
 jobs:
   pypi:
     runs-on: ubuntu-latest
     outputs:
       url: ${{ steps.upload-pypi-release-artifacts.outputs.artifact-url }}
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,14 +38,14 @@ jobs:
           flit build
           python -m twine check dist/*
 
-      - name: Publish package to TestPyPI
-        uses: pypa/gh-action-pypi-publish@v1.5.1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TEST_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
-          verbose: true
-          skip_existing: true
+      # - name: Publish package to TestPyPI
+      #   uses: pypa/gh-action-pypi-publish@v1.5.1
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.PYPI_TEST_TOKEN }}
+      #     repository_url: https://test.pypi.org/legacy/
+      #     verbose: true
+      #     skip_existing: true
 
       - uses: actions/upload-artifact@v4
         id: upload-pypi-release-artifacts
@@ -51,6 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       url: ${{ steps.upload-docs-release-artifacts.outputs.artifact-url }}
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -75,6 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       url: ${{ steps.upload-docker-release-artifacts.outputs.artifact-url }}
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -116,12 +123,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-        id: extract_branch
-
-
       - name: Add comment to PR
         env:
           GH_TOKEN: ${{ github.token }}
@@ -130,8 +131,9 @@ jobs:
           docs_url: ${{needs.docs.outputs.url}}
         run: |
           echo "The new release artifacts have been generated and tested. You can download and inspect them if you want by using the links below: " > comment.txt
-          echo "    - pypi: $pypi_url" >> comment.txt
+          echo "    - pypi:   $pypi_url" >> comment.txt
           echo "    - docker: $docker_url" >> comment.txt
-          echo "    - docs: $docs_url" >> comment.txt
+          echo "    - docs:   $docs_url" >> comment.txt
+          export PR_ID=$(gh pr list --state "open" --author "app/github-actions" --search "release"  --json "number" --jq '. | first | .number')
 
-          gh pr comment ${{ steps.extract_branch.outputs.branch }} --body-file comment.txt
+          gh pr comment $PR_ID --body-file comment.txt
