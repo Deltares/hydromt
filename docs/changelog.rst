@@ -11,6 +11,7 @@ Unreleased
 
 New
 ---
+- Further automate release mechanism. (#1019)
 
 Changed
 -------
