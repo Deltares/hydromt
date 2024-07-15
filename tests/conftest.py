@@ -51,9 +51,9 @@ def PLUGINS() -> Plugins:
 
 
 @pytest.fixture()
-def test_settings(tmp_dir: Path) -> Generator[Settings, None, None]:
+def test_settings(tmp_path: Path) -> Generator[Settings, None, None]:
     """Temporary sets settings for testing."""
-    cache_dir: Path = tmp_dir / "test_caching"
+    cache_dir: Path = tmp_path / "test_caching"
     SETTINGS.cache_root = cache_dir
     yield SETTINGS
     SETTINGS.cache_root = SETTINGS.model_fields["cache_root"].default
