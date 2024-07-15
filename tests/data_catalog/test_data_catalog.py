@@ -880,12 +880,6 @@ class TestGetRasterDataset:
         # Check reading and some preprocess
         assert "precip" in ds
         assert not np.any(ds[ds.raster.x_dim] > 180)
-        # Skip as I don't think this adds value to testing a gcs cloud archive
-        # Write and compare
-        # fn_nc = str(tmpdir.join("test.nc"))
-        # ds.to_netcdf(fn_nc)
-        # ds1 = data_catalog.get_rasterdataset(fn_nc)
-        # assert np.allclose(ds["precip"][0, :, :], ds1["precip"][0, :, :])
 
     @pytest.mark.integration()
     def test_reads_slippy_map_output(self, tmp_dir: Path, rioda_large: xr.DataArray):
