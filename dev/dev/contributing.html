@@ -836,22 +836,15 @@ Test should be run from the tests folder.</p>
 <section id="creating-a-release">
 <h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>Create a new branch with the name “release/&lt;version&gt;” where &lt;version&gt; is the version number, e.g. v0.7.0</p></li>
-<li><p>Bump the version number (without “v”!) in the __init__.py, check and update the docs/changelog.rst file and add a short summary to the changelog for this version.
-Check if all dependencies in the toml are up to date. Commit all changes</p></li>
-<li><p>Create a new documentation version in the <cite>docs/switcher.json</cite> that has the same structure as the other version entries. Please make sure the list stays sorted as this represents the ordering of the menu.</p></li>
-<li><p>Create a tag using <cite>git tag &lt;version&gt;</cite>, e.g. git tag v0.7.0</p></li>
-<li><p>Push your changes to github. To include the tag do <cite>git push origin &lt;version&gt;</cite>. This should trigger a test release to test.pypi.org</p></li>
-<li><p>If all tests and the test release have succeeded, merge de branch to main.</p></li>
-<li><p>Create a new release on github under <a class="github reference external" href="https://github.com/Deltares/hydromt/releases">Deltares/hydromt</a>.
-Use the “generate release notes” button and copy the content of the changelog for this version on top of the release notes. This should trigger the release to PyPi.</p></li>
-<li><p>The new PyPi package will trigger a new PR to the <a class="reference external" href="https://github.com/conda-forge/hydromt-feedstock">HydroMT feedstock repos of conda-forge</a>.
-Check if all dependencies are up to date and modify the PR if necessary. Merge the PR to release the new version on conda-forge.</p></li>
+<li><p>Go to the <cite>actions</cite> tab on Github, select <cite>Create a release</cite> from the actions listen to the left, then use the <cite>run workflow</cite> button to start the release process. You will be asked whether it will be a <cite>major</cite>, <cite>minor</cite> or <cite>patch</cite> release. Choose the appropriate action.</p></li>
+<li><p>The action you just run will open a new PR for you with a new branch named <cite>release/v&lt;NEW_VERSION&gt;</cite>. (the <cite>NEW_VERSION</cite> will be calculated for you based on which kind of release you selected.) In the new PR, the changelog, hydromt version and sphinx <cite>switcher.json</cite> will be updated for you. Any changes you made to the <cite>pyproject.toml</cite> since the last release will be posted as a comment in the PR. You will need these during the Conda-forge release if there are any.</p></li>
+<li><p>Every commit to this new branch will trigger the creation (and testing) of release artifacts. In our case those are: Documentation, the PyPi package and docker image (the conda release happens separately). After the artifacts are created, they will be uploaded to the repository’s internal artifact cache. A bot will post links to these created artifacts in the PR which you can use to download and locally inspect them.</p></li>
+<li><p>When you are happy with the release in the PR, you can simply merge it. We suggest naming the commit something like “Release v&lt;NEW_VERSION&gt;”</p></li>
+<li><p>After the PR is merged, a action should start (though it will not show up under the PR itself) that will publish the latest artifacts created to their respective platform. After this, a bot will add a final commit to the <cite>main</cite> branch, setting the hydromt version back to a dev version, and adding new headers to the <cite>docs/changelog.rst</cite> for unreleased features. It will also create a tag and a github release for you automatically. The release is now done as far as this repo is concerned.</p></li>
+<li><p>The newly published PyPi package will trigger a new PR to the <a class="reference external" href="https://github.com/conda-forge/hydromt-feedstock">HydroMT feedstock repos of conda-forge</a>.
+Here you can use the comment posted to the release PR to see if the <cite>meta.yml</cite> needs to be updated. Merge the PR to release the new version on conda-forge.</p></li>
+<li><p>celebrate the new release!</p></li>
 </ol>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>In the next PR that get’s merged into main, the version numbers in __init__.py and the changelog should be changed to the next release with “.dev” postfix.</p>
-</div>
 </section>
 </section>
 
