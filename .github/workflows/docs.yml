@@ -32,8 +32,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@v3
-      - uses: prefix-dev/setup-pixi@v0.6.0
+        uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.8.1
         with:
           pixi-version: "v0.21.1"
           environments: full-py311
@@ -49,13 +49,13 @@ jobs:
           pixi run --locked -e full-py311 sphinx-build ./docs ./docs/_build -b dummy -W
 
       - name: Generate docs
-        if: ${{ github.event_name != 'pull_request' && !github.event.act }}
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           pixi run --locked -e full-py311 html
           echo "DOC_VERSION=$(pixi run --locked -e full-py311 python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
 
       - name: Upload to GitHub Pages
-        if: ${{ github.event_name != 'pull_request' && !github.event.act }}
+        if: ${{ github.event_name != 'pull_request' }}
         uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
