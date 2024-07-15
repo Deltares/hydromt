@@ -4,9 +4,9 @@ import logging
 import os
 import xml.etree.ElementTree as ET
 from ast import literal_eval
-from os.path import basename, dirname, isabs, isdir, isfile, join
+from os.path import basename, dirname, isdir, isfile, join
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import geopandas as gpd
 import numpy as np
@@ -15,7 +15,7 @@ from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
 
 from hydromt._typing.type_def import StrPath
-from hydromt._utils.uris import _strip_scheme
+from hydromt._utils.uris import _strip_scheme, _strip_vsi
 from hydromt.config import SETTINGS
 
 logger = logging.getLogger(__name__)
@@ -116,7 +116,11 @@ def _cache_vrt_tiles(
         fs: AbstractFileSystem = url_to_fs(vrt_uri)[0]
 
     # cache vrt file
-    vrt_root = dirname(vrt_uri)
+    vrt_root: str = fs._parent(vrt_uri)
+
+    # Strip scheme from base uri and get path to directory with vrt file
+    scheme, stripped = _strip_scheme(vrt_uri)
+
     vrt_destination_path = join(cache_dir, basename(vrt_uri))
     if not isfile(vrt_destination_path):
         _copy_to_local(vrt_uri, vrt_destination_path, fs)
@@ -155,47 +159,53 @@ def _cache_vrt_tiles(
     paths = []
     for source in band_name.findall(source_name):
         if geom is None or _overlaps(source, transform, bbox):
-            vrt_ref_el: ET.Element = source.find("SourceFilename")
+            vrt_ref_el: Optional[ET.Element] = source.find("SourceFilename")
             if vrt_ref_el is None:
                 raise ValueError(f"Could not find Source File in vrt: {vrt_uri}.")
-            vrt_ref: str = vrt_ref_el.text
+            vrt_ref: str = vrt_ref_el.text.replace("\\", os.sep)  # dewindowsify
+            vrt_relative: int = int(vrt_ref_el.get("relativeToVRT"))  # 0 or 1
 
-            if isabs(vrt_ref):
-                # not relative uri, probably virtual file system https://gdal.org/user/virtual_file_systems.html
+            if not vrt_relative:
+                if vrt_ref.startswith("/vsi"):
+                    # virtual file system https://gdal.org/user/virtual_file_systems.html
+                    # also starts with /vsi on windows
 
-                # Strip scheme from base uri and get path to directory with vrt file
-                scheme, stripped = _strip_scheme(vrt_uri)
-                # get base path vrs
-                vrs_ref: Tuple[str, ...] = Path(vrt_ref).parts[2:]
+                    # get base path vrs, can safely strip /vsi<type>/
+                    _, vrt_ref = _strip_vsi(vrt_ref)
+
                 if scheme is None:
                     # local path
-                    # get directory of vrt file without vrs
-                    vrt_directory: str = str(Path(stripped).parent)
                     # Get relative uri that the vrt points to
-                    relative_uri_ref: str = str(Path(*vrs_ref)).lstrip(vrt_directory)
+                    relative_uri_ref: Path = Path(vrt_ref.lstrip(stripped))
                     # Set download uri to match vrt_uri
-                    src_uri: str = str(Path(*vrs_ref))
+                    src_uri: str = vrt_ref
                 else:
-                    # protocol, assume path separator is "/"
-                    sep = "/"
+                    # matching fs sep
+                    sep = fs.sep
                     vrt_directory: str = sep.join(stripped.split(sep)[:-1])
                     # Get relative uri that the vrt points to
-                    relative_uri_ref: str = sep.join(vrs_ref).lstrip(vrt_directory)
+                    relative_uri_ref: str = vrt_ref.lstrip(vrt_directory)
                     # Set download uri to match vrt_uri
-                    src_uri: str = scheme + sep.join(vrs_ref)
+                    src_uri: str = scheme + vrt_ref
 
                 # Set download dest to cache_dir and refer to it in the vrt
                 dst: Path = cache_dir / relative_uri_ref
                 vrt_ref_el.text = relative_uri_ref
             else:
-                src_uri: str = os.path.join(vrt_root, vrt_ref)
+                if scheme is None:
+                    # local uri
+                    src_uri: str = join(vrt_root, vrt_ref)
+                else:
+                    # fsspec uri
+                    src_uri: str = fs.sep.join((vrt_root), vrt_ref)
+
                 dst: Path = cache_dir / vrt_ref
             if not isfile(dst):  # Skip cached files
                 paths.append((src_uri, dst))
 
     # Write new xml file
     ET.ElementTree(root).write(vrt_destination_path)
-    # TODO multi thread download
+
     logger.info(f"Downloading {len(paths)} tiles to {cache_dir}")
     for src, dst in paths:
         _copy_to_local(src, dst, fs)
