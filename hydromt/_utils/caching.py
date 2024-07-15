@@ -43,7 +43,7 @@ def _copy_to_local(
     if fs is None:
         fs: AbstractFileSystem = url_to_fs(src)[0]
     if not isdir(dirname(dst)):
-        os.makedirs(dirname(dst), exists_ok=True)
+        os.makedirs(dirname(dst), exist_ok=True)
 
     fs.get(src, str(dst), block_size=block_size)
 
