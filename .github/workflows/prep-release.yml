@@ -76,7 +76,7 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
 
-          # # create release branch
+          ## create release branch
           git pull # make sure git doesn't reject our push becasue of unknown refs
           git checkout -b "release/v$NEW_VERSION"
 
@@ -107,7 +107,7 @@ jobs:
           # otherwise the number conversion would fail here.
 
           #| . + [{\"name\":\"latest\",\"version\":\"latest\",\"url\":\"https://deltares.github.io/hydromt/latest\"}]
-          # add teh latest field back in at the end
+          # add the latest field back in at the end
 
           # avoid race conditions by using a tmp file
           mv tmp.json docs/_static/switcher.json
