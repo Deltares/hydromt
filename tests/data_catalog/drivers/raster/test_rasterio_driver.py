@@ -17,12 +17,6 @@ from hydromt.io import open_mfraster, open_raster
 
 class TestRasterioDriver:
     @pytest.fixture()
-    def _test_settings(self, tmp_path: Path):
-        SETTINGS.cache_root = tmp_path / "TestRasterioDriver"
-        yield
-        SETTINGS.cache_root = SETTINGS.model_fields["cache_root"].default
-
-    @pytest.fixture()
     def vrt_tiled_raster_ds(self, tmp_path: Path, rioda_large: xr.DataArray) -> str:
         # write vrt data
         name = "test_vrt_tiled_raster_ds"
@@ -34,7 +28,7 @@ class TestRasterioDriver:
         )
         return str(root)
 
-    @pytest.mark.usefixtures("_test_settings")
+    @pytest.mark.usefixtures("test_settings")
     def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
         cache_dir: str = "tests_caches_tifs_from_vrt"
         driver = RasterioDriver(options={"cache_dir": cache_dir})

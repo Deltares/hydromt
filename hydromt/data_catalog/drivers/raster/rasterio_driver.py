@@ -66,12 +66,14 @@ class RasterioDriver(RasterDatasetDriver):
             cache_dir = Path(cache_root) / self.options.get(
                 "cache_dir",
                 Path(
-                    _strip_scheme(uris[0])
+                    _strip_scheme(uris[0])[1]
                 ).stem,  # default to first uri without extension
             )
             uris_cached = []
             for uri in uris:
-                cached_uri: str = _cache_vrt_tiles(uri, geom=mask, cache_dir=cache_dir)
+                cached_uri: str = _cache_vrt_tiles(
+                    uri, geom=mask, fs=self.filesystem, cache_dir=cache_dir
+                )
                 uris_cached.append(cached_uri)
             uris = uris_cached
 

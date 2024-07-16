@@ -46,6 +46,7 @@ cmip6_{model}_historical_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
+      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
@@ -90,6 +91,7 @@ cmip6_{model}_ssp119_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
+      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
@@ -141,6 +143,7 @@ cmip6_{model}_ssp126_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
+      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
@@ -195,6 +198,7 @@ cmip6_{model}_ssp245_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
+      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
@@ -249,6 +253,7 @@ cmip6_{model}_ssp370_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
+      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
@@ -292,6 +297,7 @@ cmip6_{model}_ssp434_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
+      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
@@ -335,6 +341,7 @@ cmip6_{model}_ssp460_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
+      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
@@ -386,6 +393,7 @@ cmip6_{model}_ssp585_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
+      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
