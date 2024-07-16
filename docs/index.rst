@@ -4,8 +4,9 @@
    :titlesonly:
    :hidden:
 
-   getting_started/intro.rst
-   user_guide/intro.rst
-   api/api.rst
-   dev/intro.rst
-   plugins.rst
+   getting_started/intro
+   user_guide/intro
+   plugins
+   api
+   team
+   changelog

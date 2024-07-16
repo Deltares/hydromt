@@ -3,7 +3,7 @@
 Examples
 ========
 
-.. include:: ../_examples/README.rst
+.. .. include:: ../_examples/README.rst
 
 
 List of examples

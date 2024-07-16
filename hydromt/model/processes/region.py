@@ -152,8 +152,7 @@ def parse_region_bbox(region: dict, *, crs: int = 4326) -> gpd.GeoDataFrame:
     ----------
     region : dict
         Dictionary describing region of interest.
-        For an exact clip of the region:
-    * {'bbox': [xmin, ymin, xmax, ymax]}
+        For an exact clip of the region: { 'bbox': [xmin, ymin, xmax, ymax] }
     crs : CRS, optional
         CRS of the bounding box coordinates. By default EPSG 4326.
     """
@@ -163,7 +162,6 @@ def parse_region_bbox(region: dict, *, crs: int = 4326) -> gpd.GeoDataFrame:
 
     _assert_parse_key(kind, "bbox")
 
-    # TODO: Make this very specific to bbox
     kwargs.update(_parse_region_value(value0, data_catalog=None))
 
     _assert_parsed_values(

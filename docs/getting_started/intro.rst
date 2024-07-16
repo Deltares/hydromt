@@ -42,7 +42,7 @@ Getting started
 
     .. grid-item-card::
         :text-align: center
-        :link: api_reference
+        :link: api
         :link-type: ref
 
         :octicon:`list-unordered;10em`
@@ -91,8 +91,7 @@ Getting started
    :hidden:
 
    quick_overview.rst
-   installation.rst
    faq.rst
    examples_index.rst
-   user_stories.rst
+   use_case_examples.rst
    publications.rst
