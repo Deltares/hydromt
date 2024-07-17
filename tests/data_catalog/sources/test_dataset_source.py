@@ -17,6 +17,7 @@ class TestDatasetSource:
         self,
         MockDatasetDriver: Type[DatasetDriver],
         mock_ds_adapter: DatasetAdapter,
+        mock_resolver: URIResolver,
         timeseries_ds: xr.Dataset,
         tmp_dir: Path,
     ):
@@ -26,6 +27,7 @@ class TestDatasetSource:
             name="example_source",
             driver=MockDatasetDriver(),
             data_adapter=mock_ds_adapter,
+            uri_resolver=mock_resolver,
             uri=str(tmp_dir / "test.nc"),
         )
         xr.testing.assert_equal(timeseries_ds, source.read_data())
@@ -47,10 +49,11 @@ class TestDatasetSource:
         self, mock_resolver: URIResolver, MockDatasetDriver: Type[DatasetDriver]
     ):
         source_name = "timeseries_dataset_zarr"
-        driver = MockDatasetDriver(uri_resolver=mock_resolver)
+        driver = MockDatasetDriver()
         with pytest.raises(ValueError, match="does not support zarr"):
             DatasetSource(
                 uri="test.zarr",
+                uri_resolver=mock_resolver,
                 driver=driver,
                 name=source_name,
             ).to_stac_catalog()
@@ -66,10 +69,11 @@ class TestDatasetSource:
             raise IndexError("no timerange found.")
 
         source_name = "timeseries_dataset_nc"
-        driver = MockDatasetDriver(uri_resolver=mock_resolver)
+        driver = MockDatasetDriver()
         monkeypatch.setattr(DatasetSource, name="get_time_range", value=_get_time_range)
         return DatasetSource(
             uri="test.nc",
+            uri_resolver=mock_resolver,
             driver=driver,
             name=source_name,
         )

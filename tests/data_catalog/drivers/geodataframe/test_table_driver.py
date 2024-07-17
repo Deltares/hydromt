@@ -8,7 +8,6 @@ import pytest
 from hydromt.data_catalog.drivers.geodataframe.table_driver import (
     GeoDataFrameTableDriver,
 )
-from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 
 class TestGeoDataFrameTableDriver:
@@ -55,13 +54,13 @@ class TestGeoDataFrameTableDriver:
     ):
         uri = request.getfixturevalue(uri)
         driver = GeoDataFrameTableDriver()
-        gdf = driver.read_data(uris=[uri])
+        gdf = driver.read(uris=[uri])
         pd.testing.assert_frame_equal(gdf, geodf)
 
     def test_unknown_extension(self):
         driver = GeoDataFrameTableDriver()
         with pytest.raises(ValueError, match="not compatible"):
-            driver.read_data(uris=["weird_ext.zzz"])
+            driver.read(uris=["weird_ext.zzz"])
 
     def test_header_case_insensitive(
         self, tmp_dir: Path, df: pd.DataFrame, geodf: gpd.GeoDataFrame
@@ -70,17 +69,5 @@ class TestGeoDataFrameTableDriver:
         df = df.rename({"longitude": "LONGITUDE"})
         df.to_csv(uri)
         driver = GeoDataFrameTableDriver()
-        gdf = driver.read_data(uris=[uri])
+        gdf = driver.read(uris=[uri])
         pd.testing.assert_frame_equal(gdf, geodf)
-
-    def test_read_multiple_uris(self):
-        # Create Resolver that returns multiple uris
-        class FakeResolver(URIResolver):
-            def resolve(self, uri: str, *args, **kwargs):
-                return ["more", "than", "one"]
-
-        driver: GeoDataFrameTableDriver = GeoDataFrameTableDriver(
-            uri_resolver=FakeResolver(),
-        )
-        with pytest.raises(ValueError, match="not supported"):
-            driver.read("uri_{variable}", variables=["more", "than", "one"])

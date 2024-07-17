@@ -489,7 +489,6 @@ grwl_mask:
   uri: grwl_tindex.gpkg
   driver:
     name: rasterio
-    uri_resolver: raster_tindex
     options:
       chunks:
         x: 3000
@@ -497,6 +496,7 @@ grwl_mask:
       mosaic_kwargs:
         method: nearest
       tileindex: location
+  uri_resolver: raster_tindex
   metadata:
     paper_doi: 10.1126/science.aat0636
     paper_ref: Allen and Pavelsky (2018)

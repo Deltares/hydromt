@@ -18,7 +18,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver, PyogrioDriver
 from hydromt.data_catalog.sources.geodataframe import GeoDataFrameSource
-from hydromt.data_catalog.uri_resolvers import ConventionResolver
+from hydromt.data_catalog.uri_resolvers import URIResolver
 
 
 class TestGeoDataFrameSource:
@@ -52,6 +52,7 @@ class TestGeoDataFrameSource:
     def test_get_data_query_params(
         self,
         geodf: gpd.GeoDataFrame,
+        mock_resolver: URIResolver,
         mock_geodf_driver: GeoDataFrameDriver,
         mock_geodataframe_adapter: GeoDataFrameAdapter,
     ):
@@ -61,6 +62,7 @@ class TestGeoDataFrameSource:
             data_type="GeoDataFrame",
             driver=mock_geodf_driver,
             data_adapter=mock_geodataframe_adapter,
+            uri_resolver=mock_resolver,
             uri="testuri",
         )
         gdf1 = data_source.read_data(bbox=list(geodf.total_bounds), buffer=1000)
@@ -73,7 +75,7 @@ class TestGeoDataFrameSource:
             name="test",
             uri=example_geojson,
             data_adapter=GeoDataFrameAdapter(),
-            driver=PyogrioDriver(uri_resolver=ConventionResolver()),
+            driver=PyogrioDriver(),
         )
         gdf = source.read_data(bbox=list(geodf.total_bounds))
         assert isinstance(gdf, gpd.GeoDataFrame)
@@ -85,7 +87,7 @@ class TestGeoDataFrameSource:
             name="test",
             uri=example_geojson,
             data_adapter=GeoDataFrameAdapter(rename={"city": "ciudad"}),
-            driver=PyogrioDriver(uri_resolver=ConventionResolver()),
+            driver=PyogrioDriver(),
         )
         gdf = source.read_data(
             bbox=list(geodf.total_bounds),
@@ -102,7 +104,7 @@ class TestGeoDataFrameSource:
             name="test",
             uri="no_file.geojson",
             data_adapter=GeoDataFrameAdapter(),
-            driver=PyogrioDriver(uri_resolver=ConventionResolver()),
+            driver=PyogrioDriver(),
         )
         with pytest.raises(NoDataException):
             source.read_data()
@@ -111,7 +113,7 @@ class TestGeoDataFrameSource:
         GeoDataFrameSource(
             name="test",
             uri="points.geojson",
-            driver=PyogrioDriver(uri_resolver={"name": "convention"}),
+            driver=PyogrioDriver(),
             data_adapter={"unit_add": {"geoattr": 1.0}},
         )
 

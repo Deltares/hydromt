@@ -9,3 +9,10 @@ __all__ = [
     "URIResolver",
     "RasterTindexResolver",
 ]
+
+# define hydromt uri resolver entry points
+# see also hydromt.uri_resolver group in pyproject.toml
+__hydromt_eps__ = [
+    "ConventionResolver",
+    "RasterTindexResolver",
+]

@@ -24,7 +24,7 @@ class PyogrioDriver(GeoDataFrameDriver):
     name = "pyogrio"
     supports_writing = True
 
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

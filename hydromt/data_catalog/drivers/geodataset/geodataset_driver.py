@@ -8,9 +8,8 @@ import xarray as xr
 
 from hydromt._typing import Geom, SourceMetadata, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
-from hydromt._typing.type_def import Bbox, GeomBuffer, Predicate
+from hydromt._typing.type_def import Predicate
 from hydromt.data_catalog.drivers import BaseDriver
-from hydromt.gis.gis_utils import parse_geom_bbox_buffer
 
 logger = getLogger(__name__)
 
@@ -18,51 +17,8 @@ logger = getLogger(__name__)
 class GeoDatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDatasets."""
 
-    def read(
-        self,
-        uri: str,
-        *,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
-        buffer: GeomBuffer = 0,
-        predicate: Predicate = "intersects",
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
-        metadata: Optional[SourceMetadata] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> Optional[xr.Dataset]:
-        """
-        Read in any compatible data source to an xarray Dataset.
-
-        args:
-            mask: Optional[Geom]. Mask for features to match the predicate, preferably
-                in the same CRS.
-        """
-        if bbox is not None or (mask is not None and buffer > 0):
-            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
-        # Merge static kwargs from the catalog with dynamic kwargs from the query.
-        uris = self.uri_resolver.resolve(
-            uri,
-            fs=self.filesystem,
-            time_range=time_range,
-            mask=mask,
-            variables=variables,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-        )
-        return self.read_data(
-            uris,
-            mask=mask,
-            predicate=predicate,
-            variables=variables,
-            time_range=time_range,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-        )
-
     @abstractmethod
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

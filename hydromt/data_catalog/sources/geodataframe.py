@@ -59,11 +59,22 @@ class GeoDataFrameSource(DataSource):
         self._used = True
         if bbox is not None or (mask is not None and buffer > 0):
             mask = parse_geom_bbox_buffer(mask, bbox, buffer)
-        gdf: gpd.GeoDataFrame = self.driver.read(
+
+        vrs: Optional[List[str]] = self.data_adapter.to_source_variables(variables)
+
+        uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
             mask=mask,
+            variables=vrs,
+            metadata=self.metadata,
+            handle_nodata=handle_nodata,
+        )
+
+        gdf: gpd.GeoDataFrame = self.driver.read(
+            uris,
+            mask=mask,
             predicate=predicate,
-            variables=variables,
+            variables=vrs,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )

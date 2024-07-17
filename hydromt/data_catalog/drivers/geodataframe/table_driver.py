@@ -27,7 +27,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
 
     name: ClassVar[str] = "geodataframe_table"
 
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

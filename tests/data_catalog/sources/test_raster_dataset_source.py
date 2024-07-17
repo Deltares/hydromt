@@ -9,6 +9,7 @@ from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources import RasterDatasetSource
+from hydromt.data_catalog.uri_resolvers import URIResolver
 from hydromt.gis.gis_utils import to_geographic_bbox
 
 
@@ -18,6 +19,7 @@ class TestRasterDatasetSource:
         raster_ds: xr.Dataset,
         mock_raster_ds_driver: RasterDatasetDriver,
         mock_raster_ds_adapter: RasterDatasetAdapter,
+        mock_resolver: URIResolver,
         tmp_dir: Path,
     ):
         source = RasterDatasetSource(
@@ -25,6 +27,7 @@ class TestRasterDatasetSource:
             name="example_rasterds",
             driver=mock_raster_ds_driver,
             data_adapter=mock_raster_ds_adapter,
+            uri_resolver=mock_resolver,
             uri=str(tmp_dir / "rasterds.zarr"),
         )
         assert raster_ds == source.read_data()
