@@ -28,10 +28,10 @@ help you get started with HydroMT. Our user guide is separated into four (main) 
 .. toctree::
 
 
+  user_guide/index
+  advanced_user/index
   plugin_dev/index
   core_dev/index
-  basic_user/index
-  advanced_user/index
 
 
 ..   The user guide is organized as follows:

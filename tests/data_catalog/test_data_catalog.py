@@ -1569,9 +1569,13 @@ def test_from_stac():
         "./tests/data/stac/catalog.json"
     )
 
-    assert type(catalog_from_stac.get_source("chirps_global")) == RasterDatasetSource
-    assert type(catalog_from_stac.get_source("gadm_level1")) == GeoDataFrameSource
-    assert type(catalog_from_stac.get_source("gtsmv3_eu_era5")) == RasterDatasetSource
+    assert isinstance(
+        catalog_from_stac.get_source("chirps_global"), RasterDatasetSource
+    )
+    assert isinstance(catalog_from_stac.get_source("gadm_level1"), GeoDataFrameSource)
+    assert isinstance(
+        catalog_from_stac.get_source("gtsmv3_eu_era5"), RasterDatasetSource
+    )
 
 
 def test_yml_from_uri_path():

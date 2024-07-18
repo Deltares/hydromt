@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """GIS related raster functions."""
+
 from __future__ import annotations
 
 import logging

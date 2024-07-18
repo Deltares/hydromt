@@ -1,4 +1,5 @@
 """Tests for the stats/design_events submodule."""
+
 import numpy as np
 
 from hydromt.stats import design_events, extremes

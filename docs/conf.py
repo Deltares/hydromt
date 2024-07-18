@@ -31,72 +31,72 @@ from docs.parse_predefined_catalogs import write_predefined_catalogs_to_rst_pane
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
 
-# def cli2rst(output, fn):
-#     with open(fn, "w") as f:
-#         f.write(".. code-block:: console\n\n")
-#         for line in output.split("\n"):
-#             f.write(f"    {line}\n")
+def cli2rst(output, fn):
+    with open(fn, "w") as f:
+        f.write(".. code-block:: console\n\n")
+        for line in output.split("\n"):
+            f.write(f"    {line}\n")
 
 
-# def remove_dir_content(path: str) -> None:
-#     for root, dirs, files in os.walk(path):
-#         for f in files:
-#             os.unlink(os.path.join(root, f))
-#         for d in dirs:
-#             shutil.rmtree(os.path.join(root, d))
-#     if os.path.isdir(path):
-#         shutil.rmtree(path)
+def remove_dir_content(path: str) -> None:
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
+    if os.path.isdir(path):
+        shutil.rmtree(path)
 
 
-# def write_panel(f, name, content="", level=0, item="dropdown"):
-#     pad = "".ljust(level * 3)
-#     f.write(f"{pad}.. {item}:: {name}\n")
-#     f.write("\n")
-#     if content:
-#         pad = "".ljust((level + 1) * 3)
-#         for line in content.split("\n"):
-#             line_clean = line.replace("*", "\\*")
-#             f.write(f"{pad}{line_clean}\n")
-#         f.write("\n")
+def write_panel(f, name, content="", level=0, item="dropdown"):
+    pad = "".ljust(level * 3)
+    f.write(f"{pad}.. {item}:: {name}\n")
+    f.write("\n")
+    if content:
+        pad = "".ljust((level + 1) * 3)
+        for line in content.split("\n"):
+            line_clean = line.replace("*", "\\*")
+            f.write(f"{pad}{line_clean}\n")
+        f.write("\n")
 
 
-# def write_nested_dropdown(name, data_cat, note="", categories=[]):
-#     df = data_cat.to_dataframe().sort_index().drop_duplicates("uri")
-#     with open(f"_generated/{name}.rst", mode="w") as f:
-#         write_panel(f, name, note, level=0)
-#         write_panel(f, "", level=1, item="tab-set")
-#         for category in categories:
-#             if category == "other":
-#                 sources = df.index[~np.isin(df["category"], categories)]
-#             else:
-#                 sources = df.index[df["category"] == category]
-#             if len(sources) > 0:
-#                 write_panel(f, category, level=2, item="tab-item")
-#             for source in sources:
-#                 items = data_cat.get_source(source).summary().items()
-#                 summary = "\n".join(
-#                     [f":{k}: {clean_str(v)}" for k, v in items if k != "category"]
-#                 )
-#                 write_panel(f, source, summary, level=3)
+def write_nested_dropdown(name, data_cat, note="", categories=[]):
+    df = data_cat.to_dataframe().sort_index().drop_duplicates("uri")
+    with open(f"_generated/{name}.rst", mode="w") as f:
+        write_panel(f, name, note, level=0)
+        write_panel(f, "", level=1, item="tab-set")
+        for category in categories:
+            if category == "other":
+                sources = df.index[~np.isin(df["category"], categories)]
+            else:
+                sources = df.index[df["category"] == category]
+            if len(sources) > 0:
+                write_panel(f, category, level=2, item="tab-item")
+            for source in sources:
+                items = data_cat.get_source(source).summary().items()
+                summary = "\n".join(
+                    [f":{k}: {clean_str(v)}" for k, v in items if k != "category"]
+                )
+                write_panel(f, source, summary, level=3)
 
-#         write_panel(f, "all", level=2, item="tab-item")
-#         for source in df.index.values:
-#             items = data_cat.get_source(source).summary()
-#             items = {k: clean_str(v) for (k, v) in items.items()}.items()
-#             summary = "\n".join([f":{k}: {v}" for k, v in items])
-#             write_panel(f, source, summary, level=3)
+        write_panel(f, "all", level=2, item="tab-item")
+        for source in df.index.values:
+            items = data_cat.get_source(source).summary()
+            items = {k: clean_str(v) for (k, v) in items.items()}.items()
+            summary = "\n".join([f":{k}: {v}" for k, v in items])
+            write_panel(f, source, summary, level=3)
 
 
-# def clean_str(s):
-#     if not isinstance(s, str):
-#         return s
-#     clean = s.replace("*", "\\*")
-#     clean = clean.replace("_", "\\_")
-#     idx = clean.find("p:/")
-#     if idx > -1:
-#         clean = clean[idx:]
+def clean_str(s):
+    if not isinstance(s, str):
+        return s
+    clean = s.replace("*", "\\*")
+    clean = clean.replace("_", "\\_")
+    idx = clean.find("p:/")
+    if idx > -1:
+        clean = clean[idx:]
 
-#     return clean
+    return clean
 
 
 # NOTE: the examples/ folder in the root should be copied to docs/examples/examples/ before running sphinx
@@ -108,6 +108,17 @@ author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 
 # The short version which is displayed
 version = hydromt.__version__
+
+
+# # -- Copy notebooks to include in docs -------
+# FIXME: examples are not yet working see #796
+# if os.path.isdir("_examples"):
+#     remove_dir_content("_examples")
+# os.makedirs("_examples")
+# copy_tree("../examples", "_examples")
+
+if not os.path.isdir("_generated"):
+    os.makedirs("_generated")
 
 # # -- Generate panels rst files from data catalogs to include in docs -------
 categories = [
@@ -123,22 +134,26 @@ categories = [
     "other",
 ]
 
-# data_cat = hydromt.DataCatalog()
-# predefined_catalogs = hydromt.plugins.PLUGINS.catalog_plugins
-# for name in predefined_catalogs:
-#     try:
-#         data_cat.from_predefined_catalogs(name)
-#     except OSError as e:
-#         print(e)
-#         continue
-#     write_nested_dropdown(name, data_cat, categories=categories)
-#     data_cat._sources = {}  # reset
-# with open("_generated/predefined_catalogs.rst", "w") as f:
-#     f.writelines(
-#         [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
-#     )
+data_cat = hydromt.DataCatalog()
+predefined_catalogs = hydromt.plugins.PLUGINS.catalog_plugins
+for name in predefined_catalogs:
+    try:
+        data_cat.from_predefined_catalogs(name)
+    except OSError as e:
+        print(e)
+        continue
+    write_nested_dropdown(name, data_cat, categories=categories)
+    data_cat._sources = {}  # reset
+with open("_generated/predefined_catalogs.rst", "w") as f:
+    f.writelines(
+        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
+    )
 
 # -- General configuration ------------------------------------------------
+
+# If your documentation needs a minimal Sphinx version, state it here.
+#
+# needs_sphinx = '1.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -147,8 +162,9 @@ extensions = [
     "sphinx_design",
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
-    'sphinx.ext.autosummary',
+    "sphinx.ext.todo",
+'sphinx.ext.napoleon',
+    "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
     "sphinx_autosummary_accessors",
@@ -157,16 +173,18 @@ extensions = [
     "nbsphinx",
     "sphinx_click",
 ]
+suppress_warnings = [
+    'autosummary.import_cycle',
+]
 
 autosummary_generate = True
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates", sphinx_autosummary_accessors.templates_path]
-
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
+#
+# source_suffix = ['.rst', '.md']
 source_suffix = ".rst"
-
 # The master toctree document.
 master_doc = "index"
 
@@ -185,6 +203,9 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 
+# If true, `todo` and `todoList` produce output, else they produce nothing.
+todo_include_todos = False
+
 # Napoleon settings
 napoleon_numpy_docstring = True
 napoleon_google_docstring = False
@@ -198,7 +219,6 @@ html_theme = "pydata_sphinx_theme"
 html_logo = "_static/hydromt-icon.svg"
 html_favicon = "_static/hydromt-icon.svg"
 autodoc_member_order = "bysource"  # overwrite default alphabetical sort
-autodoc_default_flags = ["members", "show-inheritance"]
 autoclass_content = "both"
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -250,14 +270,51 @@ html_context = {
     "default_mode": "light",
 }
 
-# remove_from_toctrees = ["_generated/**"]
+remove_from_toctrees = ["_generated/*"]
 
+# no sidebar in api section
+# html_sidebars = {
+#   "api": [],
+#   "_generated/*": []
+# }
+
+# Custom sidebar templates, must be a dictionary that maps document names
+# to template names.
+#
+# This is required for the alabaster theme
+# refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
+# html_sidebars = {
+#     "**": [
+#         "relations.html",  # needs 'show_related': True theme option to display
+#         "searchbox.html",
+#     ]
+# }
+
+# The name of an image file (relative to this directory) to place at the top
+# of the sidebar.
 
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "hydromt_doc"
 
+
+# -- Options for LaTeX output ---------------------------------------------
+
+latex_elements = {
+    # The paper size ('letterpaper' or 'a4paper').
+    #
+    # 'papersize': 'letterpaper',
+    # The font size ('10pt', '11pt' or '12pt').
+    #
+    # 'pointsize': '10pt',
+    # Additional stuff for the LaTeX preamble.
+    #
+    # 'preamble': '',
+    # Latex figure (float) alignment
+    #
+    # 'figure_align': 'htbp',
+}
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
@@ -297,11 +354,28 @@ texinfo_documents = [
     ),
 ]
 
+# FIXME exception while evaluating only directive expression: chunk after expression
+# nbsphinx_prolog = r"""
+# {% set docname = env.doc2path(env.docname, base=None) %}
+# .. only:: html
+#     .. role:: raw-html(raw)
+#         :format: html
+#     .. note::
+#         | This page was generated from `{{ docname }}`__.
+#         | Interactive online version: :raw-html:`<a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/{{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
+#         __ https://github.com/Deltares/hydromt/blob/main/examples/{{ docname }}
+# """
+
 # -- INTERSPHINX -----------------------------------------------------------
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    # "numpy": ("https://numpy.org/doc/stable", None),
+    # "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
+    # "matplotlib": ("https://matplotlib.org/stable/", None),
+    # "dask": ("https://docs.dask.org/en/latest", None),
     "rasterio": ("https://rasterio.readthedocs.io/en/latest", None),
     "geopandas": ("https://geopandas.org/en/stable", None),
     "xarray": ("https://docs.xarray.dev/en/stable", None),

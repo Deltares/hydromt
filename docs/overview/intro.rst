@@ -95,3 +95,4 @@ Getting started
    examples_index.rst
    use_case_examples.rst
    publications.rst
+   team
