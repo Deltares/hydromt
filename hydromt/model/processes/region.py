@@ -55,21 +55,13 @@ def parse_region_basin(
         ('outlets': true) of stream threshold arguments (e.g.: 'uparea': 1000).
 
         Common use-cases include:
-
         * {'basin': ID}
-
         * {'basin': [ID1, ID2, ..]}
-
         * {'basin': [x, y]}
-
         * {'basin': [[x1, x2, ..], [y1, y2, ..]]}
-
         * {'basin': /path/to/point_geometry}
-
         * {'basin': [xmin, ymin, xmax, ymax]}
-
         * {'basin': [xmin, ymin, xmax, ymax], 'outlets': true}
-
         * {'basin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
 
         Subbasins are defined by its outlet locations and include all area upstream
@@ -83,25 +75,22 @@ def parse_region_basin(
         within the provide bounds a warning will be raised. Common use-cases include:
 
         * {'subbasin': [x, y], '<variable>': threshold}
+        * ::
 
-        * {
-            'subbasin': [[x1, x2, ..], [y1, y2, ..]],
-            '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
-        }
+            {
+                'subbasin': [[x1, x2, ..], [y1, y2, ..]],
+                '<variable>': threshold, 'bounds': [xmin, ymin, xmax, ymax]
+            }
 
         * {'subbasin': /path/to/point_geometry, '<variable>': threshold}
-
         * {'subbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-
         * {'subbasin': /path/to/polygon_geometry, '<variable>': threshold}
 
         Interbasins are similar to subbasins but are bounded by a bounding box or
         geometry and do not include all upstream area. Common use-cases include:
 
         * {'interbasin': [xmin, ymin, xmax, ymax], '<variable>': threshold}
-
         * {'interbasin': [xmin, ymin, xmax, ymax], 'xy': [x, y]}
-
         * {'interbasin': /path/to/polygon_geometry, 'outlets': true}
     data_catalog : DataCatalog
         DataCatalog object containing the data sources.
@@ -152,8 +141,7 @@ def parse_region_bbox(region: dict, *, crs: int = 4326) -> gpd.GeoDataFrame:
     ----------
     region : dict
         Dictionary describing region of interest.
-        For an exact clip of the region:
-    * {'bbox': [xmin, ymin, xmax, ymax]}
+        For an exact clip of the region: { 'bbox': [xmin, ymin, xmax, ymax] }
     crs : CRS, optional
         CRS of the bounding box coordinates. By default EPSG 4326.
     """
@@ -163,7 +151,6 @@ def parse_region_bbox(region: dict, *, crs: int = 4326) -> gpd.GeoDataFrame:
 
     _assert_parse_key(kind, "bbox")
 
-    # TODO: Make this very specific to bbox
     kwargs.update(_parse_region_value(value0, data_catalog=None))
 
     _assert_parsed_values(

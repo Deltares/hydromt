@@ -1318,7 +1318,7 @@ class DataCatalog(object):
         ----------
         data_like : Union[ str, SourceSpecDict, Path, xr.Dataset, xr.DataArray, GeoDataFrameSource ]
             Data catalog key, path to vector file, a GeoDataFrameSource object,
-             or a vector geopandas object.
+            or a vector geopandas object.
             The catalog key can be a string or a dictionary with the following keys:
             {'name', 'provider', 'version'}.
             If a path to a vector file is provided it will be added

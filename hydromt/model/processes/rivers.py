@@ -1,4 +1,5 @@
 """Implementations for river workflows."""
+
 import logging
 from typing import Union
 
