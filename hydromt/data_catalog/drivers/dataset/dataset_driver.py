@@ -21,40 +21,8 @@ logger: Logger = getLogger(__name__)
 class DatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read Datasets."""
 
-    def read(
-        self,
-        uri: str,
-        *,
-        variables: Optional[Variables] = None,
-        time_range: Optional[TimeRange] = None,
-        metadata: Optional[SourceMetadata] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> xr.Dataset:
-        """
-        Read in any compatible data source to an xarray Dataset.
-
-        args:
-        """
-        uris = self.uri_resolver.resolve(
-            uri,
-            self.filesystem,
-            time_range=time_range,
-            variables=variables,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-            options=self.options,
-        )
-        return self.read_data(
-            uris,
-            time_range=time_range,
-            variables=variables,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-        )
-
     @abstractmethod
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

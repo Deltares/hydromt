@@ -32,7 +32,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     name = "raster_xarray"
     supports_writing = True
 
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

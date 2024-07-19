@@ -22,7 +22,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
 
     name: ClassVar[str] = "geodataset_vector"
 
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

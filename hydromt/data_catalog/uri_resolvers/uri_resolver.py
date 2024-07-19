@@ -2,39 +2,28 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from fsspec import AbstractFileSystem
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    SerializerFunctionWrapHandler,
-    model_serializer,
-)
+from fsspec.implementations.local import LocalFileSystem
+from pydantic import ConfigDict, Field
 
-from hydromt._typing import Geom, NoDataStrategy, SourceMetadata, TimeRange, Zoom
+from hydromt._typing import FS, Geom, NoDataStrategy, SourceMetadata, TimeRange, Zoom
+from hydromt.abstract_base import AbstractBaseModel
+from hydromt.plugins import PLUGINS
 
 logger: Logger = getLogger(__name__)
 
 
-class URIResolver(BaseModel, ABC):
+class URIResolver(AbstractBaseModel, ABC):
     """URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
     model_config = ConfigDict(extra="forbid")
-    name: ClassVar[str]
-
-    @model_serializer(mode="wrap")
-    def _serialize(self, nxt: SerializerFunctionWrapHandler) -> Any:
-        """Also serialize name."""
-        res = nxt(self)
-        res["name"] = self.name
-        return res
+    filesystem: FS = Field(default_factory=LocalFileSystem)
 
     @abstractmethod
     def resolve(
         self,
         uri: str,
-        fs: AbstractFileSystem,
         *,
         time_range: Optional[TimeRange] = None,
         mask: Optional[Geom] = None,
@@ -50,8 +39,6 @@ class URIResolver(BaseModel, ABC):
         ----------
         uri : str
             Unique Resource Identifier
-        fs : AbstractFileSystem
-            fsspec filesystem used to resolve wildcards in the uri
         time_range : Optional[TimeRange], optional
             left-inclusive start end time of the data, by default None
         mask : Optional[Geom], optional
@@ -78,3 +65,9 @@ class URIResolver(BaseModel, ABC):
             when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`
         """
         ...
+
+    @classmethod
+    def load_plugins(cls):
+        """Load URIResolver plugins."""
+        plugins: Dict[str, URIResolver] = PLUGINS.uri_resolver_plugins
+        logger.debug(f"loaded {cls.__name__} plugins: {plugins}")

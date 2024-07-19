@@ -10,6 +10,7 @@ from importlib_metadata import entry_points
 if TYPE_CHECKING:
     from hydromt.data_catalog.drivers import BaseDriver
     from hydromt.data_catalog.predefined_catalog import PredefinedCatalog
+    from hydromt.data_catalog.uri_resolvers import URIResolver
     from hydromt.model import Model
     from hydromt.model.components import ModelComponent
 
@@ -169,6 +170,22 @@ class CatalogPlugins(PluginGroup):
         )
 
 
+class URIResolverPlugins(PluginGroup):
+    group = "hydromt.uri_resolvers"
+    base_module = "hydromt.data_catalog.uri_resolvers"
+    base_class = "URIResolver"
+
+    @property
+    def plugins(self) -> dict[str, Type["URIResolver"]]:
+        if self._plugins is None:
+            self._initialize_plugins()
+
+        return cast(
+            Dict[str, Type["URIResolver"]],
+            {name: value["type"] for name, value in self._plugins.items()},
+        )
+
+
 class Plugins:
     """The model catalogue provides access to plugins."""
 
@@ -178,6 +195,7 @@ class Plugins:
         self._driver_plugins: DriverPlugins = DriverPlugins()
         self._model_plugins: ModelPlugins = ModelPlugins()
         self._catalog_plugins: CatalogPlugins = CatalogPlugins()
+        self._uri_resolvers_plugins: URIResolverPlugins = URIResolverPlugins()
 
     @property
     def component_plugins(self) -> dict[str, type["ModelComponent"]]:
@@ -200,6 +218,11 @@ class Plugins:
         return self._catalog_plugins.plugins
 
     @property
+    def uri_resolver_plugins(self) -> Dict[str, Type["URIResolver"]]:
+        """Load and provide access to all known uriresolver plugins."""
+        return self._uri_resolvers_plugins.plugins
+
+    @property
     def model_metadata(self) -> Dict[str, Dict[str, str]]:
         """Load and provide access to all known model plugins."""
         return self._model_plugins.metadata
@@ -219,6 +242,11 @@ class Plugins:
         """Load and provide access to all known catalog plugin metadata."""
         return self._catalog_plugins.metadata
 
+    @property
+    def uri_resolver_metadata(self) -> Dict[str, Dict[str, str]]:
+        """Load and provider access to all known uriresolver plugin metadata."""
+        return self._uri_resolvers_plugins.metadata
+
     def model_summary(self) -> str:
         """Generate string representation containing the registered model entrypoints."""
         return self._model_plugins.summary()
@@ -235,6 +263,9 @@ class Plugins:
         """Generate string representation containing the registered catalog entrypoints."""
         return self._catalog_plugins.summary()
 
+    def uri_resolver_summary(self) -> str:
+        """Generate string representation containing the registered uri resolver entrypoints."""
+
     def plugin_summary(self) -> str:
         return "\n".join(
             [
@@ -242,6 +273,7 @@ class Plugins:
                 self.component_summary(),
                 self.driver_summary(),
                 self.catalog_summary(),
+                self.uri_resolver_summary(),
             ]
         )
 

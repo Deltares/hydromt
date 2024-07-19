@@ -9,11 +9,11 @@ from hydromt._typing.fsspec_types import FS, serialize_filesystem, validate_file
 class TestSerializeFileSystem:
     def test_serializes(self):
         fs = MemoryFileSystem()
-        assert serialize_filesystem(fs) == "memory"
+        assert serialize_filesystem(fs) == {"protocol": "memory"}
 
     def test_serializes_fs_with_multiple_names(self):
         fs = LocalFileSystem()
-        assert serialize_filesystem(fs) == "file"
+        assert serialize_filesystem(fs) == {"protocol": "file"}
 
 
 class TestValidateFileSystem:

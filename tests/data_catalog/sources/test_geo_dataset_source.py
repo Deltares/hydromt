@@ -10,6 +10,7 @@ from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 from hydromt.data_catalog.sources import GeoDatasetSource
+from hydromt.data_catalog.uri_resolvers import URIResolver
 from hydromt.gis.gis_utils import to_geographic_bbox
 
 
@@ -19,6 +20,7 @@ class TestGeoDatasetSource:
         geoda: xr.DataArray,
         mock_geo_ds_driver: GeoDatasetDriver,
         mock_geo_ds_adapter: GeoDatasetAdapter,
+        mock_resolver: URIResolver,
         tmp_dir: Path,
     ):
         geoda = geoda.to_dataset()
@@ -27,6 +29,7 @@ class TestGeoDatasetSource:
             name="geoda.zarr",
             driver=mock_geo_ds_driver,
             data_adapter=mock_geo_ds_adapter,
+            uri_resolver=mock_resolver,
             uri=str(tmp_dir / "geoda.zarr"),
         )
         read_data = source.read_data()
@@ -34,12 +37,15 @@ class TestGeoDatasetSource:
 
     @pytest.fixture()
     def writable_source(
-        self, MockGeoDatasetReadOnlyDriver: Type[GeoDatasetDriver], geoda: xr.DataArray
+        self,
+        MockGeoDatasetReadOnlyDriver: Type[GeoDatasetDriver],
+        mock_resolver: URIResolver,
     ) -> GeoDatasetSource:
         return GeoDatasetSource(
             name="test",
             uri="geoda.zarr",
             driver=MockGeoDatasetReadOnlyDriver(),
+            uri_resolver=mock_resolver,
             metadata=SourceMetadata(crs=4326),
         )
 

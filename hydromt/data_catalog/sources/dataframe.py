@@ -45,15 +45,27 @@ class DataFrameSource(DataSource):
         predicate: str = "intersects",  # TODO: https://github.com/Deltares/hydromt/issues/983
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[pd.DataFrame]:
-        """Use the driver and data adapter to read and harmonize the data."""
+        """Use the resolver, driver, and data adapter to read and harmonize the data."""
         self.mark_as_used()
-        df: pd.DataFrame = self.driver.read(
+
+        tr: TimeRange = self.data_adapter.to_source_timerange(time_range)
+        vrs: Optional[List[str]] = self.data_adapter.to_source_variables(variables)
+
+        uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            variables=variables,
-            time_range=time_range,
+            variables=vrs,
+            time_range=tr,
+            handle_nodata=handle_nodata,
+        )
+
+        df: pd.DataFrame = self.driver.read(
+            uris,
+            variables=vrs,
+            time_range=tr,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
+
         return self.data_adapter.transform(
             df,
             self.metadata,

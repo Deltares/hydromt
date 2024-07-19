@@ -1,11 +1,13 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import pytest
 
+from hydromt._typing import NoDataException
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources import DataSource, GeoDataFrameSource, create_source
 from hydromt.data_catalog.sources.data_source import get_nested_var, set_nested_var
+from hydromt.data_catalog.uri_resolvers import URIResolver
 
 
 class TestDataSource:
@@ -13,6 +15,7 @@ class TestDataSource:
         self,
         mock_geodf_driver: GeoDataFrameDriver,
         mock_geodataframe_adapter: GeoDataFrameAdapter,
+        mock_resolver: URIResolver,
         root: str,
     ):
         submodel: DataSource = GeoDataFrameSource.model_validate(
@@ -22,6 +25,7 @@ class TestDataSource:
                 "data_type": "GeoDataFrame",
                 "driver": mock_geodf_driver,
                 "data_adapter": mock_geodataframe_adapter,
+                "uri_resolver": mock_resolver,
                 "uri": "test_uri",
                 "metadata": {"url": "www.example.com"},
             }
@@ -32,10 +36,31 @@ class TestDataSource:
         assert summ["driver"] == "MockGeoDataFrameDriver"
         assert summ["url"] == "www.example.com"
 
+    def test_copies_fs(
+        self,
+        mock_geodf_driver: GeoDataFrameDriver,
+        mock_resolver: URIResolver,
+        mock_geodataframe_adapter: GeoDataFrameAdapter,
+        root: str,
+    ):
+        GeoDataFrameSource.model_validate(
+            {
+                "root": root,
+                "name": "geojsonfile",
+                "data_type": "GeoDataFrame",
+                "driver": mock_geodf_driver,
+                "data_adapter": mock_geodataframe_adapter,
+                "uri_resolver": mock_resolver,
+                "uri": "test_uri",
+                "metadata": {"url": "www.example.com"},
+            }
+        )
+
     def test_serializes_data_type(
         self,
         mock_geodf_driver: GeoDataFrameDriver,
         mock_geodataframe_adapter: GeoDataFrameAdapter,
+        mock_resolver: URIResolver,
         root: str,
     ):
         submodel: DataSource = GeoDataFrameSource.model_validate(
@@ -45,24 +70,40 @@ class TestDataSource:
                 "data_type": "GeoDataFrame",
                 "driver": mock_geodf_driver,
                 "data_adapter": mock_geodataframe_adapter,
+                "uri_resolver": mock_resolver,
                 "uri": "test_uri",
                 "metadata": {"url": "www.example.com"},
             }
         )
         assert submodel.model_dump()["data_type"] == "GeoDataFrame"
 
+    def test_read_no_file_found(
+        self,
+        mock_geodf_driver,
+        mock_geodataframe_adapter,
+    ):
+        class MockRaisingResolver(URIResolver):
+            def resolve(self, uris: List[str], **kwargs):
+                raise NoDataException()
+
+        source = GeoDataFrameSource(
+            name="raises",
+            data_adapter=mock_geodataframe_adapter,
+            driver=mock_geodf_driver,
+            uri_resolver=MockRaisingResolver(),
+            uri="myfile",
+        )
+        with pytest.raises(NoDataException):
+            source.read_data()
+
 
 class TestGetNestedVar:
-    def test_reads_nested(
-        self,
-    ):
+    def test_reads_nested(self, mock_geodf_driver: GeoDataFrameDriver):
         class FakeGeoDfDriver(GeoDataFrameDriver):
             name = "test_reads_nested"
 
-            def read_data(self, **kwargs):
+            def read(self, **kwargs):
                 pass
-
-        mock_geodf_driver = FakeGeoDfDriver(uri_resolver={"name": "convention"})
 
         submodel: DataSource = create_source(
             {

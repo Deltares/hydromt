@@ -16,44 +16,8 @@ logger: Logger = getLogger(__name__)
 class GeoDataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
 
-    def read(
-        self,
-        uri: str,
-        *,
-        mask: Optional[Geom] = None,
-        variables: Optional[List[str]] = None,
-        predicate: str = "intersects",
-        metadata: Optional[SourceMetadata] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> gpd.GeoDataFrame:
-        """
-        Read in any compatible data source to a geopandas `GeoDataFrame`.
-
-        args:
-            mask: Optional[Geom]. Mask for features to match the predicate, preferably
-                in the same CRS.
-        """
-        uris = self.uri_resolver.resolve(
-            uri,
-            self.filesystem,
-            mask=mask,
-            variables=variables,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-        )
-        gdf = self.read_data(
-            uris,
-            mask=mask,
-            predicate=predicate,
-            variables=variables,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-        )
-        return gdf
-
     @abstractmethod
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

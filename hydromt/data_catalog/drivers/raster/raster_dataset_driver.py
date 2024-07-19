@@ -26,50 +26,8 @@ logger: Logger = getLogger(__name__)
 class RasterDatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
 
-    def read(
-        self,
-        uri: str,
-        *,
-        mask: Optional[Geom] = None,
-        variables: Optional[Variables] = None,
-        time_range: Optional[TimeRange] = None,
-        zoom: Optional[Zoom] = None,
-        metadata: Optional[SourceMetadata] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> xr.Dataset:
-        """
-        Read in any compatible data source to an xarray Dataset.
-
-        args:
-            mask: Optional[Geom]. Mask for features to match the predicate, preferably
-                in the same CRS.
-        """
-        # Merge static kwargs from the catalog with dynamic kwargs from the query.
-        uris = self.uri_resolver.resolve(
-            uri,
-            self.filesystem,
-            mask=mask,
-            time_range=time_range,
-            variables=variables,
-            zoom=zoom,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-            options=self.options,
-        )
-
-        return self.read_data(
-            uris,
-            mask=mask,
-            time_range=time_range,
-            variables=variables,
-            zoom=zoom,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-        )
-
     @abstractmethod
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

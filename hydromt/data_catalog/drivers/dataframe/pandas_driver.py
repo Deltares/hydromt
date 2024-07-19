@@ -26,7 +26,7 @@ class PandasDriver(DataFrameDriver):
     name = "pandas"
     supports_writing = True
 
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

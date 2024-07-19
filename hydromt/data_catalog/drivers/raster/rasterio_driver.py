@@ -36,7 +36,7 @@ class RasterioDriver(RasterDatasetDriver):
 
     name = "rasterio"
 
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

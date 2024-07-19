@@ -33,7 +33,7 @@ class TestRasterioDriver:
         cache_dir: str = "tests_caches_tifs_from_vrt"
         driver = RasterioDriver(options={"cache_dir": cache_dir})
         driver.read(
-            uri=str(Path(vrt_tiled_raster_ds) / "*.vrt"),
+            uris=[str(Path(vrt_tiled_raster_ds) / "test_vrt_tiled_raster_ds_zl0.vrt")]
         )
         assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
@@ -48,7 +48,7 @@ class TestRasterioDriver:
         xr.testing.assert_equal(rioda, ds["small_tif"])
 
     def test_renames_single_var(self, small_tif: str):
-        ds: xr.Dataset = RasterioDriver().read_data([small_tif], variables=["test"])
+        ds: xr.Dataset = RasterioDriver().read([small_tif], variables=["test"])
         assert list(ds.data_vars) == ["test"]
 
     def test_sets_nodata(self, rioda: xr.DataArray, tmp_path: Path):

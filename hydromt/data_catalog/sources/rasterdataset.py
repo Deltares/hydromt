@@ -68,8 +68,18 @@ class RasterDatasetSource(DataSource):
         tr = self.data_adapter.to_source_timerange(time_range)
         vrs = self.data_adapter.to_source_variables(variables)
 
-        ds: xr.Dataset = self.driver.read(
+        uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
+            time_range=tr,
+            mask=mask,
+            variables=variables,
+            zoom=zoom,
+            metadata=self.metadata,
+            handle_nodata=handle_nodata,
+        )
+
+        ds: xr.Dataset = self.driver.read(
+            uris,
             mask=mask,
             time_range=tr,
             variables=vrs,

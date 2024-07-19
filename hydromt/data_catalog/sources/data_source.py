@@ -1,5 +1,7 @@
 """Abstract DataSource class."""
 
+from __future__ import annotations
+
 from abc import ABC
 from copy import deepcopy
 from logging import Logger, getLogger
@@ -21,6 +23,7 @@ from hydromt._typing import DataType, SourceMetadata
 from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
+from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
 
 logger: Logger = getLogger(__name__)
 
@@ -46,6 +49,7 @@ class DataSource(BaseModel, ABC):
     uri: str
     data_adapter: DataAdapterBase
     driver: BaseDriver
+    uri_resolver: URIResolver = Field(default_factory=ConventionResolver)
     data_type: ClassVar[DataType]
     _fallback_driver_read: ClassVar[str]
     _fallback_driver_write: ClassVar[str]
@@ -83,6 +87,23 @@ class DataSource(BaseModel, ABC):
                 if data_type != cls.data_type:
                     raise ValueError(f"'data_type' must be '{cls.data_type}'.")
         return copy_data
+
+    @model_validator(mode="after")
+    def _validate_fs_equal_if_not_set(self) -> DataSource:
+        """
+        Validate and change the filesystems.
+
+        They have to be equal between driver and uri resolver if they are not set.
+        They can be different, but only if set explicitly.
+        """
+        driver_fs_set = "filesystem" in self.driver.model_fields_set
+        uri_res_fs_set = "filesystem" in self.uri_resolver.model_fields_set
+        if driver_fs_set ^ uri_res_fs_set:
+            if driver_fs_set:
+                self.uri_resolver.filesystem = self.driver.filesystem
+            else:
+                self.driver.filesystem = self.uri_resolver.filesystem
+        return self
 
     @property
     def full_uri(self) -> str:
