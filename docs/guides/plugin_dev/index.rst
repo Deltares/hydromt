@@ -8,6 +8,7 @@ Plugin Developer guide
     custom_component
     custom_driver
     custom_model_builder
+    custom_resolver
     migrating_to_v1
     model_config
     plugin_quickstart
