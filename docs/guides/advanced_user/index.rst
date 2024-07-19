@@ -3,6 +3,7 @@ Advanced user guide
 
 .. toctree::
 
+    installation
     architecture
     data_prepare_cat
     data_sources

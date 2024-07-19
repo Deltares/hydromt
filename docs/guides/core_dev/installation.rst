@@ -1,4 +1,5 @@
-.. _dev_install:
+.. _installation_core_dev:
+
 
 Developer installation guide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
