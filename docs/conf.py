@@ -18,15 +18,12 @@
 #
 import os
 import shutil
-from distutils.dir_util import copy_tree
 
 import numpy as np
 import sphinx_autosummary_accessors
 
 import hydromt
 import hydromt.plugins
-
-from docs.parse_predefined_catalogs import write_predefined_catalogs_to_rst_panels
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
@@ -172,6 +169,9 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",
     "sphinx_click",
+]
+suppress_warnings = [
+    'autosummary.import_cycle',
 ]
 
 autosummary_generate = True

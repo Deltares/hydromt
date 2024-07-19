@@ -138,14 +138,16 @@ class ConfigComponent(ModelComponent):
 
         Examples
         --------
-        >> self.set({'a': 1, 'b': {'c': {'d': 2}}})
-        >> self.data
-            {'a': 1, 'b': {'c': {'d': 2}}}
-        >> self.set_value('a', 99)
-        >> {'a': 99, 'b': {'c': {'d': 2}}}
+        ::
 
-        >> self.set_value('b.d.e', 24)
-        >> {'a': 99, 'b': {'c': {'d': 24}}}
+            >> self.set({'a': 1, 'b': {'c': {'d': 2}}})
+            >> self.data
+                {'a': 1, 'b': {'c': {'d': 2}}}
+            >> self.set_value('a', 99)
+            >> {'a': 99, 'b': {'c': {'d': 2}}}
+
+            >> self.set_value('b.d.e', 24)
+            >> {'a': 99, 'b': {'c': {'d': 24}}}
         """
         self._initialize()
         parts = key.split(".")
@@ -226,13 +228,15 @@ class ConfigComponent(ModelComponent):
 
         Examples
         --------
-        >> self.create()
-        >> self.data
-            {}
+        ::
 
-        >> self.create(template='path/to/template.yml')
-        >> self.data
-            {'a': 1, 'b': {'c': {'d': 2}}}
+            >> self.create()
+            >> self.data
+                {}
+
+            >> self.create(template='path/to/template.yml')
+            >> self.data
+                {'a': 1, 'b': {'c': {'d': 2}}}
         """
         # Check if self.data is not empty
         if len(self.data) > 0:
@@ -276,12 +280,19 @@ class ConfigComponent(ModelComponent):
 
         Examples
         --------
-        >> self.update({'a': 1, 'b': {'c': {'d': 2}}})
-        >> self.data
+        Setting data as a nested dictionary::
+
+
+            >> self.update({'a': 1, 'b': {'c': {'d': 2}}})
+            >> self.data
             {'a': 1, 'b': {'c': {'d': 2}}}
-        >> self.update({'a.d.f.g': 1, 'b': {'c': {'d': 2}}})
-        >> self.data
+
+        Setting data using dotted notation::
+
+            >> self.update({'a.d.f.g': 1, 'b': {'c': {'d': 2}}})
+            >> self.data
             {'a': {'d':{'f':{'g': 1}}}, 'b': {'c': {'d': 2}}}
+
         """
         if len(data) > 0:
             logger.debug("Setting model config options.")

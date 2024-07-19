@@ -1,4 +1,5 @@
 """Tests for the stats/extremes submodule."""
+
 import numpy as np
 import pandas as pd
 import pytest

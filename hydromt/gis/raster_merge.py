@@ -1,4 +1,5 @@
 """Implementations relating to merging of datasets and arrays."""
+
 import numpy as np
 import rasterio
 from pyproj import CRS

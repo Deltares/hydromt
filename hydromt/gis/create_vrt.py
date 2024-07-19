@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Small utility to create vrt files."""
+
 from __future__ import annotations
 
 import glob

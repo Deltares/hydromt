@@ -1,4 +1,5 @@
 """Testing for the internal hydromt utility functions."""
+
 from hydromt._utils import _partition_dictionaries
 
 
