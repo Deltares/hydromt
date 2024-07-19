@@ -91,7 +91,6 @@ doc = [
   "sphinx_autosummary_accessors", # doc layout
   "sphinx",                       # build docks
   "sphinx_design",                # doc layout
-  "sphinx-autoapi",               # auto api documentation
   "sphinx-click",                 # click integration
 ]
 examples = [

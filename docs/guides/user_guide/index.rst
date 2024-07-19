@@ -1,5 +1,5 @@
-Basic user guide
-================
+User Guide
+==========
 
 .. toctree::
 

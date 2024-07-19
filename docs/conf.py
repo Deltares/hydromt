@@ -18,15 +18,12 @@
 #
 import os
 import shutil
-from distutils.dir_util import copy_tree
 
 import numpy as np
 import sphinx_autosummary_accessors
 
 import hydromt
 import hydromt.plugins
-
-from docs.parse_predefined_catalogs import write_predefined_catalogs_to_rst_panels
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
@@ -163,7 +160,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
-'sphinx.ext.napoleon',
+    "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
