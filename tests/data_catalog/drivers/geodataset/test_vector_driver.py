@@ -1,7 +1,7 @@
 """Tests the RasterXarray driver."""
 
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 from unittest.mock import MagicMock
 
 import pytest
@@ -9,8 +9,6 @@ from pytest_mock import MockerFixture
 from xarray import Dataset
 
 from hydromt.data_catalog.drivers import GeoDatasetVectorDriver
-from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
-from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 from hydromt.gis import vector
 from hydromt.io.readers import open_geodataset
 
@@ -31,24 +29,19 @@ class TestGeoDatasetVectorDriver:
         mocked_function = MagicMock(return_value=Dataset())
         mock_preprocess.get.return_value = mocked_function
 
-        class FakeURIResolver(URIResolver):
-            def resolve(self, uri: str, *args, **kwargs):
-                return [uri]
-
-        uri: str = "file.geojson"
+        uris: List[str] = ["file.geojson"]
         driver = GeoDatasetVectorDriver(
-            uri_resolver=FakeURIResolver(),
             options={"preprocess": "remove_duplicates"},
         )
         res: Optional[Dataset] = driver.read(
-            uri,
+            uris,
             variables=["var1"],
         )
         assert res is not None
         call_args = mock_geods_open.call_args
 
         print(call_args[1])
-        assert call_args[1]["loc_path"] == uri  # first arg
+        assert call_args[1]["loc_path"] == uris[0]  # first arg
         assert mocked_function.call_count == 1
 
     def test_write_raises(self):
@@ -64,9 +57,7 @@ class TestGeoDatasetVectorDriver:
         return gdf_path
 
     def test_read(self, geodf, example_vector_geods: Path):
-        res = GeoDatasetVectorDriver(uri_resolver=ConventionResolver()).read(
-            str(example_vector_geods)
-        )
+        res = GeoDatasetVectorDriver().read([str(example_vector_geods)])
         ds = vector.GeoDataset.from_gdf(geodf)
         assert res is not None
         assert ds.equals(res)
@@ -76,7 +67,7 @@ class TestGeoDatasetVectorDriver:
             ValueError,
             match="GeodatasetVectorDriver only supports reading from one URI per source",
         ):
-            _ = GeoDatasetVectorDriver().read_data(["one.zarr", "two.txt"])
+            _ = GeoDatasetVectorDriver().read(["one.zarr", "two.txt"])
 
     def test_calls_open_geodataset(self, mocker: MockerFixture):
         mock_geods_open: mocker.MagicMock = mocker.patch(
@@ -85,11 +76,7 @@ class TestGeoDatasetVectorDriver:
         )
         mock_geods_open.return_value = Dataset()
 
-        class FakeURIResolver(URIResolver):
-            def resolve(self, uri: str, *args, **kwargs):
-                return [uri]
-
-        uri: str = "file.geojson"
-        driver = GeoDatasetVectorDriver(uri_resolver=FakeURIResolver())
-        _ = driver.read(uri)
+        uris: str = ["file.geojson"]
+        driver = GeoDatasetVectorDriver()
+        _ = driver.read(uris)
         assert mock_geods_open.call_count == 1

@@ -27,7 +27,7 @@ class DatasetXarrayDriver(DatasetDriver):
     name: ClassVar[str] = "dataset_xarray"
     supports_writing = True
 
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

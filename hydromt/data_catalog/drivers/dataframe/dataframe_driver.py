@@ -23,41 +23,8 @@ class DataFrameDriver(BaseDriver, ABC):
 
     supports_writing: ClassVar[bool] = False
 
-    def read(
-        self,
-        uri: str,
-        *,
-        variables: Optional[Variables] = None,
-        time_range: Optional[TimeRange] = None,
-        metadata: Optional[SourceMetadata] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
-    ) -> pd.DataFrame:
-        """
-        Read in any compatible data source to a pandas `DataFrame`.
-
-        args:
-        """
-        # Merge static kwargs from the catalog with dynamic kwargs from the query.
-        uris = self.uri_resolver.resolve(
-            uri,
-            self.filesystem,
-            variables=variables,
-            metadata=metadata,
-            time_range=time_range,
-            handle_nodata=handle_nodata,
-        )
-        df = self.read_data(
-            uris,
-            variables=variables,
-            time_range=time_range,
-            metadata=metadata,
-            handle_nodata=handle_nodata,
-        )
-        return df
-
     @abstractmethod
-    def read_data(
+    def read(
         self,
         uris: List[str],
         *,

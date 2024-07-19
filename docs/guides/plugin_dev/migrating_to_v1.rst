@@ -557,7 +557,7 @@ Where there are a few changes from the previous versions:
 - `driver` is it's own class and can be specified:
 	- by string, implying default arguments
 	- using a YAML object, with a mandatory `name` plus kwargs.
-- `uri_resolver` hangs under driver and can be specified:
+- `uri_resolver` can be specified:
 	- by string, implying default arguments
 	- using a YAML object, with a mandatory `name` plus kwargs.
 - `filesystem` is moved to driver, and can be specified:

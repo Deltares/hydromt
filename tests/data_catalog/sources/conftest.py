@@ -41,10 +41,7 @@ def MockDataFrameDriver(df: pd.DataFrame) -> Type[DataFrameDriver]:
         def write(self, path: StrPath, df: pd.DataFrame, **kwargs) -> None:
             pass
 
-        def read(self, uri: str, **kwargs) -> pd.DataFrame:
-            return self.read_data([uri], **kwargs)
-
-        def read_data(self, uris: List[str], **kwargs) -> pd.DataFrame:
+        def read(self, uris: List[str], **kwargs) -> pd.DataFrame:
             return df
 
     return MockDataFrameDriver
@@ -80,10 +77,7 @@ def MockDatasetDriver(timeseries_ds: xr.Dataset) -> Type[DatasetDriver]:
         def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
             pass
 
-        def read(self, uri: str, **kwargs) -> xr.Dataset:
-            return self.read_data([uri], **kwargs)
-
-        def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
+        def read(self, uris: List[str], **kwargs) -> xr.Dataset:
             return timeseries_ds
 
     return MockDatasetDriver
@@ -110,10 +104,7 @@ def MockGeoDataFrameDriver(geodf: gpd.GeoDataFrame) -> Type[GeoDataFrameDriver]:
         def write(self, path: StrPath, gdf: gpd.GeoDataFrame, **kwargs) -> None:
             pass
 
-        def read(self, uri: str, **kwargs) -> gpd.GeoDataFrame:
-            return self.read_data([uri], **kwargs)
-
-        def read_data(self, *args, **kwargs) -> gpd.GeoDataFrame:
+        def read(self, *args, **kwargs) -> gpd.GeoDataFrame:
             return geodf
 
     return MockGeoDataFrameDriver
@@ -132,7 +123,7 @@ def MockGeoDataFrameReadOnlyDriver(MockGeoDataFrameDriver) -> Type[GeoDataFrameD
 
 
 @pytest.fixture()
-def MockGeoDatasetDriver(geoda: xr.Dataset) -> Type[GeoDatasetDriver]:
+def MockGeoDatasetDriver(geoda: xr.DataArray) -> Type[GeoDatasetDriver]:
     class MockGeoDatasetDriver(GeoDatasetDriver):
         name = "mock_geods_driver"
         supports_writing = True
@@ -142,15 +133,8 @@ def MockGeoDatasetDriver(geoda: xr.Dataset) -> Type[GeoDatasetDriver]:
         ) -> None:
             pass
 
-        def read(self, uri: str, **kwargs) -> xr.Dataset:
-            kinda_ds = self.read_data([uri], **kwargs)
-            if isinstance(kinda_ds, xr.DataArray):
-                return kinda_ds.to_dataset()
-            else:
-                return kinda_ds
-
-        def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
-            return geoda
+        def read(self, uris: List[str], **kwargs) -> xr.Dataset:
+            return geoda.to_dataset()
 
     return MockGeoDatasetDriver
 
@@ -187,10 +171,7 @@ def MockRasterDatasetDriver(raster_ds: xr.Dataset) -> Type[RasterDatasetDriver]:
         ) -> None:
             pass
 
-        def read(self, uri: str, **kwargs) -> xr.Dataset:
-            return self.read_data([uri], **kwargs)
-
-        def read_data(self, uris: List[str], **kwargs) -> xr.Dataset:
+        def read(self, uris: List[str], **kwargs) -> xr.Dataset:
             return raster_ds
 
     return MockRasterDatasetDriver

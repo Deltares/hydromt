@@ -46,10 +46,24 @@ class DatasetSource(DataSource):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
     ) -> Union[xr.Dataset, xr.DataArray]:
-        """
-        Read data from this source.
+        """Use the resolver, driver, and data adapter to read and harmonize the data.
 
-        Args:
+        Parameters
+        ----------
+        variables : Optional[List[str]], optional
+            Names of variables to return, or all if None, by default None
+            variables queried for, by default None
+        time_range : Optional[TimeRange], optional
+            left-inclusive start end time of the data, by default None
+        handle_nodata : NoDataStrategy, optional
+            how to react when no data is found, by default NoDataStrategy.RAISE
+        single_var_as_array : bool, optional
+            _description_, by default True
+
+        Returns
+        -------
+        Union[xr.Dataset, xr.DataArray]
+            harmonized data
         """
         self._used = True
 
@@ -57,13 +71,21 @@ class DatasetSource(DataSource):
         tr = self.data_adapter.to_source_timerange(time_range)
         vrs = self.data_adapter.to_source_variables(variables)
 
-        ds: xr.Dataset = self.driver.read(
+        uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
+            time_range=tr,
+            variables=vrs,
+            handle_nodata=handle_nodata,
+        )
+
+        ds: xr.Dataset = self.driver.read(
+            uris,
             time_range=tr,
             variables=vrs,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
+
         return self.data_adapter.transform(
             ds,
             self.metadata,

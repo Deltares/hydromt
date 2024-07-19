@@ -9,7 +9,6 @@ from string import Formatter
 from typing import Any, Dict, Iterable, List, Optional, Pattern, Set, Tuple
 
 import pandas as pd
-from fsspec import AbstractFileSystem
 from fsspec.core import split_protocol
 
 from hydromt._typing import (
@@ -90,21 +89,19 @@ class ConventionResolver(URIResolver):
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
 
-    def _resolve_wildcards(
-        self, uris: Iterable[str], fs: AbstractFileSystem
-    ) -> Set[str]:
+    def _resolve_wildcards(self, uris: Iterable[str]) -> Set[str]:
         """Expand on the wildcards in the uris based on the filesystem."""
 
         def split_and_glob(uri: str) -> Tuple[Optional[str], List[str]]:
             protocol, _ = split_protocol(uri)
-            return (protocol, fs.glob(uri))
+            return (protocol, self.filesystem.glob(uri))
 
         def maybe_unstrip_protocol(
             pair: Tuple[Optional[str], Iterable[str]],
         ) -> Iterable[str]:
             if pair[0] is not None:
                 return map(
-                    lambda uri: fs.unstrip_protocol(uri)
+                    lambda uri: self.filesystem.unstrip_protocol(uri)
                     if not uri.startswith(pair[0])
                     else uri,
                     pair[1],
@@ -128,7 +125,6 @@ class ConventionResolver(URIResolver):
     def resolve(
         self,
         uri: str,
-        fs: AbstractFileSystem,
         *,
         time_range: Optional[TimeRange] = None,
         mask: Optional[Geom] = None,
@@ -144,8 +140,6 @@ class ConventionResolver(URIResolver):
         ----------
         uri : str
             Unique Resource Identifier
-        fs : AbstractFileSystem
-            fsspec filesystem used to resolve wildcards in the uri
         time_range : Optional[TimeRange], optional
             left-inclusive start end time of the data, by default None
         mask : Optional[Geom], optional
@@ -207,9 +201,7 @@ class ConventionResolver(URIResolver):
             product(dates, variables),
         )
         uris: List[str] = list(
-            self._resolve_wildcards(
-                map(lambda fmt: uri_expanded.format(**fmt), fmts), fs
-            )
+            self._resolve_wildcards(map(lambda fmt: uri_expanded.format(**fmt), fmts))
         )
         if not uris:
             exec_nodata_strat(

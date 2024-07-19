@@ -12,8 +12,6 @@ from hydromt.data_catalog.drivers.dataset.xarray_driver import (
     DatasetXarrayDriver,
 )
 from hydromt.data_catalog.drivers.preprocessing import round_latlon
-from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
-from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 
 class TestRasterXarrayDriver:
@@ -24,21 +22,16 @@ class TestRasterXarrayDriver:
         )
         mock_xr_open.return_value = xr.Dataset()
 
-        class FakeURIResolver(URIResolver):
-            def resolve(self, uri: str, *args, **kwargs):
-                return [uri]
-
-        uri: str = "file.netcdf"
+        uris: str = ["file.netcdf"]
         driver = DatasetXarrayDriver(
-            uri_resolver=FakeURIResolver(),
             options={"preprocess": "round_latlon"},
         )
         res: xr.Dataset = driver.read(
-            uri,
+            uris,
             variables=["var1", "var2"],
         )
         call_args = mock_xr_open.call_args
-        assert call_args[0][0] == [uri]  # first arg
+        assert call_args[0][0] == uris  # first arg
         assert call_args[1].get("preprocess") == round_latlon
         assert res.sizes == {}  # empty dataframe
 
@@ -50,12 +43,10 @@ class TestRasterXarrayDriver:
         netcdf_path = tmp_path / f"{uuid4().hex}.nc"
         driver = DatasetXarrayDriver()
         driver.write(netcdf_path, raster_ds)
-        assert np.all(driver.read(str(netcdf_path)) == raster_ds)
+        assert np.all(driver.read([str(netcdf_path)]) == raster_ds)
 
     def test_zarr_read(self, example_zarr_file: Path):
-        res: xr.Dataset = DatasetXarrayDriver(uri_resolver=ConventionResolver()).read(
-            str(example_zarr_file)
-        )
+        res: xr.Dataset = DatasetXarrayDriver().read([str(example_zarr_file)])
         assert list(res.data_vars.keys()) == ["variable"]
         assert res["variable"].shape == (10, 10)
         assert list(res.coords.keys()) == ["xc", "yc"]
@@ -65,7 +56,7 @@ class TestRasterXarrayDriver:
         zarr_path: Path = tmp_dir / "raster.zarr"
         driver = DatasetXarrayDriver()
         driver.write(zarr_path, raster_ds)
-        assert np.all(driver.read(str(zarr_path)) == raster_ds)
+        assert np.all(driver.read([str(zarr_path)]) == raster_ds)
 
     def test_calls_zarr_with_zarr_ext(self, mocker: MockerFixture):
         mock_xr_open: mocker.MagicMock = mocker.patch(
@@ -74,13 +65,9 @@ class TestRasterXarrayDriver:
         )
         mock_xr_open.return_value = xr.Dataset()
 
-        class FakeURIResolver(URIResolver):
-            def resolve(self, uri: str, *args, **kwargs):
-                return [uri]
-
         uri: str = "file.zarr"
-        driver = DatasetXarrayDriver(uri_resolver=FakeURIResolver())
-        _ = driver.read(uri)
+        driver = DatasetXarrayDriver()
+        _ = driver.read([uri])
         assert mock_xr_open.call_count == 1
 
     def test_calls_nc_func_with_nc_ext(self, mocker: MockerFixture):
@@ -90,11 +77,7 @@ class TestRasterXarrayDriver:
         )
         mock_xr_open.return_value = xr.Dataset()
 
-        class FakeURIResolver(URIResolver):
-            def resolve(self, uri: str, *args, **kwargs):
-                return [uri]
-
         uri: str = "file.netcdf"
-        driver = DatasetXarrayDriver(uri_resolver=FakeURIResolver())
-        _ = driver.read(uri)
+        driver = DatasetXarrayDriver()
+        _ = driver.read([uri])
         assert mock_xr_open.call_count == 1

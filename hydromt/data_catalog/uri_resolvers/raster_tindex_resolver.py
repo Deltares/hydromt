@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import geopandas as gpd
-from fsspec import AbstractFileSystem
 
 from hydromt._typing import (
     NoDataStrategy,
@@ -28,7 +27,6 @@ class RasterTindexResolver(URIResolver):
     def resolve(
         self,
         uri: str,
-        fs: AbstractFileSystem,
         *,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[Zoom] = None,
@@ -44,8 +42,6 @@ class RasterTindexResolver(URIResolver):
         ----------
         uri : str
             Unique Resource Identifier
-        fs : AbstractFileSystem
-            fsspec filesystem used to resolve wildcards in the uri
         time_range : Optional[TimeRange], optional
             left-inclusive start end time of the data, by default None
         mask : Optional[Geom], optional

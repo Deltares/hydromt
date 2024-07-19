@@ -33,20 +33,19 @@ class TestConventionResolver:
 
     def test_resolves_correctly(self, test_filesystem: MemoryFileSystem):
         uri = "/{unknown_key}_{variable}_{year}_{month:02d}.nc"
-        resolver = ConventionResolver()
+        resolver = ConventionResolver(filesystem=test_filesystem)
 
-        uris = sorted(resolver.resolve(uri, test_filesystem))  # sort for assertion
+        uris = sorted(resolver.resolve(uri))  # sort for assertion
         assert len(uris) == 2 * 2 * 12  # zoom levels * variables * years * months
         assert uris[0] == "/{unknown_key}_precip_2020_01.nc"
 
-        uris = sorted(resolver.resolve(uri, test_filesystem, variables=["temp"]))
+        uris = sorted(resolver.resolve(uri, variables=["temp"]))
         assert len(uris) == 1 * 2 * 12
         assert uris[0] == "/{unknown_key}_temp_2020_01.nc"
 
         uris = sorted(
             resolver.resolve(
                 uri,
-                test_filesystem,
                 time_range=("2021-03-01", "2021-05-01"),
                 variables=["precip"],
             )
@@ -56,14 +55,14 @@ class TestConventionResolver:
 
     def test_raises_not_found(self, test_filesystem: MemoryFileSystem):
         uri = "/some_other_key/files/*"
-        resolver = ConventionResolver()
+        resolver = ConventionResolver(filesystem=test_filesystem)
         with pytest.raises(NoDataException):
-            resolver.resolve(uri, test_filesystem)
+            resolver.resolve(uri)
 
     def test_uri_without_wildcard(self, test_filesystem: MemoryFileSystem):
         uri = "/{unknown_key}_precip_2020_01.nc"
-        resolver = ConventionResolver()
-        assert resolver.resolve(uri, test_filesystem) == [uri]
+        resolver = ConventionResolver(filesystem=test_filesystem)
+        assert resolver.resolve(uri) == [uri]
 
     def test_capture_regex(self):
         pat = "here-is-some-more-leading-{year}-text-for-{month}-you-{variable}.pq"
