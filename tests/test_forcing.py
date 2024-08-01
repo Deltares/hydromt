@@ -43,7 +43,14 @@ def test_pet(data_catalog):
     et_data = data_catalog.get_rasterdataset("era5_daily_zarr")
     dem = data_catalog.get_rasterdataset("era5_orography").squeeze("time", drop=True)
 
-    peto = pet(et_data, et_data, dem, method="penman-monteith_tdew")
+    peto_tdew = pet(et_data, et_data, dem, method="penman-monteith_tdew")
+    assert peto_tdew.raster.shape == dem.raster.shape
+    np.testing.assert_almost_equal(peto_tdew.mean(), 0.57746, decimal=4)
 
-    assert peto.raster.shape == dem.raster.shape
-    np.testing.assert_almost_equal(peto.mean(), 0.57746, decimal=4)
+    # Convert to relative humidity using simple approach
+    # as relative humidity is not provided in ERA5 data
+    # Lawrence (2005) dx.doi.org/10.1175/BAMS-86-2-225
+    et_data["rh"] = 5 * et_data["temp_dew"] + 100 - 5 * et_data["temp"]
+    peto_rh = pet(et_data, et_data, dem, method="penman-monteith_rh_simple")
+    assert peto_rh.raster.shape == dem.raster.shape
+    np.testing.assert_almost_equal(peto_rh.mean(), 0.51279, decimal=4)
