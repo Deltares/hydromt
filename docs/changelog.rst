@@ -13,13 +13,13 @@ New
 ---
 - Further automate release mechanism. (#1019)
 
+
 Changed
 -------
 
 Fixed
 -----
 - Bugfix related to use of pyet in Penman-Monteith PET calculation. (#918)
------
 
 Deprecated
 ----------
