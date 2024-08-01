@@ -17,7 +17,8 @@ Changed
 -------
 
 Fixed
-- Bugfix related to use of pyet in Penman-Monteith PET calculation (#918)
+---
+- Bugfix related to use of pyet in Penman-Monteith PET calculation. (#918)
 -----
 
 Deprecated
