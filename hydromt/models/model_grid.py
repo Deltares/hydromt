@@ -439,7 +439,6 @@ class GridMixin(object):
 
 
 class GridModel(GridMixin, Model):
-
     """Model class Grid Model for gridded models in HydroMT."""
 
     _CLI_ARGS = {"region": "setup_grid"}
@@ -583,7 +582,7 @@ class GridModel(GridMixin, Model):
                     )
                 )
             else:  # rotated
-                geomu = geom.unary_union
+                geomu = geom.union_all()
                 x0, y0, mmax, nmax, rot = workflows.grid.rotated_grid(
                     geomu, res, dec_origin=dec_origin, dec_rotation=dec_rotation
                 )

@@ -1,4 +1,5 @@
 """Implementations for all of pythe necessary IO for HydroMT."""
+
 import glob
 import io as pyio
 import logging
@@ -631,9 +632,11 @@ def open_vector(
             bbox_reader = gis_utils.bbox_from_file_and_filters(
                 str(fn), bbox_shapely, geom, crs
             )
-            gdf = read_dataframe(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
+            gdf = read_dataframe(str(fn), bbox=bbox_reader, **kwargs)
         else:
-            gdf = gpd.read_file(str(fn), bbox=bbox, mask=geom, mode=mode, **kwargs)
+            if isinstance(bbox, list):
+                bbox = tuple(bbox)
+            gdf = gpd.read_file(str(fn), bbox=bbox, mask=geom, **kwargs)
 
     # check geometry type
     if assert_gtype is not None:

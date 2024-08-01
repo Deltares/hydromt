@@ -20,9 +20,10 @@ dependencies = [
   "mercantile",             # tile handling
   "netcdf4",                # netcfd IO
   "numba",                  # speed up computations (used in e.g. stats)
-  "numpy>=1.23",            # pin necessary to ensure compatability with C headers
+  "numpy>=1.23, <2",        # pin necessary to ensure compatability with C headers
   "packaging",              # compare versions of hydromt
   "pandas",                 # Dataframes
+  "pooch",                  # data fetching
   "pydantic~=2.4",          # Validation
   "pyflwdir>=0.5.4",        # Hight models and derivatives
   "pyogrio>=0.6",           # io for geopandas dataframes
@@ -37,7 +38,7 @@ dependencies = [
   "tomli",                  # parsing toml files
   "tomli-w",                # writing toml files
   "universal_pathlib>=0.2", # provides path compatability between different filesystems
-  "xarray",                 # ndim data arrays
+  "xarray",                  # ndim data arrays
   "xmltodict",              # xml parser also used to read VRT
   "zarr",                   # zarr
 ]
@@ -115,7 +116,7 @@ target-version = "py39"
 # enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
 select = ["E", "F", "I", "PT", "D", "B"]
 ignore-init-module-imports = true
-ignore = ["D211", "D213", 'D206', 'E501', "E741", "D105", "E712", "B904"]
+ignore = ["D211", "D213", "D206", "E501", "E741", "D105", "E712", "B904"]
 exclude = ["docs"]
 
 [tool.ruff.per-file-ignores]
