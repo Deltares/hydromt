@@ -25,6 +25,7 @@ A :Class:`Model` can be populated with many different :Class:`ModelComponent`s. 
 component can represent any type of data you have on your area of interest. This
 component can have many properties, but always has a py:method:`ModelComponent.read` and
 py:method:`ModelComponent.write` component to read in and write out data.
+A :Class:`Model` must have at least one :Class:`ModelComponent`.
 
 ModelRegion
 -----------
