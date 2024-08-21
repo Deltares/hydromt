@@ -23,9 +23,9 @@ ModelComponent
 
 A :Class:`Model` can be populated with many different :Class:`ModelComponent` s. A
 component can represent any type of data you have on your area of interest. This
-component can have many properties, but always has a :meth:`ModelComponent.read`
-and :meth:`ModelComponent.write` component to read in and write out data. A
-:Class:`Model` must have at least one :Class:`ModelComponent`.
+component can have many properties, but always has a :meth:`ModelComponent.read` and
+:meth:`ModelComponent.write` component to read in and write out data. A :Class:`Model`
+must have at least one :Class:`ModelComponent`.
 
 ModelRegion
 -----------
@@ -38,10 +38,10 @@ The :Class:`ModelRegion` defines the area of interest for a certain
 DataCatalog
 -----------
 
-:Class:`Model` s need data. Where the data should be found and how it should be loaded is
-defined in the :Class:`DataCatalog`. Each item in the catalog is a :Class:`DataSource`.
-Users can create their own catalogs, using a `yaml` format, or they can share their
-:Class:`PredefinedCatalog` using the :ref:`plugins` system.
+:Class:`Model` s need data. Where the data should be found and how it should be loaded
+is defined in the :Class:`DataCatalog`. Each item in the catalog is a
+:Class:`DataSource`. Users can create their own catalogs, using a `yaml` format, or they
+can share their :Class:`PredefinedCatalog` using the :ref:`plugins` system.
 
 DataSource
 ----------
@@ -51,10 +51,9 @@ The :class:`DataSource` is the python representation of a parsed entry in the
 also carries the :class:`DataAdapter`, :class:`URIResolver` and :class:`Driver` and
 serves as an entrypoint to the data. Per HydroMT data type (e.g. `RasterDataset`,
 `GeoDataFrame`), HydroMT has one :Class:`DataSource`, e.g. :Class:`RasterDatasetSource`,
-:Class:`GeoDataFrameSource`. The :meth:`DataSource.read` method governs the full
-process of discovery with the :Class:`URIResolver`, reading data with the
-:Class:`Driver`, and transforming the data to a HydroMT standard with a
-:Class:`DataAdapter`.
+:Class:`GeoDataFrameSource`. The :meth:`DataSource.read` method governs the full process
+of discovery with the :Class:`URIResolver`, reading data with the :Class:`Driver`, and
+transforming the data to a HydroMT standard with a :Class:`DataAdapter`.
 
 URIResolver
 -----------
