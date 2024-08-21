@@ -11,6 +11,9 @@
         }
     },
     "editor.formatOnSave": true,
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wrappingIndent": "same",
+    "editor.wordWrapColumn": 88,
     "files.exclude": {
         ".mypy_cache": true,
         ".pixi": true,
@@ -39,5 +42,7 @@
         "xugrid",
         "zarr"
     ],
-    "autoDocstring.docstringFormat": "numpy"
+    "autoDocstring.docstringFormat": "numpy",
+    "rewrap.autoWrap.enabled": true,
+    "rewrap.wrappingColumn": 88
 }
