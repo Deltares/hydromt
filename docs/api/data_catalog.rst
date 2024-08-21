@@ -173,6 +173,7 @@ RasterDataset
 
    drivers.raster.raster_dataset_driver.RasterDatasetDriver
    drivers.raster.raster_dataset_driver.RasterDatasetDriver.read
+   drivers.raster.raster_dataset_driver.RasterDatasetDriver.read_data
    drivers.raster.raster_dataset_driver.RasterDatasetDriver.write
 
 RasterDatasetXarrayDriver
@@ -183,6 +184,7 @@ RasterDatasetXarrayDriver
 
    drivers.raster.raster_xarray_driver.RasterDatasetXarrayDriver
    drivers.raster.raster_xarray_driver.RasterDatasetXarrayDriver.read
+   drivers.raster.raster_xarray_driver.RasterDatasetXarrayDriver.read_data
    drivers.raster.raster_xarray_driver.RasterDatasetXarrayDriver.write
 
 RasterioDriver
@@ -203,6 +205,7 @@ GeoDataFrame
 
    drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver
    drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.read
+   drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.read_data
    drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver.write
 
 PyogrioDriver
@@ -213,6 +216,7 @@ PyogrioDriver
 
    drivers.geodataframe.pyogrio_driver.PyogrioDriver
    drivers.geodataframe.pyogrio_driver.PyogrioDriver.read
+   drivers.geodataframe.pyogrio_driver.PyogrioDriver.read_data
    drivers.geodataframe.pyogrio_driver.PyogrioDriver.write
 
 GeoDataFrameTableDriver
@@ -223,6 +227,7 @@ GeoDataFrameTableDriver
 
    drivers.geodataframe.table_driver.GeoDataFrameTableDriver
    drivers.geodataframe.table_driver.GeoDataFrameTableDriver.read
+   drivers.geodataframe.table_driver.GeoDataFrameTableDriver.read_data
    drivers.geodataframe.table_driver.GeoDataFrameTableDriver.write
 
 DataFrame
@@ -233,6 +238,7 @@ DataFrame
 
    drivers.dataframe.dataframe_driver.DataFrameDriver
    drivers.dataframe.dataframe_driver.DataFrameDriver.read
+   drivers.dataframe.dataframe_driver.DataFrameDriver.read_data
    drivers.dataframe.dataframe_driver.DataFrameDriver.write
 
 PandasDriver
@@ -243,6 +249,7 @@ PandasDriver
 
    drivers.dataframe.pandas_driver.PandasDriver
    drivers.dataframe.pandas_driver.PandasDriver.read
+   drivers.dataframe.pandas_driver.PandasDriver.read_data
    drivers.dataframe.pandas_driver.PandasDriver.write
 
 GeoDataFrame
@@ -253,6 +260,7 @@ GeoDataFrame
 
    drivers.geodataset.geodataset_driver.GeoDatasetDriver
    drivers.geodataset.geodataset_driver.GeoDatasetDriver.read
+   drivers.geodataset.geodataset_driver.GeoDatasetDriver.read_data
    drivers.geodataset.geodataset_driver.GeoDatasetDriver.write
 
 DataAdapter
