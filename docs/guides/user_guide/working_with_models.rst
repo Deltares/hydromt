@@ -1,4 +1,9 @@
-.. _working_winth_models:
+.. _working_with_models:
 
 Working with models
 ===================
+
+.. _model_yaml_setup:
+
+YAML definition
+---------------
