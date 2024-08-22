@@ -3,9 +3,10 @@
         "ms-python.python",
         "ms-python.debugpy",
         "ms-python.vscode-pylance",
+        "ms-python.mypy-type-checker",
         "charliermarsh.ruff",
         "njpwerner.autodocstring",
-        "streetsidesoftware.code-spell-checker",
-        "ms-python.mypy-type-checker"
+        "stkb.rewrap",
+        "streetsidesoftware.code-spell-checker"
     ]
 }
