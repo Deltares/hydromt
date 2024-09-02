@@ -11,7 +11,7 @@ from hydromt.data_catalog.adapters import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 from hydromt.data_catalog.sources import GeoDatasetSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
-from hydromt.gis.gis_utils import to_geographic_bbox
+from hydromt.gis._gis_utils import _to_geographic_bbox
 
 
 class TestGeoDatasetSource:
@@ -83,7 +83,7 @@ class TestGeoDatasetSource:
 
     def test_detect_bbox(self, writable_source: GeoDatasetSource, geoda: xr.DataArray):
         geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-        geoda_detected_bbox = to_geographic_bbox(*writable_source.detect_bbox(geoda))
+        geoda_detected_bbox = _to_geographic_bbox(*writable_source.detect_bbox(geoda))
         assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
 
     def test_detect_time_range(

@@ -19,19 +19,19 @@ from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
 logger: Logger = getLogger(__name__)
 
 
-def write_yaml(path: StrPath, data: Dict[str, Any]):
+def _write_yaml(path: StrPath, data: Dict[str, Any]):
     """Write a dictionary to a yaml formatted file."""
     with open(path, "w") as f:
         dump_yaml(data, f)
 
 
-def write_toml(path: StrPath, data: Dict[str, Any]):
+def _write_toml(path: StrPath, data: Dict[str, Any]):
     """Write a dictionary to a toml formatted file."""
     with open(path, "wb") as f:
         dump_toml(data, f)
 
 
-def write_xy(path, gdf, fmt="%.4f"):
+def _write_xy(path, gdf, fmt="%.4f"):
     """Write geopandas.GeoDataFrame with Point geometries to point xy files.
 
     Parameters
@@ -50,7 +50,7 @@ def write_xy(path, gdf, fmt="%.4f"):
         np.savetxt(f, xy, fmt=fmt)
 
 
-def netcdf_writer(
+def _netcdf_writer(
     obj: Union[xr.Dataset, xr.DataArray],
     data_root: Union[str, Path],
     data_name: str,
@@ -90,7 +90,7 @@ def netcdf_writer(
     return write_path
 
 
-def zarr_writer(
+def _zarr_writer(
     obj: Union[xr.Dataset, xr.DataArray],
     data_root: Union[str, Path],
     data_name: str,
@@ -119,7 +119,7 @@ def zarr_writer(
     return write_path
 
 
-def write_nc(
+def _write_nc(
     nc_dict: XArrayDict,
     filename_template: str,
     root: Path,
@@ -194,7 +194,7 @@ def write_nc(
     return None
 
 
-def write_region(
+def _write_region(
     region: gpd.GeoDataFrame,
     *,
     filename: StrPath,

@@ -7,7 +7,7 @@ from copy import deepcopy
 from logging import Logger, getLogger
 from os.path import abspath, join
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union
+from typing import Any, ClassVar, Dict, Optional, TypeVar, Union
 
 from pydantic import (
     BaseModel,
@@ -44,6 +44,8 @@ class DataSource(BaseModel, ABC):
     model_config = ConfigDict(extra="forbid")
 
     _used: bool = PrivateAttr(default=False)
+    _fallback_driver_read: ClassVar[str]
+    _fallback_driver_write: ClassVar[str]
 
     name: str
     uri: str
@@ -51,15 +53,12 @@ class DataSource(BaseModel, ABC):
     driver: BaseDriver
     uri_resolver: URIResolver = Field(default_factory=ConventionResolver)
     data_type: ClassVar[DataType]
-    _fallback_driver_read: ClassVar[str]
-    _fallback_driver_write: ClassVar[str]
     root: Optional[str] = Field(
         default=None, exclude=True
     )  # root is already in the catalog.
     version: Optional[Union[str, int, float]] = Field(default=None)
     provider: Optional[str] = Field(default=None)
     metadata: SourceMetadata = Field(default_factory=SourceMetadata)
-    _used = False
 
     def summary(self) -> Dict[str, Any]:
         """Return a summary of the DataSource."""
@@ -73,7 +72,7 @@ class DataSource(BaseModel, ABC):
         )
         return summ
 
-    def mark_as_used(self):
+    def _mark_as_used(self):
         """Mark the data adapter as used."""
         self._used = True
 
@@ -134,60 +133,3 @@ def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
             rel_path = join(root, rel_path)
         path = Path(abspath(rel_path))
     return str(path)
-
-
-def get_nested_var(
-    nested_var: List[str], nested_object: Any, default: Any = None
-) -> Any:
-    """Get nested variable during pydantic "before" validation."""
-    if lenn := len(nested_var) > 0:
-        var: str = nested_var.pop(0)
-        prop: Union[BaseModel, Dict, None] = _get_property(nested_object, var, default)
-
-        return get_nested_var(nested_var, prop, default)
-    elif lenn == 0:  # Got the value we were looking for
-        return nested_object
-
-
-def set_nested_var(
-    nested_var_keys: List[str],
-    nested_object: Any,
-    value: Any,
-):
-    """Set nested variable during pydantic "before" validation."""
-    key: str = nested_var_keys.pop(0)
-    if len(nested_var_keys) > 0:
-        prop: Union[BaseModel, Dict, None] = _get_property(
-            nested_object, key, default={}
-        )
-        # Then set result of get on larger object
-        newprop = set_nested_var(nested_var_keys, prop, value)
-        return _set_pydantic_or_dict_property(nested_object, key, newprop)
-    else:
-        return _set_pydantic_or_dict_property(nested_object, key, value)
-
-
-def _get_property(obj: Any, key: str, default: T) -> Union[Dict, BaseModel, T]:
-    if isinstance(obj, Dict):
-        return obj.get(key, default)
-    elif isinstance(obj, BaseModel):
-        return getattr(obj, key)
-    elif isinstance(obj, str):
-        # shortcut for {"name": str}
-        return {"name": obj}
-    else:
-        return default
-
-
-def _set_pydantic_or_dict_property(
-    obj: Any, key: str, value: Any
-) -> Union[BaseModel, Dict]:
-    if isinstance(obj, Dict):
-        obj[key] = value
-    elif isinstance(obj, BaseModel):
-        setattr(obj, key, value)  # forces validation
-    else:
-        raise ValueError(
-            f"Cannot set value '{value}' on object '{obj}' with key '{key}'."
-        )
-    return obj

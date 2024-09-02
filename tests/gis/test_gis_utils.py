@@ -13,21 +13,21 @@ from pyproj import CRS
 from rasterio.transform import from_origin
 from shapely import Polygon, box
 
-from hydromt.gis import create_vrt, gis_utils, raster_utils, vector_utils
+from hydromt._io import _open_raster
+from hydromt.gis import _create_vrt, _gis_utils, _raster_utils, _vector_utils
 from hydromt.gis.raster import RasterDataArray, full_from_transform
-from hydromt.io import open_raster
 
 
 def test_crs():
     bbox = [3, 51.5, 4, 52]  # NL
-    assert gis_utils.utm_crs(bbox).to_epsg() == 32631
-    assert gis_utils.parse_crs("utm", bbox).to_epsg() == 32631
+    assert _gis_utils._utm_crs(bbox).to_epsg() == 32631
+    assert _gis_utils._parse_crs("utm", bbox).to_epsg() == 32631
     bbox1 = [-77.5, -12.2, -77.0, -12.0]
-    assert gis_utils.utm_crs(bbox1).to_epsg() == 32718
-    _, _, xattrs, yattrs = gis_utils.axes_attrs(gis_utils.parse_crs(4326))
+    assert _gis_utils._utm_crs(bbox1).to_epsg() == 32718
+    _, _, xattrs, yattrs = _gis_utils._axes_attrs(_gis_utils._parse_crs(4326))
     assert xattrs["units"] == "degrees_east"
     assert yattrs["units"] == "degrees_north"
-    _, _, xattrs, yattrs = gis_utils.axes_attrs(gis_utils.utm_crs(bbox1))
+    _, _, xattrs, yattrs = _gis_utils._axes_attrs(_gis_utils._utm_crs(bbox1))
     assert xattrs["units"] == yattrs["units"] == "metre"
 
 
@@ -35,7 +35,7 @@ def test_affine_to_coords():
     # create grid with x from 0-360E
     transform = from_origin(0, 90, 1, 1)  # upper left corner
     shape = (180, 360)
-    coords = raster_utils.affine_to_coords(transform, shape)
+    coords = _raster_utils._affine_to_coords(transform, shape)
     xs, ys = coords["x"][1], coords["y"][1]
     assert np.all(ys == 90 - np.arange(0.5, shape[0]))
     assert np.all(xs == np.arange(0.5, shape[1]))
@@ -50,7 +50,7 @@ def test_meridian_offset():
             crs="epsg:4326",
         )
         # return W180-E180 grid if no bbox is provided
-        da1 = raster_utils.meridian_offset(da)
+        da1 = _raster_utils._meridian_offset(da)
         assert da1.raster.bounds == (-180, -90, 180, 90)
         # make sure bbox is respected
         for bbox in [
@@ -59,7 +59,7 @@ def test_meridian_offset():
             [-10, -2, 190, 2],  # bbox crossing 0 and 180
             [-190, -2, -170, 2],  # bbox crossing -180
         ]:
-            da2 = raster_utils.meridian_offset(da, bbox=bbox)
+            da2 = _raster_utils._meridian_offset(da, bbox=bbox)
             assert (
                 da2.raster.bounds[0] <= bbox[0]
             ), f"{da2.raster.bounds[0]} <= {bbox[0]}"
@@ -69,14 +69,14 @@ def test_meridian_offset():
 
     # test error
     with pytest.raises(ValueError, match="This method is only applicable to data"):
-        raster_utils.meridian_offset(da.raster.clip_bbox([0, 0, 10, 10]))
+        _raster_utils._meridian_offset(da.raster.clip_bbox([0, 0, 10, 10]))
 
 
 def test_transform_rotation():
     # with rotation
     transform = Affine.rotation(30) * Affine.scale(1, 2)
     shape = (10, 5)
-    coords = raster_utils.affine_to_coords(transform, shape)
+    coords = _raster_utils._affine_to_coords(transform, shape)
     xs, ys = coords["xc"][1], coords["yc"][1]
     assert xs.ndim == 2
     assert ys.ndim == 2
@@ -92,27 +92,27 @@ def test_area_res():
     shape = (180, 360)
     da = full_from_transform(transform, shape, crs=4326)
     assert np.isclose(da.raster.area_grid().sum() / 1e6, 510064511.156224)
-    assert raster_utils.cellres(0) == (111319.458, 110574.2727)
+    assert _raster_utils._cellres(0) == (111319.458, 110574.2727)
 
 
 def test_gdf(world):
     country = world.iloc[[0], :].to_crs(3857)
-    assert np.all(vector_utils.filter_gdf(world, country) == 0)
-    idx0 = vector_utils.filter_gdf(world, bbox=[3, 51.5, 4, 52])[0]
+    assert np.all(_vector_utils._filter_gdf(world, country) == 0)
+    idx0 = _vector_utils._filter_gdf(world, bbox=[3, 51.5, 4, 52])[0]
     assert world.iloc[idx0,]["iso_a3"] == "NLD"
     with pytest.raises(ValueError, match="Unknown geometry mask type"):
-        vector_utils.filter_gdf(world, geom=[3, 51.5, 4, 52])
+        _vector_utils._filter_gdf(world, geom=[3, 51.5, 4, 52])
 
 
 def test_nearest(world, geodf):
-    idx, _ = vector_utils.nearest(geodf, geodf)
+    idx, _ = _vector_utils._nearest(geodf, geodf)
     assert np.all(idx == geodf.index)
-    idx, dst = vector_utils.nearest(geodf, world)
+    idx, dst = _vector_utils._nearest(geodf, world)
     assert np.all(dst == 0)
     assert np.all(world.loc[idx, "name"].values == geodf["country"].values)
     gdf0 = geodf.copy()
     gdf0["iso_a3"] = ""
-    gdf1 = vector_utils.nearest_merge(geodf, world.drop(idx), max_dist=1e6)
+    gdf1 = _vector_utils._nearest_merge(geodf, world.drop(idx), max_dist=1e6)
     assert np.all(gdf1.loc[gdf1["distance_right"] > 1e6, "index_right"] == -1)
     assert np.all(gdf1.loc[gdf1["distance_right"] > 1e6, "iso_a3"] != "")
 
@@ -128,12 +128,12 @@ def test_spread():
     da_msk = RasterDataArray.from_numpy(msk, transform=transform, crs=4326)
     da_frc = RasterDataArray.from_numpy(frc, transform=transform, crs=4326)
     # only testing the wrapping of pyflwdir method, not the method itself
-    ds_out = raster_utils.spread2d(da_obs, da_friction=da_frc, da_mask=da_msk)
+    ds_out = _raster_utils._spread2d(da_obs, da_friction=da_frc, da_mask=da_msk)
     assert np.all(ds_out["source_value"] == 1)
     assert np.all(ds_out["source_idx"] == 310)
     assert ds_out["source_dst"].values[10, 10] == 0
     with pytest.raises(ValueError, match='"nodata" must be a finite value'):
-        raster_utils.spread2d(da_obs, nodata=np.nan)
+        _raster_utils._spread2d(da_obs, nodata=np.nan)
 
 
 def test_create_vrt(tmpdir, rioda_large):
@@ -147,13 +147,13 @@ def test_create_vrt(tmpdir, rioda_large):
     # test create_vrt
     vrt_path = os.path.join(path, "dummy_xyz", "vrt", "zl0.vrt")
     tif_path_glob = os.path.join(path, "dummy_xyz", "*", "*", "*.tif")
-    create_vrt.create_vrt(vrt_path, files_path=tif_path_glob)
+    _create_vrt._create_vrt(vrt_path, files_path=tif_path_glob)
     assert os.path.isfile(vrt_path)
-    assert isinstance(open_raster(vrt_path).load(), xr.DataArray)  # try reading
+    assert isinstance(_open_raster(vrt_path).load(), xr.DataArray)  # try reading
     with pytest.raises(ValueError, match="Either 'files' or 'files_path' is required"):
-        create_vrt.create_vrt(vrt_path)
+        _create_vrt._create_vrt(vrt_path)
     with pytest.raises(IOError, match="No files found at "):
-        create_vrt.create_vrt(
+        _create_vrt._create_vrt(
             vrt_path, files_path=os.path.join(path, "dummy_xyz", "*.abc")
         )
 
@@ -190,7 +190,7 @@ class TestBBoxFromFileAndFilters:
     def test_gdf_bbox_crs_source_crs(
         self, gdf_bbox_with_crs: gpd.GeoDataFrame, vector_data_with_crs: Path
     ):
-        bbox = gis_utils.bbox_from_file_and_filters(
+        bbox = _gis_utils._bbox_from_file_and_filters(
             vector_data_with_crs, bbox=gdf_bbox_with_crs
         )
         # assert converted to CRS of source data EPSG:3857
@@ -199,7 +199,7 @@ class TestBBoxFromFileAndFilters:
     def test_gdf_mask_no_crs_source_crs(
         self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_with_crs: Path
     ):
-        bbox = gis_utils.bbox_from_file_and_filters(
+        bbox = _gis_utils._bbox_from_file_and_filters(
             vector_data_with_crs, bbox=gdf_mask_without_crs
         )
         # assert converted to CRS of source data EPSG:3857
@@ -208,7 +208,7 @@ class TestBBoxFromFileAndFilters:
     def test_gdf_mask_crs_source_no_crs(
         self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_without_crs: Path
     ):
-        bbox = gis_utils.bbox_from_file_and_filters(
+        bbox = _gis_utils._bbox_from_file_and_filters(
             vector_data_without_crs, bbox=gdf_mask_without_crs
         )
         assert all(map(lambda x: abs(x) < 180, bbox))
@@ -216,19 +216,19 @@ class TestBBoxFromFileAndFilters:
     def test_gdf_mask_no_crs_source_no_crs(
         self, gdf_mask_without_crs: gpd.GeoDataFrame, vector_data_without_crs: Path
     ):
-        bbox = gis_utils.bbox_from_file_and_filters(
+        bbox = _gis_utils._bbox_from_file_and_filters(
             vector_data_without_crs, bbox=gdf_mask_without_crs, crs=4326
         )
         assert all(map(lambda x: abs(x) < 180, bbox))
 
     def test_shapely_input(self, shapely_bbox: Polygon, vector_data_with_crs: Path):
-        bbox = gis_utils.bbox_from_file_and_filters(
+        bbox = _gis_utils._bbox_from_file_and_filters(
             vector_data_with_crs, bbox=shapely_bbox
         )
         assert all(map(lambda x: abs(x) > 180, bbox))
 
     def test_does_not_filter(self, vector_data_with_crs: Path):
-        bbox = gis_utils.bbox_from_file_and_filters(vector_data_with_crs)
+        bbox = _gis_utils._bbox_from_file_and_filters(vector_data_with_crs)
         assert bbox is None
 
     def test_raises_valueerror(
@@ -238,7 +238,7 @@ class TestBBoxFromFileAndFilters:
             ValueError,
             match="Both 'bbox' and 'mask' are provided. Please provide only one.",
         ):
-            gis_utils.bbox_from_file_and_filters(
+            _gis_utils._bbox_from_file_and_filters(
                 vector_data_with_crs, bbox=gdf_bbox_with_crs, mask=gdf_bbox_with_crs
             )
 
@@ -249,27 +249,27 @@ class TestZoomToOverviewLevel:
         return {"source_crs": 4326, "zls_dict": {0: 0.1, 1: 0.3}}
 
     def test_none(self):
-        assert gis_utils.zoom_to_overview_level(None) is None
+        assert _gis_utils._zoom_to_overview_level(None) is None
 
     def test_int(self, kwargs: Dict[str, Any]):
-        assert gis_utils.zoom_to_overview_level(1, **kwargs) == 1
+        assert _gis_utils._zoom_to_overview_level(1, **kwargs) == 1
 
     def test_tuple(self, kwargs: Dict[str, Any]):
-        assert gis_utils.zoom_to_overview_level((0.3, "degree"), **kwargs) == 1
+        assert _gis_utils._zoom_to_overview_level((0.3, "degree"), **kwargs) == 1
 
     def test_close(self, kwargs: Dict[str, Any]):
-        assert gis_utils.zoom_to_overview_level((0.29, "degree"), **kwargs) == 0
+        assert _gis_utils._zoom_to_overview_level((0.29, "degree"), **kwargs) == 0
 
     def test_rounds_down(self, kwargs: Dict[str, Any]):
-        assert gis_utils.zoom_to_overview_level((0.1, "degree"), **kwargs) == 0
+        assert _gis_utils._zoom_to_overview_level((0.1, "degree"), **kwargs) == 0
 
     def test_meters(self, kwargs: Dict[str, Any]):
-        assert gis_utils.zoom_to_overview_level((1, "meter"), **kwargs) == 0
+        assert _gis_utils._zoom_to_overview_level((1, "meter"), **kwargs) == 0
 
     def test_raises_unit_error(self, kwargs: Dict[str, Any]):
         with pytest.raises(TypeError, match="zoom_level unit"):
-            gis_utils.zoom_to_overview_level((1, "asdf"), **kwargs)
+            _gis_utils._zoom_to_overview_level((1, "asdf"), **kwargs)
 
     def test_raises_not_understood_error(self, kwargs: Dict[str, Any]):
         with pytest.raises(TypeError, match="zoom_level not understood"):
-            gis_utils.zoom_to_overview_level(zoom=(1, "asdf", "asdf"), **kwargs)
+            _gis_utils._zoom_to_overview_level(zoom=(1, "asdf", "asdf"), **kwargs)

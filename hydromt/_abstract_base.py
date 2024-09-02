@@ -49,7 +49,7 @@ class AbstractBaseModel(BaseModel, ABC):
 
         if name := data.pop("name", None):
             # Load plugins, importing subclasses
-            cls.load_plugins()
+            cls._load_plugins()
 
             # Find which subclass to instantiate.
             possible_subclasses: List[AbstractBaseModel] = list(
@@ -78,7 +78,7 @@ class AbstractBaseModel(BaseModel, ABC):
 
     @classmethod
     @abstractmethod
-    def load_plugins(cls):
+    def _load_plugins(cls):
         """Load plugins for this model."""
         ...
 

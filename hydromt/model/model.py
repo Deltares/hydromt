@@ -13,12 +13,12 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 import geopandas as gdp
 from pyproj import CRS
 
+from hydromt._io.readers import _read_yaml
 from hydromt._typing import StrPath
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt._utils import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
-from hydromt.io.readers import read_yaml
 from hydromt.model.components import (
     DatasetsComponent,
     ModelComponent,
@@ -188,7 +188,7 @@ class Model(object, metaclass=ABCMeta):
     @staticmethod
     def from_yml(path: Path) -> "Model":
         """Construct a model with the components and other init arguments in the yaml file located at `path`."""
-        file_contents = read_yaml(path)
+        file_contents = _read_yaml(path)
         return Model.from_dict(file_contents)
 
     @property
@@ -442,7 +442,7 @@ class Model(object, metaclass=ABCMeta):
         if cat.sources:
             if save_csv:
                 csv_path = os.path.splitext(path)[0] + ".csv"
-                cat.to_dataframe().reset_index().to_csv(
+                cat._to_dataframe().reset_index().to_csv(
                     csv_path, sep=",", index=False, header=True
                 )
 

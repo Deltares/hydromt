@@ -9,7 +9,7 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from xarray import open_mfdataset
 
-from hydromt.data_catalog.drivers.preprocessing import round_latlon
+from hydromt.data_catalog.drivers._preprocessing import _round_latlon
 from hydromt.data_catalog.drivers.raster.raster_xarray_driver import (
     RasterDatasetXarrayDriver,
 )
@@ -33,7 +33,7 @@ class TestRasterXarrayDriver:
         )
         call_args = mock_xr_open.call_args
         assert call_args[0][0] == uris  # first arg
-        assert call_args[1].get("preprocess") == round_latlon
+        assert call_args[1].get("preprocess") == _round_latlon
         assert res.sizes == {}  # empty dataframe
 
         assert (

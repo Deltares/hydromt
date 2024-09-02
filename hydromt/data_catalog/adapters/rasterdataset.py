@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import os
 from logging import getLogger
-from os.path import join
 from typing import Any, Dict, List, Optional, Union, cast
 
 import numpy as np
@@ -13,13 +11,11 @@ import xarray as xr
 from pyproj import CRS
 
 from hydromt._typing import (
-    Bbox,
     Data,
     Geom,
     NoDataException,
     NoDataStrategy,
     SourceMetadata,
-    StrPath,
     TimeRange,
     Variables,
     exec_nodata_strat,
@@ -31,9 +27,8 @@ from hydromt._utils import (
     _slice_temporal_dimension,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.gis._gdal_drivers import GDAL_DRIVER_CODE_MAP, GDAL_EXT_CODE_MAP
+from hydromt.gis._raster_utils import _meridian_offset
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.gis.raster_utils import meridian_offset
 
 logger = getLogger(__name__)
 
@@ -42,102 +37,6 @@ __all__ = ["RasterDatasetAdapter"]
 
 class RasterDatasetAdapter(DataAdapterBase):
     """Implementation for the RasterDatasetAdapter."""
-
-    def to_file(
-        self,
-        data_root: StrPath,
-        data_name: str,
-        bbox: Optional[Bbox] = None,
-        time_range: Optional[TimeRange] = None,
-        driver: Optional[str] = None,
-        variables: Optional[Variables] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ):
-        """Save a data slice to file.
-
-        Parameters
-        ----------
-        data_root : str, Path
-            Path to output folder
-        data_name : str
-            Name of output file without extension.
-        bbox : array-like of floats
-            (xmin, ymin, xmax, ymax) bounding box of area of interest.
-        time_range: tuple of str, datetime, optional
-            Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
-        driver : str, optional
-            Driver to write file, e.g.: 'netcdf', 'zarr' or any gdal data type,
-            by default None
-        variables : list of str, optional
-            Names of GeoDataset variables to return. By default all dataset variables
-            are returned.
-        **kwargs
-            Additional keyword arguments that are passed to the `to_netcdf`
-            function.
-
-        Returns
-        -------
-        write_path: str
-            Absolute path to output file
-        driver: str
-            Name of driver to read data with, see
-            :py:func:`~hydromt.data_catalog.DataCatalog.get_rasterdataset`
-        kwargs: dict
-            the additional kwyeord arguments that were passed to `to_netcdf`
-        """
-        obj = self.get_data(
-            bbox=bbox,
-            time_range=time_range,
-            variables=variables,
-            handle_nodata=handle_nodata,
-            single_var_as_array=variables is None,
-        )
-
-        if obj is None:
-            return None
-
-        read_kwargs = {}
-        if driver is None:
-            # by default write 2D raster data to GeoTiff and 3D raster data to netcdf
-            driver = "netcdf" if len(obj.dims) == 3 else "GTiff"
-        # write using various writers
-        if driver == "netcdf":
-            dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.raster.vars
-            if variables is None:
-                encoding = {k: {"zlib": True} for k in dvars}
-                write_path = join(data_root, f"{data_name}.nc")
-                obj.to_netcdf(write_path, encoding=encoding, **kwargs)
-            else:  # save per variable
-                if not os.path.isdir(join(data_root, data_name)):
-                    os.makedirs(join(data_root, data_name))
-                for var in dvars:
-                    write_path = join(data_root, data_name, f"{var}.nc")
-                    obj[var].to_netcdf(
-                        write_path, encoding={var: {"zlib": True}}, **kwargs
-                    )
-                write_path = join(data_root, data_name, "{variable}.nc")
-        elif driver == "zarr":
-            write_path = join(data_root, f"{data_name}.zarr")
-            obj.to_zarr(write_path, **kwargs)
-        elif driver not in GDAL_DRIVER_CODE_MAP.values():
-            raise ValueError(f"RasterDataset: Driver {driver} unknown.")
-        else:
-            ext = GDAL_EXT_CODE_MAP.get(driver)
-            if driver == "GTiff" and "compress" not in kwargs:
-                kwargs.update(compress="lzw")  # default lzw compression
-            if isinstance(obj, xr.DataArray):
-                write_path = join(data_root, f"{data_name}.{ext}")
-                obj.raster.to_raster(write_path, driver=driver, **kwargs)
-            else:
-                write_path = join(data_root, data_name, "{variable}" + f".{ext}")
-                obj.raster.to_mapstack(
-                    join(data_root, data_name), driver=driver, **kwargs
-                )
-            driver = "raster"
-
-        return write_path, driver, read_kwargs
 
     def transform(
         self,
@@ -319,7 +218,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         # work with 4326 data that is defined at 0-360 degrees longtitude
         w, _, e, _ = ds.raster.bounds
         if epsg == 4326 and np.isclose(e - w, 360):  # allow for rounding errors
-            ds = meridian_offset(ds, bbox)
+            ds = _meridian_offset(ds, bbox)
 
         # clip with bbox
         if bbox is not None:

@@ -8,16 +8,16 @@ import pytest
 from pytest_mock import MockerFixture
 from xarray import Dataset
 
+from hydromt._io.readers import _open_geodataset
 from hydromt.data_catalog.drivers import GeoDatasetVectorDriver
 from hydromt.gis import vector
-from hydromt.io.readers import open_geodataset
 
 
 class TestGeoDatasetVectorDriver:
     def test_calls_preprocess(self, mocker: MockerFixture):
         mock_geods_open: mocker.MagicMock = mocker.patch(
             "hydromt.data_catalog.drivers.geodataset.vector_driver.open_geodataset",
-            spec=open_geodataset,
+            spec=_open_geodataset,
         )
         mock_geods_open.return_value = Dataset()
 
@@ -72,7 +72,7 @@ class TestGeoDatasetVectorDriver:
     def test_calls_open_geodataset(self, mocker: MockerFixture):
         mock_geods_open: mocker.MagicMock = mocker.patch(
             "hydromt.data_catalog.drivers.geodataset.vector_driver.open_geodataset",
-            spec=open_geodataset,
+            spec=_open_geodataset,
         )
         mock_geods_open.return_value = Dataset()
 

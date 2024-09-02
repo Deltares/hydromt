@@ -13,9 +13,9 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt._io.readers import _read_nc
+from hydromt._io.writers import _write_nc
 from hydromt.gis.vector import GeoDataset
-from hydromt.io.readers import read_nc
-from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -223,7 +223,7 @@ class VectorComponent(SpatialModelComponent):
             # to avoid issues with reading object dtype data
             if "chunks" not in kwargs:
                 kwargs["chunks"] = None
-            ds = xr.merge(read_nc(filename, root=self.root.path, **kwargs).values())
+            ds = xr.merge(_read_nc(filename, root=self.root.path, **kwargs).values())
             # check if ds is empty (default filename has a value)
             if len(ds.sizes) == 0:
                 filename = None
@@ -334,7 +334,7 @@ class VectorComponent(SpatialModelComponent):
             else:
                 ds = ds.vector.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
             # write_nc requires dict - use dummy key
-            write_nc(
+            _write_nc(
                 {"vector": ds},
                 filename,
                 engine="netcdf4",
@@ -354,7 +354,7 @@ class VectorComponent(SpatialModelComponent):
             gdf = ds.vector.geometry.to_frame("geometry")
             gdf.to_file(join(self.root.path, geometry_filename))
             # write_nc requires dict - use dummy key
-            write_nc(
+            _write_nc(
                 {"vector": ds.drop_vars("geometry")},
                 filename,
                 root=self.root.path,

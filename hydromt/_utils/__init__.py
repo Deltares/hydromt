@@ -8,8 +8,10 @@ from .dataset import (
     _single_var_as_array,
     _slice_temporal_dimension,
 )
+from .deep_merge import _deep_merge
 from .dictionaries import _partition_dictionaries
 from .elevation import _elevation2rgba, _rgba2elevation
+from .log import _setuplog
 from .nodata import _has_no_data, _set_raster_nodata, _set_vector_nodata
 from .path import _make_config_paths_abs, _make_config_paths_relative
 from .rgetattr import _rgetattr
@@ -20,8 +22,10 @@ from .uris import _is_valid_url, _strip_scheme
 __all__ = [
     "_cache_vrt_tiles",
     "_copy_to_local",
+    "_deep_merge",
     "_rename_vars",
     "_set_metadata",
+    "_setuplog",
     "_shift_dataset_time",
     "_single_var_as_array",
     "_slice_temporal_dimension",

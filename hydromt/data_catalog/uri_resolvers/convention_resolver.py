@@ -20,7 +20,7 @@ from hydromt._typing import (
     exec_nodata_strat,
 )
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.gis.gis_utils import zoom_to_overview_level
+from hydromt.gis._gis_utils import _zoom_to_overview_level
 
 from .uri_resolver import URIResolver
 
@@ -186,7 +186,7 @@ class ConventionResolver(URIResolver):
                 zls_dict: Optional[Dict[int, float]] = None
 
             overview_level: int = (
-                zoom_to_overview_level(zoom, mask, zls_dict, metadata.crs) or 0
+                _zoom_to_overview_level(zoom, mask, zls_dict, metadata.crs) or 0
             )
         else:
             overview_level = 0  # fill any valid value

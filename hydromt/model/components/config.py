@@ -6,9 +6,9 @@ from os.path import abspath, dirname, isabs, isfile, join, splitext
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
+from hydromt._io.readers import _read_toml, _read_yaml
+from hydromt._io.writers import _write_toml, _write_yaml
 from hydromt._utils.path import _make_config_paths_relative
-from hydromt.io.readers import read_toml, read_yaml
-from hydromt.io.writers import write_toml, write_yaml
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 
@@ -91,9 +91,9 @@ class ConfigComponent(ModelComponent):
             write_data = _make_config_paths_relative(self.data, self.root.path)
             ext = splitext(p)[-1]
             if ext in [".yml", ".yaml"]:
-                write_yaml(write_path, write_data)
+                _write_yaml(write_path, write_data)
             elif ext == ".toml":
-                write_toml(write_path, write_data)
+                _write_toml(write_path, write_data)
             else:
                 raise ValueError(f"Unknown file extension: {ext}")
 
@@ -119,9 +119,9 @@ class ConfigComponent(ModelComponent):
         ext = splitext(p)[-1]
         # Always overwrite config when reading
         if ext in [".yml", ".yaml"]:
-            self._data = read_yaml(read_path)
+            self._data = _read_yaml(read_path)
         elif ext == ".toml":
-            self._data = read_toml(read_path)
+            self._data = _read_toml(read_path)
         else:
             raise ValueError(f"Unknown file extension: {ext}")
 
@@ -262,9 +262,9 @@ class ConfigComponent(ModelComponent):
         # Here directly overwrite config with template
         logger.info(f"Creating model config from {prefix} template: {template}")
         if template.suffix in [".yml", ".yaml"]:
-            self._data = read_yaml(template)
+            self._data = _read_yaml(template)
         elif template.suffix == ".toml":
-            self._data = read_toml(template)
+            self._data = _read_toml(template)
         else:
             raise ValueError(f"Unknown file extension: {template.suffix}")
 

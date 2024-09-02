@@ -8,8 +8,8 @@ import geopandas as gpd
 from geopandas import GeoDataFrame
 from pyproj import CRS
 
+from hydromt._io.writers import _write_region
 from hydromt._typing.type_def import StrPath
-from hydromt.io.writers import write_region
 from hydromt.model.components.base import ModelComponent
 
 if TYPE_CHECKING:
@@ -117,7 +117,7 @@ class SpatialModelComponent(ModelComponent, ABC):
             logger.info("No region data available to write.")
             return
 
-        write_region(
+        _write_region(
             self.region,
             filename=filename or self._region_filename,
             to_wgs84=to_wgs84,

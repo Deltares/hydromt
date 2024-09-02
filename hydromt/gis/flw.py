@@ -9,8 +9,8 @@ import numpy as np
 import pyflwdir
 import xarray as xr
 
-from hydromt.gis.raster_utils import affine_to_coords
-from hydromt.gis.vector_utils import nearest
+from hydromt.gis._raster_utils import _affine_to_coords
+from hydromt.gis._vector_utils import _nearest
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,7 @@ __all__ = [
 
 def flwdir_from_da(
     da: xr.DataArray,
+    *,
     ftype: str = "infer",
     check_ftype: bool = True,
     mask: Union[xr.DataArray, bool, None] = None,
@@ -89,6 +90,7 @@ def flwdir_from_da(
 
 def d8_from_dem(
     da_elv: xr.DataArray,
+    *,
     max_depth: float = -1.0,
     outlets: Literal["edge", "min", "idxs_pit"] = "edge",
     idxs_pit: Optional[np.ndarray] = None,
@@ -203,6 +205,7 @@ def d8_from_dem(
 
 def upscale_flwdir(
     ds: xr.Dataset,
+    *,
     flwdir: pyflwdir.FlwdirRaster,
     scale_ratio: int,
     method: str = "com2",
@@ -258,7 +261,7 @@ def upscale_flwdir(
     # setup output DataArray
     ftype = flwdir.ftype
     dims = ds.raster.dims
-    coords = affine_to_coords(
+    coords = _affine_to_coords(
         flwdir_out.transform,
         flwdir_out.shape,
         x_dim=ds.raster.x_dim,
@@ -295,6 +298,7 @@ def upscale_flwdir(
 def reproject_hydrography_like(
     ds_hydro: xr.Dataset,
     da_elv: xr.DataArray,
+    *,
     river_upa: float = 5.0,
     river_len: float = 1e3,
     uparea_name: str = "uparea",
@@ -408,7 +412,7 @@ def reproject_hydrography_like(
                 crs=crs,
             )
             gdf0["distnc"] = flwdir.distnc.flat[inflow_idxs]
-            gdf0["idx2"], gdf0["dst2"] = nearest(gdf0, gdf_stream)
+            gdf0["idx2"], gdf0["dst2"] = _nearest(gdf0, gdf_stream)
             gdf0 = gdf0.sort_values("distnc", ascending=False).drop_duplicates("idx2")
             gdf0["uparea"] = gdf_stream.loc[gdf0["idx2"].values, "uparea"].values
             # set stream uparea to selected inflow cells and calculate total uparea
@@ -436,6 +440,7 @@ def reproject_hydrography_like(
 
 def gauge_map(
     ds: Union[xr.Dataset, xr.DataArray],
+    *,
     idxs: Optional[np.ndarray] = None,
     xy: Optional[Tuple] = None,
     ids: Optional[np.ndarray] = None,
@@ -512,7 +517,7 @@ def gauge_map(
     return da_gauges, idxs, ids
 
 
-def outlet_map(da_flw: xr.DataArray, ftype: str = "infer") -> xr.DataArray:
+def outlet_map(da_flw: xr.DataArray, *, ftype: str = "infer") -> xr.DataArray:
     """Return a mask of basin outlets/pits from a flow direction raster.
 
     Parameters
@@ -536,7 +541,7 @@ def outlet_map(da_flw: xr.DataArray, ftype: str = "infer") -> xr.DataArray:
     return xr.DataArray(mask, dims=da_flw.raster.dims, coords=da_flw.raster.coords)
 
 
-def stream_map(ds, stream=None, **stream_kwargs):
+def stream_map(ds, *, stream=None, **stream_kwargs):
     """Return a stream mask DataArray.
 
     Parameters
@@ -572,6 +577,7 @@ def stream_map(ds, stream=None, **stream_kwargs):
 def basin_map(
     ds: xr.Dataset,
     flwdir: pyflwdir.FlwdirRaster,
+    *,
     xy: Optional[Tuple] = None,
     idxs: Optional[np.ndarray] = None,
     outlets: bool = False,
@@ -647,6 +653,7 @@ def basin_map(
 def clip_basins(
     ds: xr.Dataset,
     flwdir: pyflwdir.FlwdirRaster,
+    *,
     xy: Optional[Tuple],
     flwdir_name: str = "flwdir",
     **kwargs,
@@ -694,6 +701,7 @@ def clip_basins(
 def dem_adjust(
     da_elevtn: xr.DataArray,
     da_flwdir: xr.DataArray,
+    *,
     da_rivmsk: Optional[xr.DataArray] = None,
     flwdir: Optional[pyflwdir.FlwdirRaster] = None,
     connectivity: int = 4,

@@ -53,7 +53,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         else:
             _uri = uris[0]
             if mask is not None:
-                bbox = bbox_from_file_and_mask(_uri, mask=mask)
+                bbox = _bbox_from_file_and_mask(_uri, mask=mask)
             else:
                 bbox = None
             gdf: Union[pd.DataFrame, gpd.GeoDataFrame] = read_dataframe(
@@ -80,7 +80,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         write_dataframe(gdf, path, **kwargs)
 
 
-def bbox_from_file_and_mask(
+def _bbox_from_file_and_mask(
     uri: str,
     mask: Geom,
 ) -> Optional[Bbox]:

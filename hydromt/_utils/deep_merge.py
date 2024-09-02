@@ -3,7 +3,7 @@
 from typing import Any, Dict
 
 
-def deep_merge(left: Dict[str, Any], right: Dict[str, Any]) -> Dict[str, Any]:
+def _deep_merge(left: Dict[str, Any], right: Dict[str, Any]) -> Dict[str, Any]:
     """Merge deeply nested dictionaries.
 
     Given overlap in the leaves the right dictionary will take precedence.
@@ -17,7 +17,7 @@ def deep_merge(left: Dict[str, Any], right: Dict[str, Any]) -> Dict[str, Any]:
         if k_right in merged:
             v_left = merged[k_right]
             if isinstance(v_left, dict) and isinstance(v_right, dict):
-                merged[k_right] = deep_merge(v_left, v_right)
+                merged[k_right] = _deep_merge(v_left, v_right)
             else:
                 merged[k_right] = v_right
         else:

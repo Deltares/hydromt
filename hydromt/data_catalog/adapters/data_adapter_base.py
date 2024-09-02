@@ -17,7 +17,7 @@ class DataAdapterBase(BaseModel):
     unit_mult: Dict[str, Any] = Field(default_factory=dict)
     rename: Dict[str, str] = Field(default_factory=dict)
 
-    def to_source_timerange(
+    def _to_source_timerange(
         self,
         time_range: Optional[TimeRange],
     ) -> Optional[TimeRange]:
@@ -41,7 +41,7 @@ class DataAdapterBase(BaseModel):
         else:
             return time_range
 
-    def to_source_variables(
+    def _to_source_variables(
         self, variables: Optional[List[str]]
     ) -> Optional[List[str]]:
         """Transform DataSource variables to the source-native names.

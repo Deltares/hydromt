@@ -32,7 +32,7 @@ from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
-from hydromt.utils import setuplog
+from hydromt.utils import _setuplog
 
 
 def test_dataset(args, datacatalog):
@@ -100,7 +100,7 @@ def test_data_catalog(args, datacatalog):
 
 if __name__ == "__main__":
     client = Client(processes=False)
-    logger = setuplog()
+    logger = _setuplog()
     parser = argparse.ArgumentParser("Test predefined data catalog")
     parser.add_argument("data_catalog", help="The data catalog to test")
     parser.add_argument(
