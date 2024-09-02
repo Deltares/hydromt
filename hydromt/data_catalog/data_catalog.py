@@ -38,7 +38,7 @@ from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import StrPath
-from hydromt._utils import _partition_dictionaries, _single_var_as_array
+from hydromt._utils import _deep_merge, _partition_dictionaries, _single_var_as_array
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
     DataFrameAdapter,
@@ -62,7 +62,6 @@ from hydromt.data_catalog.sources import (
 )
 from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
 from hydromt.plugins import PLUGINS
-from hydromt.utils import _deep_merge
 
 logger = logging.getLogger(__name__)
 

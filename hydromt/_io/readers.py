@@ -25,9 +25,9 @@ from tomli import load as load_toml
 from yaml import safe_load as load_yaml
 
 from hydromt._typing.type_def import StrPath
+from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
-from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.gis import _gis_utils, _vector_utils, raster, vector
 from hydromt.gis._raster_merge import _merge
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -905,8 +905,8 @@ def _read_nc(
     ncs = dict()
     path_template = root / filename_template
 
-    path_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
-        str(path_template)
+    path_glob, _, regex = _expand_uri_placeholders(
+        str(path_template), placeholders=_placeholders
     )
     paths = glob(path_glob)
     for path in paths:

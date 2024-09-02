@@ -381,7 +381,7 @@ def test_data_catalog_contains_source_version_permissive(data_catalog):
 def test_data_catalog_repr(data_catalog):
     assert isinstance(data_catalog.__repr__(), str)
     assert isinstance(data_catalog._repr_html_(), str)
-    assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
+    assert isinstance(data_catalog._to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataSource"):
         data_catalog.add_source("test", "string")  # type: ignore
 

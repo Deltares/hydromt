@@ -67,12 +67,16 @@ def test_from_dem(demda, flwdir):
 
 
 def test_upscale(hydds, flwdir):
-    flwda1, _ = flw.upscale_flwdir(hydds, flwdir, 3, uparea_name="uparea", method="dmm")
+    flwda1, _ = flw.upscale_flwdir(
+        hydds, flwdir=flwdir, scale_ratio=3, uparea_name="uparea", method="dmm"
+    )
     assert hydds["flwdir"].shape[0] / 3 == flwda1.shape[0]
     assert np.all([v in flwda1.coords for v in ["x_out", "y_out", "idx_out"]])
     # errors
     with pytest.raises(ValueError, match="Flwdir and ds dimensions do not match"):
-        flw.upscale_flwdir(hydds.isel(x=slice(1, -1)), flwdir, 3, method="dmm")
+        flw.upscale_flwdir(
+            hydds.isel(x=slice(1, -1)), flwdir=flwdir, scale_ratio=3, method="dmm"
+        )
 
 
 def test_reproject_flwdir(hydds, demda):
@@ -164,7 +168,9 @@ def test_stream_map(hydds, flwdir):
 
 
 def test_dem_adjust(hydds, demda, flwdir):
-    demda1 = flw.dem_adjust(demda, hydds["flwdir"], hydds["uparea"] > 5, river_d8=True)
+    demda1 = flw.dem_adjust(
+        demda, hydds["flwdir"], da_rivmsk=hydds["uparea"] > 5, river_d8=True
+    )
     assert np.all((demda1.values - flwdir.downstream(demda1.values)) >= 0)
     demda2 = flw.dem_adjust(demda, hydds["flwdir"], flwdir=flwdir, connectivity=8)
     assert np.all((demda2.values - flwdir.downstream(demda2.values)) >= 0)

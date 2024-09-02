@@ -28,11 +28,11 @@ from dask.distributed import Client
 from pydantic_core import ValidationError
 
 from hydromt import DataCatalog
+from hydromt._utils import _setuplog
 from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
-from hydromt.utils import _setuplog
 
 
 def test_dataset(args, datacatalog):

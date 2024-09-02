@@ -132,11 +132,11 @@ def test_open_geodataset(tmpdir, geodf):
     geodf1 = ds.vector.to_gdf()
     assert np.all(geodf == geodf1[geodf.columns])
     # add timeseries
-    ds = _open_geodataset(point_data_path, timeseries_path)
+    ds = _open_geodataset(point_data_path, data_path=timeseries_path)
     assert name in ds.data_vars
     assert np.all(ds[name].values == 0)
     # test for polygon geometry
-    ds = _open_geodataset(polygon_data_path, timeseries_path)
+    ds = _open_geodataset(polygon_data_path, data_path=timeseries_path)
     assert name in ds.data_vars
     assert ds.vector.geom_type == "Polygon"
     with pytest.raises(IOError, match="GeoDataset point location file not found"):

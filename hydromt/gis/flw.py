@@ -683,7 +683,7 @@ def clip_basins(
     basin_map
     hydromt.RasterDataArray.clip_mask
     """
-    da_basins, xy = basin_map(ds, flwdir, xy, **kwargs)
+    da_basins, xy = basin_map(ds, flwdir, xy=xy, **kwargs)
     idxs_pit = flwdir.index(*xy)
     # set pit values in DataArray
     pit_value = flwdir._core._pv

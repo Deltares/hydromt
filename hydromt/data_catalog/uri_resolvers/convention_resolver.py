@@ -3,10 +3,7 @@
 from functools import reduce
 from itertools import chain, product
 from logging import Logger, getLogger
-from re import compile as compile_regex
-from re import error as regex_error
-from string import Formatter
-from typing import Any, Dict, Iterable, List, Optional, Pattern, Set, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 import pandas as pd
 from fsspec.core import split_protocol
@@ -19,6 +16,7 @@ from hydromt._typing import (
     Zoom,
     exec_nodata_strat,
 )
+from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.gis._gis_utils import _zoom_to_overview_level
 
@@ -34,49 +32,6 @@ class ConventionResolver(URIResolver):
         {"year", "month", "variable", "name", "overview_level"}
     )
     name = "convention"
-
-    def _expand_uri_placeholders(
-        self,
-        uri: str,
-        time_range: Optional[Tuple[str, str]] = None,
-        variables: Optional[List[str]] = None,
-    ) -> Tuple[str, List[str], Pattern[str]]:
-        """Expand known placeholders in the URI."""
-        keys: list[str] = []
-        pattern: str = ""
-
-        if "{" in uri:
-            uri_expanded = ""
-            for literal_text, key, fmt, _ in Formatter().parse(uri):
-                uri_expanded += literal_text
-                pattern += literal_text
-                if key is None:
-                    continue
-                pattern += "(.*)"
-                key_str = "{" + f"{key}:{fmt}" + "}" if fmt else "{" + key + "}"
-                # remove unused fields
-                if key in ["year", "month"] and time_range is None:
-                    uri_expanded += "*"
-                elif key == "variable" and variables is None:
-                    uri_expanded += "*"
-                elif key == "name":
-                    uri_expanded += "*"
-                # escape unknown fields
-                elif key is not None and key not in self._uri_placeholders:
-                    uri_expanded = uri_expanded + "{" + key_str + "}"
-                else:
-                    uri_expanded = uri_expanded + key_str
-                    keys.append(key)
-            uri = uri_expanded
-
-        # windows paths creating invalid escape sequences
-        try:
-            regex = compile_regex(pattern)
-        except regex_error:
-            # try it as raw path if regular string fails
-            regex = compile_regex(pattern.encode("unicode_escape").decode())
-
-        return (uri, keys, regex)
 
     def _get_dates(
         self,
@@ -170,8 +125,11 @@ class ConventionResolver(URIResolver):
         if metadata is None:
             metadata: SourceMetadata = SourceMetadata()
 
-        uri_expanded, keys, _ = self._expand_uri_placeholders(
-            uri, time_range, variables
+        uri_expanded, keys, _ = _expand_uri_placeholders(
+            uri,
+            placeholders=self._uri_placeholders,
+            time_range=time_range,
+            variables=variables,
         )
         if time_range:
             dates = self._get_dates(keys, time_range)
