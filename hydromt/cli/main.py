@@ -16,13 +16,13 @@ from pydantic import ValidationError
 from hydromt import __version__
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
+from hydromt._utils import log
 from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt._validators.region import validate_region
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
-from hydromt.utils import log
 
 logger = logging.getLogger(__name__)
 
@@ -233,7 +233,7 @@ def build(
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.setuplog(join(model_root, "hydromt.log"), log_level=log_level, append=False)
+    log._setuplog(join(model_root, "hydromt.log"), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
     opt = _utils.parse_config(config, opt_cli=opt)
@@ -263,7 +263,7 @@ def build(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## UPDATE
@@ -331,7 +331,7 @@ def update(
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.setuplog(join(model_out, "hydromt.log"), log_level=log_level)
+    log._setuplog(join(model_out, "hydromt.log"), log_level=log_level)
     logger.info(f"Updating {model} model at {model_root} ({mode}).")
     logger.info(f"Output dir: {model_out}")
     # parse settings
@@ -367,7 +367,7 @@ def update(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 @main.command(
@@ -415,7 +415,7 @@ def check(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.setuplog(join(".", "hydromt.log"), log_level=log_level)
+    log._setuplog(join(".", "hydromt.log"), log_level=log_level)
     try:
         all_exceptions: List[Exception] = []
         for cat_path in data:
@@ -458,7 +458,7 @@ def check(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## Export
@@ -522,7 +522,7 @@ def export(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.setuplog(join(export_dest_path, "hydromt.log"), log_level=log_level)
+    log._setuplog(join(export_dest_path, "hydromt.log"), log_level=log_level)
     logger.info(f"Output dir: {export_dest_path}")
 
     if error_on_empty:
@@ -595,7 +595,7 @@ def export(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 ## CLIP
@@ -641,7 +641,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
 
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.setuplog(join(model_destination, "hydromt-clip.log"), log_level=log_level)
+    log._setuplog(join(model_destination, "hydromt-clip.log"), log_level=log_level)
     logger.info(f"Clipping instance of {model} model.")
     logger.info(f"Region: {region}")
 
@@ -662,7 +662,7 @@ def clip(ctx, model, model_root, model_destination, region, quiet, verbose):
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log.wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
 
 
 if __name__ == "__main__":

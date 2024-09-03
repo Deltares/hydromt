@@ -16,15 +16,16 @@ from shapely.geometry.base import BaseGeometry
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "nearest",
-    "nearest_merge",
-    "filter_gdf",
+    "_nearest",
+    "_nearest_merge",
+    "_filter_gdf",
 ]
 
 
-def nearest_merge(
+def _nearest_merge(
     gdf1: gpd.GeoDataFrame,
     gdf2: gpd.GeoDataFrame,
+    *,
     columns: Optional[list] = None,
     max_dist: Optional[float] = None,
     overwrite: bool = False,
@@ -58,7 +59,7 @@ def nearest_merge(
         Merged GeoDataFrames
     """
     # Get nearest index right
-    idx_nn, dst = nearest(gdf1, gdf2)
+    idx_nn, dst = _nearest(gdf1, gdf2)
     if not inplace:
         gdf1 = gdf1.copy()
     valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
@@ -75,7 +76,7 @@ def nearest_merge(
         return gdf1[:, left_only_cols].join(gdf2, join="left")
 
 
-def nearest(
+def _nearest(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Return the index of and distance [m] to the nearest geometry.
@@ -122,7 +123,7 @@ def nearest(
     return gdf2.index.values[idx], dst
 
 
-def filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
+def _filter_gdf(gdf, geom=None, bbox=None, crs=None, predicate="intersects"):
     """Filter GeoDataFrame geometries based on geometry mask or bounding box."""
     gtypes = (gpd.GeoDataFrame, gpd.GeoSeries, BaseGeometry)
     if bbox is not None and geom is None:

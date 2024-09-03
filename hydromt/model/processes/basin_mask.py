@@ -258,7 +258,7 @@ def get_basin_geometry(
                 raise ValueError("No outlets found with with given criteria.")
             xy = outmap.raster.idx_to_xy(idxs_out)
         # get subbasin map
-        bas_mask, xy_out = basin_map(ds, flwdir, xy, **kwargs)
+        bas_mask, xy_out = basin_map(ds, flwdir, xy=xy, **kwargs)
         # is subbasin with bounds check if all upstream cells are included
         if kind == "subbasin" and bounds is not None:
             geom = gpd.GeoDataFrame(geometry=[box(*bounds)], crs=ds.raster.crs)

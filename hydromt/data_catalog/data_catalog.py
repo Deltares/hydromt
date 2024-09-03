@@ -34,10 +34,11 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt import __version__
+from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import StrPath
-from hydromt._utils import _partition_dictionaries, _single_var_as_array
+from hydromt._utils import _deep_merge, _partition_dictionaries, _single_var_as_array
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
     DataFrameAdapter,
@@ -59,10 +60,8 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
     create_source,
 )
-from hydromt.gis.gis_utils import parse_geom_bbox_buffer
-from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
 from hydromt.plugins import PLUGINS
-from hydromt.utils import deep_merge
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +130,7 @@ class DataCatalog(object):
                 self.from_predefined_catalogs(name_or_path)
 
     @property
-    def sources(self) -> Dict[DataSource]:
+    def sources(self) -> Dict[str, DataSource]:
         """Returns dictionary of DataSources."""
         if len(self._sources) == 0 and self._fallback_lib is not None:
             # read artifacts by default if no catalogs are provided
@@ -535,7 +534,7 @@ class DataCatalog(object):
 
     def __repr__(self):
         """Prettyprint the sources."""
-        return self.to_dataframe().__repr__()
+        return self._to_dataframe().__repr__()
 
     def __eq__(self, other) -> bool:
         if type(other) is type(self):
@@ -555,7 +554,7 @@ class DataCatalog(object):
         return True
 
     def _repr_html_(self):
-        return self.to_dataframe()._repr_html_()
+        return self._to_dataframe()._repr_html_()
 
     def update(self, **kwargs) -> None:
         """Add data sources to library or update them."""
@@ -859,7 +858,7 @@ class DataCatalog(object):
                 category=category,
             )
             if mark_used:
-                source.mark_as_used()
+                source._mark_as_used()
             self.add_source(name, source)
 
         return self
@@ -983,7 +982,7 @@ class DataCatalog(object):
             sources_out = {"meta": meta, **sources_out}
         return sources_out
 
-    def to_dataframe(self, source_names: Optional[List] = None) -> pd.DataFrame:
+    def _to_dataframe(self, source_names: Optional[List] = None) -> pd.DataFrame:
         """Return data catalog summary as DataFrame."""
         source_names = source_names or []
         d = []
@@ -1257,7 +1256,7 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             if geom is not None or bbox is not None:
-                mask = parse_geom_bbox_buffer(geom, bbox, buffer)
+                mask = _parse_geom_bbox_buffer(geom, bbox, buffer)
             else:
                 mask = None
             data_like = RasterDatasetAdapter._slice_data(
@@ -1360,7 +1359,7 @@ class DataCatalog(object):
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if geom is not None or bbox is not None:
-            mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+            mask = _parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
         else:
             mask = None
         if isinstance(data_like, dict):
@@ -1487,7 +1486,7 @@ class DataCatalog(object):
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if geom is not None or bbox is not None:
-            mask = parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+            mask = _parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
         else:
             mask = None
         if isinstance(data_like, dict):
@@ -1804,7 +1803,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             for diff in variants:
                 source_copy = copy.deepcopy(source)
                 source_copy = {
-                    str(k): v for (k, v) in deep_merge(source_copy, diff).items()
+                    str(k): v for (k, v) in _deep_merge(source_copy, diff).items()
                 }
 
                 data_dicts.append({name: source_copy})
@@ -1834,12 +1833,3 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             data_list.extend(_denormalise_data_dict(item))
 
     return data_list
-
-
-def abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:
-    path = Path(str(rel_path))
-    if not path.is_absolute():
-        if root is not None:
-            rel_path = join(root, rel_path)
-        path = Path(abspath(rel_path))
-    return str(path)

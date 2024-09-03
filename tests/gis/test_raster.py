@@ -14,8 +14,8 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import LineString, Point, box
 
-from hydromt.gis import gis_utils, raster
-from hydromt.io import open_raster
+from hydromt._io import _open_raster
+from hydromt.gis import _gis_utils, raster
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported
@@ -264,7 +264,7 @@ def test_rasterize_geometry(rioda):
     assert da2.name == "area"
     assert da2.raster.nodata == -1.0
     rioda_grid = rioda.raster.vector_grid()
-    crs_utm = gis_utils.parse_crs("utm", rioda_grid.total_bounds)
+    crs_utm = _gis_utils._parse_crs("utm", rioda_grid.total_bounds)
     rioda_grid = rioda_grid.to_crs(crs_utm)
     assert da2.values.max() == rioda_grid.area.max()
 
@@ -545,7 +545,7 @@ def test_rotated(transform, shape, tmpdir):
     # test I/O
     path = str(tmpdir.join("rotated.tif"))
     da.raster.to_raster(path)
-    assert da.raster.identical_grid(open_raster(path))
+    assert da.raster.identical_grid(_open_raster(path))
     # test rasterize
     gdf = da.raster.vector_grid()
     gdf["value"] = np.arange(gdf.index.size).astype(np.float32)
@@ -565,7 +565,7 @@ def test_rotated(transform, shape, tmpdir):
     # zonal stat
     assert np.all(idxs == da2.raster.zonal_stats(gdf_pnts, ["mean"])["value_mean"])
     # test reproject to non-rotated utm grid
-    dst_crs = gis_utils.parse_crs("utm", da.raster.bounds)
+    dst_crs = _gis_utils._parse_crs("utm", da.raster.bounds)
     da2_reproj = da2.raster.reproject(dst_crs=dst_crs)
     assert np.all(da2.raster.box.intersects(da2_reproj.raster.box.to_crs(4326)))
 
@@ -583,7 +583,7 @@ def test_to_xyz_tiles(tmpdir, rioda_large):
         assert src.shape == (256, 256)
 
     test_bounds = [2.13, -2.13, 3.2, -1.07]
-    _test_r = open_raster(join(path, "dummy_xyz", "0", "2", "1.tif"))
+    _test_r = _open_raster(join(path, "dummy_xyz", "0", "2", "1.tif"))
     assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
 
 
@@ -654,10 +654,10 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
         assert src.shape == (256, 256)
     with rasterio.open(join(tif_dir, "lvl8.vrt"), "r") as src:
         assert src.shape == (1024, 768)
-    _test_r = open_raster(join(tif_dir, "7", "64", "64.tif"))
+    _test_r = _open_raster(join(tif_dir, "7", "64", "64.tif"))
     assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
     assert all([isfile(join(tif_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
-    _test_vrt = open_raster(join(tif_dir, "lvl7.vrt"))
+    _test_vrt = _open_raster(join(tif_dir, "lvl7.vrt"))
     assert isinstance(_test_vrt, xr.DataArray)
 
     # nc
@@ -673,10 +673,10 @@ def test_to_slippy_tiles(tmpdir, rioda_large):
         assert src.shape == (256, 256)
     with rasterio.open(join(nc_dir, "lvl8.vrt"), "r") as src:
         assert src.shape == (1024, 768)
-    _test_r = open_raster(join(nc_dir, "7", "64", "64.nc"))
+    _test_r = _open_raster(join(nc_dir, "7", "64", "64.nc"))
     assert [round(_n, 2) for _n in _test_r.raster.bounds] == test_bounds
     assert all([isfile(join(nc_dir, f"lvl{zl}.vrt")) for zl in range(5, 9)])
-    _test_vrt = open_raster(join(nc_dir, "lvl7.vrt"))
+    _test_vrt = _open_raster(join(nc_dir, "lvl7.vrt"))
     assert isinstance(_test_vrt, xr.DataArray)
 
     # test all errors in to_slippy_tiles

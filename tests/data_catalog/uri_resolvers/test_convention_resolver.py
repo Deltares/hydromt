@@ -6,6 +6,7 @@ import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
 from hydromt._typing import NoDataException
+from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 
 
@@ -67,9 +68,8 @@ class TestConventionResolver:
     def test_capture_regex(self):
         pat = "here-is-some-more-leading-{year}-text-for-{month}-you-{variable}.pq"
         example = "here-is-some-more-leading-2024-04-02-text-for-era5-you-0001.pq"
-        resolver = ConventionResolver()
 
-        glob, keys, regex = resolver._expand_uri_placeholders(pat)
+        glob, keys, regex = _expand_uri_placeholders(pat)
         assert glob == "here-is-some-more-leading-*-text-for-*-you-*.pq"
         # we know regex will match, so type ignore is safe
         assert regex.match(example).groups() == ("2024-04-02", "era5", "0001")  # type: ignore

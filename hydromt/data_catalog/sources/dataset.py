@@ -68,8 +68,8 @@ class DatasetSource(DataSource):
         self._used = True
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter.to_source_timerange(time_range)
-        vrs = self.data_adapter.to_source_variables(variables)
+        tr = self.data_adapter._to_source_timerange(time_range)
+        vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,

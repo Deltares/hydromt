@@ -47,8 +47,6 @@ def exec_nodata_strat(msg: str, strategy: NoDataStrategy) -> None:
         logger.warning(msg)
     elif strategy == NoDataStrategy.IGNORE:
         pass
-    else:
-        raise NotImplementedError(f"NoDataStrategy '{strategy}' not implemented.")
 
 
 class ErrorHandleMethod(Enum):

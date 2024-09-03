@@ -13,8 +13,8 @@ import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
 
+from hydromt._io.readers import _read_nc
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io.readers import read_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.processes.mesh import (
@@ -196,7 +196,7 @@ class MeshComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
 
         filename = filename or str(self._filename)
-        files = read_nc(
+        files = _read_nc(
             filename,
             root=self.root.path,
             single_var_as_array=False,

@@ -14,13 +14,13 @@ from pyflwdir import gis_utils as gis
 from rasterio.transform import Affine
 
 __all__ = [
-    "affine_to_coords",
-    "affine_to_meshgrid",
-    "cellarea",
-    "cellres",
-    "meridian_offset",
-    "reggrid_area",
-    "spread2d",
+    "_affine_to_coords",
+    "_affine_to_meshgrid",
+    "_cellarea",
+    "_cellres",
+    "_meridian_offset",
+    "_reggrid_area",
+    "_spread2d",
 ]
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
 # TRANSFORM
 
 
-def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
+def _affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
     """Return a raster axis with pixel center coordinates based on the transform.
 
     Parameters
@@ -69,7 +69,7 @@ def affine_to_coords(transform, shape, x_dim="x", y_dim="y"):
     return coords
 
 
-def affine_to_meshgrid(transform, shape):
+def _affine_to_meshgrid(transform, shape):
     """Return a meshgrid of pixel center coordinates based on the transform.
 
     Parameters
@@ -95,7 +95,7 @@ def affine_to_meshgrid(transform, shape):
     return x_coords, y_coords
 
 
-def meridian_offset(ds, bbox=None):
+def _meridian_offset(ds, bbox=None):
     """Shift data along the x-axis of global datasets to avoid issues along the 180 meridian.
 
     Without a bbox the data is shifted to span 180W to 180E.
@@ -147,15 +147,15 @@ def meridian_offset(ds, bbox=None):
 
 
 ## CELLAREAS
-def reggrid_area(lats, lons):
+def _reggrid_area(lats, lons):
     """Return the cell area [m2] for a regular grid based on its cell centres lat, lon."""  # noqa: E501
     xres = np.abs(np.mean(np.diff(lons)))
     yres = np.abs(np.mean(np.diff(lats)))
     area = np.ones((lats.size, lons.size), dtype=lats.dtype)
-    return cellarea(lats, xres, yres)[:, None] * area
+    return _cellarea(lats, xres, yres)[:, None] * area
 
 
-def cellarea(lat, xres=1.0, yres=1.0):
+def _cellarea(lat, xres=1.0, yres=1.0):
     """Return the area [m2] of cell based on its center latitude and resolution in degrees.
 
     Resolution is in measured degrees.
@@ -166,7 +166,7 @@ def cellarea(lat, xres=1.0, yres=1.0):
     return _R**2 * dx * (np.sin(l2) - np.sin(l1))
 
 
-def cellres(lat, xres=1.0, yres=1.0):
+def _cellres(lat, xres=1.0, yres=1.0):
     """Return the cell (x, y) resolution [m].
 
     Based on cell center latitude and its resolution measured in degrees.
@@ -199,7 +199,7 @@ def cellres(lat, xres=1.0, yres=1.0):
 ## SPREAD
 
 
-def spread2d(
+def _spread2d(
     da_obs: xr.DataArray,
     da_mask: Optional[xr.DataArray] = None,
     da_friction: Optional[xr.DataArray] = None,

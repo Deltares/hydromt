@@ -16,10 +16,10 @@ from hydromt import __version__
 
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 
-__all__ = ["setuplog"]
+__all__ = ["_setuplog"]
 
 
-def wait_and_remove_file_handlers(logger: Logger):
+def _wait_and_remove_file_handlers(logger: Logger):
     for handler in logger.handlers:
         if isinstance(handler, FileHandler):
             # remove handler first, as otherwise new calls to the logger may open the
@@ -31,7 +31,7 @@ def wait_and_remove_file_handlers(logger: Logger):
             handler.close()
 
 
-def setuplog(
+def _setuplog(
     path: Optional[str] = None,
     log_level: int = 20,
     fmt: str = FMT,
@@ -52,7 +52,7 @@ def setuplog(
         by default True
     """
     main_logger: Logger = getLogger("hydromt")
-    wait_and_remove_file_handlers(main_logger)
+    _wait_and_remove_file_handlers(main_logger)
     captureWarnings(True)
     main_logger.setLevel(log_level)
     console = StreamHandler(sys.stdout)
@@ -62,11 +62,11 @@ def setuplog(
     if path is not None:
         if append is False and os.path.isfile(path):
             os.unlink(path)
-        add_filehandler(main_logger, path, log_level=log_level, fmt=fmt)
+        _add_filehandler(main_logger, path, log_level=log_level, fmt=fmt)
     main_logger.info(f"HydroMT version: {__version__}")
 
 
-def add_filehandler(logger, path, log_level=20, fmt=FMT):
+def _add_filehandler(logger, path, log_level=20, fmt=FMT):
     """Add file handler to logger."""
     if not os.path.isdir(os.path.dirname(path)):
         os.makedirs(os.path.dirname(path))

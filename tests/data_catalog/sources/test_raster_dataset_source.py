@@ -10,7 +10,7 @@ from hydromt.data_catalog.adapters import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
-from hydromt.gis.gis_utils import to_geographic_bbox
+from hydromt.gis._gis_utils import _to_geographic_bbox
 
 
 class TestRasterDatasetSource:
@@ -47,6 +47,6 @@ class TestRasterDatasetSource:
         self, writable_source: RasterDatasetSource, rioda: xr.DataArray
     ):
         rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
-        rioda_detected_bbox = to_geographic_bbox(*writable_source.detect_bbox(rioda))
+        rioda_detected_bbox = _to_geographic_bbox(*writable_source.detect_bbox(rioda))
 
         assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))

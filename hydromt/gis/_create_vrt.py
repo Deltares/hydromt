@@ -15,12 +15,12 @@ if _compat.HAS_RIO_VRT:
     import rio_vrt
 
 
-def create_vrt(
+def _create_vrt(
     vrt_path: str,
     files: list = None,
     files_path: str = None,
 ):
-    r"""Create a .vrt file from a list op raster datasets.
+    r"""Create a .vrt file from a list of raster datasets.
 
     Either a list of files (`files`) or a path containing wildcards
     (`files_path`) to infer the list of files is required.
@@ -34,7 +34,7 @@ def create_vrt(
     files_path : str, optional
         Unix style path containing a pattern using wildcards (*)
         n.b. this is without an extension
-        e.g. c:\\temp\\*\\*.tif for all tif files in subfolders of 'c:\temp'
+        e.g. c:\temp\*\*.tif for all tif files in subfolders of 'c:\temp'
     """
     if not _compat.HAS_RIO_VRT:
         raise ImportError(

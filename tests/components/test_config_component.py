@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
+from hydromt._io.readers import _config_read, _read_yaml
+from hydromt._io.writers import _write_yaml
 from hydromt._utils.path import _make_config_paths_abs, _make_config_paths_relative
-from hydromt.io.readers import configread, read_yaml
-from hydromt.io.writers import write_yaml
 from hydromt.model import Model
 from hydromt.model.components.config import ConfigComponent
 
@@ -42,14 +42,14 @@ def test_rejects_non_yaml_format(tmpdir):
         pass
 
     with pytest.raises(ValueError, match="Unknown extension"):
-        _ = configread(config_file, abs_path=True)
+        _ = _config_read(config_file, abs_path=True)
 
 
 def test_config_create_always_reads(tmpdir):
     filename = "myconfig.yaml"
     config_path = join(tmpdir, filename)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
-    write_yaml(config_path, config_data)
+    _write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
     config_component = ConfigComponent(
@@ -65,7 +65,7 @@ def test_config_does_not_read_at_lazy_init(tmpdir):
     filename = "myconfig.yaml"
     config_path = join(tmpdir, filename)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
-    write_yaml(config_path, config_data)
+    _write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
     config_component = ConfigComponent(
@@ -132,7 +132,7 @@ def test_write_config(tmpdir):
     assert not isfile(write_path)
     config_component.write()
     assert isfile(write_path)
-    read_contents = read_yaml(write_path)
+    read_contents = _read_yaml(write_path)
     assert read_contents == {"global": {"name": "test"}}
 
 

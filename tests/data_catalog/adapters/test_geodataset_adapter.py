@@ -4,7 +4,7 @@ import xarray as xr
 
 from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
-from hydromt.gis.gis_utils import parse_geom_bbox_buffer
+from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
 
 
 class TestGeoDatasetAdapter:
@@ -15,7 +15,7 @@ class TestGeoDatasetAdapter:
 
     def test_transform_data_bbox(self, example_geo_ds: xr.Dataset):
         adapter = GeoDatasetAdapter()
-        mask = parse_geom_bbox_buffer(bbox=example_geo_ds.vector.bounds)
+        mask = _parse_geom_bbox_buffer(bbox=example_geo_ds.vector.bounds)
         ds = adapter.transform(
             example_geo_ds,
             metadata=SourceMetadata(),

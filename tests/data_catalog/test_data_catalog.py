@@ -24,6 +24,7 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_OPENPYXL, HAS_S3FS
+from hydromt._io.writers import _write_xy
 from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
@@ -44,8 +45,7 @@ from hydromt.data_catalog.sources import (
     GeoDatasetSource,
     RasterDatasetSource,
 )
-from hydromt.gis.gis_utils import to_geographic_bbox
-from hydromt.io.writers import write_xy
+from hydromt.gis._gis_utils import _to_geographic_bbox
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
 DATADIR = join(dirname(abspath(__file__)), "..", "data")
@@ -381,7 +381,7 @@ def test_data_catalog_contains_source_version_permissive(data_catalog):
 def test_data_catalog_repr(data_catalog):
     assert isinstance(data_catalog.__repr__(), str)
     assert isinstance(data_catalog._repr_html_(), str)
-    assert isinstance(data_catalog.to_dataframe(), pd.DataFrame)
+    assert isinstance(data_catalog._to_dataframe(), pd.DataFrame)
     with pytest.raises(ValueError, match="Value must be DataSource"):
         data_catalog.add_source("test", "string")  # type: ignore
 
@@ -403,7 +403,7 @@ def test_used_sources():
     merged_yml_path = join(DATADIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_path)
     source = data_catalog.get_source("esa_worldcover")
-    source.mark_as_used()
+    source._mark_as_used()
     sources = data_catalog.list_sources(used_only=True)
     assert len(data_catalog) > 1
     assert len(sources) == 1
@@ -745,9 +745,9 @@ class TestGetRasterDataset:
         assert isinstance(da1, xr.DataArray)
 
     @pytest.fixture()
-    def zoom_level_cog(self, tmp_dir: Path, rioda_large: xr.DataArray) -> str:
+    def zoom_level_cog(self, tmp_path: Path, rioda_large: xr.DataArray) -> str:
         # write COG
-        cog_uri = str(tmp_dir / "test_cog.tif")
+        cog_uri = str(tmp_path / "test_cog.tif")
         rioda_large.raster.to_raster(cog_uri, driver="COG", overviews="auto")
         return cog_uri
 
@@ -1101,7 +1101,7 @@ class TestGetGeoDataset:
     @pytest.fixture()
     def xy_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
         uri_csv_locs = str(tmp_dir / "test_locs.xy")
-        write_xy(uri_csv_locs, geodf)
+        _write_xy(uri_csv_locs, geodf)
         return uri_csv_locs
 
     @pytest.fixture()
@@ -1574,7 +1574,7 @@ def test_detect_extent_rasterdataset(data_catalog):
     bbox = 11.60, 45.20, 13.00, 46.80
     expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
     ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
-    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    detected_spatial_range = _to_geographic_bbox(*ds.get_bbox(detect=True))
     detected_temporal_range = ds.get_time_range(detect=True)
     assert np.allclose(detected_spatial_range, bbox)
     assert detected_temporal_range == expected_temporal_range
@@ -1586,7 +1586,7 @@ def test_detect_extent_geodataframe(data_catalog):
     bbox = (6.63087893, 35.49291611, 18.52069473, 49.01704407)
     ds = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
 
-    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    detected_spatial_range = _to_geographic_bbox(*ds.get_bbox(detect=True))
     assert np.all(np.equal(detected_spatial_range, bbox))
 
 
@@ -1598,7 +1598,7 @@ def test_detect_extent_geodataset(data_catalog):
         np.datetime64("2010-02-14T23:50:00.000000000"),
     )
     ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
-    detected_spatial_range = to_geographic_bbox(*ds.get_bbox(detect=True))
+    detected_spatial_range = _to_geographic_bbox(*ds.get_bbox(detect=True))
     detected_temporal_range = ds.get_time_range(detect=True)
     assert np.all(np.equal(detected_spatial_range, bbox))
     assert detected_temporal_range == expected_temporal_range
