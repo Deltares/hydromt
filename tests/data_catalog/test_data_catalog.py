@@ -745,9 +745,9 @@ class TestGetRasterDataset:
         assert isinstance(da1, xr.DataArray)
 
     @pytest.fixture()
-    def zoom_level_cog(self, tmp_dir: Path, rioda_large: xr.DataArray) -> str:
+    def zoom_level_cog(self, tmp_path: Path, rioda_large: xr.DataArray) -> str:
         # write COG
-        cog_uri = str(tmp_dir / "test_cog.tif")
+        cog_uri = str(tmp_path / "test_cog.tif")
         rioda_large.raster.to_raster(cog_uri, driver="COG", overviews="auto")
         return cog_uri
 
