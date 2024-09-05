@@ -75,7 +75,7 @@ def test_data_catalog(args, datacatalog):
     logger.info("Checking paths of data catalog sources")
     for source_name, source in datacatalog.__iter__():
         logger.info(f"Checking paths of {source_name}")
-        if isinstance(source.driver.metadata_resolver, RasterTindexResolver):
+        if isinstance(source.uri_resolver, RasterTindexResolver):
             if not exists(source.full_uri):
                 error_count += 1
                 logger.error(
@@ -84,7 +84,7 @@ def test_data_catalog(args, datacatalog):
             continue
 
         else:
-            paths = source.driver.metadata_resolver.resolve(
+            paths = source.driver.uri_resolver.resolve(
                 source.full_uri, source.driver.filesystem
             )
             for path in paths:

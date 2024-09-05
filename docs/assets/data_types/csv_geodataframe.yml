@@ -1,0 +1,6 @@
+stations:
+  uri: /path/to/stations.csv
+  data_type: GeoDataFrame
+  driver: geodataframe_table
+  metadata:
+    crs: 4326

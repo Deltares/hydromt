@@ -77,23 +77,20 @@ The variable name is based on the filename, in this case `"GLOBCOVER_200901_2009
 The `chunks` key-word argument is passed to :py:meth:`~hydromt.io.open_mfraster`
 and allows lazy reading of the data.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/single_variable_geotiff_raster.yml
+   :language: yaml
 
-    globcover:
-      uri: base/landcover/globcover/GLOBCOVER_200901_200912_300x300m.tif
-      data_type: RasterDataset
-      driver:
-        name: raster
-        options:
-          chunks:
-            x: 3600
-            y: 3600
-      meta:
-        category: landuse
-        source_url: http://due.esrin.esa.int/page_globcover.php
-        source_license: CC-BY-3.0
-        paper_ref: Arino et al (2012)
-        paper_doi: 10.1594/PANGAEA.787668
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/single_variable_geotiff_raster.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _VRT:
 
@@ -113,32 +110,16 @@ for large raster datasets which are often tiled and can be combined using
 `gdalbuildvrt. <https://gdal.org/programs/gdalbuildvrt.html>`_
 
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/vrt_raster_dataset.yml
+   :language: yaml
 
-    merit_hydro:
-      uri: base/merit_hydro/{variable}.vrt
-      data_type: RasterDataset
-      driver:
-        name: raster
-        options:
-          chunks:
-          x: 6000
-          y: 6000
-      data_adapter:
-        rename:
-          dir: flwdir
-          bas: basins
-          upa: uparea
-          elv: elevtn
-          sto: strord
-      metadata:
-        crs: 4326
-        category: topography
-        source_version: 1.0
-        paper_doi: 10.1029/2019WR024873
-        paper_ref: Dai Yamazaki
-        source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
-        source_license: CC-BY-NC 4.0 or ODbL 1.0
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/vrt_raster_dataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _Tile:
 
@@ -161,27 +142,16 @@ set the resampling `method`. The name of the column in the tile index attribute 
 (to be directly passed as an argument to
 :py:meth:`~hydromt._io._open_raster_from_tindex`).
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/tiled_raster_dataset.yml
+   :language: yaml
 
-    grwl_mask:
-      path: static_data/base/grwl/tindex.gpkg
-      data_type: RasterDataset
-      driver: raster_tindex
-        options:
-          chunks:
-            x: 3000
-            y: 3000
-          mosaic_kwargs:
-            method: nearest
-          tileindex: location
-      meta:
-        nodata: 0
-        category: hydrography
-        paper_doi: 10.1126/science.aat0636
-        paper_ref: Allen and Pavelsky (2018)
-        source_license: CC BY 4.0
-        source_url: https://doi.org/10.5281/zenodo.1297434
-        source_version: 1.01
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/tiled_raster_dataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. NOTE::
 
@@ -222,34 +192,16 @@ see description of the `uri` argument in the :ref:`yaml file description <data_y
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/netcdf_raster_dataset.yml
+   :language: yaml
 
-    era5_hourly:
-      uri: forcing/ERA5/org/era5_{variable}_{year}_hourly.nc
-      data_type: RasterDataset
-      driver:
-        name: netcdf
-        options:
-          chunks: {latitude: 125, longitude: 120, time: 50}
-          combine: by_coords
-          decode_times: true
-          parallel: true
-      metadata:
-        crs: 4326
-        category: meteo
-        paper_doi: 10.1002/qj.3803
-        paper_ref: Hersbach et al. (2019)
-        source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
-        source_url: https://doi.org/10.24381/cds.bd0915c6
-      data_adapter:
-        rename:
-          t2m: temp
-          tp: precip
-        unit_add:
-          temp: -273.15
-        unit_mult:
-          precip: 1000
+.. testcode:: geotiff
+  :hide:
 
+  catalog_path = "docs/assets/data_types/netcdf_raster_dataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 Preprocess functions when combining multiple files
 """"""""""""""""""""""""""""""""""""""""""""""""""
@@ -277,7 +229,7 @@ Vector data (GeoDataFrame)
    * - Driver
      - File formats
      - Comments
-   * - :py:class:`vector <geodataframe.pyogrio_driver.PyogrioDriver>`
+   * - :py:class:`pyogrio <geodataframe.pyogrio_driver.PyogrioDriver>`
      - ESRI Shapefile, GeoPackage, GeoJSON, etc.
      - Point, Line and Polygon geometries. Uses :py:func:`pyogrio.read_dataframe`
    * - :py:class:`geodataframe_table <geodataframe.table_driver.GeoDataFrameTableDriver>`
@@ -295,23 +247,20 @@ spatial index for fast filtering of the data based on spatial location. An examp
 shown below. Note that the rename, ``unit_mult``, ``unit_add`` and ``nodata`` options refer to
 columns of the attribute table in case of a GeoDataFrame.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/gpkg_geodataframe.yml
+   :language: yaml
 
-  GDP_world:
-    uri: base/emissions/GDP-countries/World_countries_GDPpcPPP.gpkg
-    data_type: GeoDataFrame
-    driver:
-      name: vector
-      options:
-        layer: GDP
-    data_adapter:
-      rename:
-        GDP: gdp
-      unit_mult:
-        gdp: 0.001
-    metadata:
-      category: socio-economic
-      source_version: 1.0
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/gpkg_geodataframe.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _textdelimited_vector:
 
@@ -347,14 +296,20 @@ of the GeoDataFrame attribute table.
 As the CRS of the coordinates cannot be inferred from the data it must be set in the
 data entry in the yaml file as shown in the example below.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/csv_geodataframe.yml
+   :language: yaml
 
-    stations:
-      uri: /path/to/stations.csv
-      data_type: GeoDataFrame
-      driver: geodataframe_table
-      metadata:
-        crs: 4326
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/csv_geodataframe.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _binary_vector:
 
@@ -382,7 +337,7 @@ Geospatial point time-series (GeoDataset)
    * - Driver
      - File formats
      - Comments
-   * - :py:class:`vector <geodataset.vector_driver.GeoDatasetVectorDriver>`
+   * - :py:class:`geodataset_vector <geodataset.vector_driver.GeoDatasetVectorDriver>`
      - Combined point location (e.g. CSV or GeoJSON) and text delimited time-series (e.g. CSV) data.
      - Uses :py:meth:`~hydromt._io._open_vector`, :py:meth:`~hydromt._io._open_timeseries_from_table`
    * - :py:class:`geodataset_xarray <geodataset.xarray_driver.GeoDatasetXarrayDriver>`
@@ -421,30 +376,20 @@ see description of the `uri` argument in the :ref:`yaml file description <data_y
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/netcdf_geodataset.yml
+   :language: yaml
 
-    gtsmv3_eu_era5:
-      uri: reanalysis-waterlevel-{year}-m{month:02d}.nc
-      data_type: GeoDataset
-      driver:
-        name: netcdf
-        options:
-          chunks: {stations: 100, time: 1500}
-          combine: by_coords
-          decode_times: true
-          parallel: true
-      data_adapter:
-        rename:
-          station_x_coordinate: lon
-          station_y_coordinate: lat
-          stations: index
-      metadata:
-        crs: 4326
-        category: ocean
-        paper_doi: 10.24381/cds.8c59054f
-        paper_ref: Copernicus Climate Change Service 2019
-        source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
-        source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/netcdf_geodataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _CSV_point:
 
@@ -463,17 +408,20 @@ referred to using the `data_path` option. The index of the time-series (in the c
 header) and point locations must match. For more options see the
 :py:meth:`~hydromt._io._open_geodataset` method.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/csv_geodataset.yml
+   :language: yaml
 
-    waterlevels_txt:
-      uri: /path/to/stations.csv
-      data_type: GeoDataset
-      driver:
-        name: vector
-        options:
-          data_path: /path/to/stations_data.csv
-      metadata:
-        crs: 4326
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/csv_geodataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 *Tabulated time series text file*
 
@@ -492,6 +440,7 @@ To read the time stamps the :py:func:`pandas.to_datetime` method is used.
 
 NetCDF time-series dataset (Dataset)
 ------------------------------------
+
 .. _dataset_formats:
 
 .. list-table::
@@ -507,7 +456,6 @@ NetCDF time-series dataset (Dataset)
 
 .. _NC_timeseries:
 
-
 Netcdf time-series dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -516,12 +464,20 @@ NetCDF and zarr timeseries data are parsed to **Dataset** with the
 The resulting dataset is similar to the **GeoDataset** except that it lacks a spatial
 dimension.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/netcdf_dataset.yml
+  :language: yaml
 
-    timeseries_dataset:
-      uri: /path/to/timeseries.netcdf
-      data_type: Dataset
-      driver: netcdf
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/netcdf_dataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _DataFrame:
 
@@ -557,19 +513,20 @@ parsing of datetime-strings. See the relevant pandas function for which argument
 used. Also note that the driver is not restricted to comma-separated files, as
 the delimiter can be given to the reader through the `options`.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/csv_dataframe.yml
+  :language: yaml
 
-    observations:
-      uri: data/lulc/globcover_mapping.csv
-      data_type: DataFrame
-      driver:
-        name: csv
-        options:
-          header: null  # null translates to None in Python -> no header
-          index_col: 0
-          parse_dates: false
-      metadata:
-        category: parameter_mapping
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/csv_dataframe.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. note::
     The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argument should be used instead.

@@ -1,0 +1,4 @@
+timeseries_dataset:
+  uri: /path/to/timeseries.netcdf
+  data_type: Dataset
+  driver: dataset_xarray

@@ -1,0 +1,11 @@
+observations:
+  uri: data/lulc/globcover_mapping.csv
+  data_type: DataFrame
+  driver:
+    name: pandas
+    options:
+      header: null  # null translates to None in Python -> no header
+      index_col: 0
+      parse_dates: false
+  metadata:
+    category: parameter_mapping

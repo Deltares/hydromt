@@ -1,0 +1,15 @@
+GDP_world:
+  uri: base/emissions/GDP-countries/World_countries_GDPpcPPP.gpkg
+  data_type: GeoDataFrame
+  driver:
+    name: pyogrio
+    options:
+      layer: GDP
+  data_adapter:
+    rename:
+      GDP: gdp
+    unit_mult:
+      gdp: 0.001
+  metadata:
+    category: socio-economic
+    source_version: 1.0
