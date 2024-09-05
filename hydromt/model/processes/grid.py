@@ -13,7 +13,7 @@ from shapely.geometry import Polygon
 
 from hydromt._typing.type_def import Number
 from hydromt.data_catalog import DataCatalog
-from hydromt.gis import gis_utils, raster
+from hydromt.gis import _gis_utils, raster
 from hydromt.model.processes.region import (
     parse_region_basin,
     parse_region_bbox,
@@ -125,7 +125,7 @@ def create_grid_from_region(
         else:
             geom = parse_region_bbox(region, crs=region_crs)
         if crs is not None:
-            crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+            crs = _gis_utils._parse_crs(crs, bbox=geom.total_bounds)
             geom = geom.to_crs(crs)
         if rotated:
             grid = create_rotated_grid_from_geom(
@@ -665,7 +665,7 @@ def _extract_coords_from_basin(
     # TODO add warning on res value if crs is projected or not?
     if res != da_hyd.raster.res:
         if crs is not None and crs != da_hyd.raster.crs:
-            crs = gis_utils.parse_crs(crs, da_hyd.raster.bounds)
+            crs = _gis_utils._parse_crs(crs, da_hyd.raster.bounds)
         else:
             crs = da_hyd.raster.crs
         da_hyd = da_hyd.raster.reproject(dst_crs=crs, dst_res=res, align=align)

@@ -17,23 +17,23 @@ from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom, Zoom
-from hydromt.gis.raster_utils import cellres
+from hydromt.gis._raster_utils import _cellres
 
 __all__ = [
-    "axes_attrs",
-    "bbox_from_file_and_filters",
-    "parse_crs",
-    "parse_geom_bbox_buffer",
-    "zoom_to_overview_level",
-    "to_geographic_bbox",
-    "utm_crs",
+    "_axes_attrs",
+    "_bbox_from_file_and_filters",
+    "_parse_crs",
+    "_parse_geom_bbox_buffer",
+    "_zoom_to_overview_level",
+    "_to_geographic_bbox",
+    "_utm_crs",
 ]
 
 logger = logging.getLogger(__name__)
 
 
 # REPROJ
-def utm_crs(bbox):
+def _utm_crs(bbox):
     """Return wkt string of nearest UTM projects.
 
     Parameters
@@ -58,7 +58,7 @@ def utm_crs(bbox):
     return CRS.from_epsg(epsg)
 
 
-def parse_crs(crs: Any, bbox: List[float] = None) -> CRS:
+def _parse_crs(crs: Any, bbox: List[float] = None) -> CRS:
     """Parse crs string to pyproj.CRS.
 
     Parameters
@@ -76,7 +76,7 @@ def parse_crs(crs: Any, bbox: List[float] = None) -> CRS:
     """
     if crs == "utm":
         if bbox is not None:
-            crs = utm_crs(bbox)
+            crs = _utm_crs(bbox)
         else:
             raise ValueError('CRS "utm" requires bbox')
     else:
@@ -84,7 +84,7 @@ def parse_crs(crs: Any, bbox: List[float] = None) -> CRS:
     return crs
 
 
-def axes_attrs(crs):
+def _axes_attrs(crs):
     """Provide CF-compliant variable names and metadata for axes.
 
     Parameters
@@ -112,7 +112,7 @@ def axes_attrs(crs):
     return x_dim, y_dim, x_attrs, y_attrs
 
 
-def parse_geom_bbox_buffer(
+def _parse_geom_bbox_buffer(
     geom: Optional[Geom] = None,
     bbox: Optional[Bbox] = None,
     buffer: float = 0.0,
@@ -156,7 +156,7 @@ def parse_geom_bbox_buffer(
     return geom
 
 
-def to_geographic_bbox(
+def _to_geographic_bbox(
     bbox: List[float], source_crs: Optional[CRS] = None
 ) -> List[float]:
     """Convert a bbox to geographic coordinates (EPSG:4326).
@@ -183,7 +183,7 @@ def to_geographic_bbox(
     return bbox
 
 
-def bbox_from_file_and_filters(
+def _bbox_from_file_and_filters(
     path: str,
     bbox: Optional[GpdShapeGeom] = None,
     mask: Optional[GpdShapeGeom] = None,
@@ -233,7 +233,7 @@ def bbox_from_file_and_filters(
     return tuple(bbox.to_crs(source_crs).total_bounds)
 
 
-def zoom_to_overview_level(
+def _zoom_to_overview_level(
     zoom: Zoom,
     mask: Optional[Geom] = None,
     zls_dict: Optional[Dict[int, float]] = None,
@@ -296,7 +296,7 @@ def zoom_to_overview_level(
                 lat = 0
                 if mask is not None:
                     lat = mask.to_crs(4326).centroid.y.item()
-                conversions["degree"] = cellres(lat=lat)[1]
+                conversions["degree"] = _cellres(lat=lat)[1]
             fsrc = conversions.get(src_res_unit, 1)
             fdst = conversions.get(dst_crs_unit, 1)
             dst_res = src_res * fsrc / fdst

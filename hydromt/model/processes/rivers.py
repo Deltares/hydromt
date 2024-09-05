@@ -10,7 +10,7 @@ import xarray as xr
 from pyflwdir import Flwdir, FlwdirRaster
 from scipy import ndimage
 
-from hydromt.gis.raster_utils import spread2d
+from hydromt.gis._raster_utils import _spread2d
 
 logger = logging.Logger(__name__)
 
@@ -55,7 +55,7 @@ def river_width(
     da_mask = da_rivmask.copy()
     da_mask.data = ndimage.binary_fill_holes(da_mask.values)
     # find nearest stream segment for all river cells
-    segid_spread = spread2d(segid, da_mask)
+    segid_spread = _spread2d(segid, da_mask)
     # get average width based on da_rivmask area and segment length
     cellarea = abs(np.multiply(*da_rivmask.raster.res))
     seg_count = ndimage.sum(

@@ -10,8 +10,8 @@ from pydantic import (
     Field,
 )
 
+from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import FS
-from hydromt.abstract_base import AbstractBaseModel
 from hydromt.plugins import PLUGINS
 
 logger: Logger = getLogger(__name__)
@@ -39,7 +39,7 @@ class BaseDriver(AbstractBaseModel, ABC):
         return super().__eq__(value)
 
     @classmethod
-    def load_plugins(cls):
+    def _load_plugins(cls):
         """Load Driver plugins."""
         plugins: Dict[str, BaseDriver] = PLUGINS.uri_resolver_plugins
         logger.debug(f"loaded {cls.__name__} plugins: {plugins}")

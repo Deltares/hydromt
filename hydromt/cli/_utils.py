@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional, Union
 
 import click
 
-from hydromt.io import configread
+from hydromt._io import _config_read
 
 __all__ = ["parse_json", "parse_config", "parse_opt"]
 
@@ -80,7 +80,7 @@ def parse_config(
     """Parse config from `path` and combine with command line options `opt_cli`."""
     opt = {}
     if path is not None and isfile(path):
-        opt = configread(path, abs_path=True, skip_abspath_sections=["setup_config"])
+        opt = _config_read(path, abs_path=True, skip_abspath_sections=["setup_config"])
     elif path is not None:
         raise IOError(f"Config not found at {path}")
     if opt_cli is not None:

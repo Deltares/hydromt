@@ -25,12 +25,12 @@ from tomli import load as load_toml
 from yaml import safe_load as load_yaml
 
 from hydromt._typing.type_def import StrPath
+from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
-from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
-from hydromt.gis import gis_utils, raster, vector, vector_utils
+from hydromt.gis import _gis_utils, _vector_utils, raster, vector
+from hydromt.gis._raster_merge import _merge
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.gis.raster_merge import merge
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
@@ -38,16 +38,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "open_mfcsv",
-    "open_raster",
-    "open_mfraster",
-    "open_raster_from_tindex",
-    "open_vector",
-    "open_geodataset",
-    "open_vector_from_table",
-    "open_timeseries_from_table",
-    "read_yaml",
-    "read_toml",
+    "_open_mfcsv",
+    "_open_raster",
+    "_open_mfraster",
+    "_open_raster_from_tindex",
+    "_open_vector",
+    "_open_geodataset",
+    "_open_vector_from_table",
+    "_open_timeseries_from_table",
+    "_read_yaml",
+    "_read_toml",
 ]
 
 OPEN_VECTOR_PREDICATE = Literal[
@@ -56,9 +56,10 @@ OPEN_VECTOR_PREDICATE = Literal[
 OPEN_VECTOR_DRIVER = Literal["csv", "xls", "xy", "vector", "parquet"]
 
 
-def open_mfcsv(
+def _open_mfcsv(
     paths: Dict[Union[str, int], Union[str, Path]],
     concat_dim: str,
+    *,
     driver_kwargs: Optional[Dict[str, Any]] = None,
     variable_axis: Literal[0, 1] = 1,
     segmented_by: Literal["id", "var"] = "id",
@@ -171,8 +172,9 @@ def open_mfcsv(
     return ds
 
 
-def open_raster(
+def _open_raster(
     uri: Union[StrPath, IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
+    *,
     mask_nodata: bool = False,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
     nodata: Union[int, float, None] = None,
@@ -233,8 +235,9 @@ def open_raster(
     return da
 
 
-def open_mfraster(
+def _open_mfraster(
     uris: Union[str, List[StrPath]],
+    *,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
     concat: bool = False,
     concat_dim: str = "dim0",
@@ -306,7 +309,7 @@ def open_mfraster(
     index_lst, file_attrs = [], []
     for i, uri in enumerate(uris):
         # read file
-        da = open_raster(uri, chunks=chunks, **kwargs)
+        da = _open_raster(uri, chunks=chunks, **kwargs)
 
         # get name, attrs and index (if concat)
         if hasattr(uri, "path"):  # file-like
@@ -357,7 +360,7 @@ def open_mfraster(
                 da = da.sortby(concat_dim).transpose(concat_dim, ...)
                 da.attrs.update(da_lst[0].attrs)
         else:
-            da = merge(da_lst, **mosaic_kwargs)  # spatial merge
+            da = _merge(da_lst, **mosaic_kwargs)  # spatial merge
             da.attrs.update({"source_file": "; ".join(file_attrs)})
         ds = da.to_dataset()  # dataset for consistency
     else:
@@ -373,8 +376,9 @@ def open_mfraster(
     return ds
 
 
-def open_raster_from_tindex(
+def _open_raster_from_tindex(
     tindex_path,
+    *,
     bbox=None,
     geom=None,
     tileindex="location",
@@ -432,7 +436,7 @@ def open_raster_from_tindex(
     if "dst_bounds" not in mosaic_kwargs:
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
 
-    ds_out = open_mfraster(
+    ds_out = _open_mfraster(
         paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
     )
     # clip to extent
@@ -442,8 +446,9 @@ def open_raster_from_tindex(
     return ds_out  # dataset to be consitent with open_mfraster
 
 
-def open_geodataset(
+def _open_geodataset(
     loc_path,
+    *,
     data_path=None,
     var_name=None,
     index_dim=None,
@@ -502,12 +507,12 @@ def open_geodataset(
         kwargs.update(assert_gtype="Point")
     # read geometry file
     polygon: Optional[Polygon] = box(*bbox) if bbox else None
-    gdf = open_vector(loc_path, crs=crs, bbox=polygon, geom=geom, **kwargs)
+    gdf = _open_vector(loc_path, crs=crs, bbox=polygon, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
     # read timeseries file
     if data_path is not None and isfile(data_path):
-        da_ts = open_timeseries_from_table(
+        da_ts = _open_timeseries_from_table(
             data_path, name=var_name, index_dim=index_dim
         )
         ds = vector.GeoDataset.from_gdf(gdf, da_ts)
@@ -518,7 +523,7 @@ def open_geodataset(
     return ds.chunk(chunks)
 
 
-def open_timeseries_from_table(path, name=None, index_dim="index", **kwargs):
+def _open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
     """Open timeseries csv or parquet file and parse to xarray.DataArray.
 
     Accepts files with time index on one dimension and numeric location index on the
@@ -583,8 +588,9 @@ def open_timeseries_from_table(path, name=None, index_dim="index", **kwargs):
     return xr.DataArray(df, dims=("time", index_dim), name=name)
 
 
-def open_vector(
+def _open_vector(
     path: StrPath,
+    *,
     driver: Optional[OPEN_VECTOR_DRIVER] = None,
     crs: Optional[CRS] = None,
     dst_crs: Optional[CRS] = None,
@@ -636,7 +642,7 @@ def open_vector(
     """
     driver = driver if driver is not None else str(path).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
-        gdf = open_vector_from_table(path, driver=driver, **kwargs)
+        gdf = _open_vector_from_table(path, driver=driver, **kwargs)
     # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
 
     else:
@@ -645,7 +651,7 @@ def open_vector(
                 bbox_shapely = box(*bbox)
             else:
                 bbox_shapely = None
-            bbox_reader = gis_utils.bbox_from_file_and_filters(
+            bbox_reader = _gis_utils._bbox_from_file_and_filters(
                 str(path), bbox_shapely, geom, crs
             )
             gdf = read_dataframe(str(path), bbox=bbox_reader, **kwargs)
@@ -674,13 +680,14 @@ def open_vector(
         gdf = gdf.to_crs(dst_crs)
     # filter points
     if gdf.index.size > 0 and (geom is not None or bbox is not None):
-        idx = vector_utils.filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
+        idx = _vector_utils._filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
         gdf = gdf.iloc[idx, :]
     return gdf
 
 
-def open_vector_from_table(
+def _open_vector_from_table(
     path,
+    *,
     driver=None,
     x_dim=None,
     y_dim=None,
@@ -752,10 +759,10 @@ def open_vector_from_table(
     return gdf
 
 
-def read_workflow_yaml(
+def _read_workflow_yaml(
     path: StrPath,
 ) -> Tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
-    d = read_yaml(path)
+    d = _read_yaml(path)
     modeltype = d.pop("modeltype", None)
     model_init = d.pop("global", {})
 
@@ -765,7 +772,7 @@ def read_workflow_yaml(
     return modeltype, model_init, steps
 
 
-def configread(
+def _config_read(
     config_path: Union[Path, str],
     defaults: Optional[Dict[str, Any]] = None,
     abs_path: bool = False,
@@ -797,7 +804,7 @@ def configread(
     # read
     ext = splitext(config_path)[-1].strip()
     if ext in [".yaml", ".yml"]:
-        cfdict = read_yaml(config_path)
+        cfdict = _read_yaml(config_path)
     else:
         raise ValueError(f"Unknown extension: {ext} Hydromt only supports yaml")
 
@@ -814,7 +821,7 @@ def configread(
     return cfdict
 
 
-def parse_values(
+def _parse_values(
     cfdict: Dict[str, Any],
     skip_eval: bool = False,
     skip_eval_sections: Optional[List[str]] = None,
@@ -856,9 +863,10 @@ def parse_values(
     return cfdict
 
 
-def read_nc(
+def _read_nc(
     filename_template: StrPath,
     root: Path,
+    *,
     mask_and_scale: bool = False,
     single_var_as_array: bool = True,
     load: bool = False,
@@ -897,8 +905,8 @@ def read_nc(
     ncs = dict()
     path_template = root / filename_template
 
-    path_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
-        str(path_template)
+    path_glob, _, regex = _expand_uri_placeholders(
+        str(path_template), placeholders=_placeholders
     )
     paths = glob(path_glob)
     for path in paths:
@@ -921,7 +929,7 @@ def read_nc(
     return ncs
 
 
-def read_yaml(path: StrPath) -> Dict[str, Any]:
+def _read_yaml(path: StrPath) -> Dict[str, Any]:
     """Read yaml file and return as dict."""
     with open(path, "rb") as stream:
         yml = load_yaml(stream)
@@ -929,11 +937,11 @@ def read_yaml(path: StrPath) -> Dict[str, Any]:
     return yml
 
 
-def parse_yaml(text: str) -> Dict[str, Any]:
+def _parse_yaml(text: str) -> Dict[str, Any]:
     return load_yaml(text)
 
 
-def read_toml(path: StrPath) -> Dict[str, Any]:
+def _read_toml(path: StrPath) -> Dict[str, Any]:
     """Read toml file and return as dict."""
     with open(path, "rb") as f:
         data = load_toml(f)
@@ -945,8 +953,8 @@ def _yml_from_uri_or_path(uri_or_path: StrPath) -> Dict[str, Any]:
     if _is_valid_url(str(uri_or_path)):
         with fetch(str(uri_or_path), stream=True) as r:
             r.raise_for_status()
-            yml = parse_yaml(r.text)
+            yml = _parse_yaml(r.text)
 
     else:
-        yml = read_yaml(uri_or_path)
+        yml = _read_yaml(uri_or_path)
     return yml

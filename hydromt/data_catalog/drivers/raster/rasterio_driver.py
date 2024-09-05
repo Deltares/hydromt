@@ -10,6 +10,7 @@ import rasterio.errors
 import xarray as xr
 from pyproj import CRS
 
+from hydromt._io.readers import _open_mfraster
 from hydromt._typing import (
     Geom,
     SourceMetadata,
@@ -25,8 +26,7 @@ from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers import RasterDatasetDriver
-from hydromt.gis.gis_utils import zoom_to_overview_level
-from hydromt.io.readers import open_mfraster
+from hydromt.gis._gis_utils import _zoom_to_overview_level
 
 logger: Logger = getLogger(__name__)
 
@@ -94,9 +94,9 @@ class RasterioDriver(RasterDatasetDriver):
                 zls_dict: Dict[int, float] = metadata.zls_dict
                 crs: Optional[CRS] = metadata.crs
             except AttributeError:  # pydantic extra=allow on SourceMetadata
-                zls_dict, crs = self.get_zoom_levels_and_crs(uris[0])
+                zls_dict, crs = self._get_zoom_levels_and_crs(uris[0])
 
-            overview_level: Optional[int] = zoom_to_overview_level(
+            overview_level: Optional[int] = _zoom_to_overview_level(
                 zoom, mask, zls_dict, crs
             )
             if overview_level:
@@ -109,11 +109,11 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> Union[xr.DataArray, xr.Dataset]:
             try:
-                return open_mfraster(uris, **kwargs)
+                return _open_mfraster(uris, **kwargs)
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     kwargs.pop("overview_level")
-                    return open_mfraster(uris, **kwargs)
+                    return _open_mfraster(uris, **kwargs)
                 else:
                     raise
 
@@ -141,8 +141,12 @@ class RasterioDriver(RasterDatasetDriver):
                 )
         return ds
 
+    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+        """Write out a RasterDataset using rasterio."""
+        raise NotImplementedError()
+
     @staticmethod
-    def get_zoom_levels_and_crs(uri: str) -> Tuple[Dict[int, float], int]:
+    def _get_zoom_levels_and_crs(uri: str) -> Tuple[Dict[int, float], int]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         zoom_levels = {}
         crs = None
@@ -161,7 +165,3 @@ class RasterioDriver(RasterDatasetDriver):
         except rasterio.RasterioIOError as e:
             logger.warning(f"IO error while detecting zoom levels: {e}")
         return zoom_levels, crs
-
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
-        """Write out a RasterDataset using rasterio."""
-        raise NotImplementedError()

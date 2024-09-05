@@ -13,7 +13,7 @@ from geopandas import GeoDataFrame, GeoSeries
 from geopandas.testing import assert_geodataframe_equal
 from shapely.geometry import box
 
-from hydromt.data_catalog.uri_resolvers import ConventionResolver
+from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -145,9 +145,7 @@ class GeomsComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
         f = filename or self._filename
         read_path = self.root.path / f
-        path_glob, _, regex = ConventionResolver()._expand_uri_placeholders(
-            str(read_path)
-        )
+        path_glob, _, regex = _expand_uri_placeholders(str(read_path))
         paths = glob(path_glob)
         for p in paths:
             name = ".".join(regex.match(p).groups())  # type: ignore

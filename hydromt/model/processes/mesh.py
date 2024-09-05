@@ -12,7 +12,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt.data_catalog import DataCatalog
-from hydromt.gis import gis_utils
+from hydromt.gis import _gis_utils
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.model.processes.region import (
     parse_region_bbox,
@@ -107,7 +107,7 @@ def create_mesh2d_from_region(
         clip_to_geom = kind == "geom"
 
         if crs is not None:
-            crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+            crs = _gis_utils._parse_crs(crs, bbox=geom.total_bounds)
             geom = geom.to_crs(crs)
 
         return create_mesh2d_from_geom(
@@ -176,7 +176,7 @@ def create_mesh2d_from_mesh(
         if grid_crs is not None:
             if grid_crs.to_epsg() == 4326:
                 bbox = mesh2d.ugrid.grid.bounds
-        crs = gis_utils.parse_crs(crs, bbox=bbox)
+        crs = _gis_utils._parse_crs(crs, bbox=bbox)
     else:
         crs = CRS.from_user_input(4326)
     if grid_crs is not None:  # parse crs

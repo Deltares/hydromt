@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 
 
-def round_latlon(ds: xr.Dataset, decimals: int = 5) -> xr.Dataset:
+def _round_latlon(ds: xr.Dataset, decimals: int = 5) -> xr.Dataset:
     """Round the x and y dimensions to latlon."""
     x_dim = ds.raster.x_dim
     y_dim = ds.raster.y_dim
@@ -15,19 +15,19 @@ def round_latlon(ds: xr.Dataset, decimals: int = 5) -> xr.Dataset:
     return ds
 
 
-def to_datetimeindex(ds: xr.Dataset) -> xr.Dataset:
+def _to_datetimeindex(ds: xr.Dataset) -> xr.Dataset:
     """Convert the 'time' index to datetimeindex."""
     if ds.indexes["time"].dtype == "O":
         ds["time"] = ds.indexes["time"].to_datetimeindex()
     return ds
 
 
-def remove_duplicates(ds: xr.Dataset) -> xr.Dataset:
+def _remove_duplicates(ds: xr.Dataset) -> xr.Dataset:
     """Remove duplicates from the 'time' index."""
     return ds.sel(time=~ds.get_index("time").duplicated())
 
 
-def harmonise_dims(ds: xr.Dataset) -> xr.Dataset:
+def _harmonise_dims(ds: xr.Dataset) -> xr.Dataset:
     """Harmonise lon-lat-time dimensions.
 
     Where needed:
@@ -64,14 +64,14 @@ def harmonise_dims(ds: xr.Dataset) -> xr.Dataset:
     ), "orientation not W->E after get_data preprocess set_lon_lat_axis"
     # Time
     if ds.indexes["time"].dtype == "O":
-        ds = to_datetimeindex(ds)
+        ds = _to_datetimeindex(ds)
 
     return ds
 
 
 PREPROCESSORS: Dict[str, Callable] = {
-    "round_latlon": round_latlon,
-    "to_datetimeindex": to_datetimeindex,
-    "remove_duplicates": remove_duplicates,
-    "harmonise_dims": harmonise_dims,
+    "round_latlon": _round_latlon,
+    "to_datetimeindex": _to_datetimeindex,
+    "remove_duplicates": _remove_duplicates,
+    "harmonise_dims": _harmonise_dims,
 }

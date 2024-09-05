@@ -16,7 +16,7 @@ from hydromt._typing import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.sources import RasterDatasetSource
-from hydromt.gis import gis_utils
+from hydromt.gis import _gis_utils
 from hydromt.model.processes.basin_mask import get_basin_geometry
 from hydromt.plugins import PLUGINS
 
@@ -316,7 +316,7 @@ def _update_crs(
     geom: gpd.GeoDataFrame, crs: Optional[Union[CRS, int]]
 ) -> Optional[gpd.GeoDataFrame]:
     if crs is not None:
-        crs = gis_utils.parse_crs(crs, bbox=geom.total_bounds)
+        crs = _gis_utils._parse_crs(crs, bbox=geom.total_bounds)
         return geom.to_crs(crs)
     return geom
 

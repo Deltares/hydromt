@@ -46,10 +46,10 @@ class DataFrameSource(DataSource):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[pd.DataFrame]:
         """Use the resolver, driver, and data adapter to read and harmonize the data."""
-        self.mark_as_used()
+        self._mark_as_used()
 
-        tr: TimeRange = self.data_adapter.to_source_timerange(time_range)
-        vrs: Optional[List[str]] = self.data_adapter.to_source_variables(variables)
+        tr: TimeRange = self.data_adapter._to_source_timerange(time_range)
+        vrs: Optional[List[str]] = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,

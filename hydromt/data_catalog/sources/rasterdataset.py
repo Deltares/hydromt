@@ -29,7 +29,7 @@ from hydromt._typing import (
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.gis.gis_utils import parse_geom_bbox_buffer
+from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 
@@ -62,11 +62,11 @@ class RasterDatasetSource(DataSource):
         """
         self._used = True
         if bbox is not None or (mask is not None and buffer > 0):
-            mask = parse_geom_bbox_buffer(mask, bbox, buffer)
+            mask = _parse_geom_bbox_buffer(mask, bbox, buffer)
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter.to_source_timerange(time_range)
-        vrs = self.data_adapter.to_source_variables(variables)
+        tr = self.data_adapter._to_source_timerange(time_range)
+        vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,

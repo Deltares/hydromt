@@ -7,8 +7,8 @@ from typing import Any, Dict, List, Optional
 from fsspec.implementations.local import LocalFileSystem
 from pydantic import ConfigDict, Field
 
+from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import FS, Geom, NoDataStrategy, SourceMetadata, TimeRange, Zoom
-from hydromt.abstract_base import AbstractBaseModel
 from hydromt.plugins import PLUGINS
 
 logger: Logger = getLogger(__name__)
@@ -65,7 +65,7 @@ class URIResolver(AbstractBaseModel, ABC):
         ...
 
     @classmethod
-    def load_plugins(cls):
+    def _load_plugins(cls):
         """Load URIResolver plugins."""
         plugins: Dict[str, URIResolver] = PLUGINS.uri_resolver_plugins
         logger.debug(f"loaded {cls.__name__} plugins: {plugins}")

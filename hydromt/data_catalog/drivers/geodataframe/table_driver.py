@@ -52,7 +52,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
 
         _uri: str = uris[0]
 
-        gdf = open_vector_from_table(
+        gdf = _open_vector_from_table(
             uri=_uri,
             x_dim=self.options.get("x_dim"),
             y_dim=self.options.get("y_dim"),
@@ -66,7 +66,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         return gdf
 
 
-def open_vector_from_table(
+def _open_vector_from_table(
     uri: str,
     x_dim: Optional[str] = None,
     y_dim: Optional[str] = None,

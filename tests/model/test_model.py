@@ -101,7 +101,7 @@ def test_write_data_catalog_single_source(tmpdir):
     model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
     data_lib_path = join(model.root.path, "hydromt_data.yml")
     sources = list(model.data_catalog.sources.keys())
-    model.data_catalog.get_source(sources[0]).mark_as_used()
+    model.data_catalog.get_source(sources[0])._mark_as_used()
     model.write_data_catalog()
     assert list(DataCatalog(data_lib_path).sources.keys()) == sources[:1]
 
@@ -111,10 +111,10 @@ def test_write_data_catalog_append(tmpdir):
     data_lib_path = join(model.root.path, "hydromt_data.yml")
     sources = list(model.data_catalog.sources.keys())
     model1 = Model(root=str(model.root.path), data_libs=["artifact_data"], mode="r+")
-    model1.data_catalog.get_source(sources[1]).mark_as_used()
+    model1.data_catalog.get_source(sources[1])._mark_as_used()
     model1.write_data_catalog(append=False)
     assert list(DataCatalog(data_lib_path).sources.keys()) == [sources[1]]
-    model1.data_catalog.get_source(sources[0]).mark_as_used()
+    model1.data_catalog.get_source(sources[0])._mark_as_used()
     model1.write_data_catalog(append=True)
     assert list(DataCatalog(data_lib_path).sources.keys()) == sources[:2]
 

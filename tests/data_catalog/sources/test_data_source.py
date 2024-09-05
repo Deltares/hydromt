@@ -5,8 +5,7 @@ import pytest
 from hydromt._typing import NoDataException
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
-from hydromt.data_catalog.sources import DataSource, GeoDataFrameSource, create_source
-from hydromt.data_catalog.sources.data_source import get_nested_var, set_nested_var
+from hydromt.data_catalog.sources import DataSource, GeoDataFrameSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
 
 
@@ -95,51 +94,3 @@ class TestDataSource:
         )
         with pytest.raises(NoDataException):
             source.read_data()
-
-
-class TestGetNestedVar:
-    def test_reads_nested(self, mock_geodf_driver: GeoDataFrameDriver):
-        class FakeGeoDfDriver(GeoDataFrameDriver):
-            name = "test_reads_nested"
-
-            def read(self, **kwargs):
-                pass
-
-        submodel: DataSource = create_source(
-            {
-                "name": "geojsonfile",
-                "data_type": "GeoDataFrame",
-                "driver": mock_geodf_driver,
-                "data_adapter": {"unit_add": {"var1": 1}},
-                "uri": "test_uri",
-            }
-        )
-        assert get_nested_var(["data_adapter", "unit_add"], submodel), {"var1": 1}
-
-
-class TestSetNestedVar:
-    @pytest.fixture()
-    def data_source_dict(self) -> Dict[str, Any]:
-        return {
-            "name": "geojsonfile",
-            "data_type": "GeoDataFrame",
-            "driver": "zarr",
-            "data_adapter": {"name": "raster", "unit_add": {"var1": 1}},
-            "uri": "test_uri",
-        }
-
-    def test_sets_nested(self, data_source_dict: Dict[str, Any]):
-        set_nested_var(["data_adapter", "unit_add", "var1"], data_source_dict, 2)
-        assert data_source_dict["data_adapter"]["unit_add"]["var1"] == 2
-
-    def test_changes_flat_value(self, data_source_dict: Dict[str, Any]):
-        set_nested_var(["driver"], data_source_dict, "pyogrio")
-        assert data_source_dict["driver"] == "pyogrio"
-
-    def test_ignores_incompatible_field(self, data_source_dict: Dict[str, Any]):
-        with pytest.raises(ValueError, match="Cannot set"):
-            set_nested_var(["driver", "name"], data_source_dict, "pyogrio")
-
-    def test_adds_missing_field(self, data_source_dict: Dict[str, Any]):
-        set_nested_var(["data_adapter", "unit_mult", "var1"], data_source_dict, 2.0)
-        assert data_source_dict["data_adapter"]["unit_mult"] == {"var1": 2.0}
