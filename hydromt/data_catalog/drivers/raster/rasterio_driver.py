@@ -56,6 +56,7 @@ class RasterioDriver(RasterDatasetDriver):
             {"time_range": time_range},
         )
         kwargs: Dict[str, Any] = {}
+        mosaic_kwargs: Dict[str, Any] = self.options.get("mosaic_kwargs", {})
 
         # get source-specific options
         cache_root: str = str(
@@ -78,7 +79,11 @@ class RasterioDriver(RasterDatasetDriver):
             uris = uris_cached
 
         if mask is not None:
-            kwargs.update({"mosaic_kwargs": {"mask": mask}})
+            mosaic_kwargs.update({"mask": mask})
+
+        # get mosaic kwargs
+        if mosaic_kwargs:
+            kwargs.update({"mosaic_kwargs": mosaic_kwargs})
 
         if np.issubdtype(type(metadata.nodata), np.number):
             kwargs.update(nodata=metadata.nodata)

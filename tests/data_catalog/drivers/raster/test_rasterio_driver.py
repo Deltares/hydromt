@@ -2,6 +2,7 @@ import glob
 from os.path import join
 from pathlib import Path
 from typing import Tuple
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -62,6 +63,13 @@ class TestRasterioDriver:
             uri, metadata=SourceMetadata(nodata=np.float64(42))
         )
         assert ds["test_sets_nodata"].raster.nodata == 42
+
+    @patch("hydromt.data_catalog.drivers.raster.rasterio_driver.open_mfraster")
+    def test_sets_mosaic_kwargs(self, fake_open_mfraster: MagicMock):
+        uris = ["test", "test2"]
+        mosaic_kwargs = {"mykwarg: 0"}
+        RasterioDriver(options={"mosaic_kwargs": mosaic_kwargs}).read(uris=uris)
+        fake_open_mfraster.assert_called_once_with(uris, mosaic_kwargs=mosaic_kwargs)
 
 
 class TestOpenMFRaster:
