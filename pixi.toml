@@ -91,9 +91,10 @@ docker-publish = { depends_on = [
 ] }
 docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
 
-html = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build", "-W"] }
-docs = { depends_on = ["html"] }
-doc = { depends_on = ["html"] }
+doctest = { cmd = ["sphinx-build","-M", "doctest", "docs", "docs/_build", "-W"] }
+docs-build = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build", "-W"], depends_on = ["doctest"] }
+docs = { depends_on = ["docs-build"] }  # alias
+doc = { depends_on = ["docs-build"] }  # alias
 serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
 
 

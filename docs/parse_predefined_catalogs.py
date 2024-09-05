@@ -147,7 +147,7 @@ def write_predefined_catalogs_to_rst_panels(
                 except OSError as e:
                     print(e)
                     continue
-            df = data_cat.to_dataframe().sort_index().drop_duplicates("path")
+            df = data_cat._to_dataframe().sort_index().drop_duplicates("path")
             df_dict[version] = df.copy()
             data_cat._sources = {}  # reset
         path = write_nested_dropdown(name, df_dict)

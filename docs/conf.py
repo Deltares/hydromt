@@ -158,6 +158,7 @@ with open("_generated/predefined_catalogs.rst", "w") as f:
 extensions = [
     "sphinx_design",
     "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx.ext.napoleon",
