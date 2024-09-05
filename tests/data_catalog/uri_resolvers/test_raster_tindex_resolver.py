@@ -70,12 +70,13 @@ class TestRasterTindexResolver:
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
         metadata = SourceMetadata()
         options = {"tileindex": "location"}
-        resolver = RasterTindexResolver(filesystem=AbstractFileSystem())
+        resolver = RasterTindexResolver(
+            filesystem=AbstractFileSystem(), options=options
+        )
         paths = resolver.resolve(
             uri=raster_tindex,
             metadata=metadata,
             mask=geom,
-            options=options,
         )
         assert len(paths) == 2
         assert (
@@ -92,7 +93,6 @@ class TestRasterTindexResolver:
             uri=raster_tindex,
             metadata=metadata,
             mask=geom,
-            options=options,
         )
         assert len(paths) == 1
         path = str(Path(join(dirname(raster_tindex), "GRWL_mask_V01.01/NA19.tif")))
@@ -110,13 +110,14 @@ class TestRasterTindexResolver:
                 uri=raster_tindex,
                 metadata=metadata,
                 mask=geom,
-                options={},
             )
 
     def test_raises_missing_tileindex(self, raster_tindex):
-        resolver = RasterTindexResolver(filesystem=AbstractFileSystem())
-        metadata = SourceMetadata()
         options = {"tileindex": "file"}
+        resolver = RasterTindexResolver(
+            filesystem=AbstractFileSystem(), options=options
+        )
+        metadata = SourceMetadata()
         geom = gpd.GeoDataFrame(geometry=[box(-78, 0.0005, -65, 4)], crs=4326)
         with pytest.raises(
             IOError,
@@ -126,18 +127,18 @@ class TestRasterTindexResolver:
                 uri=raster_tindex,
                 metadata=metadata,
                 mask=geom,
-                options=options,
             )
 
     def test_raises_no_intersecting_files(self, raster_tindex):
-        resolver = RasterTindexResolver(filesystem=AbstractFileSystem())
-        metadata = SourceMetadata()
         options = {"tileindex": "file"}
+        resolver = RasterTindexResolver(
+            filesystem=AbstractFileSystem(), options=options
+        )
+        metadata = SourceMetadata()
         geom = gpd.GeoDataFrame(geometry=[box(4, 52, 5, 53)], crs=4326)
         with pytest.raises(NoDataException, match="found no intersecting tiles."):
             resolver.resolve(
                 uri=raster_tindex,
                 metadata=metadata,
                 mask=geom,
-                options=options,
             )

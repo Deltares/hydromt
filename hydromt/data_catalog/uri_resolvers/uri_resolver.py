@@ -19,6 +19,7 @@ class URIResolver(AbstractBaseModel, ABC):
 
     model_config = ConfigDict(extra="forbid")
     filesystem: FS = Field(default_factory=LocalFileSystem)
+    options: Dict[str, Any] = Field(default_factory=dict)
 
     @abstractmethod
     def resolve(
@@ -31,7 +32,6 @@ class URIResolver(AbstractBaseModel, ABC):
         zoom_level: Optional[Zoom] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve a single uri to multiple uris.
 
@@ -51,8 +51,6 @@ class URIResolver(AbstractBaseModel, ABC):
             Metadata of DataSource.
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
-        options : Optional[Dict[str, Any]], optional
-            extra options for this resolver, by default None
 
         Returns
         -------
