@@ -16,7 +16,6 @@ API reference
    data_source
    drivers
    gis
-   io
    model
    stats
    plugin

@@ -16,7 +16,6 @@ General
    DataCatalog.sources
    DataCatalog.predefined_catalogs
    DataCatalog.to_dict
-   DataCatalog.to_dataframe
    DataCatalog.to_yml
    DataCatalog.export_data
    DataCatalog.get_source_bbox

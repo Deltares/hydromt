@@ -136,11 +136,9 @@ intersecting footprints will be merged together in the CRS of the most central t
 Use `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_ to build an excepted tile index file.
 
 Here a GeoPackage with the tile index referring to individual GeoTiff raster tiles is used.
-The `mosaic_kwargs` are passed to :py:meth:`~hydromt._io._open_raster_from_tindex` to
+The `mosaic_kwargs` are passed to :py:meth:`hydromt.gis.merge` to
 set the resampling `method`. The name of the column in the tile index attribute table
 `tileindex` which contains the raster tile file names is set in the `driver.options``
-(to be directly passed as an argument to
-:py:meth:`~hydromt._io._open_raster_from_tindex`).
 
 .. literalinclude:: ../../assets/data_types/tiled_raster_dataset.yml
    :language: yaml
@@ -234,7 +232,7 @@ Vector data (GeoDataFrame)
      - Point, Line and Polygon geometries. Uses :py:func:`pyogrio.read_dataframe`
    * - :py:class:`geodataframe_table <geodataframe.table_driver.GeoDataFrameTableDriver>`
      - CSV, XY, PARQUET and EXCEL.
-     - Point geometries only. Uses :py:meth:`~hydromt._io._open_vector_from_table`
+     - Point geometries only.
 
 .. _GPKG_vector:
 
@@ -338,8 +336,9 @@ Geospatial point time-series (GeoDataset)
      - File formats
      - Comments
    * - :py:class:`geodataset_vector <geodataset.vector_driver.GeoDatasetVectorDriver>`
-     - Combined point location (e.g. CSV or GeoJSON) and text delimited time-series (e.g. CSV) data.
-     - Uses :py:meth:`~hydromt._io._open_vector`, :py:meth:`~hydromt._io._open_timeseries_from_table`
+     - Combined point location (e.g. CSV or GeoJSON) and text delimited time-series
+       (e.g. CSV) data.
+     -
    * - :py:class:`geodataset_xarray <geodataset.xarray_driver.GeoDatasetXarrayDriver>`
      - NetCDF and Zarr
      - required time and index dimensions_ and x- and y coordinates.
@@ -405,8 +404,7 @@ earlier examples for GeoDataFrame datasets. Finally, certain binary formats such
 parquet are also supported. In addition a tabulated time-series text file can be passed
 to be used as a variable of the GeoDataset. This data is added by a second file which is
 referred to using the `data_path` option. The index of the time-series (in the columns
-header) and point locations must match. For more options see the
-:py:meth:`~hydromt._io._open_geodataset` method.
+header) and point locations must match.
 
 .. literalinclude:: ../../assets/data_types/csv_geodataset.yml
    :language: yaml
@@ -425,7 +423,6 @@ header) and point locations must match. For more options see the
 
 *Tabulated time series text file*
 
-This data is read using the :py:meth:`~hydromt._io._open_timeseries_from_table` method.
 To read the time stamps the :py:func:`pandas.to_datetime` method is used.
 
 .. code-block:: console
