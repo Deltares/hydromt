@@ -64,7 +64,7 @@ class TestRasterioDriver:
         )
         assert ds["test_sets_nodata"].raster.nodata == 42
 
-    @patch("hydromt.data_catalog.drivers.raster.rasterio_driver.open_mfraster")
+    @patch("hydromt.data_catalog.drivers.raster.rasterio_driver._open_mfraster")
     def test_sets_mosaic_kwargs(self, fake_open_mfraster: MagicMock):
         uris = ["test", "test2"]
         mosaic_kwargs = {"mykwarg: 0"}
