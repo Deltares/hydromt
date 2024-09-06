@@ -57,8 +57,8 @@ def write_panel(f, name, content="", level=0, item="dropdown"):
         f.write("\n")
 
 
-def write_nested_dropdown(name, data_cat, note="", categories=[]):
-    df = data_cat.to_dataframe().sort_index().drop_duplicates("uri")
+def write_nested_dropdown(name, data_cat: hydromt.DataCatalog, note="", categories=[]):
+    df = data_cat._to_dataframe().sort_index().drop_duplicates("uri")
     with open(f"_generated/{name}.rst", mode="w") as f:
         write_panel(f, name, note, level=0)
         write_panel(f, "", level=1, item="tab-set")

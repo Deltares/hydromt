@@ -6,10 +6,10 @@ from pyproj import CRS
 
 from hydromt.gis.raster import full_from_transform
 
-__all__ = ["_merge"]
+__all__ = ["merge"]
 
 
-def _merge(
+def merge(
     data_arrays,
     dst_crs=None,
     dst_bounds=None,

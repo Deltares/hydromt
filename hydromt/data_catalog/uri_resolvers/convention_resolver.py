@@ -87,7 +87,6 @@ class ConventionResolver(URIResolver):
         variables: Optional[List[str]] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve the placeholders in the URI using naming conventions.
 
@@ -107,8 +106,6 @@ class ConventionResolver(URIResolver):
             DataSource metadata.
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
-        options : Optional[Dict[str, Any]], optional
-            extra options for this resolver, by default None
 
         Returns
         -------

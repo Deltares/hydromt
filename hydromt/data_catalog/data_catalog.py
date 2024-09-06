@@ -665,7 +665,8 @@ class DataCatalog(object):
         A yaml data entry is provided below, where all the text between <>
         should be filled by the user. Multiple data sources of the same
         data type should be grouped.  Currently the following data types are supported:
-        {'RasterDataset', 'GeoDataset', 'GeoDataFrame'}. See the specific data adapters
+        {'RasterDataset', 'GeoDataset', 'GeoDataFrame', 'DataFrame', 'Dataset'}. See the
+        specific data adapters
         for more information about the required and optional arguments.
 
         .. code-block:: yaml
@@ -677,22 +678,12 @@ class DataCatalog(object):
               name: <name>
               sha256: <sha256> # only if the root is an archive
             <name>:
-              path: <path>
+              uri: <uri>
               data_type: <data_type>
               driver: <driver>
-              filesystem: <filesystem>
-              driver_kwargs:
-                <key>: <value>
-              nodata:
-                <hydromt_variable_name1>: <nodata>
-              rename:
-                <native_variable_name1>: <hydromt_variable_name1>
-                <native_variable_name2>: <hydromt_variable_name2>
-              unit_add:
-                <hydromt_variable_name1>: <float/int>
-              unit_mult:
-                <hydromt_variable_name1>: <float/int>
-              meta:
+              data_adapter: <data_adapter>
+              uri_resolver: <uri_resolver>
+              metadata:
                 source_url: <source_url>
                 source_version: <source_version>
                 source_licence: <source_licence>
@@ -801,13 +792,9 @@ class DataCatalog(object):
                     "path": <path>,
                     "data_type": <data_type>,
                     "driver": <driver>,
-                    "filesystem": <filesystem>,
-                    "driver_kwargs": {<key>: <value>},
-                    "nodata": <nodata>,
-                    "rename": {<native_variable_name1>: <hydromt_variable_name1>},
-                    "unit_add": {<hydromt_variable_name1>: <float/int>},
-                    "unit_mult": {<hydromt_variable_name1>: <float/int>},
-                    "meta": {...},
+                    "data_adapter": <data_adapter>,
+                    "uri_resolver": <uri_resolver>,
+                    "metadata": {...},
                     "placeholders": {<placeholder_name_1>: <list of names>},
                 }
                 <name2>: {

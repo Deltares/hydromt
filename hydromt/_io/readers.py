@@ -29,8 +29,8 @@ from hydromt._utils.naming_convention import _expand_uri_placeholders, _placehol
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import _gis_utils, _vector_utils, raster, vector
-from hydromt.gis._raster_merge import _merge
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.gis.raster_merge import merge
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
@@ -360,7 +360,7 @@ def _open_mfraster(
                 da = da.sortby(concat_dim).transpose(concat_dim, ...)
                 da.attrs.update(da_lst[0].attrs)
         else:
-            da = _merge(da_lst, **mosaic_kwargs)  # spatial merge
+            da = merge(da_lst, **mosaic_kwargs)  # spatial merge
             da.attrs.update({"source_file": "; ".join(file_attrs)})
         ds = da.to_dataset()  # dataset for consistency
     else:

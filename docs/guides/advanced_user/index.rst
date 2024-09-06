@@ -5,7 +5,6 @@ Advanced user guide
 
     architecture
     data_prepare_cat
-    data_sources
     data_types
     hydromt_python
     methods_stats

@@ -1,5 +1,7 @@
 .. _data_types:
 
+.. currentmodule:: hydromt.data_catalog.drivers
+
 Supported data types
 ====================
 
@@ -11,15 +13,16 @@ HydroMT currently supports the following data types:
 - :ref:`Dataset <Dataset>`:  non-spatial n-dimensional data
 - :ref:`DataFrame <DataFrame>`: 2D tabular data
 
-Internally the RasterDataset, GeoDataset, and Dataset are represented by :py:class:`xarray.Dataset` objects,
-the GeoDataFrame by :py:class:`geopandas.GeoDataFrame`, and the DataFrame by
-:py:class:`pandas.DataFrame`. We use drivers, typically from third-party packages and sometimes
-wrapped in HydroMT functions, to parse many different file formats to this standardized internal
-data representation.
+Internally the RasterDataset, GeoDataset, and Dataset are represented by
+:py:class:`xarray.Dataset` objects, the GeoDataFrame by
+:py:class:`geopandas.GeoDataFrame`, and the DataFrame by :py:class:`pandas.DataFrame`.
+We use drivers, typically from third-party packages and sometimes wrapped in HydroMT
+functions, to parse many different file formats to this standardized internal data
+representation.
 
 .. note::
 
-    Please contact us through the issue list if you would like to add other drivers.
+  It is also possible to create your own driver. See at :ref:`Custom Driver<custom_driver>`
 
 .. _dimensions:
 
@@ -44,26 +47,23 @@ Raster data (RasterDataset)
 .. _raster_formats:
 
 .. list-table::
-   :widths: 17, 25, 28, 30
+   :widths: 17, 25, 30
    :header-rows: 1
 
    * - Driver
      - File formats
-     - Method
      - Comments
-   * - ``raster``
+   * - :py:class:`raster <raster.rasterio_driver.RasterioDriver>`
      - GeoTIFF, ArcASCII, VRT, etc. (see `GDAL formats <http://www.gdal.org/formats_list.html>`_)
-     - :py:meth:`~hydromt.io.open_mfraster`
      - Based on :py:func:`xarray.open_rasterio`
        and :py:func:`rasterio.open`
-   * - ``raster_tindex``
+   * - :py:class:`raster <raster.rasterio_driver.RasterioDriver>` with the
+       :py:class:`raster_tindex <hydromt.data_catalog.uri_resolvers.raster_tindex_resolver.RasterTindexResolver>` resolver
      - raster tile index file (see `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_)
-     - :py:meth:`~hydromt.io.open_raster_from_tindex`
-     - Options to merge tiles via ``mosaic_kwargs``.
-   * - ``netcdf`` or ``zarr``
+     - Options to merge tiles via `options -> mosaic_kwargs`.
+   * - :py:class:`raster_xarray <raster.raster_xarray_driver.RasterDatasetXarrayDriver>`
      - NetCDF and Zarr
-     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
-     - required y and x dimensions_
+     - required y and x dimensions
 
 
 .. _GeoTiff:
@@ -73,24 +73,24 @@ Raster data (RasterDataset)
 Single raster files are parsed to a **RasterDataset** based on the **raster** driver.
 This driver supports 2D raster for which the dimensions are names "x" and "y".
 A potential third dimension is called "dim0".
-The variable name is based on the filename, in this case "GLOBCOVER_200901_200912_300x300m".
-The ``chunks`` key-word argument is passed to :py:meth:`~hydromt.io.open_mfraster`
+The variable name is based on the filename, in this case `"GLOBCOVER_200901_200912_300x300m"`.
+The `chunks` key-word argument is passed to :py:meth:`~hydromt.io.open_mfraster`
 and allows lazy reading of the data.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/single_variable_geotiff_raster.yml
+   :language: yaml
 
-    globcover:
-      path: base/landcover/globcover/GLOBCOVER_200901_200912_300x300m.tif
-      data_type: RasterDataset
-      driver: raster
-      driver_kwargs:
-        chunks: {x: 3600, y: 3600}
-      meta:
-        category: landuse
-        source_url: http://due.esrin.esa.int/page_globcover.php
-        source_license: CC-BY-3.0
-        paper_ref: Arino et al (2012)
-        paper_doi: 10.1594/PANGAEA.787668
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/single_variable_geotiff_raster.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _VRT:
 
@@ -100,45 +100,35 @@ Multi-variable Virtual Raster Tileset (VRT)
 Multiple raster layers from different files are parsed using the **raster** driver.
 Each raster becomes a variable in the resulting RasterDataset based on its filename.
 The path to multiple files can be set using a sting glob or several keys,
-see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
+see description of the `uri` argument in the :ref:`yaml file description <data_yaml>`.
 Note that the rasters should have identical grids.
 
-Here multiple .vrt files (dir.vrt, bas.vrt, etc.) are combined based on their variable name
-into a single dataset with variables flwdir, basins, etc.
-Other multiple file raster datasets (e.g. GeoTIFF files) can be read in the same way.
-VRT files are useful for large raster datasets which are often tiled and can be combined using
+Here multiple .vrt files (dir.vrt, bas.vrt, etc.) are combined based on their variable
+name into a single dataset with variables flwdir, basins, etc. Other multiple file
+raster datasets (e.g. GeoTIFF files) can be read in the same way. VRT files are useful
+for large raster datasets which are often tiled and can be combined using
 `gdalbuildvrt. <https://gdal.org/programs/gdalbuildvrt.html>`_
 
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/vrt_raster_dataset.yml
+   :language: yaml
 
-    merit_hydro:
-      path: base/merit_hydro/{variable}.vrt
-      data_type: RasterDataset
-      driver: raster
-      crs: 4326
-      driver_kwargs:
-        chunks: {x: 6000, y: 6000}
-      rename:
-        dir: flwdir
-        bas: basins
-        upa: uparea
-        elv: elevtn
-        sto: strord
-      meta:
-        category: topography
-        source_version: 1.0
-        paper_doi: 10.1029/2019WR024873
-        paper_ref: Dai Yamazaki
-        source_url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
-        source_license: CC-BY-NC 4.0 or ODbL 1.0
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/vrt_raster_dataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _Tile:
 
 Tiled raster dataset
 ^^^^^^^^^^^^^^^^^^^^
 
-Tiled index datasets are parsed using the **raster_tindex** driver.
+Tiled index datasets are parsed using the
+:py:Class:`raster_tindex <hydromt.data_catalog.uri_resolvers.raster_tindex_resolver.RasterTindexResolver>`
+:py:class:`~hydromt.data_catalog.uri_resolvers.uri_resolver.URIResolver`.
 This data format is used to combine raster tiles with different CRS projections.
 A polygon vector file (e.g. GeoPackage) is used to make a tile index with the spatial
 footprints of each tile. When reading a spatial slice of this data the files with
@@ -146,34 +136,26 @@ intersecting footprints will be merged together in the CRS of the most central t
 Use `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_ to build an excepted tile index file.
 
 Here a GeoPackage with the tile index referring to individual GeoTiff raster tiles is used.
-The ``mosaic_kwargs`` are passed to :py:meth:`~hydromt.io.open_raster_from_tindex` to
-set the resampling ``method``. The name of the column in the tile index attribute table ``tileindex``
-which contains the raster tile file names is set in the ``driver_kwargs`` (to be directly passed as an argument to
-:py:meth:`~hydromt.io.open_raster_from_tindex`).
+The `mosaic_kwargs` are passed to :py:meth:`hydromt.gis.merge` to
+set the resampling `method`. The name of the column in the tile index attribute table
+`tileindex` which contains the raster tile file names is set in the `driver.options``
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/tiled_raster_dataset.yml
+   :language: yaml
 
-    grwl_mask:
-      path: static_data/base/grwl/tindex.gpkg
-      data_type: RasterDataset
-      driver: raster_tindex
-      nodata: 0
-      driver_kwargs:
-        chunks: {x: 3000, y: 3000}
-        mosaic_kwargs: {method: nearest}
-        tileindex: location
-      meta:
-        category: hydrography
-        paper_doi: 10.1126/science.aat0636
-        paper_ref: Allen and Pavelsky (2018)
-        source_license: CC BY 4.0
-        source_url: https://doi.org/10.5281/zenodo.1297434
-        source_version: 1.01
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/tiled_raster_dataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. NOTE::
 
-  Tiled raster datasets are not read lazily as different tiles have to be merged together based on
-  their values. For fast access to large raster datasets, other formats might be more suitable.
+  Tiled raster datasets are not read lazily as different tiles have to be merged
+  together based on their values. For fast access to large raster datasets, other
+  formats might be more suitable.
 
 .. _NC_raster:
 
@@ -199,54 +181,34 @@ See list of recognized dimensions_ names.
 
 
 To read a raster dataset from a multiple file netcdf archive the following data entry
-is used, where the ``driver_kwargs`` are passed to :py:func:`xarray.open_mfdataset`
+is used, where the `options` are passed to :py:func:`xarray.open_mfdataset`
 (or :py:func:`xarray.open_zarr` for zarr data).
-In case the CRS cannot be inferred from the netcdf data it should be defined with the ``crs`` option here.
+In case the CRS cannot be inferred from the netcdf metadata it should be defined with
+the `crs` `metadata`` here.
 The path to multiple files can be set using a sting glob or several keys,
-see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
+see description of the `uri` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/netcdf_raster_dataset.yml
+   :language: yaml
 
-    era5_hourly:
-      path: forcing/ERA5/org/era5_{variable}_{year}_hourly.nc
-      data_type: RasterDataset
-      driver: netcdf
-      crs: 4326
-      driver_kwargs:
-        chunks: {latitude: 125, longitude: 120, time: 50}
-        combine: by_coords
-        decode_times: true
-        parallel: true
-      meta:
-        category: meteo
-        paper_doi: 10.1002/qj.3803
-        paper_ref: Hersbach et al. (2019)
-        source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
-        source_url: https://doi.org/10.24381/cds.bd0915c6
-      rename:
-        t2m: temp
-        tp: precip
-      unit_add:
-        temp: -273.15
-      unit_mult:
-        precip: 1000
+.. testcode:: geotiff
+  :hide:
 
+  catalog_path = "docs/assets/data_types/netcdf_raster_dataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 Preprocess functions when combining multiple files
 """"""""""""""""""""""""""""""""""""""""""""""""""
 
-In :py:func:`xarray.open_mfdataset`, xarray allows for a *preprocess* function to be run before merging several
-netcdf files together. In hydroMT, some preprocess functions are available and can be passed through the ``driver_kwargs``
-options in the same way as any xr.open_mfdataset options. These preprocess functions are:
-
-- **round_latlon**: round x and y dimensions to 5 decimals to avoid merging problems in xarray due to small differences
-  in x, y values in the different netcdf files of the same data source.
-- **to_datetimeindex**: force parsing the time dimension to a datetime index.
-- **remove_duplicates**: remove time duplicates
-
-
+In :py:func:`xarray.open_mfdataset`, xarray allows for a **preprocess** function to be
+run before merging several netcdf files together. In hydroMT, some preprocess functions
+are available and can be passed through the options in the same way as any
+xr.open_mfdataset options. These preprocess functions are found at
+:py:obj:`hydromt.data_catalog.preprocessing.py`
 
 .. _GeoDataFrame:
 
@@ -259,23 +221,18 @@ Vector data (GeoDataFrame)
 .. _vector_formats:
 
 .. list-table::
-   :widths: 17, 25, 28, 30
+   :widths: 17, 25, 30
    :header-rows: 1
 
    * - Driver
      - File formats
-     - Method
      - Comments
-   * - ``vector``
+   * - :py:class:`pyogrio <geodataframe.pyogrio_driver.PyogrioDriver>`
      - ESRI Shapefile, GeoPackage, GeoJSON, etc.
-     - :py:meth:`~hydromt.io.open_vector`
-     - Point, Line and Polygon geometries. Uses :py:func:`geopandas.read_file`
-   * - ``vector_table``
+     - Point, Line and Polygon geometries. Uses :py:func:`pyogrio.read_dataframe`
+   * - :py:class:`geodataframe_table <geodataframe.table_driver.GeoDataFrameTableDriver>`
      - CSV, XY, PARQUET and EXCEL.
-     - :py:meth:`~hydromt.io.open_vector`
-     - Point geometries only. Uses :py:meth:`~hydromt.io.open_vector_from_table`
-
-
+     - Point geometries only.
 
 .. _GPKG_vector:
 
@@ -288,21 +245,20 @@ spatial index for fast filtering of the data based on spatial location. An examp
 shown below. Note that the rename, ``unit_mult``, ``unit_add`` and ``nodata`` options refer to
 columns of the attribute table in case of a GeoDataFrame.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/gpkg_geodataframe.yml
+   :language: yaml
 
-      GDP_world:
-        path: base/emissions/GDP-countries/World_countries_GDPpcPPP.gpkg
-        data_type: GeoDataFrame
-        driver: vector
-        driver_kwargs:
-          layer: GDP
-        rename:
-          GDP: gdp
-        unit_mult:
-          gdp: 0.001
-        meta:
-          category: socio-economic
-          source_version: 1.0
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/gpkg_geodataframe.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _textdelimited_vector:
 
@@ -336,28 +292,30 @@ of the GeoDataFrame attribute table.
     ...
 
 As the CRS of the coordinates cannot be inferred from the data it must be set in the
-data entry in the yaml file as shown in the example below. The internal data format
-is based on the file extension unless the ``driver_kwargs`` ``driver`` option is set.
-See :py:meth:`~hydromt.io.open_vector` and :py:func:`~hydromt.io.open_vector_from_table` for more
-options.
+data entry in the yaml file as shown in the example below.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/csv_geodataframe.yml
+   :language: yaml
 
-    stations:
-      path: /path/to/stations.csv
-      data_type: GeoDataFrame
-      driver: vector_table
-      crs: 4326
-      driver_kwargs:
-        driver: csv
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/csv_geodataframe.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _binary_vector:
 
-HydroMT also supports reading and writing vector data in binary format. Currently only parquet is
-supported, but others could be added if desired. The structure of the files should be the same as
-the text format files described above but writing according to the parquet file spec. Since this is
-a binary format, not examples are provided, but for example pandas can write the same data structure
-to parquet as it can csv.
+HydroMT also supports reading and writing vector data in binary format. Currently only
+parquet is supported, but others could be added if desired. The structure of the files
+should be the same as the text format files described above but writing according to the
+parquet file spec. Since this is a binary format, not examples are provided, but for
+example pandas can write the same data structure to parquet as it can csv.
 
 
 .. _GeoDataset:
@@ -371,20 +329,18 @@ Geospatial point time-series (GeoDataset)
 .. _geo_formats:
 
 .. list-table::
-   :widths: 17, 25, 28, 30
+   :widths: 17, 25, 30
    :header-rows: 1
 
    * - Driver
      - File formats
-     - Method
      - Comments
-   * - ``vector``
-     - Combined point location (e.g. CSV or GeoJSON) and text delimited time-series (e.g. CSV) data.
-     - :py:meth:`~hydromt.io.open_geodataset`
-     - Uses :py:meth:`~hydromt.io.open_vector`, :py:meth:`~hydromt.io.open_timeseries_from_table`
-   * - ``netcdf`` or ``zarr``
+   * - :py:class:`geodataset_vector <geodataset.vector_driver.GeoDatasetVectorDriver>`
+     - Combined point location (e.g. CSV or GeoJSON) and text delimited time-series
+       (e.g. CSV) data.
+     -
+   * - :py:class:`geodataset_xarray <geodataset.xarray_driver.GeoDatasetXarrayDriver>`
      - NetCDF and Zarr
-     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
      - required time and index dimensions_ and x- and y coordinates.
 
 
@@ -411,67 +367,63 @@ on a list of recognized dimensions_ names.
         waterlevel   (time, stations)
 
 To read a point time-series dataset from a multiple file netcdf archive the following data entry
-is used, where the ``driver_kwargs`` are passed to :py:func:`xarray.open_mfdataset`
+is used, where the options are passed to :py:func:`xarray.open_mfdataset`
 (or :py:func:`xarray.open_zarr` for zarr data).
 In case the CRS cannot be inferred from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys,
-see description of the ``path`` argument in the :ref:`yaml file description <data_yaml>`.
+see description of the `uri` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/netcdf_geodataset.yml
+   :language: yaml
 
-    gtsmv3_eu_era5:
-      path: reanalysis-waterlevel-{year}-m{month:02d}.nc
-      data_type: GeoDataset
-      driver: netcdf
-      crs: 4326
-      driver_kwargs:
-        chunks: {stations: 100, time: 1500}
-        combine: by_coords
-        decode_times: true
-        parallel: true
-      rename:
-        station_x_coordinate: lon
-        station_y_coordinate: lat
-        stations: index
-      meta:
-        category: ocean
-        paper_doi: 10.24381/cds.8c59054f
-        paper_ref: Copernicus Climate Change Service 2019
-        source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
-        source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/netcdf_geodataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _CSV_point:
 
 CSV point time-series data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Point time-series data where the geospatial point geometries and time-series are saved in
-separate (text) files are parsed to **GeoDataset** using the **vector** driver.
-The GeoDataset must at least contain a location index with point geometries which is referred to by the ``path`` argument
-The path may refer to both GIS vector data such as GeoJSON with only Point geometries
-or tabulated point vector data such as csv files, see earlier examples for GeoDataFrame datasets.
-Finally, certain binary formats such as parquet are also supported.
-In addition a tabulated time-series text file can be passed to be used as a variable of the GeoDataset.
-This data is added by a second file which is referred to using the ``data_path`` key-word argument.
-The index of the time-series (in the columns header) and point locations must match.
-For more options see the :py:meth:`~hydromt.io.open_geodataset` method.
+Point time-series data where the geospatial point geometries and time-series are saved
+in separate (text) files are parsed to **GeoDataset** using the **vector** driver. The
+GeoDataset must at least contain a location index with point geometries which is
+referred to by the `uri` argument The path may refer to both GIS vector data such as
+GeoJSON with only Point geometries or tabulated point vector data such as csv files, see
+earlier examples for GeoDataFrame datasets. Finally, certain binary formats such as
+parquet are also supported. In addition a tabulated time-series text file can be passed
+to be used as a variable of the GeoDataset. This data is added by a second file which is
+referred to using the `data_path` option. The index of the time-series (in the columns
+header) and point locations must match.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/csv_geodataset.yml
+   :language: yaml
 
-    waterlevels_txt:
-      path: /path/to/stations.csv
-      data_type: GeoDataset
-      driver: vector
-      crs: 4326
-      driver_kwargs:
-        data_path: /path/to/stations_data.csv
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/csv_geodataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 *Tabulated time series text file*
 
-This data is read using the :py:meth:`~hydromt.io.open_timeseries_from_table` method. To
-read the time stamps the :py:func:`pandas.to_datetime` method is used.
+To read the time stamps the :py:func:`pandas.to_datetime` method is used.
 
 .. code-block:: console
 
@@ -485,38 +437,44 @@ read the time stamps the :py:func:`pandas.to_datetime` method is used.
 
 NetCDF time-series dataset (Dataset)
 ------------------------------------
+
 .. _dataset_formats:
 
 .. list-table::
-   :widths: 17, 25, 28, 30
+   :widths: 17, 25, 30
    :header-rows: 1
 
    * - Driver
      - File formats
-     - Method
      - Comments
-   * - ``netcdf`` or ``zarr``
+   * - :py:Class:`dataset_xarray <dataset.xarray_driver.DatasetXarrayDriver>`
      - NetCDF and Zarr
-     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
      - required time and index dimensions_.
 
 .. _NC_timeseries:
 
-
 Netcdf time-series dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-NetCDF and zarr timeseries data are parsed to **Dataset** with the **netcdf** and **zarr** drivers.
-The resulting dataset is similar to the **GeoDataset** except that it lacks a spatial dimension.
+NetCDF and zarr timeseries data are parsed to **Dataset** with the
+:py:class:`~dataset.xarray_driver.DatasetXarrayDriver`.
+The resulting dataset is similar to the **GeoDataset** except that it lacks a spatial
+dimension.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/netcdf_dataset.yml
+  :language: yaml
 
-    timeseries_dataset:
-      path: /path/to/timeseries.netcdf
-      data_type: Dataset
-      driver: netcdf
+.. testsetup:: *
 
+  from hydromt import DataCatalog
 
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/netcdf_dataset.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. _DataFrame:
 
@@ -526,30 +484,15 @@ The resulting dataset is similar to the **GeoDataset** except that it lacks a sp
 .. _dataframe_formats:
 
 .. list-table::
-   :widths: 17, 25, 28, 30
+   :widths: 17, 25, 30
    :header-rows: 1
 
    * - Driver
      - File formats
-     - Method
      - Comments
-   * - ``csv``
-     - Comma-separated files (or using another delimiter)
-     - :py:func:`pandas.read_csv`
-     - See :py:func:`pandas.read_csv` for all
-   * - ``excel``
-     - Excel files
-     - :py:func:`pandas.read_excel`
-     - If required, provide a sheet name through driver_kwargs
-   * - ``parquet``
-     - Binary encoded columnar data format
-     - :py:func:`pandas.read_parquet`
-     -
-   * - ``fwf``
-     - Fixed width delimited text files
-     - :py:func:`pandas.read_fwf`
-     - The formatting of these files can either be inferred or defined by the user, both through the driver_kwargs.
-
+   * - :py:class:`csv <dataframe.pandas_driver.PandasDriver>`
+     - any file readable by pandas
+     - Provide a sheet name or formatting through options
 
 .. note::
 
@@ -559,24 +502,28 @@ The resulting dataset is similar to the **GeoDataset** except that it lacks a sp
 Supported files
 ^^^^^^^^^^^^^^^
 
-The DataFrameAdapter is quite flexible in supporting different types of tabular data formats. All drivers allow for flexible reading of
-files: for example both mapping tables and time series data are supported. Please note that for timeseries, the driver_kwargs need to be used to
-set the correct column for indexing, and formatting and parsing of datetime-strings. See the relevant pandas function for which arguments
-can be used. Also note that the **csv** driver is not restricted to comma-separated files, as the delimiter can be given to the reader
-through the driver_kwargs.
+The DataFrameAdapter is quite flexible in supporting different types of tabular data
+formats. The driver allows for flexible reading of files: for example both mapping
+tables and time series data are supported. Please note that for timeseries, the
+`options` need to be used to set the correct column for indexing, and formatting and
+parsing of datetime-strings. See the relevant pandas function for which arguments can be
+used. Also note that the driver is not restricted to comma-separated files, as
+the delimiter can be given to the reader through the `options`.
 
-.. code-block:: yaml
+.. literalinclude:: ../../assets/data_types/csv_dataframe.yml
+  :language: yaml
 
-    observations:
-      path: data/lulc/globcover_mapping.csv
-      data_type: DataFrame
-      driver: csv
-      meta:
-        category: parameter_mapping
-      driver_kwargs:
-        header: null  # null translates to None in Python -> no header
-        index_col: 0
-        parse_dates: false
+.. testsetup:: *
+
+  from hydromt import DataCatalog
+
+.. testcode:: geotiff
+  :hide:
+
+  catalog_path = "docs/assets/data_types/csv_dataframe.yml"
+
+  catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
+  catalog.from_yml(catalog_path)
 
 .. note::
     The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argument should be used instead.

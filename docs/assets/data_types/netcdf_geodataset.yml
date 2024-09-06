@@ -1,0 +1,22 @@
+gtsmv3_eu_era5:
+  uri: reanalysis-waterlevel-{year}-m{month:02d}.nc
+  data_type: GeoDataset
+  driver:
+    name: geodataset_xarray
+    options:
+      chunks: {stations: 100, time: 1500}
+      combine: by_coords
+      decode_times: true
+      parallel: true
+  data_adapter:
+    rename:
+      station_x_coordinate: lon
+      station_y_coordinate: lat
+      stations: index
+  metadata:
+    crs: 4326
+    category: ocean
+    paper_doi: 10.24381/cds.8c59054f
+    paper_ref: Copernicus Climate Change Service 2019
+    source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    source_url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview

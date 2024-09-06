@@ -1,0 +1,9 @@
+waterlevels_txt:
+  uri: /path/to/stations.csv
+  data_type: GeoDataset
+  driver:
+    name: geodataset_vector
+    options:
+      data_path: /path/to/stations_data.csv
+  metadata:
+    crs: 4326

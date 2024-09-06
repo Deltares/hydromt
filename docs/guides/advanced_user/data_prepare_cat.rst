@@ -29,8 +29,8 @@ shown keys is highly recommended. The ``rename``, ``nodata``, ``unit_add`` and
 ``unit_mult`` options are set per variable (or attribute table column in case of a
 GeoDataFrame).
 
-.. include:: ../../assets/example_catalog.yml
-  :code: yaml
+.. literalinclude:: ../../assets/example_catalog.yml
+  :language: yaml
 
 .. testsetup:: *
 

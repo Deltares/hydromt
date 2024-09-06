@@ -3,7 +3,7 @@
 from logging import Logger, getLogger
 from os.path import abspath, dirname, join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import geopandas as gpd
 
@@ -34,7 +34,6 @@ class RasterTindexResolver(URIResolver):
         variables: Union[int, tuple[float, str], None] = None,
         metadata: Optional[SourceMetadata],
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        options: Optional[Dict[str, Any]] = None,
     ) -> List[str]:
         """Resolve URIs of a raster tindex file.
 
@@ -54,8 +53,6 @@ class RasterTindexResolver(URIResolver):
             DataSource metadata.
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
-        options : Optional[Dict[str, Any]], optional
-            extra options for this resolver, by default None
 
         Returns
         -------
@@ -71,7 +68,7 @@ class RasterTindexResolver(URIResolver):
             raise ValueError(f"Resolver {self.name} needs a mask")
         gdf = gpd.read_file(uri)
         gdf = gdf.iloc[gdf.sindex.query(mask.to_crs(gdf.crs).union_all())]
-        tileindex: Optional[str] = options.get("tileindex")
+        tileindex: Optional[str] = self.options.get("tileindex")
         if tileindex is None:
             raise ValueError(
                 f"{self.__class__.__name__} needs options specifying 'tileindex'"
