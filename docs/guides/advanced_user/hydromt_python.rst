@@ -29,22 +29,24 @@ Input data
 Most classes around the finding, reading and transforming input data have
 implementations for the five different data_types in HydroMT.
 The main objects to work with input data are:
-- The :class:`~data_catalog.DataCatalog` is the most high-level class and leverages
-  the next few classes to find, read and transform the data coming from its
-  configuration. The methods used to do this are called  ``get_<data_type>``,
-  for example :method:`~data_catalog.DataCatalog.get_rasterdataset`.
-- The :class:`~resolvers.uri_resolver.URIResolver` is responsible for finding the data
-  based on a single uri. This class is generic for all data_types. An implementation
-  that finds data based on naming conventions is the :method:`~resolvers.convention_resolver.ConventionResolver`.
-- The :class:`Driver <drivers.base_driver.BaseDriver>` has different subclasses based
-  on the data_type, for example
-  :class:`~drivers.raster.raster_dataset_driver.RasterDatasetDriver`, which then has
-  different implementations, for example a driver for reading raster data using
-  rasterio: :class:`~drivers.raster.rasterio_driver.RasterioDriver`.
-  which reads raster data.
-- :class:`DataAdapter <adapters.data_adapter_base.DataAdapterBase>` has subclasses that
-  transform data, like renaming, reprojecting etc. These subclasses are for example:
-  :class:`~adapters.rasterdataset.RasterDatasetAdapter`.
+
+* The :class:`~data_catalog.DataCatalog` is the most high-level class and leverages the
+    next few classes to find, read and transform the data coming from its configuration.
+    The methods used to do this are called  ``get_<data_type>``, for example
+    :func:`~data_catalog.DataCatalog.get_rasterdataset`.
+* The :class:`~resolvers.uri_resolver.URIResolver` is responsible for finding the data
+    based on a single uri. This class is generic for all data_types. An implementation
+    that finds data based on naming conventions is the
+    :class:`~resolvers.convention_resolver.ConventionResolver`.
+* The :class:`Driver <drivers.base_driver.BaseDriver>` has different subclasses based on
+    the data_type, for example
+    :class:`~drivers.raster.raster_dataset_driver.RasterDatasetDriver`, which then has
+    different implementations, for example a driver for reading raster data using
+    rasterio: :class:`~drivers.raster.rasterio_driver.RasterioDriver`. which reads
+    raster data.
+* :class:`DataAdapter <adapters.data_adapter_base.DataAdapterBase>` has subclasses that
+    transform data, like renaming, reprojecting etc. These subclasses are for example:
+    :class:`~adapters.rasterdataset.RasterDatasetAdapter`.
 
 So let's say you would like to read data in HydroMT, you can do this by creating a
 DataCatalog instance and using the ``get_<data_type>`` methods to read the data.
@@ -75,6 +77,7 @@ You can find more detailed examples on using the DataCatalog and DataAdapter in 
 * `Exporting data <../_examples/export_data.ipynb>`_
 
 .. _xarray_accessors:
+
 Xarray Accessors
 ----------------
 Some powerful functionality that HydroMT uses is exposed in the ``gis`` module. In this
@@ -89,6 +92,7 @@ There is also the :ref:`GeoDataset API <geodataset_api>` to work with geodataset
 geometry or convert to geopandas.GeoDataFrame to access further GIS methods.
 
 .. _flowpy_wrappers:
+
 FlowPy Wrappers:
 ----------------
 
@@ -99,6 +103,7 @@ example, calculate flow direction, flow accumulation, stream network, catchments
 reproject hydrography.
 
 .. _stats:
+
 Stats:
 ------
 
@@ -111,19 +116,20 @@ events (extract peaks or compute return values).
 The ``model`` module has a ``processes`` submodule. This module contains some functions
 to work with different kinds of model in- and ouput.
 
-- :ref:`grid <workflows_grid_api>`: generic workflows to prepare regular gridded data.
-  Used with the ``GridModel``. For example to prepare regular grid data from constant,
-  from RasterDataset (with or without reclassification) or from GeoDataFrame.
-- `:ref: mesh <workflows_mesh_api>:` generic workflows to prepare unstructured mesh
-  data. Used with the ``MeshModel``. For example to create a mesh grid or prepare
-  unstructured mesh data from RasterDataset.
-- `:ref: basin_mask <workflows_basin_api>`: workflows to prepare a basin mask based on
-  different region definitions (bounding box, point coordinates, polygon etc.)
-- `:ref: rivers <workflows_rivers_api>:` workflows to prepare river profile data like
-  width and depth.
-- `:ref: temp <workflows_forcing_api>`: workflows to prepare meteorological forcing
-  data. For example to prepare precipitation, temperature, or compute evapotranspiration
-  data. Advanced downscaling methods are also available within these workflows.
+* :ref:`grid <workflows_grid_api>`: generic workflows to prepare regular gridded data.
+    Used with the ``GridModel``. For example to prepare regular grid data from constant,
+    from RasterDataset (with or without reclassification) or from GeoDataFrame.
+* :ref:`mesh <workflows_mesh_api>:` generic workflows to prepare unstructured mesh
+    data. Used with the ``MeshModel``. For example to create a mesh grid or prepare
+    unstructured mesh data from RasterDataset.
+* :ref:`basin_mask <workflows_basin_api>`: workflows to prepare a basin mask based on
+    different region definitions (bounding box, point coordinates, polygon etc.)
+* :ref:`rivers <workflows_rivers_api>:` workflows to prepare river profile data like
+    width and depth.
+* :ref:`temp <workflows_forcing_api>`: workflows to prepare meteorological forcing
+    data. For example to prepare precipitation, temperature, or compute
+    evapotranspiration data. Advanced downscaling methods are also available within
+    these workflows.
 
 You can find a couple of detailed examples of how to use HydroMT methods and workflows in Python:
 
