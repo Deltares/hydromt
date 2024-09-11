@@ -3,11 +3,12 @@
 Using HydroMT in Python
 =======================
 
-As HydroMT's architecture is very modular, it is possible to use HydroMT in Python
-without using the command line interface (CLI). With Python, you actually have access to
-a lot of internal functionalities. This can be useful if you want to for example:
+As HydroMT's architecture is modular, it is possible to use HydroMT as a python library
+without using the command line interface (CLI). Using the libary, you actually have
+access to many internal functionalities. This can be useful if you want to for example:
 
-- build / update / clip models, check configurations or export data in Python instead of the CLI
+- build / update / clip models, check configurations or export data in Python instead of
+  the CLI
 - analyse model inputs or results
 - analyse and compare input data without connecting to a specific model
 - process input data for another reason than building a model
@@ -16,44 +17,38 @@ a lot of internal functionalities. This can be useful if you want to for example
 So first, let's go deeper into the API of HydroMT. You have all available functions
 and their documentation in the `API reference <../api.rst>`_.
 
-HydroMT is here to read and harmonize **input data**, and to process it via its **methods and
-workflows** in order to prepare ready to run **models**. So HydroMT's methods are organized
-around these main objects.
+HydroMT is here to read and harmonize **input data**, and to process it via its
+**methods and workflows** in order to prepare ready to run **models**. So HydroMT's
+methods are organized around these main objects.
 
 Input data
 ----------
-The main objects to work with input data are the `DataCatalog <../_generated/hydromt.data_catalog.DataCatalog.rst>`_
-and the `DataAdapter <../_generated/hydromt.data_adapter.DataAdapter.rst>`_ classes of HydroMT.
-The ``DataCatalog`` is what is used to tell HydroMT where the data can be found and how it can be read,
-as well as what maintains the administration of exactly what data was used to maintain reproducibility.
-The ``DataAdapter`` are what does the actual reading of the data and get instructed and instantiated by
-the DataCatalog. Currently, five different types of input data are supported by the Adapters and represented by a specific Python data
-object:
 
-- `RasterDatasetAdapter <../_generated/hydromt.data_adapter.RasterDatasetAdapter.rst>`_ :
-  gridded datasets such as DEMs or gridded spatially distributed rainfall datasets (represented
-  by :ref:`RasterDataset <RasterDataset>` objects, a raster-specific type of Xarray Datasets)
-- `DataFrameAdapter <../_generated/hydromt.data_adapter.DataFrameAdapter.rst>`_ :
-  tables that can be used to, for example, convert land classes to roughness values (represented by
-  Pandas :ref:`DataFrame <DataFrame>` objects)
-- `GeoDataFrameAdapter <../_generated/hydromt.data_adapter.GeoDataFrameAdapter.rst>`_ :
-  vector datasets such as administrative units or river center lines (represented by Geopandas :ref:`GeoDataFrame <GeoDataFrame>` objects)
-- `GeoDatasetAdapter <../_generated/hydromt.data_adapter.GeoDatasetAdapter.rst>`_ :
-  time series with associated geo-locations such as observations of discharge (represented by :ref:`GeoDataset <GeoDataset>`
-  objects, a geo-specific type of Xarray Datasets)
-- `DatasetAdapter <../_generated/hydromt.data_adapter.DatasetAdapter.rst>`_ :
-  non-spatial N-dimension data (represented by Xarray :ref:`Dataset <Dataset>` objects).
+.. currentmodule:: hydromt.data_catalog
+
+Most classes around the finding, reading and transforming input data have
+implementations for the five different data_types in HydroMT.
+The main objects to work with input data are:
+- The :class:`~data_catalog.DataCatalog` is the most high-level class and leverages
+  the next few classes to find, read and transform the data coming from its
+  configuration. The methods used to do this are called  ``get_<data_type>``,
+  for example :method:`~data_catalog.DataCatalog.get_rasterdataset`.
+- The :class:`~resolvers.uri_resolver.URIResolver` is responsible for finding the data
+  based on a single uri. This class is generic for all data_types. An implementation
+  that finds data based on naming conventions is the :method:`~resolvers.convention_resolver.ConventionResolver`.
+- The :class:`Driver <drivers.base_driver.BaseDriver>` has different subclasses based
+  on the data_type, for example
+  :class:`~drivers.raster.raster_dataset_driver.RasterDatasetDriver`, which then has
+  different implementations, for example a driver for reading raster data using
+  rasterio: :class:`~drivers.raster.rasterio_driver.RasterioDriver`.
+  which reads raster data.
+- :class:`DataAdapter <adapters.data_adapter_base.DataAdapterBase>` has subclasses that
+  transform data, like renaming, reprojecting etc. These subclasses are for example:
+  :class:`~adapters.rasterdataset.RasterDatasetAdapter`.
 
 So let's say you would like to read data in HydroMT, you can do this by creating a
-DataCatalog instance and using the ``get_<data_type>`` methods to read the data. These are:
-
-- `get_rasterdataset <../_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.rst>`_
-- `get_dataframe <../_generated/hydromt.data_catalog.DataCatalog.get_dataframe.rst>`_
-- `get_geodataframe <../_generated/hydromt.data_catalog.DataCatalog.get_geodataframe.rst>`_
-- `get_geodataset <../_generated/hydromt.data_catalog.DataCatalog.get_geodataset.rst>`_
-- `get_dataset <../_generated/hydromt.data_catalog.DataCatalog.get_dataset.rst>`_
-
-Here is a short example of how to read data in Python using HydroMT:
+DataCatalog instance and using the ``get_<data_type>`` methods to read the data.
+This is a short example:
 
 .. code-block:: python
 
@@ -79,29 +74,56 @@ You can find more detailed examples on using the DataCatalog and DataAdapter in 
 * `Preparing a data catalog <../_examples/prep_data_catalog.ipynb>`_
 * `Exporting data <../_examples/export_data.ipynb>`_
 
-Methods and workflows
----------------------
-Most of the heavy work in HydroMT is done by :ref:`Methods and workflows <methods_workflows>`.
-``Methods`` provide the low-level functionality such as GIS rasterization, reprojection, or zonal statistics.
-``Workflows`` combine several methods to transform input data to a model layer (e.g. interpolate nodata,
-then reproject). Examples of workflows include the delineation of hydrological basins (watersheds), conversion
-of landuse-landcover data to model parameter maps, and preparation of meteorological data.
+.. _xarray_accessors:
+Xarray Accessors
+----------------
+Some powerful functionality that HydroMT uses is exposed in the ``gis`` module. In this
+module `xarray
+accessors <https://docs.xarray.dev/en/stable/internals/extending-xarray.html>`_ are
+located. These allow for powerful new methods on top of xarray ``Dataset`` and
+``DataArray`` classes.
+There is the :ref:`raster API <raster_api>`, such as functionality to repoject,
+resample, transform, interpolate nodata or zonal statistics.
+There is also the :ref:`GeoDataset API <geodataset_api>` to work with geodataset data
+(N-dim point/line/polygon geometry). For example, reprojecting, transform, update
+geometry or convert to geopandas.GeoDataFrame to access further GIS methods.
 
-The available methods in HydroMT are:
+.. _flowpy_wrappers:
+FlowPy Wrappers:
+----------------
 
-- :ref: raster <raster_api>: GIS methods to work with raster / regular grid data. For example, reprojecting, resampling, transform, interpolate nodata or zonal statistics etc.
-- :ref: vector <geodataset_api>: GIS methods to work with geodataset data (N-dim point/line/polygon geometry). For example, reprojecting, transform, update geometry or convert to geopandas.GeoDataFrame to access further GIS methods.
-- :ref: flw <flw_api>: Hydrological methods for raster DEM data. For example, calculate flow direction, flow accumulation, stream network, catchments, or reproject hydrography.
-- :ref: gis_utils <gis_utils_api>: other general GIS methods. For example to compute the area of a grid cell or to perform a merge of nearest geodataframe.
-- :ref: stats <statistics>: Statistical methods including ``skills`` to compute skill scores of models (e.g. NSE, KGE, bias and many more) and ``extremes`` to analyse extreme events (extract peaks or compute return values).
+`PyFlwDir <https://deltares.github.io/pyflwdir/latest/index.html>` contains a series of
+methods to work with gridded DEM and flow direction datasets. The ``gis.flw`` module
+builds on top of this and provides hydrological methods for raster DEM data. For
+example, calculate flow direction, flow accumulation, stream network, catchments, or
+reproject hydrography.
 
-The available workflows in HydroMT are:
+.. _stats:
+Stats:
+------
 
-- :ref: grid <workflows_grid_api>: generic workflows to prepare regular gridded data. Used with the ``GridModel``. For example to prepare regular grid data from constant, from RasterDataset (with or without reclassification) or from GeoDataFrame.
-- :ref: mesh <workflows_mesh_api>: generic workflows to prepare unstructured mesh data. Used with the ``MeshModel``. For example to create a mesh grid or prepare unstructured mesh data from RasterDataset.
-- :ref: basin_mask <workflows_basin_api>: workflows to prepare a basin mask based on different region definitions (bounding box, point coordinates, polygon etc.)
-- :ref: rivers <workflows_rivers_api>: workflows to prepare river profile data like width and depth.
-- :ref: forcing <workflows_forcing_api>: workflows to prepare meteorological forcing data. For example to prepare precipitation, temperature, or compute evapotranspiration data.	Advanced downscaling methods are also available within these workflows.
+The ``stats`` module has statistical methods including ``skills`` to compute skill
+scores of models (e.g. NSE, KGE, bias and many more) and ``extremes`` to analyse extreme
+events (extract peaks or compute return values).
+
+.. _processes:
+
+The ``model`` module has a ``processes`` submodule. This module contains some functions
+to work with different kinds of model in- and ouput.
+
+- :ref:`grid <workflows_grid_api>`: generic workflows to prepare regular gridded data.
+  Used with the ``GridModel``. For example to prepare regular grid data from constant,
+  from RasterDataset (with or without reclassification) or from GeoDataFrame.
+- `:ref: mesh <workflows_mesh_api>:` generic workflows to prepare unstructured mesh
+  data. Used with the ``MeshModel``. For example to create a mesh grid or prepare
+  unstructured mesh data from RasterDataset.
+- `:ref: basin_mask <workflows_basin_api>`: workflows to prepare a basin mask based on
+  different region definitions (bounding box, point coordinates, polygon etc.)
+- `:ref: rivers <workflows_rivers_api>:` workflows to prepare river profile data like
+  width and depth.
+- `:ref: temp <workflows_forcing_api>`: workflows to prepare meteorological forcing
+  data. For example to prepare precipitation, temperature, or compute evapotranspiration
+  data. Advanced downscaling methods are also available within these workflows.
 
 You can find a couple of detailed examples of how to use HydroMT methods and workflows in Python:
 
@@ -112,16 +134,18 @@ You can find a couple of detailed examples of how to use HydroMT methods and wor
 
 Models
 ------
-As well as with the CLI, you can also :ref:`build <python_build>`, :ref:`update <python_update>`
-or :ref:`clip <python_clip>` models in Python. If you want to develop you own plugin you can find detailed information in the
-:ref:`plugin development guide <plugin_quickstart>`.
+As well as with the CLI, you can also :ref:`build <python_build>`, :ref:`update
+<python_update>` or :ref:`clip <python_clip>` models in Python. If you want to develop
+you own plugin you can find detailed information in the :ref:`plugin development guide
+<plugin_quickstart>`.
 
-But you can also use HydroMT and its ``Model`` class to do some analysis on your model inputs or results.
-HydroMT views a model as a combination of different components to represent the different type of inputs
-of a model, like ``config`` for the model run configuration file, ``forcing`` for the dynamic forcing
-data of the model etc. For each component, there are methods to ``set_<component>`` (update or add a new
-data layer), ``read_<component>`` and ``write_<component>``.
-In the :ref:`model API <model_interface>` you can find all available components.
+But you can also use HydroMT and its ``Model`` class to do some analysis on your model
+inputs or results. HydroMT views a model as a combination of different components to
+represent the different type of inputs of a model, like ``config`` for the model run
+configuration file, ``forcing`` for the dynamic forcing data of the model etc. For each
+component, there are methods to ``set_<component>`` (update or add a new data layer),
+``read_<component>`` and ``write_<component>``. In the :ref:`model API
+<model_interface>` you can find all available components.
 
 Here is a small example of how to use the ``Model`` class in python to plot or analyse your model:
 
