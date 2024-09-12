@@ -20,8 +20,8 @@ entry points to extend it's functionalities:
 We will elaborate on each of these entrypoints in more detail in their own section but
 first we will cover the necessary information that is common to all: how to tell hydromt
 to use your custom behaviour. As an example we will use the hypothetical hydromt plugin
-for the Advanced Water and Environmental Systems Optimization and Modeling Engine or
-AWESOME for short. The package will be called `hydromt_awesome`.
+for the (fictional) Advanced Water and Environmental Systems Optimization and Modeling
+Engine or AWESOME for short. The package will be called `hydromt_awesome`.
 
 EntryPoints
 ===========
@@ -45,7 +45,7 @@ awesome_pipes = "hydromt_awesome.awesome.components:PipeComponent"
 awesome_dem_resolver = "hydromt_awesome.awesome.resolvers:DEMResolver"
 
 [project.entry-points."hydromt.Driver"]
-awesome_kernel_driver = "hydromt_awesome.awesome.drivers:AwedomeKernelFileDriver"
+awesome_kernel_driver = "hydromt_awesome.awesome.drivers:AwesomeKernelFileDriver"
 
 [project.entry-points."hydromt.Catalog"]
 awesome_default_data_catalog = "hydromt_awesome.awesome.data_catalog:AwesomeCatalog"

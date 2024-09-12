@@ -1,8 +1,8 @@
 
 .. _kernel_config:
 
-Preparing a model configuration
-===============================
+Preparing a model workflow
+==========================
 
 A user can define a complete pipeline of methods and their options to :ref:`build a model <model_build>` or :ref:`updating an existing model <model_update>`
 in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_
