@@ -6,7 +6,7 @@ DataAdapter
 .. autosummary::
    :toctree: ../_generated
 
-   DataAdapterBase
+   data_adapter_base.DataAdapterBase
 
 RasterDataset
 -------------
