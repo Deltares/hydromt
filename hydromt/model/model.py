@@ -58,9 +58,6 @@ class Model(object, metaclass=ABCMeta):
     ):
         """Initialize a model.
 
-        Note that the * in the signature signifies that all of the arguments after the
-        * in this function MUST be provided as keyword arguments.
-
         Parameters
         ----------
         root : str, optional
@@ -69,14 +66,18 @@ class Model(object, metaclass=ABCMeta):
             Dictionary of components to add to the model, by default None
             Every entry in this dictionary contains the name of the component as key,
             and the component object as value, or a dictionary with options passed to the component initializers.
-            If a component is a dictionary, the key 'type' should be provided with the name of the component type.
+            If a component is a dictionary, the key 'type' should be provided with the
+            name of the component type.
+
             .. code-block:: python
+
                 {
                     "grid": {
                         "type": "GridComponent",
                         "filename": "path/to/grid.nc"
                     }
                 }
+
         mode : {'r','r+','w'}, optional
             read/append/write mode, by default "w"
         data_libs : List[str], optional

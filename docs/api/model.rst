@@ -18,6 +18,7 @@ High-level methods
 .. autosummary::
    :toctree: ../_generated
 
+   Model
    Model.read
    Model.write
    Model.write_data_catalog

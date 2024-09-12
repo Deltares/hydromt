@@ -3,6 +3,11 @@
 DataAdapter
 ===========
 
+.. autosummary::
+   :toctree: ../_generated
+
+   DataAdapterBase
+
 RasterDataset
 -------------
 
