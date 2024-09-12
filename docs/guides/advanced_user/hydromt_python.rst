@@ -4,8 +4,9 @@ Using HydroMT in Python
 =======================
 
 As HydroMT's architecture is modular, it is possible to use HydroMT as a python library
-without using the command line interface (CLI). Using the libary, you actually have
-access to many internal functionalities. This can be useful if you want to for example:
+without using the command line interface (CLI). Using the libary, you have more of
+HydroMTs functionalities at your disposal. This can be useful if you want to for
+example:
 
 - build / update / clip models, check configurations or export data in Python instead of
   the CLI
