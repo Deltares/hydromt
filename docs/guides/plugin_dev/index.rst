@@ -4,7 +4,6 @@ Plugin Developer guide
 .. toctree::
 
     plugin_quickstart
-    best_practices
     custom_catalog
     custom_component
     custom_driver
