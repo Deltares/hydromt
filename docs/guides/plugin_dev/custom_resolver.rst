@@ -5,12 +5,12 @@ Custom Resolver
 ===============
 
 In addition to data which may or may not be in custom file formats, to be able to read
-data, we must also know how it is layed out. For example the AWS Copernicus DEM data
+data, we must also know how it is laid out. For example the AWS Copernicus DEM data
 (https://registry.opendata.aws/copernicus-dem/) is provided as Cloud Optimised GeoTiff,
 but has no spacial index. Instead the files are divided in tiles covering the globe and
 must be queried using the desired resolution, nothing and easting to find the correct
 files. To be able to query this data set effectively we need a way to translate geo
-spacial data into a list of files which we shoudl load to get the data we want. This is
+spacial data into a list of files which we should load to get the data we want. This is
 exactly where `URIResolver`s come in.
 
 A `URIResolver` is what we use to generate a list of uris to the files we wish to query.

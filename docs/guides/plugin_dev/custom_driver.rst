@@ -4,8 +4,8 @@ Custom Drivers
 ==============
 
 Drivers are the second ingredient necessary to read (custom) datasets. Where as
-`URIResovler`s (discussed previously) determen _what_ to read, drivers determin _how_ to
-read and slice it. For exmaple, you might use the same `ConventionResolver` to determine
+`URIResolver`s (discussed previously) determines _what_ to read, drivers determine _how_ to
+read and slice it. For example, you might use the same `ConventionResolver` to determine
 which files to read, but different drivers to read `.nc`, `.zarr` or `.tiff` files. Vice
 versa you might also use the same driver but different resolvers to read data depending
 on how it was organised. It should therefore be noted that to read a particular dataset

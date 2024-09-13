@@ -19,7 +19,7 @@ Initialisation
 There are generally two types of components you might want to implement:
 `ModelComponent` and `SpatialModelComponent`. They are similar but the
 `SpatialModelComponent` is meant to hold spacial data. A model MUST have at least one
-`SpatialModelComponent` for it's region functionality to funciton properly.
+`SpatialModelComponent` for it's region functionality to function properly.
 
 Components of any kind, should take a reference to the model they are a part of at
 initialization so that components can access other components through the model as is
@@ -66,13 +66,13 @@ derive the region.
 Required attributes
 -------------------
 
-Asside form initialisation the components are expected to have some other properties
+Aside form initialisation the components are expected to have some other properties
 (`data`, `model`, `data_catalog` and `root`) and functions (`read` and `write`).
 Functions annotated with the `@hydromt_step` decorator will be available to users of a
 workflow yaml. Depending on the context your component may also want to implement the
-functions `set` (which is typcially not annotaed with the `@hydromt_step` decorator
-since it cannot be sued in a yaml workflow)`, and `test_equal`. `set` is typcially used
+functions `set` (which is typically not annotaed with the `@hydromt_step` decorator
+since it cannot be sued in a yaml workflow)`, and `test_equal`. `set` is typically used
 by python users to overwrite data in the component after they have done something with
-it outside of your component. `test_equal` is purely for testin purposes and should test
-whether the comopnent provided (including potential data) is equal to the component it
+it outside of your component. `test_equal` is purely for testing purposes and should test
+whether the component provided (including potential data) is equal to the component it
 is being run on. This is very useful for testing that includes data.

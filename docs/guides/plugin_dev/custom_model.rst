@@ -25,7 +25,7 @@ implement much or even any of the basic functionalities.
 
 If you wish to provide default behaviour for your users, such as providing default
 components that your model will always need, you can do so by overriding the `__init__`
-funciton on your model like so:
+function on your model like so:
 
 ```python
 class AwesomeModel:
@@ -148,7 +148,7 @@ hypothetical landuse grid from a raster input data:
 Processes
 ^^^^^^^^^
 We encourage developers and users to define their functionality using functions that can
-be organised into seperate modules or scripts. This can keep your class definitions from
+be organised into separate modules or scripts. This can keep your class definitions from
 becoming very large unwieldy to work with as well as making it easier to make sure all
 the functionalities are properly tested (which we encourage even more strongly!)
 Because the python script defining your plugin Model class can get quite long and it  In

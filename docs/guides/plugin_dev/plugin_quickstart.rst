@@ -14,10 +14,10 @@ section.
 .. NOTE::
 
   Most of this section of the docs is dedicated to creating *new* functinoality. If you
-  already have a plugin and want to know how to port that to the new V1 archetecture
+  already have a plugin and want to know how to port that to the new V1 architecture
   please refer to :ref:`migrating_to_v1` specifically.
 
-The new V1 archetecture of HdydroMT already offers a lot more flexibility to customise
+The new V1 architecture of HdydroMT already offers a lot more flexibility to customise
 the behaviour of HydroMT without the need for a plugin, by adding `ModelComponents`
 however there are still plenty of use cases you might want to make a plugin, including
 but not limited to:
@@ -46,7 +46,7 @@ customise or create new variants of any of the following objects:
 Please see `_register_plugins` for more detail on how to make sure that HydroMT will
 find your implementation. Currently the only real requirement for making a HydroMT
 plugin is that it is a Python Package that uses one of the above entrypoints and
-inherets from the appropriate base class so hydroMT will know how to operate it.
+inherits from the appropriate base class so hydroMT will know how to operate it.
 
 This does not mean that your plugin must necessarily be written entirely in python, but
 if it isn't you will have to make python bindings for it. This can help with performance
