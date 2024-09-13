@@ -13,12 +13,8 @@ of the library pooch to fetch the correct data catalogs. Please refer to it's do
 This class will help fetch the correct files for the data catalog. The yaml
 file specifying the data catalog should be the same format as any other catalog.
 
-You might have to make sure that both hydromt and your plugin are installed before
-it will discover your plugin. After you should be able to verify that your catalog
-is discovered correctly from the command line:
-
-```sh
-hydromt --plugins
-```
-
-The output should then contain the name of your class
+If you structure your data catalog and their versioning just ike hydromt core does,
+then the base class doesn't actually have to do much more than point to a different
+repository by overriding the `base_url` class variable. As long as the url points to a
+correctly configured repository everything should work automatically. Please refer to
+the HydroMT core and pooch documentation for more information ion this.
