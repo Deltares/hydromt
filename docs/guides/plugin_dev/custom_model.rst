@@ -62,7 +62,7 @@ single component such as for example adding perturbations for a sensitivity anal
 still be defined in the Model class itself.
 
 Any additional functionality that you define on either your model or your model
-components should be available to your users through the workflow yaml interface
+components that is annotated with the `@hydromt_step` decorator should be available to your users through the workflow yaml interface
 automatically.
 
 .. NOTE::

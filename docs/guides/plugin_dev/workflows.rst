@@ -25,49 +25,107 @@ in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_
     The format of the latter differs with each plugin, but can be accessed in HydroMT trough the :py:meth:`~hydromt.Model.config` component.
 
 
-Model configuration (.yaml) file
+Workflow (.yaml) file
 --------------------------------
 
-The .yaml file has a simple syntax with sections and key-value pairs. In HydroMT sections corresponds with model methods
-and the key-value pair with the arguments of each method. For available methods and their arguments of a specific model,
-please visit the :ref:`plugin documentation pages <plugins>` or the :ref: `API reference`.
-When passed to the build or update CLI methods, HydroMT executes all methods in order as provided in the .yaml file.
-As such the .yaml file, in combination with a data catalog yaml file
-define a **reproducible** model.
+The YAML file serves as the configuration and workflow definition for building and updating models in HydroMT. It uses a simple key-value syntax with structured sections to define steps and arguments for each method. Each step corresponds to a model action (method), and arguments specify how that action is applied. The order of execution is determined by the sequence of steps listed in the YAML file.
 
-HydroMT configuration file specifications and conventions:
+- **Model Type**: The top level defines the `modeltype`, such as "model".
+- **Global Components**: Under the `global` section, you can define reusable components
+  that apply throughout the model workflow. Each component is named and has a specific
+  type, like `GridComponent` or `ConfigComponent`.
+- **Steps**: The main logic of the model is defined under `steps`. Each step is a method call, which typically includes the method name and its required arguments. The order of the steps is critical, as HydroMT executes each step sequentially.
 
-- HydroMT will execute each method (i.e. section) in the order it is provided in the .yaml file.
-- Methods can be re-used by enumerating the methods by adding a number to the end (without underscore or space!).
-  Although this is not enforced in the code, by convention we start enumerating the second call of each method with a number 2, the third call with a number 3 etc.
-- Arguments ending with ``_fn`` (short for filename) are typically used to set a data source from the data catalog based on its source name,
-  see :ref:`Working with data in HydroMT <get_data>`.
+Below is an example of the YAML format used in HydroMT:
 
-An example .yaml file is shown below. Note that this .yaml file does not apply to any supported model plugin.
+```yaml
+---
+modeltype: model
+global:
+  components:
+    grid:
+      type: GridComponent
+    config:
+      type: ConfigComponent
 
-.. code-block:: yaml
+steps:
+  - config.update:
+      data:
+        header.settings: value
+        timers.end: '2010-02-15'
+        timers.start: '2010-02-05'
 
-    setup_basemaps:
-      topography_fn: merit   # source name of topography data
-      crs: 4326              # CRS EPSG code
-      res: 100               # resolution [m]
+  - grid.create_from_region:
+      region:
+        bbox: [12.05, 45.30, 12.85, 45.65]
+      res: 0.01
+      crs: 4326
+      basin_index_path: merit_hydro_index
+      hydrography_path: merit_hydro
 
-    setup_manning_roughness:
-      lulc_fn: globcover             # source name of landuse-landcover data
-      mapping_fn: globcover_mapping  # source name of mapping table converting lulc classes to N values
+  - grid.add_data_from_constant:
+      constant: 0.01
+      name: c1
+      dtype: float32
+      nodata: -99.0
 
-    setup_infiltration:
-      soil_fn:
-        source: soil_data             # source name of soil data with specific version
-        version: 1.0                  # version of soil data
-      mapping_fn: soil_mapping        # source name of mapping table converting soil classes to infiltration parameters
+  - grid.add_data_from_rasterdataset:
+      raster_data: merit_hydro_1k
+      variables:
+        - elevtn
+        - basins
+      reproject_method:
+        - average
+        - mode
 
+  - grid.add_data_from_rasterdataset:
+      raster_data: vito
+      fill_method: nearest
+      reproject_method: mode
+      rename:
+        vito: landuse
 
-.. TIP::
+  - grid.add_data_from_raster_reclass:
+      raster_data: vito
+      reclass_table_data: vito_reclass
+      reclass_variables:
+        - manning
+      reproject_method:
+        - average
 
-    By default the hydromt :py:meth:`~hydromt.Model.build` and :py:meth:`~hydromt.Model.update` commands will write **all** the
-    model files at the end of the workflow using the :py:meth:`~hydromt.Model.write` method. This behaviour can be custumized by
-    adding the write method to the workflow with specific arguments, or adding the write method of a specific model component,
-    for instance :py:meth:`~hydromt.GridModel.write_grid` or :py:meth:`~hydromt.Model.write_forcing`. If a write method is added
-    to the workflow, the default write method will not be executed at the end and the user needs to take care that all required
-    files are written to disk.
+  - grid.add_data_from_geodataframe:
+      vector_data: hydro_lakes
+      variables:
+        - waterbody_id
+        - Depth_avg
+      nodata:
+        - -1
+        - -999.0
+      rasterize_method: value
+      rename:
+        waterbody_id: lake_id
+        Depth_avg: lake_depth
+
+  - grid.add_data_from_geodataframe:
+      vector_data: hydro_lakes
+      rasterize_method: fraction
+      rename:
+        hydro_lakes: water_frac
+
+  - write:
+      components:
+        - config
+        - grid
+```
+
+### Explanation of Key Methods
+
+- **`config.update`**: Updates configuration settings. In the example, it sets parameters like `header.settings`, and start and end times for the model run.
+- **`grid.create_from_region`**: Creates a grid based on a specified bounding box (bbox), resolution, and coordinate reference system (CRS). Additional options include setting basin and hydrography paths.
+- **`grid.add_data_from_constant`**: Adds a constant value to the grid. Parameters like `name`, `dtype`, and `nodata` specify how the constant data is handled.
+- **`grid.add_data_from_rasterdataset`**: Adds data from a raster dataset. It includes options to specify variables, reprojection methods, and renaming rules for variables.
+- **`grid.add_data_from_raster_reclass`**: Reclassifies raster data based on a specified reclassification table and applies transformations to the grid.
+- **`grid.add_data_from_geodataframe`**: Adds vector data to the grid, rasterizing specific attributes, handling nodata values, and renaming variables.
+- **`write`**: Specifies which components of the model (e.g., `config`, `grid`) should be written to disk at the end of the workflow. By default, all files are written unless specified otherwise.
+
+It should be noted that, by default, the HydroMT `build` and `update` commands write all output files at the end of the workflow using the `write` method. This behavior can be customized by explicitly specifying the `write` step in the YAML file, allowing more granular control over which files are written and when.

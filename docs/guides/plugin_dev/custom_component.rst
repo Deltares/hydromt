@@ -10,32 +10,69 @@ but also potentially something like rivers, catchments, pipes or other custom be
 your plugin might need.
 
 
+Implementing a component
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can do this in a similar way to how you define your custom Model or
-ModelComponents. We'll assume you have a custom data catalog called
-`PluginDataCatalog.yml` that you want to make available to your plugin users.
+Initialisation
+--------------
 
-Firstly you should make a `PluginDataCatalog` class which inherits from `PredefinedCatalog`. This will ensure that HydroMT can find your catalog
-and also know how to interact with it. The base `PredefinedCatalog` makes use
-of the library pooch to fetch the correct data catalogs. Please refer to it's documentation for more information on how to use it: https://www.fatiando.org/pooch/dev/
-This class will help fetch the correct files for the data catalog. The yaml
-file specifying the data catalog should be the same format as any other catalog.
+There are generally two types of components you might want to implement:
+`ModelComponent` and `SpatialModelComponent`. They are similar but the
+`SpatialModelComponent` is meant to hold spacial data. A model MUST have at least one
+`SpatialModelComponent` for it's region functionality to funciton properly.
 
-After you've implemented this class you should just have to register it's
-entry point in your `pyproject.toml` like so:
+Components of any kind, should take a reference to the model they are a part of at
+initialization so that components can access other components through the model as is
+necessary. Typically this is done like so:
 
-```toml
-[project.entry-points."hydromt.data.PredefinedCatalog"]
-my_plugin_catalog = "hydromt_plugin.path.to.catalog.class:PluginDataCatalog"
+.. code-block:: python
 
-```
+    def __init__(
+        self,
+        model: Model,
+        filename: str = "component/{name}.csv",
+    ):
+        self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
+        self._filename: str = filename
+        super().__init__(model=model)
 
-You might have to make sure that both hydromt and your plugin are installed before
-it will discover your plugin. After you should be able to verify that your catalog
-is discovered correctly from the command line:
+The filename should be taken because components are lazy loaded by default, meaning that
+the data associated with them only get's loaded if necessary. Therefore it is important
+to set a property on the component so that it can read from/write to the correct default
+file location.
 
-```sh
-hydromt --plugins
-```
+`SpatialModelComponent`s should take some additional information in their
+initialisation:
 
-The output should then contain the name of your class
+.. code-block:: python
+
+    def __init__(
+        self,
+        model: Model,
+        *,
+        region_component: str,
+        filename: str = "spatial_component/{name}.nc",
+        region_filename: str = "spatial_component/region.geojson",
+    ):
+        ...
+
+The region_filename is a similar file location iwthin the model root where region data
+should be written if necessary. Note also that spactial components do not necessarily
+have their own region. Sometimes they can derive their region from other spacial
+components, such as a subgrid deriving it's region from the main grid. If this is the
+case then set the `region_component` to the name of the component from which you wish to
+derive the region.
+
+Required attributes
+-------------------
+
+Asside form initialisation the components are expected to have some other properties
+(`data`, `model`, `data_catalog` and `root`) and functions (`read` and `write`).
+Functions annotated with the `@hydromt_step` decorator will be available to users of a
+workflow yaml. Depending on the context your component may also want to implement the
+functions `set` (which is typcially not annotaed with the `@hydromt_step` decorator
+since it cannot be sued in a yaml workflow)`, and `test_equal`. `set` is typcially used
+by python users to overwrite data in the component after they have done something with
+it outside of your component. `test_equal` is purely for testin purposes and should test
+whether the comopnent provided (including potential data) is equal to the component it
+is being run on. This is very useful for testing that includes data.
