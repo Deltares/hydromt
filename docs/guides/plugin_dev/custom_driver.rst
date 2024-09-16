@@ -21,13 +21,7 @@ To function drivers MUST at least implement the following function:
     def read(
         self,
         uris: List[str],
-        *,
-        mask: Optional[Geom] = None,
-        predicate: Predicate = "intersects",
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
-        metadata: Optional[SourceMetadata] = None,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        ...
     ) -> Any:
         ...
 
@@ -40,11 +34,12 @@ You may optionally also implement the following function as is appropriate:
         self,
         path: StrPath,
         data: Any,
-        **kwargs,
+        ...
     ):
         ...
 
 As can be seen, `read` takes all of the URIs that the `resolver` has produced and will
 attempt to read data from them in whatever way is appropriate. Since the contents of the
 files themselves might also have to be sliced it is advisable to take the same arguments
-as the resolver is able to take.
+as the resolver is able to take. Note that the signature of the functions may vary
+between data types.
