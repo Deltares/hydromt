@@ -26,7 +26,9 @@ Engine or AWESOME for short. The package will be called `hydromt_awesome`.
 EntryPoints
 ===========
 
-Entrypoints are how you can tell HydroMT about your code that you would like it to use.
+Entrypoints are how you can tell Python (and by extention HydroMT) about your code that
+you would like it to use. You can find more detailed information about them in the
+`official Python documentation <https://packaging.python.org/en/latest/specifications/entry-points/>`
 You first do this by specifying the entrypoint to tell HydroMT about in your
 `pyproject.toml`. So for example in the `pyproject.toml` of `hydromt_awesome` we might
 write:
