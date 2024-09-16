@@ -15,7 +15,7 @@ section.
 
   Most of this section of the docs is dedicated to creating *new* functinoality. If you
   already have a plugin and want to know how to port that to the new V1 architecture
-  please refer to :ref:`migrating_to_v1` specifically.
+  please refer to :ref:`The migration guide <migration>` specifically.
 
 The new V1 architecture of HdydroMT already offers a lot more flexibility to customise
 the behaviour of HydroMT without the need for a plugin, by adding `ModelComponents`

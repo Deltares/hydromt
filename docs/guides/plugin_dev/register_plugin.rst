@@ -31,25 +31,25 @@ You first do this by specifying the entrypoint to tell HydroMT about in your
 `pyproject.toml`. So for example in the `pyproject.toml` of `hydromt_awesome` we might
 write:
 
-```toml
+.. code-block::toml
 
-[project.entry-points."hydromt.models"]
-awesome = "hydromt_awesome.awesome:AwesomeModel"
+    [project.entry-points."hydromt.models"]
+    awesome = "hydromt_awesome.awesome:AwesomeModel"
 
-[project.entry-points."hydromt.ModelComponent"]
-awesome_rivers = "hydromt_awesome.awesome.components:RiverComponent"
-awesome_lakes = "hydromt_awesome.awesome.components:LakesComponent"
-awesome_pipes = "hydromt_awesome.awesome.components:PipeComponent"
+    [project.entry-points."hydromt.ModelComponent"]
+    awesome_rivers = "hydromt_awesome.awesome.components:RiverComponent"
+    awesome_lakes = "hydromt_awesome.awesome.components:LakesComponent"
+    awesome_pipes = "hydromt_awesome.awesome.components:PipeComponent"
 
-[project.entry-points."hydromt.Resolver"]
-awesome_dem_resolver = "hydromt_awesome.awesome.resolvers:DEMResolver"
+    [project.entry-points."hydromt.Resolver"]
+    awesome_dem_resolver = "hydromt_awesome.awesome.resolvers:DEMResolver"
 
-[project.entry-points."hydromt.Driver"]
-awesome_kernel_driver = "hydromt_awesome.awesome.drivers:AwesomeKernelFileDriver"
+    [project.entry-points."hydromt.Driver"]
+    awesome_kernel_driver = "hydromt_awesome.awesome.drivers:AwesomeKernelFileDriver"
 
-[project.entry-points."hydromt.Catalog"]
-awesome_default_data_catalog = "hydromt_awesome.awesome.data_catalog:AwesomeCatalog"
-```
+    [project.entry-points."hydromt.Catalog"]
+    awesome_default_data_catalog = "hydromt_awesome.awesome.data_catalog:AwesomeCatalog"
+
 
 The structure of these should be very similar across all entrypoints. The header should
 be of the form `project.entry-points.` followed by the path to the hydromt object you
@@ -66,18 +66,18 @@ objects to import. Note that this should be a list of strings. For example, here
 `__hydromt_eps__` list that core devines for it's model components (we use the same
 mechanism as you will)
 
-```python
-__hydromt_eps__ = [
-    "ConfigComponent",
-    "DatasetsComponent",
-    "GeomsComponent",
-    "GridComponent",
-    "MeshComponent",
-    "SpatialDatasetsComponent",
-    "TablesComponent",
-    "VectorComponent",
-]
-```
+.. code-block:: python
+
+    __hydromt_eps__ = [
+        "ConfigComponent",
+        "DatasetsComponent",
+        "GeomsComponent",
+        "GridComponent",
+        "MeshComponent",
+        "SpatialDatasetsComponent",
+        "TablesComponent",
+        "VectorComponent",
+    ]
 
 The objects you define in this list should of course be imported before you define them.
 All the classes you define here should become available to access through the HydroMT
@@ -85,18 +85,18 @@ plugin functionality. You can verify that HydroMT can discover your plugins by r
 the CLI with the relevant flag. For example if you want to see which model components
 are available in the current installation you can print them by executing:
 
-```sh
-$ hydromt --components
-Component plugins:
-        - ConfigComponent (hydromt 1.0.0a0)
-        - DatasetsComponent (hydromt 1.0.0a0)
-        - GeomsComponent (hydromt 1.0.0a0)
-        - GridComponent (hydromt 1.0.0a0)
-        - MeshComponent (hydromt 1.0.0a0)
-        - SpatialDatasetsComponent (hydromt 1.0.0a0)
-        - TablesComponent (hydromt 1.0.0a0)
-        - VectorComponent (hydromt 1.0.0a0)
-```
+.. code-block:: shell
+
+    $ hydromt --components
+    Component plugins:
+            - ConfigComponent (hydromt 1.0.0a0)
+            - DatasetsComponent (hydromt 1.0.0a0)
+            - GeomsComponent (hydromt 1.0.0a0)
+            - GridComponent (hydromt 1.0.0a0)
+            - MeshComponent (hydromt 1.0.0a0)
+            - SpatialDatasetsComponent (hydromt 1.0.0a0)
+            - TablesComponent (hydromt 1.0.0a0)
+            - VectorComponent (hydromt 1.0.0a0)
 
 This will show you all the components that HydroMT currently knows about, what package
 they were imported from and which version.

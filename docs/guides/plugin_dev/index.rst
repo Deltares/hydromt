@@ -7,7 +7,7 @@ Plugin Developer guide
     custom_catalog
     custom_component
     custom_driver
-    custom_model_builder
+    custom_model
     custom_resolver
     migrating_to_v1
     workflows

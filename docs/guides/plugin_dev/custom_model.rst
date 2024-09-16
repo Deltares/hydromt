@@ -27,13 +27,14 @@ If you wish to provide default behaviour for your users, such as providing defau
 components that your model will always need, you can do so by overriding the `__init__`
 function on your model like so:
 
-```python
-class AwesomeModel:
-   def __init__(self, ...):
-      super().__init__(...)
-      self.add_component("extra_grid", GridComponent)
-      # extra customisation code here...
-```
+.. doctest:: python
+
+    class AwesomeModel:
+      def __init__(self, ...):
+          super().__init__(...)
+          self.add_component("extra_grid", GridComponent)
+          # extra customisation code here...
+
 
 Please make sure to call the `super().__init__` function before you do anything else to
 setup your class so that the base functionality also get's run properly.
@@ -158,18 +159,20 @@ These processes are usually stored in separate python scripts that you can decid
 
 A couple of tips if you want to define processes:
 
-- check out the :ref:`process available` in HydroMT core
+- check out the process available in HydroMT core
 - avoid passing the HydroMT model class to your process function, but pass the required
   arguments directly. try to do this:
+
   .. NOTE::
-      def interpolate_grid(grid: xr.DataSet, crs: CRS):
-         ...
+    def interpolate_grid(grid: xr.DataSet, crs: CRS):
+      ...
 
    not this:
+
    .. WARNING::
-      def interpolate_grid(model: AwesomeModel):
-         grid = model.grid
-         ...
+    def interpolate_grid(model: AwesomeModel):
+      grid = model.grid
+      ...
 
    Ideally the workflows work from common python objects like xarray or geopandas rather than with the ``Model`` class.
 - if you want to do some GIS processing on ``RasterDataset`` or ``GeoDataset``, HydroMT defines a lot of useful methods. Check out the :ref: `Raster methods API doc` for RasterDataset and :ref: `GeoDataset methods API doc`. For ``GeoDataFrame``, the `geopandas <https://geopandas.org/en/stable/index.html>`_ library should have most of what you need (and for ``UgridDataset`` or mesh, the `xugrid <https://deltares.github.io/xugrid/>`_ library). For computing or deriving other variables from an input dataset, HydroMT contains also a couple of useful workflows for example ``flwdir`` for flow direction methods, ``basin_mask`` to derive basin shape, or ``stats`` to derive general, efficiency or extreme value statistics from data.

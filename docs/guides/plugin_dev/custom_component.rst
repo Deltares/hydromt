@@ -25,21 +25,24 @@ Components of any kind, should take a reference to the model they are a part of 
 initialization so that components can access other components through the model as is
 necessary. Typically this is done like so:
 
-.. code-block:: python
+.. doctest:: python
 
-    def __init__(
-        self,
-        model: Model,
-        filename: str = "component/{name}.csv",
-    ):
-        self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
-        self._filename: str = filename
-        super().__init__(model=model)
+    class AwesomeRiverComponent(ModelComponent):
+        def __init__(
+            self,
+            model: Model,
+            filename: str = "component/{name}.csv",
+        ):
+            self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None
+            self._filename: str = filename
+            super().__init__(model=model)
 
-The filename should be taken because components are lazy loaded by default, meaning that
+
+It is also important that the component has a ``self._filename`` property defined
+because the data in components they are lazy loaded by default, meaning that
 the data associated with them only get's loaded if necessary. Therefore it is important
 to set a property on the component so that it can read from/write to the correct default
-file location.
+file location, without additional input.
 
 ``SpatialModelComponent`` s should take some additional information in their
 initialisation:

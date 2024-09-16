@@ -26,6 +26,7 @@ Implementing a Resolver
 Ultimately a resolver has only one public method that it must implement:
 
 .. code-block:: python
+
     def resolve(
         self,
         uri: str,
@@ -37,7 +38,7 @@ Ultimately a resolver has only one public method that it must implement:
         metadata: Optional[SourceMetadata],
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> List[str]:
-```
+        ...
 
 As you can see it takes in a single uri string and will produce from that a list of
 other strings. These strings will then be passed to the appropriate driver to be read
