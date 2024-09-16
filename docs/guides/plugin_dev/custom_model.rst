@@ -151,10 +151,10 @@ Processes
 We encourage developers and users to define their functionality using functions that can
 be organised into separate modules or scripts. This can keep your class definitions from
 becoming very large unwieldy to work with as well as making it easier to make sure all
-the functionalities are properly tested (which we encourage even more strongly!)
-Because the python script defining your plugin Model class can get quite long and it  In
-HydroMT these are usually called processes (prior to V1 these were called workflows, but
-that name is now used for the yaml interface, and therefore were renamed to processes).
+the functionalities are properly tested (which we encourage even more strongly!).
+In HydroMT these functionalities are usually called processes (prior to V1 these were called workflows,
+but that name is now used for the yaml interface, and therefore were renamed to
+processes).
 These processes are usually stored in separate python scripts that you can decide to store in a process subfolder.
 
 A couple of tips if you want to define processes:
