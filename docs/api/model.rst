@@ -89,7 +89,8 @@ components.
    components.ModelComponent
    components.ModelComponent.model
    components.ModelComponent.data_catalog
-
+   components.ModelComponent.read
+   components.ModelComponent.write
    components.ModelComponent.root
 
 SpatialModelComponent
