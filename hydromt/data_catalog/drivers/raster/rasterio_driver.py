@@ -109,7 +109,7 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> Union[xr.DataArray, xr.Dataset]:
             try:
-                return _open_mfraster(uris, **kwargs)
+                return _open_mfraster(uris, mosaic=len(uris) > 1, **kwargs)
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     kwargs.pop("overview_level")

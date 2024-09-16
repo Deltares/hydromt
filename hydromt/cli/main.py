@@ -585,10 +585,10 @@ def export(
             bbox=bbox,
             time_range=time_tup,
             unit_conversion=unit_conversion,
-            meta=meta,
+            metadata=meta,
             append=append,
             handle_nodata=handle_nodata,
-            forced_overwrite=fo,
+            force_overwrite=fo,
         )
 
     except Exception as e:

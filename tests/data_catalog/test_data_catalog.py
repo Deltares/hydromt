@@ -25,6 +25,7 @@ from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_OPENPYXL, HAS_S3FS
 from hydromt._io.writers import _write_xy
+from hydromt._typing import Bbox, TimeRange
 from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
@@ -443,12 +444,12 @@ def test_data_catalogs_raises_on_unknown_predefined_catalog(data_catalog):
 
 
 @pytest.fixture()
-def export_test_slice_objects(tmpdir, data_catalog):
-    data_catalog._sources = {}
-    data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
+def export_test_slice_objects(
+    tmp_path: Path, data_catalog: DataCatalog
+) -> Tuple[DataCatalog, Bbox, TimeRange, List[str], Path]:
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_range = ("2010-02-10", "2010-02-15")
-    data_lib_path = join(tmpdir, "data_catalog.yml")
+    data_lib_path = tmp_path / "data_catalog.yml"
     source_names = [
         "era5[precip,temp]",
         "grwl_mask",
@@ -462,7 +463,6 @@ def export_test_slice_objects(tmpdir, data_catalog):
     return (data_catalog, bbox, time_range, source_names, data_lib_path)
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 @pytest.mark.integration()
 def test_export_global_datasets(tmpdir, export_test_slice_objects):
     (
@@ -477,7 +477,7 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
         bbox=bbox,
         time_range=time_range,
         source_names=source_names,
-        meta={"version": 1},
+        metadata={"version": 1},
         handle_nodata=NoDataStrategy.IGNORE,
     )
     with open(data_lib_path, "r") as f:

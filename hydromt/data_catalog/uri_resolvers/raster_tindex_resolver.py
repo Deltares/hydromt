@@ -29,7 +29,7 @@ class RasterTindexResolver(URIResolver):
         uri: str,
         *,
         time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[Zoom] = None,
+        zoom: Optional[Zoom] = None,
         mask: Optional[gpd.GeoDataFrame] = None,
         variables: Union[int, tuple[float, str], None] = None,
         metadata: Optional[SourceMetadata],
@@ -45,7 +45,7 @@ class RasterTindexResolver(URIResolver):
             left-inclusive start end time of the data, by default None
         mask : Optional[Geom], optional
             A geometry defining the area of interest, by default None
-        zoom_level : Optional[ZoomLevel], optional
+        zoom: Optional[Zoom], optional
             zoom_level of the dataset, by default None
         variables : Optional[List[str]], optional
             Names of variables to return, or all if None, by default None

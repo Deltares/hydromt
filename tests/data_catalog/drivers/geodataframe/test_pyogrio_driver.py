@@ -4,6 +4,8 @@ from pathlib import Path
 import geopandas as gpd
 import numpy as np
 import pytest
+from pyogrio import write_dataframe
+from pytest_mock import MockerFixture
 from shapely import box
 
 from hydromt._typing import Bbox
@@ -101,3 +103,15 @@ class TestPyogrioDriver:
         driver = PyogrioDriver()
         driver.write(df_path, geodf)
         assert np.all(driver.read([str(df_path)]) == geodf)
+
+    def test_write_unknown_uri(
+        self, geodf: gpd.GeoDataFrame, tmp_dir: Path, mocker: MockerFixture
+    ):
+        df_path = tmp_dir / "temp.fakeformat"
+        mock_xr_open: mocker.MagicMock = mocker.patch(
+            "hydromt.data_catalog.drivers.geodataframe.pyogrio_driver.write_dataframe",
+            spec=write_dataframe,
+        )
+        driver = PyogrioDriver()
+        driver.write(df_path, geodf)
+        assert mock_xr_open.call_args[0][1] == str(tmp_dir / "temp.fgb")
