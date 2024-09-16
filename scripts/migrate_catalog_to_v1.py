@@ -107,7 +107,7 @@ def migrate_entry(
         driver_name: str = DRIVER_RENAME_MAPPING[data_type][old_driver]
         entry["driver"] = {"name": driver_name}
         if old_driver == "raster_tindex":
-            entry["uri_resolver"] = "raster_tindex"
+            entry["uri_resolver"] = {"name": "raster_tindex"}
 
     # move kwargs and driver_kwargs to driver options
     old_kwarg_names: Set[str] = {"kwargs", "driver_kwargs"}
@@ -115,6 +115,8 @@ def migrate_entry(
         entry["driver"]["options"] = {}
         for field in old_kwarg_names:
             if value := entry.pop(field, None):
+                if tindex := value.pop("tileindex", None):
+                    entry["uri_resolver"]["options"] = {"tileindex": tindex}
                 entry["driver"]["options"] = value
 
     # move fsspec filesystem to driver
@@ -134,20 +136,32 @@ def migrate_entry(
         for before, after in {
             "source_url": "url",
             "source_author": "author",
-            "source_version": "version",
             "source_license": "license",
             "source_info": "info",
         }.items():
             if value := metadata.pop(before, None):
                 metadata[after] = value
-            entry["metadata"] = metadata
+
+        first_entry: bool = True
+        for before, after in {
+            "source_spatial_extent": "bbox",
+            "source_temporal_extent": "time_range",
+        }.items():
+            if value := metadata.pop(before, None):
+                if first_entry:
+                    metadata["extent"] = {}
+                    first_entry = False
+                metadata["extent"][after] = value
+
+        entry["metadata"] = metadata
 
     # move crs and nodata to metadata
     new_meta: Set[str] = {"crs", "nodata"}
     if "metadata" not in entry:
         entry["metadata"] = {}
     for field in new_meta:
-        if value := entry.pop(field, None):
+        value: Any = entry.pop(field, None)
+        if value is not None:
             entry["metadata"][field] = value
     if not entry["metadata"]:
         entry.pop("metadata")
@@ -158,7 +172,8 @@ def migrate_entry(
         entry["data_adapter"] = {}
 
         for param in postprocessing_params:
-            if val := entry.pop(param, None):
+            val: Any = entry.pop(param, None)
+            if val is not None:
                 entry["data_adapter"][param] = val
 
     # Migrate variants

@@ -46,15 +46,14 @@ cmip6_{model}_historical_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
-      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
     paper_ref: Taylor et al. 2012
+    source_version: 1.3.1
     url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
-    version: 1.3.1
     license: CC BY 4.0
     crs: 4326
   data_adapter:
@@ -63,11 +62,11 @@ cmip6_{model}_historical_{member}_{timestep}:
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_add:
+      temp: -273.15
     unit_mult:
       precip: 86400
       press_msl: 0.01
-    unit_add:
-      temp: -273.15
 cmip6_{model}_ssp119_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -91,15 +90,14 @@ cmip6_{model}_ssp119_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
-      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
     paper_ref: Taylor et al. 2012
+    source_version: 1.3.1
     url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
-    version: 1.3.1
     license: CC BY 4.0
     crs: 4326
   data_adapter:
@@ -108,11 +106,11 @@ cmip6_{model}_ssp119_{member}_{timestep}:
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_add:
+      temp: -273.15
     unit_mult:
       precip: 86400
       press_msl: 0.01
-    unit_add:
-      temp: -273.15
 cmip6_{model}_ssp126_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -143,15 +141,14 @@ cmip6_{model}_ssp126_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
-      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
     paper_ref: Taylor et al. 2012
+    source_version: 1.3.1
     url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
-    version: 1.3.1
     license: CC BY 4.0
     crs: 4326
   data_adapter:
@@ -160,11 +157,11 @@ cmip6_{model}_ssp126_{member}_{timestep}:
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_add:
+      temp: -273.15
     unit_mult:
       precip: 86400
       press_msl: 0.01
-    unit_add:
-      temp: -273.15
 cmip6_{model}_ssp245_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -198,15 +195,14 @@ cmip6_{model}_ssp245_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
-      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
     paper_ref: Taylor et al. 2012
+    source_version: 1.3.1
     url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
-    version: 1.3.1
     license: CC BY 4.0
     crs: 4326
   data_adapter:
@@ -215,11 +211,11 @@ cmip6_{model}_ssp245_{member}_{timestep}:
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_add:
+      temp: -273.15
     unit_mult:
       precip: 86400
       press_msl: 0.01
-    unit_add:
-      temp: -273.15
 cmip6_{model}_ssp370_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -253,15 +249,14 @@ cmip6_{model}_ssp370_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
-      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
     paper_ref: Taylor et al. 2012
+    source_version: 1.3.1
     url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
-    version: 1.3.1
     license: CC BY 4.0
     crs: 4326
   data_adapter:
@@ -270,11 +265,11 @@ cmip6_{model}_ssp370_{member}_{timestep}:
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_add:
+      temp: -273.15
     unit_mult:
       precip: 86400
       press_msl: 0.01
-    unit_add:
-      temp: -273.15
 cmip6_{model}_ssp434_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -297,15 +292,14 @@ cmip6_{model}_ssp434_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
-      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
     paper_ref: Taylor et al. 2012
+    source_version: 1.3.1
     url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
-    version: 1.3.1
     license: CC BY 4.0
     crs: 4326
   data_adapter:
@@ -314,11 +308,11 @@ cmip6_{model}_ssp434_{member}_{timestep}:
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_add:
+      temp: -273.15
     unit_mult:
       precip: 86400
       press_msl: 0.01
-    unit_add:
-      temp: -273.15
 cmip6_{model}_ssp460_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -341,15 +335,14 @@ cmip6_{model}_ssp460_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
-      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
     paper_ref: Taylor et al. 2012
+    source_version: 1.3.1
     url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
-    version: 1.3.1
     license: CC BY 4.0
     crs: 4326
   data_adapter:
@@ -358,11 +351,11 @@ cmip6_{model}_ssp460_{member}_{timestep}:
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_add:
+      temp: -273.15
     unit_mult:
       precip: 86400
       press_msl: 0.01
-    unit_add:
-      temp: -273.15
 cmip6_{model}_ssp585_{member}_{timestep}:
   data_type: RasterDataset
   placeholders:
@@ -393,15 +386,14 @@ cmip6_{model}_ssp585_{member}_{timestep}:
       decode_times: true
       preprocess: harmonise_dims
       consolidated: true
-      ext_override: .zarr
     filesystem:
       protocol: gcs
   metadata:
     category: climate
     paper_doi: 10.1175/BAMS-D-11-00094.1
     paper_ref: Taylor et al. 2012
+    source_version: 1.3.1
     url: https://console.cloud.google.com/marketplace/details/noaa-public/cmip6?_ga=2.136097265.-1784288694.1541379221&pli=1
-    version: 1.3.1
     license: CC BY 4.0
     crs: 4326
   data_adapter:
@@ -410,8 +402,8 @@ cmip6_{model}_ssp585_{member}_{timestep}:
       tas: temp
       rsds: kin
       psl: press_msl
+    unit_add:
+      temp: -273.15
     unit_mult:
       precip: 86400
       press_msl: 0.01
-    unit_add:
-      temp: -273.15
