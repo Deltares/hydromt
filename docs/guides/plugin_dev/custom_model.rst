@@ -52,7 +52,7 @@ the other subclasses. Apart from the components here are a couple of useful prop
 - :py:attr:`~Model.logger`: the HydroMT logger object for your model instance.
 
 
-.. _plugin_setup:
+.. _setting_up_plugin_model_objects:
 
 Setup basic model objects
 ^^^^^^^^^^^^^^^^^^^^^^^^^
