@@ -264,7 +264,8 @@ class Plugins:
         return self._catalog_plugins.summary()
 
     def uri_resolver_summary(self) -> str:
-        """Generate string representation containing the registered uri resolver entrypoints."""
+        """Generate string representation of the registered uri resolver entrypoints."""
+        return self._uri_resolvers_plugins.summary()
 
     def plugin_summary(self) -> str:
         return "\n".join(
