@@ -9,7 +9,7 @@ probably spend most of your time as a plugin developer. We offer the possibility
 of extending what is in hydromt via the use of entry points. These entry points
 are a way of telling hydromt core about code you would like it to use to do specialised
 such as reading and writing a custom file format. Currently core exposes the following
-entry points to extend it's functionalities:
+entry points to extend its functionalities:
 
 * Model
 * ModelComponent

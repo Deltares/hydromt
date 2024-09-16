@@ -4,8 +4,8 @@ Custom Drivers
 ==============
 
 Drivers are the second ingredient necessary to read (custom) datasets. Where as
-`URIResolver`s (discussed previously) determines _what_ to read, drivers determine _how_ to
-read and slice it. For example, you might use the same `ConventionResolver` to determine
+``URIResolver`` s (discussed previously) determines _what_ to read, drivers determine _how_ to
+read and slice it. For example, you might use the same ``ConventionResolver`` to determine
 which files to read, but different drivers to read `.nc`, `.zarr` or `.tiff` files. Vice
 versa you might also use the same driver but different resolvers to read data depending
 on how it was organised. It should therefore be noted that to read a particular dataset
@@ -14,7 +14,7 @@ it might be necessary to implement a custom resolver as well as a custom driver.
 Implementing a Drivers
 ^^^^^^^^^^^^^^^^^^^^^^
 
-to function drivers MUST at least implement the following function:
+To function drivers MUST at least implement the following function:
 
 .. code-block:: python
 

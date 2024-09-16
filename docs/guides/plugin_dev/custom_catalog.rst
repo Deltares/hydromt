@@ -13,8 +13,8 @@ of the library pooch to fetch the correct data catalogs. Please refer to it's do
 This class will help fetch the correct files for the data catalog. The yaml
 file specifying the data catalog should be the same format as any other catalog.
 
-If you structure your data catalog and their versioning just ike hydromt core does,
+If you structure your data catalog and their versioning just like hydromt core does,
 then the base class doesn't actually have to do much more than point to a different
 repository by overriding the `base_url` class variable. As long as the url points to a
 correctly configured repository everything should work automatically. Please refer to
-the HydroMT core and pooch documentation for more information ion this.
+the HydroMT core and pooch documentation for more information.

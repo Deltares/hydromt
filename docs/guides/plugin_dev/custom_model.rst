@@ -57,7 +57,7 @@ Setup basic model objects
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 When building a model from scratch, the first thing you should do is take inventory of
 what your components need. As already mentioned most of the behaviour will be defined in
-the components, but over arching functionality that doesn't necessarily belong to a
+the components, but overarching functionality that doesn't necessarily belong to a
 single component such as for example adding perturbations for a sensitivity analysis can
 still be defined in the Model class itself.
 

@@ -4,7 +4,7 @@ Custom components
 =================
 
 Components are a large part of how HydroMT defines its behavior.
-A component is basically a part of the model architecture that is responsible
+A component is a part of the model architecture that is responsible
 for handling a specific part of the data, such as the Grid, Config, or Mesh
 but also potentially something like rivers, catchments, pipes or other custom behavior
 your plugin might need.
@@ -41,7 +41,7 @@ the data associated with them only get's loaded if necessary. Therefore it is im
 to set a property on the component so that it can read from/write to the correct default
 file location.
 
-`SpatialModelComponent`s should take some additional information in their
+``SpatialModelComponent`` s should take some additional information in their
 initialisation:
 
 .. code-block:: python
@@ -56,11 +56,11 @@ initialisation:
     ):
         ...
 
-The region_filename is a similar file location iwthin the model root where region data
-should be written if necessary. Note also that spactial components do not necessarily
+The ``region_filename`` is a similar file location within the model root where region data
+should be written if necessary. Note also that spatial components do not necessarily
 have their own region. Sometimes they can derive their region from other spacial
-components, such as a subgrid deriving it's region from the main grid. If this is the
-case then set the `region_component` to the name of the component from which you wish to
+components, such as a subgrid deriving its region from the main grid. If this is the
+case then set the ``region_component`` to the name of the component from which you wish to
 derive the region.
 
 Required attributes
@@ -68,9 +68,9 @@ Required attributes
 
 Aside form initialisation the components are expected to have some other properties
 (`data`, `model`, `data_catalog` and `root`) and functions (`read` and `write`).
-Functions annotated with the `@hydromt_step` decorator will be available to users of a
+Functions annotated with the ``@hydromt_step`` decorator will be available to users of a
 workflow yaml. Depending on the context your component may also want to implement the
-functions `set` (which is typically not annotaed with the `@hydromt_step` decorator
+functions `set` (which is typically not annotaed with the ``@hydromt_step`` decorator
 since it cannot be sued in a yaml workflow)`, and `test_equal`. `set` is typically used
 by python users to overwrite data in the component after they have done something with
 it outside of your component. `test_equal` is purely for testing purposes and should test
