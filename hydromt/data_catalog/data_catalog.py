@@ -1152,21 +1152,7 @@ class DataCatalog(object):
                                 handle_nodata,
                             )
                             continue
-                        # # update path & driver and remove kwargs
-                        # # and rename in output sources
-                        # if unit_conversion:
-                        #     source.unit_mult = {}
-                        #     source.unit_add = {}
-                        # else:
-                        #     source.unit_mult = unit_mult
-                        #     source.unit_add = unit_add
-                        # source.path = write_path
-                        # source.driver = driver
-                        # source.filesystem = "local"
-                        # source.driver_kwargs = {}
-                        # if driver_kwargs is not None:
-                        #     source.driver_kwargs.update(driver_kwargs)
-                        # source.rename = {}
+
                         if key in sources_out:
                             logger.warning(
                                 f"{key} already exists in data catalog, overwriting..."
