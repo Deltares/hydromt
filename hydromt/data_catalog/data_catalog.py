@@ -9,7 +9,7 @@ import logging
 import os
 from datetime import datetime
 from os.path import abspath, basename, exists, isfile, join, splitext
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import (
     Any,
     Dict,
@@ -40,7 +40,12 @@ from hydromt import __version__
 from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, StrPath, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
-from hydromt._utils import _deep_merge, _partition_dictionaries, _single_var_as_array
+from hydromt._utils import (
+    _deep_merge,
+    _is_valid_url,
+    _partition_dictionaries,
+    _single_var_as_array,
+)
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
     DataFrameAdapter,
@@ -1044,7 +1049,7 @@ class DataCatalog(object):
         # create copy of data with selected source names
         source_vars = {}
         if len(source_names) > 0:
-            sources = {}
+            sources: Dict[str, Dict[str, Dict[Any, DataSource]]] = {}
             for source in source_names:
                 # support both strings and SourceSpecDicts here
                 if isinstance(source, str):
@@ -1073,7 +1078,9 @@ class DataCatalog(object):
                 sources[name][provider][version] = copy.deepcopy(source)
 
         else:
-            sources = copy.deepcopy(self.sources)
+            sources: Dict[str, Dict[str, Dict[Any, DataSource]]] = copy.deepcopy(
+                self.sources
+            )
 
         # read existing data catalog if it exists
         path = join(new_root, "data_catalog.yml")
@@ -1094,7 +1101,14 @@ class DataCatalog(object):
                             source.data_adapter.unit_mult = {}
                             source.data_adapter.unit_add = {}
                         try:
-                            p = cast(Path, Path(new_root) / source.uri)
+                            if (
+                                _is_valid_url(source.uri)
+                                or PurePath(source.uri).is_absolute()
+                            ):
+                                new_uri: PurePath = PurePath(source.uri).name
+                            else:
+                                new_uri: PurePath = source.uri
+                            p = cast(Path, Path(new_root) / new_uri)
                             if not force_overwrite and isfile(p):
                                 logger.warning(
                                     f"File {p} already exists and not in forced overwrite mode. skipping..."

@@ -523,14 +523,14 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
 
 
 @pytest.mark.integration()
-def test_export_dataframe(tmpdir, df, df_time):
+def test_export_dataframe(tmp_path, df, df_time):
     # Write two csv files
-    csv_path = str(tmpdir.join("test.csv"))
-    parquet_path = str(tmpdir.join("test.parquet"))
+    csv_path = str(tmp_path / "test.csv")
+    parquet_path = str(tmp_path / "test.parquet")
     df.to_csv(csv_path)
     df.to_parquet(parquet_path)
-    csv_ts_path = str(tmpdir.join("test_ts.csv"))
-    parquet_ts_path = str(tmpdir.join("test_ts.parquet"))
+    csv_ts_path = str(tmp_path / "test_ts.csv")
+    parquet_ts_path = str(tmp_path / "test_ts.parquet")
     df_time.to_csv(csv_ts_path)
     df_time.to_parquet(parquet_ts_path)
 
@@ -572,21 +572,27 @@ def test_export_dataframe(tmpdir, df, df_time):
     data_catalog = DataCatalog()
     data_catalog.from_dict(data_dict)
 
+    data_catalog_reread_path: Path = tmp_path / "newdir_filter"
     data_catalog.export_data(
-        str(tmpdir),
+        str(data_catalog_reread_path),
         time_range=("2010-02-01", "2010-02-14"),
         bbox=[11.70, 45.35, 12.95, 46.70],
         handle_nodata=NoDataStrategy.IGNORE,
     )
-    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    assert len(data_catalog1.list_sources()) == 2
+    data_catalog_reread = DataCatalog(
+        str(data_catalog_reread_path / "data_catalog.yml")
+    )
+    assert len(data_catalog_reread.list_sources()) == 2
 
-    data_catalog.export_data(str(tmpdir))
-    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
+    data_catalog_reread_path_nofilter: Path = tmp_path / "newdir"
+    data_catalog.export_data(str(data_catalog_reread_path_nofilter))
+    data_catalog1 = DataCatalog(
+        str(data_catalog_reread_path_nofilter / "data_catalog.yml")
+    )
     assert len(data_catalog1.list_sources()) == 4
     for key, source in data_catalog1.list_sources():
         dtypes = pd.DataFrame
-        obj = source.get_data()
+        obj = source.read_data()
         assert isinstance(obj, dtypes), key
 
 
