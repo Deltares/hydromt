@@ -487,7 +487,6 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     (
         data_catalog,
@@ -501,7 +500,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
         bbox=bbox,
         time_range=time_range,
         source_names=source_names,
-        meta={"version": 1},
+        metadata={"version": 1},
         handle_nodata=NoDataStrategy.IGNORE,
     )
     # test append and overwrite source
@@ -510,7 +509,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
         bbox=bbox,
         source_names=["corine"],
         append=True,
-        meta={"version": 2},
+        metadata={"version": 2},
         handle_nodata=NoDataStrategy.IGNORE,
     )
 
@@ -523,7 +522,6 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 @pytest.mark.integration()
 def test_export_dataframe(tmpdir, df, df_time):
     # Write two csv files
@@ -539,30 +537,34 @@ def test_export_dataframe(tmpdir, df, df_time):
     # Test to_file method (needs reading)
     data_dict = {
         "test_df": {
-            "path": csv_path,
-            "driver": "csv",
-            "data_type": "DataFrame",
-            "kwargs": {
-                "index_col": 0,
+            "uri": csv_path,
+            "driver": {
+                "name": "pandas",
+                "options": {
+                    "index_col": 0,
+                },
             },
+            "data_type": "DataFrame",
         },
         "test_df_ts": {
-            "path": csv_ts_path,
-            "driver": "csv",
-            "data_type": "DataFrame",
-            "kwargs": {
-                "index_col": 0,
-                "parse_dates": True,
+            "uri": csv_ts_path,
+            "driver": {
+                "name": "pandas",
+                "options": {
+                    "index_col": 0,
+                    "parse_dates": True,
+                },
             },
+            "data_type": "DataFrame",
         },
         "test_df_parquet": {
-            "path": parquet_path,
-            "driver": "parquet",
+            "uri": parquet_path,
+            "driver": "pandas",
             "data_type": "DataFrame",
         },
         "test_df_ts_parquet": {
-            "path": parquet_ts_path,
-            "driver": "parquet",
+            "uri": parquet_ts_path,
+            "driver": "pandas",
             "data_type": "DataFrame",
         },
     }

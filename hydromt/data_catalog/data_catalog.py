@@ -7,7 +7,6 @@ import inspect
 import itertools
 import logging
 import os
-import warnings
 from datetime import datetime
 from os.path import abspath, basename, exists, isfile, join, splitext
 from pathlib import Path
@@ -452,11 +451,9 @@ class DataCatalog(object):
         else:
             versions = self._sources[name][provider]
             if provider in self._sources[name] and version in versions:
-                warnings.warn(
+                logger.warning(
                     f"overwriting data source '{name}' with "
                     f"provider {provider} and version {version}.",
-                    UserWarning,
-                    stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
             versions.update({str(version): source})
@@ -1036,6 +1033,9 @@ class DataCatalog(object):
 
         new_root = new_root.absolute()
         new_root.mkdir(exist_ok=True)
+
+        if not time_range:
+            time_range: Tuple[Union[datetime, str], Union[datetime, str]] = tuple()
 
         # convert strings to timerange
         if any(map(lambda t: not isinstance(t, datetime), time_range)):

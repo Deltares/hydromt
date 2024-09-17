@@ -128,6 +128,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             path = no_ext + ".zarr"
             ext = ".zarr"
         if ext == ".zarr":
-            ds.to_zarr(path, **kwargs)
+            ds.to_zarr(path, mode="w", **kwargs)
         else:
             ds.to_netcdf(path, **kwargs)
