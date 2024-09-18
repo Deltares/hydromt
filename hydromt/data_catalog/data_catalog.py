@@ -585,7 +585,7 @@ class DataCatalog(object):
 
         """
         if "=" in name:
-            name, version = name.split("=")[0], name.split("=")[-1]
+            name, version = name.split("=")
         if name not in self.predefined_catalogs:
             raise ValueError(
                 f'Catalog with name "{name}" not found in predefined catalogs'
@@ -708,17 +708,18 @@ class DataCatalog(object):
             catalog_name = cast(
                 str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
             )
-        version = meta.get("version", None)
-        if root is None:
-            root = meta.get("root", os.path.dirname(urlpath))
-        if root.split(".")[-1] in ["gz", "zip"]:
-            # if root is an archive, unpack it at the cache dir
-            root = self._cache_archive(
-                archive_uri=root,
-                name=catalog_name,
-                version=version,
-                sha256=meta.get("sha256", None),
+
+        if root is not None:
+            self.root = root
+        elif "root" in meta:
+            root = meta.pop("root")
+        elif "roots" in meta:
+            root = self._determine_catalog_root(meta)
+        else:
+            raise ValueError(
+                "root must be set as an argument if it is not included in the meta of the catalog"
             )
+
         self.from_dict(
             yml,
             catalog_name=catalog_name,
@@ -822,8 +823,10 @@ class DataCatalog(object):
             self.root = root
         elif "roots" in meta:
             self.root = self._determine_catalog_root(meta)
-
-        logger.info(f"Data Catalog is using root: {self.root}")
+        else:
+            raise ValueError(
+                "root must be set as an argument if it is not included in the meta of the catalog"
+            )
 
         if self.root is not None and splitext(self.root)[-1] in ["gz", "zip"]:
             # if root is an archive, unpack it at the cache dir
