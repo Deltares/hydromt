@@ -101,35 +101,41 @@ def migrate_entry(
         entry["uri"] = path
 
     # migrate driver str to dict
+
     data_type: Optional[str] = entry.get("data_type", variant_ref.get("data_type"))
     if data_type and entry.get("driver"):
         old_driver: str = entry.pop("driver")
         driver_name: str = DRIVER_RENAME_MAPPING[data_type][old_driver]
         entry["driver"] = {"name": driver_name}
+        driver_options: Dict[str, Any] = entry["driver"].get("options", {})
+        entry["driver"]["options"] = driver_options
         if old_driver == "raster_tindex":
             entry["uri_resolver"] = {"name": "raster_tindex"}
+            driver_options["mosaic"] = True
 
-    # move kwargs and driver_kwargs to driver options
-    old_kwarg_names: Set[str] = {"kwargs", "driver_kwargs"}
-    if any(old_kwarg_names.intersection(entry.keys())):
-        entry["driver"]["options"] = {}
-        for field in old_kwarg_names:
-            if value := entry.pop(field, None):
-                if tindex := value.pop("tileindex", None):
-                    entry["uri_resolver"]["options"] = {"tileindex": tindex}
-                entry["driver"]["options"] = value
+        # move kwargs and driver_kwargs to driver options
+        old_kwarg_names: Set[str] = {"kwargs", "driver_kwargs"}
+        if any(old_kwarg_names.intersection(entry.keys())):
+            for field in old_kwarg_names:
+                if value := entry.pop(field, None):
+                    if tindex := value.pop("tileindex", None):
+                        entry["uri_resolver"]["options"] = {"tileindex": tindex}
+                    driver_options.update(value)
 
-    # move fsspec filesystem to driver
-    if filesystem := entry.pop("filesystem", None):
-        if isinstance(filesystem, str):
-            entry["driver"]["filesystem"] = {"protocol": filesystem}
-        else:
-            entry["driver"]["filesystem"] = filesystem
-        if storage_options := entry.pop("storage_options", None):
-            entry["driver"]["filesystem"] = {
-                **entry["driver"]["filesystem"],
-                **storage_options,
-            }
+        if driver_options:
+            entry["driver"]["options"] = driver_options
+
+        # move fsspec filesystem to driver
+        if filesystem := entry.pop("filesystem", None):
+            if isinstance(filesystem, str):
+                entry["driver"]["filesystem"] = {"protocol": filesystem}
+            else:
+                entry["driver"]["filesystem"] = filesystem
+            if storage_options := entry.pop("storage_options", None):
+                entry["driver"]["filesystem"] = {
+                    **entry["driver"]["filesystem"],
+                    **storage_options,
+                }
 
     # migrate meta to metadata
     if metadata := entry.pop("meta", None):

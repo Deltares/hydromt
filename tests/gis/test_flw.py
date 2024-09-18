@@ -1,5 +1,7 @@
 """Test hydromt.flw submodule."""
 
+from logging import WARNING
+
 import geopandas as gpd
 import numpy as np
 import pytest
@@ -126,7 +128,7 @@ def test_clip_basins(hydds, flwdir):
     assert hydds_clipped.where(hydds_clipped["mask"]).max() == upa0
 
 
-def test_gauge_map(hydds, flwdir):
+def test_gauge_map(hydds, flwdir, caplog: pytest.LogCaptureFixture):
     # test with idxs at outlet
     idx0 = np.argmax(hydds["uparea"].values.ravel())
     da_gauges, idxs, ids = flw.gauge_map(hydds, idxs=[idx0])
@@ -144,8 +146,9 @@ def test_gauge_map(hydds, flwdir):
     with pytest.raises(ValueError, match="Either idxs or xy required"):
         flw.gauge_map(hydds)
     # test warning
-    with pytest.warns(UserWarning, match="Snapping distance"):
+    with caplog.at_level(WARNING):
         flw.gauge_map(hydds, flwdir=flwdir, stream=stream, xy=xy, max_dist=0)
+        assert "Snapping distance" in caplog.text
 
 
 def test_outlet_map(hydds, flwdir):

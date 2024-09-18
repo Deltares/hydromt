@@ -120,7 +120,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         """
         no_ext, ext = splitext(path)
         # set filepath if incompat
-        if ext not in {".zarr", ".netcdf"}:
+        if ext not in {".zarr", ".nc", ".netcdf"}:
             logger.warning(
                 f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
                 "switching to zarr"

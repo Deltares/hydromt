@@ -67,9 +67,11 @@ class TestRasterioDriver:
     @patch("hydromt.data_catalog.drivers.raster.rasterio_driver._open_mfraster")
     def test_sets_mosaic_kwargs(self, fake_open_mfraster: MagicMock):
         uris = ["test", "test2"]
-        mosaic_kwargs = {"mykwarg: 0"}
+        mosaic_kwargs = {"mykwarg": 0}
         RasterioDriver(options={"mosaic_kwargs": mosaic_kwargs}).read(uris=uris)
-        fake_open_mfraster.assert_called_once_with(uris, mosaic_kwargs=mosaic_kwargs)
+        fake_open_mfraster.assert_called_once_with(
+            uris, mosaic=False, mosaic_kwargs=mosaic_kwargs
+        )
 
 
 class TestOpenMFRaster:

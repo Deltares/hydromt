@@ -9,6 +9,7 @@ chelsa:
   uri: chelsa.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: meteo
     paper_doi: 10.1038/sdata.2017.122
@@ -22,6 +23,7 @@ chirps_global:
   uri: chirps_global.nc
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     paper_doi: 10.3133/ds832
@@ -38,6 +40,7 @@ corine:
   uri: corine.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: landuse & landcover
     url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
@@ -49,6 +52,7 @@ dtu10mdt:
   uri: dtu10mdt.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: topography
     paper_doi: 10.1029/2008JC005179
@@ -62,6 +66,7 @@ dtu10mdt_egm96:
   uri: dtu10mdt_egm96.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: topography
     paper_doi: 10.1029/2008JC005179
@@ -75,6 +80,7 @@ eobs:
   uri: eobs.nc
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     paper_doi: 10.1029/2017JD028200
@@ -91,6 +97,7 @@ eobs_orography:
   uri: eobs_orography.nc
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     paper_doi: 10.1029/2017JD028200
@@ -104,6 +111,7 @@ era5:
   uri: era5.nc
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     history: Extracted from Copernicus Climate Data Store; resampled by Deltares to
@@ -129,6 +137,7 @@ era5_hourly:
   uri: era5_hourly.nc
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     history: Extracted from Copernicus Climate Data Store
@@ -150,6 +159,7 @@ era5_daily_zarr:
   uri: era5_daily_zarr.zarr
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     history: Extracted from Copernicus Climate Data Store; resampled by Deltares to
@@ -164,6 +174,7 @@ era5_hourly_zarr:
   uri: era5_hourly_zarr.zarr
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     history: Extracted from Copernicus Climate Data Store
@@ -177,6 +188,7 @@ era5_orography:
   uri: era5_orography.nc
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     history: Extracted from Copernicus Climate Data Store
@@ -194,6 +206,7 @@ gadm_level1:
   uri: gadm_level1.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: geography
     notes: last downloaded 2020-10-19; license required for commercial use
@@ -207,6 +220,7 @@ gadm_level2:
   uri: gadm_level2.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: geography
     notes: last downloaded 2020-10-19; license required for commercial use
@@ -220,6 +234,7 @@ gadm_level3:
   uri: gadm_level3.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: geography
     notes: last downloaded 2020-10-19; license required for commercial use
@@ -233,6 +248,7 @@ gcn250:
   uri: gcn250/{variable}.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: soil
     paper_doi: 10.1038/s41597-019-0155-x
@@ -246,6 +262,7 @@ gdp_world:
   uri: gdp_world.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: socio economic
     author: Wilfred Altena
@@ -259,6 +276,7 @@ gebco:
   uri: gebco.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: topography
     paper_doi: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9
@@ -283,6 +301,7 @@ ghs_smod_2015:
       url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     author: JRC-ISPRA EC
@@ -293,6 +312,7 @@ ghs_pop_2015:
   uri: ghs_pop_2015.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.2905/0C6B9751-A71F-4062-830B-43C9F432370F
@@ -307,6 +327,7 @@ ghs_pop_2015_54009:
   uri: ghs_pop_2015_54009.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.2760/062975
@@ -319,6 +340,7 @@ globcover_2009:
   uri: globcover.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: landuse & landcover
     paper_doi: 10.1594/PANGAEA.787668
@@ -332,6 +354,7 @@ glw_buffaloes:
   uri: glw_buffaloes.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.7910/DVN/5U8MWI
@@ -346,6 +369,7 @@ glw_cattle:
   uri: glw_cattle.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.7910/DVN/GIVQ75
@@ -360,6 +384,7 @@ glw_chicken:
   uri: glw_chicken.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.7910/DVN/SUFASB
@@ -374,6 +399,7 @@ glw_ducks:
   uri: glw_ducks.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.7910/DVN/ICHCBH
@@ -388,6 +414,7 @@ glw_goats:
   uri: glw_goats.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.7910/DVN/OCPH42
@@ -402,6 +429,7 @@ glw_horses:
   uri: glw_horses.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.7910/DVN/7Q52MV
@@ -416,6 +444,7 @@ glw_pigs:
   uri: glw_pigs.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.7910/DVN/33N0JG
@@ -430,6 +459,7 @@ glw_sheep:
   uri: glw_sheep.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.7910/DVN/BLWPZN
@@ -443,6 +473,7 @@ grdc:
   uri: grdc.csv
   driver:
     name: geodataframe_table
+    options: {}
   metadata:
     category: observed data
     url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
@@ -455,6 +486,7 @@ grip_roads:
   uri: grip_roads.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: road
     paper_doi: 10.1088/1748-9326/aabd42
@@ -468,6 +500,7 @@ grwl:
   uri: grwl.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: surface water
     paper_doi: 10.1126/science.aat0636
@@ -481,6 +514,7 @@ grwl_mask:
   driver:
     name: rasterio
     options:
+      mosaic: true
       chunks:
         x: 3000
         y: 3000
@@ -502,6 +536,7 @@ gswo:
   uri: gswo.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: surface water
     paper_doi: 10.1038/nature20584
@@ -514,6 +549,7 @@ gtsmv3_eu_era5:
   uri: gtsmv3_eu_era5.nc
   driver:
     name: geodataset_xarray
+    options: {}
   metadata:
     category: ocean
     paper_doi: 10.24381/cds.8c59054f
@@ -526,6 +562,7 @@ guf_bld_2012:
   uri: guf_bld_2012.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: socio economic
     paper_doi: 10.1016/j.isprsjprs.2017.10.012
@@ -539,6 +576,7 @@ hydro_lakes:
   uri: hydro_lakes.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: surface water
     author: Arjen Haag
@@ -553,12 +591,13 @@ hydro_reservoirs:
   uri: hydro_reservoirs.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: surface water
     author: Alessia Matano
     info: GRanD.v1.1_HydroLAKES.v10_JRC.2016
-    crs: 4326
     nodata: -99
+    crs: 4326
   data_adapter:
     unit_mult:
       Area_avg: 1000000.0
@@ -572,19 +611,21 @@ koppen_geiger:
   uri: koppen_geiger.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: meteo
     paper_doi: 10.1127/0941-2948/2006/0130
     paper_ref: Kottek et al. (2006)
     url: http://koeppen-geiger.vu-wien.ac.at/present.htm
-    crs: 4326
     nodata: 0
+    crs: 4326
 mdt_cnes_cls18:
   data_type: RasterDataset
   version: 18
   uri: mdt_cnes_cls18.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: topography
     paper_doi: 10.5194/os-17-789-2021
@@ -598,6 +639,7 @@ merit_hydro:
   uri: merit_hydro/{variable}.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: topography
     paper_doi: 10.1029/2019WR024873
@@ -611,6 +653,7 @@ merit_hydro_ihu:
   uri: merit_hydro_1k/{variable}.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: topography
     paper_doi: 10.5194/hess-2020-582
@@ -623,6 +666,7 @@ merit_hydro_index:
   uri: merit_hydro_index.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: topography
     paper_doi: 10.5194/hess-2020-582
@@ -635,6 +679,7 @@ modis_lai:
   uri: modis_lai.nc
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: landuse & landcover
     notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the
@@ -653,6 +698,7 @@ osm_coastlines:
   uri: osm_coastlines.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: geography
     url: https://osmdata.openstreetmap.de/data/coastlines.html
@@ -666,6 +712,7 @@ osm_landareas:
   uri: osm_landareas.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: geography
     url: https://osmdata.openstreetmap.de/data/coastlines.html
@@ -679,6 +726,7 @@ rgi:
   uri: rgi.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: surface water
     paper_doi: 10.3189/2014JoG13J176
@@ -693,6 +741,7 @@ hydro_rivers_lin:
   uri: rivers_lin2019_v1.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     category: hydrography
     paper_doi: 10.5281/zenodo.3552776
@@ -705,6 +754,7 @@ simard:
   uri: simard.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: landuse & landcover
     paper_doi: 10.1029/2011JG001708
@@ -717,6 +767,7 @@ soilgrids:
   uri: soilgrids/{variable}.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: soil
     notes: "soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia\
@@ -760,6 +811,7 @@ vito_2015:
   uri: vito.tif
   driver:
     name: rasterio
+    options: {}
   metadata:
     category: landuse & landcover
     paper_doi: 10.5281/zenodo.3939038
@@ -771,6 +823,7 @@ wb_countries:
   uri: wb_countries.gpkg
   driver:
     name: pyogrio
+    options: {}
   metadata:
     author: World Bank
     category: socio-economic
@@ -784,6 +837,7 @@ worldclim:
   uri: worldclim.nc
   driver:
     name: raster_xarray
+    options: {}
   metadata:
     category: meteo
     paper_doi: 10.1002/joc.5086

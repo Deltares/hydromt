@@ -4,6 +4,7 @@ import glob
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from logging import WARNING
 from os import mkdir
 from os.path import abspath, basename, dirname, join
 from pathlib import Path
@@ -290,11 +291,14 @@ def test_catalog_entry_single_variant_unknown_source(aws_worldcover):
         aws_data_catalog.get_source("asdfasdf", version="2021", provider="aws")
 
 
-def test_catalog_entry_warns_on_override_version(aws_worldcover):
+def test_catalog_entry_warns_on_override_version(
+    aws_worldcover, caplog: pytest.LogCaptureFixture
+):
     aws_yml_path, aws_data_catalog = aws_worldcover
     # make sure we trigger user warning when overwriting versions
-    with pytest.warns(UserWarning):
+    with caplog.at_level(WARNING):
         aws_data_catalog.from_yml(aws_yml_path)
+        assert "overwriting data source" in caplog.text
 
 
 def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
