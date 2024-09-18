@@ -47,8 +47,10 @@ If you found a bug or an issue you would like to tackle or contribute to a new d
    used and what assumptions can be made about it. Please make sure the tests pass on
    all environments in our CI. This should be checked in your PR with every commit you push.
 5. Make sure all pre-commit hooks pass, see  :ref:`code-format`. For ipynb files make
-  sure that you have cleared all results.
-6. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`_.
+   sure that you have cleared all results.
+6. Update docs/changelog.rst file with a summary of your changes and a link to your
+   pull request. See for example the `hydromt changelog
+   <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`_.
 7. Push your commits to the github repository and open a draft pull request. The body of
    the pull request will be pre-filled with a template. Please fill out this template
    with the relevant information, and complete the checklist included. Filling out the
@@ -59,13 +61,14 @@ If you found a bug or an issue you would like to tackle or contribute to a new d
 9. Depending on the PR, the reviewer may ask you to either make changes or accept your
    PR.
 
+
+
 .. _git-conventions:
 
 Git conventions
 ---------------
 
- We follow the `GitHub workflow
-<https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/github-flow>`__
+We follow the `GitHub workflow <https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests-github-flow>`__
 to allow many people to work together on the project.
 
 After discussing a new proposal or implementation in the issue tracker, you can start
@@ -245,7 +248,7 @@ should be created with model-specific data readers, writers and setup methods as
 - A Model child class implementation for a specific model kernel can be exposed to HydroMT as a plugin by specifying a
   ``hydromt.models`` `entry-point <https://packaging.python.org/en/latest/specifications/entry-points/>`_ in the pyproject.toml file of a package.
   For a more detailed explanation of how to build a plugin please refer to the
-  :ref:`plugin_dev` section.
+  :ref:`register_plugins` section.
 - We highly recommend writing integration tests to ensure the correctness of your code.
 
 

@@ -1,7 +1,7 @@
 .. _custom_model_builder:
 
-Custom Model Builders
-=====================
+Custom Models
+=============
 
 
 The main goal of your plugin is to be able to build and update model instances for your
@@ -20,11 +20,11 @@ Initialisation
 ^^^^^^^^^^^^^^
 
 Most of the functionality necessary to initialise models is already taken care of in
-Core, therefore if you inherit from the core `Model` class you should not have to
+Core, therefore if you inherit from the core ``Model`` class you should not have to
 implement much or even any of the basic functionalities.
 
 If you wish to provide default behaviour for your users, such as providing default
-components that your model will always need, you can do so by overriding the `__init__`
+components that your model will always need, you can do so by overriding the ``__init__``
 function on your model like so:
 
 .. doctest:: python
@@ -36,7 +36,7 @@ function on your model like so:
           # extra customisation code here...
 
 
-Please make sure to call the `super().__init__` function before you do anything else to
+Please make sure to call the ``super().__init__`` function before you do anything else to
 setup your class so that the base functionality also get's run properly.
 
 Additional Model properties
@@ -46,8 +46,7 @@ the other subclasses. Apart from the components here are a couple of useful prop
 
 - :py:attr:`~Model.root`: path to the root folder of the model instance you are working with.
 - :py:attr:`~Model.crs`: the reference coordinate system (pyproj.CRS) of the model.
-- :py:attr:`~Model.region`: A shortcut to retrieve region data from the designated
-     spacial component
+- :py:attr:`~Model.region`: A shortcut to retrieve region data from the designated spacial component
 - :py:attr:`~Model.data_catalog`: the current data catalog you can use to add data to your model.
 - :py:attr:`~Model.logger`: the HydroMT logger object for your model instance.
 
@@ -81,13 +80,10 @@ Setup methods
 
 In general, a HydroMT ``setup_<>`` method does 4 things:
 
-  1. read and parse the data using the ``DataCatalog`` and corresponding ``DataAdapter.get_data`` method (
-  ``get_rasterdataset`` for RasterDataset, ``get_GeoDataset`` for GeoDataset, ``get_geodataframe`` for GeoDataFrame and
-  ``get_dataframe`` for DataFrame).
-
-  2. process that data in some way, optionally by calling other functions.
-  3. Optionally, rename or update attributes from HydroMT variable conventions (name, unit) to the specific model conventions.
-  4. add the data to the corresponding HydroMT model components.
+1. read and parse the data using the ``DataCatalog``
+2. process that data in some way, optionally by calling other functions.
+3. Optionally, rename or update attributes from HydroMT variable conventions (name, unit) to the specific model conventions.
+4. add the data to the corresponding HydroMT model components.
 
 Below is a simplified example of what a setup function would look like for a
 hypothetical landuse grid from a raster input data:
@@ -163,16 +159,21 @@ A couple of tips if you want to define processes:
 - avoid passing the HydroMT model class to your process function, but pass the required
   arguments directly. try to do this:
 
-  .. NOTE::
+  .. code-block:: python
+
     def interpolate_grid(grid: xr.DataSet, crs: CRS):
       ...
 
-   not this:
 
-   .. WARNING::
+  not this:
+
+
+  .. code-block:: python
+
     def interpolate_grid(model: AwesomeModel):
       grid = model.grid
       ...
 
-   Ideally the workflows work from common python objects like xarray or geopandas rather than with the ``Model`` class.
+
+  Ideally the workflows work from common python objects like xarray or geopandas rather than with the ``Model`` class.
 - if you want to do some GIS processing on ``RasterDataset`` or ``GeoDataset``, HydroMT defines a lot of useful methods. Check out the :ref: `Raster methods API doc` for RasterDataset and :ref: `GeoDataset methods API doc`. For ``GeoDataFrame``, the `geopandas <https://geopandas.org/en/stable/index.html>`_ library should have most of what you need (and for ``UgridDataset`` or mesh, the `xugrid <https://deltares.github.io/xugrid/>`_ library). For computing or deriving other variables from an input dataset, HydroMT contains also a couple of useful workflows for example ``flwdir`` for flow direction methods, ``basin_mask`` to derive basin shape, or ``stats`` to derive general, efficiency or extreme value statistics from data.
