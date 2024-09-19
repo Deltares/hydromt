@@ -471,6 +471,7 @@ def _open_geodataset(
         coordinates index.
         This can either be a csv, or parquet with datetime in the first column and the
         location index in the header row, or a netcdf with a time and index dimensions.
+        Note that this MUST be relative to the directory where `loc_path` points to
     var_name: str, optional
         Name of the variable in case of a csv, or parquet data_path file. By default,
         None and infered from basename.
@@ -501,6 +502,7 @@ def _open_geodataset(
     chunks = chunks or {}
     if not isfile(loc_path):
         raise IOError(f"GeoDataset point location file not found: {loc_path}")
+
     # For filetype [], only point geometry is supported
     filetype = str(loc_path).split(".")[-1].lower()
     if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
@@ -511,13 +513,16 @@ def _open_geodataset(
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
     # read timeseries file
-    if data_path is not None and isfile(data_path):
-        da_ts = _open_timeseries_from_table(
-            data_path, name=var_name, index_dim=index_dim
-        )
-        ds = vector.GeoDataset.from_gdf(gdf, da_ts)
-    elif data_path is not None:
-        raise IOError(f"GeoDataset data file not found: {data_path}")
+    if data_path is not None:
+        loc_path_base = dirname(loc_path)
+        full_data_path = join(loc_path_base, data_path)
+        if isfile(full_data_path):
+            da_ts = _open_timeseries_from_table(
+                full_data_path, name=var_name, index_dim=index_dim
+            )
+            ds = vector.GeoDataset.from_gdf(gdf, da_ts)
+        else:
+            raise IOError(f"GeoDataset data file not found: {data_path}")
     else:
         ds = vector.GeoDataset.from_gdf(gdf)  # coordinates only
     return ds.chunk(chunks)
