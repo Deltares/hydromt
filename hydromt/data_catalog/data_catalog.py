@@ -829,12 +829,12 @@ class DataCatalog(object):
 
         if root is not None:
             self.root = root
+        elif "root" in meta:
+            root = meta.pop("root")
         elif "roots" in meta:
-            self.root = self._determine_catalog_root(meta)
+            root = self._determine_catalog_root(meta)
         else:
-            raise ValueError(
-                "root must be set as an argument if it is not included in the meta of the catalog"
-            )
+            root = dirname(Path("."))
 
         if self.root is not None and splitext(self.root)[-1] in [".gz", ".zip"]:
             # if root is an archive, unpack it at the cache dir
