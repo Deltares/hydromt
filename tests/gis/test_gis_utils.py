@@ -20,14 +20,14 @@ from hydromt.gis.raster import RasterDataArray, full_from_transform
 
 def test_crs():
     bbox = [3, 51.5, 4, 52]  # NL
-    assert _gis_utils._utm_crs(bbox).to_epsg() == 32631
+    assert _gis_utils.utm_crs(bbox).to_epsg() == 32631
     assert _gis_utils._parse_crs("utm", bbox).to_epsg() == 32631
     bbox1 = [-77.5, -12.2, -77.0, -12.0]
-    assert _gis_utils._utm_crs(bbox1).to_epsg() == 32718
+    assert _gis_utils.utm_crs(bbox1).to_epsg() == 32718
     _, _, xattrs, yattrs = _gis_utils._axes_attrs(_gis_utils._parse_crs(4326))
     assert xattrs["units"] == "degrees_east"
     assert yattrs["units"] == "degrees_north"
-    _, _, xattrs, yattrs = _gis_utils._axes_attrs(_gis_utils._utm_crs(bbox1))
+    _, _, xattrs, yattrs = _gis_utils._axes_attrs(_gis_utils.utm_crs(bbox1))
     assert xattrs["units"] == yattrs["units"] == "metre"
 
 

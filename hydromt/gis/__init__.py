@@ -3,6 +3,7 @@
 # required for accessor style documentation
 from xarray import DataArray, Dataset  # noqa: F401
 
+from ._gis_utils import utm_crs
 from .raster import (
     RasterDataArray,
     RasterDataset,
@@ -20,4 +21,5 @@ __all__ = [
     "full",
     "full_from_transform",
     "full_like",
+    "utm_crs",
 ]
