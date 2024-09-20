@@ -1,4 +1,6 @@
 ---
+meta:
+  root: examples/data
 waterlevels_txt:
   uri: stations.csv
   data_type: GeoDataset

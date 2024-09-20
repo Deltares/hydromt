@@ -30,7 +30,7 @@ steps:
       nodata: -99.0
 
   - grid.add_data_from_rasterdataset:
-      raster_data: merit_hydro_1k
+      raster_data: merit_hydro_ihu
       variables:
         - elevtn
         - basins
@@ -39,14 +39,14 @@ steps:
         - mode
 
   - grid.add_data_from_rasterdataset:
-      raster_data: vito
+      raster_data: vito_2015
       fill_method: nearest
       reproject_method: mode
       rename:
         vito: landuse
 
   - grid.add_data_from_raster_reclass:
-      raster_data: vito
+      raster_data: vito_2015
       reclass_table_data: vito_reclass
       reclass_variables:
         - manning

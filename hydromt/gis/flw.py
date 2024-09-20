@@ -1,7 +1,6 @@
 """Hydrological flow direction methods powered by pyFlwDir."""
 
 import logging
-import warnings
 from typing import Literal, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -504,7 +503,6 @@ def gauge_map(
         if np.any(dist > max_dist):
             far = len(dist[dist > max_dist])
             msg = f"Snapping distance of {far} gauge(s) exceeds {max_dist} m"
-            warnings.warn(msg, UserWarning, stacklevel=2)
             logger.warning(msg)
     gauges = np.zeros(ds.raster.shape, dtype=np.int32)
     gauges.flat[idxs] = ids

@@ -12,8 +12,8 @@ esa_worldcover_2020_v100:
       anon: true
   metadata:
     category: landuse
+    source_version: v100
     url: https://doi.org/10.5281/zenodo.5571936
-    version: v100
     license: CC BY 4.0
     crs: 4326
   data_adapter:

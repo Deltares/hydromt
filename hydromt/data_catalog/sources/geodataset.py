@@ -142,7 +142,7 @@ class GeoDatasetSource(DataSource):
             return None
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": file_path, "root": None, "driver": driver}
+        update: Dict[str, Any] = {"uri": str(file_path), "root": None, "driver": driver}
 
         driver.write(
             file_path,

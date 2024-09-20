@@ -4,6 +4,7 @@ import glob
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from logging import WARNING
 from os import mkdir
 from os.path import abspath, basename, dirname, join
 from pathlib import Path
@@ -25,6 +26,7 @@ from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_OPENPYXL, HAS_S3FS
 from hydromt._io.writers import _write_xy
+from hydromt._typing import Bbox, TimeRange
 from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
@@ -289,11 +291,14 @@ def test_catalog_entry_single_variant_unknown_source(aws_worldcover):
         aws_data_catalog.get_source("asdfasdf", version="2021", provider="aws")
 
 
-def test_catalog_entry_warns_on_override_version(aws_worldcover):
+def test_catalog_entry_warns_on_override_version(
+    aws_worldcover, caplog: pytest.LogCaptureFixture
+):
     aws_yml_path, aws_data_catalog = aws_worldcover
     # make sure we trigger user warning when overwriting versions
-    with pytest.warns(UserWarning):
+    with caplog.at_level(WARNING):
         aws_data_catalog.from_yml(aws_yml_path)
+        assert "overwriting data source" in caplog.text
 
 
 def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
@@ -443,12 +448,12 @@ def test_data_catalogs_raises_on_unknown_predefined_catalog(data_catalog):
 
 
 @pytest.fixture()
-def export_test_slice_objects(tmpdir, data_catalog):
-    data_catalog._sources = {}
-    data_catalog.from_predefined_catalogs("artifact_data=v1.0.0")
+def export_test_slice_objects(
+    tmp_path: Path, data_catalog: DataCatalog
+) -> Tuple[DataCatalog, Bbox, TimeRange, List[str], Path]:
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
     time_range = ("2010-02-10", "2010-02-15")
-    data_lib_path = join(tmpdir, "data_catalog.yml")
+    data_lib_path = tmp_path / "data_catalog.yml"
     source_names = [
         "era5[precip,temp]",
         "grwl_mask",
@@ -462,7 +467,6 @@ def export_test_slice_objects(tmpdir, data_catalog):
     return (data_catalog, bbox, time_range, source_names, data_lib_path)
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 @pytest.mark.integration()
 def test_export_global_datasets(tmpdir, export_test_slice_objects):
     (
@@ -477,7 +481,7 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
         bbox=bbox,
         time_range=time_range,
         source_names=source_names,
-        meta={"version": 1},
+        metadata={"version": 1},
         handle_nodata=NoDataStrategy.IGNORE,
     )
     with open(data_lib_path, "r") as f:
@@ -487,7 +491,6 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     (
         data_catalog,
@@ -501,7 +504,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
         bbox=bbox,
         time_range=time_range,
         source_names=source_names,
-        meta={"version": 1},
+        metadata={"version": 1},
         handle_nodata=NoDataStrategy.IGNORE,
     )
     # test append and overwrite source
@@ -510,7 +513,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
         bbox=bbox,
         source_names=["corine"],
         append=True,
-        meta={"version": 2},
+        metadata={"version": 2},
         handle_nodata=NoDataStrategy.IGNORE,
     )
 
@@ -523,46 +526,49 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
-@pytest.mark.skip("needs https://github.com/Deltares/hydromt/issues/886")
 @pytest.mark.integration()
-def test_export_dataframe(tmpdir, df, df_time):
+def test_export_dataframe(tmp_path, df, df_time):
     # Write two csv files
-    csv_path = str(tmpdir.join("test.csv"))
-    parquet_path = str(tmpdir.join("test.parquet"))
+    csv_path = str(tmp_path / "test.csv")
+    parquet_path = str(tmp_path / "test.parquet")
     df.to_csv(csv_path)
     df.to_parquet(parquet_path)
-    csv_ts_path = str(tmpdir.join("test_ts.csv"))
-    parquet_ts_path = str(tmpdir.join("test_ts.parquet"))
+    csv_ts_path = str(tmp_path / "test_ts.csv")
+    parquet_ts_path = str(tmp_path / "test_ts.parquet")
     df_time.to_csv(csv_ts_path)
     df_time.to_parquet(parquet_ts_path)
 
     # Test to_file method (needs reading)
     data_dict = {
         "test_df": {
-            "path": csv_path,
-            "driver": "csv",
-            "data_type": "DataFrame",
-            "kwargs": {
-                "index_col": 0,
+            "uri": csv_path,
+            "driver": {
+                "name": "pandas",
+                "options": {
+                    "index_col": 0,
+                },
             },
+            "data_type": "DataFrame",
         },
         "test_df_ts": {
-            "path": csv_ts_path,
-            "driver": "csv",
-            "data_type": "DataFrame",
-            "kwargs": {
-                "index_col": 0,
-                "parse_dates": True,
+            "uri": csv_ts_path,
+            "driver": {
+                "name": "pandas",
+                "options": {
+                    "index_col": 0,
+                    "parse_dates": True,
+                },
             },
+            "data_type": "DataFrame",
         },
         "test_df_parquet": {
-            "path": parquet_path,
-            "driver": "parquet",
+            "uri": parquet_path,
+            "driver": "pandas",
             "data_type": "DataFrame",
         },
         "test_df_ts_parquet": {
-            "path": parquet_ts_path,
-            "driver": "parquet",
+            "uri": parquet_ts_path,
+            "driver": "pandas",
             "data_type": "DataFrame",
         },
     }
@@ -570,21 +576,27 @@ def test_export_dataframe(tmpdir, df, df_time):
     data_catalog = DataCatalog()
     data_catalog.from_dict(data_dict)
 
+    data_catalog_reread_path: Path = tmp_path / "newdir_filter"
     data_catalog.export_data(
-        str(tmpdir),
+        str(data_catalog_reread_path),
         time_range=("2010-02-01", "2010-02-14"),
         bbox=[11.70, 45.35, 12.95, 46.70],
         handle_nodata=NoDataStrategy.IGNORE,
     )
-    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
-    assert len(data_catalog1.list_sources()) == 2
+    data_catalog_reread = DataCatalog(
+        str(data_catalog_reread_path / "data_catalog.yml")
+    )
+    assert len(data_catalog_reread.list_sources()) == 2
 
-    data_catalog.export_data(str(tmpdir))
-    data_catalog1 = DataCatalog(str(tmpdir.join("data_catalog.yml")))
+    data_catalog_reread_path_nofilter: Path = tmp_path / "newdir"
+    data_catalog.export_data(str(data_catalog_reread_path_nofilter))
+    data_catalog1 = DataCatalog(
+        str(data_catalog_reread_path_nofilter / "data_catalog.yml")
+    )
     assert len(data_catalog1.list_sources()) == 4
     for key, source in data_catalog1.list_sources():
         dtypes = pd.DataFrame
-        obj = source.get_data()
+        obj = source.read_data()
         assert isinstance(obj, dtypes), key
 
 

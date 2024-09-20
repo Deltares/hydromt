@@ -122,6 +122,8 @@ class ConventionResolver(URIResolver):
         if metadata is None:
             metadata: SourceMetadata = SourceMetadata()
 
+        logger.debug(f"attempting to resolve uri: {uri}")
+
         uri_expanded, keys, _ = _expand_uri_placeholders(
             uri,
             placeholders=self._uri_placeholders,

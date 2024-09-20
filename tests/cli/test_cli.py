@@ -1,6 +1,6 @@
 """Tests for the cli submodule."""
 
-from logging import NOTSET, Logger, getLogger
+from logging import NOTSET, WARNING, Logger, getLogger
 from os.path import abspath, dirname, join
 from pathlib import Path
 from typing import Generator
@@ -145,9 +145,6 @@ def test_export_cli_deltares_data(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-@pytest.mark.skip(
-    "Needs implementation of https://github.com/Deltares/hydromt/issues/886"
-)
 def test_export_cli_no_data_ignore(tmpdir):
     with pytest.raises(NoDataException):
         _ = CliRunner().invoke(
@@ -193,41 +190,23 @@ def test_cli_build_override(tmpdir):
     assert r.exit_code == 0
 
 
-@pytest.mark.skip(
-    "Needs implementation of https://github.com/Deltares/hydromt/issues/886"
-)
 def test_export_skips_overwrite(tmpdir, caplog: pytest.LogCaptureFixture):
-    _ = CliRunner().invoke(
-        hydromt_cli,
-        [
-            "export",
-            str(tmpdir),
-            "-s",
-            "hydro_lakes",
-            "--bbox",
-            "[12.05,12.06,12.07,12.08]",
-        ],
-        catch_exceptions=False,
-    )
-
-    _ = CliRunner().invoke(
-        hydromt_cli,
-        [
-            "export",
-            str(tmpdir),
-            "-s",
-            "hydro_lakes",
-            "--bbox",
-            "[12.05,12.06,12.07,12.08]",
-        ],
-        catch_exceptions=False,
-    )
+    with caplog.at_level(WARNING):
+        # export twice
+        for _i in range(2):
+            _ = CliRunner().invoke(
+                hydromt_cli,
+                [
+                    "export",
+                    str(tmpdir),
+                    "-s",
+                    "hydro_lakes",
+                ],
+                catch_exceptions=False,
+            )
     assert "already exists and not in forced overwrite mode" in caplog.text
 
 
-@pytest.mark.skip(
-    "Needs implementation of https://github.com/Deltares/hydromt/issues/886"
-)
 def test_export_does_not_warn_on_fo(tmpdir, caplog):
     _ = CliRunner().invoke(
         hydromt_cli,
