@@ -755,7 +755,10 @@ class DataCatalog(object):
     ) -> Path:
         """Determine which of the roots provided in meta exists and should be used."""
         root = None
-        for r in meta["roots"]:
+        to_check = meta.get("roots", [])
+        if "root" in meta:
+            to_check.append(meta["root"])
+        for r in to_check:
             if exists(r):
                 root = r
                 break
@@ -835,11 +838,11 @@ class DataCatalog(object):
         if root is not None:
             self.root = root
         elif "root" in meta:
-            root = meta.pop("root")
+            self.root = meta.pop("root")
         elif "roots" in meta:
-            root = self._determine_catalog_root(meta)
+            self.root = self._determine_catalog_root(meta)
         else:
-            root = dirname(Path("."))
+            self.root = dirname(Path("."))
 
         if self.root is not None and splitext(self.root)[-1] in [".gz", ".zip"]:
             # if root is an archive, unpack it at the cache dir
