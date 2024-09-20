@@ -57,7 +57,7 @@ class RasterioDriver(RasterDatasetDriver):
         )
         kwargs: Dict[str, Any] = {}
         mosaic_kwargs: Dict[str, Any] = self.options.get("mosaic_kwargs", {})
-        mosaic: bool = self.options.get("mosaic", False) and len(uris > 1)
+        mosaic: bool = self.options.get("mosaic", False) and len(uris) > 1
 
         # get source-specific options
         cache_root: str = str(

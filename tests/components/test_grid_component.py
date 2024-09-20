@@ -359,13 +359,13 @@ def test_grid_component_model(tmpdir):
         mask_name="mask",
     )
     model.grid.add_data_from_rasterdataset(
-        raster_data="vito",
+        raster_data="vito_2015",
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
     )
     model.grid.add_data_from_raster_reclass(
-        raster_data="vito",
+        raster_data="vito_2015",
         fill_method="nearest",
         reclass_table_data="vito_mapping",
         reclass_variables=["roughness_manning"],
