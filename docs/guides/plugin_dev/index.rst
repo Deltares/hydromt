@@ -3,14 +3,13 @@ Plugin Developer guide
 
 .. toctree::
 
-    best_practices
+    plugin_quickstart
     custom_catalog
     custom_component
     custom_driver
-    custom_model_builder
+    custom_model
     custom_resolver
     migrating_to_v1
-    model_config
-    plugin_quickstart
+    workflows
     register_plugin
     testing_your_plugin

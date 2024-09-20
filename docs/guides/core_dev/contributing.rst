@@ -17,14 +17,14 @@ The MIT `license <https://github.com/Deltares/hydromt/blob/docs/LICENSE>`_ appli
 Issue conventions
 -----------------
 
-HydroMT is a relatively new project and highly active. We have bugs, both known and unknown.
-
 The HydroMT `issue tracker <https://github.com/Deltares/hydromt/issues>`_ is the place to share any bugs or feature requests you might have.
 Please search existing issues, open and closed, before creating a new one.
 
 For bugs, please provide tracebacks and relevant log files to clarify the issue.
 `Minimal reproducible examples <https://stackoverflow.com/help/minimal-reproducible-example>`_,
-are especially helpful!
+are especially helpful! If you're submiting a PR for a bug that does not yet have an
+associated issue, please create one together with your PR (unless it is something
+trivial). This is important for us to keep track of the changes made to core.
 
 Checklist pull requests
 -----------------------
@@ -32,12 +32,35 @@ Checklist pull requests
 If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure to do the following steps:
 
 1. If it does not yet exist, create an issue following the :ref:`issue-conventions`.
-2. Create a new branch where you develop your new code, see also :ref:`git-conventions`.
-3. Make sure all pre-commit hooks pass, see  :ref:`code-format`. For ipynb files make sure that you have cleared all results.
-4. Update docs/changelog.rst file with a summary of your changes and a link to your pull request. See for example the `hydromt changelog <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`_.
-5. Push your commits to the github repository and open a draft pull request. The body of the pull request will be pre-filled with a template. Please fill out this template with the relevant information, and complete the checklist included.
-6. Once you're satisfied with the changes mark the pull request as "as ready for review" and ask another contributor to review the code. The review should cover the implementation as well as steps 2-4.
-7. Merge the pull request once the review has been approved.
+2. Make a fork of the repository. More information on how to do this can be found at
+   `the github documentation
+   <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo>_`
+   While you can develop on the main branch of your fork and submit PRs from there, we
+   encourage you to make branches on your fork as well, especially if you plan on
+   working on multiple issues at the same time. If you have commit rights on the
+   repository you may also make your contributions there instead of on a fork.
+3. Create a new branch where you develop your new code, see also :ref:`git-conventions`.
+4. Both in the case of a new feature and in the case of a bug please add a test that
+   demonstrates the correctness of your code. If it is a bug, you should generally ad a
+   test that reproduces the bug, and then your code should fix the behaviour. In the
+   case of a new feature your test should show and verify how the new feature should be
+   used and what assumptions can be made about it. Please make sure the tests pass on
+   all environments in our CI. This should be checked in your PR with every commit you push.
+5. Make sure all pre-commit hooks pass, see  :ref:`code-format`. For ipynb files make
+   sure that you have cleared all results.
+6. Update docs/changelog.rst file with a summary of your changes and a link to your
+   pull request. See for example the `hydromt changelog
+   <https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst>`_.
+7. Push your commits to the github repository and open a draft pull request. The body of
+   the pull request will be pre-filled with a template. Please fill out this template
+   with the relevant information, and complete the checklist included. Filling out the
+   template will greatly increase the chances of your PR getting a swift response.
+8. Once you're satisfied with the changes mark the pull request as "as ready for review"
+   and ask another contributor to review the code. The review should cover the
+   implementation as well as steps 2-4.
+9. Depending on the PR, the reviewer may ask you to either make changes or accept your
+   PR.
+
 
 
 .. _git-conventions:
@@ -45,14 +68,7 @@ If you found a bug or an issue you would like to tackle or contribute to a new d
 Git conventions
 ---------------
 
-First of all, if git is new to you, here are some great resources for learning Git:
-
-- the GitHub `help pages <https://docs.github.com/en/github/getting-started-with-github/getting-started-with-git>`__.
-- the NumPy’s `documentation <http://docs.scipy.org/doc/numpy/dev/index.html>`__.
-
-The code is hosted on GitHub. To contribute you will need to sign up for a free
-GitHub account. We follow the `GitHub workflow
-<https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/github-flow>`__
+We follow the `GitHub workflow <https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests-github-flow>`__
 to allow many people to work together on the project.
 
 After discussing a new proposal or implementation in the issue tracker, you can start
@@ -192,7 +208,8 @@ HydroMT design conventions
 
 General
 ^^^^^^^
-- We use :ref:`naming and unit conventions <data_convention>` for frequently used variables to assure consistency within HydroMT
+- We use :ref:`naming and unit conventions <data_convention>` for frequently used
+  variables to assure consistency within HydroMT
 
 Data
 ^^^^
@@ -207,19 +224,16 @@ Data
 Model Class
 ^^^^^^^^^^^
 The HydroMT :ref:`Model class <model_api>` consists of several methods and attributes with specific design/naming conventions.
-To implement HydroMT for a specific model kernel/software, a child class named `<Name>Model` (e.g. SfincsModel for Sfincs, GridModel for a gridded model)
-should be created with model-specific data readers, writers and setup methods.
+To implement HydroMT for a specific model kernel/software, a child class named `<Name>Model` (e.g. SfincsModel for Sfincs)
+should be created with model-specific data readers, writers and setup methods as is appropriate.
 
 - :ref:`Model data components <model_interface>` are data attributes which together define a model instance and
   are identical for all models. Each component represents a specific model component and is parsed to a specific
   Python data object that should adhere to certain specifications. For instance, the ``grid`` component represent
   all static regular grids of a model in a :py:class:`xarray.Dataset` object.
-- Most model components have an associated `write_<component>` and `read_<component>` method to read/write with model
+- Most model components have an associated `write` and `read` method to read/write with model
   specific data formats and parse to / from the model component. These methods may have additional optional arguments
   (i.e. with default values), but no required arguments. The results component does not have write method.
-- To build a model we specify ``setup_*`` methods which transform raw input data to a specific model variable, for instance
-  the `setup_soilmaps` method in HydroMT-Wflow to transform soil properties to associated Wflow parameter maps which are part
-  of the `staticmaps` component.
 - All public model methods may only contain arguments which require one of the following basic python types:
   string, numeric integer and float, boolean, None, list and dict types. This is requirement makes it possible to
   expose these methods and their arguments via a :ref:`model config .yml file <model_config>`.
@@ -231,22 +245,11 @@ should be created with model-specific data readers, writers and setup methods.
 - The Model class currently contains three high-level methods (:py:meth:`~hydromt.Model.build`,
   :py:meth:`~hydromt.Model.update` and :py:meth:`~hydromt.Model.clip` which are common for all model plugins and
   exposed through the CLI. This list of methods might be extended going forward.
-- The `region` and `res (resolution)` arguments used in the command line :ref:`build <model_build>`
-  and :ref:`clip <model_clip>` methods are passed to the model method(s) referred in the internal `_CLI_ARGS` model constant, which
-  in by default, as coded in the Model class, is the `setup_basemaps` method for both arguments. This is typically
-  the first model method which should be called when building a model.
 - A Model child class implementation for a specific model kernel can be exposed to HydroMT as a plugin by specifying a
   ``hydromt.models`` `entry-point <https://packaging.python.org/en/latest/specifications/entry-points/>`_ in the pyproject.toml file of a package.
-  See e.g. the `HydroMT-Wflow pyproject.toml <https://github.com/Deltares/hydromt_wflow/blob/docs/pyproject.toml>`_
-- We highly recommend writing integration tests which build/update/clip example model instances and check these with previously build instances.
-
-Workflows
-^^^^^^^^^
-- Workflows define (partial) transformations of data from input data to model data. And should, if possible, be kept
-  generic to be shared between model plugins.
-- The input data is passed to the workflow by python data objects consistent with its associated data types
-  (e.g. :py:class:`xarray.Dataset` for regular rasters) and not read by the workflow itself.
-- Unit tests should (see below) be written for workflows to ensure these (keep) work(ing) as intended.
+  For a more detailed explanation of how to build a plugin please refer to the
+  :ref:`register_plugins` section.
+- We highly recommend writing integration tests to ensure the correctness of your code.
 
 
 Code conventions
@@ -254,13 +257,17 @@ Code conventions
 
 Naming
 ^^^^^^
+- Please avoid using short abbreviations in function and variable names unless they are
+  very well known, they generally make code harder to read and follow.
 - Avoid using names that are too general or too wordy. Strike a good balance between the two.
 - Folder and script names are always lowercase and preferably single words (no underscores)
 - Python classes are written with CamelCase
 - Methods are written with lowercase and might use underscores for readability.
-  Specific names are used for methods of the Model class and any child classes, see above.
+  Specific names are used for methods of the Model class and any child classes, see
+  above.
 - Names of (global) constants should be all upper case.
-- Internal (non-public) constants and methods start with an underscore.
+- Internal (non-public) constants and methods start with an underscore, these should not
+  be used outside of your package's code.
 
 Type hinting
 ^^^^^^^^^^^^
@@ -274,6 +281,7 @@ Docstrings
 - We use the `numpy docstring format <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
   You can easily create these docstring once method arguments have type hints (see above) with
   the VSCode `autoDocstring plugin <https://github.com/NilsJPWerner/autoDocstring>`_.
+- please ensure that all public code you constribute has a valid docstring.
 
 .. _code-format:
 
@@ -419,21 +427,15 @@ A single test:
     $ python -m pytest --verbose test_rio.py::test_object
 
 
+
 Creating a release
 ------------------
 
-1. Create a new branch with the name "release/<version>" where <version> is the version number, e.g. v0.7.0
-2. Bump the version number (without "v"!) in the __init__.py, check and update the docs/changelog.rst file and add a short summary to the changelog for this version.
-   Check if all dependencies in the toml are up to date. Commit all changes
-3. Create a new documentation version in the `docs/switcher.json` that has the same structure as the other version entries. Please make sure the list stays sorted as this represents the ordering of the menu.
-4. Create a tag using `git tag <version>`, e.g. git tag v0.7.0
-5. Push your changes to github. To include the tag do `git push origin <version>`. This should trigger a test release to test.pypi.org
-6. If all tests and the test release have succeeded, merge de branch to main.
-7. Create a new release on github under https://github.com/Deltares/hydromt/releases.
-   Use the "generate release notes" button and copy the content of the changelog for this version on top of the release notes. This should trigger the release to PyPi.
-8. The new PyPi package will trigger a new PR to the `HydroMT feedstock repos of conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_.
-   Check if all dependencies are up to date and modify the PR if necessary. Merge the PR to release the new version on conda-forge.
-
-.. NOTE::
-
-  In the next PR that get's merged into main, the version numbers in __init__.py and the changelog should be changed to the next release with ".dev" postfix.
+1. Go to the `actions` tab on Github, select `Create a release` from the actions listen to the left, then use the `run workflow` button to start the release process. You will be asked whether it will be a `major`, `minor` or `patch` release. Choose the appropriate action.
+2. The action you just run will open a new PR for you with a new branch named `release/v<NEW_VERSION>`. (the `NEW_VERSION` will be calculated for you based on which kind of release you selected.) In the new PR, the changelog, hydromt version and sphinx `switcher.json` will be updated for you. Any changes you made to the `pyproject.toml` since the last release will be posted as a comment in the PR. You will need these during the Conda-forge release if there are any.
+3. Every commit to this new branch will trigger the creation (and testing) of release artifacts. In our case those are: Documentation, the PyPi package and docker image (the conda release happens separately). After the artifacts are created, they will be uploaded to the repository's internal artifact cache. A bot will post links to these created artifacts in the PR which you can use to download and locally inspect them.
+4. When you are happy with the release in the PR, you can simply merge it. We suggest naming the commit something like "Release v<NEW_VERSION>"
+5. After the PR is merged, a action should start (though it will not show up under the PR itself) that will publish the latest artifacts created to their respective platform. After this, a bot will add a final commit to the `main` branch, setting the hydromt version back to a dev version, and adding new headers to the `docs/changelog.rst` for unreleased features. It will also create a tag and a github release for you automatically. The release is now done as far as this repo is concerned.
+6. The newly published PyPi package will trigger a new PR to the `HydroMT feedstock repos of conda-forge <https://github.com/conda-forge/hydromt-feedstock>`_.
+   Here you can use the comment posted to the release PR to see if the `meta.yml` needs to be updated. Merge the PR to release the new version on conda-forge.
+7. celebrate the new release!
