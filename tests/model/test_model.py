@@ -404,10 +404,10 @@ def test_maps_setup():
         split_dataset=False,
     )
     mod.maps.add_raster_data_from_rasterdataset(
-        raster_filename="vito", fill_method="nearest"
+        raster_filename="vito_2015", fill_method="nearest"
     )
     mod.maps.add_raster_data_from_raster_reclass(
-        raster_filename="vito",
+        raster_filename="vito_2015",
         reclass_table_filename="vito_mapping",
         reclass_variables=["roughness_manning"],
         split_dataset=True,
@@ -659,7 +659,7 @@ def test_grid_model_raster_dataset_vito(grid_model):
         align=True,
     )
     grid_model.grid.add_data_from_rasterdataset(
-        raster_data="vito",
+        raster_data="vito_2015",
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
@@ -676,7 +676,7 @@ def test_grid_model_raster_reclass(grid_model):
         align=True,
     )
     grid_model.grid.add_data_from_raster_reclass(
-        raster_data="vito",
+        raster_data="vito_2015",
         fill_method="nearest",
         reclass_table_data="vito_mapping",
         reclass_variables=["roughness_manning"],
@@ -869,7 +869,7 @@ def test_setup_mesh_from_bbox(mesh_model):
     )
     # need to add some data to it before checks will work
     mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito", grid_name="mesh2d", resampling_method="mode"
+        "vito_2015", grid_name="mesh2d", resampling_method="mode"
     )
 
     assert "vito" in mesh_model.mesh.data
@@ -894,7 +894,7 @@ def test_setup_mesh_from_geom(mesh_model, tmpdir):
     )
     # need to add some data to it before checks will work
     dummy_mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito", grid_name="mesh2d", resampling_method="mode"
+        "vito_2015", grid_name="mesh2d", resampling_method="mode"
     )
     region = dummy_mesh_model.mesh.region
     mesh_model.mesh.create_2d_from_region(
@@ -920,7 +920,7 @@ def test_setup_mesh_from_mesh(mesh_model, griduda):
     )
     # need to add some data to it before checks will work
     mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito", grid_name="mesh2d", resampling_method="mode"
+        "vito_2015", grid_name="mesh2d", resampling_method="mode"
     )
 
     assert np.all(griduda.ugrid.total_bounds == mesh_model.mesh.region.total_bounds)
@@ -945,7 +945,7 @@ def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda):
     )
     # need to add some data to it before checks will work
     mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito", grid_name="mesh1", resampling_method="mode"
+        "vito_2015", grid_name="mesh1", resampling_method="mode"
     )
     assert "vito" in mesh_model.mesh.data, mesh_model.mesh.data
     assert mesh_model.mesh.data.ugrid.grid.n_node == 49
@@ -965,7 +965,7 @@ def test_mesh_model_setup_from_raster_dataset(mesh_model, griduda):
     region = {"mesh": griduda}
     mesh_model.mesh.create_2d_from_region(region, grid_name="mesh2d")
     mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito", grid_name="mesh2d", resampling_method="mode"
+        "vito_2015", grid_name="mesh2d", resampling_method="mode"
     )
     assert "vito" in mesh_model.mesh.data.data_vars
 
@@ -974,10 +974,10 @@ def test_mesh_model_setup_from_raster_reclass(mesh_model, griduda):
     region = {"mesh": griduda}
     mesh_model.mesh.create_2d_from_region(region, grid_name="mesh2d")
     mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito", grid_name="mesh2d", resampling_method="mode"
+        "vito_2015", grid_name="mesh2d", resampling_method="mode"
     )
     mesh_model.mesh.add_2d_data_from_raster_reclass(
-        raster_filename="vito",
+        raster_filename="vito_2015",
         reclass_table_filename="vito_mapping",
         reclass_variables=["landuse", "roughness_manning"],
         resampling_method=["mode", "centroid"],

@@ -57,6 +57,7 @@ class RasterioDriver(RasterDatasetDriver):
         )
         kwargs: Dict[str, Any] = {}
         mosaic_kwargs: Dict[str, Any] = self.options.get("mosaic_kwargs", {})
+        mosaic: bool = self.options.get("mosaic", False) and len(uris) > 1
 
         # get source-specific options
         cache_root: str = str(
@@ -109,11 +110,11 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> Union[xr.DataArray, xr.Dataset]:
             try:
-                return _open_mfraster(uris, **kwargs)
+                return _open_mfraster(uris, mosaic=mosaic, **kwargs)
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     kwargs.pop("overview_level")
-                    return _open_mfraster(uris, **kwargs)
+                    return _open_mfraster(uris, mosaic=mosaic, **kwargs)
                 else:
                     raise
 

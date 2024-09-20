@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import List
+from unittest.mock import MagicMock
 from uuid import uuid4
 
 import numpy as np
@@ -45,6 +46,13 @@ class TestRasterXarrayDriver:
         driver = RasterDatasetXarrayDriver()
         driver.write(netcdf_path, raster_ds)
         assert np.all(driver.read([str(netcdf_path)]) == raster_ds)
+
+    def test_unknown_ext(self):
+        driver = RasterDatasetXarrayDriver()
+        mock_ds = MagicMock()
+        gpkg_path: Path = Path("path") / "to" / "file.gpkg"
+        driver.write(gpkg_path, mock_ds)
+        mock_ds.to_zarr.assert_called_once()
 
     def test_zarr_read(self, example_zarr_file: Path):
         res: xr.Dataset = RasterDatasetXarrayDriver().read([str(example_zarr_file)])

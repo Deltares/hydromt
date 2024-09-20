@@ -3,25 +3,28 @@
 from __future__ import annotations
 
 import copy
+import inspect
 import itertools
 import logging
 import os
-import warnings
 from datetime import datetime
 from os.path import abspath, basename, exists, isfile, join, splitext
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import (
     Any,
     Dict,
     Iterator,
     List,
     Optional,
+    Set,
     Tuple,
     Type,
     Union,
     cast,
 )
 
+import dateutil
+import dateutil.parser
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -35,10 +38,14 @@ from pystac import CatalogType, MediaType
 
 from hydromt import __version__
 from hydromt._io.readers import _yml_from_uri_or_path
-from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, TimeRange
+from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, StrPath, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
-from hydromt._typing.type_def import StrPath
-from hydromt._utils import _deep_merge, _partition_dictionaries, _single_var_as_array
+from hydromt._utils import (
+    _deep_merge,
+    _is_valid_url,
+    _partition_dictionaries,
+    _single_var_as_array,
+)
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
     DataFrameAdapter,
@@ -248,7 +255,7 @@ class DataCatalog(object):
         version: Optional[str] = None,
         detect: bool = True,
         strict: bool = False,
-    ) -> Optional[Tuple[Tuple[float, float, float, float], int]]:
+    ) -> Optional[Tuple[Bbox, int]]:
         """Retrieve the bounding box and crs of the source.
 
         Parameters
@@ -449,11 +456,9 @@ class DataCatalog(object):
         else:
             versions = self._sources[name][provider]
             if provider in self._sources[name] and version in versions:
-                warnings.warn(
+                logger.warning(
                     f"overwriting data source '{name}' with "
                     f"provider {provider} and version {version}.",
-                    UserWarning,
-                    stacklevel=2,
                 )
             # update and sort dictionary -> make sure newest version is last
             versions.update({str(version): source})
@@ -988,13 +993,13 @@ class DataCatalog(object):
 
     def export_data(
         self,
-        data_root: Union[Path, str],
+        new_root: Union[Path, str],
         bbox: Optional[Bbox] = None,
         time_range: Optional[TimeRange] = None,
         source_names: Optional[List[str]] = None,
         unit_conversion: bool = True,
-        meta: Optional[Dict[str, Any]] = None,
-        forced_overwrite: bool = False,
+        metadata: Optional[Dict[str, Any]] = None,
+        force_overwrite: bool = False,
         append: bool = False,
         handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ) -> None:
@@ -1002,7 +1007,7 @@ class DataCatalog(object):
 
         Parameters
         ----------
-        data_root : str, Path
+        new_root : str, Path
             Path to output folder
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
@@ -1025,16 +1030,26 @@ class DataCatalog(object):
         append: bool, optional
             If True, append to existing data catalog, by default False.
         """
+        # Create new root
         source_names = source_names or []
-        meta = meta or {}
-        data_root = abspath(data_root)
-        if not os.path.isdir(data_root):
-            os.makedirs(data_root)
+        metadata = metadata or {}
+        if not isinstance(new_root, Path):
+            new_root = Path(new_root)
+
+        new_root = new_root.absolute()
+        new_root.mkdir(exist_ok=True)
+
+        if not time_range:
+            time_range: Tuple[Union[datetime, str], Union[datetime, str]] = tuple()
+
+        # convert strings to timerange
+        if any(map(lambda t: not isinstance(t, datetime), time_range)):
+            time_range = tuple(map(lambda t: dateutil.parser.parse(t), time_range))
 
         # create copy of data with selected source names
         source_vars = {}
         if len(source_names) > 0:
-            sources = {}
+            sources: Dict[str, Dict[str, Dict[Any, DataSource]]] = {}
             for source in source_names:
                 # support both strings and SourceSpecDicts here
                 if isinstance(source, str):
@@ -1063,10 +1078,12 @@ class DataCatalog(object):
                 sources[name][provider][version] = copy.deepcopy(source)
 
         else:
-            sources = copy.deepcopy(self.sources)
+            sources: Dict[str, Dict[str, Dict[Any, DataSource]]] = copy.deepcopy(
+                self.sources
+            )
 
         # read existing data catalog if it exists
-        path = join(data_root, "data_catalog.yml")
+        path = join(new_root, "data_catalog.yml")
         if isfile(path) and append:
             logger.info(f"Appending existing data catalog {path}")
             sources_out = DataCatalog(path).sources
@@ -1081,23 +1098,53 @@ class DataCatalog(object):
                         # read slice of source and write to file
                         logger.debug(f"Exporting {key}.")
                         if not unit_conversion:
-                            unit_mult = source.data_adapter.unit_mult
-                            unit_add = source.data_adapter.unit_add
                             source.data_adapter.unit_mult = {}
                             source.data_adapter.unit_add = {}
                         try:
-                            p = cast(Path, Path(data_root) / source.uri)
-                            if not forced_overwrite and isfile(p):
+                            if (
+                                _is_valid_url(source.uri)
+                                or PurePath(source.uri).is_absolute()
+                            ):
+                                new_uri: PurePath = PurePath(source.uri).name
+                            else:
+                                new_uri: PurePath = source.uri
+                            p = cast(Path, Path(new_root) / new_uri)
+                            if not force_overwrite and isfile(p):
                                 logger.warning(
                                     f"File {p} already exists and not in forced overwrite mode. skipping..."
                                 )
                                 continue
-                            write_path, driver, driver_kwargs = source.to_file(
+
+                            # get keyword only params
+                            kw_only_params: Set[inspect.Parameter] = set(
+                                map(
+                                    lambda x: x[0],  # take param name
+                                    filter(
+                                        lambda t: t[1].kind
+                                        == 3,  # 3 in enum is kw_only
+                                        inspect.signature(
+                                            source.to_file
+                                        ).parameters.items(),
+                                    ),
+                                )
+                            )
+                            # get kwargs that are available for this source
+                            query_kwargs: Dict[str, Any] = {
+                                "variables": source_vars.get(key, None),
+                                "bbox": bbox,
+                                "time_range": time_range,
+                            }
+                            # Then combine with values
+                            query_kwargs: Dict[str, Any] = {
+                                k: v
+                                for k, v in query_kwargs.items()
+                                if k in kw_only_params
+                            }
+
+                            new_source: DataSource = source.to_file(
                                 file_path=p,
-                                variables=source_vars.get(key, None),
-                                bbox=bbox,
-                                time_range=time_range,
                                 handle_nodata=NoDataStrategy.RAISE,
+                                **query_kwargs,
                             )
                         except NoDataException as e:
                             exec_nodata_strat(
@@ -1105,21 +1152,7 @@ class DataCatalog(object):
                                 handle_nodata,
                             )
                             continue
-                        # update path & driver and remove kwargs
-                        # and rename in output sources
-                        if unit_conversion:
-                            source.unit_mult = {}
-                            source.unit_add = {}
-                        else:
-                            source.unit_mult = unit_mult
-                            source.unit_add = unit_add
-                        source.path = write_path
-                        source.driver = driver
-                        source.filesystem = "local"
-                        source.driver_kwargs = {}
-                        if driver_kwargs is not None:
-                            source.driver_kwargs.update(driver_kwargs)
-                        source.rename = {}
+
                         if key in sources_out:
                             logger.warning(
                                 f"{key} already exists in data catalog, overwriting..."
@@ -1129,9 +1162,9 @@ class DataCatalog(object):
                         if provider not in sources_out[key]:
                             sources_out[key][provider] = {}
 
-                        sources_out[key][provider][version] = source
+                        sources_out[key][provider][version] = new_source
                     except FileNotFoundError:
-                        logger.warning(f"{key} file not found at {source.path}")
+                        logger.warning(f"{key} file not found at {new_source.uri}")
 
         # write data catalog to yml
         data_catalog_out = DataCatalog()
@@ -1140,7 +1173,7 @@ class DataCatalog(object):
                 for _version, adapter in available_versions.items():
                     data_catalog_out.add_source(key, adapter)
 
-        data_catalog_out.to_yml(path, root="auto", meta=meta)
+        data_catalog_out.to_yml(path, root="auto", meta=metadata)
 
     def get_rasterdataset(
         self,

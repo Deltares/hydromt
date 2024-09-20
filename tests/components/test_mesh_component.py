@@ -378,12 +378,12 @@ def test_mesh_with_model(griduda, world, tmpdir):
     model1.add_component(name="mesh", component=mesh_component)
     model1.mesh.create_2d_from_region(region, grid_name="mesh2d")
     model1.mesh.add_2d_data_from_rasterdataset(
-        "vito", grid_name="mesh2d", resampling_method="mode"
+        "vito_2015", grid_name="mesh2d", resampling_method="mode"
     )
     assert "vito" in model1.mesh.data.data_vars
 
     model1.mesh.add_2d_data_from_raster_reclass(
-        raster_filename="vito",
+        raster_filename="vito_2015",
         reclass_table_filename="vito_mapping",
         reclass_variables=["landuse", "roughness_manning"],
         resampling_method=["mode", "centroid"],

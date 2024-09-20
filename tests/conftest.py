@@ -600,7 +600,7 @@ def mock_model(tmpdir, mocker: MockerFixture):
 @pytest.fixture()
 def basin_files():
     data_catalog = DataCatalog("artifact_data")
-    ds = data_catalog.get_rasterdataset("merit_hydro_1k")
+    ds = data_catalog.get_rasterdataset("merit_hydro_ihu")
     gdf_bas_index = data_catalog.get_geodataframe("merit_hydro_index")
     bas_index = data_catalog.get_source("merit_hydro_index")
 
