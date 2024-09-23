@@ -1,12 +1,18 @@
+from datetime import datetime
+from os.path import basename
 from pathlib import Path
+from typing import cast
 from uuid import uuid4
 
 import geopandas as gpd
 import numpy as np
 import pytest
 from pydantic import ValidationError
+from pystac import Asset as StacAsset
+from pystac import Catalog as StacCatalog
+from pystac import Item as StacItem
 
-from hydromt._typing import NoDataException
+from hydromt._typing import NoDataException, NoDataStrategy
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver, PyogrioDriver
@@ -115,3 +121,35 @@ class TestGeoDataFrameSource:
         source.metadata.attrs = {"NAME_0": {"long_name": "Country names"}}
         gdf = source.read_data()
         assert gdf["NAME_0"].attrs["long_name"] == "Country names"
+
+    def test_to_stac_geodataframe(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
+        gdf_path = str(tmp_dir / "test.geojson")
+        geodf.to_file(gdf_path, driver="GeoJSON")
+        data_catalog = DataCatalog()  # read artifacts
+        _ = data_catalog.sources  # load artifact data as fallback
+
+        # geodataframe
+        name = "gadm_level1"
+        adapter = cast(GeoDataFrameAdapter, data_catalog.get_source(name))
+        bbox, _ = adapter.get_bbox()
+        gdf_stac_catalog = StacCatalog(id=name, description=name)
+        gds_stac_item = StacItem(
+            name,
+            geometry=None,
+            bbox=list(bbox),
+            properties=adapter.metadata,
+            datetime=datetime(1, 1, 1),
+        )
+        gds_stac_asset = StacAsset(str(adapter.uri))
+        gds_base_name = basename(adapter.uri)
+        gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
+
+        gdf_stac_catalog.add_item(gds_stac_item)
+        outcome = cast(
+            StacCatalog, adapter.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+        )
+        assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        adapter.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert adapter.to_stac_catalog(on_error=NoDataStrategy.IGNORE) is None

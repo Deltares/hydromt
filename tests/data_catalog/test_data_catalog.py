@@ -116,6 +116,7 @@ def test_parser():
     datasource = _parse_data_source_dict("test", source, root=root)
     assert isinstance(datasource, GeoDataFrameSource)
     assert datasource.full_uri == abspath(source["uri"])
+
     dd = {
         "test": {
             "driver": {"name": "pyogrio"},
@@ -694,6 +695,16 @@ class TestGetRasterDataset:
 
         raster_stac_catalog.add_item(raster_stac_item)
 
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+        )
+
+        assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(on_error=NoDataStrategy.SKIP) is None
+
     @pytest.fixture()
     def zoom_dict(self, tmp_dir: Path, zoom_level_tif: str) -> Dict[str, Any]:
         return {
@@ -1014,6 +1025,14 @@ class TestGetGeoDataFrame:
         gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
         gdf_stac_catalog.add_item(gds_stac_item)
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+        )
+        assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(on_error=NoDataStrategy.SKIP) is None
 
 
 def test_get_geodataframe_path(data_catalog):
@@ -1234,6 +1253,15 @@ class TestGetGeoDataset:
         gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
         gds_stac_catalog.add_item(gds_stac_item)
+
+        outcome = cast(
+            StacCatalog, source.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+        )
+        assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
+        source.metadata.crs = (
+            -3.14
+        )  # manually create an invalid adapter by deleting the crs
+        assert source.to_stac_catalog(NoDataStrategy.IGNORE) is None
 
 
 def test_get_geodataset_artifact_data(data_catalog):
