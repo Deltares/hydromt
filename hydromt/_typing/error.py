@@ -47,11 +47,3 @@ def exec_nodata_strat(msg: str, strategy: NoDataStrategy) -> None:
         logger.warning(msg)
     elif strategy == NoDataStrategy.IGNORE:
         pass
-
-
-class ErrorHandleMethod(Enum):
-    """Strategies for error handling within hydromt."""
-
-    RAISE = 1
-    SKIP = 2
-    COERCE = 3

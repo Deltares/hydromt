@@ -41,7 +41,6 @@ from hydromt.data_catalog.data_catalog import (
     _yml_from_uri_or_path,
 )
 from hydromt.data_catalog.sources import (
-    DataFrameSource,
     DataSource,
     GeoDataFrameSource,
     GeoDatasetSource,
@@ -1499,44 +1498,6 @@ class TestGetDataFrame:
             },
         )
         assert np.all(dfts.columns == vars_slice)
-
-    def test_to_stac(self, df: pd.DataFrame, tmp_dir: Path):
-        uri_df = str(tmp_dir / "test.csv")
-        name = "test_dataframe"
-        df.to_csv(uri_df)
-        dc = DataCatalog().from_dict(
-            {name: {"data_type": "DataFrame", "uri": uri_df, "driver": "pandas"}}
-        )
-
-        source = cast(DataFrameSource, dc.get_source(name))
-
-        with pytest.raises(
-            NotImplementedError,
-            match="DataFrameSource does not support full stac conversion ",
-        ):
-            source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-
-        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
-
-        stac_catalog = StacCatalog(
-            name,
-            description=name,
-        )
-        stac_item = StacItem(
-            name,
-            geometry=None,
-            bbox=[0, 0, 0, 0],
-            properties=source.metadata.model_dump(exclude_none=True),
-            datetime=datetime(1, 1, 1),
-        )
-        stac_asset = StacAsset(str(uri_df))
-        stac_item.add_asset("hydromt_path", stac_asset)
-
-        stac_catalog.add_item(stac_item)
-        outcome = cast(
-            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.COERCE)
-        )
-        assert stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
 
 
 def test_get_dataframe(df, tmpdir, data_catalog):

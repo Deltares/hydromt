@@ -1,18 +1,14 @@
 """DataSource class for the DataFrame type."""
 
-from datetime import datetime
 from logging import Logger, getLogger
 from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import pandas as pd
 from fsspec import filesystem
 from pydantic import Field
-from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
-from pystac import Item as StacItem
 
 from hydromt._typing import (
-    ErrorHandleMethod,
     NoDataStrategy,
     StrPath,
     TimeRange,
@@ -122,7 +118,7 @@ class DataFrameSource(DataSource):
 
     def to_stac_catalog(
         self,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ) -> Optional[StacCatalog]:
         """
         Convert a dataframe into a STAC Catalog representation.
@@ -141,29 +137,12 @@ class DataFrameSource(DataSource):
         - Optional[StacCatalog]: The STAC Catalog representation of the dataframe, or
           None if the dataset was skipped.
         """
-        if on_error == ErrorHandleMethod.SKIP:
+        if handle_nodata == NoDataStrategy.IGNORE:
             logger.warning(
                 f"Skipping {self.name} during stac conversion because"
                 "because detecting temporal extent failed."
             )
             return
-        elif on_error == ErrorHandleMethod.COERCE:
-            stac_catalog = StacCatalog(
-                self.name,
-                description=self.name,
-            )
-            stac_item = StacItem(
-                self.name,
-                geometry=None,
-                bbox=[0, 0, 0, 0],
-                properties=self.metadata.model_dump(),
-                datetime=datetime(1, 1, 1),
-            )
-            stac_asset = StacAsset(self.full_uri)
-            stac_item.add_asset("hydromt_path", stac_asset)
-
-            stac_catalog.add_item(stac_item)
-            return stac_catalog
         else:
             raise NotImplementedError(
                 "DataFrameSource does not support full stac conversion as it lacks"
