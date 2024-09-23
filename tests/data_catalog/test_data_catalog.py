@@ -46,6 +46,7 @@ from hydromt.data_catalog.sources import (
     GeoDatasetSource,
     RasterDatasetSource,
 )
+from hydromt.data_catalog.sources.dataframe import DataFrameSource
 from hydromt.gis._gis_utils import _to_geographic_bbox
 
 CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
@@ -1497,6 +1498,25 @@ def test_get_dataframe_variables(df, data_catalog):
     df = data_catalog.get_dataframe(df, variables=["city"])
     assert isinstance(df, pd.DataFrame)
     assert df.columns == ["city"]
+
+
+def test_to_stac(self, df: pd.DataFrame, tmp_dir: Path):
+    uri_df = str(tmp_dir / "test.csv")
+    name = "test_dataframe"
+    df.to_csv(uri_df)
+    dc = DataCatalog().from_dict(
+        {name: {"data_type": "DataFrame", "uri": uri_df, "driver": "pandas"}}
+    )
+
+    source = cast(DataFrameSource, dc.get_source(name))
+
+    with pytest.raises(
+        NotImplementedError,
+        match="DataFrameSource does not support full stac conversion ",
+    ):
+        source.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+
+    assert source.to_stac_catalog(on_error=NoDataStrategy.IGNORE) is None
 
 
 def test_get_dataframe_custom_data(tmp_dir, df, data_catalog):
