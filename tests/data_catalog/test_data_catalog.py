@@ -702,9 +702,9 @@ class TestGetRasterDataset:
 
         assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
         source.metadata.crs = (
-            -3.14
-        )  # manually create an invalid adapter by deleting the crs
-        assert source.to_stac_catalog(handle_nodata=NoDataStrategy.SKIP) is None
+            234234234  # manually create an invalid adapter by deleting the crs
+        )
+        assert source.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None
 
     @pytest.fixture()
     def zoom_dict(self, tmp_dir: Path, zoom_level_tif: str) -> Dict[str, Any]:
@@ -1033,7 +1033,7 @@ class TestGetGeoDataFrame:
         source.metadata.crs = (
             -3.14
         )  # manually create an invalid adapter by deleting the crs
-        assert source.to_stac_catalog(handle_nodata=NoDataStrategy.SKIP) is None
+        assert source.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None
 
 
 def test_get_geodataframe_path(data_catalog):
@@ -1500,7 +1500,7 @@ def test_get_dataframe_variables(df, data_catalog):
     assert df.columns == ["city"]
 
 
-def test_to_stac(self, df: pd.DataFrame, tmp_dir: Path):
+def test_to_stac(df: pd.DataFrame, tmp_dir: Path):
     uri_df = str(tmp_dir / "test.csv")
     name = "test_dataframe"
     df.to_csv(uri_df)

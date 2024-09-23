@@ -237,7 +237,7 @@ class GeoDataFrameSource(DataSource):
                 raise RuntimeError(
                     f"Unknown extension: {ext} cannot determine media type"
                 )
-        except (IndexError, KeyError, CRSError) as e:
+        except (IndexError, KeyError, CRSError, TypeError) as e:
             if handle_nodata == NoDataStrategy.IGNORE:
                 logger.warning(
                     "Skipping {name} during stac conversion because"
