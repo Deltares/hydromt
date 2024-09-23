@@ -1,7 +1,4 @@
 meta:
-  roots:
-  - d:/hydromt_testdata
-  - ~/.hydromt_testdata
   hydromt_version: '>=1.0a, <2.0'
   version: v1.0.0
 gtsmv3_eu_era5:
