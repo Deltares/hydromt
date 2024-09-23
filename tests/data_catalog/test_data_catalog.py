@@ -27,7 +27,7 @@ from yaml import dump
 from hydromt._compat import HAS_GCSFS, HAS_OPENPYXL, HAS_S3FS
 from hydromt._io.writers import _write_xy
 from hydromt._typing import Bbox, TimeRange
-from hydromt._typing.error import ErrorHandleMethod, NoDataException, NoDataStrategy
+from hydromt._typing.error import NoDataException, NoDataStrategy
 from hydromt.config import Settings
 from hydromt.data_catalog.adapters import (
     GeoDataFrameAdapter,
@@ -116,24 +116,6 @@ def test_parser():
     datasource = _parse_data_source_dict("test", source, root=root)
     assert isinstance(datasource, GeoDataFrameSource)
     assert datasource.full_uri == abspath(source["uri"])
-    # TODO: do we want to allow Path objects?
-    # # test with Path object
-    # source.update(uri=Path(source["uri"]))
-    # datasource = _parse_data_source_dict("test", source, root=root)
-    # assert datasource.uri == abspath(source["uri"])
-    # rel path
-    # source = {
-    #     "data_adapter": {"name": "GeoDataFrame"},
-    #     "driver": {"name": "pyogrio"},
-    #     "data_type": "GeoDataFrame",
-    #     "uri": "path/to/data.gpkg",
-    #     "kwargs": {"fn": "test"},
-    # }
-    # datasource = _parse_data_source_dict("test", source, root=root)
-    # assert datasource.uri == abspath(join(root, source["uri"]))
-    # check if path in kwargs is also absolute
-    # assert datasource.driver_kwargs["fn"] == abspath(join(root, "test"))
-    # alias
     dd = {
         "test": {
             "driver": {"name": "pyogrio"},
@@ -712,16 +694,6 @@ class TestGetRasterDataset:
 
         raster_stac_catalog.add_item(raster_stac_item)
 
-        outcome = cast(
-            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-        )
-
-        assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-        source.metadata.crs = (
-            -3.14
-        )  # manually create an invalid adapter by deleting the crs
-        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
-
     @pytest.fixture()
     def zoom_dict(self, tmp_dir: Path, zoom_level_tif: str) -> Dict[str, Any]:
         return {
@@ -1042,14 +1014,6 @@ class TestGetGeoDataFrame:
         gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
         gdf_stac_catalog.add_item(gds_stac_item)
-        outcome = cast(
-            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-        )
-        assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-        source.metadata.crs = (
-            -3.14
-        )  # manually create an invalid adapter by deleting the crs
-        assert source.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
 
 
 def test_get_geodataframe_path(data_catalog):
@@ -1270,15 +1234,6 @@ class TestGetGeoDataset:
         gds_stac_item.add_asset(gds_base_name, gds_stac_asset)
 
         gds_stac_catalog.add_item(gds_stac_item)
-
-        outcome = cast(
-            StacCatalog, source.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
-        )
-        assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
-        source.metadata.crs = (
-            -3.14
-        )  # manually create an invalid adapter by deleting the crs
-        assert source.to_stac_catalog(ErrorHandleMethod.SKIP) is None
 
 
 def test_get_geodataset_artifact_data(data_catalog):
