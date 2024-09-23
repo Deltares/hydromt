@@ -26,14 +26,14 @@ __all__ = [
     "_parse_geom_bbox_buffer",
     "_zoom_to_overview_level",
     "_to_geographic_bbox",
-    "_utm_crs",
+    "utm_crs",
 ]
 
 logger = logging.getLogger(__name__)
 
 
 # REPROJ
-def _utm_crs(bbox):
+def utm_crs(bbox):
     """Return wkt string of nearest UTM projects.
 
     Parameters
@@ -76,7 +76,7 @@ def _parse_crs(crs: Any, bbox: List[float] = None) -> CRS:
     """
     if crs == "utm":
         if bbox is not None:
-            crs = _utm_crs(bbox)
+            crs = utm_crs(bbox)
         else:
             raise ValueError('CRS "utm" requires bbox')
     else:
