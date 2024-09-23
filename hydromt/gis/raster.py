@@ -1701,7 +1701,7 @@ class XRasterBase(XGeoBase):
             return dst_crs
         elif dst_crs == "utm":
             # make sure bounds are in EPSG:4326
-            dst_crs = _gis_utils._utm_crs(self.transform_bounds(4326))
+            dst_crs = _gis_utils.utm_crs(self.transform_bounds(4326))
         elif dst_crs is not None:
             dst_crs = CRS.from_user_input(dst_crs)
         else:

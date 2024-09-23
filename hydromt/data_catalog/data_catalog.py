@@ -8,7 +8,7 @@ import itertools
 import logging
 import os
 from datetime import datetime
-from os.path import abspath, basename, exists, isfile, join, splitext
+from os.path import abspath, basename, dirname, exists, isfile, join, splitext
 from pathlib import Path, PurePath
 from typing import (
     Any,
@@ -590,7 +590,7 @@ class DataCatalog(object):
 
         """
         if "=" in name:
-            name, version = name.split("=")[0], name.split("=")[-1]
+            name, version = name.split("=")
         if name not in self.predefined_catalogs:
             raise ValueError(
                 f'Catalog with name "{name}" not found in predefined catalogs'
@@ -599,7 +599,7 @@ class DataCatalog(object):
         catalog_path = self.predefined_catalogs[name].get_catalog_file(version)
         # read catalog
         logger.info(f"Reading data catalog {name} {version}")
-        self.from_yml(catalog_path, catalog_name=name)
+        self.from_yml(catalog_path, catalog_name=name, catalog_version=version)
 
     def _cache_archive(
         self,
@@ -652,6 +652,7 @@ class DataCatalog(object):
         urlpath: Union[Path, str],
         root: Optional[StrPath] = None,
         catalog_name: Optional[str] = None,
+        catalog_version: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
         """Add data sources based on yaml file.
@@ -705,28 +706,31 @@ class DataCatalog(object):
         """
         logger.info(f"Parsing data catalog from {urlpath}")
         yml = _yml_from_uri_or_path(urlpath)
-        # parse metadata
-        meta = dict()
         # read meta data
-        meta = yml.pop("meta", meta)
+        meta = yml.pop("meta", {})
         if catalog_name is None:
             catalog_name = cast(
                 str, meta.get("name", "".join(basename(urlpath).split(".")[:-1]))
             )
-        version = meta.get("version", None)
-        if root is None:
-            root = meta.get("root", os.path.dirname(urlpath))
-        if root.split(".")[-1] in ["gz", "zip"]:
-            # if root is an archive, unpack it at the cache dir
-            root = self._cache_archive(
-                archive_uri=root,
-                name=catalog_name,
-                version=version,
-                sha256=meta.get("sha256", None),
-            )
+
+        if catalog_version is not None:
+            version = catalog_version
+        else:
+            version = meta.pop("version", "latest")
+
+        if root is not None:
+            self.root = root
+        elif "root" in meta:
+            root = meta.pop("root")
+        elif "roots" in meta:
+            root = self._determine_catalog_root(meta)
+        else:
+            root = dirname(Path(urlpath))
+
         self.from_dict(
             yml,
             catalog_name=catalog_name,
+            catalog_version=version,
             root=root,
             category=meta.get("category", None),
             mark_used=mark_used,
@@ -751,7 +755,10 @@ class DataCatalog(object):
     ) -> Path:
         """Determine which of the roots provided in meta exists and should be used."""
         root = None
-        for r in meta["roots"]:
+        to_check = meta.get("roots", [])
+        if "root" in meta:
+            to_check.append(meta["root"])
+        for r in to_check:
             if exists(r):
                 root = r
                 break
@@ -765,6 +772,7 @@ class DataCatalog(object):
         self,
         data_dict: Dict[str, Any],
         catalog_name: str = "",
+        catalog_version: Optional[str] = None,
         root: Optional[StrPath] = None,
         category: Optional[str] = None,
         mark_used: bool = False,
@@ -821,16 +829,22 @@ class DataCatalog(object):
 
         if "category" in meta and category is None:
             category = meta.pop("category")
-        version = meta.get("version", None)
+
+        if catalog_version is not None:
+            version = catalog_version
+        else:
+            version = meta.get("version", None)
 
         if root is not None:
             self.root = root
+        elif "root" in meta:
+            self.root = meta.pop("root")
         elif "roots" in meta:
             self.root = self._determine_catalog_root(meta)
+        else:
+            self.root = dirname(Path("."))
 
-        logger.info(f"Data Catalog is using root: {self.root}")
-
-        if self.root is not None and splitext(self.root)[-1] in ["gz", "zip"]:
+        if self.root is not None and splitext(self.root)[-1] in [".gz", ".zip"]:
             # if root is an archive, unpack it at the cache dir
             self.root = self._cache_archive(
                 self.root, name=catalog_name, version=version
@@ -846,7 +860,7 @@ class DataCatalog(object):
             source = _parse_data_source_dict(
                 name,
                 source_dict,
-                root=root,
+                root=self.root,
                 category=category,
             )
             if mark_used:

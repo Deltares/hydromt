@@ -42,7 +42,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         _warn_on_unused_kwargs(
             self.__class__.__name__,
             {
-                "predicate": predicate,
                 "variables": variables,
                 "time_range": time_range,
                 "metadata": metadata,
@@ -65,7 +64,9 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
         crs: Optional[CRS] = metadata.crs if metadata else None
-        data = _open_geodataset(loc_path=uri, geom=mask, crs=crs, **options)
+        data = _open_geodataset(
+            loc_path=uri, geom=mask, crs=crs, predicate=predicate, **options
+        )
 
         if preprocessor is None:
             out = data

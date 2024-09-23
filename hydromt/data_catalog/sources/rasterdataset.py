@@ -70,7 +70,7 @@ class RasterDatasetSource(DataSource):
             self.full_uri,
             time_range=tr,
             mask=mask,
-            variables=variables,
+            variables=vrs,
             zoom=zoom,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
