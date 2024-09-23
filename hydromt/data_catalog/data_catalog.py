@@ -38,7 +38,7 @@ from pystac import CatalogType, MediaType
 
 from hydromt import __version__
 from hydromt._io.readers import _yml_from_uri_or_path
-from hydromt._typing import Bbox, ErrorHandleMethod, SourceSpecDict, StrPath, TimeRange
+from hydromt._typing import Bbox, SourceSpecDict, StrPath, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._utils import (
     _deep_merge,
@@ -157,7 +157,7 @@ class DataCatalog(object):
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
         catalog_type: CatalogType = CatalogType.RELATIVE_PUBLISHED,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ):
         """Write data catalog to STAC format.
 
@@ -181,7 +181,7 @@ class DataCatalog(object):
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
         for _name, source in self.list_sources(used_only):
-            stac_child_catalog = source.to_stac_catalog(on_error)
+            stac_child_catalog = source.to_stac_catalog(handle_nodata)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
@@ -191,7 +191,7 @@ class DataCatalog(object):
     def from_stac_catalog(
         self,
         stac_like: Union[str, Path, StacCatalog, dict],
-        on_error: ErrorHandleMethod = ErrorHandleMethod.SKIP,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ):
         """Write data catalog to STAC format.
 
@@ -199,8 +199,8 @@ class DataCatalog(object):
         ----------
         path: str, Path
             stac path.
-        on_error: ErrorHandleMethod
-            What to do on error when converting from STAC
+        handle_nodata: NoDataStrategy
+            What to do when required data is not available when converting from STAC
         """
         if isinstance(stac_like, (str, Path)):
             stac_catalog = StacCatalog.from_file(stac_like)

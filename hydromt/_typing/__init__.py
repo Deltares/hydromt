@@ -2,7 +2,6 @@
 
 from .crs import CRS
 from .error import (
-    ErrorHandleMethod,
     NoDataException,
     NoDataStrategy,
     exec_nodata_strat,
@@ -55,7 +54,6 @@ __all__ = [
     "TotalBounds",
     "XArrayDict",
     "ModelMode",
-    "ErrorHandleMethod",
     "NoDataStrategy",
     "NoDataException",
     "exec_nodata_strat",

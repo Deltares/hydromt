@@ -12,8 +12,7 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt._typing import NoDataException
-from hydromt._typing.error import ErrorHandleMethod
+from hydromt._typing import NoDataException, NoDataStrategy
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver, PyogrioDriver
@@ -147,10 +146,10 @@ class TestGeoDataFrameSource:
 
         gdf_stac_catalog.add_item(gds_stac_item)
         outcome = cast(
-            StacCatalog, adapter.to_stac_catalog(on_error=ErrorHandleMethod.RAISE)
+            StacCatalog, adapter.to_stac_catalog(handle_nodata=NoDataStrategy.RAISE)
         )
         assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
         adapter.metadata.crs = (
             -3.14
         )  # manually create an invalid adapter by deleting the crs
-        assert adapter.to_stac_catalog(on_error=ErrorHandleMethod.SKIP) is None
+        assert adapter.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None

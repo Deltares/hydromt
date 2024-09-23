@@ -1,6 +1,5 @@
 """DataSource class for the GeoDataset type."""
 
-from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
@@ -18,7 +17,6 @@ from pystac import MediaType
 
 from hydromt._typing import (
     Bbox,
-    ErrorHandleMethod,
     Geom,
     NoDataStrategy,
     StrPath,
@@ -273,7 +271,7 @@ class GeoDatasetSource(DataSource):
 
     def to_stac_catalog(
         self,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ) -> Optional[StacCatalog]:
         """
         Convert a geodataset into a STAC Catalog representation.
@@ -283,10 +281,9 @@ class GeoDatasetSource(DataSource):
 
         Parameters
         ----------
-        - on_error (str, optional): The error handling strategy.
-          Options are: "raise" to raise an error on failure, "skip" to skip
-          the dataset on failure, and "coerce" (default) to set default
-          values on failure.
+        - handle_nodata (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "IGNORE" to skip
+          the dataset on failure
 
         Returns
         -------
@@ -308,18 +305,12 @@ class GeoDatasetSource(DataSource):
                     f"Unknown extension: {ext} cannot determine media type"
                 )
         except (IndexError, KeyError, CRSError) as e:
-            if on_error == ErrorHandleMethod.SKIP:
+            if handle_nodata == NoDataStrategy.IGNORE:
                 logger.warning(
                     "Skipping {name} during stac conversion because"
                     "because detecting spacial extent failed."
                 )
                 return
-            elif on_error == ErrorHandleMethod.COERCE:
-                bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.metadata
-                start_dt = datetime(1, 1, 1)
-                end_dt = datetime(1, 1, 1)
-                media_type = MediaType.JSON
             else:
                 raise e
 

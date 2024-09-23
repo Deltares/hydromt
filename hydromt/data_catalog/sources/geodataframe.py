@@ -17,7 +17,6 @@ from pystac import MediaType
 
 from hydromt._typing import (
     Bbox,
-    ErrorHandleMethod,
     Geom,
     NoDataStrategy,
     StrPath,
@@ -206,7 +205,7 @@ class GeoDataFrameSource(DataSource):
 
     def to_stac_catalog(
         self,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ) -> Optional[StacCatalog]:
         """
         Convert a geodataframe into a STAC Catalog representation.
@@ -218,10 +217,9 @@ class GeoDataFrameSource(DataSource):
 
         Parameters
         ----------
-        - on_error (str, optional): The error handling strategy.
-          Options are: "raise" to raise an error on failure, "skip" to skip
-          the dataset on failure, and "coerce" (default) to set
-          default values on failure.
+        - handle_nodata (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "ignore" to skip
+          the dataset on failure.
 
         Returns
         -------
@@ -239,19 +237,15 @@ class GeoDataFrameSource(DataSource):
                 raise RuntimeError(
                     f"Unknown extension: {ext} cannot determine media type"
                 )
-        except (IndexError, KeyError, CRSError):
-            if on_error == ErrorHandleMethod.SKIP:
+        except (IndexError, KeyError, CRSError, TypeError) as e:
+            if handle_nodata == NoDataStrategy.IGNORE:
                 logger.warning(
                     "Skipping {name} during stac conversion because"
                     "because detecting spacial extent failed."
                 )
                 return
-            elif on_error == ErrorHandleMethod.COERCE:
-                bbox = [0.0, 0.0, 0.0, 0.0]
-                props = self.data_adapter.meta
-                media_type = MediaType.JSON
             else:
-                raise
+                raise e
         else:
             stac_catalog = StacCatalog(
                 self.name,

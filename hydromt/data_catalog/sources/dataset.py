@@ -1,6 +1,5 @@
 """DataSource class for the Dataset type."""
 
-from datetime import datetime
 from logging import Logger, getLogger
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
@@ -16,7 +15,6 @@ from pystac import Item as StacItem
 from pystac import MediaType
 
 from hydromt._typing import (
-    ErrorHandleMethod,
     NoDataStrategy,
     StrPath,
     TimeRange,
@@ -202,7 +200,7 @@ class DatasetSource(DataSource):
 
     def to_stac_catalog(
         self,
-        on_error: ErrorHandleMethod = ErrorHandleMethod.COERCE,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
     ) -> Optional[StacCatalog]:
         """
         Convert a dataset into a STAC Catalog representation.
@@ -212,9 +210,9 @@ class DatasetSource(DataSource):
 
         Parameters
         ----------
-        - on_error (str, optional): The error handling strategy.
+        - handle_nodata (str, optional): The error handling strategy.
           Options are: "raise" to raise an error on failure, "skip" to skip the
-          dataset on failure, and "coerce" (default) to set default values on failure.
+          dataset on failure.
 
         Returns
         -------
@@ -236,17 +234,12 @@ class DatasetSource(DataSource):
                     f"Unknown extension: {ext} cannot determine media type"
                 )
         except (IndexError, KeyError, CRSError) as e:
-            if on_error == ErrorHandleMethod.SKIP:
+            if handle_nodata == NoDataStrategy.IGNORE:
                 logger.warning(
                     "Skipping {name} during stac conversion because"
                     "because detecting spacial extent failed."
                 )
                 return
-            elif on_error == ErrorHandleMethod.COERCE:
-                props = self.metadata.model_dump(exclude_none=True, exclude_unset=True)
-                start_dt = datetime(1, 1, 1)
-                end_dt = datetime(1, 1, 1)
-                media_type = MediaType.JSON
             else:
                 raise e
 

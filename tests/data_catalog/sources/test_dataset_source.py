@@ -5,7 +5,7 @@ import pytest
 import xarray as xr
 from pystac import Catalog as StacCatalog
 
-from hydromt._typing import ErrorHandleMethod
+from hydromt._typing.error import NoDataStrategy
 from hydromt.data_catalog.adapters import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources import DatasetSource
@@ -80,16 +80,6 @@ class TestDatasetSource:
 
     def test_to_stac_catalog_skip(self, dataset_source_no_timerange: DatasetSource):
         catalog: Optional[StacCatalog] = dataset_source_no_timerange.to_stac_catalog(
-            on_error=ErrorHandleMethod.SKIP
+            handle_nodata=NoDataStrategy.IGNORE
         )
         assert catalog is None
-
-    def test_to_stac_catalog_coerce(self, dataset_source_no_timerange: DatasetSource):
-        catalog: Optional[StacCatalog] = dataset_source_no_timerange.to_stac_catalog(
-            on_error=ErrorHandleMethod.COERCE
-        )
-        assert isinstance(catalog, StacCatalog)
-        stac_item = next(catalog.get_items(dataset_source_no_timerange.name), None)
-        assert list(stac_item.assets.keys())[0] == "test.nc"
-        assert stac_item.properties["start_datetime"] == "0001-01-01T00:00:00Z"
-        assert stac_item.properties["end_datetime"] == "0001-01-01T00:00:00Z"
