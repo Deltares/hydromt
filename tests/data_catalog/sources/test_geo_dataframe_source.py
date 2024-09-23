@@ -146,10 +146,10 @@ class TestGeoDataFrameSource:
 
         gdf_stac_catalog.add_item(gds_stac_item)
         outcome = cast(
-            StacCatalog, adapter.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+            StacCatalog, adapter.to_stac_catalog(handle_nodata=NoDataStrategy.RAISE)
         )
         assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
         adapter.metadata.crs = (
             -3.14
         )  # manually create an invalid adapter by deleting the crs
-        assert adapter.to_stac_catalog(on_error=NoDataStrategy.IGNORE) is None
+        assert adapter.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None

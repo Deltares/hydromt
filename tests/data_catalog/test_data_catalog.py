@@ -697,14 +697,14 @@ class TestGetRasterDataset:
         raster_stac_catalog.add_item(raster_stac_item)
 
         outcome = cast(
-            StacCatalog, source.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+            StacCatalog, source.to_stac_catalog(handle_nodata=NoDataStrategy.RAISE)
         )
 
         assert raster_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
         source.metadata.crs = (
             -3.14
         )  # manually create an invalid adapter by deleting the crs
-        assert source.to_stac_catalog(on_error=NoDataStrategy.SKIP) is None
+        assert source.to_stac_catalog(handle_nodata=NoDataStrategy.SKIP) is None
 
     @pytest.fixture()
     def zoom_dict(self, tmp_dir: Path, zoom_level_tif: str) -> Dict[str, Any]:
@@ -1027,13 +1027,13 @@ class TestGetGeoDataFrame:
 
         gdf_stac_catalog.add_item(gds_stac_item)
         outcome = cast(
-            StacCatalog, source.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+            StacCatalog, source.to_stac_catalog(handle_nodata=NoDataStrategy.RAISE)
         )
         assert gdf_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
         source.metadata.crs = (
             -3.14
         )  # manually create an invalid adapter by deleting the crs
-        assert source.to_stac_catalog(on_error=NoDataStrategy.SKIP) is None
+        assert source.to_stac_catalog(handle_nodata=NoDataStrategy.SKIP) is None
 
 
 def test_get_geodataframe_path(data_catalog):
@@ -1256,7 +1256,7 @@ class TestGetGeoDataset:
         gds_stac_catalog.add_item(gds_stac_item)
 
         outcome = cast(
-            StacCatalog, source.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+            StacCatalog, source.to_stac_catalog(handle_nodata=NoDataStrategy.RAISE)
         )
         assert gds_stac_catalog.to_dict() == outcome.to_dict()  # type: ignore
         source.metadata.crs = (
@@ -1514,9 +1514,9 @@ def test_to_stac(self, df: pd.DataFrame, tmp_dir: Path):
         NotImplementedError,
         match="DataFrameSource does not support full stac conversion ",
     ):
-        source.to_stac_catalog(on_error=NoDataStrategy.RAISE)
+        source.to_stac_catalog(handle_nodata=NoDataStrategy.RAISE)
 
-    assert source.to_stac_catalog(on_error=NoDataStrategy.IGNORE) is None
+    assert source.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None
 
 
 def test_get_dataframe_custom_data(tmp_dir, df, data_catalog):

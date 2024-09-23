@@ -210,9 +210,9 @@ class DatasetSource(DataSource):
 
         Parameters
         ----------
-        - on_error (str, optional): The error handling strategy.
+        - handle_nodata (str, optional): The error handling strategy.
           Options are: "raise" to raise an error on failure, "skip" to skip the
-          dataset on failure, and "coerce" (default) to set default values on failure.
+          dataset on failure.
 
         Returns
         -------

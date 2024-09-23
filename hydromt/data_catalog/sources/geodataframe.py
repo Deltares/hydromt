@@ -217,10 +217,9 @@ class GeoDataFrameSource(DataSource):
 
         Parameters
         ----------
-        - on_error (str, optional): The error handling strategy.
-          Options are: "raise" to raise an error on failure, "skip" to skip
-          the dataset on failure, and "coerce" (default) to set
-          default values on failure.
+        - handle_nodata (str, optional): The error handling strategy.
+          Options are: "raise" to raise an error on failure, "ignore" to skip
+          the dataset on failure.
 
         Returns
         -------
