@@ -50,7 +50,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         path: StrPath,
         ds: xr.Dataset,
         **kwargs,
-    ) -> None:
+    ) -> str:
         """
         Write out a RasterDataset to file.
 

@@ -35,7 +35,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         path: StrPath,
         gdf: gpd.GeoDataFrame,
         **kwargs,
-    ) -> None:
+    ) -> str:
         """
         Write out a GeoDataFrame to file.
 

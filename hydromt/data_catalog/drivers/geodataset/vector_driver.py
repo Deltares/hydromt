@@ -93,6 +93,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         path: StrPath,
         ds: xr.Dataset,
         **kwargs,
-    ) -> xr.Dataset:
+    ) -> str:
         """Not implemented."""
         raise NotImplementedError("GeodatasetVectorDriver does not support writing. ")

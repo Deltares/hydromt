@@ -73,7 +73,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         path: StrPath,
         gdf: gpd.GeoDataFrame,
         **kwargs,
-    ) -> None:
+    ) -> str:
         """
         Write out a GeoDataFrame to file using pyogrio.
 
@@ -88,6 +88,8 @@ class PyogrioDriver(GeoDataFrameDriver):
             path = no_ext + ".fgb"
 
         write_dataframe(gdf, path, **kwargs)
+
+        return str(path)
 
 
 def _bbox_from_file_and_mask(

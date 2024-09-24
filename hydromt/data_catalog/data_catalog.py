@@ -9,7 +9,7 @@ import logging
 import os
 from datetime import datetime
 from os.path import abspath, basename, dirname, exists, isfile, join, splitext
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -41,7 +41,6 @@ from hydromt._typing import Bbox, SourceSpecDict, StrPath, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._utils import (
     _deep_merge,
-    _is_valid_url,
     _partition_dictionaries,
     _single_var_as_array,
 )
@@ -1136,26 +1135,21 @@ class DataCatalog(object):
                                 if k in kw_only_params
                             }
 
-                            # first resolve any placeholders
-                            # FIXME: place me in the to_file interface
-                            uris: List[str] = source.uri_resolver.resolve(
-                                uri=source.full_uri,
-                                handle_nodata=handle_nodata,
-                                **query_kwargs,
+                            bbox: Optional[Bbox] = query_kwargs.get("bbox")
+                            if bbox is not None:
+                                mask = _parse_geom_bbox_buffer(bbox=bbox)
+                            else:
+                                mask = None
+
+                            source_kwargs: Dict[str, Any] = copy.deepcopy(query_kwargs)
+                            source_kwargs.pop("bbox")
+                            source_kwargs["mask"] = mask
+
+                            basename: str = source._get_uri_basename(
+                                handle_nodata, **source_kwargs
                             )
 
-                            # if multiple_uris, use the first one:
-                            if len(uris) > 0:
-                                uri: str = uris[0]
-                            else:
-                                raise NoDataException("!")
-                            # if uri is a url or absolute path, just use the name
-                            # else, use the relative uri
-                            if _is_valid_url(uri) or PurePath(uri).is_absolute():
-                                new_uri: PurePath = PurePath(uri).name
-                            else:
-                                new_uri: PurePath = source.uri
-                            p = cast(Path, Path(new_root) / new_uri)
+                            p = cast(Path, Path(new_root) / basename)
                             if not force_overwrite and isfile(p):
                                 logger.warning(
                                     f"File {p} already exists and not in forced overwrite mode. skipping..."

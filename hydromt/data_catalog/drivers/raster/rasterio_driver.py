@@ -142,7 +142,7 @@ class RasterioDriver(RasterDatasetDriver):
                 )
         return ds
 
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> str:
         """Write out a RasterDataset using rasterio."""
         raise NotImplementedError()
 
