@@ -105,14 +105,15 @@ class DataFrameSource(DataSource):
         if df is None:  # handle_nodata == ignore
             return None
 
-        # update source and its driver based on local path
-        update: Dict[str, Any] = {"uri": str(file_path), "root": None, "driver": driver}
-
-        driver.write(
+        # driver can return different path if file ext changes
+        dest_path: str = driver.write(
             file_path,
             df,
             **kwargs,
         )
+
+        # update source and its driver based on local path
+        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
 
         return self.model_copy(update=update)
 

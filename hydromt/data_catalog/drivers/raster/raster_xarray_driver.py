@@ -112,11 +112,13 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 )
         return ds
 
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> str:
         """
         Write the RasterDataset to a local file using zarr.
 
         args:
+
+        returns: str with written uri
         """
         no_ext, ext = splitext(path)
         # set filepath if incompat
@@ -131,3 +133,5 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             ds.to_zarr(path, mode="w", **kwargs)
         else:
             ds.to_netcdf(path, **kwargs)
+
+        return str(path)

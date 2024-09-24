@@ -103,7 +103,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 )
         return ds
 
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> str:
         """
         Write the GeoDataset to a local file using zarr.
 
@@ -116,3 +116,5 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             ds.vector.to_netcdf(path, **kwargs)
         else:
             raise ValueError(f"Unknown extension for GeoDatasetXarrayDriver: {ext} ")
+
+        return path

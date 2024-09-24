@@ -42,7 +42,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         path: StrPath,
         ds: xr.Dataset,
         **kwargs,
-    ) -> None:
+    ) -> str:
         """
         Write out a GeoDataset to file.
 

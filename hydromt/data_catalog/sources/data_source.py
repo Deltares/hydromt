@@ -6,8 +6,8 @@ from abc import ABC
 from copy import deepcopy
 from logging import Logger, getLogger
 from os.path import abspath, join
-from pathlib import Path
-from typing import Any, ClassVar, Dict, Optional, TypeVar, Union
+from pathlib import Path, PurePath
+from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union
 
 from pydantic import (
     BaseModel,
@@ -19,7 +19,7 @@ from pydantic import (
     model_validator,
 )
 
-from hydromt._typing import DataType, SourceMetadata
+from hydromt._typing import DataType, NoDataException, NoDataStrategy, SourceMetadata
 from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
@@ -124,6 +124,30 @@ class DataSource(BaseModel, ABC):
         res: Dict[str, Any] = nxt(self)
         res["data_type"] = self.data_type
         return res
+
+    def _get_uri_basename(self, handle_nodata: NoDataStrategy, **query_kwargs) -> str:
+        if "{" in self.uri:
+            # first resolve any placeholders
+            # FIXME: place me in the to_file interface
+            uris: List[str] = self.uri_resolver.resolve(
+                uri=self.full_uri,
+                handle_nodata=handle_nodata,
+                **query_kwargs,
+            )
+
+            # if multiple_uris, use the first one:
+            if len(uris) > 0:
+                uri: str = uris[0]
+            else:
+                raise NoDataException("!")
+        else:
+            uri: str = self.uri
+
+        basename: Optional[str] = PurePath(uri).name
+        if basename is None:
+            raise ValueError(f"Failed to get basename of uri: {self.uri}")
+        else:
+            return basename
 
 
 def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:

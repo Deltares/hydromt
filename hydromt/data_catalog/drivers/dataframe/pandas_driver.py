@@ -91,7 +91,7 @@ class PandasDriver(DataFrameDriver):
         path: StrPath,
         df: pd.DataFrame,
         **kwargs,
-    ) -> None:
+    ) -> str:
         """
         Write out a DataFrame to file.
 
@@ -118,6 +118,8 @@ class PandasDriver(DataFrameDriver):
             df.to_excel(path, engine="openpyxl", **kwargs)
         else:
             raise ValueError(f"DataFrame: file extension {extension} is unknown.")
+
+        return str(path)
 
     def _unify_variables_and_pandas_kwargs(
         self,
