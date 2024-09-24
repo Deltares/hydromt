@@ -1142,7 +1142,7 @@ class DataCatalog(object):
                                 mask = None
 
                             source_kwargs: Dict[str, Any] = copy.deepcopy(query_kwargs)
-                            source_kwargs.pop("bbox")
+                            source_kwargs.pop("bbox", None)
                             source_kwargs["mask"] = mask
 
                             basename: str = source._get_uri_basename(
