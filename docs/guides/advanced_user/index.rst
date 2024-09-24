@@ -10,5 +10,3 @@ Advanced user guide
     methods_stats
     model_clip
     model_components
-    model_config
-    model_processes
