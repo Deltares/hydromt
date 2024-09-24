@@ -3,8 +3,8 @@
 Clipping a model
 ================
 
-The ``clip`` method allows to clip a subregion from an existing model, including all static maps,
-static geometries and forcing data.
+The ``clip`` method allows to clip a subregion from an existing model, including all
+static maps, static geometries and forcing data.
 
 **Steps in brief:**
 
@@ -16,7 +16,6 @@ static geometries and forcing data.
 
     This method is not yet implemented for all plugins. Please check the documentation of the respective
     :ref:`plugin<plugins>` for more information on whether the clip method is available.
-
 
 .. _cli_clip:
 

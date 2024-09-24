@@ -9,7 +9,7 @@ import logging
 import os
 from datetime import datetime
 from os.path import abspath, basename, dirname, exists, isfile, join, splitext
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -23,7 +23,6 @@ from typing import (
     cast,
 )
 
-import dateutil
 import dateutil.parser
 import geopandas as gpd
 import numpy as np
@@ -42,7 +41,6 @@ from hydromt._typing import Bbox, SourceSpecDict, StrPath, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._utils import (
     _deep_merge,
-    _is_valid_url,
     _partition_dictionaries,
     _single_var_as_array,
 )
@@ -1053,12 +1051,8 @@ class DataCatalog(object):
         new_root = new_root.absolute()
         new_root.mkdir(exist_ok=True)
 
-        if not time_range:
-            time_range: Tuple[Union[datetime, str], Union[datetime, str]] = tuple()
-
-        # convert strings to timerange
-        if any(map(lambda t: not isinstance(t, datetime), time_range)):
-            time_range = tuple(map(lambda t: dateutil.parser.parse(t), time_range))
+        if time_range:
+            time_range: TimeRange = _parse_time_range(time_range)
 
         # create copy of data with selected source names
         source_vars = {}
@@ -1115,20 +1109,6 @@ class DataCatalog(object):
                             source.data_adapter.unit_mult = {}
                             source.data_adapter.unit_add = {}
                         try:
-                            if (
-                                _is_valid_url(source.uri)
-                                or PurePath(source.uri).is_absolute()
-                            ):
-                                new_uri: PurePath = PurePath(source.uri).name
-                            else:
-                                new_uri: PurePath = source.uri
-                            p = cast(Path, Path(new_root) / new_uri)
-                            if not force_overwrite and isfile(p):
-                                logger.warning(
-                                    f"File {p} already exists and not in forced overwrite mode. skipping..."
-                                )
-                                continue
-
                             # get keyword only params
                             kw_only_params: Set[inspect.Parameter] = set(
                                 map(
@@ -1154,6 +1134,27 @@ class DataCatalog(object):
                                 for k, v in query_kwargs.items()
                                 if k in kw_only_params
                             }
+
+                            bbox: Optional[Bbox] = query_kwargs.get("bbox")
+                            if bbox is not None:
+                                mask = _parse_geom_bbox_buffer(bbox=bbox)
+                            else:
+                                mask = None
+
+                            source_kwargs: Dict[str, Any] = copy.deepcopy(query_kwargs)
+                            source_kwargs.pop("bbox", None)
+                            source_kwargs["mask"] = mask
+
+                            basename: str = source._get_uri_basename(
+                                handle_nodata, **source_kwargs
+                            )
+
+                            p = cast(Path, Path(new_root) / basename)
+                            if not force_overwrite and isfile(p):
+                                logger.warning(
+                                    f"File {p} already exists and not in forced overwrite mode. skipping..."
+                                )
+                                continue
 
                             new_source: DataSource = source.to_file(
                                 file_path=p,
@@ -1266,6 +1267,9 @@ class DataCatalog(object):
         """
         if isinstance(variables, str):
             variables = [variables]
+
+        if time_range:
+            time_range = _parse_time_range(time_range)
 
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1523,10 +1527,15 @@ class DataCatalog(object):
             mask = _parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
         else:
             mask = None
+
+        if time_range:
+            time_range = _parse_time_range(time_range)
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
             )
+
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
@@ -1636,6 +1645,10 @@ class DataCatalog(object):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
             )
+
+        if time_range:
+            time_range = _parse_time_range(time_range)
+
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
@@ -1719,6 +1732,10 @@ class DataCatalog(object):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
             )
+
+        if time_range:
+            time_range = _parse_time_range(time_range)
+
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
@@ -1867,3 +1884,12 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             data_list.extend(_denormalise_data_dict(item))
 
     return data_list
+
+
+def _parse_time_range(
+    time_range: Tuple[Union[str, datetime], Union[str, datetime]],
+) -> TimeRange:
+    """Parse timerange with strings to datetime."""
+    if any(map(lambda t: not isinstance(t, datetime), time_range)):
+        time_range = tuple(map(lambda t: dateutil.parser.parse(t), time_range))
+    return cast(TimeRange, time_range)

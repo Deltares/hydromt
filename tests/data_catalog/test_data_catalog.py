@@ -1287,7 +1287,7 @@ def test_get_geodataset_bbox_time_range(data_catalog: DataCatalog):
         driver="geodataset_xarray",
     )
     assert da.vector.index.size == 2
-    assert da.time.size == 720
+    assert da.time.size == 4 * 24 * 6 + 1  # 4 days, 24 hours, data point per 10 minutes
     assert isinstance(da, xr.DataArray)
 
 
@@ -1468,7 +1468,7 @@ class TestGetDataFrame:
             time_range=("2007-01-02", "2007-01-04"),
             driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
         )
-        assert len(dfts) == 3
+        assert dfts.shape[0] == 3
 
     def test_time_variable_slice(self, csv_uri_time: str, data_catalog: DataCatalog):
         # Test variable slice

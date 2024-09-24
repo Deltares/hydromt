@@ -96,7 +96,7 @@ class DatasetXarrayDriver(DatasetDriver):
                 )
         return ds
 
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> None:
+    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> str:
         """
         Write the Dataset to a local file using zarr.
 
@@ -109,3 +109,5 @@ class DatasetXarrayDriver(DatasetDriver):
             ds.to_netcdf(path, **kwargs)
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {ext} ")
+
+        return str(path)

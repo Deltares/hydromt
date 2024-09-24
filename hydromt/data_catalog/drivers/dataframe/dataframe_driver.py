@@ -41,7 +41,7 @@ class DataFrameDriver(BaseDriver, ABC):
         path: StrPath,
         df: pd.DataFrame,
         **kwargs,
-    ) -> None:
+    ) -> str:
         """
         Write out a DataFrame to file.
 
