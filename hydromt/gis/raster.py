@@ -2327,7 +2327,12 @@ class RasterDataArray(XRasterBase):
         return interp_array
 
     def to_xyz_tiles(
-        self, root: str, tile_size: int, zoom_levels: list, driver="GTiff", **kwargs
+        self,
+        root: str,
+        tile_size: int,
+        zoom_levels: list,
+        gdal_driver="GTiff",
+        **kwargs,
     ):
         """Export rasterdataset to tiles in a xyz structure.
 
@@ -2340,7 +2345,7 @@ class RasterDataArray(XRasterBase):
             Number of pixels per tile in one direction
         zoom_levels : list
             Zoom levels to be put in the database
-        driver : str, optional
+        gdal_driver: str, optional
             GDAL driver (e.g., 'GTiff' for geotif files), or 'netcdf4' for netcdf files.
         **kwargs
             Key-word arguments to write raster files
@@ -2353,7 +2358,7 @@ class RasterDataArray(XRasterBase):
                 "blockysize": tile_size,
                 "tiled": True,
             },
-        }.get(driver.lower(), {})
+        }.get(gdal_driver.lower(), {})
         kwargs = {**kwargs0, **kwargs}
 
         normalized_root = os.path.normpath(os.path.basename(root))
@@ -2424,16 +2429,16 @@ class RasterDataArray(XRasterBase):
                 temp.raster.set_nodata(nodata)
                 temp.raster._crs = obj.raster.crs
 
-                if driver == "netcdf4":
+                if gdal_driver == "netcdf4":
                     path = join(ssd, f"{row}.nc")
                     temp = temp.raster.gdal_compliant()
                     temp.to_netcdf(path, engine="netcdf4", **kwargs)
-                elif driver in GDAL_EXT_CODE_MAP:
-                    ext = GDAL_EXT_CODE_MAP.get(driver)
+                elif gdal_driver in GDAL_EXT_CODE_MAP:
+                    ext = GDAL_EXT_CODE_MAP.get(gdal_driver)
                     path = join(ssd, f"{row}.{ext}")
-                    temp.raster.to_raster(path, driver=driver, **kwargs)
+                    temp.raster.to_raster(path, driver=gdal_driver, **kwargs)
                 else:
-                    raise ValueError(f"Unkown file driver {driver}")
+                    raise ValueError(f"Unkown file driver {gdal_driver}")
                 paths.append(path)
 
                 del temp
@@ -2710,11 +2715,13 @@ class RasterDataArray(XRasterBase):
         # Write a quick yaml for the database
         if write_vrt:
             yml = {
-                "crs": 3857,
                 "data_type": "RasterDataset",
-                "driver": "raster",
-                "path": "lvl{zoom_level}.vrt",
-                "zoom_levels": zoom_levels,
+                "driver": "rasterio",
+                "uri": "lvl{overview_level}.vrt",
+                "metadata": {
+                    "zls_dict": zoom_levels,
+                    "crs": 3857,
+                },
             }
             name = os.path.basename(root)
             with open(join(root, f"{name}.yml"), "w") as f:
