@@ -242,8 +242,8 @@ should be created with model-specific data readers, writers and setup methods as
   by arguments which end with ``_fn`` (short for filename) which refer to a source in the data catalog
   based on the source name or a file based on the (relative) path to the file. Within a model method the data is read
   by calling any ``DataCatalog.get_<data_type>`` method which work for both source and file names.
-- The Model class currently contains three high-level methods (:py:meth:`~hydromt.Model.build`,
-  :py:meth:`~hydromt.Model.update` and :py:meth:`~hydromt.Model.clip` which are common for all model plugins and
+- The Model class currently contains two high-level methods (:py:meth:`~hydromt.Model.build`,
+  :py:meth:`~hydromt.Model.update` is are common for all model plugins and
   exposed through the CLI. This list of methods might be extended going forward.
 - A Model child class implementation for a specific model kernel can be exposed to HydroMT as a plugin by specifying a
   ``hydromt.models`` `entry-point <https://packaging.python.org/en/latest/specifications/entry-points/>`_ in the pyproject.toml file of a package.

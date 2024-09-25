@@ -8,7 +8,7 @@ HydroMT and this documentation use a specific terminology to describe specific o
 ==============================  ======================================================================================
 Term                            Explanation
 ==============================  ======================================================================================
-Command Line Interface (CLI)    high-level interface to HydroMT *build*, *update*, *clip*, *check* and *export* methods.
+Command Line Interface (CLI)    high-level interface to HydroMT *build*, *update*, *check* and *export* methods.
 Configuration (HydroMT)         (.yaml) file describing the complete pipeline with all methods and their arguments to
                                 *build* or *update* a model.
 Data catalog                    A set of data sources available for HydroMT. It is build up from *yaml* files containing
@@ -33,6 +33,6 @@ Model plugin                    (Plugin) Package that links the HydroMT Model cl
                                 Plugins are installed separately from HydroMT and are not part of the HydroMT core package.
                                 Plugins are the most common way of using HydroMT to build and update specific models.
 Model kernel                    The model software to execute a model simulation. This is *not* part of any HydroMT plugin.
-Region                          Argument of the *build* and *clip* CLI methods that specifies the region of interest where
+Region                          Argument of the *build*CLI methods that specifies the region of interest where
                                 the model should be prepared / which spatial subregion should be clipped.
 ==============================  ======================================================================================

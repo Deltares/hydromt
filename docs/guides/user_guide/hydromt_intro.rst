@@ -73,8 +73,7 @@ Finally user can interact with HydroMT through the following interfaces:
 - **Command Line Interface (CLI)**
 
   The :ref:`CLI <hydromt_cli>` is a high-level interface to HydroMT. It is used to run HydroMT commands such as
-  :ref:`build <model_build>`, :ref:`update <model_update>` or :ref:`clip <model_clip>`.
-
+  :ref:`build <model_build>`, :ref:`update <model_update>`
 - **Python Interface**
 
   While most common functionalities can be called through the CLI, the :ref:`Python interface <hydromt_python>` offers more flexibility for advanced users.
