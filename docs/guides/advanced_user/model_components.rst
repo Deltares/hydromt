@@ -22,61 +22,8 @@ and the write permissions as well as other components. This means that component
 effectively exit outside of a model.
 
 There are basically two ways to add a component to a model: using the workflow yaml and
-using the python interface.
-
-Adding components using the workflow yaml
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In a workflow file, all the components that a model needs to have (appart from any
-default components your plugin has already provided) must be declared upfront. This is
-done with the ``global`` keyword (typcially placed at the start of the file)
-
-it should look like this
-
-.. code-block:: yaml
-
-    global:
-        components:
-            grid:
-                type: GridComponent
-            config:
-                type: ConfigComponent
-            forcing:
-                type: SpatialDatasetsComponent
-                region_component: grid
-        region_component: grid
-
-
-here you can see that ``components`` should take a mapping where the keys are the name
-the component will have. These must then again take a mapping that specifies at least
-the type of component. The name of the component type should correspond to the python
-class name.
-
-An additional point of note is that spacial components (such as ``forcing`` and
-``grid``) in the example above, can either define their own region (``grid``) or derive
-their region from another component (``forcing``). This can be done by specifying the
-``region_component`` key, and should refer to the name of the spacial component you wish
-to use. You can also specify which spacial component the model should derive it's region
-from. If you have only one spacial component, this information may be omitted, but if
-you have multiple (as in the example above) you must also specify which component the
-model should derive it's region from.
-
-After you have specified the components that should be added to your model in the
-``global`` key, you can use them in the steps of your workflow like so:
-
-.. code-block:: yaml
-
-    steps:
-        - grid.add_data_from_constant:
-            constant: 0.01
-            name: "c1"
-            nodata: -99.0
-        - ...
-
-in the example above ``grid`` is the name of the component and
-``add_data_from_constant`` is the function on it that you want to call. Please check the
-specific component for what functions are available. Note that only functions that have
-the ``@hydromt_step`` decorator are available to use from the yaml workflow.
+using the python interface. For more detail on how components are created and accessed
+from the workflow file see :ref:`this page <model_workflow>`
 
 Adding components using the Python interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
