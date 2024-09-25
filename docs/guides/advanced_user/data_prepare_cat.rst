@@ -146,7 +146,7 @@ To request a specific variant, the variant arguments can be used as keyword argu
 the `DataCatalog.get_rasterdataset` method, see code below. By default the newest
 version from the last provider is returned when requesting a data source with specific
 version or provider. Requesting a specific version from a HydroMT configuration file is
-also possible, see :ref:`model_config`.
+also possible.
 
 
 .. code-block:: python

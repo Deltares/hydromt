@@ -236,7 +236,7 @@ should be created with model-specific data readers, writers and setup methods as
   (i.e. with default values), but no required arguments. The results component does not have write method.
 - All public model methods may only contain arguments which require one of the following basic python types:
   string, numeric integer and float, boolean, None, list and dict types. This is requirement makes it possible to
-  expose these methods and their arguments via a :ref:`model config .yml file <model_config>`.
+  expose these methods and their arguments via a :ref:`model workflow .yml file <model_workflow>`.
 - Data is exposed to each model method through the ``Model.data_catalog`` attribute which is an instance of the
   :py:class:`hydromt.DataCatalog`. Data of :ref:`supported data types <data_types>` is provided to model methods
   by arguments which end with ``_fn`` (short for filename) which refer to a source in the data catalog

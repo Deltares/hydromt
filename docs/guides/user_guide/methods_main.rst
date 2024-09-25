@@ -1,6 +1,6 @@
-.. _methods_workflows:
+.. _methods_processes:
 
-Overview methods and workflows
+Overview methods and processes
 ==============================
 
 Methods and workflows are the engine of HydroMT. Methods provide the low-level functionality, only accessible through the Python interface,
