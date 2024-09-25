@@ -55,14 +55,6 @@ def test_cli_update_help():
     assert r.output.startswith("Usage: main update [OPTIONS] MODEL MODEL_ROOT")
 
 
-def test_cli_clip_help():
-    r = CliRunner().invoke(hydromt_cli, ["clip", "--help"])
-    assert r.exit_code == 0
-    assert r.output.startswith(
-        "Usage: main clip [OPTIONS] MODEL MODEL_ROOT MODEL_DESTINATION"
-    )
-
-
 @pytest.fixture()
 def _reset_log_level() -> Generator[None, None, None]:
     yield
@@ -112,16 +104,6 @@ def test_cli_update_unknown_model(tmpdir):
                 "--opt",
                 "key=value",
             ],
-            catch_exceptions=False,
-        )
-
-
-@pytest.mark.usefixtures("_reset_log_level")
-def test_cli_clip_unknown_model(tmpdir):
-    with pytest.raises(NotImplementedError):
-        _ = CliRunner().invoke(
-            hydromt_cli,
-            ["clip", "test_model", str(tmpdir), str(tmpdir), "{'bbox': [1,2,3,4]}"],
             catch_exceptions=False,
         )
 
