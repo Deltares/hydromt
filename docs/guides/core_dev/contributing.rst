@@ -227,7 +227,7 @@ The HydroMT :ref:`Model class <model_api>` consists of several methods and attri
 To implement HydroMT for a specific model kernel/software, a child class named `<Name>Model` (e.g. SfincsModel for Sfincs)
 should be created with model-specific data readers, writers and setup methods as is appropriate.
 
-- :ref:`Model data components <model_interface>` are data attributes which together define a model instance and
+- :ref:`Model data components </guides/advanced_user/model_components.rst>` are data attributes which together define a model instance and
   are identical for all models. Each component represents a specific model component and is parsed to a specific
   Python data object that should adhere to certain specifications. For instance, the ``grid`` component represent
   all static regular grids of a model in a :py:class:`xarray.Dataset` object.

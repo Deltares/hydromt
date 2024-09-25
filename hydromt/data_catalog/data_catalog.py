@@ -1001,7 +1001,10 @@ class DataCatalog(object):
                     **source.summary(),
                 }
             )
-        return pd.DataFrame.from_records(d).set_index("name")
+        if d:
+            return pd.DataFrame.from_records(d).set_index("name")
+        else:
+            return pd.DataFrame()
 
     def export_data(
         self,
