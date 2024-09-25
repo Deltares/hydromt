@@ -73,4 +73,5 @@ catalog name. You can then get data from the catalog using the
     data_catalog = DataCatalog(data_libs=["deltares_data=v2024.2"])
     # get data from the catalog
     ds = data_catalog.get_rasterdataset("eobs") # get the most recently added
-    ds = data_catalog.get_rasterdataset("eobs", version="22.0e") # get a specific version
+    ds = data_catalog.get_rasterdataset("eobs", version="22.0e") # get a specific
+    version
