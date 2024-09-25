@@ -35,14 +35,14 @@ Alternatively, deltares_data can also be accessed with the ``--dd`` option:
     hydromt build MODEL --dd ...
 
 
-You can specify a version of the catalog by adding the version number after the catalog name, e.g. ``deltares_data=2024.2``.
+You can specify a version of the catalog by adding the version number after the catalog name, e.g. ``deltares_data=v1.0.0``.
 
 .. code-block:: bash
 
-    hydromt build MODEL -d deltares_data=2024.2 ...
+    hydromt build MODEL -d deltares_data=v1.0.0 ...
 
 Once you have set the data catalog you can specify the data source(s) for each method in the HydroMT
-:ref:`model configuration file <model_config>` as shown in the example below with the `setup_precip_forcing` method.
+:ref:`model workflow file <model_workflow>` as shown in the example below with the `setup_precip_forcing` method.
 
 .. code-block:: yaml
 
@@ -54,7 +54,6 @@ Once you have set the data catalog you can specify the data source(s) for each m
       raster_fn:
         source: 'eobs'
         version: 'v22.0e'
-
 
 
 From Python
@@ -74,32 +73,5 @@ catalog name. You can then get data from the catalog using the
     data_catalog = DataCatalog(data_libs=["deltares_data=v2024.2"])
     # get data from the catalog
     ds = data_catalog.get_rasterdataset("eobs") # get the most recently added
-    ds = data_catalog.get_rasterdataset("eobs", version="22.0e") # get a specific version
-
-
-Similar when building a model using the :py:class:`Model` class you can specify the
-data catalog and version. Subsequently you can use specific data sources for each
-model :ref: `setup method`
-
-.. code-block:: python
-
-    from hydromt import Model
-    # initialize a model with a specific data catalog version
-    mod = Model(data_libs=["deltares_data=v2024.2"])
-    # setup a region and create a map based on eobs orography
-    mod.setup_region(region = {'bbox': [4.5, 51.5, 6.5, 53.5]})
-    # create a map using the latest version
-    mod.setup_maps_from_rasterdataset(
-        raster_fn='eobs_orography',
-        name="orography_latest",
-    )
-    # create a map using a specific version
-    mod.setup_maps_from_rasterdataset(
-        raster_fn={'source': 'eobs_orography',  "version": "22.0e"},
-        name="orography_v22.0e",
-    )
-
-Available pre-defined data catalogs
------------------------------------
-
-.. .. include:: ../_generated/predefined_catalogs.rst
+    ds = data_catalog.get_rasterdataset("eobs", version="22.0e") # get a specific
+    version

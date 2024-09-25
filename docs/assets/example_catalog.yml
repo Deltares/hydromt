@@ -2,6 +2,7 @@
     roots:
       - /linux/path/to/data_root/
       - C:\Windows\path\to\data_root
+      - .
     version: version
     name: data_catalog_name
 
