@@ -8,9 +8,6 @@ It is possible to use the ``rename`` option in the :ref:`data catalog yaml file 
 This section lists the different variable naming and unit conventions of HydroMT by types.
 A list of recognized :ref:`dimension names <dimensions>` is found here.
 
-.. NOTE::
-
-    This list is still in development.
 
 
 Topography

@@ -15,7 +15,7 @@ HydroMT involves the following generic steps:
 2) Define the model :ref:`region <region>` which describes the area of interest. The model region can be based on a
    simple bounding box or geometry, but also a (sub)(inter)basin that is delineated on-the-fly based on available
    hydrography data.
-3) Configure the model setup in an :ref:`yaml configuration file <model_config>`. A HydroMT yaml configuration file
+3) Configure the model setup in an :ref:`yaml configuration file <model_workflow>`. A HydroMT yaml configuration file
    represents a reproducible recipe to build a model by listing (in order of execution) the model methods and
    their arguments. These methods and their arguments are described in the documentation.
 4) Run the HydroMT :ref:`build method <model_build>` from either command line (as shown in the figure) or Python.
