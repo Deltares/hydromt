@@ -143,12 +143,7 @@ You can find a couple of detailed examples of how to use HydroMT methods and wor
 Models
 ------
 
-As well as with the CLI, you can also :ref:`build <python_build>`, :ref:`update
-<python_update>` or :ref:`clip <python_clip>` models in Python. If you want to develop
-you own plugin you can find detailed information in the :ref:`plugin development guide
-<plugin_quickstart>`.
-
-But you can also use HydroMT and its :class:`~model.Model` and
+You can also use HydroMT and its :class:`~model.Model` and
 :class:`~components.base.ModelComponent` classes to do some analysis on your model
 inputs or results. HydroMT views a model as a combination of different components to
 represent the different type of inputs of a model, like ``config`` for the model run
