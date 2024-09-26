@@ -40,7 +40,7 @@ dependencies = [
   "tomli",                  # parsing toml files
   "tomli-w",                # writing toml files
   "universal_pathlib>=0.2", # provides path compatability between different filesystems
-  "xarray",                  # ndim data arrays
+  "xarray",                 # ndim data arrays
   "xmltodict",              # xml parser also used to read VRT
   "xugrid>=0.9.0",          # xarray wrapper for mesh processing
   "zarr",                   # zarr
@@ -64,12 +64,12 @@ io = [
   "openpyxl",         # excel IO
   "fastparquet",      # parquet IO
   "pillow",           # image IO
-  "rio-vrt",          # write VRT files
+  "rio-vrt==0.2.0",   # write VRT files
   "s3fs",             # S3 file system
 ]
 extra = [
-  "matplotlib",    # plotting; required for slippy tiles
-  "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
+  "matplotlib", # plotting; required for slippy tiles
+  "pyet",       # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
   "flit",        # needed to publish to pypi

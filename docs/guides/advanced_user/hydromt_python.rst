@@ -149,8 +149,7 @@ inputs or results. HydroMT views a model as a combination of different component
 represent the different type of inputs of a model, like ``config`` for the model run
 configuration file, ``forcing`` for the dynamic forcing data of the model etc. For each
 component, there are methods to ``set_<component>`` (update or add a new data layer),
-``read_<component>`` and ``write_<component>``. In the :ref:`model API
-<model_interface>` you can find all available components.
+``read_<component>`` and ``write_<component>``.
 
 Here is a small example of how to use the :class:`~model.Model` class in python to plot
 or analyse your model:

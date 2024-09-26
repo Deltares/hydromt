@@ -13,7 +13,7 @@ import warnings
 import netCDF4  # noqa: F401
 
 # submodules
-from . import _io, data_catalog, gis, model, stats
+from . import _io, data_catalog, gis, model, stats, utils
 
 # high-level methods
 from .data_catalog import DataCatalog

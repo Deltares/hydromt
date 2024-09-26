@@ -60,7 +60,7 @@ More concretely HydroMT is organized in the following way:
 
 - **Methods and workflow**
 
-  Most of the heavy work in HydroMT is done by :ref:`Methods and workflows <methods_workflows>`,
+  Most of the heavy work in HydroMT is done by :ref:`Methods and workflows <model_workflow>`,
   indicated by the gear wheels in the image :ref:`arch_hydromt` below. ``Methods`` provide the low-level functionality
   such as GIS rasterization, reprojection, or zonal statistics. ``processes`` combine several methods to
   transform data to a model layer or post-process model results. Examples of workflows include the
@@ -72,13 +72,13 @@ Finally user can interact with HydroMT through the following interfaces:
 
 - **Command Line Interface (CLI)**
 
-  The :ref:`CLI <hydromt_cli>` is a high-level interface to HydroMT. It is used to run HydroMT commands such as
+  The CLI is a high-level interface to HydroMT. It is used to run HydroMT commands such as
   :ref:`build <model_build>`, :ref:`update <model_update>`
 - **Python Interface**
 
-  While most common functionalities can be called through the CLI, the :ref:`Python interface <hydromt_python>` offers more flexibility for advanced users.
-  It allows you to e.g. interact directly with a model component :ref:`Model API <model_interface>` and apply the many
-  methods and workflows available. Please find all available functions :ref: `API reference`
+  While most common functionalities can be called through the CLI, the Python interface offers more flexibility for advanced users.
+  It allows you to e.g. interact directly with a model component Model API and apply the many
+  methods and workflows available. Please find all available functions API reference
 
 .. _arch_hydromt:
 

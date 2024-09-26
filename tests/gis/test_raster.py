@@ -432,7 +432,7 @@ def test_area_grid(rioda):
     rioda_proj = rioda.copy()
     rioda_proj.raster.set_crs(3857)
     area1 = rioda_proj.raster.area_grid()
-    assert np.all(area1 == 0.25)
+    assert np.all(np.isclose(area1, 0.25))
     # density
     assert np.all(rioda.raster.density_grid() == rioda / area)
     assert np.all(rioda_proj.raster.density_grid() == rioda_proj / area1)

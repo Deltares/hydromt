@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim as base
+FROM debian:bookworm-slim AS base
 ARG PIXIENV
 RUN apt-get update && apt-get install -y curl
 
@@ -6,7 +6,7 @@ RUN useradd deltares
 USER deltares
 WORKDIR /home/deltares
 
-RUN curl -fsSL https://pixi.sh/install.sh | bash
+RUN curl -proto="https" -fsSL https://pixi.sh/install.sh | bash
 ENV PATH=/home/deltares/.pixi/bin:$PATH
 COPY pixi.toml pixi.lock pyproject.toml README.rst ./
 COPY data/ ./data
@@ -24,14 +24,14 @@ RUN echo "pixi run --locked -e ${RUNENV} \$@" > run_pixi.sh \
 ENTRYPOINT ["sh", "run_pixi.sh"]
 CMD ["hydromt","--models"]
 
-FROM base as full
+FROM base AS full
 USER deltares
 COPY examples/ ./examples
 COPY tests/ ./tests
 
-FROM base as slim
+FROM base AS slim
 USER deltares
 COPY examples/ ./examples
 
-FROM base as min
+FROM base AS min
 USER deltares
