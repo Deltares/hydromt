@@ -140,6 +140,7 @@ for name in predefined_catalogs:
         print(e)
         continue
     write_nested_dropdown(name, data_cat, categories=categories)
+    write_nested_dropdown(name, data_cat, categories=categories)
     data_cat._sources = {}  # reset
 with open("_generated/predefined_catalogs.rst", "w") as f:
     f.writelines(

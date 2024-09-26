@@ -18,7 +18,7 @@ model is built step by step by adding :Class:`~components.base.ModelComponent` s
 Model. :ref:`Plugins` can define steps which act on these components to implement
 complex interactions between different components. The area of interest for the model
 can be defined by the :Class:`~components.spatial.SpatialModelComponent`. The complete
-model building workflow can be encoded in a :ref:`model_yaml_setup` file.
+model building workflow can be encoded in a :ref:`workflow file <model_workflow>` file.
 
 ModelComponent
 --------------

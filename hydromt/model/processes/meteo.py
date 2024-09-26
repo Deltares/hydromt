@@ -698,7 +698,7 @@ def pm_fao56(
     if var == "temp_dew":
         avp = pyet.calc_e0(tmean=temp_dew)
     elif var == "rh":
-        avp = pyet.calc_e0(tmax=temp_max, tmin=temp_min, rh=temp_dew)
+        avp = pyet.calc_ea(tmax=temp_max, tmin=temp_min, rh=temp_dew)
 
     # Net radiation
     dates = pyet.utils.get_index(kin)
