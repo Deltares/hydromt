@@ -9,47 +9,47 @@ on:
     - 'release/**'
 
 jobs:
-  publish-docker:
-    if: github.event.pull_request.merged == true
-    name: Finalise docker (${{ matrix.flavour }}) release
-    runs-on: ubuntu-24.04 # latest LTS release
-    strategy:
-      fail-fast: false
-      matrix:
-        flavour: ['min','slim','full']
-    concurrency:
-      group: NEW_RELEASE_DOCKER
-      cancel-in-progress: false # don't abort while we might be creating a PR or something
-    steps:
-      - uses: actions/checkout@v4
-        name: Checkout code
+  # publish-docker:
+  #   if: github.event.pull_request.merged == true
+  #   name: Finalise docker (${{ matrix.flavour }}) release
+  #   runs-on: ubuntu-24.04 # latest LTS release
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       flavour: ['min','slim','full']
+  #   concurrency:
+  #     group: NEW_RELEASE_DOCKER
+  #     cancel-in-progress: false # don't abort while we might be creating a PR or something
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       name: Checkout code
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: hydromt-docker-image
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: hydromt-docker-image
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push ${{ matrix.flavour }} image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: ${{ matrix.flavour }}
-          push:  true
-          tags: deltares/hydromt:${{ env.version }}-${{ matrix.flavour }}
+  #     - name: Build and push ${{ matrix.flavour }} image
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         context: .
+  #         target: ${{ matrix.flavour }}
+  #         push:  true
+  #         tags: deltares/hydromt:${{ env.version }}-${{ matrix.flavour }}
 
-      - name: Build and push latest image
-        if: matrix.flavour == 'slim'
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          target: ${{ matrix.flavour }}
-          push:  true
-          tags: deltares/hydromt:${{ env.version }}, deltares/hydromt:latest
+  #     - name: Build and push latest image
+  #       if: matrix.flavour == 'slim'
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         context: .
+  #         target: ${{ matrix.flavour }}
+  #         push:  true
+  #         tags: deltares/hydromt:${{ env.version }}, deltares/hydromt:latest
 
   publish-pypi:
     runs-on: ubuntu-latest
@@ -87,7 +87,7 @@ jobs:
 
   gh-release:
     needs:
-      - publish-docker
+      # - publish-docker
       - publish-pypi
       - publish-docs
     runs-on: ubuntu-latest
