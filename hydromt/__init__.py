@@ -13,7 +13,7 @@ import warnings
 import netCDF4  # noqa: F401
 
 # submodules
-from . import _io, data_catalog, gis, model, stats, utils
+from . import _io, data_catalog, gis, model, stats
 
 # high-level methods
 from .data_catalog import DataCatalog
@@ -31,7 +31,6 @@ __all__ = [
     "_io",
     "model",
     "stats",
-    "utils",
     # raster and vector accessor
     "raster",
     "vector",
