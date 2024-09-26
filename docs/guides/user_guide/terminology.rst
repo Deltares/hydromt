@@ -33,6 +33,5 @@ Model plugin                    (Plugin) Package that links the HydroMT Model cl
                                 Plugins are installed separately from HydroMT and are not part of the HydroMT core package.
                                 Plugins are the most common way of using HydroMT to build and update specific models.
 Model kernel                    The model software to execute a model simulation. This is *not* part of any HydroMT plugin.
-Region                          Argument of the *build*CLI methods that specifies the region of interest where
-                                the model should be prepared / which spatial subregion should be clipped.
+Region                          Argument of the *build* CLI methods that specifies the region of interest where                                the model should be prepared / which spatial subregion should be clipped.
 ==============================  ======================================================================================

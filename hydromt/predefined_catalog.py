@@ -9,13 +9,20 @@ from typing import Callable, ClassVar, Optional
 import packaging.version
 import pooch
 
-from hydromt.data_adapter.caching import HYDROMT_DATADIR, _copyfile, _uri_validator
+from hydromt._utils import _copy_to_local, _is_valid_url
+from hydromt.config import SETTINGS
 
 logger = logging.getLogger(__name__)
 
-# this is the default location of the predefined catalogs
-# in the test environment this is set to local data/catalogs directory using a global fixture
-GIT_ROOT = r"https://raw.githubusercontent.com/Deltares/hydromt/main/data/catalogs"
+# get repos folder
+_hydromt_root = Path(__file__).parent.parent.parent
+if Path(_hydromt_root, "data/catalogs").exists():
+    # get local repos catalogs if these exist
+    CATALOG_ROOT = Path(_hydromt_root, "data/catalogs").as_posix()
+else:
+    # otherwise use the online catalogs
+    _git_root = r"https://raw.githubusercontent.com/Deltares/hydromt/main"
+    CATALOG_ROOT = f"{_git_root}/data/catalogs"
 
 __all__ = [
     "PredefinedCatalog",
@@ -24,6 +31,13 @@ __all__ = [
     "AWSDataCatalog",
     "GCSCMIP6DataCatalog",
     "create_registry_file",
+]
+
+__hydromt_eps__ = [
+    "DeltaresDataCatalog",
+    "ArtifactDataCatalog",
+    "AWSDataCatalog",
+    "GCSCMIP6DataCatalog",
 ]
 
 
@@ -77,10 +91,12 @@ class PredefinedCatalog(object):
     """
 
     # required class variables to be defined in subclasses
-    base_url: ClassVar[str] = GIT_ROOT
+    base_url: ClassVar[str] = CATALOG_ROOT
     name: ClassVar[str] = "predefined_catalog"
 
-    def __init__(self, format_version: str = "v0", cache_dir=HYDROMT_DATADIR) -> None:
+    def __init__(
+        self, format_version: str = "v0", cache_dir=SETTINGS.cache_root
+    ) -> None:
         # init arguments passed by DataCatalog
         self._format_version = format_version
         self._cache_dir: Path = Path(cache_dir)
@@ -140,7 +156,7 @@ class PredefinedCatalog(object):
         if registry_path.exists():
             registry_path.unlink()
         try:  # try to retrieve and cache the registry file
-            _copyfile(f"{self.base_url}/registry.txt", registry_path)
+            _copy_to_local(f"{self.base_url}/registry.txt", registry_path)
         except (ConnectionError, FileNotFoundError):
             logger.warning(
                 f"Failed to retrieve {self.name} versions file from {self.base_url}."
@@ -178,7 +194,7 @@ class PredefinedCatalog(object):
 
     @property
     def _downloader(self) -> Optional[Callable]:
-        if not _uri_validator(self.base_url):
+        if not _is_valid_url(self.base_url):
             return _copy_file
         return None
 
@@ -217,38 +233,29 @@ def _copy_file(
 class DeltaresDataCatalog(PredefinedCatalog):
     """Deltares data catalog."""
 
-    base_url = f"{GIT_ROOT}/deltares_data"
+    base_url = f"{CATALOG_ROOT}/deltares_data"
     name = "deltares_data"
 
 
 class ArtifactDataCatalog(PredefinedCatalog):
     """Artifact data catalog."""
 
-    base_url = f"{GIT_ROOT}/artifact_data"
+    base_url = f"{CATALOG_ROOT}/artifact_data"
     name = "artifact_data"
 
 
 class AWSDataCatalog(PredefinedCatalog):
     """AWS data catalog."""
 
-    base_url = f"{GIT_ROOT}/aws_data"
+    base_url = f"{CATALOG_ROOT}/aws_data"
     name = "aws_data"
 
 
 class GCSCMIP6DataCatalog(PredefinedCatalog):
     """GCS CMIP6 data catalog."""
 
-    base_url = f"{GIT_ROOT}/gcs_cmip6_data"
+    base_url = f"{CATALOG_ROOT}/gcs_cmip6_data"
     name = "gcs_cmip6_data"
-
-
-# TODO: replace with a entrypoint plugin structure in v1
-PREDEFINED_CATALOGS = {
-    "artifact_data": ArtifactDataCatalog,
-    "deltares_data": DeltaresDataCatalog,
-    "aws_data": AWSDataCatalog,
-    "gcs_cmip6_data": GCSCMIP6DataCatalog,
-}
 
 
 def _replace_line_endings(file_path: Path):

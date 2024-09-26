@@ -58,6 +58,8 @@ class HydromtModelStep(BaseModel):
         else:
             _ = sig.bind(**self.args)
 
+        return self
+
 
 class HydromtGlobalConfig(BaseModel):
     components: list[HydromtComponentConfig]

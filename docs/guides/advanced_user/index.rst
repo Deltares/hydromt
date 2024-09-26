@@ -8,5 +8,4 @@ Advanced user guide
     data_types
     hydromt_python
     methods_stats
-    model_clip
     model_components
