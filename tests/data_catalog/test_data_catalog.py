@@ -583,6 +583,7 @@ def test_export_dataframe(tmp_path, df, df_time):
         assert isinstance(obj, dtypes), key
 
 
+@pytest.mark.skip("flakey test due to external http issues")
 @pytest.mark.integration()
 def test_http_data():
     dc = DataCatalog().from_dict(
