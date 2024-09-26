@@ -21,7 +21,6 @@ dependencies = [
   "netcdf4",                # netcfd IO
   "numba",                  # speed up computations (used in e.g. stats)
   "numpy>=1.23, <2",        # pin necessary to ensure compatability with C headers
-  "numpy>=1.23, <2",        # pin necessary to ensure compatability with C headers
   "packaging",              # compare versions of hydromt
   "pandas",                 # Dataframes
   "pooch",                  # data fetching
@@ -71,7 +70,6 @@ io = [
 extra = [
   "matplotlib",    # plotting; required for slippy tiles
   "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
-  "xugrid>=0.9.0", # xarray wrapper for mesh processing
 ]
 dev = [
   "flit",        # needed to publish to pypi
