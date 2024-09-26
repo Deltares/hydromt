@@ -9,7 +9,7 @@ on:
           - patch
           - minor
           - major
-          - post
+          - same
         default: minor
         description: "Is this a Major, Minor, or Patch release?"
 jobs:
