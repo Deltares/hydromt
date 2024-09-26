@@ -20,18 +20,13 @@ of the method name. For instance, the second time that you use the setup_config 
 `setup_config2` in your .yaml file, etc. Note that the actual numbers don't really matter,
 the sequence in which these are in the .yaml file determines the sequence in which these are called.
 
- | **Q**: How can I just write specific :ref:`model data component <model_interface>`
+ | **Q**: How can I just write specific model data component
    (i.e.: grid, geoms, forcing, config or states) instead of the all model data when updating?
 
 Each model plugin implements a combined `write()` method that writes the entire model and is
 called by default at the end of a build or update. If you however add a write method
 (e.g. `write_grid` for a Grid model, `write_forcing`, `write_config`, etc.) to the .yaml file the call to the
 general write method is disabled and only the selected model data attributes are written.
-
- | **Q**: Can I define more than one data catalog when building / updating models?
-
-Yes! You can provide several datasets by repeating the `-d`
-:ref:`option in the command line interface <get_data_cli>`
 
 Working with data in HydroMT
 ----------------------------
