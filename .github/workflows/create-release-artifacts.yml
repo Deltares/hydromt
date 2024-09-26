@@ -68,7 +68,8 @@ jobs:
 
       - name: Generate docs
         run: |
-          pixi run --locked -e full-py311 html
+          pixi run -e full-py311 install
+          pixi run --locked -e full-py311 doc
 
       - uses: actions/upload-artifact@v4
         id: upload-docs-release-artifacts
