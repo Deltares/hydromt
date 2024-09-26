@@ -1,10 +1,15 @@
 ---
+meta:
+  root: examples/data
 waterlevels_txt:
-  path: stations.csv
+  uri: stations.csv
   data_type: GeoDataset
-  driver: vector
-  crs: 4326
-  kwargs:
-    fn_data: stations_data.csv
-  rename:
-    stations_data: waterlevel
+  driver:
+    name: geodataset_vector
+    options:
+      data_path: stations_data.csv
+  metadata:
+    crs: 4326
+  data_adapter:
+    rename:
+      stations_data: waterlevel

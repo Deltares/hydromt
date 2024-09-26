@@ -9,6 +9,7 @@ on:
           - patch
           - minor
           - major
+          - same
         default: minor
         description: "Is this a Major, Minor, or Patch release?"
 jobs:
@@ -44,7 +45,7 @@ jobs:
           set -e
           # check if there already is a release PR open
           # parsing of current version
-          export CURRENT_VERSION=$(grep "version" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+          export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
           export CURRENT_MAJOR=$(echo $CURRENT_VERSION | cut -d'.' -f 1)
           export CURRENT_MINOR=$(echo $CURRENT_VERSION | cut -d'.' -f 2)
           export CURRENT_PATHCH=$(echo $CURRENT_VERSION | cut -d'.' -f 3)
@@ -53,6 +54,10 @@ jobs:
 
           ## calculate new release number
           case $BUMP in
+
+          "same")
+          	export NEW_VERSION="$CURRENT_MAJOR.$CURRENT_MINOR.$CURRENT_PATHCH"
+          	;;
 
           "patch")
           	export NEW_VERSION="$CURRENT_MAJOR.$CURRENT_MINOR.$((CURRENT_PATHCH + 1))"
@@ -65,7 +70,6 @@ jobs:
           "major")
           	export NEW_VERSION="$((CURRENT_MAJOR + 1)).0.0"
           	;;
-
           *)
           	echo "invalid bump: $BUMP"
           	exit 1

@@ -1,26 +1,41 @@
 """HydroMT: Automated and reproducible model building and analysis."""
 
 # version number without 'v' at start
-__version__ = "0.10.0.dev0"
+__version__ = "1.0.0"
 
-# pkg_resource deprication warnings originate from dependencies
-# so silence them for now
+# This is only here to suppress the bug described in
+# https://github.com/pydata/xarray/issues/7259
+# We have to make sure that netcdf4 is imported before
+# numpy is imported for the first time, e.g. also via
+# importing xarray
 import warnings
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-
-# required for accessor style documentation
-import faulthandler
-
-from xarray import DataArray, Dataset
+import netCDF4  # noqa: F401
 
 # submodules
-from . import cli, flw, raster, stats, vector, workflows
-from .data_catalog import *
-from .io import *
+from . import _io, data_catalog, gis, model, stats
 
 # high-level methods
-from .models import *
+from .data_catalog import DataCatalog
+from .gis import raster, vector
+from .model import Model, hydromt_step
+from .plugins import PLUGINS
 
-faulthandler.enable()
+__all__ = [
+    # high-level classes
+    "DataCatalog",
+    "Model",
+    # submodules
+    "data_catalog",
+    "gis",
+    "_io",
+    "model",
+    "stats",
+    # raster and vector accessor
+    "raster",
+    "vector",
+    # high-level functions
+    "hydromt_step",
+    # plugins
+    "PLUGINS",
+]

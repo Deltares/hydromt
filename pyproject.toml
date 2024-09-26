@@ -24,7 +24,9 @@ dependencies = [
   "packaging",              # compare versions of hydromt
   "pandas",                 # Dataframes
   "pooch",                  # data fetching
+  "pyarrow<16",             # prevents incompat with pandas.
   "pydantic~=2.4",          # Validation
+  "pydantic-settings~=2.2", # Settings Management
   "pyflwdir>=0.5.4",        # Hight models and derivatives
   "pyogrio>=0.6",           # io for geopandas dataframes
   "pyproj",                 # projections for Coordinate reference systems
@@ -38,8 +40,9 @@ dependencies = [
   "tomli",                  # parsing toml files
   "tomli-w",                # writing toml files
   "universal_pathlib>=0.2", # provides path compatability between different filesystems
-  "xarray",                  # ndim data arrays
+  "xarray",                 # ndim data arrays
   "xmltodict",              # xml parser also used to read VRT
+  "xugrid>=0.9.0",          # xarray wrapper for mesh processing
   "zarr",                   # zarr
 ]
 
@@ -61,16 +64,14 @@ io = [
   "openpyxl",         # excel IO
   "fastparquet",      # parquet IO
   "pillow",           # image IO
-  "rio-vrt",          # write VRT files
+  "rio-vrt==0.2.0",   # write VRT files
   "s3fs",             # S3 file system
 ]
 extra = [
-  "matplotlib",    # plotting; required for slippy tiles
-  "pyet",          # calc evapotraspiration, quite well used, used in all wflow models but domain specific
-  "xugrid>=0.9.0", # xarray wrapper for mesh processing
+  "matplotlib", # plotting; required for slippy tiles
+  "pyet",       # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
-  "black",       # linting
   "flit",        # needed to publish to pypi
   "pip>=23.1.2", # needed for recursive dependencies
   "pre-commit",  # linting
@@ -78,11 +79,10 @@ dev = [
   "twine",       # needed to publish to pypi
 ]
 test = [
-  "pytest>=2.7.3",  # testing framework
+  "pytest>=8",      # testing framework
   "pytest-cov",     # test coverage
   "pytest-mock",    # mocking
   "pytest-timeout", # darn hanging tests
-  "xugrid",
 ]
 doc = [
   "hydromt[examples,extra]",      # examples are included in the docs
@@ -109,26 +109,42 @@ Source = "https://github.com/Deltares/hydromt"
 [project.scripts]
 hydromt = "hydromt.cli.main:main"
 
+[project.entry-points."hydromt.components"]
+core = "hydromt.model.components"
+
+[project.entry-points."hydromt.drivers"]
+core = "hydromt.data_catalog.drivers"
+
+[project.entry-points."hydromt.models"]
+core = "hydromt.model.model"
+
+[project.entry-points."hydromt.catalogs"]
+core = "hydromt.data_catalog.predefined_catalog"
+
+[project.entry-points."hydromt.uri_resolvers"]
+core = "hydromt.data_catalog.uri_resolvers"
+
+[tool.setuptools.dynamic]
+description = { file = "hydromt/__init__.py" }
+
 [tool.ruff]
 line-length = 88
 target-version = "py39"
-
-# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
-select = ["E", "F", "I", "PT", "D", "B"]
-ignore-init-module-imports = true
-ignore = ["D211", "D213", "D206", "E501", "E741", "D105", "E712", "B904"]
 exclude = ["docs"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint]
+# enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
+select = ["E", "F", "I", "PT", "D", "B", "ICN", "TID"]
+ignore = ["D211", "D213", "D206", "E501", "E741", "D105", "E712", "B904"]
+
+[tool.ruff.lint.per-file-ignores]
 "tests/**" = ["D100", "D101", "D102", "D103", "D104"]
 "hydromt/__init__.py" = ["E402", "F401", "F403"]
-"hydromt/workflows/__init__.py" = ["F403"]
-"hydromt/stats/__init__.py" = ["F403"]
-"hydromt/models/__init__.py" = ["F403", "F401", "F405"]
+"hydromt/models/__init__.py" = ["F401"]
 "hydromt/_compat.py" = ["F401"]
 "tests/conftest.py" = ["E402"]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
 [tool.flit.sdist]
@@ -138,15 +154,30 @@ exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 [tool.pytest.ini_options]
 addopts = "--ff "
 testpaths = ["tests"]
+markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
-  "ignore:distutils Version classes are deprecated:DeprecationWarning",
-  "ignore:getargs:DeprecationWarning",                                     # The 'u' format is deprecated. Use 'U' instead.
-  "ignore:The *staticgeoms:DeprecationWarning",
-  "ignore:The *staticmaps:DeprecationWarning",
-  "ignore:The set_staticmaps:DeprecationWarning",
-  "ignore:Adding a predefined data catalog:DeprecationWarning",
-  "ignore:Shapely 2.0 is installed:UserWarning",
-  "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
-  "ignore:.*isinstance:numba.core.errors.NumbaExperimentalFeatureWarning", # soon to be solved upstream. see https://github.com/numba/numba/pull/8911
+  "error",
+  # "ignore:rasterio.errors.NotGeoreferencedWarning",                        # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
+  "ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
+  "ignore::ResourceWarning",                                                      # upstream issue with aoihttp, can remove once aoihttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
+  "ignore::pytest.PytestUnraisableExceptionWarning",                              # combine with the above: https://github.com/pytest-dev/pytest/issues/9825
+  'ignore:pathlib\.Path\.__enter__:DeprecationWarning',                           # xugrid in python 3.11
+  #   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
 ]
+
+[tool.mypy]
+# TODO: Re-enable the tests
+exclude = ["docs/.*", "tests/.*"]
+plugins = ["pydantic.mypy", "numpy.typing.mypy_plugin"]
+python_version = "3.9"
+ignore_missing_imports = true
+
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_equality = true
+extra_checks = true
+disallow_subclassing_any = true
+disallow_untyped_decorators = true
+disallow_any_generics = true

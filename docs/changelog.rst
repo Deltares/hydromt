@@ -6,11 +6,60 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
-Unreleased
-==========
+V1
+==
+
+Added
+-----
+- Added Driver class for customizable io
+- Added entrypoints for Driver Plugins as "hydromt.drivers"
+- Added entrypoints for ModelComponent Plugins as "hydromt.components"
+- Added entrypoints for PredefinedCatalog Plugins as "hydromt.catalogs"
+- Added `URIResolver` class for customizable metadata discovery
+- Added DataSource class to represent and validate DataCatalog entries.
+- Data catalogs can now list multiple roots depending on the system used (linux, windows etc). where the first existing root will be used. (#786)
+- A Github action now checks whether the migration guide is updated (#829)
+- Added a `ConfigComponent` to write configurations for kernels/simulations. (#863)
+- Added a `GeomsComponent` to manage geo-spatial geometry data of a model. (#867)
+- Added a `DatasetsComponent` to manage multidimensional data of a model. (#894)
+- Added a `GeoDatasetDriver` to read vector data from tabular formats. (#912)
+- Added a `GeoDatasetSource` to handle vector data from tabular formats. (#912)
+- Added `RasterTindexResolver` to handle URIs in raster tindex files. (#928)
+
+Changed
+-------
+- The data catalog format has been refactored to better represent the individual v1 components. (#912)
+- The `root` meta key of data catalogs yaml files has become `roots` (#786)
+- The model region is no longer a subset of the `geoms` but rather it's own component class. See the migration guide for more info (#810)
+- The model class has been moved to a component architecture. See the migration guide for more info (#845)
+- Changed the `GeoDatasetAdapter` to transform vector data from tabular formats. (#912)
+- Updated deltares_data data catalog to incorporate the newest data catalog features (#667)
+- Changed the logging in HydroMT to canonical logging using logging hierarchy (#1006)
+- Rename variables away from the conventions `fn` and `time_tuple` (#1017)
+- Implemented reading using `zoom` instead of the ambiguous `zoom_level` (#875)
+
+Removed
+-------
+- support for `**artifact_keys` when initializing the DataCatalog has been removed. (#786)
+- support for dictionary like features on the DataCatalog have been removed. (#790)
+- Support for using `.ini` and `.toml` files for configuration has been removed. (#791)
+- `staticmaps` and `staticgeoms` attributes on the `Model` object have been removed. (#845)
+- Code refering to the unimplemented Network Model type has been removed (#871)
+- Removed `_API`, `.api` property, `test_api` and other `Model` level conventions as they are now handled by the components. (#894)
+- support for using aliases in the DataCatalog has been removed. (#987)
+- support for `storage_options` in the DataCatalog and adapters has been removed. (#987)
+- The function `hydromt.gis.flw.guagemap` has been removed in favour of `hydromt.gis.flw.guage_map`. (#987)
+- The function `hydromt.gis.flw.basinmap` has been removed in favour of `hydromt.gis.flw.basin_map`. (#987)
+- Support for using the `within` predicate in the function `get_basin_geometry` has been removed. (#987)
+
+
+
+v1.0.0 (2024-09-26)
+===================
 
 New
 ---
+- New `PredefinedCatalog` class to handle predefined catalog version based on pooch registry files. (#849)
 - Further automate release mechanism. (#1019)
 
 
@@ -67,12 +116,17 @@ Fixed
 
 v0.9.3 (2024-02-08)
 ===================
-This release fixes several bugs. Most notably the `NoDataSrategy` is available in much more data reading methods so plugins can use it more directly. Additionally there are some bug fixes relating to reading shapefiles and reading COGs.
+This release fixes several bugs. Most notably the `NoDataStrategy` is available in much more data reading methods so plugins can use it more directly. Additionally there are some bug fixes relating to reading shapefiles and reading COGs.
 
 Added
 -----
 - Test script for testing predefined catalogs locally. (#735)
 - Option to write a data catalog to a csv file (#425)
+
+Changed
+-------
+- Datacatalog preserves variant specific meta data (#521)
+- Updated DataCatalogValidator to deal with provider and driver_kwargs (#521)
 
 Fixed
 -----
@@ -81,6 +135,7 @@ Fixed
 - add option to ignore empty data sets when exporting data (#743)
 - Fix bug in `raster._check_dimensions` for datasets with multiple variables with varying dimension size (#761)
 - Fix bug when reading COGs at requested zoom level (#758)
+
 
 v0.9.2 (2024-01-09)
 ===================
@@ -92,9 +147,11 @@ Added
 - New stats.skills VE and RSR (#666)
 - Check CLI command can now validate bbox and geom regions (#664)
 
+
 Changed
 -------
 - Export CLI now uses '-s' for source, '-t' for time and '-i' for config. (#660)
+
 
 Fixed
 -----
@@ -163,7 +220,7 @@ Data
 
 Model
 ^^^^^
-- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwritting updated netcdf files. (PR #460)
+- new ``force-overwrite`` option in ``hydromt update`` CLI to force overwriting updated netcdf files. (PR #460)
 - Model objects now have a _MODEL_VERSION attribute that plugins can use for compatibility purposes (PR # 495)
 - ``set_forcing`` can now add pandas.DataFrame object to forcing. (PR #534)
 

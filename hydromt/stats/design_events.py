@@ -1,10 +1,12 @@
 """Functions for design events."""
+
 import math as math
 from typing import Optional
 
 import numpy as np
 import xarray as xr
 from numba import njit
+from numpy.typing import NDArray
 
 __all__ = [
     "get_peak_hydrographs",
@@ -74,12 +76,12 @@ def get_peak_hydrographs(
 
 @njit
 def hydrograph_1d(
-    ts: np.ndarray,
-    peaks: np.ndarray,
+    ts: NDArray[np.float_],
+    peaks: NDArray[np.bool_],
     wdw_size: int,
     n_peaks: Optional[int] = None,
     normalize: bool = True,
-) -> np.ndarray:
+) -> NDArray[np.float_]:
     """Return hydrograph 1D.
 
     Return 2D array of shape (`n_peaks`, `wdw_size`) with normalized hydrographs

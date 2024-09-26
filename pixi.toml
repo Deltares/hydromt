@@ -1,154 +1,174 @@
-	[project]
-	name = "hydromt"
-	version = "0.1.0"
-	description = "Add a short description here"
-	authors = ["Sam Vente <savente93@gmail.com>"]
-	channels = ["conda-forge"]
-	platforms = ["linux-64", "win-64"]
+[project]
+name = "hydromt"
+version = "0.1.0"
+description = "Add a short description here"
+authors = ["Sam Vente <savente93@gmail.com>"]
+channels = ["conda-forge"]
+platforms = ["linux-64", "win-64"]
 
-	[tasks]
+[tasks]
 
-	install = { depends_on = ["install-hydromt", "install-pre-commit"] }
-	install-hydromt = "pip install --no-deps --editable ."
-	install-pre-commit = "pre-commit install"
+install = { depends_on = ["install-hydromt", "install-pre-commit"] }
+install-hydromt = "pip install --no-deps --editable ."
+install-pre-commit = "pre-commit install"
 
-	lint = { cmd = ["pre-commit", "run", "--all"] }
+lint = { cmd = ["pre-commit", "run", "--all"] }
 
-	docker-build-min = { cmd = [
-	  "docker",
-	  "build",
-	  "-t",
-	  "deltares/hydromt:min",
-	  "--target=min",
-	  "--build-arg",
-	  "PIXIENV=min-py311",
-	  ".",
-	] }
-	docker-build-full = { cmd = [
-	  "docker",
-	  "build",
-	  "-t",
-	  "deltares/hydromt:full",
-	  "--target=full",
-	  "--build-arg",
-	  "PIXIENV=full-py311",
-	  ".",
-	] }
-	docker-build-slim = { cmd = [
-	  "docker",
-	  "build",
-	  "-t",
-	  "deltares/hydromt:slim",
-	  "--target=slim",
-	  "--build-arg",
-	  "PIXIENV=slim-py311",
-	  ".",
-	] }
-	docker-build-latest = { cmd = [
-	  "docker",
-	  "build",
-	  "-t",
-	  "deltares/hydromt:latest",
-	  "--target=slim",
-	  "--build-arg",
-	  "PIXIENV=slim-py311",
-	  ".",
-	] }
+docker-build-min = { cmd = [
+	"docker",
+	"build",
+	"-t",
+	"deltares/hydromt:min",
+	"--target=min",
+	"--build-arg",
+	"PIXIENV=min-py311",
+	".",
+] }
+docker-build-full = { cmd = [
+	"docker",
+	"build",
+	"-t",
+	"deltares/hydromt:full",
+	"--target=full",
+	"--build-arg",
+	"PIXIENV=full-py311",
+	".",
+] }
+docker-build-slim = { cmd = [
+	"docker",
+	"build",
+	"-t",
+	"deltares/hydromt:slim",
+	"--target=slim",
+	"--build-arg",
+	"PIXIENV=slim-py311",
+	".",
+] }
+docker-build-latest = { cmd = [
+	"docker",
+	"build",
+	"-t",
+	"deltares/hydromt:latest",
+	"--target=slim",
+	"--build-arg",
+	"PIXIENV=slim-py311",
+	".",
+] }
 
-	docker-publish-min = { cmd = [
-	  "docker",
-	  "push",
-	  "deltares/hydromt:min",
-	], depends_on = [
-	  "docker-build-min",
-	] }
-	docker-publish-slim = { cmd = [
-	  "docker",
-	  "push",
-	  "deltares/hydromt:slim",
-	], depends_on = [
-	  "docker-build-slim",
-	] }
-	docker-publish-latest = { cmd = [
-	  "docker",
-	  "push",
-	  "deltares/hydromt:latest",
-	], depends_on = [
-	  "docker-build-latest",
-	] }
-	docker-publish-full = { cmd = [
-	  "docker",
-	  "push",
-	  "deltares/hydromt:full",
-	], depends_on = [
-	  "docker-build-full",
-	] }
-	docker-publish = { depends_on = [
-	  "docker-publish-min",
-	  "docker-publish-slim",
-	  "docker-publish-latest",
-	  "docker-publish-full",
-	] }
-	docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
+docker-publish-min = { cmd = [
+	"docker",
+	"push",
+	"deltares/hydromt:min",
+], depends_on = [
+	"docker-build-min",
+] }
+docker-publish-slim = { cmd = [
+	"docker",
+	"push",
+	"deltares/hydromt:slim",
+], depends_on = [
+	"docker-build-slim",
+] }
+docker-publish-latest = { cmd = [
+	"docker",
+	"push",
+	"deltares/hydromt:latest",
+], depends_on = [
+	"docker-build-latest",
+] }
+docker-publish-full = { cmd = [
+	"docker",
+	"push",
+	"deltares/hydromt:full",
+], depends_on = [
+	"docker-build-full",
+] }
+docker-publish = { depends_on = [
+	"docker-publish-min",
+	"docker-publish-slim",
+	"docker-publish-latest",
+	"docker-publish-full",
+] }
+docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
 
-	html = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build", "-W"] }
-	docs = { depends_on = ["html"] }
-	doc = { depends_on = ["html"] }
-	serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
+doctest = { cmd = [
+	"sphinx-build",
+	"-M",
+	"doctest",
+	"docs",
+	"docs/_build",
+	"-W",
+] }
+docs-build = { cmd = [
+	"sphinx-build",
+	"-M",
+	"html",
+	"docs",
+	"docs/_build",
+	"-W",
+], depends_on = [
+	"doctest",
+] }
+docs = { depends_on = ["docs-build"] } # alias
+doc = { depends_on = ["docs-build"] } # alias
+serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
 
 
-	pypi = { depends_on = [
-	  "pypi-git-clean",
-	  "pypi-git-restore",
-	  "pypi-flit-build",
-	  "pypi-twine",
-	] }
-	pypi-git-clean = { cmd = ["git", "clean", "-xdf"] }
-	pypi-git-resore = { cmd = ["git", "restore", "-SW", "."] }
-	pypi-flit-build = { cmd = ["flit", "build"] }
-	pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
+pypi = { depends_on = [
+	"pypi-git-clean",
+	"pypi-git-restore",
+	"pypi-flit-build",
+	"pypi-twine",
+] }
+pypi-git-clean = { cmd = ["git", "clean", "-xdf"] }
+pypi-git-resore = { cmd = ["git", "restore", "-SW", "."] }
+pypi-flit-build = { cmd = ["flit", "build"] }
+pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
 
-	# clean
-	clean = { depends_on = [
-	  # "clean-env-files",
-	  "clean-dist",
-	  "clean-docs-generated",
-	  "clean-docs-build",
-	  "clean-docs-exmaples",
-	] }
-	# clean-env-files = { cmd = ["rm", "-f", "*environment.yml"] }
-	clean-dist = { cmd = ["rm", "-rf", "dist"] }
-	clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
-	clean-docs-build = { cmd = ["rm", "-rf", "docs/_build"] }
-	clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
+# clean
+clean = { depends_on = [
+	"clean-dist",
+	"clean-docs-generated",
+	"clean-docs-build",
+	"clean-docs-exmaples",
+] }
+clean-dist = { cmd = ["rm", "-rf", "dist"] }
+clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
+clean-docs-build = { cmd = ["rm", "-rf", "docs/_build"] }
+clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
 
-	test = { cmd = ["pytest"] }
-	test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
-	test-cov = { cmd = [
-	  "pytest",
-	  "--verbose",
-	  "--cov=hydromt",
-	  "--cov-report",
-	  "xml",
-	] }
+test = { cmd = ["pytest"] }
+test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
+test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error"] }
+test-cov = { cmd = [
+	"pytest",
+	"--verbose",
+	"--cov=hydromt",
+	"--cov-report",
+	"xml",
+] }
 
-	[dependencies]
-	affine = "*"
-	bottleneck = "*"
-	click = "*"
-	dask = "*"
-	fsspec = "*"
-	geopandas = ">=0.10"
-	importlib_metadata = "*"
-	mercantile = "*"
-	netcdf4 = "*"
-	numba = "*"
-	numpy = ">=1.23, <2"
+mypy = "mypy ."
+
+[dependencies]
+affine = "*"
+bottleneck = "*"
+click = "*"
+dask = "*"
+fsspec = "*"
+geopandas = ">=0.10"
+importlib_metadata = "*"
+mercantile = "*"
+netcdf4 = "*"
+numba = "*"
+numpy = ">=1.23, <2"
 packaging = "*"
 pandas = "*"
 pip = "*"
 pooch = "*"
+pyarrow = "<16"
 pydantic = "~=2.4"
+pydantic-settings = "~=2.2"
 pyflwdir = ">=0.5.4"
 pyogrio = ">=0.6"
 pyproj = "*"
@@ -165,6 +185,7 @@ universal_pathlib = ">=0.2"
 xarray = "*"
 xmltodict = "*"
 zarr = "*"
+xugrid = ">=0.9.0"
 
 [feature.py39.dependencies]
 python = "3.9.*"
@@ -180,7 +201,7 @@ gcsfs = ">=2023.12.1"
 openpyxl = "*"
 fastparquet = "*"
 pillow = "*"
-rio-vrt = "*"
+rio-vrt = "0.2.0"
 s3fs = "*"
 
 [feature.extra.dependencies]
@@ -191,17 +212,25 @@ xugrid = ">=0.9.0"
 [feature.dev.dependencies]
 black = "*"
 flit = "*"
+mypy = "*"
+pandas-stubs = "*"
 pip = ">=23.1.2"
 pre-commit = "*"
 ruff = "*"
 twine = "*"
+types-openpyxl = "*"
+types-PyYAML = "*"
+types-Pillow = "*"
+types-requests = "*"
+
+[feature.dev.pypi-dependencies]
+types-xmltodict = "*"
 
 [feature.test.dependencies]
-pytest = ">=2.7.3"
+pytest = ">=8"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-timeout = "*"
-xugrid = "*"
 
 [feature.doc.dependencies]
 nbsphinx = "*"
@@ -220,59 +249,59 @@ notebook = "*"
 
 [environments]
 default = { features = [
-  "py39",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py39",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py39" }
 full-py311 = { features = [
-  "py311",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py311",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py311" }
 slim-py311 = { features = [
-  "py311",
-  "io",
-  "extra",
-  "examples",
+	"py311",
+	"io",
+	"extra",
+	"examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311"], solve-group = "py311" }
 full-py310 = { features = [
-  "py310",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py310",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py310" }
 slim-py310 = { features = [
-  "py310",
-  "io",
-  "extra",
-  "examples",
+	"py310",
+	"io",
+	"extra",
+	"examples",
 ], solve-group = "py310" }
 min-py310 = { features = ["py310"], solve-group = "py310" }
 full-py39 = { features = [
-  "py39",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py39",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py39" }
 slim-py39 = { features = [
-  "py39",
-  "io",
-  "extra",
-  "examples",
+	"py39",
+	"io",
+	"extra",
+	"examples",
 ], solve-group = "py39" }
 min-py39 = { features = ["py39"], solve-group = "py39" }

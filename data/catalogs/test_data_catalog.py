@@ -19,15 +19,20 @@ Example dataset source test call:
 In addition the passed data catalog yaml is checked if it is a valid data catalog yaml.
 
 """
+
 import argparse
 import json
+from os.path import exists
 
 from dask.distributed import Client
 from pydantic_core import ValidationError
 
 from hydromt import DataCatalog
-from hydromt.log import setuplog
-from hydromt.validators.data_catalog import DataCatalogValidator
+from hydromt._utils import _setuplog
+from hydromt._validators.data_catalog import DataCatalogValidator
+from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
+    RasterTindexResolver,
+)
 
 
 def test_dataset(args, datacatalog):
@@ -68,26 +73,34 @@ def test_data_catalog(args, datacatalog):
     """Tests the paths of the given data catalog."""
     error_count = 0
     logger.info("Checking paths of data catalog sources")
-    for source in datacatalog.get_source_names():
-        try:
-            logger.info(f"Checking paths of {source}")
-            datacatalog.get_source(source)._resolve_paths()
-        except FileNotFoundError as e:
-            logger.error(f"File not found for dataset source {source}: {e}")
+    for source_name, source in datacatalog.__iter__():
+        logger.info(f"Checking paths of {source_name}")
+        if isinstance(source.uri_resolver, RasterTindexResolver):
+            if not exists(source.full_uri):
+                error_count += 1
+                logger.error(
+                    f"File {source.full_uri} not found for dataset source {source_name}"
+                )
+            continue
 
-            error_count += 1
-        except ValueError as e:
-            logger.error(
-                f"Something went wrong with creating path string for dataset source {source}: {e}"
+        else:
+            paths = source.driver.uri_resolver.resolve(
+                source.full_uri, source.driver.filesystem
             )
-            error_count += 1
+            for path in paths:
+                if not exists(path):
+                    logger.error(
+                        f"File {path} not found for dataset source {source_name}"
+                    )
+                    error_count += 1
+
     if error_count > 0:
         logger.error(f"Encountered {error_count} errors")
 
 
 if __name__ == "__main__":
     client = Client(processes=False)
-    logger = setuplog()
+    logger = _setuplog()
     parser = argparse.ArgumentParser("Test predefined data catalog")
     parser.add_argument("data_catalog", help="The data catalog to test")
     parser.add_argument(

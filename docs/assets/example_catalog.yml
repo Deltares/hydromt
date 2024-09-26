@@ -1,0 +1,69 @@
+  meta:
+    roots:
+      - /linux/path/to/data_root/
+      - C:\Windows\path\to\data_root
+      - .
+    version: version
+    name: data_catalog_name
+
+  era5:
+    data_type: RasterDataset
+    variants:
+    - provider: netcdf
+      uri: meteo/era5_daily/nc_merged/era5_{year}_daily.nc
+      driver:
+        name: raster_xarray
+        options:
+          chunks:
+            latitude: 250
+            longitude: 240
+            time: 30
+          combine: by_coords
+          decode_times: true
+          parallel: true
+    - provider: zarr
+      uri: meteo/era5_daily.zarr
+      driver:
+        name: raster_xarray
+        options:
+          chunks: auto
+    metadata:
+      category: meteo
+      notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+        daily frequency
+      paper_doi: 10.1002/qj.3803
+      paper_ref: Hersbach et al. (2019)
+      url: https://doi.org/10.24381/cds.bd0915c6
+      version: ERA5 daily data on pressure levels
+      license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+      crs: 4326
+      temporal_extent:
+        start: '1950-01-02'
+        end: '2023-11-30'
+      spatial_extent:
+        West: -0.125
+        South: -90.125
+        East: 359.875
+        North: 90.125
+    data_adapter:
+      unit_add:
+        temp: -273.15
+        temp_dew: -273.15
+        temp_max: -273.15
+        temp_min: -273.15
+      unit_mult:
+        kin: 0.000277778
+        kout: 0.000277778
+        ssr: 0.000277778
+        press_msl: 0.01
+      rename:
+        d2m: temp_dew
+        msl: press_msl
+        ssrd: kin
+        t2m: temp
+        tisr: kout
+        tmax: temp_max
+        tmin: temp_min
+        tp: precip
+        u10: wind10_u
+        v10: wind10_v

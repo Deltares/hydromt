@@ -68,7 +68,8 @@ jobs:
 
       - name: Generate docs
         run: |
-          pixi run --locked -e full-py311 html
+          pixi run -e full-py311 install
+          pixi run --locked -e full-py311 doc
 
       - uses: actions/upload-artifact@v4
         id: upload-docs-release-artifacts
@@ -77,53 +78,53 @@ jobs:
           path: docs/_build
 
 
-  docker:
-    runs-on: ubuntu-latest
-    outputs:
-      url: ${{ steps.upload-docker-release-artifacts.outputs.artifact-url }}
-    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # docker:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     url: ${{ steps.upload-docker-release-artifacts.outputs.artifact-url }}
+  #   if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub to check credentials
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Login to Docker Hub to check credentials
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and export
-        uses: docker/build-push-action@v6
-        with:
-          outputs: type=docker,dest=/tmp/hydromt-docker-image.tar
-          tags: hydromt
+  #     - name: Build and export
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         outputs: type=docker,dest=/tmp/hydromt-docker-image.tar
+  #         tags: hydromt
 
-      - name: Run Tests
-        run: |
-          docker load --input /tmp/hydromt-docker-image.tar
-          docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt
+  #     - name: Run Tests
+  #       run: |
+  #         docker load --input /tmp/hydromt-docker-image.tar
+  #         docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt
 
-      - name: Test Binder integration with repo2docker
-        run: |
-          pip install jupyter-repo2docker
-          repo2docker . echo 'success!'
+  #     - name: Test Binder integration with repo2docker
+  #       run: |
+  #         pip install jupyter-repo2docker
+  #         repo2docker . echo 'success!'
 
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        id: upload-docker-release-artifacts
-        with:
-          name: hydromt-docker-image
-          path: /tmp/hydromt-docker-image.tar
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       id: upload-docker-release-artifacts
+  #       with:
+  #         name: hydromt-docker-image
+  #         path: /tmp/hydromt-docker-image.tar
 
   notify:
     needs:
       - pypi
       - docs
-      - docker
+      # - docker
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -133,12 +134,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           pypi_url: ${{needs.pypi.outputs.url}}
-          docker_url: ${{needs.docker.outputs.url}}
+          # docker_url: ${{needs.docker.outputs.url}}
           docs_url: ${{needs.docs.outputs.url}}
         run: |
           echo "The new release artifacts have been generated and tested. You can download and inspect them if you want by using the links below: " > comment.txt
           echo "    - pypi:   $pypi_url" >> comment.txt
-          echo "    - docker: $docker_url" >> comment.txt
           echo "    - docs:   $docs_url" >> comment.txt
           export PR_ID=$(gh pr list --state "open" --author "app/github-actions" --search "release"  --json "number" --jq '. | first | .number')
 

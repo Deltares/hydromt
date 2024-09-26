@@ -1,5 +1,8 @@
+* text eol=lf
+*.gpkg binary
 *.yaml text eol=lf
 *.yml text eol=lf
+*.png binary
 
 # GitHub syntax highlighting
 pixi.lock linguist-language=YAML

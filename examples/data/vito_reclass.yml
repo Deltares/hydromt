@@ -1,9 +1,12 @@
 ---
+meta:
+  root: examples/data
 vito_reclass:
   data_type: DataFrame
-  driver: csv
-  kwargs:
-    index_col: 0
-  meta:
+  driver:
+    name: pandas
+    options:
+      index_col: 0
+  metadata:
     notes: reclass table for manning values
-  path: vito_reclass.csv
+  uri: vito_reclass.csv

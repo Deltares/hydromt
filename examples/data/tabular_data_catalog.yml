@@ -1,8 +1,11 @@
 ---
+meta:
+  root: examples/data
 example_csv_data:
-  path: example_csv_data.csv
+  uri: example_csv_data.csv
   data_type: DataFrame
-  driver: csv
-  kwargs:
-    parse_dates: true
-    index_col: time
+  driver:
+    name: pandas
+    options:
+      parse_dates: true
+      index_col: time

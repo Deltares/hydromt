@@ -1,0 +1,26 @@
+
+era5_hourly:
+  uri: forcing/ERA5/org/era5_{variable}_{year}_hourly.nc
+  data_type: RasterDataset
+  driver:
+    name: raster_xarray
+    options:
+      chunks: {latitude: 125, longitude: 120, time: 50}
+      combine: by_coords
+      decode_times: true
+      parallel: true
+  metadata:
+    crs: 4326
+    category: meteo
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    source_license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+    source_url: https://doi.org/10.24381/cds.bd0915c6
+  data_adapter:
+    rename:
+      t2m: temp
+      tp: precip
+    unit_add:
+      temp: -273.15
+    unit_mult:
+      precip: 1000
