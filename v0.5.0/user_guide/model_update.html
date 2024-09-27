@@ -1,0 +1,492 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Updating a model &#8212; HydroMT  documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Clipping a model" href="model_clip.html" />
+    <link rel="prev" title="Building a model" href="model_build.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="light">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+    <img src="../_static/hydromt-logo.jpg" class="logo__image only-light" alt="Logo image">
+    <img src="../_static/hydromt-logo.jpg" class="logo__image only-dark" alt="Logo image">
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started/intro.html">
+  Getting started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="intro.html">
+  User guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../api.html">
+  API reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../dev/intro.html">
+  Developments
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../plugins.html">
+  Plugins
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/Deltares/hydromt" rel="noopener" target="_blank" title="GitHub"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://www.deltares.nl/en/" rel="noopener" target="_blank" title="Deltares"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Table of Contents
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="data_main.html">
+   Working with data in HydroMT
+  </a>
+  <input checked class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="data_prepare_cat.html">
+     Preparing a Data Catalog
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="data_types.html">
+     Supported data types
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="data_existing_cat.html">
+     Pre-defined data catalogs
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="data_conventions.html">
+     Data conventions
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../_examples/reading_raster_data.html">
+     Example: Reading raster data
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../_examples/reading_vector_data.html">
+     Example: Reading vector data
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="model_main.html">
+   Working with models in HydroMT
+  </a>
+  <input checked class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="model_build.html">
+     Building a model
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     Updating a model
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="model_clip.html">
+     Clipping a model
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="model_config.html">
+     Preparing a model configuration
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="model_region.html">
+     Defining a model region
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="methods_main.html">
+   Methods and workflows
+  </a>
+  <input checked class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../_examples/delineate_basin.html">
+     Example: Delineating basins
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../_examples/working_with_raster.html">
+     Example: Working with raster data
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="methods_stats.html">
+     Statistical methods
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#from-cli">
+   From CLI
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#from-python">
+   From Python
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/user_guide/model_update.rst">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="updating-a-model">
+<span id="model-update"></span><h1>Updating a model<a class="headerlink" href="#updating-a-model" title="Permalink to this heading">#</a></h1>
+<p>To add or change one or more components of an existing model the <code class="docutils literal notranslate"><span class="pre">update</span></code> method can be used.
+The update method works identical for all <a class="reference internal" href="../plugins.html#plugins"><span class="std std-ref">HydroMT model plugins</span></a>,
+but the model methods (i.e. sections and options in the <a class="reference internal" href="model_config.html#model-config"><span class="std std-ref">.ini configuration file</span></a>) are different for each model.</p>
+<p><strong>Steps in brief:</strong></p>
+<ol class="arabic simple">
+<li><p>You have an <strong>existing model</strong> schematization. This model does not have to be complete.</p></li>
+<li><p>Prepare or use a pre-defined <strong>data catalog</strong> with all the required data sources, see <a class="reference internal" href="data_main.html#get-data"><span class="std std-ref">working with data</span></a></p></li>
+<li><p>Prepare a <strong>model configuration</strong> with the methods that you want to use to add or change components of your model: see <a class="reference internal" href="model_config.html#model-config"><span class="std std-ref">model configuration</span></a>.</p></li>
+<li><p><strong>Update</strong> your model using the CLI or Python interface</p></li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>By default all model data is written at the end of the update method. If your update however
+only affects a certain model data (e.g. staticmaps or forcing) you can add a write_* method
+(e.g. <cite>write_staticmaps</cite>, <cite>write_forcing</cite>) to the .ini file and only these data will be written.</p>
+<p>Note that the model config is often changed as part of the a model method and <cite>write_config</cite>
+should thus be added to the .ini file to keep the model data and config consistent.</p>
+</div>
+<section id="from-cli">
+<span id="cli-update"></span><h2>From CLI<a class="headerlink" href="#from-cli" title="Permalink to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">hydromt</span> <span class="pre">update</span></code> command line interface (CLI) method can be run from the command line after the right conda environment is activated.</p>
+<p>By default, the model is updated in place, overwriting the existing model schematization.
+To save a copy of the model provide a new output model root directory with the <code class="docutils literal notranslate"><span class="pre">-o</span></code> option.</p>
+<p>By default, all model methods in the .ini configuration file provided with <code class="docutils literal notranslate"><span class="pre">-i</span></code> will be updated.
+To update only certain methods, the <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">&lt;method&gt;</span></code> option can be used to select methods
+in combination with <a class="reference internal" href="model_config.html#model-config"><span class="std std-ref">.ini file</span></a>.
+Besides the ini file, method arguments can be set from the CLI with <code class="docutils literal notranslate"><span class="pre">--opt</span> <span class="pre">&lt;method.argument=value&gt;</span></code>.
+If used in combination with an .ini file, it will overwrite the same arguments in the .ini file.
+Both <code class="docutils literal notranslate"><span class="pre">-c</span></code> and <code class="docutils literal notranslate"><span class="pre">-opt</span></code> can be used repeatedly in a single update.</p>
+<p><strong>Example usage</strong></p>
+<p>In the following example a Wflow model at <code class="docutils literal notranslate"><span class="pre">/path/to/model</span></code> is updated and the results are written to a new directory <code class="docutils literal notranslate"><span class="pre">/path/to/model_out</span></code>.
+The pipeline with methods which are updated are outlined in the <code class="docutils literal notranslate"><span class="pre">wflow_config.ini</span></code> configuration file and used data sources
+in the <code class="docutils literal notranslate"><span class="pre">data_catalog.yml</span></code> catalog file.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v</span>
+</pre></div>
+</div>
+<p>The following example updates (overwrites!) the landuse-landcover based staticmaps in a Wflow model with the <code class="docutils literal notranslate"><span class="pre">setup_lulcmaps</span></code> method
+based on a the different landuse-landcover dataset according to <code class="docutils literal notranslate"><span class="pre">setup_lulcmaps.lulc_fn=vito</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">vito</span></code> dataset must be defined in the <code class="docutils literal notranslate"><span class="pre">data_catalog.yml</span></code> catalog file.
+Note that no .ini file is used here but instead the methods and options are defined in the update command.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt update wflow /path/to/model_root -c setup_lulcmaps -c write_staticmaps --opt setup_lulcmaps.lulc_fn=vito -d /path/to/data_catalog.yml -v</span>
+</pre></div>
+</div>
+<p><strong>Overview of options</strong></p>
+<p>To check all options do:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt update --help</span>
+</pre></div>
+</div>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">Usage: main update [OPTIONS] MODEL MODEL_ROOT</span>
+
+<span class="go">  Update a specific component of a model. Set an output directory to copy the</span>
+<span class="go">  edited model to a new folder, otherwise maps are overwritten.</span>
+
+<span class="go">  Example usage:</span>
+<span class="go">  --------------</span>
+
+<span class="go">  Update (overwrite!) landuse-landcover based maps in a Wflow model</span>
+<span class="go">  hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v</span>
+
+<span class="go">  Update Wflow model components outlined in an .ini configuration file and write the model to a directory</span>
+<span class="go">  hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.ini -d /path/to/data_catalog.yml -v</span>
+
+<span class="go">Options:</span>
+<span class="go">  -o, --model-out DIRECTORY  Output model folder. Maps in MODEL_ROOT are</span>
+<span class="go">                             overwritten if left empty.</span>
+<span class="go">  -c, --components TEXT      Model methods from ini file to run</span>
+<span class="go">  --opt TEXT                 Method specific keyword arguments, see the method</span>
+<span class="go">                             documentation of the specific model for more</span>
+<span class="go">                             information about the arguments.</span>
+<span class="go">  -i, --config PATH          Path to hydroMT configuration file, for the model</span>
+<span class="go">                             specific implementation.</span>
+<span class="go">  -d, --data TEXT            Path to local yaml data catalog file OR name of</span>
+<span class="go">                             predefined data catalog.</span>
+<span class="go">  --dd, --deltares-data      Shortcut to add the &quot;deltares_data&quot; catalog</span>
+<span class="go">  -q, --quiet                Decrease verbosity.</span>
+<span class="go">  -v, --verbose              Increase verbosity.</span>
+<span class="go">  --help                     Show this message and exit.</span>
+</pre></div>
+</div>
+</section>
+<section id="from-python">
+<span id="python-update"></span><h2>From Python<a class="headerlink" href="#from-python" title="Permalink to this heading">#</a></h2>
+<p>All HydroMT models have an <a class="reference internal" href="../_generated/hydromt.Model.update.html#hydromt.Model.update" title="hydromt.Model.update"><code class="xref py py-func docutils literal notranslate"><span class="pre">update()</span></code></a> method which can be used when updating models from Python.
+The data catalog yaml files and logging have to be set when initializing the model.
+The configuration file can be parsed using <a class="reference internal" href="../_generated/hydromt.config.configread.html#hydromt.config.configread" title="hydromt.config.configread"><code class="xref py py-func docutils literal notranslate"><span class="pre">configread()</span></code></a> and passed to the build method using the <code class="docutils literal notranslate"><span class="pre">opt</span></code> argument.</p>
+<p><strong>Example usage</strong></p>
+<p>To update a Wflow model based on methods in an .ini file, as also shown in the first CLI example above, the following Python code is required.
+Note that compared to building a model, the model should be initialized in read (if you save the output to a new root)
+or append (if you update the model data in place) mode.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hydromt_wflow</span> <span class="kn">import</span> <span class="n">WflowModel</span>
+<span class="kn">from</span> <span class="nn">hydromt.config</span> <span class="kn">import</span> <span class="n">configread</span>
+<span class="n">data_libs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;/path/to/data_catalog.yml&#39;</span><span class="p">]</span>
+<span class="n">opt</span><span class="o">=</span><span class="n">configread</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;/path/to/wflow_config.ini&#39;</span><span class="p">)</span>  <span class="c1"># parse .ini configuration</span>
+<span class="n">mod</span> <span class="o">=</span> <span class="n">WflowModel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;/path/to/model_root&#39;</span><span class="p">,</span> <span class="n">data_libs</span><span class="o">=</span><span class="n">data_libs</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>  <span class="c1"># initialize model with default logger in read mode</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model_out</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;/path/to/model_out&#39;</span><span class="p">,</span> <span class="n">opt</span><span class="o">=</span><span class="n">opt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To update a single component of a Wflow model from Python, the model methods can also be called directly instead of using the update method.
+Note that this will however not log the used methods and arguments making your model harder to reproduce. To change the model root before writing
+the updated model use the <a class="reference internal" href="../_generated/hydromt.Model.set_root.html#hydromt.Model.set_root" title="hydromt.Model.set_root"><code class="xref py py-func docutils literal notranslate"><span class="pre">set_root()</span></code></a> method (not shown in this example).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">hydromt_wflow</span> <span class="kn">import</span> <span class="n">WflowModel</span>
+<span class="n">data_libs</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;/path/to/data_catalog.yml&#39;</span><span class="p">]</span>  <span class="c1"># this catalog contains the &#39;vito&#39; data source</span>
+<span class="n">mod</span> <span class="o">=</span> <span class="n">WflowModel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;/path/to/model_root&#39;</span><span class="p">,</span> <span class="n">data_libs</span><span class="o">=</span><span class="n">data_libs</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r+&#39;</span><span class="p">)</span>  <span class="c1"># initialize model with default logger in append mode</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">setup_lulcmaps</span><span class="p">(</span><span class="n">lulc_fn</span><span class="o">=</span><span class="s1">&#39;vito&#39;</span><span class="p">)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">write_staticmaps</span><span class="p">()</span>  <span class="c1"># write static maps component with updated lulc maps</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="model_build.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Building a model</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="model_clip.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Clipping a model</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright Deltares.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>
