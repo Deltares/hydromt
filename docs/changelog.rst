@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+unreleased
+==========
+
+Fixed
+-----
+- Bug in paths with "{}" in DataCatalog
+
+
 v0.10.0 (2024-06-14)
 ====================
 
