@@ -51,8 +51,21 @@ jobs:
       - name: Generate docs
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          pixi run --locked -e full-py311 html
-          echo "DOC_VERSION=$(pixi run --locked -e full-py311 python -c 'from hydromt import __version__ as v; print("dev" if "dev" in v else "v"+v.replace(".dev",""))')" >> $GITHUB_ENV
+          pixi run --locked -e full-py311 docs
+          export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+          if [ -z "$CURRENT_VERSION" ]; then
+            echo "Could not determine version, exiting..."
+            exit 1
+          fi
+
+          # are we a dev version or not?
+          if echo "$CURRENT_VERSION" | grep -q "dev"; then
+            # no dev, just echo the version number
+            echo "v$CURRENT_VERSION" >> "$GITHUB_ENV"
+          else
+            echo "dev" >> "$GITHUB_ENV"
+          fi
+
 
       - name: Upload to GitHub Pages
         if: ${{ github.event_name != 'pull_request' }}

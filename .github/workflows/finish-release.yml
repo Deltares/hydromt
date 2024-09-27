@@ -8,10 +8,6 @@ on:
     branches:
     - 'release/**'
   workflow_dispatch:
-    inputs:
-      run_id:
-        type: number
-        description: "The id of the workflow run that created the artifacts"
 
 jobs:
   # publish-docker:
