@@ -6,9 +6,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>HydroMT: Automated and reproducible model building and analysis &#8212; HydroMT  documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Search - HydroMT  documentation</title>
   
   
   
@@ -42,19 +40,19 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'search';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
+  <script src="_static/searchtools.js"></script>
+  <script src="_static/language_data.js"></script>
+  <script src="searchindex.js"></script>
     <link rel="icon" href="_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting started" href="overview/intro.html" />
+    <link rel="search" title="Search" href="#" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -86,7 +84,7 @@
     <div class="search-button__overlay"></div>
     <div class="search-button__search-container">
 <form class="bd-search d-flex align-items-center"
-      action="search.html"
+      action="#"
       method="get">
   <i class="fa-solid fa-magnifying-glass"></i>
   <input type="search"
@@ -123,7 +121,7 @@
     
   
 
-<a class="navbar-brand logo" href="#">
+<a class="navbar-brand logo" href="index.html">
   
   
   
@@ -292,10 +290,6 @@ document.write(`
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
-      <span class="fa-solid fa-outdent"></span>
-    </button>
-  
 </div>
 
     </header>
@@ -446,81 +440,43 @@ document.write(`
               <div class="bd-header-article d-print-none"></div>
               
               
-              
-                
-<div id="searchbox"></div>
-                <article class="bd-article">
-                  
-  <section id="hydromt-automated-and-reproducible-model-building-and-analysis">
-<span id="readme"></span><h1>HydroMT: Automated and reproducible model building and analysis<a class="headerlink" href="#hydromt-automated-and-reproducible-model-building-and-analysis" title="Link to this heading">#</a></h1>
-<p><a class="reference external" href="https://pypi.org/project/hydromt/"><img alt="PyPI" src="https://img.shields.io/pypi/v/hydromt.svg?style=flat" /></a> <a class="reference external" href="https://anaconda.org/conda-forge/hydromt"><img alt="Conda-Forge" src="https://anaconda.org/conda-forge/hydromt/badges/version.svg" /></a> <a class="reference external" href="https://deltares.github.io/hydromt/latest"><img alt="Latest developers docs" src="https://img.shields.io/badge/docs-latest-brightgreen.svg" /></a> <a class="reference external" href="https://deltares.github.io/hydromt/stable"><img alt="Stable docs last release" src="https://img.shields.io/badge/docs-stable-brightgreen.svg" /></a> <a class="reference external" href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a> <a class="reference external" href="https://codecov.io/gh/Deltares/hydromt"><img alt="Coverage" src="https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH" /></a> <a class="reference external" href="https://github.com/Deltares/hydromt/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/Deltares/hydromt?style=flat" /></a> <a class="reference external" href="https://zenodo.org/badge/latestdoi/348020332"><img alt="Zenodo" src="https://zenodo.org/badge/348020332.svg" /></a> <a class="reference external" href="https://doi.org/10.21105/joss.04897"><img alt="joss_paper" src="https://joss.theoj.org/papers/10.21105/joss.04897/status.svg" /></a></p>
-<section id="what-is-hydromt">
-<h2>What is HydroMT?<a class="headerlink" href="#what-is-hydromt" title="Link to this heading">#</a></h2>
-<p><strong>HydroMT</strong> (Hydro Model Tools) is an open-source Python package that facilitates the process of
-building and analyzing spatial geoscientific models with a focus on water system models.
-It does so by automating the workflow to go from raw data to a complete model instance which
-is ready to run and to analyse model results once the simulation has finished.
-HydroMT builds on the latest packages in the scientific and geospatial python eco-system including
-<a class="reference external" href="https://xarray.pydata.org">xarray</a>, <a class="reference external" href="https://rasterio.readthedocs.io">rasterio</a>, <a class="reference external" href="https://corteva.github.io/rioxarray/stable/">rioxarray</a>, <a class="reference external" href="https://geopandas.org">geopandas</a>, <a class="reference external" href="https://scipy.org/">scipy</a> and <a class="reference external" href="https://deltares.github.io/pyflwdir">pyflwdir</a>.</p>
-</section>
-<section id="why-hydromt">
-<h2>Why HydroMT?<a class="headerlink" href="#why-hydromt" title="Link to this heading">#</a></h2>
-<p>Setting up spatial geoscientific models typically requires many (manual) steps
-to process input data and might therefore be time consuming and hard to reproduce.
-Especially improving models based on global geospatial datasets, which are
-rapidly becoming available at increasingly high resolutions, might be challenging.
-Furthermore, analyzing model schematization and results from different models,
-which often use model-specific peculiar data formats, can be time consuming.
-This package aims to make the model building process <strong>fast</strong>, <strong>modular</strong> and <strong>reproducible</strong>
-by configuring the model building process from a single <em>yaml</em> configuration file
-and <strong>model- and data-agnostic</strong> through a common model and data interface.</p>
-</section>
-<section id="how-to-use-hydromt">
-<h2>How to use HydroMT?<a class="headerlink" href="#how-to-use-hydromt" title="Link to this heading">#</a></h2>
-<p>HydroMT can be used as a <strong>command line</strong> application (CLI) which provides commands to <em>build</em>,
-<em>update</em> and <em>clip</em> models with a single line, or <strong>from Python</strong> to exploit its rich interface.
-You can learn more about how to use HydroMT in its <a class="reference external" href="https://deltares.github.io/hydromt/latest/">online documentation.</a>
-For a smooth installing experience, we recommend installing HydroMT and its dependencies
-from conda-forge in a clean environment, see <a class="reference external" href="https://deltares.github.io/hydromt/latest/getting_started/installation">installation guide.</a></p>
-</section>
-<section id="hydromt-model-plugins">
-<h2>HydroMT model plugins<a class="headerlink" href="#hydromt-model-plugins" title="Link to this heading">#</a></h2>
-<p>HydroMT is commonly used in combination with a <strong>model plugin</strong> which
-provides a HydroMT implementation for specific model software. Using the plugins allows to prepare a ready-to-run set of input files from raw geoscientific datasets and analyse model results in a fast and reproducible way.
-Known model plugins include:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_wflow">hydromt_wflow</a>: A framework for distributed rainfall-runoff (wflow_sbm) and sediment transport (wflow_sediment) modelling.</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_delwaq">hydromt_delwaq</a>: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_sfincs">hydromt_sfincs</a>: A fast 2D hydrodynamic flood model (SFINCS).</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_fiat">hydromt_fiat</a>: A flood impact model (FIAT).</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_delft3dfm">hydromt_delft3dfm</a>: A flexible mesh hydrodynamic suite for 1D2D and 2D3D modelling (Delft3D FM).</p></li>
-</ul>
-</section>
-<section id="how-to-cite">
-<h2>How to cite?<a class="headerlink" href="#how-to-cite" title="Link to this heading">#</a></h2>
-<p>For publications, please cite our JOSS paper <a class="reference external" href="https://doi.org/10.21105/joss.04897"><img alt="joss_paper" src="https://joss.theoj.org/papers/10.21105/joss.04897/status.svg" /></a></p>
-<dl class="simple">
-<dt>::</dt><dd><p>Eilander et al., (2023). HydroMT: Automated and reproducible model building and analysis. Journal of Open Source Software, 8(83), 4897, <a class="reference external" href="https://doi.org/10.21105/joss.04897">https://doi.org/10.21105/joss.04897</a></p>
-</dd>
-</dl>
-<p>To cite a specific software version please use the DOI provided in the Zenodo badge <a class="reference external" href="https://zenodo.org/badge/latestdoi/348020332"><img alt="Zenodo" src="https://zenodo.org/badge/348020332.svg" /></a> that points to the latest release.</p>
-</section>
-<section id="how-to-contribute">
-<h2>How to contribute?<a class="headerlink" href="#how-to-contribute" title="Link to this heading">#</a></h2>
-<p>If you find any issues in the code or documentation feel free to leave an issue on the <a class="reference external" href="https://github.com/Deltares/hydromt/issues">github issue tracker.</a>
-You can find information about how to contribute to the HydroMT project at our <a class="reference external" href="https://deltares.github.io/hydromt/latest/dev/contributing">contributing page.</a></p>
-<p>HydroMT seeks active contribution from the (hydro) geoscientific community.
-So far, it has been developed and tested with a range of <a class="reference external" href="https://www.deltares.nl/en/">Deltares</a> models, but
-we believe it is applicable to a much wider set of geoscientific models and are
-happy to discuss how it can be implemented for your model.</p>
-<div class="toctree-wrapper compound">
-</div>
-</section>
-</section>
+  <div class="bd-search-container">
+    <h1>Search</h1>
+    <noscript>
+      <div class="admonition error">
+        <p class="admonition-title">Error</p>
+        <p>Please activate JavaScript to enable the search functionality.</p>
+      </div>
+    </noscript>
+    
+<form class="bd-search d-flex align-items-center"
+      action="#"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    <div id="search-results"></div>
+  </div>
+  <script>
+    // Activate the search field on page load
+    let searchInput = document.querySelector("form.bd-search input");
+    if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+        console.log("[PST]: Set focus on search field.");
+    }
+  </script>
 
-
-                </article>
-              
               
               
               
@@ -528,68 +484,12 @@ happy to discuss how it can be implemented for your model.</p>
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
-    <a class="right-next"
-       href="overview/intro.html"
-       title="next page">
-      <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Getting started</p>
-      </div>
-      <i class="fa-solid fa-angle-right"></i>
-    </a>
 </div>
                 </footer>
               
             </div>
             
             
-              
-                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
-
-
-  <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
-  </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-hydromt">What is HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-hydromt">Why HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-use-hydromt">How to use HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydromt-model-plugins">HydroMT model plugins</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-cite">How to cite?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-contribute">How to contribute?</a></li>
-</ul>
-  </nav></div>
-
-  <div class="sidebar-secondary-item">
-
-  
-  <div class="tocsection editthispage">
-    <a href="https://github.com/Deltares/hydromt/edit/main/docs/index.rst">
-      <i class="fa-solid fa-pencil"></i>
-      
-      
-        
-          Edit on GitHub
-        
-      
-    </a>
-  </div>
-</div>
-
-  <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="_sources/index.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
-
-</div></div>
               
             
           </div>
