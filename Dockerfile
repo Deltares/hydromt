@@ -6,7 +6,7 @@ RUN useradd deltares
 USER deltares
 WORKDIR /home/deltares
 
-RUN curl -proto="https" -fsSL https://pixi.sh/install.sh | bash
+RUN curl --proto="https" -fsSL https://pixi.sh/install.sh | bash
 ENV PATH=/home/deltares/.pixi/bin:$PATH
 COPY pixi.toml pixi.lock pyproject.toml README.rst ./
 COPY data/ ./data
