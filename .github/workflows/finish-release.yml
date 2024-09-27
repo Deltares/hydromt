@@ -60,11 +60,16 @@ jobs:
     runs-on: ubuntu-latest
     # if: github.event.pull_request.merged == true
     steps:
-      - uses: actions/download-artifact@v4
+      - id: download-artifact
+        uses: dawidd6/action-download-artifact@v6
         with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: create-release-artifacts.yml
+          workflow_conclusion: success
           name: pypi-release-artifacts
           path: dist
-          run-id: ${{ inputs.run_id }}
+          check_artifacts: true
+          if_no_artifact_found: fail
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@v1.9.0
         with:
@@ -76,11 +81,16 @@ jobs:
     runs-on: ubuntu-latest
     # if: github.event.pull_request.merged == true
     steps:
-    - uses: actions/download-artifact@v4
+    - id: download-artifact
+      uses: dawidd6/action-download-artifact@v6
       with:
-          name: docs-release-artifacts
-          path: docs/_build
-          run-id: ${{ inputs.run_id }}
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: create-release-artifacts.yml
+        workflow_conclusion: success
+        name: docs-release-artifacts
+        path: docs/_build
+        check_artifacts: true
+        if_no_artifact_found: fail
     - name: Upload to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4.0.0
       with:
