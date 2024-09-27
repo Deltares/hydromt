@@ -53,18 +53,21 @@ jobs:
         run: |
           pixi run --locked -e full-py311 docs
           export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+
           if [ -z "$CURRENT_VERSION" ]; then
             echo "Could not determine version, exiting..."
             exit 1
           fi
 
-          # are we a dev version or not?
+          # Are we a dev version or not?
           if echo "$CURRENT_VERSION" | grep -q "dev"; then
-            # no dev, just echo the version number
-            echo "v$CURRENT_VERSION" >> "$GITHUB_ENV"
+            # If it's a dev version, just echo "dev"
+            echo "DOC_VERSION=dev" >> "$GITHUB_ENV"
           else
-            echo "dev" >> "$GITHUB_ENV"
+            # Otherwise, echo the version number
+            echo "DOC_VERSION=v$CURRENT_VERSION" >> "$GITHUB_ENV"
           fi
+
 
 
       - name: Upload to GitHub Pages
