@@ -7,6 +7,11 @@ on:
     - closed
     branches:
     - 'release/**'
+  workflow_dispatch:
+    inputs:
+      run_id:
+        type: number
+        description: "The id of the workflow run that created the artifacts"
 
 jobs:
   # publish-docker:
@@ -53,12 +58,13 @@ jobs:
 
   publish-pypi:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: pypi-release-artifacts
           path: dist
+          run-id: ${{ inputs.run_id }}
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@v1.9.0
         with:
@@ -68,12 +74,13 @@ jobs:
 
   publish-docs:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     steps:
     - uses: actions/download-artifact@v4
       with:
           name: docs-release-artifacts
           path: docs/_build
+          run-id: ${{ inputs.run_id }}
     - name: Upload to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4.0.0
       with:
