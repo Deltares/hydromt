@@ -63,7 +63,7 @@
     "name": "dev",
     "version": "dev",
     "url": "https://deltares.github.io/hydromt/dev/"
-  }
+  },
   {
     "name": "latest",
     "version": "latest",
