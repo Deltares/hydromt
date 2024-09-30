@@ -24,7 +24,7 @@ dependencies = [
   "packaging",              # compare versions of hydromt
   "pandas",                 # Dataframes
   "pooch",                  # data fetching
-  "pyarrow<16",             # prevents incompat with pandas.
+  "pyarrow<18",             # prevents incompat with pandas.
   "pydantic~=2.4",          # Validation
   "pydantic-settings~=2.2", # Settings Management
   "pyflwdir>=0.5.4",        # Hight models and derivatives
