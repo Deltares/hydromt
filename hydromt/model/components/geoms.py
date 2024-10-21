@@ -95,6 +95,7 @@ class GeomsComponent(SpatialModelComponent):
             bounds[2].max(),
             bounds[3].max(),
         )
+        # TODO: total_bounds should be replaced with *total_bounds
         region = gpd.GeoDataFrame(
             geometry=[gpd.GeoSeries(box(total_bounds))], crs=self.model.crs
         )

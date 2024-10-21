@@ -25,6 +25,11 @@ def test_model_set_geoms(tmpdir):
 
     assert list(geom_component.data.keys()) == ["geom_wgs84"]
     assert list(geom_component.data.values())[0].equals(geom)
+    # TODO: this will for sure fail, assertion has to be updated.
+    # at least we should call _region_data since I expect that this shows the bug
+    # I would like to have a failing testcase first before adding the fix
+    # to be sure the fix is covered
+    assert geom_component._region_data() == 1
 
 
 def test_model_read_geoms(tmpdir):
