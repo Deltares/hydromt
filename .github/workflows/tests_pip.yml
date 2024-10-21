@@ -15,6 +15,7 @@ on:
       - tests/*
       - hydromt/*
       - data/*
+      - workflows/*
       - pyproject.toml
 
 
