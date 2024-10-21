@@ -15,7 +15,8 @@ from hydromt.model.components.spatial import SpatialModelComponent
 
 
 def test_model_set_geoms(tmpdir):
-    bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
+    bbox_list = [4.221067, 51.949474, 4.471006, 52.073727]
+    bbox = box(*bbox_list, ccw=True)
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
 
     model = Model(root=str(tmpdir), mode="w")
@@ -26,7 +27,7 @@ def test_model_set_geoms(tmpdir):
 
     assert list(geom_component.data.keys()) == ["geom_wgs84"]
     assert list(geom_component.data.values())[0].equals(geom)
-    expected_bounds = np.array([[4.221067, 51.949474,  4.471006, 52.073727]])
+    expected_bounds = np.array([bbox_list])
     assert np.allclose(geom_component._region_data.bounds.values, expected_bounds)
 
 
