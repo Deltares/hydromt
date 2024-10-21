@@ -53,4 +53,8 @@ jobs:
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          python -m pytest --verbose
+          python -m pytest --verbose --cov=hydromt --cov-report xml --cov-report term
+
+      - uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
