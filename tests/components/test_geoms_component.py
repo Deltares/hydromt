@@ -7,6 +7,7 @@ import geopandas as gpd
 from pyproj import CRS
 from pytest_mock import MockerFixture
 from shapely.geometry import box
+import numpy as np
 
 from hydromt.model import Model
 from hydromt.model.components.geoms import GeomsComponent
@@ -25,11 +26,8 @@ def test_model_set_geoms(tmpdir):
 
     assert list(geom_component.data.keys()) == ["geom_wgs84"]
     assert list(geom_component.data.values())[0].equals(geom)
-    # TODO: this will for sure fail, assertion has to be updated.
-    # at least we should call _region_data since I expect that this shows the bug
-    # I would like to have a failing testcase first before adding the fix
-    # to be sure the fix is covered
-    assert geom_component._region_data() == 1
+    expected_bounds = np.array([[ 4.221067, 51.949474,  4.471006, 52.073727]])
+    assert np.allclose(geom_component._region_data.bounds.values, expected_bounds)
 
 
 def test_model_read_geoms(tmpdir):
