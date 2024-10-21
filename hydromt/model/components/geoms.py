@@ -95,9 +95,7 @@ class GeomsComponent(SpatialModelComponent):
             bounds[:,2].max(),
             bounds[:,3].max(),
         )
-        region = gpd.GeoDataFrame(
-            geometry=[box(*total_bounds)], crs=self.model.crs
-        )
+        region = gpd.GeoDataFrame(geometry=[box(*total_bounds)], crs=self.model.crs)
 
         return region
 
