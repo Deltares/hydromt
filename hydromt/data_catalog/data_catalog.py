@@ -641,6 +641,7 @@ class DataCatalog(object):
             known_hash=sha256,
             path=str(root),
             fname=Path(archive_uri).name,
+            filter='data',
             **kwargs,
         )
         return root
