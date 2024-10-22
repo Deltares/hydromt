@@ -257,6 +257,15 @@ default = { features = [
 	"doc",
 	"examples",
 ], solve-group = "py39" }
+full-py312 = { features = [
+	"py312",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
+], solve-group = "py311" }
 full-py311 = { features = [
 	"py311",
 	"io",
