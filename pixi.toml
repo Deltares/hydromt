@@ -196,6 +196,9 @@ python = "3.10.*"
 [feature.py311.dependencies]
 python = "3.11.*"
 
+[feature.py312.dependencies]
+python = "3.12.*"
+
 [feature.io.dependencies]
 gcsfs = ">=2023.12.1"
 openpyxl = "*"
