@@ -168,7 +168,7 @@ filterwarnings = [
   "ignore::pytest.PytestUnraisableExceptionWarning",                              # combine with the above: https://github.com/pytest-dev/pytest/issues/9825
   'ignore:pathlib\.Path\.__enter__:DeprecationWarning',                           # xugrid in python 3.11
   #   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
-  "ignore:Use the filter argument to control this behavior:DeprecationWarning",   # upstream Python 3.14 deprecationwarning to add filter to tar_file.extractall() in pooch.UnTar()
+  'ignore:Use the filter argument to control this behavior:DeprecationWarning',   # upstream Python 3.14 deprecationwarning to add filter to tar_file.extractall() in pooch.UnTar()
 ]
 
 [tool.mypy]
