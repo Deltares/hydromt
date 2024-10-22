@@ -265,7 +265,7 @@ full-py312 = { features = [
 	"test",
 	"doc",
 	"examples",
-], solve-group = "py311" }
+], solve-group = "py312" }
 full-py311 = { features = [
 	"py311",
 	"io",
