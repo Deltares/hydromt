@@ -32,7 +32,7 @@ dependencies = [
   "pyproj",                 # projections for Coordinate reference systems
   "pystac",                 # STAC integration
   "pyyaml",                 # yaml interface
-  "rasterio",               # raster wrapper around gdal
+  "rasterio<1.4.0",         # raster wrapper around gdal
   "requests",               # donwload stuff
   "rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
   "scipy",                  # scientific utilities
