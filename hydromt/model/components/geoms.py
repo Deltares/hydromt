@@ -90,14 +90,12 @@ class GeomsComponent(SpatialModelComponent):
             return None
         bounds = np.column_stack([geom.bounds for geom in self.data.values()])
         total_bounds = (
-            bounds[0].min(),
-            bounds[1].min(),
-            bounds[2].max(),
-            bounds[3].max(),
+            bounds[:, 0].min(),
+            bounds[:, 1].min(),
+            bounds[:, 2].max(),
+            bounds[:, 3].max(),
         )
-        region = gpd.GeoDataFrame(
-            geometry=[gpd.GeoSeries(box(total_bounds))], crs=self.model.crs
-        )
+        region = gpd.GeoDataFrame(geometry=[box(*total_bounds)], crs=self.model.crs)
 
         return region
 
