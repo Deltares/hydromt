@@ -1,12 +1,11 @@
 FROM debian:bookworm-slim AS base
 ARG PIXIENV
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl && apt clean && useradd deltares
 
-RUN useradd deltares
 USER deltares
 WORKDIR /home/deltares
 
-RUN curl --proto="https" -fsSL https://pixi.sh/install.sh | bash
+RUN curl --proto "=https" -fsSL https://pixi.sh/install.sh | bash
 ENV PATH=/home/deltares/.pixi/bin:$PATH
 COPY pixi.toml pixi.lock pyproject.toml README.rst ./
 COPY data/ ./data
