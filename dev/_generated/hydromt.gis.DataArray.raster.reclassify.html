@@ -46,7 +46,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
         DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
         </script>
     <link rel="icon" href="../_static/hydromt-icon.svg"/>
@@ -958,14 +958,14 @@ document.write(`
 <h1>hydromt.gis.DataArray.raster.reclassify<a class="headerlink" href="#hydromt-gis-dataarray-raster-reclassify" title="Link to this heading">#</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="hydromt.gis.DataArray.raster.reclassify">
-<span class="sig-prename descclassname"><span class="pre">gis.DataArray.raster.</span></span><span class="sig-name descname"><span class="pre">reclassify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reclass_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'exact'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hydromt.gis.DataArray.raster.reclassify" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">gis.DataArray.raster.</span></span><span class="sig-name descname"><span class="pre">reclassify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reclass_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'exact'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#hydromt.gis.DataArray.raster.reclassify" title="Link to this definition">#</a></dt>
 <dd><p>Reclass columns in df from raster map (DataArray).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>reclass_table</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – Tables with parameter names and values in columns
 and values in obj as index.</p></li>
-<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Reclassification method. For now only ‘exact’ for
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Reclassification method. For now only ‘exact’ for
 one-on-one cell value mapping.</p></li>
 <li><p><strong>logger</strong> – The logger to be used. If no logger is provided the
 default one will beused.</p></li>
