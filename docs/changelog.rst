@@ -15,6 +15,7 @@ New
 
 Changed
 -------
+- Rasterio have as been limited to ``<1.4.0``(#1097)
 
 Fixed
 -----
