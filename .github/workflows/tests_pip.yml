@@ -8,6 +8,7 @@ on:
       - hydromt/*
       - data/*
       - pyproject.toml
+      - .github/workflows/tests_pip.yml
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - hydromt/*
       - data/*
       - pyproject.toml
+      - .github/workflows/tests_pip.yml
 
 
 jobs:
