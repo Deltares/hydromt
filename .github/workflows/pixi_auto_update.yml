@@ -16,7 +16,7 @@ jobs:
           ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          pixi-version: "v0.21.1"
+          pixi-version: "v0.34.0"
           cache: false
       - name: Update pixi lock file
         run: |

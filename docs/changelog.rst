@@ -6,6 +6,24 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+
+Unreleased
+==========
+
+New
+---
+
+Changed
+-------
+- Rasterio have as been limited to ``<1.4.0`` (#1097)
+
+Fixed
+-----
+- Fixed incorrect arguments causing crashes in ``geom_component._region_data()`` (#1091)
+
+Deprecated
+----------
+
 V1
 ==
 
@@ -51,23 +69,6 @@ Removed
 - The function `hydromt.gis.flw.guagemap` has been removed in favour of `hydromt.gis.flw.guage_map`. (#987)
 - The function `hydromt.gis.flw.basinmap` has been removed in favour of `hydromt.gis.flw.basin_map`. (#987)
 - Support for using the `within` predicate in the function `get_basin_geometry` has been removed. (#987)
-
-
-
-Unreleased
-==========
-
-New
----
-
-Changed
--------
-
-Fixed
------
-
-Deprecated
-----------
 
 v1.0.0 (2024-09-26)
 ===================
