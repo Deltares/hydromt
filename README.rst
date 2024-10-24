@@ -4,7 +4,7 @@
 HydroMT: Automated and reproducible model building and analysis
 ===============================================================
 
-|pypi| |conda forge| |docs_latest| |docs_stable| |binder| |codecov| |license| |doi| |joss_paper|
+|pypi| |pyversions| |conda forge| |docs_latest| |docs_stable| |binder| |codecov| |license| |doi| |joss_paper|
 
 
 What is HydroMT?
@@ -88,6 +88,10 @@ happy to discuss how it can be implemented for your model.
 .. |pypi| image:: https://img.shields.io/pypi/v/hydromt.svg?style=flat
     :alt: PyPI
     :target: https://pypi.org/project/hydromt/
+
+.. |pyversions| image:: https://img.shields.io/pypi/pyversions/hydromt.svg
+    :alt: Python versions
+    :target: https://pypi.org/project/hydromt
 
 .. |conda forge| image:: https://anaconda.org/conda-forge/hydromt/badges/version.svg
     :alt: Conda-Forge
