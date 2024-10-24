@@ -7,7 +7,6 @@ ENV HOME=/home/deltares \
     USE_PYGEOS=0 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYDEVD_DISABLE_FILE_VALIDATION=1
-RUN pixi shell
 WORKDIR ${HOME}
-ENTRYPOINT []
-CMD ["jupyter","notebook","--port=8888","--ip=0.0.0.0"]
+ENTRYPOINT ["pixi", "run", "-e", "slim-py311"]
+CMD ["pixi", "run", "-e", "slim-py311","jupyter","notebook","--port=8888","--ip=0.0.0.0"]
