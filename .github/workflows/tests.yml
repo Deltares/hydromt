@@ -60,3 +60,8 @@ jobs:
         run: |
           export NUMBA_DISABLE_JIT=1
           pixi run --locked -e full-py${{ matrix.python-version }} test-cov
+
+      - name: Publish code coverage
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
