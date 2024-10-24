@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim AS base
 ARG PIXIENV
-RUN apt-get update && apt-get install -y curl && apt clean && useradd deltares
+RUN apt-get update && apt-get install -y curl && apt clean && useradd deltares --uid 1000
 
 USER deltares
 WORKDIR /home/deltares
