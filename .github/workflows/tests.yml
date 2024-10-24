@@ -54,9 +54,9 @@ jobs:
           environments: full-py${{ matrix.python-version }}
       - name: Prepare pixi
         run: |
-          pixi run -e full-py${{ matrix.python-version }} install-hydromt
+          pixi run --locked -e full-py${{ matrix.python-version }} install-hydromt
 
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          pixi run -e full-py${{ matrix.python-version }} test-cov
+          pixi run --locked -e full-py${{ matrix.python-version }} test-cov
