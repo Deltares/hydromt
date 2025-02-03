@@ -26,6 +26,10 @@ on:
       - pixi.lock
       - pixi.toml
       - .github/workflows/tests.yml
+  workflow_run:
+    workflows: [Pixi auto update]
+    types:
+      - completed
 
 
 jobs:
