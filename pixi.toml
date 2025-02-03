@@ -8,7 +8,7 @@ platforms = ["linux-64", "win-64"]
 
 [tasks]
 
-install = { depends_on = ["install-hydromt", "install-pre-commit"] }
+install = { depends-on = ["install-hydromt", "install-pre-commit"] }
 install-hydromt = "pip install --no-deps --editable ."
 install-pre-commit = "pre-commit install"
 
@@ -59,31 +59,31 @@ docker-publish-min = { cmd = [
 	"docker",
 	"push",
 	"deltares/hydromt:min",
-], depends_on = [
+], depends-on = [
 	"docker-build-min",
 ] }
 docker-publish-slim = { cmd = [
 	"docker",
 	"push",
 	"deltares/hydromt:slim",
-], depends_on = [
+], depends-on = [
 	"docker-build-slim",
 ] }
 docker-publish-latest = { cmd = [
 	"docker",
 	"push",
 	"deltares/hydromt:latest",
-], depends_on = [
+], depends-on = [
 	"docker-build-latest",
 ] }
 docker-publish-full = { cmd = [
 	"docker",
 	"push",
 	"deltares/hydromt:full",
-], depends_on = [
+], depends-on = [
 	"docker-build-full",
 ] }
-docker-publish = { depends_on = [
+docker-publish = { depends-on = [
 	"docker-publish-min",
 	"docker-publish-slim",
 	"docker-publish-latest",
@@ -106,15 +106,15 @@ docs-build = { cmd = [
 	"docs",
 	"docs/_build",
 	"-W",
-], depends_on = [
+], depends-on = [
 	"doctest",
 ] }
-docs = { depends_on = ["docs-build"] } # alias
-doc = { depends_on = ["docs-build"] } # alias
+docs = { depends-on = ["docs-build"] } # alias
+doc = { depends-on = ["docs-build"] } # alias
 serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
 
 
-pypi = { depends_on = [
+pypi = { depends-on = [
 	"pypi-git-clean",
 	"pypi-git-restore",
 	"pypi-flit-build",
@@ -126,7 +126,7 @@ pypi-flit-build = { cmd = ["flit", "build"] }
 pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
 
 # clean
-clean = { depends_on = [
+clean = { depends-on = [
 	"clean-dist",
 	"clean-docs-generated",
 	"clean-docs-build",
