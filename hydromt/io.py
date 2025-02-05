@@ -1,4 +1,5 @@
 """Implementations for all of pythe necessary IO for HydroMT."""
+
 import glob
 import io as pyio
 import logging
@@ -633,6 +634,7 @@ def open_vector(
             )
             gdf = read_dataframe(str(fn), bbox=bbox_reader, mode=mode, **kwargs)
         else:
+            bbox = tuple(bbox) if bbox is not None else None
             gdf = gpd.read_file(str(fn), bbox=bbox, mask=geom, mode=mode, **kwargs)
 
     # check geometry type
