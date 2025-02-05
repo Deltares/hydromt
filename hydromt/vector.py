@@ -1,4 +1,5 @@
 """Implementation of the vector workloads."""
+
 from __future__ import annotations
 
 import logging
@@ -20,7 +21,6 @@ GDAL_VERSION = gdal_version()
 
 
 class GeoBase(raster.XGeoBase):
-
     """Base accessor class for geo data."""
 
     def __init__(self, xarray_obj) -> None:
@@ -45,7 +45,7 @@ class GeoBase(raster.XGeoBase):
             ndim = self._obj[name].ndim
             if ndim != 1:  # only single dim geometries
                 continue
-            item = self._obj[name][0].values.item()
+            item = self._obj[name].values[0]
             if isinstance(item, BaseGeometry):
                 names.append(name)
                 types.append("geom")
@@ -352,7 +352,7 @@ class GeoBase(raster.XGeoBase):
                 x_name: (index_dim, geometry.x.values),
                 y_name: (index_dim, geometry.y.values),
             }
-        obj = self._obj.copy()
+        obj = self._obj.copy(deep=False)
         if replace:
             obj = obj.drop_vars(drop_vars, errors="ignore")
         obj = obj.assign_coords(coords)
@@ -663,7 +663,6 @@ class GeoBase(raster.XGeoBase):
 
 @xr.register_dataarray_accessor("vector")
 class GeoDataArray(GeoBase):
-
     """Accessor class for vector based geo data arrays."""
 
     def __init__(self, xarray_obj):
@@ -836,8 +835,7 @@ class GeoDataArray(GeoBase):
 
 @xr.register_dataset_accessor("vector")
 class GeoDataset(GeoBase):
-
-    """Implementation for a vectorased geo dataset."""
+    """Implementation for a vectorized geo dataset."""
 
     def __init__(self, xarray_obj):
         """Initialise the object."""
@@ -953,10 +951,12 @@ class GeoDataset(GeoBase):
                 if hdr != geom_name:
                     ds[hdr] = (index_dim, gdf.loc[_index, hdr])
                 else:
-                    ds = ds.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr])})
+                    ds = ds.assign_coords(
+                        {hdr: (index_dim, gdf.loc[_index, hdr].to_numpy())}
+                    )
         else:
             ds = ds.assign_coords(
-                {hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs}
+                {hdr: (index_dim, gdf.loc[_index, hdr].to_numpy()) for hdr in hdrs}
             )
         # set geospatial attributes
         ds.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
