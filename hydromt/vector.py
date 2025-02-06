@@ -784,7 +784,9 @@ class GeoDataArray(GeoBase):
         da = da.reindex({index_dim: _index}).transpose(index_dim, ...)
         # set gdf geometry and optional other columns
         hdrs = gdf.columns if keep_cols else [geom_name]
-        da = da.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs})
+        da = da.assign_coords(
+            {hdr: (index_dim, gdf.loc[_index, hdr].to_numpy()) for hdr in hdrs}
+        )
         # set geospatial attributes
         da.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
         da.vector.set_crs(gdf.crs)
