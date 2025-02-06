@@ -165,6 +165,7 @@ universal_pathlib = ">=0.2"
 xarray = "*"
 xmltodict = "*"
 zarr = "*"
+libgdal-hdf5 = ">=3.10.1,<4"
 
 [feature.py39.dependencies]
 python = "3.9.*"
