@@ -18,9 +18,10 @@ dependencies = [
   "geopandas>=0.10",        # pandas but geo, wraps fiona and shapely
   "importlib_metadata",     # entrypoints backport
   "mercantile",             # tile handling
+  "libgdal",                 # needed for gdal compatability with rasterio
   "netcdf4",                # netcfd IO
   "numba",                  # speed up computations (used in e.g. stats)
-  "numpy>=1.23",            # pin necessary to ensure compatability with C headers
+  "numpy",                  # pin necessary to ensure compatability with C headers
   "packaging",              # compare versions of hydromt
   "pandas",                 # Dataframes
   "pooch",                  # data fetching
@@ -38,9 +39,10 @@ dependencies = [
   "tomli",                  # parsing toml files
   "tomli-w",                # writing toml files
   "universal_pathlib>=0.2", # provides path compatability between different filesystems
-  "xarray==2024.3.0",       # ndim data arrays
+  "xarray",                 # ndim data arrays
   "xmltodict",              # xml parser also used to read VRT
   "zarr",                   # zarr
+  "rio-vrt=0.2.0"            # For creating virtual rasters
 ]
 
 requires-python = ">=3.9"
