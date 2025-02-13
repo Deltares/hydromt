@@ -42,7 +42,6 @@ dependencies = [
   "xarray",                 # ndim data arrays
   "xmltodict",              # xml parser also used to read VRT
   "zarr",                   # zarr
-  "rio-vrt=0.2.0"            # For creating virtual rasters
 ]
 
 requires-python = ">=3.9"
@@ -63,7 +62,7 @@ io = [
   "openpyxl",         # excel IO
   "fastparquet",      # parquet IO
   "pillow",           # image IO
-  "rio-vrt",          # write VRT files
+  "rio-vrt=0.2.0",    # write VRT files
   "s3fs",             # S3 file system
 ]
 extra = [
