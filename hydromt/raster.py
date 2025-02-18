@@ -6,6 +6,7 @@
 # license file: https://github.com/corteva/rioxarray/blob/0.9.0/LICENSE
 
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
+
 from __future__ import annotations
 
 import itertools
@@ -222,7 +223,6 @@ def tile_window_xyz(shape, px):
 
 
 class XGeoBase(object):
-
     """Base class for the GIS extensions for xarray."""
 
     def __init__(self, xarray_obj: xr.DataArray | xr.Dataset) -> None:
@@ -333,7 +333,6 @@ class XGeoBase(object):
 
 
 class XRasterBase(XGeoBase):
-
     """Base class for a Raster GIS extensions for xarray."""
 
     def __init__(self, xarray_obj):
@@ -528,7 +527,7 @@ class XRasterBase(XGeoBase):
             c3x, c3y = transform * (self.width, 0)
             xs = (c0x, c1x, c2x, c3x)
             ys = (c0y, c1y, c2y, c3y)
-        return min(xs), min(ys), max(xs), max(ys)
+        return float(min(xs)), float(min(ys)), float(max(xs)), float(max(ys))
 
     @property
     def box(self) -> gpd.GeoDataFrame:
@@ -1801,7 +1800,6 @@ class XRasterBase(XGeoBase):
 
 @xr.register_dataarray_accessor("raster")
 class RasterDataArray(XRasterBase):
-
     """GIS extension for xarray.DataArray."""
 
     def __init__(self, xarray_obj):
@@ -2244,6 +2242,8 @@ class RasterDataArray(XRasterBase):
             xs, ys = self.xcoords.values, self.ycoords.values
             if xs.ndim == 1:
                 xs, ys = np.meshgrid(xs, ys)
+            xs = xs.reshape(*mask.shape)
+            ys = ys.reshape(*mask.shape)
         if method == "rio_idw":
             # NOTE: modifies src_data inplace
             interp_data = rasterio.fill.fillnodata(src_data.copy(), mask, **kwargs)
@@ -2873,7 +2873,6 @@ class RasterDataArray(XRasterBase):
 
 @xr.register_dataset_accessor("raster")
 class RasterDataset(XRasterBase):
-
     """GIS extension for :class:`xarray.Dataset`."""
 
     @property

@@ -8,7 +8,7 @@ platforms = ["linux-64", "win-64"]
 
 [tasks]
 
-install = { depends_on = ["install-hydromt", "install-pre-commit"] }
+install = { depends-on = ["install-hydromt", "install-pre-commit"] }
 install-hydromt = "pip install --no-deps --editable ."
 install-pre-commit = "pre-commit install"
 
@@ -59,31 +59,31 @@ docker-publish-min = { cmd = [
   "docker",
   "push",
   "deltares/hydromt:min",
-], depends_on = [
+], depends-on = [
   "docker-build-min",
 ] }
 docker-publish-slim = { cmd = [
   "docker",
   "push",
   "deltares/hydromt:slim",
-], depends_on = [
+], depends-on = [
   "docker-build-slim",
 ] }
 docker-publish-latest = { cmd = [
   "docker",
   "push",
   "deltares/hydromt:latest",
-], depends_on = [
+], depends-on = [
   "docker-build-latest",
 ] }
 docker-publish-full = { cmd = [
   "docker",
   "push",
   "deltares/hydromt:full",
-], depends_on = [
+], depends-on = [
   "docker-build-full",
 ] }
-docker-publish = { depends_on = [
+docker-publish = { depends-on = [
   "docker-publish-min",
   "docker-publish-slim",
   "docker-publish-latest",
@@ -92,12 +92,12 @@ docker-publish = { depends_on = [
 docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
 
 html = { cmd = ["sphinx-build", "-M", "html", "docs", "docs/_build", "-W"] }
-docs = { depends_on = ["html"] }
-doc = { depends_on = ["html"] }
+docs = { depends-on = ["html"] }
+doc = { depends-on = ["html"] }
 serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
 
 
-pypi = { depends_on = [
+pypi = { depends-on = [
   "pypi-git-clean",
   "pypi-git-restore",
   "pypi-flit-build",
@@ -109,7 +109,7 @@ pypi-flit-build = { cmd = ["flit", "build"] }
 pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
 
 # clean
-clean = { depends_on = [
+clean = { depends-on = [
   # "clean-env-files",
   "clean-dist",
   "clean-docs-generated",
@@ -132,7 +132,7 @@ test-cov = { cmd = [
   "xml",
 ] }
 
-[dependencies]
+[pypi-dependencies]
 affine = "*"
 bottleneck = "*"
 click = "*"
@@ -143,7 +143,7 @@ importlib_metadata = "*"
 mercantile = "*"
 netcdf4 = "*"
 numba = "*"
-numpy = ">=1.23"
+numpy = "*"
 packaging = "*"
 pandas = "*"
 pip = "*"
@@ -165,30 +165,32 @@ universal_pathlib = ">=0.2"
 xarray = "*"
 xmltodict = "*"
 zarr = "*"
+# add editable self install
+hydromt = { path = ".", editable = true }
 
 [feature.py39.dependencies]
-python = "3.9.*"
+python = "~=3.9"
 
 [feature.py310.dependencies]
-python = "3.10.*"
+python = "~=3.10"
 
 [feature.py311.dependencies]
-python = "3.11.*"
+python = "~=3.11"
 
-[feature.io.dependencies]
+[feature.io.pypi-dependencies]
 gcsfs = ">=2023.12.1"
 openpyxl = "*"
 fastparquet = "*"
 pillow = "*"
-rio-vrt = "*"
+rio-vrt = "==0.2.0"
 s3fs = "*"
 
-[feature.extra.dependencies]
+[feature.extra.pypi-dependencies]
 matplotlib = "*"
 pyet = "*"
 xugrid = ">=0.9.0"
 
-[feature.dev.dependencies]
+[feature.dev.pypi-dependencies]
 black = "*"
 flit = "*"
 pip = ">=23.1.2"
@@ -196,24 +198,22 @@ pre-commit = "*"
 ruff = "*"
 twine = "*"
 
-[feature.test.dependencies]
+[feature.test.pypi-dependencies]
 pytest = ">=2.7.3"
 pytest-cov = "*"
 pytest-mock = "*"
 pytest-timeout = "*"
 xugrid = "*"
 
-[feature.doc.dependencies]
+[feature.doc.pypi-dependencies]
 nbsphinx = "*"
 pydata-sphinx-theme = ">=0.15.2"
 sphinx = "*"
-
-[feature.doc.pypi-dependencies]
 sphinx_autosummary_accessors = "*"
 sphinx_design = "*"
-"sphinx-click" = "*"
+sphinx-click = "*"
 
-[feature.examples.dependencies]
+[feature.examples.pypi-dependencies]
 cartopy = "*"
 jupyterlab = "*"
 notebook = "*"

@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - v1
+      - v0.10.1
     paths:
       - tests/*
       - hydromt/*
@@ -15,9 +15,9 @@ on:
       - pixi.toml
       - .github/workflows/tests.yml
   pull_request:
-    branches:
-      - main
-      - v1
+    # branches:
+    #   - main
+    #   - v1
     paths:
       - tests/*
       - hydromt/*
@@ -48,9 +48,9 @@ jobs:
     steps:
 
       - uses: actions/checkout@v4
-      - uses: prefix-dev/setup-pixi@v0.6.0
+      - uses: prefix-dev/setup-pixi@v0.8.2
         with:
-          pixi-version: "v0.21.1"
+          pixi-version: v0.41.1
           environments: full-py${{ matrix.python-version }}
       - name: Prepare pixi
         run: |
