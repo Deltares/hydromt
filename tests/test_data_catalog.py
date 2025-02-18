@@ -602,15 +602,9 @@ def test_detect_extent(data_catalog):
 
 
 def test_to_stac(tmpdir, data_catalog):
-    _ = data_catalog.get_rasterdataset("chirps_global")
-    _ = data_catalog.get_geodataframe("gadm_level1")
-    _ = data_catalog.get_geodataset("gtsmv3_eu_era5")
-
-    sources = [
-        "chirps_global",
-        "gadm_level1",
-        "gtsmv3_eu_era5",
-    ]
+    sources = ["chirps_global", "gadm_level1", "gtsmv3_eu_era5"]
+    for source in sources:
+        data_catalog.get_source(source).mark_as_used()
 
     stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
 
