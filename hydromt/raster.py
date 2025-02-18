@@ -527,7 +527,7 @@ class XRasterBase(XGeoBase):
             c3x, c3y = transform * (self.width, 0)
             xs = (c0x, c1x, c2x, c3x)
             ys = (c0y, c1y, c2y, c3y)
-        return min(xs), min(ys), max(xs), max(ys)
+        return float(min(xs)), float(min(ys)), float(max(xs)), float(max(ys))
 
     @property
     def box(self) -> gpd.GeoDataFrame:

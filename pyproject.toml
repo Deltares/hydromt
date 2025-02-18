@@ -18,7 +18,6 @@ dependencies = [
   "geopandas>=0.10",        # pandas but geo, wraps fiona and shapely
   "importlib_metadata",     # entrypoints backport
   "mercantile",             # tile handling
-  "libgdal",                 # needed for gdal compatability with rasterio
   "netcdf4",                # netcfd IO
   "numba",                  # speed up computations (used in e.g. stats)
   "numpy",                  # pin necessary to ensure compatability with C headers
@@ -62,7 +61,7 @@ io = [
   "openpyxl",         # excel IO
   "fastparquet",      # parquet IO
   "pillow",           # image IO
-  "rio-vrt=0.2.0",    # write VRT files
+  "rio-vrt==0.2.0",   # write VRT files
   "s3fs",             # S3 file system
 ]
 extra = [
