@@ -48,9 +48,9 @@ jobs:
     steps:
 
       - uses: actions/checkout@v4
-      - uses: prefix-dev/setup-pixi@v0.6.0
+      - uses: prefix-dev/setup-pixi@v0.8.2
         with:
-          pixi-version: "v0.21.1"
+          pixi-version: v0.41.1
           environments: full-py${{ matrix.python-version }}
       - name: Prepare pixi
         run: |
