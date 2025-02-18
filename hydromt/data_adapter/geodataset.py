@@ -1,4 +1,5 @@
 """Implementation for the geodataset DataAdapter."""
+
 import warnings
 from datetime import datetime
 from logging import Logger, getLogger
@@ -42,7 +43,6 @@ __all__ = ["GeoDatasetAdapter", "GeoDatasetSource"]
 
 
 class GeoDatasetAdapter(DataAdapter):
-
     """DatasetAdapter for GeoDatasets."""
 
     _DEFAULT_DRIVER = "vector"
@@ -495,7 +495,8 @@ class GeoDatasetAdapter(DataAdapter):
                 ds.attrs.update(self.attrs[ds.name])
             else:
                 for k in self.attrs:
-                    ds[k].attrs.update(self.attrs[k])
+                    if k in ds.data_vars:
+                        ds[k].attrs.update(self.attrs[k])
 
         ds.attrs.update(self.meta)
         return ds

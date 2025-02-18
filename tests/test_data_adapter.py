@@ -252,16 +252,20 @@ def test_rasterdataset_driver_kwargs(data_catalog: DataCatalog, tmpdir):
 
 def test_rasterdataset_unit_attrs(data_catalog: DataCatalog):
     era5_dict = {"era5": data_catalog.get_source("era5").to_dict()}
+    rename = {"temp": "temperature"}
     attrs = {
-        "temp": {"unit": "degrees C", "long_name": "temperature"},
+        "temperature": {"unit": "degrees C", "long_name": "temperature"},
         "temp_max": {"unit": "degrees C", "long_name": "maximum temperature"},
         "temp_min": {"unit": "degrees C", "long_name": "minimum temperature"},
     }
-    era5_dict["era5"].update(dict(attrs=attrs))
+    era5_dict["era5"].update(dict(attrs=attrs, rename=rename))
     data_catalog.from_dict(era5_dict)
     raster = data_catalog.get_rasterdataset("era5")
-    assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
+    assert raster["temperature"].attrs["unit"] == attrs["temperature"]["unit"]
     assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
+    # test with retrieving single variable
+    da = data_catalog.get_rasterdataset("era5", variables=["temperature"])
+    assert da.attrs["unit"] == attrs["temperature"]["unit"]
 
 
 def test_geodataset(geoda, geodf, ts, tmpdir, data_catalog):
@@ -332,7 +336,9 @@ def test_geodataset_unit_attrs(data_catalog: DataCatalog):
     }
     gtsm_dict["gtsmv3_eu_era5"].update(dict(attrs=attrs))
     data_catalog.from_dict(gtsm_dict)
-    gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
+    gtsm_geodataarray = data_catalog.get_geodataset(
+        "gtsmv3_eu_era5", variables=["waterlevel"]
+    )
     assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
     assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
 
