@@ -2,15 +2,15 @@ name: Tests with pip install
 
 on:
   push:
-    branches: [main]
+    branches: [main, v0.10.1]
     paths:
       - tests/*
       - hydromt/*
       - data/*
       - pyproject.toml
   pull_request:
-    branches:
-      - main
+    # branches:
+    #   - main
     paths:
       - tests/*
       - hydromt/*

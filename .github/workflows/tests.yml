@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      - v1
+      - v0.10.1
     paths:
       - tests/*
       - hydromt/*
@@ -15,9 +15,9 @@ on:
       - pixi.toml
       - .github/workflows/tests.yml
   pull_request:
-    branches:
-      - main
-      - v1
+    # branches:
+    #   - main
+    #   - v1
     paths:
       - tests/*
       - hydromt/*
