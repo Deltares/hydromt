@@ -27,6 +27,7 @@ from hydromt.data_adapter import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
+from hydromt.data_adapter.dataframe import DataFrameAdapter
 from hydromt.data_catalog import DataCatalog
 from hydromt.exceptions import NoDataException
 from hydromt.gis_utils import to_geographic_bbox
@@ -39,25 +40,15 @@ CATALOGDIR = join(dirname(abspath(__file__)), "..", "data", "catalogs")
 
 def test_resolve_path(tmpdir):
     # create dummy files
+    path = join(tmpdir, "{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc")
     for variable in ["precip", "temp"]:
         for year in [2020, 2021]:
             for month in range(1, 13):
                 fn = join(tmpdir, f"{{unknown_key}}_0_{variable}_{year}_{month:02d}.nc")
                 with open(fn, "w") as f:
                     f.write("")
-    # create data catalog for these files
-    dd = {
-        "test": {
-            "data_type": "RasterDataset",
-            "driver": "netcdf",
-            "path": join(
-                tmpdir, "{unknown_key}_{zoom_level}_{variable}_{year}_{month:02d}.nc"
-            ),
-        }
-    }
-    cat = DataCatalog()
-    cat.from_dict(dd)
-    source = cat.get_source("test")
+    # create adapter
+    source = RasterDatasetAdapter(path=path)
     # test
     fns = source._resolve_paths()
     assert len(fns) == 48
@@ -67,6 +58,15 @@ def test_resolve_path(tmpdir):
     assert len(fns) == 3
     with pytest.raises(FileNotFoundError, match="No such file found:"):
         source._resolve_paths(variables=["waves"])
+
+
+def test_resolve_path_unknown_key(tmp_path):
+    # create dummy csv file
+    path = tmp_path / "{unknown_key}.csv"
+    path.write_text("test")
+    # create adapter
+    source = DataFrameAdapter(path=path)
+    source._resolve_paths()
 
 
 def test_rasterdataset(rioda, tmpdir):

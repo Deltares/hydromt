@@ -1,4 +1,5 @@
 """DataAdapter class."""
+
 from __future__ import annotations
 
 import logging
@@ -107,7 +108,6 @@ PREPROCESSORS = {
 
 
 class DataAdapter(object, metaclass=ABCMeta):
-
     """General Interface to data source for HydroMT."""
 
     _DEFAULT_DRIVER = None  # placeholder
@@ -325,6 +325,7 @@ class DataAdapter(object, metaclass=ABCMeta):
         known_keys = ["year", "month", "zoom_level", "variable"]
         fns = []
         keys = []
+        unknown_keys = []
         # rebuild path based on arguments and escape unknown keys
         if "{" in str(self.path):
             path = ""
@@ -340,10 +341,15 @@ class DataAdapter(object, metaclass=ABCMeta):
                     path += "*"
                 # escape unknown fields
                 elif key is not None and key not in known_keys:
-                    path = path + "{" + key_str + "}"
+                    unknown_keys.append(key)
+                    path += key_str
                 else:
                     path = path + key_str
                     keys.append(key)
+            if keys and unknown_keys:
+                # escape unknown keys
+                for key in unknown_keys:
+                    path = path.replace("{" + key + "}", "{{" + key + "}}")
         else:
             path = self.path
 
