@@ -1,4 +1,5 @@
 """Implementation for the RasterDatasetAdapter."""
+
 from __future__ import annotations
 
 import os
@@ -47,7 +48,6 @@ __all__ = ["RasterDatasetAdapter", "RasterDatasetSource"]
 
 
 class RasterDatasetAdapter(DataAdapter):
-
     """Implementation for the RasterDatasetAdapter."""
 
     _DEFAULT_DRIVER = "raster"
@@ -659,7 +659,8 @@ class RasterDatasetAdapter(DataAdapter):
     def _set_metadata(self, ds):
         # unit attributes
         for k in self.attrs:
-            ds[k].attrs.update(self.attrs[k])
+            if k in ds.data_vars:
+                ds[k].attrs.update(self.attrs[k])
         # set meta data
         ds.attrs.update(self.meta)
         return ds
@@ -729,7 +730,7 @@ class RasterDatasetAdapter(DataAdapter):
         elif isinstance(zoom_level, int):
             if zoom_level not in zls_dict:
                 raise ValueError(
-                    f"Zoom level {zoom_level} not defined." f"Select from {zls_dict}."
+                    f"Zoom level {zoom_level} not defined.Select from {zls_dict}."
                 )
             zl = zoom_level
             dst_res = zls_dict[zoom_level]
