@@ -6,6 +6,17 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+v0.10.1 (2025-02-26)
+====================
+
+Fixed
+-----
+
+- Fix dependencies v0.10 (#1112)
+- fix resolve path (#1114)
+- fix attr issue on get_data with variable filter (#1117) 
+
+
 v0.10.0 (2024-06-14)
 ====================
 
