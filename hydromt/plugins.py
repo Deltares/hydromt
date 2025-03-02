@@ -65,6 +65,7 @@ class PluginGroup:
                         f"{self.group} plugin {ep_name} {attr_name} ({ep.dist.name}) is not a valid {self.base_class}"
                     )
                 name = getattr(attr, "name", attr_name)
+                name = attr_name
                 if name not in plugins:
                     # other than type, this is for display only, hence string
                     plugins[name] = {
