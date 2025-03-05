@@ -3,8 +3,7 @@
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
-from pydantic_core import Url
+from pydantic import AnyUrl, ValidationError
 
 from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._validators.data_catalog import (
@@ -17,7 +16,7 @@ from hydromt._validators.data_catalog import (
 @pytest.mark.skip("validators need  to be updated to newest format")
 def test_deltares_data_catalog(latest_dd_version_uri):
     yml_dict = _yml_from_uri_or_path(latest_dd_version_uri)
-    # whould raise error if something goes wrong
+    # would raise error if something goes wrong
     _ = DataCatalogValidator.from_dict(yml_dict)
 
 
@@ -50,7 +49,7 @@ def test_geodataframe_entry_validation():
     assert entry.meta.paper_doi == "10.1038/s41597-019-0300-6"
     assert entry.meta.paper_ref == "Linke et al. (2019)"
     assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == Url("https://www.hydrosheds.org/hydroatlas")
+    assert entry.meta.source_url == AnyUrl("https://www.hydrosheds.org/hydroatlas")
     assert entry.meta.source_version == "10"
     assert entry.path == Path("hydrography/hydro_atlas/basin_atlas_v10.gpkg")
 
@@ -94,7 +93,7 @@ def test_valid_catalog_variants():
     _ = DataCatalogValidator.from_dict(d)
 
 
-def test_no_hydrmt_version_loggs_warning(caplog: pytest.LogCaptureFixture):
+def test_no_hydromt_version_logs_warning(caplog: pytest.LogCaptureFixture):
     d = {
         "meta": {"roots": [""]},
     }
@@ -151,7 +150,7 @@ def test_raster_dataset_entry_validation():
     assert entry.meta.paper_doi == "10.1038/sdata.2017.122"
     assert entry.meta.paper_ref == "Karger et al. (2017)"
     assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == Url("https://chelsa-climate.org/downloads/")
+    assert entry.meta.source_url == AnyUrl("https://chelsa-climate.org/downloads/")
     assert entry.meta.source_version == "1.2"
 
 
