@@ -53,7 +53,7 @@ class GeoBase(raster.XGeoBase):
             ndim = self._obj[name].ndim
             if ndim != 1:  # only single dim geometries
                 continue
-            item = self._obj[name][0].values.item()
+            item = self._obj[name].values[0]
             if isinstance(item, BaseGeometry):
                 names.append(name)
                 types.append("geom")
@@ -824,7 +824,9 @@ class GeoDataArray(GeoBase):
         da = da.reindex({index_dim: _index}).transpose(index_dim, ...)
         # set gdf geometry and optional other columns
         hdrs = gdf.columns if keep_cols else [geom_name]
-        da = da.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs})
+        da = da.assign_coords(
+            {hdr: (index_dim, gdf.loc[_index, hdr].to_numpy()) for hdr in hdrs}
+        )
         # set geospatial attributes
         da.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
         da.vector.set_crs(gdf.crs)
@@ -991,10 +993,12 @@ class GeoDataset(GeoBase):
                 if hdr != geom_name:
                     ds[hdr] = (index_dim, gdf.loc[_index, hdr])
                 else:
-                    ds = ds.assign_coords({hdr: (index_dim, gdf.loc[_index, hdr])})
+                    ds = ds.assign_coords(
+                        {hdr: (index_dim, gdf.loc[_index, hdr].to_numpy())}
+                    )
         else:
             ds = ds.assign_coords(
-                {hdr: (index_dim, gdf.loc[_index, hdr]) for hdr in hdrs}
+                {hdr: (index_dim, gdf.loc[_index, hdr].to_numpy()) for hdr in hdrs}
             )
         # set geospatial attributes
         ds.vector.set_spatial_dims(geom_name=geom_name, geom_format="geom")
