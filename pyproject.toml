@@ -20,7 +20,7 @@ dependencies = [
   "mercantile",             # tile handling
   "netcdf4",                # netcfd IO
   "numba",                  # speed up computations (used in e.g. stats)
-  "numpy>=1.23, <2",        # pin necessary to ensure compatability with C headers
+  "numpy",                  # pin necessary to ensure compatability with C headers
   "packaging",              # compare versions of hydromt
   "pandas",                 # Dataframes
   "pooch",                  # data fetching
@@ -32,7 +32,7 @@ dependencies = [
   "pyproj",                 # projections for Coordinate reference systems
   "pystac",                 # STAC integration
   "pyyaml",                 # yaml interface
-  "rasterio<1.4.0",         # raster wrapper around gdal
+  "rasterio",               # raster wrapper around gdal
   "requests",               # donwload stuff
   "rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
   "scipy",                  # scientific utilities

@@ -33,9 +33,9 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
-      - uses: prefix-dev/setup-pixi@v0.8.1
+      - uses: prefix-dev/setup-pixi@v0.8.2
         with:
-          pixi-version: "v0.34.0"
+          pixi-version: v0.41.1
           environments: full-py311
       - name: Prepare pixi
         run: |
