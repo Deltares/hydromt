@@ -192,13 +192,13 @@ hydromt = { path = ".", editable = true }
 
 
 [feature.py39.dependencies]
-python = "~=3.9"
+python = "3.9.*"
 
 [feature.py310.dependencies]
-python = "~=3.10"
+python = "3.10.*"
 
 [feature.py311.dependencies]
-python = "~=3.11"
+python = "3.11.*"
 
 [feature.io.dependencies]
 gcsfs = ">=2023.12.1"
