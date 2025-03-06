@@ -44,5 +44,9 @@
     ],
     "autoDocstring.docstringFormat": "numpy",
     "rewrap.autoWrap.enabled": true,
-    "rewrap.wrappingColumn": 88
+    "rewrap.wrappingColumn": 88,
+    "sonarlint.connectedMode.project": {
+        "connectionId": "deltares",
+        "projectKey": "Deltares_hydromt"
+    }
 }
