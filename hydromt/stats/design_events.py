@@ -76,12 +76,12 @@ def get_peak_hydrographs(
 
 @njit
 def hydrograph_1d(
-    ts: NDArray[np.float_],
+    ts: NDArray[np.float64],
     peaks: NDArray[np.bool_],
     wdw_size: int,
     n_peaks: Optional[int] = None,
     normalize: bool = True,
-) -> NDArray[np.float_]:
+) -> NDArray[np.float64]:
     """Return hydrograph 1D.
 
     Return 2D array of shape (`n_peaks`, `wdw_size`) with normalized hydrographs
