@@ -281,7 +281,7 @@ def get_peaks(
         )
 
     duck = dask.array if isinstance(da.data, dask.array.Array) else np
-    lmax = duck.apply_along_axis(func, da.get_axis_num(time_dim), da)
+    lmax = duck.apply_along_axis(func, da.get_axis_num(time_dim), da.data)
     # apply POT threshold
     peaks = da.where(lmax)
     if ev_type.upper() == "POT":
