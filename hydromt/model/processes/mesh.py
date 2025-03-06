@@ -184,7 +184,7 @@ def create_mesh2d_from_mesh(
     else:
         # Assume model crs
         logger.warning(
-            "Mesh data from mesh file doesn't have a CRS." f" Assuming crs option {crs}"
+            f"Mesh data from mesh file doesn't have a CRS. Assuming crs option {crs}"
         )
         mesh2d.ugrid.grid.set_crs(crs)
     mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
@@ -331,7 +331,7 @@ def mesh2d_from_rasterdataset(
     regridder = dict()
     # Get one variable name in ds to simplify to da
     var = [v for v in ds.data_vars][0]
-    uda = xu.UgridDataArray.from_structured(
+    uda = xu.UgridDataArray.from_structured2d(
         ds[var], x=ds.raster.xcoords.name, y=ds.raster.ycoords.name
     )
     uda.ugrid.set_crs(ds.raster.crs)
@@ -356,7 +356,7 @@ def mesh2d_from_rasterdataset(
     # Convert ds to xugrid
     for i, var in enumerate(ds.data_vars):
         logger.info(f"Resampling {var} to mesh2d using {resampling_method[i]} method")
-        uda = xu.UgridDataArray.from_structured(
+        uda = xu.UgridDataArray.from_structured2d(
             ds[var].rename({ds.raster.x_dim: "x", ds.raster.y_dim: "y"})
         )
         uda.ugrid.set_crs(ds.raster.crs)
