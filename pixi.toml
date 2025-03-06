@@ -183,7 +183,7 @@ tomli-w = "*"
 universal_pathlib = ">=0.2"
 xarray = "*"
 xmltodict = "*"
-zarr = "*"
+zarr = ">=2,<3"
 xugrid = ">=0.9.0"
 
 [pypi-dependencies]
