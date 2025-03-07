@@ -33,9 +33,6 @@ jobs:
         with:
           pixi-version: v0.41.1
           environments: min-py311
-      - name: Prepare pixi
-        run: |
-          pixi run --locked -e min-py311 install-hydromt
       - name: Validate the catalogs
         run: |
           export NUMBA_DISABLE_JIT=1

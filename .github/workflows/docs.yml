@@ -37,9 +37,6 @@ jobs:
         with:
           pixi-version: v0.41.1
           environments: full-py311
-      - name: Prepare pixi
-        run: |
-          pixi run --locked -e full-py311 install-hydromt
 
       # if we're not publishing we don't have to write them, so we might as well
       # save ourself a bunch of IO time

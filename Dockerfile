@@ -10,7 +10,7 @@ ENV PATH=/home/deltares/.pixi/bin:$PATH
 COPY pixi.toml pixi.lock pyproject.toml README.rst ./
 COPY data/ ./data
 COPY hydromt/ ./hydromt
-RUN pixi run --locked -e ${PIXIENV} install-hydromt \
+RUN pixi install --locked -e ${PIXIENV} \
   && rm -rf .cache \
   && find .pixi -type f -name "*.pyc" -delete
 

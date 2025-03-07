@@ -56,9 +56,6 @@ jobs:
         with:
           pixi-version: v0.41.1
           environments: full-py${{ matrix.python-version }}
-      - name: Prepare pixi
-        run: |
-          pixi run --locked -e full-py${{ matrix.python-version }} install-hydromt
 
       - name: Test
         run: |
