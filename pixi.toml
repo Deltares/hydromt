@@ -185,6 +185,7 @@ xarray = "*"
 xmltodict = "*"
 zarr = ">=2,<3"
 xugrid = ">=0.9.0"
+libgdal-hdf5 = ">=3.10.2,<4"
 
 [pypi-dependencies]
 # add editable self install
