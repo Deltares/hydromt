@@ -205,7 +205,47 @@ python = "3.11.*"
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
 
-[tool.pixi.tasks]
+[tool.pixi.feature.doc.tasks]
+doctest = { cmd = [
+  "sphinx-build",
+  "-M",
+  "doctest",
+  "docs",
+  "docs/_build",
+  "-W",
+] }
+docs-build = { cmd = [
+  "sphinx-build",
+  "-M",
+  "html",
+  "docs",
+  "docs/_build",
+  "-W",
+], depends-on = [
+  "doctest",
+] }
+docs = { depends-on = ["docs-build"] } # alias
+doc = { depends-on = ["docs-build"] } # alias
+serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
+
+[tool.pixi.feature.test.tasks]
+test = { cmd = ["pytest"] }
+test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
+test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error"] }
+test-cov = { cmd = [
+  "pytest",
+  "--verbose",
+  "--cov=hydromt",
+  "--cov-report",
+  "xml",
+] }
+
+[tool.pixi.feature.dev.tasks]
+install = { depends-on = ["install-pre-commit"] }
+install-pre-commit = "pre-commit install"
+lint = { cmd = ["pre-commit", "run", "--all"] }
+mypy = "mypy ."
+
 docker-build-min = { cmd = [
   "docker",
   "build",
@@ -305,47 +345,6 @@ clean-dist = { cmd = ["rm", "-rf", "dist"] }
 clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
 clean-docs-build = { cmd = ["rm", "-rf", "docs/_build"] }
 clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
-
-[tool.pixi.feature.doc.tasks]
-doctest = { cmd = [
-  "sphinx-build",
-  "-M",
-  "doctest",
-  "docs",
-  "docs/_build",
-  "-W",
-] }
-docs-build = { cmd = [
-  "sphinx-build",
-  "-M",
-  "html",
-  "docs",
-  "docs/_build",
-  "-W",
-], depends-on = [
-  "doctest",
-] }
-docs = { depends-on = ["docs-build"] } # alias
-doc = { depends-on = ["docs-build"] } # alias
-serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
-
-[tool.pixi.feature.test.tasks]
-test = { cmd = ["pytest"] }
-test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
-test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error"] }
-test-cov = { cmd = [
-  "pytest",
-  "--verbose",
-  "--cov=hydromt",
-  "--cov-report",
-  "xml",
-] }
-
-[tool.pixi.feature.dev.tasks]
-install = { depends-on = ["install-pre-commit"] }
-install-pre-commit = "pre-commit install"
-lint = { cmd = ["pre-commit", "run", "--all"] }
-mypy = "mypy ."
 
 [tool.pixi.environments]
 default = { features = [

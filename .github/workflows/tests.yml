@@ -12,7 +12,6 @@ on:
       - data/**/*
       - pyproject.toml
       - pixi.lock
-      - pixi.toml
       - .github/workflows/tests.yml
   pull_request:
     branches:
@@ -24,7 +23,6 @@ on:
       - data/**/*
       - pyproject.toml
       - pixi.lock
-      - pixi.toml
       - .github/workflows/tests.yml
   workflow_run:
     workflows: [Pixi auto update]
