@@ -72,11 +72,9 @@ extra = [
   "pyet",       # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
-  "black",           # code formatting
   "flit",            # needed to publish to pypi
   "mypy",            # static type checking
   "pandas-stubs",    # type hints for pandas
-  "pip>=23.1.2",     # needed for recursive dependencies
   "pre-commit",      # linting
   "ruff",            # linting
   "twine",           # needed to publish to pypi
