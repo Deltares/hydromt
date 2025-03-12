@@ -82,6 +82,8 @@ class TestDataSource:
         mock_geodataframe_adapter,
     ):
         class MockRaisingResolver(URIResolver):
+            name = "raises"
+
             def resolve(self, uris: List[str], **kwargs):
                 raise NoDataException()
 
