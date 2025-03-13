@@ -247,46 +247,36 @@ install-pre-commit = "pre-commit install"
 lint = { cmd = ["pre-commit", "run", "--all"] }
 mypy = "mypy ."
 
+docker-build = { cmd = [
+  "docker",
+  "build",
+  "-t",
+  "deltares/hydromt:$DOCKER_TAG",
+  "--target=$DOCKER_TARGET",
+  "--build-arg",
+  "PIXIENV=$DOCKER_TARGET-py311",
+  ".",
+], env = { DOCKER_TAG = "<DOCKER_TAG>", DOCKER_TARGET = "<DOCKER_TARGET>" } }
 docker-build-min = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:min",
-  "--target=min",
-  "--build-arg",
-  "PIXIENV=min-py311",
-  ".",
-] }
+  "pixi",
+  "run",
+  "docker-build",
+], env = { DOCKER_TAG = "min", DOCKER_TARGET = "min" } }
 docker-build-full = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:full",
-  "--target=full",
-  "--build-arg",
-  "PIXIENV=full-py311",
-  ".",
-] }
+  "pixi",
+  "run",
+  "docker-build",
+], env = { DOCKER_TAG = "full", DOCKER_TARGET = "full" } }
 docker-build-slim = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:slim",
-  "--target=slim",
-  "--build-arg",
-  "PIXIENV=slim-py311",
-  ".",
-] }
+  "pixi",
+  "run",
+  "docker-build",
+], env = { DOCKER_TAG = "slim", DOCKER_TARGET = "slim" } }
 docker-build-latest = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:latest",
-  "--target=slim",
-  "--build-arg",
-  "PIXIENV=slim-py311",
-  ".",
-] }
+  "pixi",
+  "run",
+  "docker-build",
+], env = { DOCKER_TAG = "latest", DOCKER_TARGET = "slim" } }
 
 docker-publish-min = { cmd = [
   "docker",
