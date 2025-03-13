@@ -737,8 +737,8 @@ class TestGetRasterDataset:
         # test zoom levels in name
         name: str = next(iter(zoom_dict.keys()))
         data_catalog.from_dict(zoom_dict)
-        da1 = data_catalog.get_rasterdataset(name, zoom=(0.3, "degree"))
-        assert isinstance(da1, xr.DataArray)
+        with data_catalog.get_rasterdataset(name, zoom=(0.3, "degree")) as da1:
+            assert isinstance(da1, xr.DataArray)
 
     @pytest.fixture()
     def zoom_level_cog(self, tmp_path: Path, rioda_large: xr.DataArray) -> str:
@@ -780,8 +780,10 @@ class TestGetRasterDataset:
         data_catalog: DataCatalog,
     ):
         # test if file hase no overviews
-        da = data_catalog.get_rasterdataset(tif_no_overviews, zoom=(0.01, "degree"))
-        xr.testing.assert_allclose(da, rioda_large)
+        with data_catalog.get_rasterdataset(
+            tif_no_overviews, zoom=(0.01, "degree")
+        ) as da:
+            xr.testing.assert_allclose(da, rioda_large)
 
     @pytest.mark.integration()
     def test_zoom_levels_with_variable(self, data_catalog: DataCatalog):

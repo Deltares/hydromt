@@ -90,6 +90,16 @@ Fixed
 Deprecated
 ----------
 
+v0.10.1 (2025-02-26)
+====================
+
+Fixed
+-----
+
+- Fix dependencies v0.10 (#1112)
+- fix resolve path (#1114)
+- fix attr issue on get_data with variable filter (#1117)
+
 v0.10.0 (2024-06-14)
 ====================
 

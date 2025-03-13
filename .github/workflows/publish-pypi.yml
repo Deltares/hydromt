@@ -15,7 +15,7 @@ jobs:
   build-artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -38,7 +38,7 @@ jobs:
             python -m twine check dist/*
 
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: releases
           path: dist
@@ -50,9 +50,9 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: releases
           path: dist
@@ -75,7 +75,7 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: releases
           path: dist
@@ -93,7 +93,7 @@ jobs:
     if: ${{ github.event_name == 'release' && !github.event.act  }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: releases
           path: dist

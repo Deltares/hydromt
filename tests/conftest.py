@@ -1,8 +1,9 @@
+import gc
 from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, ClassVar, Dict, Generator, Optional, cast
+from typing import Any, ClassVar, Dict, Generator, List, Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -16,11 +17,7 @@ from dask import config as dask_config
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-from hydromt import (
-    Model,
-    raster,
-    vector,
-)
+from hydromt import Model, raster, vector
 from hydromt._typing import SourceMetadata
 from hydromt.config import SETTINGS, Settings
 from hydromt.data_catalog import DataCatalog
@@ -42,6 +39,18 @@ dask_config.set(scheduler="single-threaded")
 
 DATADIR = join(dirname(abspath(__file__)), "data")
 DC_PARAM_PATH = join(DATADIR, "parameters_data.yml")
+
+
+def get_open_xarray_objects() -> List[tuple[Union[xr.Dataset, xr.DataArray], Path]]:
+    """Get all xarray objects that are still open with a connection to disk."""
+    xarray_objects = filter(
+        lambda o: isinstance(o, (xr.DataArray, xr.Dataset)), gc.get_objects()
+    )
+    return [
+        (o, Path(o.encoding["source"]))
+        for o in xarray_objects
+        if o.encoding.get("source", None) is not None
+    ]
 
 
 @pytest.fixture()
@@ -117,7 +126,12 @@ def latest_dd_version_uri():
 @pytest.fixture(scope="class")
 def tmp_dir() -> Generator[Path, None, None]:
     with TemporaryDirectory() as tempdirname:
-        yield Path(tempdirname)
+        tempdirpath = Path(tempdirname)
+        yield tempdirpath
+        open_xarrays = get_open_xarray_objects()
+        for obj, source in open_xarrays:
+            if tempdirpath in source.parents:
+                obj.close()
 
 
 @pytest.fixture(scope="session")

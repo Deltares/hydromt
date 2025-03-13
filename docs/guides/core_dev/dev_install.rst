@@ -40,14 +40,14 @@ Fine tuned installation
 -----------------------
 
 If you want a more fine tuned installation you can also specify exactly which features you'd like to install.
-For instance, you can add a new environment in ``pixi.toml`` to install _extra_, _io_ and _doc_ dependencies.
+For instance, you can add a new environment in ``pyproject.toml`` to install _extra_, _io_ and _doc_ dependencies.
 
 .. code-block:: toml
 
-    [environments]
+    [pixi.tool.environments]
     my_env = ["extra", "io", "doc"]
 
-We have 7 optional dependency groups you can specify (see ``pixi.toml`` for list of dependencies in each group):
+We have 7 optional dependency groups you can specify (see ``pyproject.toml`` for list of dependencies in each group):
 
 1. ``io``: Reading and writing various formats like excel but also cloud file systems
 2. ``extra``: Couldn't think of a better name for this one, but it has some extra for ET and mesh calculations
@@ -72,14 +72,13 @@ Adding a dependency
 In order to add a dependency you need to:
 
 1. Add it to the ``pyproject.toml`` file in the ``[project.dependencies]`` section.
-2. And you need to add it to the ``pixi.toml`` file in the ``[dependencies]`` section.
-3. Then you will need to run ``pixi run -e <ENVIRONMENT> install`` to install the new dependency. It will update the ``pixi.lock`` file.
-4. Commit the changes to the ``pyproject.toml``, ``pixi.toml``, and ``pixi.lock`` files.
+2. Then you will need to run ``pixi run -e <ENVIRONMENT> install`` to install the new dependency. It will update the ``pixi.lock`` file.
+3. Commit the changes to the ``pyproject.toml``, and ``pixi.lock`` files.
 
 Updating dependencies
 ---------------------
 
-The dependencies in pixi are managed via the ``pixi.toml`` and ``pixi.lock`` file.
+The dependencies in pixi are managed via the ``pyproject.toml`` and ``pixi.lock`` file.
 We commit the ``pixi.lock`` file to the repository to ensure that everyone has the same versions of the dependencies installed.
 Since it freezes the dependencies, we will need to schedule regular updates.
 

@@ -19,6 +19,7 @@ def _rgba2elevation(
     rgba: np.ndarray, nodata=np.nan, dtype=np.float32
 ) -> NDArray[np.float32]:
     """Convert rgb tuple to elevation."""
+    rgba = rgba.astype(dtype)
     r, g, b, a = np.split(rgba, 4, axis=2)
     val = (r * 256 + g + b / 256) - 32768
     return np.where(a == 0, nodata, val).squeeze().astype(dtype)
