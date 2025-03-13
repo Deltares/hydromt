@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,18 +27,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -47,10 +47,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'guides/advanced_user/data_types';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="icon" href="../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -176,7 +177,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -461,9 +464,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -523,7 +531,7 @@
 <li><p><a class="reference internal" href="#dataframe"><span class="std std-ref">DataFrame</span></a>: 2D tabular data</p></li>
 </ul>
 <p>Internally the RasterDataset, GeoDataset, and Dataset are represented by
-<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.9.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects, the GeoDataFrame by
+<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects, the GeoDataFrame by
 <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a>, and the DataFrame by <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>.
 We use drivers, typically from third-party packages and sometimes wrapped in HydroMT
 functions, to parse many different file formats to this standardized internal data
@@ -705,8 +713,8 @@ See list of recognized <a class="reference internal" href="#dimensions">dimensio
 </pre></div>
 </div>
 <p>To read a raster dataset from a multiple file netcdf archive the following data entry
-is used, where the <cite>options</cite> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2024.9.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
-(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2024.9.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
+is used, where the <cite>options</cite> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
+(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
 In case the CRS cannot be inferred from the netcdf metadata it should be defined with
 the <cite>crs</cite> <cite>metadata`</cite> here.
 The path to multiple files can be set using a sting glob or several keys,
@@ -742,7 +750,7 @@ unify the data to match the HydroMT naming and unit <a class="reference internal
 </div>
 <section id="preprocess-functions-when-combining-multiple-files">
 <h4>Preprocess functions when combining multiple files<a class="headerlink" href="#preprocess-functions-when-combining-multiple-files" title="Link to this heading">#</a></h4>
-<p>In <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2024.9.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, xarray allows for a <strong>preprocess</strong> function to be
+<p>In <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, xarray allows for a <strong>preprocess</strong> function to be
 run before merging several netcdf files together. In hydroMT, some preprocess functions
 are available and can be passed through the options in the same way as any
 xr.open_mfdataset options. These preprocess functions are found at
@@ -894,8 +902,8 @@ on a list of recognized <a class="reference internal" href="#dimensions">dimensi
 </pre></div>
 </div>
 <p>To read a point time-series dataset from a multiple file netcdf archive the following data entry
-is used, where the options are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2024.9.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
-(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2024.9.1.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
+is used, where the options are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
+(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2025.1.3.dev0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
 In case the CRS cannot be inferred from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys,
 see description of the <cite>uri</cite> argument in the <a class="reference internal" href="data_prepare_cat.html#data-yaml"><span class="std std-ref">yaml file description</span></a>.
@@ -1147,13 +1155,13 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
 </div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../../_sources/guides/advanced_user/data_types.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/guides/advanced_user/data_types.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1168,8 +1176,8 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1202,7 +1210,8 @@ This is parsed to the Python code as a <cite>None</cite>.</p>
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,18 +26,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
@@ -46,10 +46,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/model/components/grid';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="icon" href="../../../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -173,7 +174,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -399,9 +402,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -450,35 +458,35 @@
   <h1>Source code for hydromt.model.components.grid</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Grid Component.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">from</span> <span class="nn">affine</span> <span class="kn">import</span> <span class="n">Affine</span>
-<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span>
-<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">box</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">affine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Affine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
-<span class="kn">from</span> <span class="nn">hydromt._io.readers</span> <span class="kn">import</span> <span class="n">_read_nc</span>
-<span class="kn">from</span> <span class="nn">hydromt._io.writers</span> <span class="kn">import</span> <span class="n">_write_nc</span>
-<span class="kn">from</span> <span class="nn">hydromt._typing.error</span> <span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
-<span class="kn">from</span> <span class="nn">hydromt._typing.type_def</span> <span class="kn">import</span> <span class="n">DeferedFileClose</span><span class="p">,</span> <span class="n">Number</span>
-<span class="kn">from</span> <span class="nn">hydromt.model.components.base</span> <span class="kn">import</span> <span class="n">ModelComponent</span>
-<span class="kn">from</span> <span class="nn">hydromt.model.components.spatial</span> <span class="kn">import</span> <span class="n">SpatialModelComponent</span>
-<span class="kn">from</span> <span class="nn">hydromt.model.processes.grid</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_nc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_write_nc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferedFileClose</span><span class="p">,</span> <span class="n">Number</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpatialModelComponent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.processes.grid</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">create_grid_from_region</span><span class="p">,</span>
     <span class="n">grid_from_constant</span><span class="p">,</span>
     <span class="n">grid_from_geodataframe</span><span class="p">,</span>
     <span class="n">grid_from_raster_reclass</span><span class="p">,</span>
     <span class="n">grid_from_rasterdataset</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">hydromt.model.steps</span> <span class="kn">import</span> <span class="n">hydromt_step</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.steps</span><span class="w"> </span><span class="kn">import</span> <span class="n">hydromt_step</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">hydromt.model.model</span> <span class="kn">import</span> <span class="n">Model</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;GridComponent&quot;</span><span class="p">]</span>
 
@@ -487,7 +495,7 @@
 
 <div class="viewcode-block" id="GridComponent">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.html#hydromt.model.components.GridComponent">[docs]</a>
-<span class="k">class</span> <span class="nc">GridComponent</span><span class="p">(</span><span class="n">SpatialModelComponent</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GridComponent</span><span class="p">(</span><span class="n">SpatialModelComponent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ModelComponent class for grid components.</span>
 
 <span class="sd">    This class is used for setting, creating, writing, and reading regular grid data for a</span>
@@ -497,7 +505,7 @@
 
 <div class="viewcode-block" id="GridComponent.__init__">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.html#hydromt.model.components.GridComponent.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="s2">&quot;Model&quot;</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -537,7 +545,7 @@
 
 <div class="viewcode-block" id="GridComponent.set">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.set.html#hydromt.model.components.GridComponent.set">[docs]</a>
-    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
         <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -586,7 +594,7 @@
 <div class="viewcode-block" id="GridComponent.write">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.write.html#hydromt.model.components.GridComponent.write">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -647,7 +655,7 @@
 <div class="viewcode-block" id="GridComponent.read">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.read.html#hydromt.model.components.GridComponent.read">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -690,7 +698,7 @@
 <div class="viewcode-block" id="GridComponent.create_from_region">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.create_from_region.html#hydromt.model.components.GridComponent.create_from_region">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span> <span class="nf">create_from_region</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_from_region</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">region</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
         <span class="o">*</span><span class="p">,</span>
@@ -789,7 +797,7 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">res</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">res</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the resolution of the model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span>
@@ -800,7 +808,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Affine</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns spatial transform of the model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform</span>
@@ -811,7 +819,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns coordinate reference system embedded in the model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">exec_nodata_strat</span><span class="p">(</span>
@@ -828,7 +836,7 @@
         <span class="k">return</span> <span class="n">CRS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the bounding box of the model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
@@ -839,7 +847,7 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_region_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_region_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the geometry of the model area of interest.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">CRS</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crs</span>
@@ -852,14 +860,14 @@
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Model static gridded data as xarray.Dataset.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_grid</span><span class="p">()</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
-    <span class="k">def</span> <span class="nf">_initialize_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_read</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_initialize_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_read</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize grid object.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">()</span>
@@ -869,7 +877,7 @@
 <div class="viewcode-block" id="GridComponent.add_data_from_constant">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.add_data_from_constant.html#hydromt.model.components.GridComponent.add_data_from_constant">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span> <span class="nf">add_data_from_constant</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_data_from_constant</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">constant</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -915,7 +923,7 @@
 <div class="viewcode-block" id="GridComponent.add_data_from_rasterdataset">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.add_data_from_rasterdataset.html#hydromt.model.components.GridComponent.add_data_from_rasterdataset">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span> <span class="nf">add_data_from_rasterdataset</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_data_from_rasterdataset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">raster_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">],</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -990,7 +998,7 @@
 <div class="viewcode-block" id="GridComponent.add_data_from_raster_reclass">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.add_data_from_raster_reclass.html#hydromt.model.components.GridComponent.add_data_from_raster_reclass">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span> <span class="nf">add_data_from_raster_reclass</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_data_from_raster_reclass</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">raster_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">],</span>
         <span class="n">reclass_table_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
@@ -1082,7 +1090,7 @@
 <div class="viewcode-block" id="GridComponent.add_data_from_geodataframe">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.add_data_from_geodataframe.html#hydromt.model.components.GridComponent.add_data_from_geodataframe">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span> <span class="nf">add_data_from_geodataframe</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_data_from_geodataframe</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">vector_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">],</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1168,7 +1176,7 @@
 
 <div class="viewcode-block" id="GridComponent.test_equal">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.test_equal.html#hydromt.model.components.GridComponent.test_equal">[docs]</a>
-    <span class="k">def</span> <span class="nf">test_equal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ModelComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_equal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">ModelComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test if two components are equal.</span>
 
 <span class="sd">        Parameters</span>
@@ -1193,7 +1201,7 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">errors</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_get_grid_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_grid_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get grid data as xarray.DataArray from this component or the reference.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_component</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">reference_component</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_component</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_region_component</span><span class="p">)</span>
@@ -1240,8 +1248,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1274,7 +1282,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

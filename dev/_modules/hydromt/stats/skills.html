@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,18 +26,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -46,10 +46,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/stats/skills';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="icon" href="../../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -173,7 +174,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -399,9 +402,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -450,15 +458,15 @@
   <h1>Source code for hydromt.stats.skills</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Implementation of necessary statistical methods.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">bottleneck</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">bottleneck</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 
 
 <span class="c1"># PERFORMANCE METRICS</span>
 <div class="viewcode-block" id="bias">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.bias.html#hydromt.stats.skills.bias">[docs]</a>
-<span class="k">def</span> <span class="nf">bias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the bias between two time series.</span>
 
 <span class="sd">        .. math::</span>
@@ -490,7 +498,7 @@
 
 <div class="viewcode-block" id="percentual_bias">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.percentual_bias.html#hydromt.stats.skills.percentual_bias">[docs]</a>
-<span class="k">def</span> <span class="nf">percentual_bias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">percentual_bias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the percentual bias between two time series.</span>
 
 <span class="sd">        .. math::</span>
@@ -522,7 +530,7 @@
 
 <div class="viewcode-block" id="volumetric_error">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.volumetric_error.html#hydromt.stats.skills.volumetric_error">[docs]</a>
-<span class="k">def</span> <span class="nf">volumetric_error</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">volumetric_error</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the volumetric error between two time series.</span>
 
 <span class="sd">        .. math::</span>
@@ -554,7 +562,7 @@
 
 <div class="viewcode-block" id="nashsutcliffe">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.nashsutcliffe.html#hydromt.stats.skills.nashsutcliffe">[docs]</a>
-<span class="k">def</span> <span class="nf">nashsutcliffe</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">nashsutcliffe</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the Nash-Sutcliffe model efficiency.</span>
 
 <span class="sd">    Efficiency is based on a simulated and observed time series.</span>
@@ -589,7 +597,7 @@
 
 <div class="viewcode-block" id="lognashsutcliffe">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.lognashsutcliffe.html#hydromt.stats.skills.lognashsutcliffe">[docs]</a>
-<span class="k">def</span> <span class="nf">lognashsutcliffe</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">lognashsutcliffe</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the log Nash-Sutcliffe model efficiency.</span>
 
 <span class="sd">    Efficiency calculation is based on simulated and observed time series.</span>
@@ -628,7 +636,7 @@
 
 <div class="viewcode-block" id="pearson_correlation">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.pearson_correlation.html#hydromt.stats.skills.pearson_correlation">[docs]</a>
-<span class="k">def</span> <span class="nf">pearson_correlation</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pearson_correlation</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the Pearson correlation coefficient of two time series.</span>
 
 <span class="sd">    Parameters</span>
@@ -657,7 +665,7 @@
 
 <div class="viewcode-block" id="spearman_rank_correlation">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.spearman_rank_correlation.html#hydromt.stats.skills.spearman_rank_correlation">[docs]</a>
-<span class="k">def</span> <span class="nf">spearman_rank_correlation</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">spearman_rank_correlation</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the spearman rank correlation coefficient of two time series.</span>
 
 <span class="sd">    Parameters</span>
@@ -686,7 +694,7 @@
 
 <div class="viewcode-block" id="kge_non_parametric">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.kge_non_parametric.html#hydromt.stats.skills.kge_non_parametric">[docs]</a>
-<span class="k">def</span> <span class="nf">kge_non_parametric</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kge_non_parametric</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the Non Parametric Kling-Gupta Efficiency (KGE, 2018).</span>
 
 <span class="sd">    Calculation is based on the two time series with decomposed scores.</span>
@@ -729,7 +737,7 @@
 
 <div class="viewcode-block" id="kge_non_parametric_flood">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.kge_non_parametric_flood.html#hydromt.stats.skills.kge_non_parametric_flood">[docs]</a>
-<span class="k">def</span> <span class="nf">kge_non_parametric_flood</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kge_non_parametric_flood</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the Non Parametric Kling-Gupta Efficiency (KGE, 2018) of two time series.</span>
 
 <span class="sd">    this KGE is optimized for flood peaks using Pearson (see Pool et al., 2018).</span>
@@ -773,7 +781,7 @@
 
 <div class="viewcode-block" id="rsquared">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.rsquared.html#hydromt.stats.skills.rsquared">[docs]</a>
-<span class="k">def</span> <span class="nf">rsquared</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rsquared</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the coefficient of determination of two time series.</span>
 
 <span class="sd">        .. math::</span>
@@ -804,7 +812,7 @@
 
 <div class="viewcode-block" id="mse">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.mse.html#hydromt.stats.skills.mse">[docs]</a>
-<span class="k">def</span> <span class="nf">mse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the mean squared error (MSE) between two time series.</span>
 
 <span class="sd">        .. math::</span>
@@ -836,7 +844,7 @@
 
 <div class="viewcode-block" id="rmse">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.rmse.html#hydromt.stats.skills.rmse">[docs]</a>
-<span class="k">def</span> <span class="nf">rmse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rmse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the root mean squared error between two time series.</span>
 
 <span class="sd">        .. math::</span>
@@ -864,7 +872,7 @@
 
 <div class="viewcode-block" id="rsr">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.rsr.html#hydromt.stats.skills.rsr">[docs]</a>
-<span class="k">def</span> <span class="nf">rsr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rsr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the RMSE-observations standard deviation (RSR) between two time series.</span>
 
 <span class="sd">        .. math::</span>
@@ -894,7 +902,7 @@
 
 <div class="viewcode-block" id="kge">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.kge.html#hydromt.stats.skills.kge">[docs]</a>
-<span class="k">def</span> <span class="nf">kge</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kge</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the Kling-Gupta Efficiency (KGE) of two time series.</span>
 
 <span class="sd">    .. ref:</span>
@@ -932,7 +940,7 @@
 
 <div class="viewcode-block" id="kge_2012">
 <a class="viewcode-back" href="../../../_generated/hydromt.stats.skills.kge_2012.html#hydromt.stats.skills.kge_2012">[docs]</a>
-<span class="k">def</span> <span class="nf">kge_2012</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">kge_2012</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Return the Kling-Gupta Efficiency (KGE, 2012) of two time series.</span>
 
 <span class="sd">    .. ref:</span>
@@ -973,7 +981,7 @@
 
 <span class="c1"># correlation ufunc function</span>
 <span class="c1"># from http://xarray.pydata.org/en/stable/dask.html#automatic-parallelization</span>
-<span class="k">def</span> <span class="nf">_covariance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_covariance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span>
         <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
         <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span>
@@ -981,40 +989,40 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_pearson_correlation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_pearson_correlation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_covariance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanstd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nanstd</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
 
 
-<span class="k">def</span> <span class="nf">_spearman_correlation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_spearman_correlation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="n">x_ranks</span> <span class="o">=</span> <span class="n">bottleneck</span><span class="o">.</span><span class="n">nanrankdata</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">y_ranks</span> <span class="o">=</span> <span class="n">bottleneck</span><span class="o">.</span><span class="n">nanrankdata</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_pearson_correlation</span><span class="p">(</span><span class="n">x_ranks</span><span class="p">,</span> <span class="n">y_ranks</span><span class="p">)</span>
 
 
 <span class="c1"># numpy functions</span>
-<span class="k">def</span> <span class="nf">_fdc_alpha</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_fdc_alpha</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
     <span class="n">fdc_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="p">))</span>
     <span class="n">fdc_o</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">))</span>
     <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fdc_s</span> <span class="o">-</span> <span class="n">fdc_o</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_bias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_bias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bias.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">sim</span> <span class="o">-</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_pbias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_pbias</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Percentual bias.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">sim</span> <span class="o">-</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_ve</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_ve</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Volumetric Error.&quot;&quot;&quot;</span>
     <span class="n">ve</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">sim</span> <span class="o">-</span> <span class="n">obs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ve</span>
 
 
-<span class="k">def</span> <span class="nf">_mse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_mse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mean squared error.&quot;&quot;&quot;</span>
     <span class="n">mse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">obs</span> <span class="o">-</span> <span class="n">sim</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">obs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span>
@@ -1022,7 +1030,7 @@
     <span class="k">return</span> <span class="n">mse</span>
 
 
-<span class="k">def</span> <span class="nf">_rsr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rsr</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;RMSE-observations standard deviation.&quot;&quot;&quot;</span>
     <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">_mse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">))</span>
     <span class="n">stdev</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
@@ -1032,7 +1040,7 @@
     <span class="k">return</span> <span class="n">rmse</span> <span class="o">/</span> <span class="n">stdev</span>
 
 
-<span class="k">def</span> <span class="nf">_nse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_nse</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;nash-sutcliffe efficiency.&quot;&quot;&quot;</span>
     <span class="n">obs_mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nansum</span><span class="p">((</span><span class="n">sim</span> <span class="o">-</span> <span class="n">obs</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
@@ -1067,8 +1075,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1101,7 +1109,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

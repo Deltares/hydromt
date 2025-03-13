@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,18 +26,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
@@ -46,10 +46,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/model/processes/region';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="icon" href="../../../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -173,7 +174,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -399,9 +402,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -450,28 +458,28 @@
   <h1>Source code for hydromt.model.processes.region</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;parse a region from a dict. See parse_region for information on usage.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span><span class="p">,</span> <span class="n">isfile</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">isdir</span><span class="p">,</span> <span class="n">isfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">geopandas</span> <span class="k">as</span> <span class="nn">gpd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
-<span class="kn">import</span> <span class="nn">xugrid</span> <span class="k">as</span> <span class="nn">xu</span>
-<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span>
-<span class="kn">from</span> <span class="nn">shapely</span> <span class="kn">import</span> <span class="n">box</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xugrid</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xu</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
-<span class="kn">from</span> <span class="nn">hydromt._typing</span> <span class="kn">import</span> <span class="n">NoDataStrategy</span>
-<span class="kn">from</span> <span class="nn">hydromt._typing.type_def</span> <span class="kn">import</span> <span class="n">StrPath</span>
-<span class="kn">from</span> <span class="nn">hydromt.data_catalog</span> <span class="kn">import</span> <span class="n">DataCatalog</span>
-<span class="kn">from</span> <span class="nn">hydromt.data_catalog.sources</span> <span class="kn">import</span> <span class="n">RasterDatasetSource</span>
-<span class="kn">from</span> <span class="nn">hydromt.gis</span> <span class="kn">import</span> <span class="n">_gis_utils</span>
-<span class="kn">from</span> <span class="nn">hydromt.model.processes.basin_mask</span> <span class="kn">import</span> <span class="n">get_basin_geometry</span>
-<span class="kn">from</span> <span class="nn">hydromt.plugins</span> <span class="kn">import</span> <span class="n">PLUGINS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrPath</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.sources</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterDatasetSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis</span><span class="w"> </span><span class="kn">import</span> <span class="n">_gis_utils</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.processes.basin_mask</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_basin_geometry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PLUGINS</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">hydromt.model.model</span> <span class="kn">import</span> <span class="n">Model</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
 
 <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -487,7 +495,7 @@
 
 <div class="viewcode-block" id="parse_region_basin">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.region.parse_region_basin.html#hydromt.model.processes.region.parse_region_basin">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_region_basin</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_region_basin</span><span class="p">(</span>
     <span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">data_catalog</span><span class="p">:</span> <span class="n">DataCatalog</span><span class="p">,</span>
@@ -589,7 +597,7 @@
 
 <div class="viewcode-block" id="parse_region_bbox">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.region.parse_region_bbox.html#hydromt.model.processes.region.parse_region_bbox">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_region_bbox</span><span class="p">(</span><span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4326</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_region_bbox</span><span class="p">(</span><span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4326</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a region of kind bbox and return the GeoDataFrame.</span>
 
 <span class="sd">    Parameters</span>
@@ -621,7 +629,7 @@
 
 <div class="viewcode-block" id="parse_region_geom">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.region.parse_region_geom.html#hydromt.model.processes.region.parse_region_geom">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_region_geom</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_region_geom</span><span class="p">(</span>
     <span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -670,7 +678,7 @@
 
 <div class="viewcode-block" id="parse_region_grid">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.region.parse_region_grid.html#hydromt.model.processes.region.parse_region_grid">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_region_grid</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_region_grid</span><span class="p">(</span>
     <span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">data_catalog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataCatalog</span><span class="p">],</span>
@@ -723,7 +731,7 @@
 
 <div class="viewcode-block" id="parse_region_other_model">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.region.parse_region_other_model.html#hydromt.model.processes.region.parse_region_other_model">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_region_other_model</span><span class="p">(</span><span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_region_other_model</span><span class="p">(</span><span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a region with a model path and return that whole Model in read mode.</span>
 
 <span class="sd">    Parameters</span>
@@ -747,7 +755,7 @@
 
 <div class="viewcode-block" id="parse_region_mesh">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.region.parse_region_mesh.html#hydromt.model.processes.region.parse_region_mesh">[docs]</a>
-<span class="k">def</span> <span class="nf">parse_region_mesh</span><span class="p">(</span><span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_region_mesh</span><span class="p">(</span><span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a region with a mesh path and return that mesh in read mode.</span>
 
 <span class="sd">    Parameters</span>
@@ -780,7 +788,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_update_crs</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_update_crs</span><span class="p">(</span>
     <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">CRS</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -789,7 +797,7 @@
     <span class="k">return</span> <span class="n">geom</span>
 
 
-<span class="k">def</span> <span class="nf">_parse_region_value</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_region_value</span><span class="p">(</span>
     <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_catalog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataCatalog</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
     <span class="n">kwarg</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -827,12 +835,12 @@
     <span class="k">return</span> <span class="n">kwarg</span>
 
 
-<span class="k">def</span> <span class="nf">_assert_parse_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_assert_parse_key</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">expected</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expected</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected key in &#39;</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span><span class="si">}</span><span class="s2">&#39; but got &#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_assert_parsed_values</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_assert_parsed_values</span><span class="p">(</span>
     <span class="o">*</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">region_value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expected</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">expected</span><span class="p">:</span>
@@ -869,8 +877,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -903,7 +911,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

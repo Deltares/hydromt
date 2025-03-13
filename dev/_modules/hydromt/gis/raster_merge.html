@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,18 +26,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -46,10 +46,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/gis/raster_merge';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="icon" href="../../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -173,7 +174,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -399,9 +402,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -450,18 +458,18 @@
   <h1>Source code for hydromt.gis.raster_merge</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Implementations relating to merging of datasets and arrays.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">rasterio</span>
-<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
-<span class="kn">from</span> <span class="nn">hydromt.gis.raster</span> <span class="kn">import</span> <span class="n">full_from_transform</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.raster</span><span class="w"> </span><span class="kn">import</span> <span class="n">full_from_transform</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;merge&quot;</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="merge">
 <a class="viewcode-back" href="../../../_generated/hydromt.gis.raster_merge.merge.html#hydromt.gis.raster_merge.merge">[docs]</a>
-<span class="k">def</span> <span class="nf">merge</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge</span><span class="p">(</span>
     <span class="n">data_arrays</span><span class="p">,</span>
     <span class="n">dst_crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">dst_bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -514,19 +522,19 @@
     <span class="c1"># define merge method</span>
     <span class="k">if</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
 
-        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
             <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
             <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span>
 
     <span class="k">elif</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
 
-        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
             <span class="n">dmask</span> <span class="o">=</span> <span class="o">~</span><span class="n">new_nodata</span>
             <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span>
 
     <span class="k">elif</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
 
-        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
             <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="o">~</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
             <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">],</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">])</span>
             <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
@@ -534,7 +542,7 @@
 
     <span class="k">elif</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
 
-        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
             <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="o">~</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
             <span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">old_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">],</span> <span class="n">new_data</span><span class="p">[</span><span class="n">dmask</span><span class="p">])</span>
             <span class="n">dmask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
@@ -542,7 +550,7 @@
 
     <span class="k">elif</span> <span class="n">merge_method</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span>
 
-        <span class="k">def</span> <span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">copyto</span><span class="p">(</span><span class="n">old_data</span><span class="p">,</span> <span class="n">new_data</span><span class="p">,</span> <span class="n">old_nodata</span><span class="p">,</span> <span class="n">new_nodata</span><span class="p">):</span>
             <span class="n">data_overlap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="o">~</span><span class="n">old_nodata</span><span class="p">,</span> <span class="o">~</span><span class="n">new_nodata</span><span class="p">)</span>
             <span class="k">assert</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">data_overlap</span><span class="p">)</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">new_nodata</span>
@@ -710,8 +718,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -744,7 +752,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

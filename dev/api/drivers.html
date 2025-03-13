@@ -16,8 +16,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -27,18 +27,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
@@ -47,10 +47,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/drivers';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -176,7 +177,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -878,9 +881,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -932,7 +940,7 @@
 <h2>Base<a class="headerlink" href="#base" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.BaseDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.BaseDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Base class for different drivers.</p></td>
 </tr>
 </tbody>
@@ -943,7 +951,7 @@
 <h2>RasterDataset<a class="headerlink" href="#rasterdataset" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetDriver.html#hydromt.data_catalog.drivers.RasterDatasetDriver" title="hydromt.data_catalog.drivers.RasterDatasetDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterDatasetDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetDriver.html#hydromt.data_catalog.drivers.RasterDatasetDriver" title="hydromt.data_catalog.drivers.RasterDatasetDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterDatasetDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Abstract Driver to read GeoDataFrames.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetDriver.read.html#hydromt.data_catalog.drivers.RasterDatasetDriver.read" title="hydromt.data_catalog.drivers.RasterDatasetDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterDatasetDriver.read</span></code></a>(uris, *[, mask, ...])</p></td>
@@ -959,7 +967,7 @@
 <h3>RasterDatasetXarrayDriver<a class="headerlink" href="#rasterdatasetxarraydriver" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.html#hydromt.data_catalog.drivers.RasterDatasetXarrayDriver" title="hydromt.data_catalog.drivers.RasterDatasetXarrayDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterDatasetXarrayDriver</span></code></a>(*[, filesystem, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.html#hydromt.data_catalog.drivers.RasterDatasetXarrayDriver" title="hydromt.data_catalog.drivers.RasterDatasetXarrayDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterDatasetXarrayDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>RasterDatasetXarrayDriver.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.read.html#hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.read" title="hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterDatasetXarrayDriver.read</span></code></a>(uris, *[, ...])</p></td>
@@ -976,7 +984,7 @@
 <h3>RasterioDriver<a class="headerlink" href="#rasteriodriver" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver" title="hydromt.data_catalog.drivers.RasterioDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterioDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver" title="hydromt.data_catalog.drivers.RasterioDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterioDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Driver using rasterio for RasterDataset.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterioDriver.read.html#hydromt.data_catalog.drivers.RasterioDriver.read" title="hydromt.data_catalog.drivers.RasterioDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RasterioDriver.read</span></code></a>(uris, *[, mask, ...])</p></td>
@@ -994,7 +1002,7 @@
 <h2>GeoDataFrame<a class="headerlink" href="#geodataframe" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameDriver.html#hydromt.data_catalog.drivers.GeoDataFrameDriver" title="hydromt.data_catalog.drivers.GeoDataFrameDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDataFrameDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameDriver.html#hydromt.data_catalog.drivers.GeoDataFrameDriver" title="hydromt.data_catalog.drivers.GeoDataFrameDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDataFrameDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Abstract Driver to read GeoDataFrames.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameDriver.read.html#hydromt.data_catalog.drivers.GeoDataFrameDriver.read" title="hydromt.data_catalog.drivers.GeoDataFrameDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDataFrameDriver.read</span></code></a>(uris, *[, mask, ...])</p></td>
@@ -1010,7 +1018,7 @@
 <h3>PyogrioDriver<a class="headerlink" href="#pyogriodriver" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PyogrioDriver.html#hydromt.data_catalog.drivers.PyogrioDriver" title="hydromt.data_catalog.drivers.PyogrioDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyogrioDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PyogrioDriver.html#hydromt.data_catalog.drivers.PyogrioDriver" title="hydromt.data_catalog.drivers.PyogrioDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyogrioDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Driver to read GeoDataFrames using the <cite>pyogrio</cite> package.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PyogrioDriver.read.html#hydromt.data_catalog.drivers.PyogrioDriver.read" title="hydromt.data_catalog.drivers.PyogrioDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyogrioDriver.read</span></code></a>(uris, *[, mask, ...])</p></td>
@@ -1027,7 +1035,7 @@
 <h3>GeoDataFrameTableDriver<a class="headerlink" href="#geodataframetabledriver" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameTableDriver.html#hydromt.data_catalog.drivers.GeoDataFrameTableDriver" title="hydromt.data_catalog.drivers.GeoDataFrameTableDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDataFrameTableDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameTableDriver.html#hydromt.data_catalog.drivers.GeoDataFrameTableDriver" title="hydromt.data_catalog.drivers.GeoDataFrameTableDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDataFrameTableDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Driver for reading in GeoDataFrames from tabular formats.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameTableDriver.read.html#hydromt.data_catalog.drivers.GeoDataFrameTableDriver.read" title="hydromt.data_catalog.drivers.GeoDataFrameTableDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDataFrameTableDriver.read</span></code></a>(uris, *[, ...])</p></td>
@@ -1045,7 +1053,7 @@
 <h2>DataFrame<a class="headerlink" href="#dataframe" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DataFrameDriver.html#hydromt.data_catalog.drivers.DataFrameDriver" title="hydromt.data_catalog.drivers.DataFrameDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrameDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DataFrameDriver.html#hydromt.data_catalog.drivers.DataFrameDriver" title="hydromt.data_catalog.drivers.DataFrameDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrameDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Abstract Driver to read DataFrames.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DataFrameDriver.read.html#hydromt.data_catalog.drivers.DataFrameDriver.read" title="hydromt.data_catalog.drivers.DataFrameDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DataFrameDriver.read</span></code></a>(uris, *[, variables, ...])</p></td>
@@ -1061,7 +1069,7 @@
 <h3>PandasDriver<a class="headerlink" href="#pandasdriver" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PandasDriver.html#hydromt.data_catalog.drivers.PandasDriver" title="hydromt.data_catalog.drivers.PandasDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PandasDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PandasDriver.html#hydromt.data_catalog.drivers.PandasDriver" title="hydromt.data_catalog.drivers.PandasDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PandasDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Driver for DataFrames using the pandas library.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PandasDriver.read.html#hydromt.data_catalog.drivers.PandasDriver.read" title="hydromt.data_catalog.drivers.PandasDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PandasDriver.read</span></code></a>(uris, *[, variables, ...])</p></td>
@@ -1079,7 +1087,7 @@
 <h2>GeoDataset<a class="headerlink" href="#geodataset" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetDriver.html#hydromt.data_catalog.drivers.GeoDatasetDriver" title="hydromt.data_catalog.drivers.GeoDatasetDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetDriver.html#hydromt.data_catalog.drivers.GeoDatasetDriver" title="hydromt.data_catalog.drivers.GeoDatasetDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Abstract Driver to read GeoDatasets.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetDriver.read.html#hydromt.data_catalog.drivers.GeoDatasetDriver.read" title="hydromt.data_catalog.drivers.GeoDatasetDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetDriver.read</span></code></a>(uris, *[, mask, ...])</p></td>
@@ -1095,7 +1103,7 @@
 <h3>GeoDatasetXarrayDriver<a class="headerlink" href="#geodatasetxarraydriver" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.html#hydromt.data_catalog.drivers.GeoDatasetXarrayDriver" title="hydromt.data_catalog.drivers.GeoDatasetXarrayDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetXarrayDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.html#hydromt.data_catalog.drivers.GeoDatasetXarrayDriver" title="hydromt.data_catalog.drivers.GeoDatasetXarrayDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetXarrayDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>GeoDatasetXarrayDriver.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.read.html#hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.read" title="hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetXarrayDriver.read</span></code></a>(uris, *[, mask, ...])</p></td>
@@ -1112,7 +1120,7 @@
 <h3>GeoDatasetVectorDriver<a class="headerlink" href="#geodatasetvectordriver" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.html#hydromt.data_catalog.drivers.GeoDatasetVectorDriver" title="hydromt.data_catalog.drivers.GeoDatasetVectorDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetVectorDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.html#hydromt.data_catalog.drivers.GeoDatasetVectorDriver" title="hydromt.data_catalog.drivers.GeoDatasetVectorDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetVectorDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>VectorGeodatasetDriver for vector data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.read.html#hydromt.data_catalog.drivers.GeoDatasetVectorDriver.read" title="hydromt.data_catalog.drivers.GeoDatasetVectorDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeoDatasetVectorDriver.read</span></code></a>(uris, *[, mask, ...])</p></td>
@@ -1130,7 +1138,7 @@
 <h2>Dataset<a class="headerlink" href="#dataset" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetDriver.html#hydromt.data_catalog.drivers.DatasetDriver" title="hydromt.data_catalog.drivers.DatasetDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatasetDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetDriver.html#hydromt.data_catalog.drivers.DatasetDriver" title="hydromt.data_catalog.drivers.DatasetDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatasetDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>Abstract Driver to read Datasets.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetDriver.read.html#hydromt.data_catalog.drivers.DatasetDriver.read" title="hydromt.data_catalog.drivers.DatasetDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatasetDriver.read</span></code></a>(uris, *[, variables, ...])</p></td>
@@ -1146,7 +1154,7 @@
 <h3>DatasetXarrayDriver<a class="headerlink" href="#datasetxarraydriver" title="Link to this heading">#</a></h3>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetXarrayDriver.html#hydromt.data_catalog.drivers.DatasetXarrayDriver" title="hydromt.data_catalog.drivers.DatasetXarrayDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatasetXarrayDriver</span></code></a>(*[, filesystem, options])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetXarrayDriver.html#hydromt.data_catalog.drivers.DatasetXarrayDriver" title="hydromt.data_catalog.drivers.DatasetXarrayDriver"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatasetXarrayDriver</span></code></a>(*, filesystem, ...)</p></td>
 <td><p>DatasetXarrayDriver.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetXarrayDriver.read.html#hydromt.data_catalog.drivers.DatasetXarrayDriver.read" title="hydromt.data_catalog.drivers.DatasetXarrayDriver.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DatasetXarrayDriver.read</span></code></a>(uris, *[, ...])</p></td>
@@ -1253,13 +1261,13 @@
 </div>
 
   <div class="sidebar-secondary-item">
-
-  <div class="tocsection sourcelink">
-    <a href="../_sources/api/drivers.rst.txt">
-      <i class="fa-solid fa-file-lines"></i> Show Source
-    </a>
-  </div>
-</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/drivers.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
 
 </div></div>
               
@@ -1274,8 +1282,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1308,7 +1316,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>

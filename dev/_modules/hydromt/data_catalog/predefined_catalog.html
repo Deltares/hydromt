@@ -15,8 +15,8 @@
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
-  <!-- 
-    this give us a css class that will be invisible only if js is disabled 
+  <!--
+    this give us a css class that will be invisible only if js is disabled
   -->
   <noscript>
     <style>
@@ -26,18 +26,18 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=aa503ec8" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
@@ -46,10 +46,11 @@
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/hydromt/data_catalog/predefined_catalog';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.0';
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
-        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
         </script>
     <link rel="icon" href="../../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -173,7 +174,9 @@
 </li>
 
             <li class="nav-item dropdown">
-                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
                     More
                 </button>
                 <ul id="pst-nav-more-links" class="dropdown-menu">
@@ -399,9 +402,14 @@
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
   </div>
-  
-  <div id="rtd-footer-container"></div>
 
 
       </div>
@@ -450,17 +458,17 @@
   <h1>Source code for hydromt.data_catalog.predefined_catalog</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Implementation of the predefined data catalogs entry points.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">packaging.version</span>
-<span class="kn">import</span> <span class="nn">pooch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">packaging.version</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
 
-<span class="kn">from</span> <span class="nn">hydromt._utils</span> <span class="kn">import</span> <span class="n">_copy_to_local</span><span class="p">,</span> <span class="n">_is_valid_url</span>
-<span class="kn">from</span> <span class="nn">hydromt.config</span> <span class="kn">import</span> <span class="n">SETTINGS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_copy_to_local</span><span class="p">,</span> <span class="n">_is_valid_url</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SETTINGS</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -493,7 +501,7 @@
 
 <div class="viewcode-block" id="create_registry_file">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_catalog.predefined_catalog.create_registry_file.html#hydromt.data_catalog.create_registry_file">[docs]</a>
-<span class="k">def</span> <span class="nf">create_registry_file</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">registry_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_registry_file</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">registry_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a registry file for all catalog files in the root directory.</span>
 
 <span class="sd">    The root directory should contain a &lt;version&gt;/data_catalog.yml file per version.</span>
@@ -529,7 +537,7 @@
 
 <div class="viewcode-block" id="PredefinedCatalog">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_catalog.PredefinedCatalog.html#hydromt.data_catalog.PredefinedCatalog">[docs]</a>
-<span class="k">class</span> <span class="nc">PredefinedCatalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PredefinedCatalog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Predefined data catalog.</span>
 
 <span class="sd">    A predefined data catalog is a collection of data_catalog.yml files that are stored in a</span>
@@ -551,7 +559,7 @@
 
 <div class="viewcode-block" id="PredefinedCatalog.__init__">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_catalog.PredefinedCatalog.html#hydromt.data_catalog.PredefinedCatalog.__init__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">format_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;v0&quot;</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">SETTINGS</span><span class="o">.</span><span class="n">cache_root</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># init arguments passed by DataCatalog</span>
@@ -563,12 +571,12 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">registry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the registry.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pooch</span><span class="o">.</span><span class="n">registry</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pooch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pooch</span><span class="o">.</span><span class="n">Pooch</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">pooch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pooch</span><span class="o">.</span><span class="n">Pooch</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a pooch instance with all data catalog files in registry.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pooch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_create_pooch</span><span class="p">()</span>
@@ -576,20 +584,20 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pooch</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the versions of the catalog.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_versions</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span>
 
-    <span class="k">def</span> <span class="nf">_create_pooch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_pooch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pooch</span> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
             <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cache_dir</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">base_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="p">,</span>
             <span class="n">retry_if_failed</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_get_versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set valid catalog versions.&quot;&quot;&quot;</span>
         <span class="c1"># parse versions from registry, assume registry key is &lt;version&gt;/data_catalog.yml</span>
         <span class="c1"># keep only versions that match the format_version</span>
@@ -604,7 +612,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_versions</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_versions</span>
 
-    <span class="k">def</span> <span class="nf">_load_registry_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_registry_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a catalog from a yaml file.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pooch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_create_pooch</span><span class="p">()</span>
@@ -629,7 +637,7 @@
 
 <div class="viewcode-block" id="PredefinedCatalog.get_catalog_file">
 <a class="viewcode-back" href="../../../_generated/hydromt.data_catalog.PredefinedCatalog.get_catalog_file.html#hydromt.data_catalog.PredefinedCatalog.get_catalog_file">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_catalog_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_catalog_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the cached catalog file path for a specific version.</span>
 
 <span class="sd">        Parameters</span>
@@ -654,14 +662,14 @@
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_downloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_downloader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_valid_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_url</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">_copy_file</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">_valid_key</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">format_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_valid_key</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">format_version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the key is a valid version.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">packaging</span><span class="o">.</span><span class="n">version</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
@@ -670,7 +678,7 @@
         <span class="k">return</span> <span class="kc">False</span>
 
 
-<span class="k">def</span> <span class="nf">_copy_file</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_copy_file</span><span class="p">(</span>
     <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">pooch</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pooch</span><span class="o">.</span><span class="n">Pooch</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -692,35 +700,35 @@
     <span class="k">return</span> <span class="n">output_file</span>
 
 
-<span class="k">class</span> <span class="nc">DeltaresDataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DeltaresDataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Deltares data catalog.&quot;&quot;&quot;</span>
 
     <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CATALOG_ROOT</span><span class="si">}</span><span class="s2">/deltares_data&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;deltares_data&quot;</span>
 
 
-<span class="k">class</span> <span class="nc">ArtifactDataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ArtifactDataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Artifact data catalog.&quot;&quot;&quot;</span>
 
     <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CATALOG_ROOT</span><span class="si">}</span><span class="s2">/artifact_data&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;artifact_data&quot;</span>
 
 
-<span class="k">class</span> <span class="nc">AWSDataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AWSDataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;AWS data catalog.&quot;&quot;&quot;</span>
 
     <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CATALOG_ROOT</span><span class="si">}</span><span class="s2">/aws_data&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;aws_data&quot;</span>
 
 
-<span class="k">class</span> <span class="nc">GCSCMIP6DataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GCSCMIP6DataCatalog</span><span class="p">(</span><span class="n">PredefinedCatalog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;GCS CMIP6 data catalog.&quot;&quot;&quot;</span>
 
     <span class="n">base_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CATALOG_ROOT</span><span class="si">}</span><span class="s2">/gcs_cmip6_data&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;gcs_cmip6_data&quot;</span>
 
 
-<span class="k">def</span> <span class="nf">_replace_line_endings</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_replace_line_endings</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
     <span class="n">WINDOWS_LINE_ENDING</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\r\n</span><span class="s2">&quot;</span>
     <span class="n">UNIX_LINE_ENDING</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">open_file</span><span class="p">:</span>
@@ -757,8 +765,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -791,7 +799,8 @@
       
         <div class="footer-item">
 <p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
 </p></div>
       
     </div>
