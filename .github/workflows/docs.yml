@@ -35,20 +35,18 @@ jobs:
         uses: actions/checkout@v4
       - uses: prefix-dev/setup-pixi@v0.8.2
         with:
-          pixi-version: v0.41.1
-          environments: full-py311
+          pixi-version: "v0.41.1"
 
       # if we're not publishing we don't have to write them, so we might as well
       # save ourself a bunch of IO time
       - name: Generate dummy docs
         if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          pixi run --locked -e full-py311 sphinx-build ./docs ./docs/_build -b dummy -W
+        run: pixi run --locked sphinx-build ./docs ./docs/_build -b dummy -W
 
       - name: Generate docs
         if: ${{ github.event_name != 'pull_request' }}
         run: |
-          pixi run --locked -e full-py311 docs
+          pixi run --locked docs
           export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
 
           if [ -z "$CURRENT_VERSION" ]; then
