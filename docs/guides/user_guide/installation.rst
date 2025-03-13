@@ -7,7 +7,7 @@ Installation guide
 Prerequisites
 =============
 
-You'll need **Python 3.9, 3.10 or 3.11** and a package manager. We recommend using pixi.
+You'll need **Python 3.9, 3.10, 3.11, 3.12, or 3.13** and a package manager. We recommend using pixi.
 
 Installation
 ============

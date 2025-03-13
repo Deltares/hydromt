@@ -28,12 +28,10 @@ Once pixi is installed you can create a developer installation by running the fo
 
     $ pixi run -e <ENVIRONMENT> install
 
-This will automatically install all dependencies needed to develop HydroMT, and it install HydroMT within the current environment in editable mode.
+This will automatically install all dependencies needed to develop HydroMT, and it will install pre-commit for this repository.
 You can use ``open-vscode.bat`` to open the current folder in VSCode with the correct environment activated.
-This bat-file simply runs ``pixi run -e <ENVIRONMENT> code .`` to set up the pixi environment before starting VSCode.
+This bat-file simply runs ``pixi run -e default code .`` to set up the pixi environment before starting VSCode.
 The python installation can be found in the ``.pixi`` folder. No need to switch interpreters.
-The ``ENVIRONMENT`` to specify is of your preference, based on what you are going to do.
-The most complete environment would be ``full-py311`` / ``default``.
 
 
 Fine tuned installation
@@ -72,7 +70,7 @@ Adding a dependency
 In order to add a dependency you need to:
 
 1. Add it to the ``pyproject.toml`` file in the ``[project.dependencies]`` section.
-2. Then you will need to run ``pixi run -e <ENVIRONMENT> install`` to install the new dependency. It will update the ``pixi.lock`` file.
+2. Then you will need to run ``pixi install`` to install the new dependency. It will update the ``pixi.lock`` file.
 3. Commit the changes to the ``pyproject.toml``, and ``pixi.lock`` files.
 
 Updating dependencies
@@ -83,6 +81,6 @@ We commit the ``pixi.lock`` file to the repository to ensure that everyone has t
 Since it freezes the dependencies, we will need to schedule regular updates.
 
 1. Remove the ``pixi.lock`` file.
-2. Run ``pixi run -e <ENVIRONMENT> install`` to update the dependencies.
+2. Run ``pixi install`` to update the dependencies.
 
 There is a Github action workflow that does this on a monthly basis. It will create a pull request with the updated ``pixi.lock`` file.

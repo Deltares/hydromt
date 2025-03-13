@@ -40,8 +40,7 @@ jobs:
           tags: hydromt
           load: true
           build-args: |
-            PIXIENV=full-py311
-
+            PIXIENV=full-latest
 
       - name: Run Tests
         run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest
