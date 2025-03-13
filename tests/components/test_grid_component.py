@@ -126,7 +126,7 @@ def test_create_raise_errors(mock_model):
         grid_component.create_from_region(region={"bbox": bbox})
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_create_basin_grid(tmpdir):
     root = join(tmpdir, "grid_model")
     model = Model(
@@ -328,7 +328,7 @@ def test_add_data_from_geodataframe(
     assert result is None
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_grid_component_model(tmpdir):
     # Initialize model
     dc_param_path = join(DATADIR, "parameters_data.yml")

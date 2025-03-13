@@ -12,7 +12,7 @@ from hydromt.model.components.config import ConfigComponent
 ABS_PATH = Path(abspath(__name__))
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_config_dict():
     return {
         "section1": {

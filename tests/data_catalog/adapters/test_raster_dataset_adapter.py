@@ -9,7 +9,7 @@ from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 
 
 class TestRasterDatasetAdapter:
-    @pytest.fixture()
+    @pytest.fixture
     def example_raster_ds(self, raster_ds: xr.Dataset):
         raster_ds.raster.set_crs(4326)
         return raster_ds

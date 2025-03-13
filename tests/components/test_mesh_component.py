@@ -314,7 +314,7 @@ def test_add_2d_data_from_raster_reclass(
     assert "mesh2d" in mesh_component.mesh_names
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_read(mock_model, caplog: pytest.LogCaptureFixture, tmpdir, griduda):
     mesh_component = MeshComponent(mock_model)
     mesh_component.model.root = ModelRoot(tmpdir, mode="w")
@@ -361,7 +361,7 @@ def test_model_mesh_workflow(tmpdir: Path):
     assert component.data == data
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_mesh_with_model(griduda, world, tmpdir):
     dc_param_path = join(DATADIR, "parameters_data.yml")
     root = join(tmpdir, "mesh_component1")

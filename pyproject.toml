@@ -149,6 +149,7 @@ ignore = ["D211", "D213", "D206", "E501", "E741", "D105", "E712", "B904"]
 "hydromt/models/__init__.py" = ["F401"]
 "hydromt/_compat.py" = ["F401"]
 "tests/conftest.py" = ["E402"]
+"examples/**" = ["B018", "D103"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

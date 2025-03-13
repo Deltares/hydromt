@@ -244,7 +244,7 @@ class TestBBoxFromFileAndFilters:
 
 
 class TestZoomToOverviewLevel:
-    @pytest.fixture()
+    @pytest.fixture
     def kwargs(self) -> Dict[str, Any]:
         return {"source_crs": 4326, "zls_dict": {0: 0.1, 1: 0.3}}
 

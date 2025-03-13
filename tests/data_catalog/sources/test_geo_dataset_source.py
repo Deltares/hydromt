@@ -35,7 +35,7 @@ class TestGeoDatasetSource:
         read_data = source.read_data()
         assert read_data.equals(geoda)
 
-    @pytest.fixture()
+    @pytest.fixture
     def writable_source(
         self,
         MockGeoDatasetReadOnlyDriver: Type[GeoDatasetDriver],
@@ -49,14 +49,14 @@ class TestGeoDatasetSource:
             metadata=SourceMetadata(crs=4326),
         )
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_writes_to_netcdf(self, tmp_dir: Path, writable_source: GeoDatasetSource):
         local_driver = GeoDatasetXarrayDriver()
         local_path: Path = tmp_dir / "geods_source_writes_netcdf.nc"
         writable_source.to_file(file_path=local_path, driver_override=local_driver)
         assert local_driver.filesystem.exists(local_path)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_writes_to_netcdf_variables(
         self,
         tmp_dir: Path,
@@ -71,7 +71,7 @@ class TestGeoDatasetSource:
         )
         assert local_driver.filesystem.exists(local_path)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_writes_to_zarr(self, tmp_dir: Path, writable_source: GeoDatasetSource):
         local_driver = GeoDatasetXarrayDriver()
         local_path = tmp_dir / "geods_source_writes_netcdf.zarr"

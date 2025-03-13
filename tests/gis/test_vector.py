@@ -11,7 +11,7 @@ from shapely.geometry import MultiPolygon, Polygon
 from hydromt.gis.vector import GeoDataArray, GeoDataset
 
 
-@pytest.fixture()
+@pytest.fixture
 def gdf():
     geom = [
         Polygon(((0, 0), (1, 0), (1, 1), (0, 1), (0, 0))),

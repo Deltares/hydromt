@@ -9,12 +9,12 @@ from hydromt.data_catalog.predefined_catalog import (
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def cat_root() -> Path:
     return Path(__file__).parents[2] / "data/catalogs"
 
 
-@pytest.fixture()
+@pytest.fixture
 def tmp_catalog_files(tmpdir):
     _base_url = Path(tmpdir) / "test_catalog"
     for version in ["v0.1.0", "v0.2.0", "v1.0.0"]:
@@ -24,7 +24,7 @@ def tmp_catalog_files(tmpdir):
     return _base_url
 
 
-@pytest.fixture()
+@pytest.fixture
 def tmp_catalog_class(tmp_catalog_files) -> type[PredefinedCatalog]:
     _base_url = tmp_catalog_files
 
