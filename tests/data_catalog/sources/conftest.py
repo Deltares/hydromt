@@ -32,7 +32,7 @@ def mock_df_adapter():
     return MockDataFrameAdapter()
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockDataFrameDriver(df: pd.DataFrame) -> Type[DataFrameDriver]:
     class MockDataFrameDriver(DataFrameDriver):
         name = "mock_df_driver"
@@ -47,7 +47,7 @@ def MockDataFrameDriver(df: pd.DataFrame) -> Type[DataFrameDriver]:
     return MockDataFrameDriver
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockDataFrameReadOnlyDriver(MockDataFrameDriver) -> Type[DataFrameDriver]:
     class MockDataFrameReadOnlyDriver(MockDataFrameDriver):
         name = "mock_df_readonly_driver"
@@ -68,7 +68,7 @@ def mock_ds_adapter():
     return MockDatasetAdapter()
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockDatasetDriver(timeseries_ds: xr.Dataset) -> Type[DatasetDriver]:
     class MockDatasetDriver(DatasetDriver):
         name = "mock_ds_driver"
@@ -83,7 +83,7 @@ def MockDatasetDriver(timeseries_ds: xr.Dataset) -> Type[DatasetDriver]:
     return MockDatasetDriver
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockDatasetReadOnlyDriver(MockDatasetDriver) -> Type[DatasetDriver]:
     class MockDatasetReadOnlyDriver(MockDatasetDriver):
         name = "mock_ds_readonly_driver"
@@ -95,7 +95,7 @@ def MockDatasetReadOnlyDriver(MockDatasetDriver) -> Type[DatasetDriver]:
 # GeoDataFrame
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockGeoDataFrameDriver(geodf: gpd.GeoDataFrame) -> Type[GeoDataFrameDriver]:
     class MockGeoDataFrameDriver(GeoDataFrameDriver):
         name = "mock_geodf_driver"
@@ -110,7 +110,7 @@ def MockGeoDataFrameDriver(geodf: gpd.GeoDataFrame) -> Type[GeoDataFrameDriver]:
     return MockGeoDataFrameDriver
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockGeoDataFrameReadOnlyDriver(MockGeoDataFrameDriver) -> Type[GeoDataFrameDriver]:
     class MockGeoDataFrameReadOnlyDriver(MockGeoDataFrameDriver):
         name = "mock_geodf_readonly_driver"
@@ -122,7 +122,7 @@ def MockGeoDataFrameReadOnlyDriver(MockGeoDataFrameDriver) -> Type[GeoDataFrameD
 # GeoDataset
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockGeoDatasetDriver(geoda: xr.DataArray) -> Type[GeoDatasetDriver]:
     class MockGeoDatasetDriver(GeoDatasetDriver):
         name = "mock_geods_driver"
@@ -139,7 +139,7 @@ def MockGeoDatasetDriver(geoda: xr.DataArray) -> Type[GeoDatasetDriver]:
     return MockGeoDatasetDriver
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockGeoDatasetReadOnlyDriver(MockGeoDatasetDriver) -> Type[GeoDatasetDriver]:
     class MockGeoDatasetReadOnlyDriver(MockGeoDatasetDriver):
         name = "mock_geods_readonly_driver"
@@ -148,7 +148,7 @@ def MockGeoDatasetReadOnlyDriver(MockGeoDatasetDriver) -> Type[GeoDatasetDriver]
     return MockGeoDatasetReadOnlyDriver
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_geo_ds_adapter():
     class MockGeoDataSetAdapter(GeoDatasetAdapter):
         def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):
@@ -160,7 +160,7 @@ def mock_geo_ds_adapter():
 # RasterDataset
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockRasterDatasetDriver(raster_ds: xr.Dataset) -> Type[RasterDatasetDriver]:
     class MockRasterDatasetDriver(RasterDatasetDriver):
         name = "mock_raster_ds_driver"
@@ -177,7 +177,7 @@ def MockRasterDatasetDriver(raster_ds: xr.Dataset) -> Type[RasterDatasetDriver]:
     return MockRasterDatasetDriver
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockRasterDatasetReadOnlyDriver(
     MockRasterDatasetDriver,
 ) -> Type[RasterDatasetDriver]:
@@ -188,7 +188,7 @@ def MockRasterDatasetReadOnlyDriver(
     return MockRasterDatasetReadOnlyDriver
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_raster_ds_adapter():
     class MockRasterDataSetAdapter(RasterDatasetAdapter):
         def transform(self, ds: xr.Dataset, metadata: SourceMetadata, **kwargs):

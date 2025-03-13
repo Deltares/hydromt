@@ -13,7 +13,7 @@ from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
 
 
 class TestRasterTindexResolver:
-    @pytest.fixture()
+    @pytest.fixture
     def raster_tindex(self, tmpdir):
         raster_tindex_dict = {
             "type": "FeatureCollection",

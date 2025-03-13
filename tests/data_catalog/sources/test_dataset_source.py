@@ -58,7 +58,7 @@ class TestDatasetSource:
                 name=source_name,
             ).to_stac_catalog()
 
-    @pytest.fixture()
+    @pytest.fixture
     def dataset_source_no_timerange(
         self,
         mock_resolver: URIResolver,

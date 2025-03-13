@@ -221,21 +221,21 @@ def test_catalog_entry_single_variant(aws_worldcover):
     assert source.uri.endswith("ESA_WorldCover_10m_2020_v100_Map_AWS.vrt")
 
 
-@pytest.fixture()
+@pytest.fixture
 def aws_worldcover():
     aws_yml_path = join(DATADIR, "aws_esa_worldcover.yml")
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_path])
     return (aws_yml_path, aws_data_catalog)
 
 
-@pytest.fixture()
+@pytest.fixture
 def merged_aws_worldcover():
     merged_yml_path = join(DATADIR, "merged_esa_worldcover.yml")
     merged_catalog = DataCatalog(data_libs=[merged_yml_path])
     return (merged_yml_path, merged_catalog)
 
 
-@pytest.fixture()
+@pytest.fixture
 def legacy_aws_worldcover():
     legacy_yml_path = join(DATADIR, "legacy_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_path])
@@ -430,7 +430,7 @@ def test_data_catalogs_raises_on_unknown_predefined_catalog(data_catalog):
         data_catalog.from_predefined_catalogs("asdf")
 
 
-@pytest.fixture()
+@pytest.fixture
 def export_test_slice_objects(
     tmp_path: Path, data_catalog: DataCatalog
 ) -> Tuple[DataCatalog, Bbox, TimeRange, List[str], Path]:
@@ -450,7 +450,7 @@ def export_test_slice_objects(
     return (data_catalog, bbox, time_range, source_names, data_lib_path)
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_export_global_datasets(tmpdir, export_test_slice_objects):
     (
         data_catalog,
@@ -509,7 +509,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_export_dataframe(tmp_path, df, df_time):
     # Write two csv files
     csv_path = str(tmp_path / "test.csv")
@@ -584,7 +584,7 @@ def test_export_dataframe(tmp_path, df, df_time):
 
 
 @pytest.mark.skip("flakey test due to external http issues")
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_http_data():
     dc = DataCatalog().from_dict(
         {
@@ -605,11 +605,11 @@ def test_http_data():
 
 
 class TestGetRasterDataset:
-    @pytest.fixture()
+    @pytest.fixture
     def era5_ds(self, data_catalog: DataCatalog) -> xr.Dataset:
         return data_catalog.get_rasterdataset("era5")
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_zarr_and_netcdf_preprocessing_gives_same_results(
         self, era5_ds: xr.Dataset, tmp_path: Path
     ):
@@ -672,7 +672,7 @@ class TestGetRasterDataset:
         assert raster["temp"].attrs["unit"] == attrs["temp"]["unit"]
         assert raster["temp_max"].attrs["long_name"] == attrs["temp_max"]["long_name"]
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_to_stac(self, data_catalog: DataCatalog):
         # raster dataset
         name = "chirps_global"
@@ -707,7 +707,7 @@ class TestGetRasterDataset:
         )
         assert source.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None
 
-    @pytest.fixture()
+    @pytest.fixture
     def zoom_dict(self, tmp_dir: Path, zoom_level_tif: str) -> Dict[str, Any]:
         return {
             "test_zoom": {
@@ -721,7 +721,7 @@ class TestGetRasterDataset:
             }
         }
 
-    @pytest.fixture()
+    @pytest.fixture
     def zoom_level_tif(self, rioda_large: xr.DataArray, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test_zl1.tif")
         # write tif with zoom level 1 in name
@@ -729,7 +729,7 @@ class TestGetRasterDataset:
         rioda_large.raster.to_raster(uri)  # , overviews=[0, 1])
         return uri
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     @pytest.mark.usefixtures("zoom_level_tif")
     def test_zoom_levels_normal_tif(
         self, data_catalog: DataCatalog, zoom_dict: Dict[str, Any]
@@ -740,7 +740,7 @@ class TestGetRasterDataset:
         with data_catalog.get_rasterdataset(name, zoom=(0.3, "degree")) as da1:
             assert isinstance(da1, xr.DataArray)
 
-    @pytest.fixture()
+    @pytest.fixture
     def zoom_level_cog(self, tmp_path: Path, rioda_large: xr.DataArray) -> str:
         # write COG
         cog_uri = str(tmp_path / "test_cog.tif")
@@ -766,13 +766,13 @@ class TestGetRasterDataset:
         )
         assert np.allclose(da1.raster.res, res * 2)
 
-    @pytest.fixture()
+    @pytest.fixture
     def tif_no_overviews(self, tmp_dir: Path, rioda_large: xr.DataArray) -> str:
         uri = str(tmp_dir / "test_tif_no_overviews.tif")
         rioda_large.raster.to_raster(uri, driver="GTiff")
         return uri
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_zoom_levels_no_overviews(
         self,
         tif_no_overviews: str,
@@ -785,20 +785,20 @@ class TestGetRasterDataset:
         ) as da:
             xr.testing.assert_allclose(da, rioda_large)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_zoom_levels_with_variable(self, data_catalog: DataCatalog):
         # test if file has {variable} in path
         da = data_catalog.get_rasterdataset("merit_hydro", zoom=(0.01, "degree"))
         assert isinstance(da, xr.Dataset)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_get_koppen_geiger(self, data_catalog: DataCatalog):
         name = "koppen_geiger"
         source = data_catalog.get_source(name)
         da = data_catalog.get_rasterdataset(source)
         assert isinstance(da, xr.DataArray)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_bbox(self, data_catalog: DataCatalog):
         name = "koppen_geiger"
         da = data_catalog.get_rasterdataset(name)
@@ -807,7 +807,7 @@ class TestGetRasterDataset:
         assert isinstance(da, xr.DataArray)
         assert np.allclose(da.raster.bounds, bbox)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
     def test_s3(self, data_catalog: DataCatalog):
         data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
@@ -879,7 +879,7 @@ class TestGetRasterDataset:
         assert "precip" in ds
         assert not np.any(ds[ds.raster.x_dim] > 180)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_reads_slippy_map_output(self, tmp_dir: Path, rioda_large: xr.DataArray):
         # write vrt data
         name = "tiled"
@@ -893,12 +893,12 @@ class TestGetRasterDataset:
         cat.get_rasterdataset(name)
         assert len(glob.glob(join(root, "*", "*", "*.tif"))) == 16
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_get_rasterdataset_unknown_datatype(self, data_catalog: DataCatalog):
         with pytest.raises(ValueError, match='Unknown raster data type "list"'):
             data_catalog.get_rasterdataset([])
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_unknown_file(self, data_catalog: DataCatalog):
         with pytest.raises(NoDataException):
             data_catalog.get_rasterdataset("test1.tif")
@@ -910,19 +910,19 @@ def test_get_rasterdataset_unknown_key(data_catalog):
 
 
 class TestGetGeoDataFrame:
-    @pytest.fixture()
+    @pytest.fixture
     def uri_geojson(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
         uri_gdf = tmp_dir / "test.geojson"
         geodf.to_file(uri_gdf, driver="GeoJSON")
         return uri_gdf
 
-    @pytest.fixture()
+    @pytest.fixture
     def uri_shp(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
         uri_shapefile = tmp_dir / "test.shp"  # shapefile what a horror
         geodf.to_file(uri_shapefile)
         return uri_shapefile
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_read_geojson_bbox(
         self, uri_geojson: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
     ):
@@ -930,7 +930,7 @@ class TestGetGeoDataFrame:
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert np.all(gdf == geodf)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_read_shapefile_bbox(
         self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
     ):
@@ -938,7 +938,7 @@ class TestGetGeoDataFrame:
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert np.all(gdf == geodf)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_read_shapefile_mask(
         self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
     ):
@@ -946,7 +946,7 @@ class TestGetGeoDataFrame:
         gdf = data_catalog.get_geodataframe(uri_shp, geom=mask)
         assert np.all(gdf == geodf)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_read_geojson_buffer_rename(
         self, uri_geojson: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
     ):
@@ -958,7 +958,7 @@ class TestGetGeoDataFrame:
         )
         assert np.all(gdf == geodf)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_read_shp_buffer_rename(
         self, uri_shp: str, geodf: gpd.GeoDataFrame, data_catalog: DataCatalog
     ):
@@ -970,7 +970,7 @@ class TestGetGeoDataFrame:
         )
         assert np.all(gdf == geodf)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_read_unit_attrs(self, data_catalog: DataCatalog):
         gadm_level1: GeoDataFrameSource = data_catalog.get_source("gadm_level1")
         attrs = {"NAME_0": {"long_name": "Country names"}}
@@ -978,7 +978,7 @@ class TestGetGeoDataFrame:
         gadm_level1_gdf = data_catalog.get_geodataframe("gadm_level1")
         assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_read_geojson_nodata_ignore(
         self, uri_geojson: str, data_catalog: DataCatalog
     ):
@@ -992,7 +992,7 @@ class TestGetGeoDataFrame:
 
         assert gdf1 is None
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_read_geojson_nodata_raise(
         self, uri_geojson: str, data_catalog: DataCatalog
     ):
@@ -1005,12 +1005,12 @@ class TestGetGeoDataFrame:
                 handle_nodata=NoDataStrategy.RAISE,
             )
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_raises_filenotfound(self, data_catalog: DataCatalog):
         with pytest.raises(NoDataException):
             data_catalog.get_geodataframe("no_file.geojson")
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_to_stac_geodataframe(self, data_catalog: DataCatalog):
         # geodataframe
         name = "gadm_level1"
@@ -1072,7 +1072,7 @@ def test_get_geodataframe_unknown_data_type(data_catalog):
         data_catalog.get_geodataframe([])
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_get_geodataframe_unknown_file(data_catalog):
     with pytest.raises(NoDataException):
         data_catalog.get_geodataframe("test1.gpkg")
@@ -1084,25 +1084,25 @@ def test_get_geodataframe_unknown_key(data_catalog):
 
 
 class TestGetGeoDataset:
-    @pytest.fixture()
+    @pytest.fixture
     def geojson_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
         uri_gdf = str(tmp_dir / "test.geojson")
         geodf.to_file(uri_gdf, driver="GeoJSON")
         return uri_gdf
 
-    @pytest.fixture()
+    @pytest.fixture
     def csv_dataset(self, ts: pd.DataFrame, tmp_dir: Path) -> str:
         uri_csv = str(tmp_dir / "test.csv")
         ts.to_csv(uri_csv)
         return uri_csv
 
-    @pytest.fixture()
+    @pytest.fixture
     def xy_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
         uri_csv_locs = str(tmp_dir / "test_locs.xy")
         _write_xy(uri_csv_locs, geodf)
         return uri_csv_locs
 
-    @pytest.fixture()
+    @pytest.fixture
     def nc_dataset(self, geoda: xr.Dataset, tmp_path: Path) -> str:
         backslash: str = "\\"
         uri_nc: str = str(
@@ -1111,7 +1111,7 @@ class TestGetGeoDataset:
         geoda.vector.to_netcdf(uri_nc)
         return uri_nc
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_geojson_vector_with_csv_data(
         self,
         geojson_dataset: str,
@@ -1127,7 +1127,7 @@ class TestGetGeoDataset:
         da = da.sortby("index")
         assert np.allclose(da, geoda)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_netcdf_with_variable_name(
         self, nc_dataset: str, data_catalog: DataCatalog, geoda: xr.DataArray
     ):
@@ -1142,7 +1142,7 @@ class TestGetGeoDataset:
         assert np.allclose(da, geoda)
         assert da.name == "test1"
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_netcdf_single_var_as_array_false(
         self, nc_dataset: str, data_catalog: DataCatalog
     ):
@@ -1152,7 +1152,7 @@ class TestGetGeoDataset:
         assert isinstance(ds, xr.Dataset)
         assert "test" in ds
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_xy_locs_with_csv_data(
         self,
         xy_dataset: str,
@@ -1174,12 +1174,12 @@ class TestGetGeoDataset:
         assert np.allclose(da, geoda)
         assert da.vector.crs.to_epsg() == 4326
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_nodata_filenotfound(self, data_catalog: DataCatalog):
         with pytest.raises(NoDataException, match="no files"):
             data_catalog.get_geodataset("no_file.geojson")
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_nodata_ignore(self, nc_dataset: str, data_catalog: DataCatalog):
         da: Optional[xr.DataArray] = data_catalog.get_geodataset(
             nc_dataset,
@@ -1190,7 +1190,7 @@ class TestGetGeoDataset:
         )
         assert da is None
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_nodata_raises_nodata(
         geodf: gpd.GeoDataFrame, nc_dataset: str, data_catalog: DataCatalog
     ):
@@ -1203,7 +1203,7 @@ class TestGetGeoDataset:
                 handle_nodata=NoDataStrategy.RAISE,
             )
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_geodataset_unit_attrs(self, data_catalog: DataCatalog):
         source: DataSource = data_catalog.get_source("gtsmv3_eu_era5")
         attrs = {
@@ -1217,7 +1217,7 @@ class TestGetGeoDataset:
         assert gtsm_geodataarray.attrs["long_name"] == attrs["waterlevel"]["long_name"]
         assert gtsm_geodataarray.attrs["unit"] == attrs["waterlevel"]["unit"]
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_geodataset_unit_conversion(self, data_catalog: DataCatalog):
         gtsm_geodataarray = data_catalog.get_geodataset("gtsmv3_eu_era5")
         source = data_catalog.get_source("gtsmv3_eu_era5")
@@ -1226,7 +1226,7 @@ class TestGetGeoDataset:
         gtsm_geodataarray1000 = datacatalog.get_geodataset(source)
         assert gtsm_geodataarray1000.equals(gtsm_geodataarray * 1000)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_geodataset_set_nodata(self, data_catalog: DataCatalog):
         source = data_catalog.get_source("gtsmv3_eu_era5")
         source.metadata.nodata = -99
@@ -1299,7 +1299,7 @@ def test_get_geodataset_unknown_data_type(data_catalog):
         data_catalog.get_geodataset([])
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_get_geodataset_unknown_file(data_catalog):
     with pytest.raises(NoDataException, match="no files"):
         data_catalog.get_geodataset("test1.nc")
@@ -1330,25 +1330,25 @@ def test_get_dataset_variables(timeseries_df: pd.DataFrame, data_catalog: DataCa
 
 
 class TestGetDataFrame:
-    @pytest.fixture()
+    @pytest.fixture
     def uri_csv(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri: str = str(tmp_dir / "test.csv")
         df.to_csv(uri)
         return uri
 
-    @pytest.fixture()
+    @pytest.fixture
     def uri_parquet(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri: str = str(tmp_dir / "test.parquet")
         df.to_parquet(uri)
         return uri
 
-    @pytest.fixture()
+    @pytest.fixture
     def uri_fwf(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test.txt")
         df.to_string(uri, index=False)
         return uri
 
-    @pytest.fixture()
+    @pytest.fixture
     def uri_xlsx(self, df: pd.DataFrame, tmp_dir: Path) -> str:
         uri = str(tmp_dir / "test.xlsx")
         df.to_excel(uri, index=False)
@@ -1411,7 +1411,7 @@ class TestGetDataFrame:
         assert cities_df["country"].attrs["long_name"] == "names of countries"
         assert np.all(cities_df["test_na"].isna())
 
-    @pytest.fixture()
+    @pytest.fixture
     def csv_uri_time(self, tmp_dir: Path, df_time: pd.DataFrame) -> str:
         uri = str(tmp_dir / "test_ts.csv")
         df_time.to_csv(uri)
@@ -1536,7 +1536,7 @@ def test_get_dataframe_unknown_data_type(data_catalog):
         data_catalog.get_dataframe([])
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_get_dataframe_unknown_file(data_catalog):
     with pytest.raises(NoDataException, match="no files"):
         data_catalog.get_dataframe("test1.csv")

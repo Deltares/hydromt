@@ -145,7 +145,7 @@ def test_model_mode_errors_writing_in_read_only(grid_model):
         grid_model.write()
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_grid_model_append(demda, df, tmpdir):
     demda.name = "dem"
     model = Model(mode="w", root=str(tmpdir))
@@ -216,7 +216,7 @@ def test_grid_model_append(demda, df, tmpdir):
     assert "df" in model2.tables.data
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_model_build_update(tmpdir, demda, obsda):
     bbox = [12.05, 45.30, 12.85, 45.65]
     model = Model(
@@ -260,7 +260,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     assert isfile(join(model_out, "grid", "grid_region.geojson")), listdir(model_out)
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
     # users will not have a use for `set` in their yaml file because there is
     # nothing they will have access to then that they cat set it to
@@ -379,7 +379,7 @@ def test_setup_region_basin(model):
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_maps_setup():
     mod = Model(
         data_libs=["artifact_data", DC_PARAM_PATH],
@@ -418,7 +418,7 @@ def test_maps_setup():
     assert len(mod.maps.data["hydrography"].data_vars) == 2
 
 
-@pytest.mark.integration()
+@pytest.mark.integration
 def test_gridmodel(demda, tmpdir):
     grid_model = Model(
         root=str(tmpdir),

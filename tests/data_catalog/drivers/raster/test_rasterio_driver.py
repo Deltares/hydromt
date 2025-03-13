@@ -17,7 +17,7 @@ from hydromt.gis.raster import full_from_transform
 
 
 class TestRasterioDriver:
-    @pytest.fixture()
+    @pytest.fixture
     def vrt_tiled_raster_ds(self, tmp_path: Path, rioda_large: xr.DataArray) -> str:
         # write vrt data
         name = "test_vrt_tiled_raster_ds"
@@ -38,7 +38,7 @@ class TestRasterioDriver:
         )
         assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
-    @pytest.fixture()
+    @pytest.fixture
     def small_tif(self, tmp_path: Path, rioda: xr.DataArray) -> str:
         path = tmp_path / "small_tif.tif"
         rioda.raster.to_raster(str(path))
@@ -75,7 +75,7 @@ class TestRasterioDriver:
 
 
 class TestOpenMFRaster:
-    @pytest.fixture()
+    @pytest.fixture
     def raster_file(self, tmp_path: Path, rioda: xr.DataArray) -> str:
         uri_tif = str(tmp_path / "test_open_mfraster.tif")
         rioda.raster.to_raster(uri_tif, crs=3857, tags={"name": "test"})
@@ -91,7 +91,7 @@ class TestOpenMFRaster:
         da_masked = _open_raster(raster_file, mask_nodata=True)
         assert np.any(np.isnan(da_masked.values))
 
-    @pytest.fixture()
+    @pytest.fixture
     def raster_file_masked_windowed(self, tmp_path: Path, raster_file: str) -> str:
         uri_tif = str(tmp_path / "test_masked.tif")
         da_masked = _open_raster(raster_file, mask_nodata=True)
@@ -103,7 +103,7 @@ class TestOpenMFRaster:
         da_windowed = _open_raster(raster_file_masked_windowed)
         assert not np.any(np.isnan(da_windowed.values))
 
-    @pytest.fixture()
+    @pytest.fixture
     def raster_file_t_dim(
         self, tmp_path: Path, raster_file_masked_windowed: str
     ) -> str:
@@ -118,7 +118,7 @@ class TestOpenMFRaster:
         da_windowed = _open_raster(raster_file_t_dim)
         assert da_windowed.dtype == np.int32
 
-    @pytest.fixture()
+    @pytest.fixture
     def raster_mapstack(
         self, tmp_path: Path, rioda: xr.DataArray
     ) -> Tuple[str, str, xr.Dataset]:
@@ -135,7 +135,7 @@ class TestOpenMFRaster:
         assert np.all([n in dvars for n in ds.raster.vars])
         assert np.all([np.isnan(ds_in[n].raster.nodata) for n in dvars])
 
-    @pytest.fixture()
+    @pytest.fixture
     def raster_mapstack_plus_one(
         self, raster_mapstack: Tuple[str, str, xr.Dataset], rioda: xr.DataArray
     ) -> Tuple[str, str, xr.Dataset]:

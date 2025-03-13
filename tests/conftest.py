@@ -53,13 +53,13 @@ def get_open_xarray_objects() -> List[tuple[Union[xr.Dataset, xr.DataArray], Pat
     ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def PLUGINS() -> Plugins:
     # make sure to start each test with a clean state
     return Plugins()
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_settings(tmp_path: Path) -> Generator[Settings, None, None]:
     """Temporary sets settings for testing."""
     cache_dir: Path = tmp_path / "test_caching"
@@ -79,7 +79,7 @@ def _local_catalog_eps(monkeypatch, PLUGINS):
         )
 
 
-@pytest.fixture()
+@pytest.fixture
 def example_zarr_file(tmp_dir: Path) -> Path:
     tmp_path: Path = tmp_dir / "0s.zarr"
     store = zarr.DirectoryStore(tmp_path)
@@ -109,7 +109,7 @@ def example_zarr_file(tmp_dir: Path) -> Path:
     return tmp_path
 
 
-@pytest.fixture()
+@pytest.fixture
 def data_catalog(_local_catalog_eps) -> DataCatalog:
     """DataCatalog instance that points to local predefined catalogs."""
     return DataCatalog("artifact_data=v1.0.0")
@@ -139,12 +139,12 @@ def root() -> str:
     return abspath(sep)
 
 
-@pytest.fixture()
+@pytest.fixture
 def test_model(tmpdir) -> Model:
     return Model(root=tmpdir)
 
 
-@pytest.fixture()
+@pytest.fixture
 def rioda():
     return raster.full_from_transform(
         transform=[0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
@@ -155,7 +155,7 @@ def rioda():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def rioda_large():
     da = raster.full_from_transform(
         transform=[0.004166666666666666, 0.0, 0.0, 0.0, -0.004166666666666667, 0.0],
@@ -184,7 +184,7 @@ def df():
     return df
 
 
-@pytest.fixture()
+@pytest.fixture
 def timeseries_df():
     # Create a date range from 2020-01-01 to 2020-12-31
     dates = pd.date_range(start="2020-01-01", end="2020-12-31", freq="D")
@@ -205,12 +205,12 @@ def timeseries_df():
     return df
 
 
-@pytest.fixture()
+@pytest.fixture
 def timeseries_ds(timeseries_df):
     return timeseries_df[["col1", "col2"]].to_xarray()
 
 
-@pytest.fixture()
+@pytest.fixture
 def dfs_segmented_by_points(df):
     return {
         id: pd.DataFrame(
@@ -224,7 +224,7 @@ def dfs_segmented_by_points(df):
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def dfs_segmented_by_vars(dfs_segmented_by_points):
     data_vars = [
         v
@@ -243,7 +243,7 @@ def dfs_segmented_by_vars(dfs_segmented_by_points):
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def df_time():
     df_time = pd.DataFrame(
         {
@@ -271,7 +271,7 @@ def world() -> gpd.GeoDataFrame:
     return gpd.read_file(Path(DATADIR) / "world.gpkg")
 
 
-@pytest.fixture()
+@pytest.fixture
 def ts(geodf):
     dates = pd.date_range("01-01-2000", "12-31-2000", name="time")
     ts = pd.DataFrame(
@@ -282,19 +282,19 @@ def ts(geodf):
     return ts
 
 
-@pytest.fixture()
+@pytest.fixture
 def geoda(geodf, ts):
     da = vector.GeoDataArray.from_gdf(geodf, ts, name="test", dims=("index", "time"))
     da.vector.set_nodata(np.nan)
     return da
 
 
-@pytest.fixture()
+@pytest.fixture
 def geods(geoda):
     return geoda.to_dataset()
 
 
-@pytest.fixture()
+@pytest.fixture
 def demda():
     np.random.seed(11)
     da = xr.DataArray(
@@ -308,7 +308,7 @@ def demda():
     return da
 
 
-@pytest.fixture()
+@pytest.fixture
 def lulcda():
     """Imitate VITO land use land cover data."""
     np.random.seed(11)
@@ -324,7 +324,7 @@ def lulcda():
     return da
 
 
-@pytest.fixture()
+@pytest.fixture
 def flwdir(demda):
     # NOTE: single basin!
     return pyflwdir.from_dem(
@@ -336,7 +336,7 @@ def flwdir(demda):
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def flwda(flwdir):
     da = xr.DataArray(
         name="flwdir",
@@ -350,7 +350,7 @@ def flwda(flwdir):
     return da
 
 
-@pytest.fixture()
+@pytest.fixture
 def hydds(flwda, flwdir):
     ds = flwda.copy().to_dataset()
     ds["uparea"] = xr.DataArray(
@@ -362,7 +362,7 @@ def hydds(flwda, flwdir):
     return ds
 
 
-@pytest.fixture()
+@pytest.fixture
 def obsda():
     rng = np.random.default_rng(12345)
     da = xr.DataArray(
@@ -375,7 +375,7 @@ def obsda():
     return da
 
 
-@pytest.fixture()
+@pytest.fixture
 def raster_ds():
     temp = 15 + 8 * np.random.randn(2, 2, 3)
     precip = 10 * np.random.rand(2, 2, 3)
@@ -395,7 +395,7 @@ def raster_ds():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def ts_extremes():
     rng = np.random.default_rng(12345)
     normal = pd.DataFrame(
@@ -418,7 +418,7 @@ def ts_extremes():
     return da
 
 
-@pytest.fixture()
+@pytest.fixture
 def griduda():
     bbox = [12.09, 46.49, 12.10, 46.50]  # Piava river
     data_catalog = DataCatalog(data_libs=["artifact_data"])
@@ -433,13 +433,13 @@ def griduda():
     return uda
 
 
-@pytest.fixture()
+@pytest.fixture
 def bbox():
     bbox = [12.05, 45.30, 12.85, 45.65]
     return gpd.GeoDataFrame(geometry=[box(*bbox)], crs=4326)
 
 
-@pytest.fixture()
+@pytest.fixture
 def grid_model(demda, world, obsda, tmpdir):
     mod = Model(
         root=str(tmpdir),
@@ -471,7 +471,7 @@ def grid_model(demda, world, obsda, tmpdir):
     return mod
 
 
-@pytest.fixture()
+@pytest.fixture
 def mesh_model(tmpdir):
     mesh_model = Model(
         root=str(tmpdir),
@@ -514,12 +514,12 @@ def _create_vector_model(
     return mod
 
 
-@pytest.fixture()
+@pytest.fixture
 def vector_model(ts, geodf, mocker: MockerFixture):
     return _create_vector_model(ts=ts, geodf=geodf, mocker=mocker)
 
 
-@pytest.fixture()
+@pytest.fixture
 def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
     return _create_vector_model(
         ts=ts,
@@ -528,7 +528,7 @@ def vector_model_no_defaults(ts, geodf, mocker: MockerFixture):
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_resolver() -> URIResolver:
     class MockURIResolver(URIResolver):
         name = "mock_resolver"
@@ -540,7 +540,7 @@ def mock_resolver() -> URIResolver:
     return resolver
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_geodataframe_adapter():
     class MockGeoDataFrameAdapter(GeoDataFrameAdapter):
         def transform(
@@ -551,7 +551,7 @@ def mock_geodataframe_adapter():
     return MockGeoDataFrameAdapter()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_geo_ds_adapter():
     class MockGeoDatasetAdapter(GeoDatasetAdapter):
         def transform(self, ds, metadata: SourceMetadata, **kwargs):
@@ -560,7 +560,7 @@ def mock_geo_ds_adapter():
     return MockGeoDatasetAdapter()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_geodf_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
     class MockGeoDataFrameDriver(GeoDataFrameDriver):
         name = "mock_geodf_driver"
@@ -571,7 +571,7 @@ def mock_geodf_driver(geodf: gpd.GeoDataFrame) -> GeoDataFrameDriver:
     return MockGeoDataFrameDriver()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_raster_ds_driver(raster_ds: xr.Dataset) -> RasterDatasetDriver:
     class MockRasterDatasetDriver(RasterDatasetDriver):
         name = "mock_raster_ds_driver"
@@ -583,7 +583,7 @@ def mock_raster_ds_driver(raster_ds: xr.Dataset) -> RasterDatasetDriver:
     return MockRasterDatasetDriver()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_geo_ds_driver(geoda: xr.DataArray) -> GeoDatasetDriver:
     class MockGeoDatasetDriver(GeoDatasetDriver):
         name = "mock_geo_ds_driver"
@@ -595,14 +595,14 @@ def mock_geo_ds_driver(geoda: xr.DataArray) -> GeoDatasetDriver:
     return MockGeoDatasetDriver()
 
 
-@pytest.fixture()
+@pytest.fixture
 def artifact_data():
     datacatalog = DataCatalog()
     datacatalog.from_predefined_catalogs("artifact_data")
     return datacatalog
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_model(tmpdir, mocker: MockerFixture):
     model = mocker.create_autospec(Model)
     model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
@@ -611,7 +611,7 @@ def mock_model(tmpdir, mocker: MockerFixture):
     return model
 
 
-@pytest.fixture()
+@pytest.fixture
 def basin_files():
     data_catalog = DataCatalog("artifact_data")
     ds = data_catalog.get_rasterdataset("merit_hydro_ihu")

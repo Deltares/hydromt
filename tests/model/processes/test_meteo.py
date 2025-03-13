@@ -20,14 +20,14 @@ from hydromt.model.processes.meteo import (
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def era5_data(data_catalog):
     era5 = data_catalog.get_rasterdataset("era5_daily_zarr")
     era5 = era5.rename({"v10": "wind10_v", "u10": "wind10_u"})
     return era5
 
 
-@pytest.fixture()
+@pytest.fixture
 def era5_dem(data_catalog):
     return data_catalog.get_rasterdataset("era5_orography").squeeze("time", drop=True)
 

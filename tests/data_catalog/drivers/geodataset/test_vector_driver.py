@@ -49,7 +49,7 @@ class TestGeoDatasetVectorDriver:
         with pytest.raises(NotImplementedError):
             driver.write("fake_path.zarr", MagicMock())  # type: ignore
 
-    @pytest.fixture()
+    @pytest.fixture
     def example_vector_geods(self, geodf, tmp_dir: Path) -> Path:
         base = Path(tmp_dir)
         gdf_path = base / "test.geojson"

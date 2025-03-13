@@ -55,7 +55,7 @@ def test_cli_update_help():
     assert r.output.startswith("Usage: main update [OPTIONS] MODEL MODEL_ROOT")
 
 
-@pytest.fixture()
+@pytest.fixture
 def _reset_log_level() -> Generator[None, None, None]:
     yield
     main_logger: Logger = getLogger("hydromt")

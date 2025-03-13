@@ -32,7 +32,7 @@ class TestRasterDatasetSource:
         )
         assert raster_ds == source.read_data()
 
-    @pytest.fixture()
+    @pytest.fixture
     def writable_source(
         self, MockRasterDatasetReadOnlyDriver: Type[RasterDatasetDriver]
     ) -> RasterDatasetSource:

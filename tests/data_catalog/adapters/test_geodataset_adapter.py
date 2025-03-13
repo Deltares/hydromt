@@ -8,7 +8,7 @@ from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
 
 
 class TestGeoDatasetAdapter:
-    @pytest.fixture()
+    @pytest.fixture
     def example_geo_ds(self, geoda: xr.DataArray) -> xr.Dataset:
         geoda.vector.set_crs(4326)
         return geoda.to_dataset()

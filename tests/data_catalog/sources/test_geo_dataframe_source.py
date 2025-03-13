@@ -21,7 +21,7 @@ from hydromt.data_catalog.uri_resolvers import URIResolver
 
 
 class TestGeoDataFrameSource:
-    @pytest.fixture()
+    @pytest.fixture
     def artifact_data(self):
         datacatalog = DataCatalog()
         datacatalog.from_predefined_catalogs("artifact_data")
@@ -68,7 +68,7 @@ class TestGeoDataFrameSource:
         assert isinstance(gdf1, gpd.GeoDataFrame)
         assert np.all(gdf1 == geodf)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_get_data(self, geodf: gpd.GeoDataFrame, example_geojson: str):
         source = GeoDataFrameSource(
             name="test",
@@ -80,7 +80,7 @@ class TestGeoDataFrameSource:
         assert isinstance(gdf, gpd.GeoDataFrame)
         assert np.all(gdf == geodf)
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_get_data_rename(self, geodf: gpd.GeoDataFrame, example_geojson: str):
         source = GeoDataFrameSource(
             name="test",
@@ -97,7 +97,7 @@ class TestGeoDataFrameSource:
         assert "ciudad" in gdf.columns
         assert "city" not in gdf.columns
 
-    @pytest.mark.integration()
+    @pytest.mark.integration
     def test_get_data_not_found(self):
         source = GeoDataFrameSource(
             name="test",
