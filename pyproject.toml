@@ -203,6 +203,12 @@ python = "3.10.*"
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
 
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+
+[tool.pixi.feature.py313.dependencies]
+python = "3.13.*"
+
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
 
@@ -254,7 +260,7 @@ docker-build = { cmd = [
   "deltares/hydromt:$DOCKER_TAG",
   "--target=$DOCKER_TARGET",
   "--build-arg",
-  "PIXIENV=$DOCKER_TARGET-py311",
+  "PIXIENV=$DOCKER_TARGET-latest",
   ".",
 ], env = { DOCKER_TAG = "<DOCKER_TAG>", DOCKER_TARGET = "<DOCKER_TARGET>" } }
 docker-build-min = { cmd = [
@@ -347,6 +353,58 @@ default = { features = [
   "doc",
   "examples",
 ], solve-group = "py39" }
+
+full-latest = { features = [
+  "py313",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py313" }
+slim-latest = { features = [
+  "py313",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py313" }
+min-latest = { features = ["py313"], solve-group = "py313" }
+
+full-py313 = { features = [
+  "py313",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py313" }
+slim-py313 = { features = [
+  "py313",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py313" }
+min-py313 = { features = ["py313"], solve-group = "py313" }
+
+full-py312 = { features = [
+  "py312",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py312" }
+slim-py312 = { features = [
+  "py312",
+  "io",
+  "extra",
+  "examples",
+], solve-group = "py312" }
+min-py312 = { features = ["py312"], solve-group = "py312" }
+
 full-py311 = { features = [
   "py311",
   "io",
@@ -363,6 +421,7 @@ slim-py311 = { features = [
   "examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311"], solve-group = "py311" }
+
 full-py310 = { features = [
   "py310",
   "io",
@@ -379,6 +438,7 @@ slim-py310 = { features = [
   "examples",
 ], solve-group = "py310" }
 min-py310 = { features = ["py310"], solve-group = "py310" }
+
 full-py39 = { features = [
   "py39",
   "io",
