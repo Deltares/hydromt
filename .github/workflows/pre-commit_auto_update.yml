@@ -1,0 +1,26 @@
+name: Pre-commit auto update
+on:
+  schedule:
+    # At 03:00 on day 3 of the month
+    - cron: "0 3 3 * *"
+  # on demand
+  workflow_dispatch:
+jobs:
+  auto-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: browniebroke/pre-commit-autoupdate-action@main
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.CI_PR_PAT }}
+          branch: update/pre-commit-hooks
+          title: Update pre-commit hooks
+          commit-message: "Update pre-commit hooks"
+          body: Update versions of pre-commit hooks to latest version.
+          author: "GitHub <noreply@github.com>"
