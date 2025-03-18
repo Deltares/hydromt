@@ -12,6 +12,8 @@ Unreleased
 
 New
 ---
+- Add support for python 3.12 and 3.13 (#540)
+- Support all versions of pyarrow (#1105)
 
 Changed
 -------

@@ -90,7 +90,7 @@ jobs:
           export NEW_CHANGELOG_HEADER="v$NEW_VERSION ($(date -I))"
           export NEW_HEADER_UNDERLINE=$(printf '=%.0s' $(seq 1 $(echo $NEW_CHANGELOG_HEADER | awk '{print length}')))
 
-          # update chagnelog with new header
+          # update changelog with new header
           sed -i "/Unreleased/{s/Unreleased/$NEW_CHANGELOG_HEADER/;n;s/=*/$NEW_HEADER_UNDERLINE/}" docs/changelog.rst
 
           # update switcher.json while maintianing the correct order with some black jq incantations. I'll try and explain below
