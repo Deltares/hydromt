@@ -6,7 +6,9 @@
         "ms-python.mypy-type-checker",
         "charliermarsh.ruff",
         "njpwerner.autodocstring",
-        "stkb.rewrap",
-        "streetsidesoftware.code-spell-checker"
+        "streetsidesoftware.code-spell-checker",
+        "tamasfe.even-better-toml",
+        "davidanson.vscode-markdownlint",
+        "sonarsource.sonarlint-vscode"
     ]
 }
