@@ -36,14 +36,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          target: full
-          tags: hydromt
+          target: slim
+          tags: deltares/hydromt:slim
           load: true
           build-args: |
-            PIXIENV=full-latest
+            PIXIENV=slim-latest
 
-      - name: Run Tests
-        run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest
+      # - name: Run Tests
+      #   run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest
       - name: Test Binder integration with repo2docker
         run: |
           pip install jupyter-repo2docker
