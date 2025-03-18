@@ -16,12 +16,8 @@ on:
       - pyproject.toml
 
 jobs:
-  test-docker-image:
+  setup:
     runs-on: ubuntu-latest
-    concurrency:
-      group: test-docker-${{ github.ref }}
-      cancel-in-progress: true
-    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,8 +27,15 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Build and test
+  test-binder:
+    needs: setup
+    runs-on: ubuntu-latest
+    concurrency:
+      group: test-binder-${{ github.ref }}
+      cancel-in-progress: true
+    timeout-minutes: 30
+    steps:
+      - name: Build slim
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -42,9 +45,27 @@ jobs:
           build-args: |
             PIXIENV=slim-latest
 
-      # - name: Run Tests
-      #   run: docker run --env NUMBA_DISABLE_JIT=1 --rm hydromt pytest
       - name: Test Binder integration with repo2docker
         run: |
           pip install jupyter-repo2docker
           repo2docker . echo 'success!'
+  test-docker:
+    needs: setup
+    runs-on: ubuntu-latest
+    concurrency:
+      group: test-docker-${{ github.ref }}
+      cancel-in-progress: true
+    timeout-minutes: 30
+    steps:
+      - name: Build full
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: full
+          tags: deltares/hydromt:full
+          load: true
+          build-args: |
+            PIXIENV=full-latest
+
+      - name: Run Tests
+        run: docker run --env NUMBA_DISABLE_JIT=1 --rm deltares/hydromt:full pytest
