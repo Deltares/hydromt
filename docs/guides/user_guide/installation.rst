@@ -7,13 +7,14 @@ Installation guide
 Prerequisites
 =============
 
-You'll need **Python 3.9, 3.10, 3.11, 3.12, or 3.13** and a package manager. We recommend using pixi.
+You'll need **Python 3.9, 3.10, 3.11, 3.12, or 3.13** and a package manager.
+We recommend using pixi.
 
 Installation
 ============
 
-HydroMT is available from pypi and conda-forge, but we recommend installing from
-conda-forge using the pixi package manager.
+HydroMT is available from pypi and conda-forge,
+but we recommend installing from conda-forge using the pixi package manager.
 
 Install HydroMT CLI
 ------------------------------------
@@ -28,8 +29,7 @@ To make the HydroMT cli available anywhere on the system using pixi execute the 
     $ pixi global install hydromt
 
 This will create a new isolated environment and install hydromt into it.
-To test whether the installation was successful you can run :code:`hydromt --plugins` and the output should
-look approximately like the one below:
+To test whether the installation was successful you can run :code:`hydromt --plugins` and the output should look approximately like the one below:
 
 .. code-block:: shell
 
@@ -63,23 +63,22 @@ look approximately like the one below:
 Installing HydroMT in a python environment
 ------------------------------------------
 
-If you wish to use hydromt through it's Python API, you can use pixi to create an
-environment for this too. If you do not have a ``pyproject.toml`` yet you can make one
-by exectuing the command:
+If you wish to use hydromt through it's Python API, you can use pixi to create an environment for this too.
+If you do not have a ``pyproject.toml`` yet you can make one by executing the command:
 
 .. code-block:: shell
 
-    $ pixi init --pyproject
+    $ pixi init --format pyproject
 
-which will create it for you. after this simply add HydroMT as a dependency with the
-following command:
+Which will create it for you.
+After this simply add HydroMT as a dependency with the following command:
 
 .. code-block:: shell
 
     $ pixi add hydromt
 
 Once you have your new (or existing ``pyproject.toml``) file install the pixi
-environement and activate it with the following commands to be able to start using it:
+environment and activate it with the following commands to be able to start using it:
 
 .. code-block:: shell
 
