@@ -108,11 +108,10 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-# FIXME: examples are not yet working see #796
-# if os.path.isdir("_examples"):
-#     remove_dir_content("_examples")
-# os.makedirs("_examples")
-# copy_tree("../examples", "_examples")
+if os.path.isdir("_examples"):
+    remove_dir_content("_examples")
+os.makedirs("_examples")
+shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
 
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")

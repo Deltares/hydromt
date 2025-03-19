@@ -1,6 +1,4 @@
 ---
-meta:
-  root: examples/data
 vito_reclass:
   data_type: DataFrame
   driver:
