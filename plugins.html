@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>HydroMT: Automated and reproducible model building and analysis &#8212; HydroMT  documentation</title>
+    <title>Plugins &#8212; HydroMT  documentation</title>
   
   
   
@@ -45,9 +45,7 @@
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'plugins';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
@@ -58,7 +56,8 @@
     <link rel="icon" href="_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting started" href="overview/intro.html" />
+    <link rel="next" title="API reference" href="api/api.html" />
+    <link rel="prev" title="Developer installation guide" href="guides/core_dev/dev_install.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.0.1" />
@@ -116,7 +115,7 @@
     
   
 
-<a class="navbar-brand logo" href="#">
+<a class="navbar-brand logo" href="index.html">
   
   
   
@@ -157,8 +156,8 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="plugins.html">
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
     Plugins
   </a>
 </li>
@@ -289,10 +288,8 @@
       
       
       
-        
-      
       <dialog id="pst-primary-sidebar-modal"></dialog>
-      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -321,8 +318,8 @@
 </li>
 
 
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="plugins.html">
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
     Plugins
   </a>
 </li>
@@ -408,6 +405,15 @@
     
   </div>
   
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
       <div class="sidebar-primary-item">
@@ -428,7 +434,31 @@
           <div class="bd-content">
             <div class="bd-article-container">
               
-              <div class="bd-header-article d-print-none"></div>
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Plugins</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
               
               
               
@@ -436,70 +466,84 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="hydromt-automated-and-reproducible-model-building-and-analysis">
-<span id="readme"></span><h1>HydroMT: Automated and reproducible model building and analysis<a class="headerlink" href="#hydromt-automated-and-reproducible-model-building-and-analysis" title="Link to this heading">#</a></h1>
-<p><a class="reference external" href="https://pypi.org/project/hydromt/"><img alt="PyPI" src="https://img.shields.io/pypi/v/hydromt.svg?style=flat" /></a> <a class="reference external" href="https://anaconda.org/conda-forge/hydromt"><img alt="Conda-Forge" src="https://anaconda.org/conda-forge/hydromt/badges/version.svg" /></a> <a class="reference external" href="https://deltares.github.io/hydromt/latest"><img alt="Latest developers docs" src="https://img.shields.io/badge/docs-latest-brightgreen.svg" /></a> <a class="reference external" href="https://deltares.github.io/hydromt/stable"><img alt="Stable docs last release" src="https://img.shields.io/badge/docs-stable-brightgreen.svg" /></a> <a class="reference external" href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a> <a class="reference external" href="https://codecov.io/gh/Deltares/hydromt"><img alt="Coverage" src="https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH" /></a> <a class="reference external" href="https://sonarcloud.io/summary/new_code?id=Deltares_hydromt"><img alt="SonarQube status" src="https://sonarcloud.io/api/project_badges/measure?project=Deltares_hydromt&amp;metric=alert_status" /></a> <a class="reference external" href="https://github.com/Deltares/hydromt/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/Deltares/hydromt?style=flat" /></a> <a class="reference external" href="https://zenodo.org/badge/latestdoi/348020332"><img alt="Zenodo" src="https://zenodo.org/badge/348020332.svg" /></a> <a class="reference external" href="https://doi.org/10.21105/joss.04897"><img alt="joss_paper" src="https://joss.theoj.org/papers/10.21105/joss.04897/status.svg" /></a></p>
-<section id="what-is-hydromt">
-<h2>What is HydroMT?<a class="headerlink" href="#what-is-hydromt" title="Link to this heading">#</a></h2>
-<p><strong>HydroMT</strong> (Hydro Model Tools) is an open-source Python package that facilitates the process of
-building and analyzing spatial geoscientific models with a focus on water system models.
-It does so by automating the workflow to go from raw data to a complete model instance which
-is ready to run and to analyse model results once the simulation has finished.
-HydroMT builds on the latest packages in the scientific and geospatial python eco-system including
-<a class="reference external" href="https://xarray.pydata.org">xarray</a>, <a class="reference external" href="https://rasterio.readthedocs.io">rasterio</a>, <a class="reference external" href="https://corteva.github.io/rioxarray/stable/">rioxarray</a>, <a class="reference external" href="https://geopandas.org">geopandas</a>, <a class="reference external" href="https://scipy.org/">scipy</a> and <a class="reference external" href="https://deltares.github.io/pyflwdir">pyflwdir</a>.</p>
-</section>
-<section id="why-hydromt">
-<h2>Why HydroMT?<a class="headerlink" href="#why-hydromt" title="Link to this heading">#</a></h2>
-<p>Setting up spatial geoscientific models typically requires many (manual) steps
-to process input data and might therefore be time consuming and hard to reproduce.
-Especially improving models based on global geospatial datasets, which are
-rapidly becoming available at increasingly high resolutions, might be challenging.
-Furthermore, analyzing model schematization and results from different models,
-which often use model-specific peculiar data formats, can be time consuming.
-This package aims to make the model building process <strong>fast</strong>, <strong>modular</strong> and <strong>reproducible</strong>
-by configuring the model building process from a single <em>yaml</em> configuration file
-and <strong>model- and data-agnostic</strong> through a common model and data interface.</p>
-</section>
-<section id="how-to-use-hydromt">
-<h2>How to use HydroMT?<a class="headerlink" href="#how-to-use-hydromt" title="Link to this heading">#</a></h2>
-<p>HydroMT can be used as a <strong>command line</strong> application (CLI) which provides commands to <em>build</em>,
-<em>update</em> and <em>clip</em> models with a single line, or <strong>from Python</strong> to exploit its rich interface.
-You can learn more about how to use HydroMT in its <a class="reference external" href="https://deltares.github.io/hydromt/latest/">online documentation.</a>
-For a smooth installing experience, we recommend installing HydroMT and its dependencies
-from conda-forge in a clean environment, see <a class="reference external" href="https://deltares.github.io/hydromt/latest/getting_started/installation">installation guide.</a></p>
-</section>
-<section id="hydromt-model-plugins">
-<h2>HydroMT model plugins<a class="headerlink" href="#hydromt-model-plugins" title="Link to this heading">#</a></h2>
-<p>HydroMT is commonly used in combination with a <strong>model plugin</strong> which
-provides a HydroMT implementation for specific model software. Using the plugins allows to prepare a ready-to-run set of input files from raw geoscientific datasets and analyse model results in a fast and reproducible way.
-Known model plugins include:</p>
+  <section id="plugins">
+<span id="id1"></span><h1>Plugins<a class="headerlink" href="#plugins" title="Link to this heading">#</a></h1>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-4 sd-row-cols-xs-4 sd-row-cols-sm-4 sd-row-cols-md-4 sd-row-cols-lg-4 sd-g-1 sd-g-xs-1 sd-g-sm-1 sd-g-md-1 sd-g-lg-1 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/wflow.png" src="_images/wflow.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Wflow plugin <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-link-external" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path></svg></p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="https://deltares.github.io/hydromt_wflow/"><span>https://deltares.github.io/hydromt_wflow/</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/SFINCS_logo.png" src="_images/SFINCS_logo.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">SFINCS plugin <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-link-external" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path></svg></p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="https://deltares.github.io/hydromt_sfincs/"><span>https://deltares.github.io/hydromt_sfincs/</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/Delft3D.png" src="_images/Delft3D.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Delwaq plugin <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-link-external" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path></svg></p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="https://deltares.github.io/hydromt_delwaq/"><span>https://deltares.github.io/hydromt_delwaq/</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text"><svg version="1.1" width="10.0em" height="10.0em" class="sd-octicon sd-octicon-package-dependents" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.126.64a1.748 1.748 0 0 1 1.75 0l8.25 4.762c.103.06.199.128.286.206a.75.75 0 0 1 .554.96c.023.113.035.23.035.35v3.332a.75.75 0 0 1-1.5 0V7.64l-7.75 4.474V22.36a.75.75 0 0 1-1.125.65l-8.75-5.052a1.75 1.75 0 0 1-.875-1.515V6.917c0-.119.012-.236.035-.35a.749.749 0 0 1 .554-.96c.088-.078.184-.146.286-.205L9.126.639Zm.875 10.173v.001l7.75-4.474-7.625-4.402a.248.248 0 0 0-.25 0L2.251 6.34Zm-8.5-3.175v8.803c0 .09.048.172.125.216l7.625 4.402v-8.947Z"></path><path d="m21.347 17.5-2.894-2.702a.75.75 0 1 1 1.023-1.096l4.286 4a.75.75 0 0 1 0 1.096l-4.286 4a.75.75 0 1 1-1.023-1.096L21.347 19h-6.633a.75.75 0 0 1 0-1.5h6.633Z"></path></svg></p>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Delft-FIAT plugin <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-link-external" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path></svg></p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="https://deltares.github.io/hydromt_fiat/"><span>https://deltares.github.io/hydromt_fiat/</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<img alt="_images/Delft3D.png" src="_images/Delft3D.png" />
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Delft3D FM plugin <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-link-external" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path></svg></p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="https://deltares.github.io/hydromt_delft3dfm/"><span>https://deltares.github.io/hydromt_delft3dfm/</span></a></div>
+</div>
+</div>
+</div>
+<section id="about-the-model-software">
+<h2>About the model software<a class="headerlink" href="#about-the-model-software" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_wflow">hydromt_wflow</a>: A framework for distributed rainfall-runoff (wflow_sbm) and sediment transport (wflow_sediment) modelling.</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_delwaq">hydromt_delwaq</a>: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_sfincs">hydromt_sfincs</a>: A fast 2D hydrodynamic flood model (SFINCS).</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_fiat">hydromt_fiat</a>: A flood impact model (FIAT).</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_delft3dfm">hydromt_delft3dfm</a>: A flexible mesh hydrodynamic suite for 1D2D and 2D3D modelling (Delft3D FM).</p></li>
+<li><p><a class="reference external" href="https://deltares.github.io/Wflow.jl/dev/">Wflow</a> is Deltares’ solution for modelling hydrological processes, allowing users to account
+for precipitation, interception, snow accumulation and melt, evapotranspiration, soil water,
+surface water and groundwater recharge in a fully distributed environment.</p></li>
+<li><p><a class="reference external" href="https://sfincs.readthedocs.io/en/latest/">SFINCS</a> is Deltares’ reduced-complexity model, designed for super-fast modelling of compound
+flooding events in a dynamic way.</p></li>
+<li><p><a class="reference external" href="https://www.deltares.nl/en/software/module/d-water-quality/">Delwaq</a> is Deltares’ water quality process library used to quantify point source and
+diffuse emissions (D-Emissions) and model the fate and transport (D-Water Quality)
+of various substances/pollutants in surface water systems.</p></li>
+<li><p><a class="reference external" href="https://publicwiki.deltares.nl/display/DFIAT/Delft-FIAT+Home">Delft-FIAT</a> is Deltares’ Flood Impact Assessment Toolbox and used to quantify the impact and risk
+of flooding and other perils.</p></li>
+<li><p><a class="reference external" href="https://oss.deltares.nl/web/delft3dfm">Delft3DFM</a> is Deltares’ Delft3D Flexible Mesh Suite (Delft3D FM) for hydrodynamic modelling</p></li>
 </ul>
 </section>
-<section id="how-to-cite">
-<h2>How to cite?<a class="headerlink" href="#how-to-cite" title="Link to this heading">#</a></h2>
-<p>For publications, please cite our JOSS paper <a class="reference external" href="https://doi.org/10.21105/joss.04897"><img alt="joss_paper" src="https://joss.theoj.org/papers/10.21105/joss.04897/status.svg" /></a></p>
-<dl class="simple">
-<dt>::</dt><dd><p>Eilander et al., (2023). HydroMT: Automated and reproducible model building and analysis. Journal of Open Source Software, 8(83), 4897, <a class="reference external" href="https://doi.org/10.21105/joss.04897">https://doi.org/10.21105/joss.04897</a></p>
-</dd>
-</dl>
-<p>To cite a specific software version please use the DOI provided in the Zenodo badge <a class="reference external" href="https://zenodo.org/badge/latestdoi/348020332"><img alt="Zenodo" src="https://zenodo.org/badge/348020332.svg" /></a> that points to the latest release.</p>
-</section>
-<section id="how-to-contribute">
-<h2>How to contribute?<a class="headerlink" href="#how-to-contribute" title="Link to this heading">#</a></h2>
-<p>If you find any issues in the code or documentation feel free to leave an issue on the <a class="reference external" href="https://github.com/Deltares/hydromt/issues">github issue tracker.</a>
-You can find information about how to contribute to the HydroMT project at our <a class="reference external" href="https://deltares.github.io/hydromt/latest/dev/contributing">contributing page.</a></p>
-<p>HydroMT seeks active contribution from the (hydro) geoscientific community.
-So far, it has been developed and tested with a range of <a class="reference external" href="https://www.deltares.nl/en/">Deltares</a> models, but
-we believe it is applicable to a much wider set of geoscientific models and are
-happy to discuss how it can be implemented for your model.</p>
-<div class="toctree-wrapper compound">
-</div>
+<section id="starting-your-own-plugin">
+<h2>Starting your own plugin<a class="headerlink" href="#starting-your-own-plugin" title="Link to this heading">#</a></h2>
+<p>If you would like to start your own HydroMT plugin for another model or software, we have some
+tips or a quick start page for you: <a class="reference internal" href="guides/plugin_dev/plugin_quickstart.html#plugin-quickstart"><span class="std std-ref">Starting your own HydroMT Plugin</span></a>.</p>
+<p>If you would like your plugin to appear on this page, please contact us via the issue board of
+HydroMT!</p>
 </section>
 </section>
 
@@ -513,12 +557,21 @@ happy to discuss how it can be implemented for your model.</p>
                 <footer class="prev-next-footer d-print-none">
                   
 <div class="prev-next-area">
+    <a class="left-prev"
+       href="guides/core_dev/dev_install.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Developer installation guide</p>
+      </div>
+    </a>
     <a class="right-next"
-       href="overview/intro.html"
+       href="api/api.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Getting started</p>
+        <p class="prev-next-title">API reference</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -541,12 +594,8 @@ happy to discuss how it can be implemented for your model.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-hydromt">What is HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-hydromt">Why HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-use-hydromt">How to use HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydromt-model-plugins">HydroMT model plugins</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-cite">How to cite?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-contribute">How to contribute?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-the-model-software">About the model software</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#starting-your-own-plugin">Starting your own plugin</a></li>
 </ul>
   </nav></div>
 
@@ -554,7 +603,7 @@ happy to discuss how it can be implemented for your model.</p>
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/Deltares/hydromt/edit/main/docs/index.rst">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/plugins.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -570,7 +619,7 @@ happy to discuss how it can be implemented for your model.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/index.rst.txt"
+      <li><a href="_sources/plugins.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

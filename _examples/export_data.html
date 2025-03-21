@@ -1,0 +1,2058 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Example: Exporting data from a data catalog &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_examples/export_data';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example: Working with models from CLI" href="working_with_models_basics.html" />
+    <link rel="prev" title="Example: Preparing a data catalog" href="prep_data_catalog.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.0.1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guides/intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plugins.html">
+    Plugins
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../_generated/predefined_catalogs.html">
+    <no title>
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    What’s new
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guides/intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plugins.html">
+    Plugins
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../_generated/predefined_catalogs.html">
+    <no title>
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    What’s new
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Table of Contents</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../overview/quick_overview.html">Quick overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/faq.html">Frequently asked questions</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../overview/examples_index.html">Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="reading_point_data.html">Example: Reading geospatial point time-series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reading_raster_data.html">Example: Reading raster data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reading_vector_data.html">Example: Reading vector data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prep_data_catalog.html">Example: Preparing a data catalog</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Example: Exporting data from a data catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_models_basics.html">Example: Working with models from CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_meshcomponent.html">Example: Working with mesh components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="delineate_basin.html">Example: Define hydrological model regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_raster.html">Example: Working with raster data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_geodatasets.html">Example: Working with geodatasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/use_case_examples.html">User’s stories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/publications.html">Publications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/team.html">Contributors</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../overview/intro.html" class="nav-link">Getting started</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="../overview/examples_index.html" class="nav-link">Examples</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Example: Exporting data from a data catalog</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<div>
+    For an interactive online version click here:
+    <a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/export_data.ipynb" target="_blank" rel="noopener noreferrer"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg"></a>
+</div></div>
+<section id="Example:-Exporting-data-from-a-data-catalog">
+<h1>Example: Exporting data from a data catalog<a class="headerlink" href="#Example:-Exporting-data-from-a-data-catalog" title="Link to this heading">#</a></h1>
+<p>This example illustrates the how to read and export data for a specific region / dates using the HydroMT <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html"><span class="doc">DataCatalog</span></a> and the <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.export_data.html"><span class="doc">export_data()</span></a> method.</p>
+<section id="Explore-the-current-data-catalog">
+<h2>Explore the current data catalog<a class="headerlink" href="#Explore-the-current-data-catalog" title="Link to this heading">#</a></h2>
+<p>For this exercise, we will use the pre-defined catalog <code class="docutils literal notranslate"><span class="pre">artifact_data</span></code> which contains a global data extracts for the Piave basin in Northern Italy. This data catalog and the actual data linked to it are for a small geographic extent as it is intended for documentation and testing purposes only. If you have another data catalog available (and the linked data), you can use it instead.</p>
+<p>To read your own data catalog (as well as a predefined catalog), you can use the <strong>data_libs</strong> argument of the <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html"><span class="doc">DataCatalog</span></a> which accepts either a absolute/relative path to a data catalog yaml file or a name of a pre-defined catalog. First let’s read the pre-defined artifact data catalog:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hydromt</span>
+
+<span class="c1"># Download and read artifacts for the Piave basin to `~/.hydromt_data/`.</span>
+<span class="n">data_catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data=v1.0.0&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">artifact_data</span></code> catalog is one of the pre-defined available DataCatalog of HydroMT. You can find an overview of <a class="reference internal" href="../guides/user_guide/data_existing_cat.html"><span class="doc">pre-defined data catalogs</span></a> in the online user guide. You can also get an overview of the pre-defined catalogs with their version number from HydroMT.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
+
+<span class="n">pprint</span><span class="p">(</span><span class="n">data_catalog</span><span class="o">.</span><span class="n">predefined_catalogs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;artifact_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.ArtifactDataCatalog object at 0x7fc084e73160&gt;,
+ &#39;aws_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.AWSDataCatalog object at 0x7fc084e73220&gt;,
+ &#39;deltares_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.DeltaresDataCatalog object at 0x7fc084e73040&gt;,
+ &#39;gcs_cmip6_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.GCSCMIP6DataCatalog object at 0x7fc084e73190&gt;}
+</pre></div></div>
+</div>
+<p>Let’s now check which data sources are available in the catalog:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># For a list of sources including attributes</span>
+<span class="n">data_catalog</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+dict_keys([&#39;chelsa&#39;, &#39;chirps_global&#39;, &#39;corine&#39;, &#39;dtu10mdt&#39;, &#39;dtu10mdt_egm96&#39;, &#39;eobs&#39;, &#39;eobs_orography&#39;, &#39;era5&#39;, &#39;era5_hourly&#39;, &#39;era5_daily_zarr&#39;, &#39;era5_hourly_zarr&#39;, &#39;era5_orography&#39;, &#39;gadm_level1&#39;, &#39;gadm_level2&#39;, &#39;gadm_level3&#39;, &#39;gcn250&#39;, &#39;gdp_world&#39;, &#39;gebco&#39;, &#39;ghs_smod_2015&#39;, &#39;ghs_pop_2015&#39;, &#39;ghs_pop_2015_54009&#39;, &#39;globcover_2009&#39;, &#39;glw_buffaloes&#39;, &#39;glw_cattle&#39;, &#39;glw_chicken&#39;, &#39;glw_ducks&#39;, &#39;glw_goats&#39;, &#39;glw_horses&#39;, &#39;glw_pigs&#39;, &#39;glw_sheep&#39;, &#39;grdc&#39;, &#39;grip_roads&#39;, &#39;grwl&#39;, &#39;grwl_mask&#39;, &#39;gswo&#39;, &#39;gtsmv3_eu_era5&#39;, &#39;guf_bld_2012&#39;, &#39;hydro_lakes&#39;, &#39;hydro_reservoirs&#39;, &#39;koppen_geiger&#39;, &#39;mdt_cnes_cls18&#39;, &#39;merit_hydro&#39;, &#39;merit_hydro_ihu&#39;, &#39;merit_hydro_index&#39;, &#39;modis_lai&#39;, &#39;osm_coastlines&#39;, &#39;osm_landareas&#39;, &#39;rgi&#39;, &#39;hydro_rivers_lin&#39;, &#39;simard&#39;, &#39;soilgrids&#39;, &#39;vito_2015&#39;, &#39;wb_countries&#39;, &#39;worldclim&#39;])
+</pre></div></div>
+</div>
+<p>And let’s now open a plot one of the available datasets to check extent and available dates:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ds</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s2">&quot;era5&quot;</span><span class="p">,</span> <span class="n">time_range</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;2010-02-02&quot;</span><span class="p">,</span> <span class="s2">&quot;2010-02-15&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available extent: </span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Available dates: </span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">ds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+object: RasterDatasetXarrayDriver does not use kwarg time_range with value &lt;generator object DataAdapterBase._to_source_timerange.&lt;locals&gt;.&lt;genexpr&gt; at 0x7fc084e9ca50&gt;.
+object: RasterDatasetXarrayDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+Name: WGS 84
+Axis Info [ellipsoidal]:
+- Lat[north]: Geodetic latitude (degree)
+- Lon[east]: Geodetic longitude (degree)
+Area of Use:
+- name: World.
+- bounds: (-180.0, -90.0, 180.0, 90.0)
+Datum: World Geodetic System 1984 ensemble
+- Ellipsoid: WGS 84
+- Prime Meridian: Greenwich
+ unit=None extent={} nodata=None attrs={} category=&#39;meteo&#39; history=&#39;Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency&#39; paper_doi=&#39;10.1002/qj.3803&#39; paper_ref=&#39;Hersbach et al. (2019)&#39; url=&#39;https://doi.org/10.24381/cds.bd0915c6&#39; license=&#39;https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products&#39;.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+Available extent: (11.625, 45.125, 13.125, 46.875)
+Available dates: 2010-02-02T00:00:00.000000000 to 2010-02-15T00:00:00.000000000
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewBox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewBox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+html[data-theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt; Size: 17kB
+Dimensions:      (time: 14, latitude: 7, longitude: 6)
+Coordinates:
+  * time         (time) datetime64[ns] 112B 2010-02-02 2010-02-03 ... 2010-02-15
+  * longitude    (longitude) float32 24B 11.75 12.0 12.25 12.5 12.75 13.0
+  * latitude     (latitude) float32 28B 46.75 46.5 46.25 46.0 45.75 45.5 45.25
+    spatial_ref  int32 4B ...
+Data variables:
+    precip       (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    temp         (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    press_msl    (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    kin          (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    kout         (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    temp_min     (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    temp_max     (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+Attributes:
+    category:        meteo
+    history:         Extracted from Copernicus Climate Data Store; resampled ...
+    paper_doi:       10.1002/qj.3803
+    paper_ref:       Hersbach et al. (2019)
+    source_license:  https://cds.climate.copernicus.eu/cdsapp/#!/terms/licenc...
+    source_url:      https://doi.org/10.24381/cds.bd0915c6
+    source_version:  ERA5 daily data on pressure levels
+    crs:             4326
+    url:             https://doi.org/10.24381/cds.bd0915c6
+    license:         https://cds.climate.copernicus.eu/cdsapp/#!/terms/licenc...</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-07762fcd-a32e-4e0d-8518-4a244e8274f1' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-07762fcd-a32e-4e0d-8518-4a244e8274f1' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 14</li><li><span class='xr-has-index'>latitude</span>: 7</li><li><span class='xr-has-index'>longitude</span>: 6</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-f3713e5b-05ae-4ce7-921e-0289cfea2e4a' class='xr-section-summary-in' type='checkbox'  checked><label for='section-f3713e5b-05ae-4ce7-921e-0289cfea2e4a' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-02 ... 2010-02-15</div><input id='attrs-c61b6608-7096-477e-8ea7-5c659e3520e8' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-c61b6608-7096-477e-8ea7-5c659e3520e8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-72d4d66d-977e-47cb-82a5-b4c12c9befb3' class='xr-var-data-in' type='checkbox'><label for='data-72d4d66d-977e-47cb-82a5-b4c12c9befb3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-02T00:00:00.000000000&#x27;, &#x27;2010-02-03T00:00:00.000000000&#x27;,
+       &#x27;2010-02-04T00:00:00.000000000&#x27;, &#x27;2010-02-05T00:00:00.000000000&#x27;,
+       &#x27;2010-02-06T00:00:00.000000000&#x27;, &#x27;2010-02-07T00:00:00.000000000&#x27;,
+       &#x27;2010-02-08T00:00:00.000000000&#x27;, &#x27;2010-02-09T00:00:00.000000000&#x27;,
+       &#x27;2010-02-10T00:00:00.000000000&#x27;, &#x27;2010-02-11T00:00:00.000000000&#x27;,
+       &#x27;2010-02-12T00:00:00.000000000&#x27;, &#x27;2010-02-13T00:00:00.000000000&#x27;,
+       &#x27;2010-02-14T00:00:00.000000000&#x27;, &#x27;2010-02-15T00:00:00.000000000&#x27;],
+      dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>longitude</span></div><div class='xr-var-dims'>(longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>11.75 12.0 12.25 12.5 12.75 13.0</div><input id='attrs-fcd79b40-3237-4a82-838a-ae9967b5fc06' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-fcd79b40-3237-4a82-838a-ae9967b5fc06' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-08f6a21b-16eb-4647-bf3b-4d68bbc8ce25' class='xr-var-data-in' type='checkbox'><label for='data-08f6a21b-16eb-4647-bf3b-4d68bbc8ce25' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.75, 12.  , 12.25, 12.5 , 12.75, 13.  ], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>latitude</span></div><div class='xr-var-dims'>(latitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>46.75 46.5 46.25 ... 45.5 45.25</div><input id='attrs-b39e6cf4-2611-41bc-8295-973fb46f1fe0' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-b39e6cf4-2611-41bc-8295-973fb46f1fe0' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1edb7a31-1fc5-4008-9252-0490899767b9' class='xr-var-data-in' type='checkbox'><label for='data-1edb7a31-1fc5-4008-9252-0490899767b9' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.75, 46.5 , 46.25, 46.  , 45.75, 45.5 , 45.25], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-4b648e1a-8266-4f90-8671-52f8fcfae6d3' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-4b648e1a-8266-4f90-8671-52f8fcfae6d3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8bbe8b66-6a85-42da-9ebe-ec73578eacef' class='xr-var-data-in' type='checkbox'><label for='data-8bbe8b66-6a85-42da-9ebe-ec73578eacef' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_dim :</span></dt><dd>longitude</dd><dt><span>y_dim :</span></dt><dd>latitude</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-2280c815-9fe6-48a4-9b39-dc528390708d' class='xr-section-summary-in' type='checkbox'  checked><label for='section-2280c815-9fe6-48a4-9b39-dc528390708d' class='xr-section-summary' >Data variables: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>precip</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-2c23acae-5435-4810-bea1-c1e80f50d141' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-2c23acae-5435-4810-bea1-c1e80f50d141' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-794f110b-789d-43c2-80f3-488092d58efe' class='xr-var-data-in' type='checkbox'><label for='data-794f110b-789d-43c2-80f3-488092d58efe' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-78d70a0b-fe10-4b50-9c82-020debdd31dd' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-78d70a0b-fe10-4b50-9c82-020debdd31dd' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-097740d7-7573-486e-90a6-a68d9d0aad03' class='xr-var-data-in' type='checkbox'><label for='data-097740d7-7573-486e-90a6-a68d9d0aad03' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>press_msl</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-512f383c-7104-46fa-98e2-b4f3ef1a44f8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-512f383c-7104-46fa-98e2-b4f3ef1a44f8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8a14ae6f-33cf-48be-becf-4a5050af3b57' class='xr-var-data-in' type='checkbox'><label for='data-8a14ae6f-33cf-48be-becf-4a5050af3b57' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kin</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-f11eab45-de4e-4bd9-b6ad-442a5a1ff431' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f11eab45-de4e-4bd9-b6ad-442a5a1ff431' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-96b4baaa-32ba-48be-bf10-4c4624dad001' class='xr-var-data-in' type='checkbox'><label for='data-96b4baaa-32ba-48be-bf10-4c4624dad001' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kout</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-a21a00b9-ab1f-4772-9fde-39cad96f6d23' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a21a00b9-ab1f-4772-9fde-39cad96f6d23' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f1da4b74-0196-451c-b22d-a1a132be5e6c' class='xr-var-data-in' type='checkbox'><label for='data-f1da4b74-0196-451c-b22d-a1a132be5e6c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_min</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-cdd70847-330e-4121-9f43-8aa0031d8632' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-cdd70847-330e-4121-9f43-8aa0031d8632' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-98231d82-2936-4193-b80c-b4d936fef7e8' class='xr-var-data-in' type='checkbox'><label for='data-98231d82-2936-4193-b80c-b4d936fef7e8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_max</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-ee92dc5c-5836-4629-a8ad-e94ecc4d895c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ee92dc5c-5836-4629-a8ad-e94ecc4d895c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-dd0502f0-1d03-4270-9312-fcb892e57692' class='xr-var-data-in' type='checkbox'><label for='data-dd0502f0-1d03-4270-9312-fcb892e57692' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+    <tr>
+        <td>
+            <table style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td> </td>
+                        <th> Array </th>
+                        <th> Chunk </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <th> Bytes </th>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
+                    </tr>
+
+                    <tr>
+                        <th> Shape </th>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                    </tr>
+                    <tr>
+                        <th> Dask graph </th>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
+                    </tr>
+                    <tr>
+                        <th> Data type </th>
+                        <td colspan="2"> float32 numpy.ndarray </td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+        <td>
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Horizontal lines -->
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Vertical lines -->
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
+
+  <!-- Colored Rectangle -->
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+
+  <!-- Text -->
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
+</svg>
+        </td>
+    </tr>
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-83c8516a-fc07-4f25-8e79-84c9ffcd5f30' class='xr-section-summary-in' type='checkbox'  ><label for='section-83c8516a-fc07-4f25-8e79-84c9ffcd5f30' class='xr-section-summary' >Indexes: <span>(3)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-0c088f72-bae0-433b-8a6a-6b76c659aae8' class='xr-index-data-in' type='checkbox'/><label for='index-0c088f72-bae0-433b-8a6a-6b76c659aae8' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;2010-02-02&#x27;, &#x27;2010-02-03&#x27;, &#x27;2010-02-04&#x27;, &#x27;2010-02-05&#x27;,
+               &#x27;2010-02-06&#x27;, &#x27;2010-02-07&#x27;, &#x27;2010-02-08&#x27;, &#x27;2010-02-09&#x27;,
+               &#x27;2010-02-10&#x27;, &#x27;2010-02-11&#x27;, &#x27;2010-02-12&#x27;, &#x27;2010-02-13&#x27;,
+               &#x27;2010-02-14&#x27;, &#x27;2010-02-15&#x27;],
+              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, freq=None))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>longitude</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-824d914b-c0c4-4b34-83a3-bd5ccabe9a05' class='xr-index-data-in' type='checkbox'/><label for='index-824d914b-c0c4-4b34-83a3-bd5ccabe9a05' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([11.75, 12.0, 12.25, 12.5, 12.75, 13.0], dtype=&#x27;float32&#x27;, name=&#x27;longitude&#x27;))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>latitude</div></div><div class='xr-index-preview'>PandasIndex</div><div></div><input id='index-94386f29-71b4-4de5-85bb-e5c99a4a568f' class='xr-index-data-in' type='checkbox'/><label for='index-94386f29-71b4-4de5-85bb-e5c99a4a568f' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([46.75, 46.5, 46.25, 46.0, 45.75, 45.5, 45.25], dtype=&#x27;float32&#x27;, name=&#x27;latitude&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-6d3c3965-496e-46d7-beda-01913450b152' class='xr-section-summary-in' type='checkbox'  ><label for='section-6d3c3965-496e-46d7-beda-01913450b152' class='xr-section-summary' >Attributes: <span>(10)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>category :</span></dt><dd>meteo</dd><dt><span>history :</span></dt><dd>Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency</dd><dt><span>paper_doi :</span></dt><dd>10.1002/qj.3803</dd><dt><span>paper_ref :</span></dt><dd>Hersbach et al. (2019)</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://doi.org/10.24381/cds.bd0915c6</dd><dt><span>source_version :</span></dt><dd>ERA5 daily data on pressure levels</dd><dt><span>crs :</span></dt><dd>4326</dd><dt><span>url :</span></dt><dd>https://doi.org/10.24381/cds.bd0915c6</dd><dt><span>license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd></dl></div></li></ul></div></div></div>
+</div>
+</section>
+<section id="Export-an-extract-of-the-data">
+<h2>Export an extract of the data<a class="headerlink" href="#Export-an-extract-of-the-data" title="Link to this heading">#</a></h2>
+<p>Now we will export a subset of the data in our <code class="docutils literal notranslate"><span class="pre">artifact_data</span></code> catalog using the <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.export_data.html"><span class="doc">DataCatalog.export_data()</span></a> method. Let’s check the method’s docstring:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">?</span>data_catalog.export_data
+</pre></div>
+</div>
+</div>
+<p>Let’s select which data source and the extent we want (based on the exploration above):</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># List of data sources to export</span>
+<span class="c1"># NOTE that for ERA5 we only export the precip variable and for merit_hydro we only export the elevtn variable</span>
+<span class="n">source_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;merit_hydro[elevtn,flwdir]&quot;</span><span class="p">,</span> <span class="s2">&quot;era5[precip]&quot;</span><span class="p">,</span> <span class="s2">&quot;vito_2015&quot;</span><span class="p">]</span>
+<span class="c1"># Geographic extent</span>
+<span class="n">bbox</span> <span class="o">=</span> <span class="p">[</span><span class="mf">12.0</span><span class="p">,</span> <span class="mf">46.0</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">,</span> <span class="mf">46.5</span><span class="p">]</span>
+<span class="c1"># Time extent</span>
+<span class="n">time_range</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;2010-02-10&quot;</span><span class="p">,</span> <span class="s2">&quot;2010-02-15&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>And let’s export the <em>tmp_data_export</em> folder:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">folder_name</span> <span class="o">=</span> <span class="s2">&quot;tmp_data_export&quot;</span>
+<span class="n">data_catalog</span><span class="o">.</span><span class="n">export_data</span><span class="p">(</span>
+    <span class="n">new_root</span><span class="o">=</span><span class="n">folder_name</span><span class="p">,</span>
+    <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span>
+    <span class="n">time_range</span><span class="o">=</span><span class="n">time_range</span><span class="p">,</span>
+    <span class="n">source_names</span><span class="o">=</span><span class="n">source_list</span><span class="p">,</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+object: ConventionResolver does not use kwarg mask with value                                             geometry
+0  POLYGON ((13 46, 13 46.5, 12 46.5, 12 46, 13 46)).
+object: ConventionResolver does not use kwarg mask with value                                             geometry
+0  POLYGON ((13 46, 13 46.5, 12 46.5, 12 46, 13 46)).
+object: RasterioDriver does not use kwarg time_range with value (datetime.datetime(2010, 2, 10, 0, 0), datetime.datetime(2010, 2, 15, 0, 0)).
+Unknown extension for RasterDatasetXarrayDriver: .tif,switching to zarr
+object: ConventionResolver does not use kwarg mask with value                                             geometry
+0  POLYGON ((13 46, 13 46.5, 12 46.5, 12 46, 13 46)).
+object: RasterDatasetXarrayDriver does not use kwarg mask with value                                             geometry
+0  POLYGON ((13 46, 13 46.5, 12 46.5, 12 46, 13 46)).
+object: RasterDatasetXarrayDriver does not use kwarg time_range with value &lt;generator object DataAdapterBase._to_source_timerange.&lt;locals&gt;.&lt;genexpr&gt; at 0x7fc084c976d0&gt;.
+object: RasterDatasetXarrayDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+Name: WGS 84
+Axis Info [ellipsoidal]:
+- Lat[north]: Geodetic latitude (degree)
+- Lon[east]: Geodetic longitude (degree)
+Area of Use:
+- name: World.
+- bounds: (-180.0, -90.0, 180.0, 90.0)
+Datum: World Geodetic System 1984 ensemble
+- Ellipsoid: WGS 84
+- Prime Meridian: Greenwich
+ unit=None extent={} nodata=None attrs={} category=&#39;meteo&#39; history=&#39;Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency&#39; paper_doi=&#39;10.1002/qj.3803&#39; paper_ref=&#39;Hersbach et al. (2019)&#39; url=&#39;https://doi.org/10.24381/cds.bd0915c6&#39; license=&#39;https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products&#39;.
+object: ConventionResolver does not use kwarg mask with value                                             geometry
+0  POLYGON ((13 46, 13 46.5, 12 46.5, 12 46, 13 46)).
+object: RasterioDriver does not use kwarg time_range with value (datetime.datetime(2010, 2, 10, 0, 0), datetime.datetime(2010, 2, 15, 0, 0)).
+Unknown extension for RasterDatasetXarrayDriver: .tif,switching to zarr
+</pre></div></div>
+</div>
+</section>
+<section id="Open-and-explore-the-exported-data">
+<h2>Open and explore the exported data<a class="headerlink" href="#Open-and-explore-the-exported-data" title="Link to this heading">#</a></h2>
+<p>Now we have our new extracted data and HydroMT saved as well a new data catalog file that goes with it:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">folder_name</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_data_export
+ - data_catalog.yml
+ - era5.nc
+tmp_data_export/strord.zarr
+ - .zattrs
+ - .zmetadata
+ - .zgroup
+tmp_data_export/strord.zarr/upgrid
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/strord.zarr/y
+ - .zattrs
+ - .zarray
+ - 0
+tmp_data_export/strord.zarr/flwdir
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/strord.zarr/rivwth
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/strord.zarr/uparea
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/strord.zarr/x
+ - .zattrs
+ - .zarray
+ - 0
+tmp_data_export/strord.zarr/hnd
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/strord.zarr/lndslp
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/strord.zarr/basins
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/strord.zarr/elevtn
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/strord.zarr/spatial_ref
+ - .zattrs
+ - .zarray
+ - 0
+tmp_data_export/strord.zarr/strord
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/vito.zarr
+ - .zattrs
+ - .zmetadata
+ - .zgroup
+tmp_data_export/vito.zarr/y
+ - .zattrs
+ - .zarray
+ - 0
+tmp_data_export/vito.zarr/x
+ - .zattrs
+ - .zarray
+ - 0
+tmp_data_export/vito.zarr/vito
+ - .zattrs
+ - .zarray
+ - 0.0
+tmp_data_export/vito.zarr/spatial_ref
+ - .zattrs
+ - .zarray
+ - 0
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_name</span><span class="p">,</span> <span class="s2">&quot;data_catalog.yml&quot;</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+meta:
+  version: &#39;1&#39;
+  root: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export
+era5:
+  uri: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export/era5.nc
+  data_adapter:
+    unit_add:
+      temp: -273.15
+      temp_max: -273.15
+      temp_min: -273.15
+      time: 86400
+    unit_mult:
+      kin: 0.000277778
+      kout: 0.000277778
+      precip: 1000
+      press_msl: 0.01
+  driver:
+    name: raster_xarray
+  version: ERA5 daily data on pressure levels
+  metadata:
+    crs: 4326
+    category: meteo
+    history: Extracted from Copernicus Climate Data Store; resampled by Deltares to
+      daily frequency
+    paper_doi: 10.1002/qj.3803
+    paper_ref: Hersbach et al. (2019)
+    url: https://doi.org/10.24381/cds.bd0915c6
+    license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+  data_type: RasterDataset
+  root: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export
+merit_hydro:
+  uri: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export/strord.zarr
+  driver:
+    name: raster_xarray
+  version: &#39;1.0&#39;
+  metadata:
+    crs: 4326
+    category: topography
+    paper_doi: 10.1029/2019WR024873
+    paper_ref: Yamazaki et al. (2019)
+    url: http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro
+    license: CC-BY-NC 4.0 or ODbL 1.0
+  data_type: RasterDataset
+  root: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export
+vito_2015:
+  uri: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export/vito.zarr
+  driver:
+    name: raster_xarray
+  version: 2.0.2
+  metadata:
+    crs: 4326
+    category: landuse &amp; landcover
+    paper_doi: 10.5281/zenodo.3939038
+    paper_ref: Buchhorn et al (2020)
+    url: https://land.copernicus.eu/global/products/lc
+  data_type: RasterDataset
+  root: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export
+
+</pre></div></div>
+</div>
+<p>Let’s open the extracted data catalog:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_catalog_extract</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span>
+    <span class="n">data_libs</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_name</span><span class="p">,</span> <span class="s2">&quot;data_catalog.yml&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">data_catalog_extract</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+dict_keys([&#39;era5&#39;, &#39;merit_hydro&#39;, &#39;vito_2015&#39;])
+</pre></div></div>
+</div>
+<p>And now let’s open the extracted data again and do a nice plot.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get both the extracted and original merit_hydro_1k DEM</span>
+<span class="n">dem</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span>
+    <span class="s2">&quot;merit_hydro&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;elevtn&quot;</span><span class="p">],</span> <span class="n">bbox</span><span class="o">=</span><span class="p">[</span><span class="mf">11.6</span><span class="p">,</span> <span class="mf">45.2</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">,</span> <span class="mf">46.8</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">dem_extract</span> <span class="o">=</span> <span class="n">data_catalog_extract</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span>
+    <span class="s2">&quot;merit_hydro&quot;</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;elevtn&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+object: ConventionResolver does not use kwarg mask with value                                             geometry
+0  POLYGON ((13 45.2, 13 46.8, 11.6 46.8, 11.6 45....
+object: RasterDatasetXarrayDriver does not use kwarg variables with value [&#39;elevtn&#39;].
+object: RasterDatasetXarrayDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+Name: WGS 84
+Axis Info [ellipsoidal]:
+- Lat[north]: Geodetic latitude (degree)
+- Lon[east]: Geodetic longitude (degree)
+Area of Use:
+- name: World.
+- bounds: (-180.0, -90.0, 180.0, 90.0)
+Datum: World Geodetic System 1984 ensemble
+- Ellipsoid: WGS 84
+- Prime Meridian: Greenwich
+ unit=None extent={} nodata=None attrs={} category=&#39;topography&#39; paper_doi=&#39;10.1029/2019WR024873&#39; paper_ref=&#39;Yamazaki et al. (2019)&#39; url=&#39;http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro&#39; license=&#39;CC-BY-NC 4.0 or ODbL 1.0&#39;.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cartopy.crs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ccrs</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
+
+<span class="n">proj</span> <span class="o">=</span> <span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">()</span>  <span class="c1"># plot projection</span>
+
+
+<span class="c1"># get bounding box of each data catalog using merit_hydro_1k</span>
+<span class="n">bbox</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">dem</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+<span class="n">bbox_extract</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="n">dem_extract</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="mi">4326</span><span class="p">)</span>
+
+<span class="c1"># Initialise plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">proj</span><span class="p">)</span>
+
+<span class="c1"># Plot the bounding box</span>
+<span class="n">bbox</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">bbox_extract</span><span class="o">.</span><span class="n">boundary</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+
+<span class="c1"># Plot elevation</span>
+<span class="n">dem</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+<span class="n">dem_extract</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask_nodata</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;terrain&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;exported and original DEMs&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Text(0.5, 1.0, &#39;exported and original DEMs&#39;)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_export_data_24_1.png" src="../_images/_examples_export_data_24_1.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="prep_data_catalog.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Example: Preparing a data catalog</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="working_with_models_basics.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Example: Working with models from CLI</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Explore-the-current-data-catalog">Explore the current data catalog</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Export-an-extract-of-the-data">Export an extract of the data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Open-and-explore-the-exported-data">Open and explore the exported data</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/_examples/export_data.ipynb">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/_examples/export_data.ipynb.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
