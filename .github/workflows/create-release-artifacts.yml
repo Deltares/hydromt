@@ -25,6 +25,7 @@ jobs:
       - name: generate env
         run: |
           pip install tomli flit twine
+          pip install -U packaging
 
       - name: Build artifacts
         run: |
