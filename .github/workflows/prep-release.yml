@@ -121,7 +121,7 @@ jobs:
           git push --set-upstream origin "release/v$NEW_VERSION"
 
           # gh cli should return the url of the pr it just created. we'll store that so we can access it later
-          export PR_URL=$( gh pr create -B "main" -H "release/v$NEW_VERSION" -t "Release v$NEW_VERSION" -b "Hi there! This is an automated PR made for your release. If everything has gone well, all tests should now be running. Please check that the PR is as you would like it to be, and feel free to push any changes to this branch before merging.  Once you're happy with the state of the PR, someone just needs to approve it, and I'll take care of the rest!" )
+          export PR_URL=$( gh pr create -B "main" -H "release/v$NEW_VERSION" -t "Release v$NEW_VERSION" -b "Hi there! This is an automated PR made for your release. If everything has gone well, all tests should now be running. Please check that the PR is as you would like it to be, and feel free to push any changes to this branch before merging.  Once you're happy with the state of the PR, just approve and merge the PR and I'll take care of the rest! (I recommend squashing)" )
           gh co "release/v$NEW_VERSION"
 
           # not fetched by default
