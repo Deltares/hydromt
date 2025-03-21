@@ -126,7 +126,7 @@ jobs:
 
           # not fetched by default
           git fetch --tags
-          export LAST_RELEASE=$(git tag  | head -n 1)
+          export LAST_RELEASE=$(git describe --tags --abbrev=0)
           export PYPROJ_DIFF=$(git diff "$LAST_RELEASE" -- pyproject.toml)
 
           if [[ -z $PYPROJ_DIFF ]]; then
