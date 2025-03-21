@@ -1,0 +1,2395 @@
+.. dropdown:: deltares_data
+
+   .. tab-set:: 
+
+      .. tab-item:: geography
+
+         .. dropdown:: gadm
+
+            :uri: geography/gadm/version4\_1/gadm\_level0.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.658}}
+            :notes: last downloaded 2023-12-18; license required for commercial use
+            :processing_script: geography/gadm/version4\_1/run\_dissolve\_level\_0.sh
+            :url: https://gadm.org/download\_world.html
+            :author: gadm
+            :license: https://gadm.org/license.html
+
+         .. dropdown:: gadm_level1
+
+            :uri: geography/gadm/version4\_1/gadm\_level1.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.658}}
+            :notes: last downloaded 2023-12-18; license required for commercial use
+            :processing_script: geography/gadm/version4\_1/run\_dissolve\_level\_1.sh
+            :url: https://gadm.org/download\_world.html
+            :author: gadm
+            :license: https://gadm.org/license.html
+
+         .. dropdown:: gadm_level2
+
+            :uri: geography/gadm/version4\_1/gadm\_level2.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.658}}
+            :notes: last downloaded 2023-12-18; license required for commercial use
+            :processing_script: geography/gadm/version4\_1/run\_dissolve\_level\_2.sh
+            :url: https://gadm.org/download\_world.html
+            :author: gadm
+            :license: https://gadm.org/license.html
+
+         .. dropdown:: gadm_level3
+
+            :uri: geography/gadm/version4\_1/gadm\_level3.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.658}}
+            :notes: last downloaded 2023-12-18; license required for commercial use
+            :processing_script: geography/gadm/version4\_1/run\_dissolve\_level\_3.sh
+            :url: https://gadm.org/download\_world.html
+            :author: gadm
+            :license: https://gadm.org/license.html
+
+         .. dropdown:: osm_coastlines
+
+            :uri: geography/osm/osm\_coastlines-db.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -78.733, 'East': 180.0, 'North': 90.0}}
+            :notes: OpenStreetMap coastlines water polygons, last updated 2020-01-09T05:29
+            :url: https://osmdata.openstreetmap.de/data/coastlines.html
+            :author: OpenStreetMap
+            :license: ODbL
+
+         .. dropdown:: osm_landareas
+
+            :uri: geography/osm/osm\_landareas-db.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.666}}
+            :notes: OpenStreetMap coastlines land polygons, last updated 2020-01-09T05:29
+            :url: https://osmdata.openstreetmap.de/data/coastlines.html
+            :author: OpenStreetMap
+            :license: ODbL
+
+      .. tab-item:: hydrography
+
+         .. dropdown:: grwl_mask
+
+            :uri: hydrography/grwl/tindex.gpkg
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :nodata: 0
+            :paper_doi: 10.1126/science.aat0636
+            :paper_ref: Allen and Pavelsky (2018)
+            :url: https://doi.org/10.5281/zenodo.1297434
+            :license: CC BY 4.0
+
+         .. dropdown:: gswo
+
+            :uri: hydrography/gswo/occur.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :nodata: 255
+            :paper_doi: 10.1038/nature20584
+            :paper_ref: Pekel et al. (2016)
+            :url: https://global-surface-water.appspot.com/download
+
+         .. dropdown:: hydro_basin_atlas_level12
+
+            :uri: hydrography/hydro\_atlas/basin\_atlas\_v10.gpkg
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -55.988, 'East': 180.001, 'North': 83.626}}
+            :notes: renaming and units might require some revision
+            :paper_doi: 10.1038/s41597-019-0300-6
+            :paper_ref: Linke et al. (2019)
+            :url: https://www.hydrosheds.org/hydroatlas
+            :license: CC BY 4.0
+
+         .. dropdown:: hydro_lake_atlas_pol
+
+            :uri: hydrography/hydro\_atlas/lake\_atlas\_v10.gpkg
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -55.865, 'East': 180.0, 'North': 83.576}}
+            :notes: renaming and units might require some revision
+            :paper_doi: 10.1038/s41597-022-01425-z
+            :paper_ref: Lehner et al. (2022)
+            :url: https://www.hydrosheds.org/hydroatlas
+            :license: CC BY 4.0
+
+         .. dropdown:: hydro_river_atlas
+
+            :uri: hydrography/hydro\_atlas/river\_atlas\_v10.gpkg
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -179.998, 'South': -55.877, 'East': 179.998, 'North': 83.59}}
+            :notes: renaming and units might require some revision
+            :paper_doi: 10.1038/s41597-019-0300-6
+            :paper_ref: Linke et al. (2019)
+            :url: https://www.hydrosheds.org/hydroatlas
+            :license: CC BY 4.0
+
+         .. dropdown:: hydro_rivers_lin
+
+            :uri: hydrography/rivers\_lin2019/rivers\_ge30m.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :extent: {'bbox': {'West': -177.204, 'South': -55.414, 'East': 180.237, 'North': 82.112}}
+            :paper_doi: 10.5281/zenodo.3552776
+            :paper_ref: Lin et al. (2019)
+            :processing_notes: hydrography/rivers\_lin2019/README
+            :url: https://zenodo.org/record/3552776#.YVbOrppByUk
+            :license: CC-BY-NC 4.0
+
+      .. tab-item:: landuse
+
+         .. dropdown:: corine
+
+            :uri: landuse/corine/CLC2018\_CLC2018\_V2018\_20.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': 900000.0, 'South': 900000.0, 'East': 7400000.0, 'North': 5500000.0}}
+            :url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
+            :author: European Environment Agency
+            :license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
+
+         .. dropdown:: esa_worldcover
+
+            :uri: landuse/esa\_worldcover/esa-worldcover.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 84.0}, 'time_range': {'start': '2020-01-01', 'end': '2020-12-31'}}
+            :processing_notes: prepare vrt file with gdalbuildvrt
+            :url: https://doi.org/10.5281/zenodo.5571936
+            :license: CC BY 4.0
+
+         .. dropdown:: globcover
+
+            :uri: landuse/globcover/GLOBCOVER\_L4\_200901\_200912\_V2.3.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.001, 'South': -64.999, 'East': 179.999, 'North': 90.001}}
+            :paper_doi: 10.1594/PANGAEA.787668
+            :paper_ref: Arino et al (2012)
+            :url: p://due.esrin.esa.int/page\_globcover.php
+            :license: CC-BY-3.0
+
+         .. dropdown:: modis_lai
+
+            :uri: landuse/modis/MODIS\_MCD15A3H\_LAI/\\*.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.004, 'South': -90.002, 'East': 180.004, 'North': 90.002}}
+            :paper_doi: 10.5067/MODIS/MCD15A3H.006
+            :paper_ref: Myneni et al (2015)
+            :processing_notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the period '2003-01-01', '2017-12-31'
+            :processing_script: {'GEE_script': 'landuse/modis/MODIS_MCD15A3H_LAI/GEE_MODIS_LAI.js', 'merge_script': 'landuse/modis/MODIS_MCD15A3H_LAI/merge_rasters_GEE_LAI.py'}
+            :url: https://lpdaac.usgs.gov/products/mcd15a3hv006/
+            :license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
+
+         .. dropdown:: simard
+
+            :uri: landuse/simard/sdat\_10023\_canopy\_height\_simard.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.1029/2011JG001708
+            :paper_ref: Simard et al (2011)
+            :url: https://webmap.ornl.gov/ogc/dataset.jsp?ds\_id=10023
+
+         .. dropdown:: vito_2015
+
+            :uri: landuse/vito/ProbaV\_LC100\_epoch2015\_global\_v2.0.2\_discrete-classification\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :paper_doi: 10.5281/zenodo.3939038
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: vito_2016
+
+            :uri: landuse/vito/PROBAV\_LC100\_global\_v3.0.1\_2016-conso\_Discrete-Classification-map\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :paper_doi: 10.5281/zenodo.3518026
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: vito_2017
+
+            :uri: landuse/vito/PROBAV\_LC100\_global\_v3.0.1\_2017-conso\_Discrete-Classification-map\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :paper_doi: 10.5281/zenodo.3518036
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: vito_2018
+
+            :uri: landuse/vito/PROBAV\_LC100\_global\_v3.0.1\_2018-conso\_Discrete-Classification-map\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :paper_doi: 10.5281/zenodo.3518038
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: vito_2019
+
+            :uri: landuse/vito/ProbaV\_LC100\_global\_v3.0.1\_2019-nrt\_discrete-classification-map\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :paper_doi: 10.5281/zenodo.3939050
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+      .. tab-item:: hydro
+
+         .. dropdown:: glofas_era5
+
+            :uri: hydro/glofas\_era5/glofas\_v31\_{year}.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 90.0}, 'time_range': {'start': '1980-01-01', 'end': '2021-05-31'}}
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.5194/essd-12-2043-2020
+            :paper_ref: Harrigan et al. (2020)
+            :processing_script: hydro/glofas\_era5/glofas\_cds\_get.py
+            :url: https://doi.org/10.24381/cds.a4fdd6b9
+            :license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
+
+         .. dropdown:: glofas_uparea
+
+            :uri: hydro/glofas\_era5/glofas\_v31\_uparea.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 90.0}}
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.5194/essd-12-2043-2020
+            :paper_ref: Harrigan et al. (2020)
+            :url: https://doi.org/10.24381/cds.a4fdd6b9
+            :license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
+
+      .. tab-item:: meteo
+
+         .. dropdown:: SM2RAIN_ASCAT_monthly_025
+
+            :uri: meteo/sm2rain\_ascat/SM2RAIN\_ASCAT\_monthly\_025\_2007\_2020.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}, 'time_range': {'start': '2007-01-01', 'end': '2020-12-01'}}
+            :notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.25-degree resolution
+            :paper_doi: 10.5194/essd-11-1583-2019
+            :paper_ref: Brocca et al. (2019)
+            :url: https://zenodo.org/record/4570192#.YueKJWNByUl
+            :license: https://creativecommons.org/licenses/by/4.0/legalcode
+
+         .. dropdown:: SM2RAIN_ASCAT_monthly_05
+
+            :uri: meteo/sm2rain\_ascat/SM2RAIN\_ASCAT\_monthly\_05\_2007\_2020.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}, 'time_range': {'start': '2007-01-01', 'end': '2020-12-01'}}
+            :notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.5-degree resolution
+            :paper_doi: 10.5194/essd-11-1583-2019
+            :paper_ref: Brocca et al. (2019)
+            :url: https://zenodo.org/record/4570192#.YueKJWNByUl
+            :license: https://creativecommons.org/licenses/by/4.0/legalcode
+
+         .. dropdown:: chelsa
+
+            :uri: meteo/chelsa\_clim\_v1.2/CHELSA\_bio10\_12.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 84.0}}
+            :paper_doi: 10.1038/sdata.2017.122
+            :paper_ref: Karger et al. (2017)
+            :url: p://chelsa-climate.org/downloads/
+            :license: CC BY 4.0
+
+         .. dropdown:: chirps
+
+            :uri: meteo/chirps\_africa\_daily\_v2.0/CHIRPS\_rainfall\_{year}.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -20.0, 'South': -40.0, 'East': 55.0, 'North': 40.0}, 'time_range': {'start': '1981-01-02', 'end': '2022-04-01'}}
+            :paper_doi: 10.1038/sdata.2015.66
+            :paper_ref: Funk et al (2015)
+            :url: https://www.chc.ucsb.edu/data/chirps
+            :license: CC
+
+         .. dropdown:: chirps_global
+
+            :uri: meteo/chirps\_global\_daily\_v2.0/chirps-v2.0.{year}.days\_p05.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -50.0, 'East': 180.0, 'North': 50.0}, 'time_range': {'start': '1981-01-02', 'end': '2023-02-01'}}
+            :paper_doi: 10.3133/ds832
+            :paper_ref: Funk et al (2014)
+            :url: https://www.chc.ucsb.edu/data/chirps
+            :license: CC
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: era5
+
+            :uri: meteo/era5\_daily.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '1950-01-02', 'end': '2023-11-30'}}
+            :notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency using right label for time.
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :processing_script: https://github.com/Deltares/hydromt/blob/main/data/src/era5\_download\_resample\_convert.py
+            :url: https://doi.org/10.24381/cds.bd0915c6
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5
+
+            :uri: meteo/era5\_daily.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '1950-01-02', 'end': '2023-11-30'}}
+            :notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency using right label for time.
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :processing_script: https://github.com/Deltares/hydromt/blob/main/data/src/era5\_download\_resample\_convert.py
+            :url: https://doi.org/10.24381/cds.bd0915c6
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5_hourly
+
+            :uri: meteo/era5.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '1950-01-01', 'end': '2023-03-01'}}
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :url: https://doi.org/10.24381/cds.adbb2d47
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5_hourly
+
+            :uri: meteo/era5.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '1950-01-01', 'end': '2023-03-01'}}
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :url: https://doi.org/10.24381/cds.adbb2d47
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5_orography
+
+            :uri: meteo/era5/meta/era5\_orography\_2018.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '2018-01-01', 'end': '2018-01-01'}}
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :url: https://apps.ecmwf.int/codes/grib/param-db?id=129
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: koppen_geiger
+
+            :uri: meteo/climate\_classification\_v2017/Map\_KG-Global.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: 0
+            :paper_doi: 10.1127/0941-2948/2006/0130
+            :paper_ref: Kottek et al. (2006)
+            :url: p://koeppen-geiger.vu-wien.ac.at/present.htm
+
+         .. dropdown:: worldclim
+
+            :uri: meteo/worldclim\_v2.0/wc2.0\_30s\_prec.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -999.0
+            :paper_doi: 10.1002/joc.5086
+            :paper_ref: Fick and Hijmans (2017)
+            :url: https://www.worldclim.org/data/worldclim21.html
+
+      .. tab-item:: ocean
+
+         .. dropdown:: era5_ocean
+
+            :uri: ocean/era5/{variable}/era5\_{variable}\_{year}\_hourly.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.25, 'South': -90.25, 'East': 359.75, 'North': 90.25}, 'time_range': {'start': '1979-01-01', 'end': '2022-04-08'}}
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :url: https://doi.org/10.24381/cds.bd0915c6
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+      .. tab-item:: socio-economic
+
+         .. dropdown:: gdp_world
+
+            :uri: socio\_economic/gdp\_world/World\_countries\_GDPpcPPP.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.665}}
+            :processing_notes: data combined by Deltares (Wilfred Altena) from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD) and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
+            :author: Wilfred Altena
+            :license: CC BY-4.0
+
+         .. dropdown:: ghs_pop_2015
+
+            :uri: socio\_economic/ghs/GHS\_POP\_E2015\_GLOBE\_R2019A\_4326\_9ss\_V1\_0.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -59.485, 'East': 180.0, 'North': 83.628}}
+            :paper_doi: 10.2905/0C6B9751-A71F-4062-830B-43C9F432370F
+            :paper_ref: Schiavina et al (2019)
+            :url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
+            :author: JRC-ISPRA EC
+            :license: https://data.jrc.ec.europa.eu/licence/com\_reuse
+
+         .. dropdown:: ghs_pop_2015_54009
+
+            :uri: socio\_economic/ghs/GHS\_POP\_E2015\_GLOBE\_R2019A\_54009\_250\_V1\_0.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: ['ESRI', '54009']
+            :extent: {'bbox': {'West': -18041000.0, 'South': -9000000.0, 'East': 18041000.0, 'North': 9000000.0}}
+            :paper_doi: 10.2760/062975
+            :paper_ref: Florczyk et al (2019)
+            :url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
+            :license: CC BY 4.0
+
+         .. dropdown:: ghs_smod_2015
+
+            :uri: socio\_economic/ghs/GHS\_SMOD\_POP2015\_GLOBE\_R2019A\_54009\_1K\_V2\_0.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: ['ESRI', '54009']
+            :extent: {'bbox': {'West': -18041000.0, 'South': -9000000.0, 'East': 18041000.0, 'North': 9000000.0}}
+            :author: JRC-ISPRA EC
+            :license: https://data.jrc.ec.europa.eu/licence/com\_reuse
+            :paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+            :paper_ref: Pesaresi et al (2019)
+            :url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+
+         .. dropdown:: ghs_smod_2015
+
+            :uri: socio\_economic/ghs/GHS\_SMOD\_POP2015\_GLOBE\_R2019A\_54009\_1K\_V2\_0.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: ['ESRI', '54009']
+            :extent: {'bbox': {'West': -18041000.0, 'South': -9000000.0, 'East': 18041000.0, 'North': 9000000.0}}
+            :author: JRC-ISPRA EC
+            :license: https://data.jrc.ec.europa.eu/licence/com\_reuse
+            :paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+            :paper_ref: Pesaresi et al (2019)
+            :url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+
+         .. dropdown:: glw_buffaloes
+
+            :uri: socio\_economic/glw/5\_Bf\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :notes: last downloaded 2020-06-11
+            :paper_doi: 10.7910/DVN/5U8MWI
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_cattle
+
+            :uri: socio\_economic/glw/5\_Ct\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.7910/DVN/GIVQ75
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_chicken
+
+            :uri: socio\_economic/glw/5\_Ch\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.7910/DVN/SUFASB
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_ducks
+
+            :uri: socio\_economic/glw/5\_Dk\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.7910/DVN/ICHCBH
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_goats
+
+            :uri: socio\_economic/glw/5\_Gt\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.7910/DVN/OCPH42
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_horses
+
+            :uri: socio\_economic/glw/5\_Ho\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.7910/DVN/7Q52MV
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_pigs
+
+            :uri: socio\_economic/glw/5\_Pg\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.7910/DVN/33N0JG
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_sheeps
+
+            :uri: socio\_economic/glw/5\_Sh\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.7910/DVN/BLWPZN
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: guf_bld_2012
+
+            :uri: infrastructure/guf/GUF04\_DLR\_v02.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -65.0, 'East': 180.0, 'North': 85.0}}
+            :paper_doi: 10.1016/j.isprsjprs.2017.10.012
+            :paper_ref: Esch et al (2017)
+            :url: p://www.dlr.de/guf
+            :license: https://www.dlr.de/eoc/en/PortalData/60/Resources/dokumente/guf/DLR-GUF\_LicenseAgreement-and-OrderForm.pdf
+
+         .. dropdown:: wb_countries
+
+            :uri: geography/wb/WB\_countries\_Admin0.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -59.473, 'East': 180.0, 'North': 83.634}}
+            :timestamp: February 2020
+            :url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
+            :author: World Bank
+            :license: CC-BY 4.0
+
+         .. dropdown:: worldpop_2020_constrained
+
+            :uri: socio\_economic/worldpop/ppp\_2020\_constrained.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -55.985, 'East': 180.0, 'North': 83.628}}
+            :nodata: -99999
+            :paper_doi: 10.1371/journal.pone.0107042
+            :paper_ref: Stevens et al. (2015)
+            :processing_script: socio\_economic/worldpop/src/
+            :url: https://www.worldpop.org/doi/10.5258/SOTON/WP00684
+            :license: CC BY 4.0
+
+         .. dropdown:: wsf_bld_2015
+
+            :uri: infrastructure/wsf/WSF2015\_v1\_EPSG4326.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :paper_doi: 10.1038/s41597-020-00580-5
+            :paper_ref: Marconcini at al (2020)
+            :url: https://un-spider.org/links-and-resources/data-sources/world-settlement-footprint-2015-wsf-dlr-eoc
+            :license: CC0 1.0
+
+      .. tab-item:: topography
+
+         .. dropdown:: copdem30
+
+            :uri: topography/copdem/copdem.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.001, 'South': -90.0, 'East': 180.0, 'North': 84.0}}
+            :nodata: -9999
+            :url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p\_l\_back\_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+            :license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA\_ESA\_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+
+         .. dropdown:: copdem30_mask
+
+            :uri: topography/copdem/copdem\_mask.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.001, 'South': -90.0, 'East': 180.0, 'North': 84.0}}
+            :nodata: -1
+            :url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p\_l\_back\_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+            :license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA\_ESA\_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+
+         .. dropdown:: copdem30_masked
+
+            :uri: topography/copdem/copdem\_masked.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.001, 'South': -90.0, 'East': 180.0, 'North': 84.0}}
+            :url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p\_l\_back\_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+            :license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA\_ESA\_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+
+         .. dropdown:: dtu10mdt
+
+            :uri: topography/dtu10mdt/DTU10MDT\_1min\_float32.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :unit: m+EGM2008
+            :extent: {'bbox': {'West': -179.992, 'South': -89.992, 'East': 179.992, 'North': 89.992}}
+            :paper_doi: 10.1029/2008JC005179
+            :paper_ref: Andersen and Knudsen (2009)
+            :url: https://www.space.dtu.dk/english/research/scientific\_data\_and\_models/global\_mean\_dynamic\_topography
+
+         .. dropdown:: dtu10mdt_egm96
+
+            :uri: topography/dtu10mdt/DTU10MDT\_1min\_egm96.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :unit: m+EGM96
+            :extent: {'bbox': {'West': -179.992, 'South': -89.985, 'East': 179.995, 'North': 89.992}}
+            :paper_doi: 10.1029/2008JC005179
+            :paper_ref: Andersen and Knudsen (2009)
+            :processing_notes: /topography/dtu10mdt/READ\_ME.txt
+            :processing_script: /topography/dtu10mdt/DTU10MDT\_egm96\_1min.ipynb
+            :url: https://www.space.dtu.dk/english/research/scientific\_data\_and\_models/global\_mean\_dynamic\_topography
+
+         .. dropdown:: fabdem
+
+            :uri: topography/fabdem/fabdem.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :paper_doi: CC BY-NC-SA 4.0
+            :paper_ref: Hawker et al. (2022)
+            :url: https://data.bris.ac.uk/data/dataset/25wfy0f9ukoge2gs7a5mqpq2j7
+            :license: CC BY-NC-SA 4.0
+
+         .. dropdown:: gebco
+
+            :uri: bathymetry/gebco/gebco.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :unit: m+MSL
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9
+            :paper_ref: Weatherall et al (2020)
+            :processing_script: bathymetry/gebco/gebco\_tiles.ipynb
+            :url: https://www.bodc.ac.uk/data/hosted\_data\_systems/gebco\_gridded\_bathymetry\_data/
+            :license: https://www.gebco.net/data\_and\_products/gridded\_bathymetry\_data/#a1
+
+         .. dropdown:: mdt_cnes_cls18
+
+            :uri: topography/mdt\_cnes\_cls18/MDT\_CNES\_CLS18\_global\_filled.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :unit: m+GOCO05S
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.5194/os-17-789-2021
+            :paper_ref: Mulet et al (2021)
+            :processing_script: topography/mdt\_cnes\_cls18/convert\_lon\_fill\_mdt.ipynb
+            :url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
+
+         .. dropdown:: merit
+
+            :uri: topography/merit/merit.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :paper_doi: 10.1002/2017GL072874
+            :paper_ref: Yamazaki et al. (2018)
+            :url: p://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT\_DEM/
+            :license: CC-BY-NC 4.0 or ODbL 1.0
+
+         .. dropdown:: merit_hydro
+
+            :uri: topography/merit\_hydro/\\*.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 85.0}}
+            :paper_doi: 10.1029/2019WR024873
+            :paper_ref: Yamazaki et al. (2019)
+            :processing_notes: create vrt file with gdalbuildvrt; additional variables for stream-order, basin index (basins), and slope (lndslp) derived with pyflwdir
+            :url: p://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT\_Hydro
+            :license: CC-BY-NC 4.0 or ODbL 1.0
+
+         .. dropdown:: merit_hydro_ihu
+
+            :uri: topography/merit\_hydro\_ihu/30sec/\\*.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 85.0}}
+            :paper_doi: 10.5194/hess-2020-582
+            :paper_ref: Eilander et al. (2021)
+            :source_doi: 10.5281/zenodo.5166932
+            :processing_notes: topography/merit\_hydro\_ihu/README
+            :url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
+            :license: ODC-By 1.0
+
+         .. dropdown:: merit_hydro_ihu_index
+
+            :uri: topography/merit\_hydro\_ihu/30sec/basins.gpkg
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.025, 'South': -59.467, 'East': 190.35, 'North': 83.683}}
+            :paper_doi: 10.5194/hess-25-5287-2021
+            :paper_ref: Eilander et al. (2021)
+            :processing_notes: topography/merit\_hydro\_ihu/README
+            :url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
+            :license: CC-BY-NC 4.0
+
+         .. dropdown:: merit_hydro_index
+
+            :uri: topography/merit\_hydro/basin\_index.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.028, 'South': -59.46, 'East': 190.338, 'North': 83.661}}
+            :paper_doi: 10.5194/hess-25-5287-2021
+            :paper_ref: Eilander et al. (2021)
+            :license: CC-BY-NC 4.0
+
+         .. dropdown:: merit_hydro_patch
+
+            :uri: topography/merit\_hydro/patches/\\*.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 85.0}}
+            :paper_doi: 10.1029/2019WR024873
+            :paper_ref: Yamazaki et al. (2019)
+            :processing_script: topography/merit\_hydro/patches/scripts
+            :processing_notes: local corrections of flow direction raster and re-derive the related maps (basins, uparea, strord)
+            :url: p://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT\_Hydro
+            :license: CC-BY-NC 4.0 or ODbL 1.0
+
+      .. tab-item:: other
+
+         .. dropdown:: gcn250
+
+            :uri: landuse/gcn250/GCN250\_\\*.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -56.0, 'East': 180.0, 'North': 84.0}}
+            :nodata: 255
+            :paper_doi: 10.1038/s41597-019-0155-x
+            :paper_ref: Jaafar et al. (2019)
+            :url: https://doi.org/10.6084/m9.figshare.7756202.v1
+            :license: CC BY 4.0
+
+         .. dropdown:: grdc
+
+            :uri: hydro/grdc/GRDC\_Stations.csv
+            :data_type: GeoDataFrame
+            :driver: GeoDataFrameTableDriver
+            :crs: 4326
+            :notes: GRDC-Station Catalogue, last downloaded 2020-07-16
+            :url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
+            :license: https://www.bafg.de/GRDC/EN/02\_srvcs/21\_tmsrs/210\_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
+
+         .. dropdown:: grip_roads
+
+            :uri: infrastructure/grip/GRIP4\_world.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -179.999, 'South': -55.055, 'East': 180.0, 'North': 73.836}}
+            :paper_ref: Meijer et al, 2018
+            :paper_doi: 10.1088/1748-9326/aabd42
+            :processing_script: infrastructure/grip/merge.ipynb
+            :url: https://www.globio.info/download-grip-dataset
+            :license: CC0-1.0
+
+         .. dropdown:: grwl
+
+            :uri: hydrography/grwl/GRWL\_vector\_V01.01/grwl.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -54.31, 'East': 180.0, 'North': 82.311}}
+            :paper_doi: 10.1126/science.aat0636
+            :paper_ref: Allen and Pavelsky (2018)
+            :url: https://doi.org/10.5281/zenodo.1297434
+            :license: CC BY 4.0
+
+         .. dropdown:: hydro_lakes
+
+            :uri: hydrography/lakes/lake-db.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -55.865, 'East': 180.0, 'North': 83.576}}
+            :processing_notes: extract of hydrolakes to only include natural lakes and exclude reservoirs and control lakes (ie filter on Lake\_type = 1)
+            :author: HydroSHEDS
+
+         .. dropdown:: hydro_reservoirs
+
+            :uri: hydrography/reservoirs/reservoir-db.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -153.059, 'South': -45.881, 'East': 176.825, 'North': 70.396}}
+            :nodata: -99
+            :notes: GRanD.v1.1\_HydroLAKES.v10\_JRC.2016
+            :processing_notes: combined not natural lakes from HydroLAKES v10 (Lake\_type != 1) with reservoirs attributes from GRanD v1.1
+            :author: Alessia Matano
+
+         .. dropdown:: pcr_globwb
+
+            :uri: hydro/pcr\_globwb/glob\_2005.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -9999
+            :notes: last downloaded 2023-11-23
+            :paper_doi: 10.5281/zenodo.1045339
+            :paper_ref: Sutanudjaja, E. H., et al (2017)
+            :processing_script: hydro/pcr\_globwb/prep\_glob.py
+            :url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+
+         .. dropdown:: pcr_globwb
+
+            :uri: hydro/pcr\_globwb/glob\_2005.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -9999
+            :notes: last downloaded 2023-11-23
+            :paper_doi: 10.5281/zenodo.1045339
+            :paper_ref: Sutanudjaja, E. H., et al (2017)
+            :processing_script: hydro/pcr\_globwb/prep\_glob.py
+            :url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+
+         .. dropdown:: pcr_globwb
+
+            :uri: hydro/pcr\_globwb/glob\_2005.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -9999
+            :notes: last downloaded 2023-11-23
+            :paper_doi: 10.5281/zenodo.1045339
+            :paper_ref: Sutanudjaja, E. H., et al (2017)
+            :processing_script: hydro/pcr\_globwb/prep\_glob.py
+            :url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+
+         .. dropdown:: pcr_globwb
+
+            :uri: hydro/pcr\_globwb/glob\_2005.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -9999
+            :notes: last downloaded 2023-11-23
+            :paper_doi: 10.5281/zenodo.1045339
+            :paper_ref: Sutanudjaja, E. H., et al (2017)
+            :processing_script: hydro/pcr\_globwb/prep\_glob.py
+            :url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+
+         .. dropdown:: rgi
+
+            :uri: hydrography/rgi/rgi.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -179.921, 'South': -78.309, 'East': 179.751, 'North': 83.608}}
+            :notes: Randolph Glacier Inventory
+            :paper_doi: 10.3189/2014JoG13J176
+            :paper_ref: Pfeffer et al. (2014)
+            :url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
+            :license: CC BY 4.0
+
+         .. dropdown:: soilgrids
+
+            :uri: soil/soilgrids\_v1.0/\\*\_250m\_ll.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :notes: soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database distribution version 2.0, european commission and the European soil bureau
+             network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre: Response to european policy support  and public data requirements. Land Use Policy 29 (2), 329â€“338. 
+            
+            :paper_doi: 10.1371/journal.pone.0169748
+            :paper_ref: Hengl et al. (2017)
+            :processing_notes: soilthickness is based on 1) soilgrids (global, depth to bedrock - BDRICM variable) and 2) dataset for Eurasia
+            :processing_script: p:/wflow\_global/static\_data/wflow\_sbm\_parameters/
+            :url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
+            :license: ODbL
+
+         .. dropdown:: worldpop_2020_UNadj_constrained
+
+            :uri: socio\_economic/worldpop/ppp\_2020\_UNadj\_constrained.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -55.985, 'East': 180.0, 'North': 83.628}}
+            :processing_script: socio\_economic/worldpop/src/
+
+      .. tab-item:: all
+
+         .. dropdown:: SM2RAIN_ASCAT_monthly_025
+
+            :uri: meteo/sm2rain\_ascat/SM2RAIN\_ASCAT\_monthly\_025\_2007\_2020.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}, 'time_range': {'start': '2007-01-01', 'end': '2020-12-01'}}
+            :category: meteo
+            :notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.25-degree resolution
+            :paper_doi: 10.5194/essd-11-1583-2019
+            :paper_ref: Brocca et al. (2019)
+            :url: https://zenodo.org/record/4570192#.YueKJWNByUl
+            :license: https://creativecommons.org/licenses/by/4.0/legalcode
+
+         .. dropdown:: SM2RAIN_ASCAT_monthly_05
+
+            :uri: meteo/sm2rain\_ascat/SM2RAIN\_ASCAT\_monthly\_05\_2007\_2020.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}, 'time_range': {'start': '2007-01-01', 'end': '2020-12-01'}}
+            :category: meteo
+            :notes: crs guessed as it is neither mentioned in the data nor in the literature, 0.5-degree resolution
+            :paper_doi: 10.5194/essd-11-1583-2019
+            :paper_ref: Brocca et al. (2019)
+            :url: https://zenodo.org/record/4570192#.YueKJWNByUl
+            :license: https://creativecommons.org/licenses/by/4.0/legalcode
+
+         .. dropdown:: chelsa
+
+            :uri: meteo/chelsa\_clim\_v1.2/CHELSA\_bio10\_12.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 84.0}}
+            :category: meteo
+            :paper_doi: 10.1038/sdata.2017.122
+            :paper_ref: Karger et al. (2017)
+            :url: p://chelsa-climate.org/downloads/
+            :license: CC BY 4.0
+
+         .. dropdown:: chirps
+
+            :uri: meteo/chirps\_africa\_daily\_v2.0/CHIRPS\_rainfall\_{year}.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -20.0, 'South': -40.0, 'East': 55.0, 'North': 40.0}, 'time_range': {'start': '1981-01-02', 'end': '2022-04-01'}}
+            :category: meteo
+            :paper_doi: 10.1038/sdata.2015.66
+            :paper_ref: Funk et al (2015)
+            :url: https://www.chc.ucsb.edu/data/chirps
+            :license: CC
+
+         .. dropdown:: chirps_global
+
+            :uri: meteo/chirps\_global\_daily\_v2.0/chirps-v2.0.{year}.days\_p05.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -50.0, 'East': 180.0, 'North': 50.0}, 'time_range': {'start': '1981-01-02', 'end': '2023-02-01'}}
+            :category: meteo
+            :paper_doi: 10.3133/ds832
+            :paper_ref: Funk et al (2014)
+            :url: https://www.chc.ucsb.edu/data/chirps
+            :license: CC
+
+         .. dropdown:: copdem30
+
+            :uri: topography/copdem/copdem.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.001, 'South': -90.0, 'East': 180.0, 'North': 84.0}}
+            :nodata: -9999
+            :category: topography
+            :url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p\_l\_back\_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+            :license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA\_ESA\_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+
+         .. dropdown:: copdem30_mask
+
+            :uri: topography/copdem/copdem\_mask.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.001, 'South': -90.0, 'East': 180.0, 'North': 84.0}}
+            :nodata: -1
+            :category: topography
+            :url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p\_l\_back\_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+            :license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA\_ESA\_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+
+         .. dropdown:: copdem30_masked
+
+            :uri: topography/copdem/copdem\_masked.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.001, 'South': -90.0, 'East': 180.0, 'North': 84.0}}
+            :category: topography
+            :url: https://spacedata.copernicus.eu/web/guest/collections/copernicus-digital-elevation-model?p\_l\_back\_url=%2Fweb%2Fguest%2Fsearch%3Fq%3Ddemhttps://spacedata.copernicus.eu/web/cscda/dataset-details?articleId=394198#D4
+            :license: https://spacedata.copernicus.eu/documents/20126/0/CSCDA\_ESA\_Mission-specific+Annex+%281%29.pdf/83b44c0a-244a-7ba3-b00c-b578a34e88a7?t=1604070311399
+
+         .. dropdown:: corine
+
+            :uri: landuse/corine/CLC2018\_CLC2018\_V2018\_20.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': 900000.0, 'South': 900000.0, 'East': 7400000.0, 'North': 5500000.0}}
+            :category: landuse
+            :url: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018
+            :author: European Environment Agency
+            :license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata
+
+         .. dropdown:: dtu10mdt
+
+            :uri: topography/dtu10mdt/DTU10MDT\_1min\_float32.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :unit: m+EGM2008
+            :extent: {'bbox': {'West': -179.992, 'South': -89.992, 'East': 179.992, 'North': 89.992}}
+            :category: topography
+            :paper_doi: 10.1029/2008JC005179
+            :paper_ref: Andersen and Knudsen (2009)
+            :url: https://www.space.dtu.dk/english/research/scientific\_data\_and\_models/global\_mean\_dynamic\_topography
+
+         .. dropdown:: dtu10mdt_egm96
+
+            :uri: topography/dtu10mdt/DTU10MDT\_1min\_egm96.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :unit: m+EGM96
+            :extent: {'bbox': {'West': -179.992, 'South': -89.985, 'East': 179.995, 'North': 89.992}}
+            :category: topography
+            :paper_doi: 10.1029/2008JC005179
+            :paper_ref: Andersen and Knudsen (2009)
+            :processing_notes: /topography/dtu10mdt/READ\_ME.txt
+            :processing_script: /topography/dtu10mdt/DTU10MDT\_egm96\_1min.ipynb
+            :url: https://www.space.dtu.dk/english/research/scientific\_data\_and\_models/global\_mean\_dynamic\_topography
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs
+
+            :uri: meteo/eobs/\\*/{variable}\_ens\_mean\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}, 'time_range': {'start': '1950-01-01', 'end': '2024-02-01'}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :processing_script: meteo/eobs/scripts/v29.0e\_fix\_qq\_dims\_and\_match\_extent.py
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: eobs_orography
+
+            :uri: meteo/eobs/elev\_ens\_0.1deg\_reg\_v29.0e.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -25.0, 'South': 25.0, 'East': 45.5, 'North': 71.5}}
+            :category: meteo
+            :paper_doi: 10.1029/2017JD028200
+            :paper_ref: Cornes et al (2018)
+            :url: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+            :license: https://surfobs.climate.copernicus.eu/dataaccess/access\_eobs.php#datafiles
+
+         .. dropdown:: era5
+
+            :uri: meteo/era5\_daily.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '1950-01-02', 'end': '2023-11-30'}}
+            :category: meteo
+            :notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency using right label for time.
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :processing_script: https://github.com/Deltares/hydromt/blob/main/data/src/era5\_download\_resample\_convert.py
+            :url: https://doi.org/10.24381/cds.bd0915c6
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5
+
+            :uri: meteo/era5\_daily.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '1950-01-02', 'end': '2023-11-30'}}
+            :category: meteo
+            :notes: Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency using right label for time.
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :processing_script: https://github.com/Deltares/hydromt/blob/main/data/src/era5\_download\_resample\_convert.py
+            :url: https://doi.org/10.24381/cds.bd0915c6
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5_hourly
+
+            :uri: meteo/era5.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '1950-01-01', 'end': '2023-03-01'}}
+            :category: meteo
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :url: https://doi.org/10.24381/cds.adbb2d47
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5_hourly
+
+            :uri: meteo/era5.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '1950-01-01', 'end': '2023-03-01'}}
+            :category: meteo
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :url: https://doi.org/10.24381/cds.adbb2d47
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5_ocean
+
+            :uri: ocean/era5/{variable}/era5\_{variable}\_{year}\_hourly.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.25, 'South': -90.25, 'East': 359.75, 'North': 90.25}, 'time_range': {'start': '1979-01-01', 'end': '2022-04-08'}}
+            :category: ocean
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :url: https://doi.org/10.24381/cds.bd0915c6
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: era5_orography
+
+            :uri: meteo/era5/meta/era5\_orography\_2018.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -0.125, 'South': -90.125, 'East': 359.875, 'North': 90.125}, 'time_range': {'start': '2018-01-01', 'end': '2018-01-01'}}
+            :category: meteo
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.1002/qj.3803
+            :paper_ref: Hersbach et al. (2019)
+            :url: https://apps.ecmwf.int/codes/grib/param-db?id=129
+            :license: https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products
+
+         .. dropdown:: esa_worldcover
+
+            :uri: landuse/esa\_worldcover/esa-worldcover.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 84.0}, 'time_range': {'start': '2020-01-01', 'end': '2020-12-31'}}
+            :category: landuse
+            :processing_notes: prepare vrt file with gdalbuildvrt
+            :url: https://doi.org/10.5281/zenodo.5571936
+            :license: CC BY 4.0
+
+         .. dropdown:: fabdem
+
+            :uri: topography/fabdem/fabdem.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :category: topography
+            :paper_doi: CC BY-NC-SA 4.0
+            :paper_ref: Hawker et al. (2022)
+            :url: https://data.bris.ac.uk/data/dataset/25wfy0f9ukoge2gs7a5mqpq2j7
+            :license: CC BY-NC-SA 4.0
+
+         .. dropdown:: gadm
+
+            :uri: geography/gadm/version4\_1/gadm\_level0.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.658}}
+            :category: geography
+            :notes: last downloaded 2023-12-18; license required for commercial use
+            :processing_script: geography/gadm/version4\_1/run\_dissolve\_level\_0.sh
+            :url: https://gadm.org/download\_world.html
+            :author: gadm
+            :license: https://gadm.org/license.html
+
+         .. dropdown:: gadm_level1
+
+            :uri: geography/gadm/version4\_1/gadm\_level1.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.658}}
+            :category: geography
+            :notes: last downloaded 2023-12-18; license required for commercial use
+            :processing_script: geography/gadm/version4\_1/run\_dissolve\_level\_1.sh
+            :url: https://gadm.org/download\_world.html
+            :author: gadm
+            :license: https://gadm.org/license.html
+
+         .. dropdown:: gadm_level2
+
+            :uri: geography/gadm/version4\_1/gadm\_level2.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.658}}
+            :category: geography
+            :notes: last downloaded 2023-12-18; license required for commercial use
+            :processing_script: geography/gadm/version4\_1/run\_dissolve\_level\_2.sh
+            :url: https://gadm.org/download\_world.html
+            :author: gadm
+            :license: https://gadm.org/license.html
+
+         .. dropdown:: gadm_level3
+
+            :uri: geography/gadm/version4\_1/gadm\_level3.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.658}}
+            :category: geography
+            :notes: last downloaded 2023-12-18; license required for commercial use
+            :processing_script: geography/gadm/version4\_1/run\_dissolve\_level\_3.sh
+            :url: https://gadm.org/download\_world.html
+            :author: gadm
+            :license: https://gadm.org/license.html
+
+         .. dropdown:: gcn250
+
+            :uri: landuse/gcn250/GCN250\_\\*.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -56.0, 'East': 180.0, 'North': 84.0}}
+            :nodata: 255
+            :category: soil
+            :paper_doi: 10.1038/s41597-019-0155-x
+            :paper_ref: Jaafar et al. (2019)
+            :url: https://doi.org/10.6084/m9.figshare.7756202.v1
+            :license: CC BY 4.0
+
+         .. dropdown:: gdp_world
+
+            :uri: socio\_economic/gdp\_world/World\_countries\_GDPpcPPP.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.665}}
+            :category: socio-economic
+            :processing_notes: data combined by Deltares (Wilfred Altena) from World Bank (https://data.worldbank.org/indicator/NY.GDP.MKTP.CD) and CIA World Factbook (https://www.cia.gov/the-world-factbook/field/real-gdp-per-capita/country-comparison)
+            :author: Wilfred Altena
+            :license: CC BY-4.0
+
+         .. dropdown:: gebco
+
+            :uri: bathymetry/gebco/gebco.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :unit: m+MSL
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: topography
+            :paper_doi: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9
+            :paper_ref: Weatherall et al (2020)
+            :processing_script: bathymetry/gebco/gebco\_tiles.ipynb
+            :url: https://www.bodc.ac.uk/data/hosted\_data\_systems/gebco\_gridded\_bathymetry\_data/
+            :license: https://www.gebco.net/data\_and\_products/gridded\_bathymetry\_data/#a1
+
+         .. dropdown:: ghs_pop_2015
+
+            :uri: socio\_economic/ghs/GHS\_POP\_E2015\_GLOBE\_R2019A\_4326\_9ss\_V1\_0.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -59.485, 'East': 180.0, 'North': 83.628}}
+            :category: socio-economic
+            :paper_doi: 10.2905/0C6B9751-A71F-4062-830B-43C9F432370F
+            :paper_ref: Schiavina et al (2019)
+            :url: https://data.jrc.ec.europa.eu/dataset/0c6b9751-a71f-4062-830b-43c9f432370f
+            :author: JRC-ISPRA EC
+            :license: https://data.jrc.ec.europa.eu/licence/com\_reuse
+
+         .. dropdown:: ghs_pop_2015_54009
+
+            :uri: socio\_economic/ghs/GHS\_POP\_E2015\_GLOBE\_R2019A\_54009\_250\_V1\_0.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: ['ESRI', '54009']
+            :extent: {'bbox': {'West': -18041000.0, 'South': -9000000.0, 'East': 18041000.0, 'North': 9000000.0}}
+            :category: socio-economic
+            :paper_doi: 10.2760/062975
+            :paper_ref: Florczyk et al (2019)
+            :url: https://ghsl.jrc.ec.europa.eu/download.php?ds=pop
+            :license: CC BY 4.0
+
+         .. dropdown:: ghs_smod_2015
+
+            :uri: socio\_economic/ghs/GHS\_SMOD\_POP2015\_GLOBE\_R2019A\_54009\_1K\_V2\_0.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: ['ESRI', '54009']
+            :extent: {'bbox': {'West': -18041000.0, 'South': -9000000.0, 'East': 18041000.0, 'North': 9000000.0}}
+            :category: socio-economic
+            :author: JRC-ISPRA EC
+            :license: https://data.jrc.ec.europa.eu/licence/com\_reuse
+            :paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+            :paper_ref: Pesaresi et al (2019)
+            :url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+
+         .. dropdown:: ghs_smod_2015
+
+            :uri: socio\_economic/ghs/GHS\_SMOD\_POP2015\_GLOBE\_R2019A\_54009\_1K\_V2\_0.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: ['ESRI', '54009']
+            :extent: {'bbox': {'West': -18041000.0, 'South': -9000000.0, 'East': 18041000.0, 'North': 9000000.0}}
+            :category: socio-economic
+            :author: JRC-ISPRA EC
+            :license: https://data.jrc.ec.europa.eu/licence/com\_reuse
+            :paper_doi: 10.2905/42E8BE89-54FF-464E-BE7B-BF9E64DA5218
+            :paper_ref: Pesaresi et al (2019)
+            :url: https://data.jrc.ec.europa.eu/dataset/42e8be89-54ff-464e-be7b-bf9e64da5218
+
+         .. dropdown:: globcover
+
+            :uri: landuse/globcover/GLOBCOVER\_L4\_200901\_200912\_V2.3.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.001, 'South': -64.999, 'East': 179.999, 'North': 90.001}}
+            :category: landuse
+            :paper_doi: 10.1594/PANGAEA.787668
+            :paper_ref: Arino et al (2012)
+            :url: p://due.esrin.esa.int/page\_globcover.php
+            :license: CC-BY-3.0
+
+         .. dropdown:: glofas_era5
+
+            :uri: hydro/glofas\_era5/glofas\_v31\_{year}.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 90.0}, 'time_range': {'start': '1980-01-01', 'end': '2021-05-31'}}
+            :category: hydro
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.5194/essd-12-2043-2020
+            :paper_ref: Harrigan et al. (2020)
+            :processing_script: hydro/glofas\_era5/glofas\_cds\_get.py
+            :url: https://doi.org/10.24381/cds.a4fdd6b9
+            :license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
+
+         .. dropdown:: glofas_uparea
+
+            :uri: hydro/glofas\_era5/glofas\_v31\_uparea.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 90.0}}
+            :category: hydro
+            :notes: Extracted from Copernicus Climate Data Store
+            :paper_doi: 10.5194/essd-12-2043-2020
+            :paper_ref: Harrigan et al. (2020)
+            :url: https://doi.org/10.24381/cds.a4fdd6b9
+            :license: https://cds.climate.copernicus.eu/api/v2/terms/static/cems-floods.pdf
+
+         .. dropdown:: glw_buffaloes
+
+            :uri: socio\_economic/glw/5\_Bf\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: socio-economic
+            :notes: last downloaded 2020-06-11
+            :paper_doi: 10.7910/DVN/5U8MWI
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_cattle
+
+            :uri: socio\_economic/glw/5\_Ct\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: socio-economic
+            :paper_doi: 10.7910/DVN/GIVQ75
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_chicken
+
+            :uri: socio\_economic/glw/5\_Ch\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: socio-economic
+            :paper_doi: 10.7910/DVN/SUFASB
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_ducks
+
+            :uri: socio\_economic/glw/5\_Dk\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: socio-economic
+            :paper_doi: 10.7910/DVN/ICHCBH
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_goats
+
+            :uri: socio\_economic/glw/5\_Gt\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: socio-economic
+            :paper_doi: 10.7910/DVN/OCPH42
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_horses
+
+            :uri: socio\_economic/glw/5\_Ho\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: socio-economic
+            :paper_doi: 10.7910/DVN/7Q52MV
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_pigs
+
+            :uri: socio\_economic/glw/5\_Pg\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: socio-economic
+            :paper_doi: 10.7910/DVN/33N0JG
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: glw_sheeps
+
+            :uri: socio\_economic/glw/5\_Sh\_2010\_Da.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: socio-economic
+            :paper_doi: 10.7910/DVN/BLWPZN
+            :paper_ref: Gilbert at al (2018)
+            :url: https://dataverse.harvard.edu/dataverse/glw\_3
+            :author: glw (Gridded Livestock of World 3 Dataverse)
+            :license: CC 4.0
+
+         .. dropdown:: grdc
+
+            :uri: hydro/grdc/GRDC\_Stations.csv
+            :data_type: GeoDataFrame
+            :driver: GeoDataFrameTableDriver
+            :crs: 4326
+            :category: observed data
+            :notes: GRDC-Station Catalogue, last downloaded 2020-07-16
+            :url: https://portal.grdc.bafg.de/applications/public.html?publicuser=PublicUser#dataDownload/StationCatalogue
+            :license: https://www.bafg.de/GRDC/EN/02\_srvcs/21\_tmsrs/210\_prtl/tou.html;jsessionid=A56D50D4A36D3D8707CBF00CBD71F106.live11291?nn=2862854
+
+         .. dropdown:: grip_roads
+
+            :uri: infrastructure/grip/GRIP4\_world.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -179.999, 'South': -55.055, 'East': 180.0, 'North': 73.836}}
+            :category: road
+            :paper_ref: Meijer et al, 2018
+            :paper_doi: 10.1088/1748-9326/aabd42
+            :processing_script: infrastructure/grip/merge.ipynb
+            :url: https://www.globio.info/download-grip-dataset
+            :license: CC0-1.0
+
+         .. dropdown:: grwl
+
+            :uri: hydrography/grwl/GRWL\_vector\_V01.01/grwl.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -54.31, 'East': 180.0, 'North': 82.311}}
+            :category: surface water
+            :paper_doi: 10.1126/science.aat0636
+            :paper_ref: Allen and Pavelsky (2018)
+            :url: https://doi.org/10.5281/zenodo.1297434
+            :license: CC BY 4.0
+
+         .. dropdown:: grwl_mask
+
+            :uri: hydrography/grwl/tindex.gpkg
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :nodata: 0
+            :category: hydrography
+            :paper_doi: 10.1126/science.aat0636
+            :paper_ref: Allen and Pavelsky (2018)
+            :url: https://doi.org/10.5281/zenodo.1297434
+            :license: CC BY 4.0
+
+         .. dropdown:: gswo
+
+            :uri: hydrography/gswo/occur.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :nodata: 255
+            :category: hydrography
+            :paper_doi: 10.1038/nature20584
+            :paper_ref: Pekel et al. (2016)
+            :url: https://global-surface-water.appspot.com/download
+
+         .. dropdown:: guf_bld_2012
+
+            :uri: infrastructure/guf/GUF04\_DLR\_v02.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -65.0, 'East': 180.0, 'North': 85.0}}
+            :category: socio-economic
+            :paper_doi: 10.1016/j.isprsjprs.2017.10.012
+            :paper_ref: Esch et al (2017)
+            :url: p://www.dlr.de/guf
+            :license: https://www.dlr.de/eoc/en/PortalData/60/Resources/dokumente/guf/DLR-GUF\_LicenseAgreement-and-OrderForm.pdf
+
+         .. dropdown:: hydro_basin_atlas_level12
+
+            :uri: hydrography/hydro\_atlas/basin\_atlas\_v10.gpkg
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -55.988, 'East': 180.001, 'North': 83.626}}
+            :category: hydrography
+            :notes: renaming and units might require some revision
+            :paper_doi: 10.1038/s41597-019-0300-6
+            :paper_ref: Linke et al. (2019)
+            :url: https://www.hydrosheds.org/hydroatlas
+            :license: CC BY 4.0
+
+         .. dropdown:: hydro_lake_atlas_pol
+
+            :uri: hydrography/hydro\_atlas/lake\_atlas\_v10.gpkg
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -55.865, 'East': 180.0, 'North': 83.576}}
+            :category: hydrography
+            :notes: renaming and units might require some revision
+            :paper_doi: 10.1038/s41597-022-01425-z
+            :paper_ref: Lehner et al. (2022)
+            :url: https://www.hydrosheds.org/hydroatlas
+            :license: CC BY 4.0
+
+         .. dropdown:: hydro_lakes
+
+            :uri: hydrography/lakes/lake-db.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -55.865, 'East': 180.0, 'North': 83.576}}
+            :category: surface water
+            :processing_notes: extract of hydrolakes to only include natural lakes and exclude reservoirs and control lakes (ie filter on Lake\_type = 1)
+            :author: HydroSHEDS
+
+         .. dropdown:: hydro_reservoirs
+
+            :uri: hydrography/reservoirs/reservoir-db.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -153.059, 'South': -45.881, 'East': 176.825, 'North': 70.396}}
+            :nodata: -99
+            :category: surface water
+            :notes: GRanD.v1.1\_HydroLAKES.v10\_JRC.2016
+            :processing_notes: combined not natural lakes from HydroLAKES v10 (Lake\_type != 1) with reservoirs attributes from GRanD v1.1
+            :author: Alessia Matano
+
+         .. dropdown:: hydro_river_atlas
+
+            :uri: hydrography/hydro\_atlas/river\_atlas\_v10.gpkg
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -179.998, 'South': -55.877, 'East': 179.998, 'North': 83.59}}
+            :category: hydrography
+            :notes: renaming and units might require some revision
+            :paper_doi: 10.1038/s41597-019-0300-6
+            :paper_ref: Linke et al. (2019)
+            :url: https://www.hydrosheds.org/hydroatlas
+            :license: CC BY 4.0
+
+         .. dropdown:: hydro_rivers_lin
+
+            :uri: hydrography/rivers\_lin2019/rivers\_ge30m.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :extent: {'bbox': {'West': -177.204, 'South': -55.414, 'East': 180.237, 'North': 82.112}}
+            :category: hydrography
+            :paper_doi: 10.5281/zenodo.3552776
+            :paper_ref: Lin et al. (2019)
+            :processing_notes: hydrography/rivers\_lin2019/README
+            :url: https://zenodo.org/record/3552776#.YVbOrppByUk
+            :license: CC-BY-NC 4.0
+
+         .. dropdown:: koppen_geiger
+
+            :uri: meteo/climate\_classification\_v2017/Map\_KG-Global.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: 0
+            :category: meteo
+            :paper_doi: 10.1127/0941-2948/2006/0130
+            :paper_ref: Kottek et al. (2006)
+            :url: p://koeppen-geiger.vu-wien.ac.at/present.htm
+
+         .. dropdown:: mdt_cnes_cls18
+
+            :uri: topography/mdt\_cnes\_cls18/MDT\_CNES\_CLS18\_global\_filled.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :unit: m+GOCO05S
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: topography
+            :paper_doi: 10.5194/os-17-789-2021
+            :paper_ref: Mulet et al (2021)
+            :processing_script: topography/mdt\_cnes\_cls18/convert\_lon\_fill\_mdt.ipynb
+            :url: https://www.aviso.altimetry.fr/en/data/products/auxiliary-products/mdt.html
+
+         .. dropdown:: merit
+
+            :uri: topography/merit/merit.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: topography
+            :paper_doi: 10.1002/2017GL072874
+            :paper_ref: Yamazaki et al. (2018)
+            :url: p://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT\_DEM/
+            :license: CC-BY-NC 4.0 or ODbL 1.0
+
+         .. dropdown:: merit_hydro
+
+            :uri: topography/merit\_hydro/\\*.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 85.0}}
+            :category: topography
+            :paper_doi: 10.1029/2019WR024873
+            :paper_ref: Yamazaki et al. (2019)
+            :processing_notes: create vrt file with gdalbuildvrt; additional variables for stream-order, basin index (basins), and slope (lndslp) derived with pyflwdir
+            :url: p://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT\_Hydro
+            :license: CC-BY-NC 4.0 or ODbL 1.0
+
+         .. dropdown:: merit_hydro_ihu
+
+            :uri: topography/merit\_hydro\_ihu/30sec/\\*.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 85.0}}
+            :category: topography
+            :paper_doi: 10.5194/hess-2020-582
+            :paper_ref: Eilander et al. (2021)
+            :source_doi: 10.5281/zenodo.5166932
+            :processing_notes: topography/merit\_hydro\_ihu/README
+            :url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
+            :license: ODC-By 1.0
+
+         .. dropdown:: merit_hydro_ihu_index
+
+            :uri: topography/merit\_hydro\_ihu/30sec/basins.gpkg
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.025, 'South': -59.467, 'East': 190.35, 'North': 83.683}}
+            :category: topography
+            :paper_doi: 10.5194/hess-25-5287-2021
+            :paper_ref: Eilander et al. (2021)
+            :processing_notes: topography/merit\_hydro\_ihu/README
+            :url: https://zenodo.org/record/5166932#.YVbxJ5pByUk
+            :license: CC-BY-NC 4.0
+
+         .. dropdown:: merit_hydro_index
+
+            :uri: topography/merit\_hydro/basin\_index.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.028, 'South': -59.46, 'East': 190.338, 'North': 83.661}}
+            :category: topography
+            :paper_doi: 10.5194/hess-25-5287-2021
+            :paper_ref: Eilander et al. (2021)
+            :license: CC-BY-NC 4.0
+
+         .. dropdown:: merit_hydro_patch
+
+            :uri: topography/merit\_hydro/patches/\\*.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 85.0}}
+            :category: topography
+            :paper_doi: 10.1029/2019WR024873
+            :paper_ref: Yamazaki et al. (2019)
+            :processing_script: topography/merit\_hydro/patches/scripts
+            :processing_notes: local corrections of flow direction raster and re-derive the related maps (basins, uparea, strord)
+            :url: p://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT\_Hydro
+            :license: CC-BY-NC 4.0 or ODbL 1.0
+
+         .. dropdown:: modis_lai
+
+            :uri: landuse/modis/MODIS\_MCD15A3H\_LAI/\\*.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.004, 'South': -90.002, 'East': 180.004, 'North': 90.002}}
+            :category: landuse
+            :paper_doi: 10.5067/MODIS/MCD15A3H.006
+            :paper_ref: Myneni et al (2015)
+            :processing_notes: this dataset has been extracted from GEE ('MODIS/006/MCD15A3H') for the period '2003-01-01', '2017-12-31'
+            :processing_script: {'GEE_script': 'landuse/modis/MODIS_MCD15A3H_LAI/GEE_MODIS_LAI.js', 'merge_script': 'landuse/modis/MODIS_MCD15A3H_LAI/merge_rasters_GEE_LAI.py'}
+            :url: https://lpdaac.usgs.gov/products/mcd15a3hv006/
+            :license: https://lpdaac.usgs.gov/data/data-citation-and-policies/
+
+         .. dropdown:: osm_coastlines
+
+            :uri: geography/osm/osm\_coastlines-db.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -78.733, 'East': 180.0, 'North': 90.0}}
+            :category: geography
+            :notes: OpenStreetMap coastlines water polygons, last updated 2020-01-09T05:29
+            :url: https://osmdata.openstreetmap.de/data/coastlines.html
+            :author: OpenStreetMap
+            :license: ODbL
+
+         .. dropdown:: osm_landareas
+
+            :uri: geography/osm/osm\_landareas-db.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 83.666}}
+            :category: geography
+            :notes: OpenStreetMap coastlines land polygons, last updated 2020-01-09T05:29
+            :url: https://osmdata.openstreetmap.de/data/coastlines.html
+            :author: OpenStreetMap
+            :license: ODbL
+
+         .. dropdown:: pcr_globwb
+
+            :uri: hydro/pcr\_globwb/glob\_2005.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -9999
+            :category: water demand
+            :notes: last downloaded 2023-11-23
+            :paper_doi: 10.5281/zenodo.1045339
+            :paper_ref: Sutanudjaja, E. H., et al (2017)
+            :processing_script: hydro/pcr\_globwb/prep\_glob.py
+            :url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+
+         .. dropdown:: pcr_globwb
+
+            :uri: hydro/pcr\_globwb/glob\_2005.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -9999
+            :category: water demand
+            :notes: last downloaded 2023-11-23
+            :paper_doi: 10.5281/zenodo.1045339
+            :paper_ref: Sutanudjaja, E. H., et al (2017)
+            :processing_script: hydro/pcr\_globwb/prep\_glob.py
+            :url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+
+         .. dropdown:: pcr_globwb
+
+            :uri: hydro/pcr\_globwb/glob\_2005.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -9999
+            :category: water demand
+            :notes: last downloaded 2023-11-23
+            :paper_doi: 10.5281/zenodo.1045339
+            :paper_ref: Sutanudjaja, E. H., et al (2017)
+            :processing_script: hydro/pcr\_globwb/prep\_glob.py
+            :url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+
+         .. dropdown:: pcr_globwb
+
+            :uri: hydro/pcr\_globwb/glob\_2005.zarr
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -9999
+            :category: water demand
+            :notes: last downloaded 2023-11-23
+            :paper_doi: 10.5281/zenodo.1045339
+            :paper_ref: Sutanudjaja, E. H., et al (2017)
+            :processing_script: hydro/pcr\_globwb/prep\_glob.py
+            :url: https://zenodo.org/records/1045339#.XWUr7E2P5aR
+
+         .. dropdown:: rgi
+
+            :uri: hydrography/rgi/rgi.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -179.921, 'South': -78.309, 'East': 179.751, 'North': 83.608}}
+            :category: surface water
+            :notes: Randolph Glacier Inventory
+            :paper_doi: 10.3189/2014JoG13J176
+            :paper_ref: Pfeffer et al. (2014)
+            :url: https://cds.climate.copernicus.eu/cdsapp#!/dataset/insitu-glaciers-extent?tab=overview
+            :license: CC BY 4.0
+
+         .. dropdown:: simard
+
+            :uri: landuse/simard/sdat\_10023\_canopy\_height\_simard.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: landuse
+            :paper_doi: 10.1029/2011JG001708
+            :paper_ref: Simard et al (2011)
+            :url: https://webmap.ornl.gov/ogc/dataset.jsp?ds\_id=10023
+
+         .. dropdown:: soilgrids
+
+            :uri: soil/soilgrids\_v1.0/\\*\_250m\_ll.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :category: soil
+            :notes: soilthickness is based on 1) soilgrids (global) and 2) dataset for Eurasia (ESDAC, 2004; Panagos et al., 2012): ESDAC, 2004. The european soil database distribution version 2.0, european commission and the European soil bureau
+             network.  esdac.jrc.ec.europa.eu, accessed: 2017-11-17.  Panagos, P., Van Liedekerke, M., Jones, A., Montanarella, L., 2012. European soil data centre: Response to european policy support  and public data requirements. Land Use Policy 29 (2), 329â€“338. 
+            
+            :paper_doi: 10.1371/journal.pone.0169748
+            :paper_ref: Hengl et al. (2017)
+            :processing_notes: soilthickness is based on 1) soilgrids (global, depth to bedrock - BDRICM variable) and 2) dataset for Eurasia
+            :processing_script: p:/wflow\_global/static\_data/wflow\_sbm\_parameters/
+            :url: https://www.isric.org/explore/soilgrids/faq-soilgrids-201
+            :license: ODbL
+
+         .. dropdown:: vito_2015
+
+            :uri: landuse/vito/ProbaV\_LC100\_epoch2015\_global\_v2.0.2\_discrete-classification\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :category: landuse
+            :paper_doi: 10.5281/zenodo.3939038
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: vito_2016
+
+            :uri: landuse/vito/PROBAV\_LC100\_global\_v3.0.1\_2016-conso\_Discrete-Classification-map\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :category: landuse
+            :paper_doi: 10.5281/zenodo.3518026
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: vito_2017
+
+            :uri: landuse/vito/PROBAV\_LC100\_global\_v3.0.1\_2017-conso\_Discrete-Classification-map\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :category: landuse
+            :paper_doi: 10.5281/zenodo.3518036
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: vito_2018
+
+            :uri: landuse/vito/PROBAV\_LC100\_global\_v3.0.1\_2018-conso\_Discrete-Classification-map\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :category: landuse
+            :paper_doi: 10.5281/zenodo.3518038
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: vito_2019
+
+            :uri: landuse/vito/ProbaV\_LC100\_global\_v3.0.1\_2019-nrt\_discrete-classification-map\_EPSG-4326.tif
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :category: landuse
+            :paper_doi: 10.5281/zenodo.3939050
+            :paper_ref: Buchhorn et al (2020)
+            :url: https://land.copernicus.eu/global/products/lc
+
+         .. dropdown:: wb_countries
+
+            :uri: geography/wb/WB\_countries\_Admin0.fgb
+            :data_type: GeoDataFrame
+            :driver: PyogrioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -59.473, 'East': 180.0, 'North': 83.634}}
+            :category: socio-economic
+            :timestamp: February 2020
+            :url: https://datacatalog.worldbank.org/dataset/world-bank-official-boundaries
+            :author: World Bank
+            :license: CC-BY 4.0
+
+         .. dropdown:: worldclim
+
+            :uri: meteo/worldclim\_v2.0/wc2.0\_30s\_prec.nc
+            :data_type: RasterDataset
+            :driver: RasterDatasetXarrayDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -90.0, 'East': 180.0, 'North': 90.0}}
+            :nodata: -999.0
+            :category: meteo
+            :paper_doi: 10.1002/joc.5086
+            :paper_ref: Fick and Hijmans (2017)
+            :url: https://www.worldclim.org/data/worldclim21.html
+
+         .. dropdown:: worldpop_2020_UNadj_constrained
+
+            :uri: socio\_economic/worldpop/ppp\_2020\_UNadj\_constrained.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -55.985, 'East': 180.0, 'North': 83.628}}
+            :processing_script: socio\_economic/worldpop/src/
+
+         .. dropdown:: worldpop_2020_constrained
+
+            :uri: socio\_economic/worldpop/ppp\_2020\_constrained.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :extent: {'bbox': {'West': -180.0, 'South': -55.985, 'East': 180.0, 'North': 83.628}}
+            :nodata: -99999
+            :category: socio-economic
+            :paper_doi: 10.1371/journal.pone.0107042
+            :paper_ref: Stevens et al. (2015)
+            :processing_script: socio\_economic/worldpop/src/
+            :url: https://www.worldpop.org/doi/10.5258/SOTON/WP00684
+            :license: CC BY 4.0
+
+         .. dropdown:: wsf_bld_2015
+
+            :uri: infrastructure/wsf/WSF2015\_v1\_EPSG4326.vrt
+            :data_type: RasterDataset
+            :driver: RasterioDriver
+            :crs: 4326
+            :extent: {'bbox': {'West': -180.0, 'South': -60.0, 'East': 180.0, 'North': 80.0}}
+            :category: socio-economic
+            :paper_doi: 10.1038/s41597-020-00580-5
+            :paper_ref: Marconcini at al (2020)
+            :url: https://un-spider.org/links-and-resources/data-sources/world-settlement-footprint-2015-wsf-dlr-eoc
+            :license: CC0 1.0
+

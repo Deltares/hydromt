@@ -1,0 +1,6 @@
+﻿hydromt.model.ModelRoot.is\_reading\_mode
+=========================================
+
+.. currentmodule:: hydromt.model
+
+.. automethod:: ModelRoot.is_reading_mode

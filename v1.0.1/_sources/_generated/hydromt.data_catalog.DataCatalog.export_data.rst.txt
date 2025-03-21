@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.DataCatalog.export\_data
+==============================================
+
+.. currentmodule:: hydromt.data_catalog
+
+.. automethod:: DataCatalog.export_data

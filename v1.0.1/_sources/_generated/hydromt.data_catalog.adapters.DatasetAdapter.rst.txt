@@ -1,0 +1,59 @@
+﻿hydromt.data\_catalog.adapters.DatasetAdapter
+=============================================
+
+.. currentmodule:: hydromt.data_catalog.adapters
+
+.. autoclass:: DatasetAdapter
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DatasetAdapter.__init__
+      ~DatasetAdapter.construct
+      ~DatasetAdapter.copy
+      ~DatasetAdapter.dict
+      ~DatasetAdapter.from_orm
+      ~DatasetAdapter.json
+      ~DatasetAdapter.model_construct
+      ~DatasetAdapter.model_copy
+      ~DatasetAdapter.model_dump
+      ~DatasetAdapter.model_dump_json
+      ~DatasetAdapter.model_json_schema
+      ~DatasetAdapter.model_parametrized_name
+      ~DatasetAdapter.model_post_init
+      ~DatasetAdapter.model_rebuild
+      ~DatasetAdapter.model_validate
+      ~DatasetAdapter.model_validate_json
+      ~DatasetAdapter.model_validate_strings
+      ~DatasetAdapter.parse_file
+      ~DatasetAdapter.parse_obj
+      ~DatasetAdapter.parse_raw
+      ~DatasetAdapter.schema
+      ~DatasetAdapter.schema_json
+      ~DatasetAdapter.transform
+      ~DatasetAdapter.update_forward_refs
+      ~DatasetAdapter.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DatasetAdapter.model_computed_fields
+      ~DatasetAdapter.model_config
+      ~DatasetAdapter.model_extra
+      ~DatasetAdapter.model_fields
+      ~DatasetAdapter.model_fields_set
+      ~DatasetAdapter.unit_add
+      ~DatasetAdapter.unit_mult
+      ~DatasetAdapter.rename
+   
+   

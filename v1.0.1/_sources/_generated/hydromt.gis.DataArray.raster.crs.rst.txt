@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.crs
+================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessorattribute:: gis.DataArray.raster.crs

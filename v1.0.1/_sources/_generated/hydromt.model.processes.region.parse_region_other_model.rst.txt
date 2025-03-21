@@ -1,0 +1,6 @@
+﻿hydromt.model.processes.region.parse\_region\_other\_model
+==========================================================
+
+.. currentmodule:: hydromt.model.processes.region
+
+.. autofunction:: parse_region_other_model

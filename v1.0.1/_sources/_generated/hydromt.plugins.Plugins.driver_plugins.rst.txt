@@ -1,0 +1,6 @@
+﻿hydromt.plugins.Plugins.driver\_plugins
+=======================================
+
+.. currentmodule:: hydromt.plugins
+
+.. autoproperty:: Plugins.driver_plugins

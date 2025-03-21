@@ -1,0 +1,6 @@
+﻿hydromt.gis.flw.dem\_adjust
+===========================
+
+.. currentmodule:: hydromt.gis.flw
+
+.. autofunction:: dem_adjust

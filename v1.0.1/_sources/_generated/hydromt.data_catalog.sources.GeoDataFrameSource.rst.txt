@@ -1,0 +1,72 @@
+﻿hydromt.data\_catalog.sources.GeoDataFrameSource
+================================================
+
+.. currentmodule:: hydromt.data_catalog.sources
+
+.. autoclass:: GeoDataFrameSource
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GeoDataFrameSource.__init__
+      ~GeoDataFrameSource.construct
+      ~GeoDataFrameSource.copy
+      ~GeoDataFrameSource.detect_bbox
+      ~GeoDataFrameSource.dict
+      ~GeoDataFrameSource.from_orm
+      ~GeoDataFrameSource.get_bbox
+      ~GeoDataFrameSource.json
+      ~GeoDataFrameSource.model_construct
+      ~GeoDataFrameSource.model_copy
+      ~GeoDataFrameSource.model_dump
+      ~GeoDataFrameSource.model_dump_json
+      ~GeoDataFrameSource.model_json_schema
+      ~GeoDataFrameSource.model_parametrized_name
+      ~GeoDataFrameSource.model_post_init
+      ~GeoDataFrameSource.model_rebuild
+      ~GeoDataFrameSource.model_validate
+      ~GeoDataFrameSource.model_validate_json
+      ~GeoDataFrameSource.model_validate_strings
+      ~GeoDataFrameSource.parse_file
+      ~GeoDataFrameSource.parse_obj
+      ~GeoDataFrameSource.parse_raw
+      ~GeoDataFrameSource.read_data
+      ~GeoDataFrameSource.schema
+      ~GeoDataFrameSource.schema_json
+      ~GeoDataFrameSource.summary
+      ~GeoDataFrameSource.to_file
+      ~GeoDataFrameSource.to_stac_catalog
+      ~GeoDataFrameSource.update_forward_refs
+      ~GeoDataFrameSource.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GeoDataFrameSource.data_type
+      ~GeoDataFrameSource.full_uri
+      ~GeoDataFrameSource.model_computed_fields
+      ~GeoDataFrameSource.model_config
+      ~GeoDataFrameSource.model_extra
+      ~GeoDataFrameSource.model_fields
+      ~GeoDataFrameSource.model_fields_set
+      ~GeoDataFrameSource.driver
+      ~GeoDataFrameSource.data_adapter
+      ~GeoDataFrameSource.name
+      ~GeoDataFrameSource.uri
+      ~GeoDataFrameSource.uri_resolver
+      ~GeoDataFrameSource.root
+      ~GeoDataFrameSource.version
+      ~GeoDataFrameSource.provider
+      ~GeoDataFrameSource.metadata
+   
+   

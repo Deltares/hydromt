@@ -1,0 +1,6 @@
+﻿hydromt.model.components.GeomsComponent.write
+=============================================
+
+.. currentmodule:: hydromt.model.components
+
+.. automethod:: GeomsComponent.write

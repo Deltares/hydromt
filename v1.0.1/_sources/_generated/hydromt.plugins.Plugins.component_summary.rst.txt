@@ -1,0 +1,6 @@
+﻿hydromt.plugins.Plugins.component\_summary
+==========================================
+
+.. currentmodule:: hydromt.plugins
+
+.. automethod:: Plugins.component_summary

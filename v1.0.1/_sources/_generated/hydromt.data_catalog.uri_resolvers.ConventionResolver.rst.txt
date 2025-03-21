@@ -1,0 +1,59 @@
+﻿hydromt.data\_catalog.uri\_resolvers.ConventionResolver
+=======================================================
+
+.. currentmodule:: hydromt.data_catalog.uri_resolvers
+
+.. autoclass:: ConventionResolver
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ConventionResolver.__init__
+      ~ConventionResolver.construct
+      ~ConventionResolver.copy
+      ~ConventionResolver.dict
+      ~ConventionResolver.from_orm
+      ~ConventionResolver.json
+      ~ConventionResolver.model_construct
+      ~ConventionResolver.model_copy
+      ~ConventionResolver.model_dump
+      ~ConventionResolver.model_dump_json
+      ~ConventionResolver.model_json_schema
+      ~ConventionResolver.model_parametrized_name
+      ~ConventionResolver.model_post_init
+      ~ConventionResolver.model_rebuild
+      ~ConventionResolver.model_validate
+      ~ConventionResolver.model_validate_json
+      ~ConventionResolver.model_validate_strings
+      ~ConventionResolver.parse_file
+      ~ConventionResolver.parse_obj
+      ~ConventionResolver.parse_raw
+      ~ConventionResolver.resolve
+      ~ConventionResolver.schema
+      ~ConventionResolver.schema_json
+      ~ConventionResolver.update_forward_refs
+      ~ConventionResolver.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ConventionResolver.model_computed_fields
+      ~ConventionResolver.model_config
+      ~ConventionResolver.model_extra
+      ~ConventionResolver.model_fields
+      ~ConventionResolver.model_fields_set
+      ~ConventionResolver.name
+      ~ConventionResolver.filesystem
+      ~ConventionResolver.options
+   
+   

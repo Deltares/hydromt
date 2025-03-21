@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.reset_spatial_dims_attrs
+=====================================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.DataArray.raster.reset_spatial_dims_attrs

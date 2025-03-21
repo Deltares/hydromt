@@ -1,0 +1,6 @@
+﻿hydromt.model.components.DatasetsComponent.set
+==============================================
+
+.. currentmodule:: hydromt.model.components
+
+.. automethod:: DatasetsComponent.set

@@ -1,0 +1,46 @@
+﻿hydromt.model.components.GridComponent
+======================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoclass:: GridComponent
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GridComponent.__init__
+      ~GridComponent.add_data_from_constant
+      ~GridComponent.add_data_from_geodataframe
+      ~GridComponent.add_data_from_raster_reclass
+      ~GridComponent.add_data_from_rasterdataset
+      ~GridComponent.create_from_region
+      ~GridComponent.read
+      ~GridComponent.set
+      ~GridComponent.test_equal
+      ~GridComponent.write
+      ~GridComponent.write_region
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GridComponent.bounds
+      ~GridComponent.crs
+      ~GridComponent.data
+      ~GridComponent.data_catalog
+      ~GridComponent.model
+      ~GridComponent.region
+      ~GridComponent.res
+      ~GridComponent.root
+      ~GridComponent.transform
+   
+   

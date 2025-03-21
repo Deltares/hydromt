@@ -1,0 +1,61 @@
+﻿hydromt.data\_catalog.drivers.GeoDatasetXarrayDriver
+====================================================
+
+.. currentmodule:: hydromt.data_catalog.drivers
+
+.. autoclass:: GeoDatasetXarrayDriver
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GeoDatasetXarrayDriver.__init__
+      ~GeoDatasetXarrayDriver.construct
+      ~GeoDatasetXarrayDriver.copy
+      ~GeoDatasetXarrayDriver.dict
+      ~GeoDatasetXarrayDriver.from_orm
+      ~GeoDatasetXarrayDriver.json
+      ~GeoDatasetXarrayDriver.model_construct
+      ~GeoDatasetXarrayDriver.model_copy
+      ~GeoDatasetXarrayDriver.model_dump
+      ~GeoDatasetXarrayDriver.model_dump_json
+      ~GeoDatasetXarrayDriver.model_json_schema
+      ~GeoDatasetXarrayDriver.model_parametrized_name
+      ~GeoDatasetXarrayDriver.model_post_init
+      ~GeoDatasetXarrayDriver.model_rebuild
+      ~GeoDatasetXarrayDriver.model_validate
+      ~GeoDatasetXarrayDriver.model_validate_json
+      ~GeoDatasetXarrayDriver.model_validate_strings
+      ~GeoDatasetXarrayDriver.parse_file
+      ~GeoDatasetXarrayDriver.parse_obj
+      ~GeoDatasetXarrayDriver.parse_raw
+      ~GeoDatasetXarrayDriver.read
+      ~GeoDatasetXarrayDriver.schema
+      ~GeoDatasetXarrayDriver.schema_json
+      ~GeoDatasetXarrayDriver.update_forward_refs
+      ~GeoDatasetXarrayDriver.validate
+      ~GeoDatasetXarrayDriver.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GeoDatasetXarrayDriver.model_computed_fields
+      ~GeoDatasetXarrayDriver.model_config
+      ~GeoDatasetXarrayDriver.model_extra
+      ~GeoDatasetXarrayDriver.model_fields
+      ~GeoDatasetXarrayDriver.model_fields_set
+      ~GeoDatasetXarrayDriver.name
+      ~GeoDatasetXarrayDriver.supports_writing
+      ~GeoDatasetXarrayDriver.filesystem
+      ~GeoDatasetXarrayDriver.options
+   
+   

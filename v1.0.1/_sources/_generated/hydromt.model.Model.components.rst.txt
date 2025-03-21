@@ -1,0 +1,6 @@
+﻿hydromt.model.Model.components
+==============================
+
+.. currentmodule:: hydromt.model
+
+.. autoattribute:: Model.components

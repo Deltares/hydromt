@@ -1,0 +1,39 @@
+﻿hydromt.model.components.GeomsComponent
+=======================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoclass:: GeomsComponent
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GeomsComponent.__init__
+      ~GeomsComponent.read
+      ~GeomsComponent.set
+      ~GeomsComponent.test_equal
+      ~GeomsComponent.write
+      ~GeomsComponent.write_region
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GeomsComponent.bounds
+      ~GeomsComponent.crs
+      ~GeomsComponent.data
+      ~GeomsComponent.data_catalog
+      ~GeomsComponent.model
+      ~GeomsComponent.region
+      ~GeomsComponent.root
+   
+   

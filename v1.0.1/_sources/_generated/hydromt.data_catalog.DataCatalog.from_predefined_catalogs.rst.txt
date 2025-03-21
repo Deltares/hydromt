@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.DataCatalog.from\_predefined\_catalogs
+============================================================
+
+.. currentmodule:: hydromt.data_catalog
+
+.. automethod:: DataCatalog.from_predefined_catalogs

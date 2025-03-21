@@ -1,0 +1,6 @@
+﻿hydromt.model.components.VectorComponent.crs
+============================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoproperty:: VectorComponent.crs

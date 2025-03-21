@@ -1,0 +1,6 @@
+﻿hydromt.model.processes.rivers.river\_width
+===========================================
+
+.. currentmodule:: hydromt.model.processes.rivers
+
+.. autofunction:: river_width

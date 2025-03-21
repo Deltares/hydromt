@@ -1,0 +1,6 @@
+﻿hydromt.model.ModelRoot.mode
+============================
+
+.. currentmodule:: hydromt.model
+
+.. autoproperty:: ModelRoot.mode

@@ -1,0 +1,6 @@
+﻿hydromt.gis.Dataset.vector.update_geometry
+==========================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.Dataset.vector.update_geometry

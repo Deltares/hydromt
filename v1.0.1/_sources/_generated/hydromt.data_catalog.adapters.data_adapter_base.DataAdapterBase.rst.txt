@@ -1,0 +1,58 @@
+﻿hydromt.data\_catalog.adapters.data\_adapter\_base.DataAdapterBase
+==================================================================
+
+.. currentmodule:: hydromt.data_catalog.adapters.data_adapter_base
+
+.. autoclass:: DataAdapterBase
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DataAdapterBase.__init__
+      ~DataAdapterBase.construct
+      ~DataAdapterBase.copy
+      ~DataAdapterBase.dict
+      ~DataAdapterBase.from_orm
+      ~DataAdapterBase.json
+      ~DataAdapterBase.model_construct
+      ~DataAdapterBase.model_copy
+      ~DataAdapterBase.model_dump
+      ~DataAdapterBase.model_dump_json
+      ~DataAdapterBase.model_json_schema
+      ~DataAdapterBase.model_parametrized_name
+      ~DataAdapterBase.model_post_init
+      ~DataAdapterBase.model_rebuild
+      ~DataAdapterBase.model_validate
+      ~DataAdapterBase.model_validate_json
+      ~DataAdapterBase.model_validate_strings
+      ~DataAdapterBase.parse_file
+      ~DataAdapterBase.parse_obj
+      ~DataAdapterBase.parse_raw
+      ~DataAdapterBase.schema
+      ~DataAdapterBase.schema_json
+      ~DataAdapterBase.update_forward_refs
+      ~DataAdapterBase.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DataAdapterBase.model_computed_fields
+      ~DataAdapterBase.model_config
+      ~DataAdapterBase.model_extra
+      ~DataAdapterBase.model_fields
+      ~DataAdapterBase.model_fields_set
+      ~DataAdapterBase.unit_add
+      ~DataAdapterBase.unit_mult
+      ~DataAdapterBase.rename
+   
+   

@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.sources.DataSource.summary
+================================================
+
+.. currentmodule:: hydromt.data_catalog.sources
+
+.. automethod:: DataSource.summary

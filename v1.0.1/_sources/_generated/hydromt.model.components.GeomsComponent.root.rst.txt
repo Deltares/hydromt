@@ -1,0 +1,6 @@
+﻿hydromt.model.components.GeomsComponent.root
+============================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoproperty:: GeomsComponent.root

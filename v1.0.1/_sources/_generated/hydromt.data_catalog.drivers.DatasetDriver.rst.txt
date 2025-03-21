@@ -1,0 +1,61 @@
+﻿hydromt.data\_catalog.drivers.DatasetDriver
+===========================================
+
+.. currentmodule:: hydromt.data_catalog.drivers
+
+.. autoclass:: DatasetDriver
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DatasetDriver.__init__
+      ~DatasetDriver.construct
+      ~DatasetDriver.copy
+      ~DatasetDriver.dict
+      ~DatasetDriver.from_orm
+      ~DatasetDriver.json
+      ~DatasetDriver.model_construct
+      ~DatasetDriver.model_copy
+      ~DatasetDriver.model_dump
+      ~DatasetDriver.model_dump_json
+      ~DatasetDriver.model_json_schema
+      ~DatasetDriver.model_parametrized_name
+      ~DatasetDriver.model_post_init
+      ~DatasetDriver.model_rebuild
+      ~DatasetDriver.model_validate
+      ~DatasetDriver.model_validate_json
+      ~DatasetDriver.model_validate_strings
+      ~DatasetDriver.parse_file
+      ~DatasetDriver.parse_obj
+      ~DatasetDriver.parse_raw
+      ~DatasetDriver.read
+      ~DatasetDriver.schema
+      ~DatasetDriver.schema_json
+      ~DatasetDriver.update_forward_refs
+      ~DatasetDriver.validate
+      ~DatasetDriver.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DatasetDriver.model_computed_fields
+      ~DatasetDriver.model_config
+      ~DatasetDriver.model_extra
+      ~DatasetDriver.model_fields
+      ~DatasetDriver.model_fields_set
+      ~DatasetDriver.supports_writing
+      ~DatasetDriver.filesystem
+      ~DatasetDriver.options
+      ~DatasetDriver.name
+   
+   

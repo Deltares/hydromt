@@ -1,0 +1,61 @@
+﻿hydromt.data\_catalog.drivers.GeoDatasetVectorDriver
+====================================================
+
+.. currentmodule:: hydromt.data_catalog.drivers
+
+.. autoclass:: GeoDatasetVectorDriver
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GeoDatasetVectorDriver.__init__
+      ~GeoDatasetVectorDriver.construct
+      ~GeoDatasetVectorDriver.copy
+      ~GeoDatasetVectorDriver.dict
+      ~GeoDatasetVectorDriver.from_orm
+      ~GeoDatasetVectorDriver.json
+      ~GeoDatasetVectorDriver.model_construct
+      ~GeoDatasetVectorDriver.model_copy
+      ~GeoDatasetVectorDriver.model_dump
+      ~GeoDatasetVectorDriver.model_dump_json
+      ~GeoDatasetVectorDriver.model_json_schema
+      ~GeoDatasetVectorDriver.model_parametrized_name
+      ~GeoDatasetVectorDriver.model_post_init
+      ~GeoDatasetVectorDriver.model_rebuild
+      ~GeoDatasetVectorDriver.model_validate
+      ~GeoDatasetVectorDriver.model_validate_json
+      ~GeoDatasetVectorDriver.model_validate_strings
+      ~GeoDatasetVectorDriver.parse_file
+      ~GeoDatasetVectorDriver.parse_obj
+      ~GeoDatasetVectorDriver.parse_raw
+      ~GeoDatasetVectorDriver.read
+      ~GeoDatasetVectorDriver.schema
+      ~GeoDatasetVectorDriver.schema_json
+      ~GeoDatasetVectorDriver.update_forward_refs
+      ~GeoDatasetVectorDriver.validate
+      ~GeoDatasetVectorDriver.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GeoDatasetVectorDriver.model_computed_fields
+      ~GeoDatasetVectorDriver.model_config
+      ~GeoDatasetVectorDriver.model_extra
+      ~GeoDatasetVectorDriver.model_fields
+      ~GeoDatasetVectorDriver.model_fields_set
+      ~GeoDatasetVectorDriver.name
+      ~GeoDatasetVectorDriver.supports_writing
+      ~GeoDatasetVectorDriver.filesystem
+      ~GeoDatasetVectorDriver.options
+   
+   

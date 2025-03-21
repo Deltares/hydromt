@@ -1,0 +1,6 @@
+﻿hydromt.model.Model.get\_component
+==================================
+
+.. currentmodule:: hydromt.model
+
+.. automethod:: Model.get_component

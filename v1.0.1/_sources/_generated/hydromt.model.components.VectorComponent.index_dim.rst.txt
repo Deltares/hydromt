@@ -1,0 +1,6 @@
+﻿hydromt.model.components.VectorComponent.index\_dim
+===================================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoproperty:: VectorComponent.index_dim

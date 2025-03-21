@@ -1,0 +1,95 @@
+{
+ "cells": [
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Example: Working with models in Python"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The main feature of HydroMT is to facilitate the process of building and analyzing spatial geoscientific models with a focus on water system models. It does so by automating the workflow to go from raw data to a complete model instance which is ready to run and to analyse model results once the simulation has finished. \n",
+    "\n",
+    "This notebook will explore how to work with HydroMT models in Python."
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Available models and components in HydroMT"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "To know which models are available within your active environment, you can use global `PLUGINS` variable in hydromt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import hydromt\n",
+    "\n",
+    "# generic model classes\n",
+    "print(f\"Model classes: {hydromt.PLUGINS.model_summary()}\")\n",
+    "# model classes from external plugin\n",
+    "print(f\"Model components: {hydromt.PLUGINS.component_summary()}\")"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Model components"
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "HydroMT defines any model through the model-agnostic Model API based on several *general* model components and *computational unit* components\n",
+    "TBC"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.9"
+  },
+  "vscode": {
+   "interpreter": {
+    "hash": "3808d5b5b54949c7a0a707a38b0a689040fa9c90ab139a050e41373880719ab1"
+   }
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}

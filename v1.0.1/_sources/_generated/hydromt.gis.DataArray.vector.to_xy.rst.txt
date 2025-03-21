@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.vector.to_xy
+==================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.DataArray.vector.to_xy

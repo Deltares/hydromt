@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.rowcol
+===================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.DataArray.raster.rowcol

@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.sources.RasterDatasetSource.get\_time\_range
+==================================================================
+
+.. currentmodule:: hydromt.data_catalog.sources
+
+.. automethod:: RasterDatasetSource.get_time_range

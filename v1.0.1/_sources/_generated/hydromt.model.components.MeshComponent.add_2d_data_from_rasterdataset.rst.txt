@@ -1,0 +1,6 @@
+﻿hydromt.model.components.MeshComponent.add\_2d\_data\_from\_rasterdataset
+=========================================================================
+
+.. currentmodule:: hydromt.model.components
+
+.. automethod:: MeshComponent.add_2d_data_from_rasterdataset

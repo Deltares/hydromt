@@ -1,0 +1,6 @@
+﻿hydromt.stats.skills.spearman\_rank\_correlation
+================================================
+
+.. currentmodule:: hydromt.stats.skills
+
+.. autofunction:: spearman_rank_correlation

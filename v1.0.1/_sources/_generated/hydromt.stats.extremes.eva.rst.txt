@@ -1,0 +1,6 @@
+﻿hydromt.stats.extremes.eva
+==========================
+
+.. currentmodule:: hydromt.stats.extremes
+
+.. autofunction:: eva

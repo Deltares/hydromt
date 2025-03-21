@@ -1,0 +1,36 @@
+﻿hydromt.model.components.TablesComponent
+========================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoclass:: TablesComponent
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~TablesComponent.__init__
+      ~TablesComponent.get_tables_merged
+      ~TablesComponent.read
+      ~TablesComponent.set
+      ~TablesComponent.test_equal
+      ~TablesComponent.write
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~TablesComponent.data
+      ~TablesComponent.data_catalog
+      ~TablesComponent.model
+      ~TablesComponent.root
+   
+   

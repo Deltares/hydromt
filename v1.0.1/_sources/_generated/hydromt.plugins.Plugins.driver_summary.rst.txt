@@ -1,0 +1,6 @@
+﻿hydromt.plugins.Plugins.driver\_summary
+=======================================
+
+.. currentmodule:: hydromt.plugins
+
+.. automethod:: Plugins.driver_summary

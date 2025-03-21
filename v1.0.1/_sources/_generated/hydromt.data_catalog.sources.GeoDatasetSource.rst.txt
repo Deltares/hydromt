@@ -1,0 +1,74 @@
+﻿hydromt.data\_catalog.sources.GeoDatasetSource
+==============================================
+
+.. currentmodule:: hydromt.data_catalog.sources
+
+.. autoclass:: GeoDatasetSource
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GeoDatasetSource.__init__
+      ~GeoDatasetSource.construct
+      ~GeoDatasetSource.copy
+      ~GeoDatasetSource.detect_bbox
+      ~GeoDatasetSource.detect_time_range
+      ~GeoDatasetSource.dict
+      ~GeoDatasetSource.from_orm
+      ~GeoDatasetSource.get_bbox
+      ~GeoDatasetSource.get_time_range
+      ~GeoDatasetSource.json
+      ~GeoDatasetSource.model_construct
+      ~GeoDatasetSource.model_copy
+      ~GeoDatasetSource.model_dump
+      ~GeoDatasetSource.model_dump_json
+      ~GeoDatasetSource.model_json_schema
+      ~GeoDatasetSource.model_parametrized_name
+      ~GeoDatasetSource.model_post_init
+      ~GeoDatasetSource.model_rebuild
+      ~GeoDatasetSource.model_validate
+      ~GeoDatasetSource.model_validate_json
+      ~GeoDatasetSource.model_validate_strings
+      ~GeoDatasetSource.parse_file
+      ~GeoDatasetSource.parse_obj
+      ~GeoDatasetSource.parse_raw
+      ~GeoDatasetSource.read_data
+      ~GeoDatasetSource.schema
+      ~GeoDatasetSource.schema_json
+      ~GeoDatasetSource.summary
+      ~GeoDatasetSource.to_file
+      ~GeoDatasetSource.to_stac_catalog
+      ~GeoDatasetSource.update_forward_refs
+      ~GeoDatasetSource.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GeoDatasetSource.data_type
+      ~GeoDatasetSource.full_uri
+      ~GeoDatasetSource.model_computed_fields
+      ~GeoDatasetSource.model_config
+      ~GeoDatasetSource.model_extra
+      ~GeoDatasetSource.model_fields
+      ~GeoDatasetSource.model_fields_set
+      ~GeoDatasetSource.driver
+      ~GeoDatasetSource.data_adapter
+      ~GeoDatasetSource.name
+      ~GeoDatasetSource.uri
+      ~GeoDatasetSource.uri_resolver
+      ~GeoDatasetSource.root
+      ~GeoDatasetSource.version
+      ~GeoDatasetSource.provider
+      ~GeoDatasetSource.metadata
+   
+   

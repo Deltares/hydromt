@@ -1,0 +1,6 @@
+﻿hydromt.gis.flw.stream\_map
+===========================
+
+.. currentmodule:: hydromt.gis.flw
+
+.. autofunction:: stream_map

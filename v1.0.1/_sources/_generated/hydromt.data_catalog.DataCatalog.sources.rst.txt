@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.DataCatalog.sources
+=========================================
+
+.. currentmodule:: hydromt.data_catalog
+
+.. autoproperty:: DataCatalog.sources

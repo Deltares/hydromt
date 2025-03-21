@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.reclassify
+=======================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.DataArray.raster.reclassify

@@ -1,0 +1,6 @@
+﻿hydromt.gis.raster\_merge.merge
+===============================
+
+.. currentmodule:: hydromt.gis.raster_merge
+
+.. autofunction:: merge

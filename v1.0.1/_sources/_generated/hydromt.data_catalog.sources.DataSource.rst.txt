@@ -1,0 +1,67 @@
+﻿hydromt.data\_catalog.sources.DataSource
+========================================
+
+.. currentmodule:: hydromt.data_catalog.sources
+
+.. autoclass:: DataSource
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DataSource.__init__
+      ~DataSource.construct
+      ~DataSource.copy
+      ~DataSource.dict
+      ~DataSource.from_orm
+      ~DataSource.json
+      ~DataSource.model_construct
+      ~DataSource.model_copy
+      ~DataSource.model_dump
+      ~DataSource.model_dump_json
+      ~DataSource.model_json_schema
+      ~DataSource.model_parametrized_name
+      ~DataSource.model_post_init
+      ~DataSource.model_rebuild
+      ~DataSource.model_validate
+      ~DataSource.model_validate_json
+      ~DataSource.model_validate_strings
+      ~DataSource.parse_file
+      ~DataSource.parse_obj
+      ~DataSource.parse_raw
+      ~DataSource.schema
+      ~DataSource.schema_json
+      ~DataSource.summary
+      ~DataSource.update_forward_refs
+      ~DataSource.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DataSource.full_uri
+      ~DataSource.model_computed_fields
+      ~DataSource.model_config
+      ~DataSource.model_extra
+      ~DataSource.model_fields
+      ~DataSource.model_fields_set
+      ~DataSource.name
+      ~DataSource.uri
+      ~DataSource.data_adapter
+      ~DataSource.driver
+      ~DataSource.uri_resolver
+      ~DataSource.data_type
+      ~DataSource.root
+      ~DataSource.version
+      ~DataSource.provider
+      ~DataSource.metadata
+   
+   

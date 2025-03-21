@@ -1,0 +1,6 @@
+﻿hydromt.stats.skills.kge\_2012
+==============================
+
+.. currentmodule:: hydromt.stats.skills
+
+.. autofunction:: kge_2012

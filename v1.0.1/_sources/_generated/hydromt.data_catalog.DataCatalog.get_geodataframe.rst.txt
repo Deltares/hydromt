@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.DataCatalog.get\_geodataframe
+===================================================
+
+.. currentmodule:: hydromt.data_catalog
+
+.. automethod:: DataCatalog.get_geodataframe

@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.adapters.RasterDatasetAdapter.transform
+=============================================================
+
+.. currentmodule:: hydromt.data_catalog.adapters
+
+.. automethod:: RasterDatasetAdapter.transform

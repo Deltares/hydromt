@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.drivers.GeoDataFrameTableDriver.read
+==========================================================
+
+.. currentmodule:: hydromt.data_catalog.drivers
+
+.. automethod:: GeoDataFrameTableDriver.read

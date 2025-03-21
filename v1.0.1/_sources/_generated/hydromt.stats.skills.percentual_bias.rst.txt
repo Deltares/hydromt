@@ -1,0 +1,6 @@
+﻿hydromt.stats.skills.percentual\_bias
+=====================================
+
+.. currentmodule:: hydromt.stats.skills
+
+.. autofunction:: percentual_bias

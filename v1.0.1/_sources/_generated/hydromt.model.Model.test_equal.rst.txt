@@ -1,0 +1,6 @@
+﻿hydromt.model.Model.test\_equal
+===============================
+
+.. currentmodule:: hydromt.model
+
+.. automethod:: Model.test_equal

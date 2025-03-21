@@ -1,0 +1,6 @@
+﻿hydromt.stats.skills.lognashsutcliffe
+=====================================
+
+.. currentmodule:: hydromt.stats.skills
+
+.. autofunction:: lognashsutcliffe

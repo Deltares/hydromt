@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.drivers.RasterDatasetXarrayDriver.read
+============================================================
+
+.. currentmodule:: hydromt.data_catalog.drivers
+
+.. automethod:: RasterDatasetXarrayDriver.read
