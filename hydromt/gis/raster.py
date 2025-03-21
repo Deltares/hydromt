@@ -179,7 +179,7 @@ def full_from_transform(
     transform : affine transform
         Two dimensional affine transform for 2D linear mapping.
     shape : tuple of int
-        Length along (dim0, x, y) dimensions, of which the first is optional.
+        Length along (dim0, y, x) dimensions, of which the first is optional.
     nodata : optional
         The nodata value to assign to the DataArray. Defaults to np.nan.
     dtype : optional

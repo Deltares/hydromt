@@ -120,10 +120,10 @@ def create_grid_from_region(
                 crs=region_crs,
                 data_catalog=data_catalog,
             )
-            if crs is not None:
-                geom = geom.to_crs(crs)
+            geom = geom.to_crs(4326)
         else:
             geom = parse_region_bbox(region, crs=region_crs)
+        # geom here should always be in 4326, and will be reprojected if crs is defined
         if crs is not None:
             crs = _gis_utils._parse_crs(crs, bbox=geom.total_bounds)
             geom = geom.to_crs(crs)
@@ -246,7 +246,7 @@ def create_rotated_grid_from_geom(
     )
     return raster.full_from_transform(
         transform,
-        shape=(mmax, nmax),
+        shape=(nmax, mmax),
         nodata=1,
         dtype=np.uint8,
         name="mask",
