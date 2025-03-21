@@ -1,0 +1,1829 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Model &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/model';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hydromt.model.Model" href="../_generated/hydromt.model.Model.html" />
+    <link rel="prev" title="hydromt.gis.flw.dem_adjust" href="../_generated/hydromt.gis.flw.dem_adjust.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guides/intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plugins.html">
+    Plugins
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../_generated/predefined_catalogs.html">
+    <no title>
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+    What’s new
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../guides/intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../plugins.html">
+    Plugins
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../_generated/predefined_catalogs.html">
+    <no title>
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../changelog.html">
+    What’s new
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="data_adapter.html">DataAdapter</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase.html">hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.RasterDatasetAdapter.html">hydromt.data_catalog.adapters.RasterDatasetAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.RasterDatasetAdapter.transform.html">hydromt.data_catalog.adapters.RasterDatasetAdapter.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.GeoDatasetAdapter.html">hydromt.data_catalog.adapters.GeoDatasetAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.GeoDatasetAdapter.transform.html">hydromt.data_catalog.adapters.GeoDatasetAdapter.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.GeoDataFrameAdapter.html">hydromt.data_catalog.adapters.GeoDataFrameAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.GeoDataFrameAdapter.transform.html">hydromt.data_catalog.adapters.GeoDataFrameAdapter.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.DataFrameAdapter.html">hydromt.data_catalog.adapters.DataFrameAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.DataFrameAdapter.transform.html">hydromt.data_catalog.adapters.DataFrameAdapter.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.DatasetAdapter.html">hydromt.data_catalog.adapters.DatasetAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.adapters.DatasetAdapter.transform.html">hydromt.data_catalog.adapters.DatasetAdapter.transform</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="data_catalog.html">Data catalog</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html">hydromt.data_catalog.DataCatalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_source.html">hydromt.data_catalog.DataCatalog.get_source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.sources.html">hydromt.data_catalog.DataCatalog.sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.predefined_catalogs.html">hydromt.data_catalog.DataCatalog.predefined_catalogs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.to_dict.html">hydromt.data_catalog.DataCatalog.to_dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.to_yml.html">hydromt.data_catalog.DataCatalog.to_yml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.export_data.html">hydromt.data_catalog.DataCatalog.export_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_source_bbox.html">hydromt.data_catalog.DataCatalog.get_source_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_source_time_range.html">hydromt.data_catalog.DataCatalog.get_source_time_range</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.add_source.html">hydromt.data_catalog.DataCatalog.add_source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.update.html">hydromt.data_catalog.DataCatalog.update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.from_yml.html">hydromt.data_catalog.DataCatalog.from_yml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_geodataset.html">hydromt.data_catalog.DataCatalog.get_geodataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_dataframe.html">hydromt.data_catalog.DataCatalog.get_dataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_dataset.html">hydromt.data_catalog.DataCatalog.get_dataset</a></li>
+</ul>
+</details></li>
+
+<li class="toctree-l1 has-children"><a class="reference internal" href="data_source.html">Data sources</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.DataSource.html">hydromt.data_catalog.sources.DataSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.DataSource.summary.html">hydromt.data_catalog.sources.DataSource.summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.RasterDatasetSource.html">hydromt.data_catalog.sources.RasterDatasetSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.RasterDatasetSource.read_data.html">hydromt.data_catalog.sources.RasterDatasetSource.read_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.RasterDatasetSource.to_stac_catalog.html">hydromt.data_catalog.sources.RasterDatasetSource.to_stac_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.RasterDatasetSource.get_bbox.html">hydromt.data_catalog.sources.RasterDatasetSource.get_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.RasterDatasetSource.get_time_range.html">hydromt.data_catalog.sources.RasterDatasetSource.get_time_range</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.RasterDatasetSource.detect_bbox.html">hydromt.data_catalog.sources.RasterDatasetSource.detect_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.RasterDatasetSource.detect_time_range.html">hydromt.data_catalog.sources.RasterDatasetSource.detect_time_range</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDataFrameSource.html">hydromt.data_catalog.sources.GeoDataFrameSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDataFrameSource.read_data.html">hydromt.data_catalog.sources.GeoDataFrameSource.read_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDataFrameSource.to_stac_catalog.html">hydromt.data_catalog.sources.GeoDataFrameSource.to_stac_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDataFrameSource.get_bbox.html">hydromt.data_catalog.sources.GeoDataFrameSource.get_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDataFrameSource.detect_bbox.html">hydromt.data_catalog.sources.GeoDataFrameSource.detect_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.DataFrameSource.html">hydromt.data_catalog.sources.DataFrameSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.DataFrameSource.read_data.html">hydromt.data_catalog.sources.DataFrameSource.read_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.DataFrameSource.to_stac_catalog.html">hydromt.data_catalog.sources.DataFrameSource.to_stac_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDatasetSource.html">hydromt.data_catalog.sources.GeoDatasetSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDatasetSource.read_data.html">hydromt.data_catalog.sources.GeoDatasetSource.read_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDatasetSource.to_stac_catalog.html">hydromt.data_catalog.sources.GeoDatasetSource.to_stac_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDatasetSource.get_bbox.html">hydromt.data_catalog.sources.GeoDatasetSource.get_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.sources.GeoDatasetSource.detect_bbox.html">hydromt.data_catalog.sources.GeoDatasetSource.detect_bbox</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="drivers.html">Drivers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.BaseDriver.html">hydromt.data_catalog.drivers.BaseDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetDriver.html">hydromt.data_catalog.drivers.RasterDatasetDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetDriver.read.html">hydromt.data_catalog.drivers.RasterDatasetDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetDriver.write.html">hydromt.data_catalog.drivers.RasterDatasetDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.html">hydromt.data_catalog.drivers.RasterDatasetXarrayDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.read.html">hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.write.html">hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterioDriver.html">hydromt.data_catalog.drivers.RasterioDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterioDriver.read.html">hydromt.data_catalog.drivers.RasterioDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.RasterioDriver.write.html">hydromt.data_catalog.drivers.RasterioDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameDriver.html">hydromt.data_catalog.drivers.GeoDataFrameDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameDriver.read.html">hydromt.data_catalog.drivers.GeoDataFrameDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameDriver.write.html">hydromt.data_catalog.drivers.GeoDataFrameDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PyogrioDriver.html">hydromt.data_catalog.drivers.PyogrioDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PyogrioDriver.read.html">hydromt.data_catalog.drivers.PyogrioDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PyogrioDriver.write.html">hydromt.data_catalog.drivers.PyogrioDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameTableDriver.html">hydromt.data_catalog.drivers.GeoDataFrameTableDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameTableDriver.read.html">hydromt.data_catalog.drivers.GeoDataFrameTableDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDataFrameTableDriver.write.html">hydromt.data_catalog.drivers.GeoDataFrameTableDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DataFrameDriver.html">hydromt.data_catalog.drivers.DataFrameDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DataFrameDriver.read.html">hydromt.data_catalog.drivers.DataFrameDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DataFrameDriver.write.html">hydromt.data_catalog.drivers.DataFrameDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PandasDriver.html">hydromt.data_catalog.drivers.PandasDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PandasDriver.read.html">hydromt.data_catalog.drivers.PandasDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.PandasDriver.write.html">hydromt.data_catalog.drivers.PandasDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetDriver.html">hydromt.data_catalog.drivers.GeoDatasetDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetDriver.read.html">hydromt.data_catalog.drivers.GeoDatasetDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetDriver.write.html">hydromt.data_catalog.drivers.GeoDatasetDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.html">hydromt.data_catalog.drivers.GeoDatasetXarrayDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.read.html">hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.write.html">hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.html">hydromt.data_catalog.drivers.GeoDatasetVectorDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.read.html">hydromt.data_catalog.drivers.GeoDatasetVectorDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.write.html">hydromt.data_catalog.drivers.GeoDatasetVectorDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetDriver.html">hydromt.data_catalog.drivers.DatasetDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetDriver.read.html">hydromt.data_catalog.drivers.DatasetDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetDriver.write.html">hydromt.data_catalog.drivers.DatasetDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetXarrayDriver.html">hydromt.data_catalog.drivers.DatasetXarrayDriver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetXarrayDriver.read.html">hydromt.data_catalog.drivers.DatasetXarrayDriver.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.drivers.DatasetXarrayDriver.write.html">hydromt.data_catalog.drivers.DatasetXarrayDriver.write</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="gis.html">GIS methods</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.raster.full.html">hydromt.gis.raster.full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.raster.full_like.html">hydromt.gis.raster.full_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.raster.full_from_transform.html">hydromt.gis.raster.full_from_transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.raster_merge.merge.html">hydromt.gis.raster_merge.merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.from_numpy.html">hydromt.gis.DataArray.raster.from_numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.raster.from_numpy.html">hydromt.gis.Dataset.raster.from_numpy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.attrs.html">hydromt.gis.DataArray.raster.attrs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.crs.html">hydromt.gis.DataArray.raster.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.bounds.html">hydromt.gis.DataArray.raster.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.transform.html">hydromt.gis.DataArray.raster.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.res.html">hydromt.gis.DataArray.raster.res</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.rotation.html">hydromt.gis.DataArray.raster.rotation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.origin.html">hydromt.gis.DataArray.raster.origin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.nodata.html">hydromt.gis.DataArray.raster.nodata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.dims.html">hydromt.gis.DataArray.raster.dims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.coords.html">hydromt.gis.DataArray.raster.coords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.dim0.html">hydromt.gis.DataArray.raster.dim0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.y_dim.html">hydromt.gis.DataArray.raster.y_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.x_dim.html">hydromt.gis.DataArray.raster.x_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.xcoords.html">hydromt.gis.DataArray.raster.xcoords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.ycoords.html">hydromt.gis.DataArray.raster.ycoords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.shape.html">hydromt.gis.DataArray.raster.shape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.size.html">hydromt.gis.DataArray.raster.size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.width.html">hydromt.gis.DataArray.raster.width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.height.html">hydromt.gis.DataArray.raster.height</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.internal_bounds.html">hydromt.gis.DataArray.raster.internal_bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.box.html">hydromt.gis.DataArray.raster.box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.set_crs.html">hydromt.gis.DataArray.raster.set_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.set_spatial_dims.html">hydromt.gis.DataArray.raster.set_spatial_dims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.reset_spatial_dims_attrs.html">hydromt.gis.DataArray.raster.reset_spatial_dims_attrs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.identical_grid.html">hydromt.gis.DataArray.raster.identical_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.aligned_grid.html">hydromt.gis.DataArray.raster.aligned_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.gdal_compliant.html">hydromt.gis.DataArray.raster.gdal_compliant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.idx_to_xy.html">hydromt.gis.DataArray.raster.idx_to_xy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.xy_to_idx.html">hydromt.gis.DataArray.raster.xy_to_idx</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.rowcol.html">hydromt.gis.DataArray.raster.rowcol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.xy.html">hydromt.gis.DataArray.raster.xy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.flipud.html">hydromt.gis.DataArray.raster.flipud</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.area_grid.html">hydromt.gis.DataArray.raster.area_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.density_grid.html">hydromt.gis.DataArray.raster.density_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.reclassify.html">hydromt.gis.DataArray.raster.reclassify</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.set_nodata.html">hydromt.gis.DataArray.raster.set_nodata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.mask_nodata.html">hydromt.gis.DataArray.raster.mask_nodata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.interpolate_na.html">hydromt.gis.DataArray.raster.interpolate_na</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.clip.html">hydromt.gis.DataArray.raster.clip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.clip_bbox.html">hydromt.gis.DataArray.raster.clip_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.clip_mask.html">hydromt.gis.DataArray.raster.clip_mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.clip_geom.html">hydromt.gis.DataArray.raster.clip_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.reproject.html">hydromt.gis.DataArray.raster.reproject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.reindex2d.html">hydromt.gis.DataArray.raster.reindex2d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.reproject_like.html">hydromt.gis.DataArray.raster.reproject_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.transform_bounds.html">hydromt.gis.DataArray.raster.transform_bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.nearest_index.html">hydromt.gis.DataArray.raster.nearest_index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.rasterize.html">hydromt.gis.DataArray.raster.rasterize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.rasterize_geometry.html">hydromt.gis.DataArray.raster.rasterize_geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.geometry_mask.html">hydromt.gis.DataArray.raster.geometry_mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.vectorize.html">hydromt.gis.DataArray.raster.vectorize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.vector_grid.html">hydromt.gis.DataArray.raster.vector_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.sample.html">hydromt.gis.DataArray.raster.sample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.zonal_stats.html">hydromt.gis.DataArray.raster.zonal_stats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.to_xyz_tiles.html">hydromt.gis.DataArray.raster.to_xyz_tiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.to_slippy_tiles.html">hydromt.gis.DataArray.raster.to_slippy_tiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.raster.to_raster.html">hydromt.gis.DataArray.raster.to_raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.raster.to_mapstack.html">hydromt.gis.Dataset.raster.to_mapstack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.from_gdf.html">hydromt.gis.DataArray.vector.from_gdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.to_gdf.html">hydromt.gis.DataArray.vector.to_gdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.from_netcdf.html">hydromt.gis.DataArray.vector.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.to_netcdf.html">hydromt.gis.DataArray.vector.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.from_gdf.html">hydromt.gis.Dataset.vector.from_gdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.to_gdf.html">hydromt.gis.Dataset.vector.to_gdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.from_netcdf.html">hydromt.gis.Dataset.vector.from_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.to_netcdf.html">hydromt.gis.Dataset.vector.to_netcdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.attrs.html">hydromt.gis.DataArray.vector.attrs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.crs.html">hydromt.gis.DataArray.vector.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.index_dim.html">hydromt.gis.DataArray.vector.index_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.time_dim.html">hydromt.gis.DataArray.vector.time_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.x_name.html">hydromt.gis.DataArray.vector.x_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.y_name.html">hydromt.gis.DataArray.vector.y_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.geom_name.html">hydromt.gis.DataArray.vector.geom_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.geom_type.html">hydromt.gis.DataArray.vector.geom_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.geom_format.html">hydromt.gis.DataArray.vector.geom_format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.index.html">hydromt.gis.DataArray.vector.index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.bounds.html">hydromt.gis.DataArray.vector.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.size.html">hydromt.gis.DataArray.vector.size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.sindex.html">hydromt.gis.DataArray.vector.sindex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.geometry.html">hydromt.gis.DataArray.vector.geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.attrs.html">hydromt.gis.Dataset.vector.attrs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.crs.html">hydromt.gis.Dataset.vector.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.index_dim.html">hydromt.gis.Dataset.vector.index_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.time_dim.html">hydromt.gis.Dataset.vector.time_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.x_name.html">hydromt.gis.Dataset.vector.x_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.y_name.html">hydromt.gis.Dataset.vector.y_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.geom_name.html">hydromt.gis.Dataset.vector.geom_name</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.geom_type.html">hydromt.gis.Dataset.vector.geom_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.geom_format.html">hydromt.gis.Dataset.vector.geom_format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.index.html">hydromt.gis.Dataset.vector.index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.bounds.html">hydromt.gis.Dataset.vector.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.size.html">hydromt.gis.Dataset.vector.size</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.sindex.html">hydromt.gis.Dataset.vector.sindex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.geometry.html">hydromt.gis.Dataset.vector.geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.ogr_compliant.html">hydromt.gis.DataArray.vector.ogr_compliant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.update_geometry.html">hydromt.gis.DataArray.vector.update_geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.to_geom.html">hydromt.gis.DataArray.vector.to_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.to_xy.html">hydromt.gis.DataArray.vector.to_xy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.to_wkt.html">hydromt.gis.DataArray.vector.to_wkt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.ogr_compliant.html">hydromt.gis.Dataset.vector.ogr_compliant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.update_geometry.html">hydromt.gis.Dataset.vector.update_geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.to_geom.html">hydromt.gis.Dataset.vector.to_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.to_xy.html">hydromt.gis.Dataset.vector.to_xy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.to_wkt.html">hydromt.gis.Dataset.vector.to_wkt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.set_crs.html">hydromt.gis.DataArray.vector.set_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.set_spatial_dims.html">hydromt.gis.DataArray.vector.set_spatial_dims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.set_crs.html">hydromt.gis.Dataset.vector.set_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.set_spatial_dims.html">hydromt.gis.Dataset.vector.set_spatial_dims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.clip_bbox.html">hydromt.gis.DataArray.vector.clip_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.clip_geom.html">hydromt.gis.DataArray.vector.clip_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.clip_bbox.html">hydromt.gis.Dataset.vector.clip_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.clip_geom.html">hydromt.gis.Dataset.vector.clip_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.to_crs.html">hydromt.gis.DataArray.vector.to_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.Dataset.vector.to_crs.html">hydromt.gis.Dataset.vector.to_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.flwdir_from_da.html">hydromt.gis.flw.flwdir_from_da</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.d8_from_dem.html">hydromt.gis.flw.d8_from_dem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.reproject_hydrography_like.html">hydromt.gis.flw.reproject_hydrography_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.upscale_flwdir.html">hydromt.gis.flw.upscale_flwdir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.stream_map.html">hydromt.gis.flw.stream_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.basin_map.html">hydromt.gis.flw.basin_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.gauge_map.html">hydromt.gis.flw.gauge_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.outlet_map.html">hydromt.gis.flw.outlet_map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.clip_basins.html">hydromt.gis.flw.clip_basins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.gis.flw.dem_adjust.html">hydromt.gis.flw.dem_adjust</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Model</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.html">hydromt.model.Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.read.html">hydromt.model.Model.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.write.html">hydromt.model.Model.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.write_data_catalog.html">hydromt.model.Model.write_data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.build.html">hydromt.model.Model.build</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.update.html">hydromt.model.Model.update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.get_component.html">hydromt.model.Model.get_component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.add_component.html">hydromt.model.Model.add_component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.test_equal.html">hydromt.model.Model.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.data_catalog.html">hydromt.model.Model.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.crs.html">hydromt.model.Model.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.root.html">hydromt.model.Model.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.region.html">hydromt.model.Model.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.Model.components.html">hydromt.model.Model.components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.html">hydromt.model.ModelRoot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.mode.html">hydromt.model.ModelRoot.mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.is_writing_mode.html">hydromt.model.ModelRoot.is_writing_mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.is_reading_mode.html">hydromt.model.ModelRoot.is_reading_mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.is_override_mode.html">hydromt.model.ModelRoot.is_override_mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.set.html">hydromt.model.ModelRoot.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.html">hydromt.model.components.ModelComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.model.html">hydromt.model.components.ModelComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.data_catalog.html">hydromt.model.components.ModelComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.read.html">hydromt.model.components.ModelComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.write.html">hydromt.model.components.ModelComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.root.html">hydromt.model.components.ModelComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.html">hydromt.model.components.SpatialModelComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.model.html">hydromt.model.components.SpatialModelComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.data_catalog.html">hydromt.model.components.SpatialModelComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.root.html">hydromt.model.components.SpatialModelComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.crs.html">hydromt.model.components.SpatialModelComponent.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.bounds.html">hydromt.model.components.SpatialModelComponent.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.region.html">hydromt.model.components.SpatialModelComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent._region_data.html">hydromt.model.components.SpatialModelComponent._region_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.write_region.html">hydromt.model.components.SpatialModelComponent.write_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.test_equal.html">hydromt.model.components.SpatialModelComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.html">hydromt.model.components.ConfigComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.model.html">hydromt.model.components.ConfigComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.data_catalog.html">hydromt.model.components.ConfigComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.root.html">hydromt.model.components.ConfigComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.data.html">hydromt.model.components.ConfigComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.write.html">hydromt.model.components.ConfigComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.read.html">hydromt.model.components.ConfigComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.create.html">hydromt.model.components.ConfigComponent.create</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.update.html">hydromt.model.components.ConfigComponent.update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.set.html">hydromt.model.components.ConfigComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.get_value.html">hydromt.model.components.ConfigComponent.get_value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.test_equal.html">hydromt.model.components.ConfigComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.html">hydromt.model.components.GeomsComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.model.html">hydromt.model.components.GeomsComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.data_catalog.html">hydromt.model.components.GeomsComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.root.html">hydromt.model.components.GeomsComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.data.html">hydromt.model.components.GeomsComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.region.html">hydromt.model.components.GeomsComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.write.html">hydromt.model.components.GeomsComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.read.html">hydromt.model.components.GeomsComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.set.html">hydromt.model.components.GeomsComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.test_equal.html">hydromt.model.components.GeomsComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.html">hydromt.model.components.TablesComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.model.html">hydromt.model.components.TablesComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.data_catalog.html">hydromt.model.components.TablesComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.root.html">hydromt.model.components.TablesComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.data.html">hydromt.model.components.TablesComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.write.html">hydromt.model.components.TablesComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.read.html">hydromt.model.components.TablesComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.set.html">hydromt.model.components.TablesComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.test_equal.html">hydromt.model.components.TablesComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.html">hydromt.model.components.DatasetsComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.model.html">hydromt.model.components.DatasetsComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.data_catalog.html">hydromt.model.components.DatasetsComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.root.html">hydromt.model.components.DatasetsComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.data.html">hydromt.model.components.DatasetsComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.write.html">hydromt.model.components.DatasetsComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.read.html">hydromt.model.components.DatasetsComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.set.html">hydromt.model.components.DatasetsComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.test_equal.html">hydromt.model.components.DatasetsComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.html">hydromt.model.components.SpatialDatasetsComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.model.html">hydromt.model.components.SpatialDatasetsComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.data_catalog.html">hydromt.model.components.SpatialDatasetsComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.root.html">hydromt.model.components.SpatialDatasetsComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.data.html">hydromt.model.components.SpatialDatasetsComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.region.html">hydromt.model.components.SpatialDatasetsComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.write.html">hydromt.model.components.SpatialDatasetsComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.read.html">hydromt.model.components.SpatialDatasetsComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass.html">hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset.html">hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.set.html">hydromt.model.components.SpatialDatasetsComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.test_equal.html">hydromt.model.components.SpatialDatasetsComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.html">hydromt.model.components.GridComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.model.html">hydromt.model.components.GridComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.data_catalog.html">hydromt.model.components.GridComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.root.html">hydromt.model.components.GridComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.res.html">hydromt.model.components.GridComponent.res</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.transform.html">hydromt.model.components.GridComponent.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.crs.html">hydromt.model.components.GridComponent.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.bounds.html">hydromt.model.components.GridComponent.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.region.html">hydromt.model.components.GridComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.data.html">hydromt.model.components.GridComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.write.html">hydromt.model.components.GridComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.read.html">hydromt.model.components.GridComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.create_from_region.html">hydromt.model.components.GridComponent.create_from_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.add_data_from_constant.html">hydromt.model.components.GridComponent.add_data_from_constant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.add_data_from_rasterdataset.html">hydromt.model.components.GridComponent.add_data_from_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.add_data_from_raster_reclass.html">hydromt.model.components.GridComponent.add_data_from_raster_reclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.add_data_from_geodataframe.html">hydromt.model.components.GridComponent.add_data_from_geodataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.set.html">hydromt.model.components.GridComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.test_equal.html">hydromt.model.components.GridComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.html">hydromt.model.components.MeshComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.model.html">hydromt.model.components.MeshComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.data_catalog.html">hydromt.model.components.MeshComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.root.html">hydromt.model.components.MeshComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.data.html">hydromt.model.components.MeshComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.crs.html">hydromt.model.components.MeshComponent.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.bounds.html">hydromt.model.components.MeshComponent.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.region.html">hydromt.model.components.MeshComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.mesh_names.html">hydromt.model.components.MeshComponent.mesh_names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.mesh_grids.html">hydromt.model.components.MeshComponent.mesh_grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.mesh_datasets.html">hydromt.model.components.MeshComponent.mesh_datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.mesh_gdf.html">hydromt.model.components.MeshComponent.mesh_gdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.write.html">hydromt.model.components.MeshComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.read.html">hydromt.model.components.MeshComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.create_2d_from_region.html">hydromt.model.components.MeshComponent.create_2d_from_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset.html">hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass.html">hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.set.html">hydromt.model.components.MeshComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.get_mesh.html">hydromt.model.components.MeshComponent.get_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.html">hydromt.model.components.VectorComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.data.html">hydromt.model.components.VectorComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.geometry.html">hydromt.model.components.VectorComponent.geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.index_dim.html">hydromt.model.components.VectorComponent.index_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.crs.html">hydromt.model.components.VectorComponent.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.model.html">hydromt.model.components.VectorComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.data_catalog.html">hydromt.model.components.VectorComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.root.html">hydromt.model.components.VectorComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.read.html">hydromt.model.components.VectorComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.write.html">hydromt.model.components.VectorComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.set.html">hydromt.model.components.VectorComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.test_equal.html">hydromt.model.components.VectorComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.grid.create_grid_from_region.html">hydromt.model.processes.grid.create_grid_from_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.grid.create_rotated_grid_from_geom.html">hydromt.model.processes.grid.create_rotated_grid_from_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.grid.grid_from_constant.html">hydromt.model.processes.grid.grid_from_constant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.grid.grid_from_rasterdataset.html">hydromt.model.processes.grid.grid_from_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.grid.grid_from_raster_reclass.html">hydromt.model.processes.grid.grid_from_raster_reclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.grid.grid_from_geodataframe.html">hydromt.model.processes.grid.grid_from_geodataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.grid.rotated_grid.html">hydromt.model.processes.grid.rotated_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.create_mesh2d_from_region.html">hydromt.model.processes.mesh.create_mesh2d_from_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.create_mesh2d_from_mesh.html">hydromt.model.processes.mesh.create_mesh2d_from_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.create_mesh2d_from_geom.html">hydromt.model.processes.mesh.create_mesh2d_from_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.mesh2d_from_rasterdataset.html">hydromt.model.processes.mesh.mesh2d_from_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.mesh2d_from_raster_reclass.html">hydromt.model.processes.mesh.mesh2d_from_raster_reclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_basin.html">hydromt.model.processes.region.parse_region_basin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_bbox.html">hydromt.model.processes.region.parse_region_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_geom.html">hydromt.model.processes.region.parse_region_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_grid.html">hydromt.model.processes.region.parse_region_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_other_model.html">hydromt.model.processes.region.parse_region_other_model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_mesh.html">hydromt.model.processes.region.parse_region_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.basin_mask.get_basin_geometry.html">hydromt.model.processes.basin_mask.get_basin_geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.rivers.river_width.html">hydromt.model.processes.rivers.river_width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.rivers.river_depth.html">hydromt.model.processes.rivers.river_depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.precip.html">hydromt.model.processes.meteo.precip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.temp.html">hydromt.model.processes.meteo.temp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.press.html">hydromt.model.processes.meteo.press</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.pet.html">hydromt.model.processes.meteo.pet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.wind.html">hydromt.model.processes.meteo.wind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.press_correction.html">hydromt.model.processes.meteo.press_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.temp_correction.html">hydromt.model.processes.meteo.temp_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.resample_time.html">hydromt.model.processes.meteo.resample_time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.delta_freq.html">hydromt.model.processes.meteo.delta_freq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.pet_debruin.html">hydromt.model.processes.meteo.pet_debruin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.pet_makkink.html">hydromt.model.processes.meteo.pet_makkink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.pm_fao56.html">hydromt.model.processes.meteo.pm_fao56</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="stats.html">Statistics and Extreme Value Analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.bias.html">hydromt.stats.skills.bias</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.percentual_bias.html">hydromt.stats.skills.percentual_bias</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.volumetric_error.html">hydromt.stats.skills.volumetric_error</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.nashsutcliffe.html">hydromt.stats.skills.nashsutcliffe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.lognashsutcliffe.html">hydromt.stats.skills.lognashsutcliffe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.pearson_correlation.html">hydromt.stats.skills.pearson_correlation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.spearman_rank_correlation.html">hydromt.stats.skills.spearman_rank_correlation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.kge.html">hydromt.stats.skills.kge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.kge_2012.html">hydromt.stats.skills.kge_2012</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.kge_non_parametric.html">hydromt.stats.skills.kge_non_parametric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.kge_non_parametric_flood.html">hydromt.stats.skills.kge_non_parametric_flood</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.rsquared.html">hydromt.stats.skills.rsquared</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.mse.html">hydromt.stats.skills.mse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.rmse.html">hydromt.stats.skills.rmse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.skills.rsr.html">hydromt.stats.skills.rsr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.extremes.get_peaks.html">hydromt.stats.extremes.get_peaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.extremes.fit_extremes.html">hydromt.stats.extremes.fit_extremes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.extremes.get_return_value.html">hydromt.stats.extremes.get_return_value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.stats.extremes.eva.html">hydromt.stats.extremes.eva</a></li>
+</ul>
+</details></li>
+
+<li class="toctree-l1 has-children"><a class="reference internal" href="plugin.html">Plugins</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.html">hydromt.plugins.Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.plugin_summary.html">hydromt.plugins.Plugins.plugin_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.model_plugins.html">hydromt.plugins.Plugins.model_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.model_metadata.html">hydromt.plugins.Plugins.model_metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.model_summary.html">hydromt.plugins.Plugins.model_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.component_plugins.html">hydromt.plugins.Plugins.component_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.component_metadata.html">hydromt.plugins.Plugins.component_metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.component_summary.html">hydromt.plugins.Plugins.component_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.driver_plugins.html">hydromt.plugins.Plugins.driver_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.driver_metadata.html">hydromt.plugins.Plugins.driver_metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.driver_summary.html">hydromt.plugins.Plugins.driver_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.catalog_plugins.html">hydromt.plugins.Plugins.catalog_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.catalog_metadata.html">hydromt.plugins.Plugins.catalog_metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.plugins.Plugins.catalog_summary.html">hydromt.plugins.Plugins.catalog_summary</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="uri_resolvers.html">URIResolver</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html">hydromt.data_catalog.uri_resolvers.URIResolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.resolve.html">hydromt.data_catalog.uri_resolvers.URIResolver.resolve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.uri_resolvers.ConventionResolver.html">hydromt.data_catalog.uri_resolvers.ConventionResolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.uri_resolvers.ConventionResolver.resolve.html">hydromt.data_catalog.uri_resolvers.ConventionResolver.resolve</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.uri_resolvers.RasterTindexResolver.html">hydromt.data_catalog.uri_resolvers.RasterTindexResolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_generated/hydromt.data_catalog.uri_resolvers.RasterTindexResolver.resolve.html">hydromt.data_catalog.uri_resolvers.RasterTindexResolver.resolve</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="api.html" class="nav-link">API reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Model</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="model">
+<span id="model-api"></span><h1>Model<a class="headerlink" href="#model" title="Link to this heading">#</a></h1>
+<section id="model-class">
+<h2>Model class<a class="headerlink" href="#model-class" title="Link to this heading">#</a></h2>
+<section id="high-level-methods">
+<h3>High-level methods<a class="headerlink" href="#high-level-methods" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.html#hydromt.model.Model" title="hydromt.model.Model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model</span></code></a>([root, components, mode, data_libs, ...])</p></td>
+<td><p>General and basic API for models in HydroMT.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.read.html#hydromt.model.Model.read" title="hydromt.model.Model.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.read</span></code></a>([components])</p></td>
+<td><p>Read provided components from disk.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.write.html#hydromt.model.Model.write" title="hydromt.model.Model.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.write</span></code></a>([components])</p></td>
+<td><p>Write provided components to disk with defaults.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.write_data_catalog.html#hydromt.model.Model.write_data_catalog" title="hydromt.model.Model.write_data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.write_data_catalog</span></code></a>([root, ...])</p></td>
+<td><p>Write the data catalog to data_lib_path.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="general-methods">
+<h3>General methods<a class="headerlink" href="#general-methods" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.build.html#hydromt.model.Model.build" title="hydromt.model.Model.build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.build</span></code></a>(*[, write])</p></td>
+<td><p>Single method to build a model from scratch based on settings in <cite>steps</cite>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.update.html#hydromt.model.Model.update" title="hydromt.model.Model.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.update</span></code></a>(*[, model_out, write, steps, ...])</p></td>
+<td><p>Single method to update a model based the settings in <cite>steps</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.get_component.html#hydromt.model.Model.get_component" title="hydromt.model.Model.get_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.get_component</span></code></a>(name)</p></td>
+<td><p>Get a component from the model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.add_component.html#hydromt.model.Model.add_component" title="hydromt.model.Model.add_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.add_component</span></code></a>(name, component)</p></td>
+<td><p>Add a component to the model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.test_equal.html#hydromt.model.Model.test_equal" title="hydromt.model.Model.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two models are equal, based on their components.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="model-attributes">
+<h3>Model attributes<a class="headerlink" href="#model-attributes" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.data_catalog.html#hydromt.model.Model.data_catalog" title="hydromt.model.Model.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.data_catalog</span></code></a></p></td>
+<td><p>DataCatalog for data access</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.crs.html#hydromt.model.Model.crs" title="hydromt.model.Model.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.crs</span></code></a></p></td>
+<td><p>Returns coordinate reference system embedded in region.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.root.html#hydromt.model.Model.root" title="hydromt.model.Model.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.root</span></code></a></p></td>
+<td><p>Model root</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.region.html#hydromt.model.Model.region" title="hydromt.model.Model.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.region</span></code></a></p></td>
+<td><p>Return the model's region component.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.Model.components.html#hydromt.model.Model.components" title="hydromt.model.Model.components"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Model.components</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="modelroot">
+<h2>ModelRoot<a class="headerlink" href="#modelroot" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.html#hydromt.model.ModelRoot" title="hydromt.model.ModelRoot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelRoot</span></code></a>(path[, mode])</p></td>
+<td><p>A class to handle model roots in a cross platform manner.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.mode.html#hydromt.model.ModelRoot.mode" title="hydromt.model.ModelRoot.mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelRoot.mode</span></code></a></p></td>
+<td><p>The mode of the model this object belongs to.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.is_writing_mode.html#hydromt.model.ModelRoot.is_writing_mode" title="hydromt.model.ModelRoot.is_writing_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelRoot.is_writing_mode</span></code></a>()</p></td>
+<td><p>Test whether we are in writing mode or not.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.is_reading_mode.html#hydromt.model.ModelRoot.is_reading_mode" title="hydromt.model.ModelRoot.is_reading_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelRoot.is_reading_mode</span></code></a>()</p></td>
+<td><p>Test whether we are in reading mode or not.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.is_override_mode.html#hydromt.model.ModelRoot.is_override_mode" title="hydromt.model.ModelRoot.is_override_mode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelRoot.is_override_mode</span></code></a>()</p></td>
+<td><p>Test whether we are in override mode or not.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id1">
+<h3>General Methods<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.ModelRoot.set.html#hydromt.model.ModelRoot.set" title="hydromt.model.ModelRoot.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelRoot.set</span></code></a>(path[, mode])</p></td>
+<td><p>Set the path of the root, and create the necessary loggers.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="model-components">
+<h2>Model components<a class="headerlink" href="#model-components" title="Link to this heading">#</a></h2>
+<section id="modelcomponent">
+<h3>ModelComponent<a class="headerlink" href="#modelcomponent" title="Link to this heading">#</a></h3>
+<p>Note that the base ModelComponent attributes and methods are available to all model
+components.</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.html#hydromt.model.components.ModelComponent" title="hydromt.model.components.ModelComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ModelComponent</span></code></a>(model)</p></td>
+<td><p>Abstract base class for ModelComponent.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.model.html#hydromt.model.components.ModelComponent.model" title="hydromt.model.components.ModelComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ModelComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.data_catalog.html#hydromt.model.components.ModelComponent.data_catalog" title="hydromt.model.components.ModelComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ModelComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.read.html#hydromt.model.components.ModelComponent.read" title="hydromt.model.components.ModelComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ModelComponent.read</span></code></a>()</p></td>
+<td><p>Read the file(s) into the component.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.write.html#hydromt.model.components.ModelComponent.write" title="hydromt.model.components.ModelComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ModelComponent.write</span></code></a>()</p></td>
+<td><p>Write the component to file(s).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ModelComponent.root.html#hydromt.model.components.ModelComponent.root" title="hydromt.model.components.ModelComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ModelComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="spatialmodelcomponent">
+<h3>SpatialModelComponent<a class="headerlink" href="#spatialmodelcomponent" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.html#hydromt.model.components.SpatialModelComponent" title="hydromt.model.components.SpatialModelComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent</span></code></a>(model, *[, ...])</p></td>
+<td><p>Base spatial model component for GIS components.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.model.html#hydromt.model.components.SpatialModelComponent.model" title="hydromt.model.components.SpatialModelComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.data_catalog.html#hydromt.model.components.SpatialModelComponent.data_catalog" title="hydromt.model.components.SpatialModelComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.root.html#hydromt.model.components.SpatialModelComponent.root" title="hydromt.model.components.SpatialModelComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.crs.html#hydromt.model.components.SpatialModelComponent.crs" title="hydromt.model.components.SpatialModelComponent.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.crs</span></code></a></p></td>
+<td><p>Provide access to the CRS of the model region.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.bounds.html#hydromt.model.components.SpatialModelComponent.bounds" title="hydromt.model.components.SpatialModelComponent.bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.bounds</span></code></a></p></td>
+<td><p>Return the total bounds of the model region.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.region.html#hydromt.model.components.SpatialModelComponent.region" title="hydromt.model.components.SpatialModelComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.region</span></code></a></p></td>
+<td><p>Provide access to the underlying GeoDataFrame data of the model region.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Plugin developer methods</strong></p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent._region_data.html#hydromt.model.components.SpatialModelComponent._region_data" title="hydromt.model.components.SpatialModelComponent._region_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent._region_data</span></code></a></p></td>
+<td><p>Implement this property in order to provide the region.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.write_region.html#hydromt.model.components.SpatialModelComponent.write_region" title="hydromt.model.components.SpatialModelComponent.write_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.write_region</span></code></a>(*)</p></td>
+<td><p>Write the model region to file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.test_equal.html#hydromt.model.components.SpatialModelComponent.test_equal" title="hydromt.model.components.SpatialModelComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two components are equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="configcomponent">
+<h3>ConfigComponent<a class="headerlink" href="#configcomponent" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.html#hydromt.model.components.ConfigComponent" title="hydromt.model.components.ConfigComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent</span></code></a>(model, *[, ...])</p></td>
+<td><p>A component to manage configuration files for model simulations/settings.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.model.html#hydromt.model.components.ConfigComponent.model" title="hydromt.model.components.ConfigComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.data_catalog.html#hydromt.model.components.ConfigComponent.data_catalog" title="hydromt.model.components.ConfigComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.root.html#hydromt.model.components.ConfigComponent.root" title="hydromt.model.components.ConfigComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.data.html#hydromt.model.components.ConfigComponent.data" title="hydromt.model.components.ConfigComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.data</span></code></a></p></td>
+<td><p>Model config values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.write.html#hydromt.model.components.ConfigComponent.write" title="hydromt.model.components.ConfigComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.write</span></code></a>([path])</p></td>
+<td><p>Write model config at &lt;root&gt;/{path}.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.read.html#hydromt.model.components.ConfigComponent.read" title="hydromt.model.components.ConfigComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.read</span></code></a>([path])</p></td>
+<td><p>Read model config at &lt;root&gt;/{path}.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.create.html#hydromt.model.components.ConfigComponent.create" title="hydromt.model.components.ConfigComponent.create"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.create</span></code></a>([template])</p></td>
+<td><p>Create a new config file based on a template file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.update.html#hydromt.model.components.ConfigComponent.update" title="hydromt.model.components.ConfigComponent.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.update</span></code></a>(data)</p></td>
+<td><p>Set the config dictionary at key(s) with values.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.set.html#hydromt.model.components.ConfigComponent.set" title="hydromt.model.components.ConfigComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.set</span></code></a>(key, value)</p></td>
+<td><p>Update the config dictionary at key(s) with values.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.get_value.html#hydromt.model.components.ConfigComponent.get_value" title="hydromt.model.components.ConfigComponent.get_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.get_value</span></code></a>(key[, ...])</p></td>
+<td><p>Get a config value at key(s).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.test_equal.html#hydromt.model.components.ConfigComponent.test_equal" title="hydromt.model.components.ConfigComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two components are equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<section id="geomscomponent">
+<h2>GeomsComponent<a class="headerlink" href="#geomscomponent" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.html#hydromt.model.components.GeomsComponent" title="hydromt.model.components.GeomsComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent</span></code></a>(model, *[, ...])</p></td>
+<td><p>A component to manage geo-spatial geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.model.html#hydromt.model.components.GeomsComponent.model" title="hydromt.model.components.GeomsComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.data_catalog.html#hydromt.model.components.GeomsComponent.data_catalog" title="hydromt.model.components.GeomsComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.root.html#hydromt.model.components.GeomsComponent.root" title="hydromt.model.components.GeomsComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.data.html#hydromt.model.components.GeomsComponent.data" title="hydromt.model.components.GeomsComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.data</span></code></a></p></td>
+<td><p>Model geometries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.region.html#hydromt.model.components.GeomsComponent.region" title="hydromt.model.components.GeomsComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.region</span></code></a></p></td>
+<td><p>Provide access to the underlying GeoDataFrame data of the model region.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.write.html#hydromt.model.components.GeomsComponent.write" title="hydromt.model.components.GeomsComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.write</span></code></a>([filename, ...])</p></td>
+<td><p>Write model geometries to a vector file (by default GeoJSON) at &lt;root&gt;/&lt;filename&gt;.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.read.html#hydromt.model.components.GeomsComponent.read" title="hydromt.model.components.GeomsComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.read</span></code></a>([filename])</p></td>
+<td><p>Read model geometries files at &lt;root&gt;/&lt;filename&gt;.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.set.html#hydromt.model.components.GeomsComponent.set" title="hydromt.model.components.GeomsComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.set</span></code></a>(geom, name)</p></td>
+<td><p>Add data to the geom component.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GeomsComponent.test_equal.html#hydromt.model.components.GeomsComponent.test_equal" title="hydromt.model.components.GeomsComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GeomsComponent.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two GeomsComponents are equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="tablescomponent">
+<h2>TablesComponent<a class="headerlink" href="#tablescomponent" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.html#hydromt.model.components.TablesComponent" title="hydromt.model.components.TablesComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent</span></code></a>(model[, filename])</p></td>
+<td><p>TablesComponent contains data as a dictionary of pandas.DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.model.html#hydromt.model.components.TablesComponent.model" title="hydromt.model.components.TablesComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.data_catalog.html#hydromt.model.components.TablesComponent.data_catalog" title="hydromt.model.components.TablesComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.root.html#hydromt.model.components.TablesComponent.root" title="hydromt.model.components.TablesComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.data.html#hydromt.model.components.TablesComponent.data" title="hydromt.model.components.TablesComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.data</span></code></a></p></td>
+<td><p>Model tables.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.write.html#hydromt.model.components.TablesComponent.write" title="hydromt.model.components.TablesComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.write</span></code></a>([filename])</p></td>
+<td><p>Write tables at provided or default filepath if none is provided.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.read.html#hydromt.model.components.TablesComponent.read" title="hydromt.model.components.TablesComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.read</span></code></a>([filename])</p></td>
+<td><p>Read tables at provided or default filepath if none is provided.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.set.html#hydromt.model.components.TablesComponent.set" title="hydromt.model.components.TablesComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.set</span></code></a>(tables[, name])</p></td>
+<td><p>Add (a) table(s) &lt;pandas.DataFrame&gt; to model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.test_equal.html#hydromt.model.components.TablesComponent.test_equal" title="hydromt.model.components.TablesComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two components are equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="datasetscomponent">
+<h2>DatasetsComponent<a class="headerlink" href="#datasetscomponent" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.html#hydromt.model.components.DatasetsComponent" title="hydromt.model.components.DatasetsComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent</span></code></a>(model[, filename])</p></td>
+<td><p>A component to manage collections of Xarray objects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.model.html#hydromt.model.components.DatasetsComponent.model" title="hydromt.model.components.DatasetsComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.data_catalog.html#hydromt.model.components.DatasetsComponent.data_catalog" title="hydromt.model.components.DatasetsComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.root.html#hydromt.model.components.DatasetsComponent.root" title="hydromt.model.components.DatasetsComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.data.html#hydromt.model.components.DatasetsComponent.data" title="hydromt.model.components.DatasetsComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent.data</span></code></a></p></td>
+<td><p>Model data in the form of xarray objects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.write.html#hydromt.model.components.DatasetsComponent.write" title="hydromt.model.components.DatasetsComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent.write</span></code></a>([...])</p></td>
+<td><p>Write dictionary of xarray.Dataset and/or xarray.DataArray to netcdf files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.read.html#hydromt.model.components.DatasetsComponent.read" title="hydromt.model.components.DatasetsComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent.read</span></code></a>([...])</p></td>
+<td><p>Read model dataset files at &lt;root&gt;/&lt;filename&gt;.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.set.html#hydromt.model.components.DatasetsComponent.set" title="hydromt.model.components.DatasetsComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent.set</span></code></a>(data[, ...])</p></td>
+<td><p>Add data to the xarray component.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.DatasetsComponent.test_equal.html#hydromt.model.components.DatasetsComponent.test_equal" title="hydromt.model.components.DatasetsComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.DatasetsComponent.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two DatasetsComponents are equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="spatialdatasetscomponent">
+<h2>SpatialDatasetsComponent<a class="headerlink" href="#spatialdatasetscomponent" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.html#hydromt.model.components.SpatialDatasetsComponent" title="hydromt.model.components.SpatialDatasetsComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent</span></code></a>(model, ...)</p></td>
+<td><p>A component to manage collection of geospatial xarray objects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.model.html#hydromt.model.components.SpatialDatasetsComponent.model" title="hydromt.model.components.SpatialDatasetsComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.data_catalog.html#hydromt.model.components.SpatialDatasetsComponent.data_catalog" title="hydromt.model.components.SpatialDatasetsComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.root.html#hydromt.model.components.SpatialDatasetsComponent.root" title="hydromt.model.components.SpatialDatasetsComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.data.html#hydromt.model.components.SpatialDatasetsComponent.data" title="hydromt.model.components.SpatialDatasetsComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.data</span></code></a></p></td>
+<td><p>Model data in the form of xarray objects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.region.html#hydromt.model.components.SpatialDatasetsComponent.region" title="hydromt.model.components.SpatialDatasetsComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.region</span></code></a></p></td>
+<td><p>Provide access to the underlying GeoDataFrame data of the model region.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.write.html#hydromt.model.components.SpatialDatasetsComponent.write" title="hydromt.model.components.SpatialDatasetsComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.write</span></code></a>([...])</p></td>
+<td><p>Write dictionary of xarray.Dataset and/or xarray.DataArray to netcdf files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.read.html#hydromt.model.components.SpatialDatasetsComponent.read" title="hydromt.model.components.SpatialDatasetsComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.read</span></code></a>([...])</p></td>
+<td><p>Read model dataset files at &lt;root&gt;/&lt;filename&gt;.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass.html#hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass" title="hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) to datasets component by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">raster_filename</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table_filename</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset.html#hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset" title="hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) from <code class="docutils literal notranslate"><span class="pre">raster_filename</span></code> to datasets component.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.set.html#hydromt.model.components.SpatialDatasetsComponent.set" title="hydromt.model.components.SpatialDatasetsComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.set</span></code></a>(data)</p></td>
+<td><p>Add data to the xarray component.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialDatasetsComponent.test_equal.html#hydromt.model.components.SpatialDatasetsComponent.test_equal" title="hydromt.model.components.SpatialDatasetsComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialDatasetsComponent.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two DatasetsComponents are equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="gridcomponent">
+<h2>GridComponent<a class="headerlink" href="#gridcomponent" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.html#hydromt.model.components.GridComponent" title="hydromt.model.components.GridComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent</span></code></a>(model, *[, ...])</p></td>
+<td><p>ModelComponent class for grid components.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.model.html#hydromt.model.components.GridComponent.model" title="hydromt.model.components.GridComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.data_catalog.html#hydromt.model.components.GridComponent.data_catalog" title="hydromt.model.components.GridComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.root.html#hydromt.model.components.GridComponent.root" title="hydromt.model.components.GridComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.res.html#hydromt.model.components.GridComponent.res" title="hydromt.model.components.GridComponent.res"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.res</span></code></a></p></td>
+<td><p>Returns the resolution of the model grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.transform.html#hydromt.model.components.GridComponent.transform" title="hydromt.model.components.GridComponent.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.transform</span></code></a></p></td>
+<td><p>Returns spatial transform of the model grid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.crs.html#hydromt.model.components.GridComponent.crs" title="hydromt.model.components.GridComponent.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.crs</span></code></a></p></td>
+<td><p>Returns coordinate reference system embedded in the model grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.bounds.html#hydromt.model.components.GridComponent.bounds" title="hydromt.model.components.GridComponent.bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.bounds</span></code></a></p></td>
+<td><p>Returns the bounding box of the model grid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.region.html#hydromt.model.components.GridComponent.region" title="hydromt.model.components.GridComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.region</span></code></a></p></td>
+<td><p>Provide access to the underlying GeoDataFrame data of the model region.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.data.html#hydromt.model.components.GridComponent.data" title="hydromt.model.components.GridComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.data</span></code></a></p></td>
+<td><p>Model static gridded data as xarray.Dataset.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.write.html#hydromt.model.components.GridComponent.write" title="hydromt.model.components.GridComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.write</span></code></a>([filename, ...])</p></td>
+<td><p>Write model grid data to netcdf file at &lt;root&gt;/&lt;fn&gt;.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.read.html#hydromt.model.components.GridComponent.read" title="hydromt.model.components.GridComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.read</span></code></a>([filename, ...])</p></td>
+<td><p>Read model grid data at &lt;root&gt;/&lt;fn&gt; and add to grid property.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.create_from_region.html#hydromt.model.components.GridComponent.create_from_region" title="hydromt.model.components.GridComponent.create_from_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.create_from_region</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Create a 2D regular grid or reads an existing grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.add_data_from_constant.html#hydromt.model.components.GridComponent.add_data_from_constant" title="hydromt.model.components.GridComponent.add_data_from_constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.add_data_from_constant</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Adds data to grid component based on a constant value.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.add_data_from_rasterdataset.html#hydromt.model.components.GridComponent.add_data_from_rasterdataset" title="hydromt.model.components.GridComponent.add_data_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.add_data_from_rasterdataset</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) from <code class="docutils literal notranslate"><span class="pre">raster_data</span></code> to grid component.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.add_data_from_raster_reclass.html#hydromt.model.components.GridComponent.add_data_from_raster_reclass" title="hydromt.model.components.GridComponent.add_data_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.add_data_from_raster_reclass</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) to grid component by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">raster_data</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table_data</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.add_data_from_geodataframe.html#hydromt.model.components.GridComponent.add_data_from_geodataframe" title="hydromt.model.components.GridComponent.add_data_from_geodataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.add_data_from_geodataframe</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) to grid component by rasterizing the data from <code class="docutils literal notranslate"><span class="pre">vector_data</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.set.html#hydromt.model.components.GridComponent.set" title="hydromt.model.components.GridComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.set</span></code></a>(data[, name])</p></td>
+<td><p>Add data to grid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.GridComponent.test_equal.html#hydromt.model.components.GridComponent.test_equal" title="hydromt.model.components.GridComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.GridComponent.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two components are equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="meshcomponent">
+<h2>MeshComponent<a class="headerlink" href="#meshcomponent" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.html#hydromt.model.components.MeshComponent" title="hydromt.model.components.MeshComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent</span></code></a>(model, *[, ...])</p></td>
+<td><p>ModelComponent class for mesh components.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.model.html#hydromt.model.components.MeshComponent.model" title="hydromt.model.components.MeshComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.data_catalog.html#hydromt.model.components.MeshComponent.data_catalog" title="hydromt.model.components.MeshComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.root.html#hydromt.model.components.MeshComponent.root" title="hydromt.model.components.MeshComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.data.html#hydromt.model.components.MeshComponent.data" title="hydromt.model.components.MeshComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.data</span></code></a></p></td>
+<td><p>Model static mesh data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.crs.html#hydromt.model.components.MeshComponent.crs" title="hydromt.model.components.MeshComponent.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.crs</span></code></a></p></td>
+<td><p>Returns model mesh crs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.bounds.html#hydromt.model.components.MeshComponent.bounds" title="hydromt.model.components.MeshComponent.bounds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.bounds</span></code></a></p></td>
+<td><p>Returns model mesh bounds.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.region.html#hydromt.model.components.MeshComponent.region" title="hydromt.model.components.MeshComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.region</span></code></a></p></td>
+<td><p>Provide access to the underlying GeoDataFrame data of the model region.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.mesh_names.html#hydromt.model.components.MeshComponent.mesh_names" title="hydromt.model.components.MeshComponent.mesh_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.mesh_names</span></code></a></p></td>
+<td><p>List of grid names in mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.mesh_grids.html#hydromt.model.components.MeshComponent.mesh_grids" title="hydromt.model.components.MeshComponent.mesh_grids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.mesh_grids</span></code></a></p></td>
+<td><p>Dictionary of grid names and Ugrid topologies in mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.mesh_datasets.html#hydromt.model.components.MeshComponent.mesh_datasets" title="hydromt.model.components.MeshComponent.mesh_datasets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.mesh_datasets</span></code></a></p></td>
+<td><p>Dictionnary of grid names and corresponding UgridDataset topology and data variables in mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.mesh_gdf.html#hydromt.model.components.MeshComponent.mesh_gdf" title="hydromt.model.components.MeshComponent.mesh_gdf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.mesh_gdf</span></code></a></p></td>
+<td><p>Returns dict of geometry of grids in mesh as a gpd.GeoDataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.write.html#hydromt.model.components.MeshComponent.write" title="hydromt.model.components.MeshComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.write</span></code></a>([filename, ...])</p></td>
+<td><p>Write model grid data to a netCDF file at &lt;root&gt;/&lt;filename&gt;.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.read.html#hydromt.model.components.MeshComponent.read" title="hydromt.model.components.MeshComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.read</span></code></a>([filename, crs])</p></td>
+<td><p>Read model mesh data at &lt;root&gt;/&lt;filename&gt; and add to mesh property.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.create_2d_from_region.html#hydromt.model.components.MeshComponent.create_2d_from_region" title="hydromt.model.components.MeshComponent.create_2d_from_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.create_2d_from_region</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset.html#hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset" title="hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.add_2d_data_from_rasterdataset</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) from <code class="docutils literal notranslate"><span class="pre">raster_filename</span></code> to 2D <code class="docutils literal notranslate"><span class="pre">grid_name</span></code> in mesh object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass.html#hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass" title="hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.add_2d_data_from_raster_reclass</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Add data variable(s) to 2D <code class="docutils literal notranslate"><span class="pre">grid_name</span></code> in mesh object by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">raster_filename</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table_filename</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.set.html#hydromt.model.components.MeshComponent.set" title="hydromt.model.components.MeshComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.set</span></code></a>(data, *[, ...])</p></td>
+<td><p>Add data to mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.MeshComponent.get_mesh.html#hydromt.model.components.MeshComponent.get_mesh" title="hydromt.model.components.MeshComponent.get_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.MeshComponent.get_mesh</span></code></a>(grid_name)</p></td>
+<td><p>Return a specific grid topology from mesh based on grid_name.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="vectorcomponent">
+<h2>VectorComponent<a class="headerlink" href="#vectorcomponent" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.html#hydromt.model.components.VectorComponent" title="hydromt.model.components.VectorComponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent</span></code></a>(model, *[, ...])</p></td>
+<td><p>ModelComponent class for vector components.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.data.html#hydromt.model.components.VectorComponent.data" title="hydromt.model.components.VectorComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.data</span></code></a></p></td>
+<td><p>Model vector (polygon) data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.geometry.html#hydromt.model.components.VectorComponent.geometry" title="hydromt.model.components.VectorComponent.geometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.geometry</span></code></a></p></td>
+<td><p>Returns the geometry of the model vector as gpd.GeoSeries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.index_dim.html#hydromt.model.components.VectorComponent.index_dim" title="hydromt.model.components.VectorComponent.index_dim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.index_dim</span></code></a></p></td>
+<td><p>Returns the index dimension of the vector.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.crs.html#hydromt.model.components.VectorComponent.crs" title="hydromt.model.components.VectorComponent.crs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.crs</span></code></a></p></td>
+<td><p>Returns coordinate reference system embedded in the vector.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.model.html#hydromt.model.components.VectorComponent.model" title="hydromt.model.components.VectorComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.model</span></code></a></p></td>
+<td><p>Return the model object this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.data_catalog.html#hydromt.model.components.VectorComponent.data_catalog" title="hydromt.model.components.VectorComponent.data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.data_catalog</span></code></a></p></td>
+<td><p>Return the data catalog of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.root.html#hydromt.model.components.VectorComponent.root" title="hydromt.model.components.VectorComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.root</span></code></a></p></td>
+<td><p>Return the root of the model this component is associated with.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.read.html#hydromt.model.components.VectorComponent.read" title="hydromt.model.components.VectorComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.read</span></code></a>(*[, ...])</p></td>
+<td><p>Read model vector from combined netcdf and geojson file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.write.html#hydromt.model.components.VectorComponent.write" title="hydromt.model.components.VectorComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.write</span></code></a>(*[, ...])</p></td>
+<td><p>Write model vector to combined netcdf and geojson files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.set.html#hydromt.model.components.VectorComponent.set" title="hydromt.model.components.VectorComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.set</span></code></a>([data, name, ...])</p></td>
+<td><p>Add data to vector.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.test_equal.html#hydromt.model.components.VectorComponent.test_equal" title="hydromt.model.components.VectorComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.test_equal</span></code></a>(other)</p></td>
+<td><p>Test if two components are equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="model-processes">
+<span id="workflows-api"></span><h2>Model Processes<a class="headerlink" href="#model-processes" title="Link to this heading">#</a></h2>
+<section id="grid">
+<span id="workflows-grid-api"></span><h3>Grid<a class="headerlink" href="#grid" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.grid.create_grid_from_region.html#hydromt.model.processes.grid.create_grid_from_region" title="hydromt.model.processes.grid.create_grid_from_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.grid.create_grid_from_region</span></code></a>(region, *)</p></td>
+<td><p>Create a 2D regular grid or reads an existing grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.grid.create_rotated_grid_from_geom.html#hydromt.model.processes.grid.create_rotated_grid_from_geom" title="hydromt.model.processes.grid.create_rotated_grid_from_geom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.grid.create_rotated_grid_from_geom</span></code></a>(...)</p></td>
+<td><p>Create a rotated grid based on a geometry.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.grid.grid_from_constant.html#hydromt.model.processes.grid.grid_from_constant" title="hydromt.model.processes.grid.grid_from_constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.grid.grid_from_constant</span></code></a>(grid_like, ...)</p></td>
+<td><p>Prepare a grid based on a constant value.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.grid.grid_from_rasterdataset.html#hydromt.model.processes.grid.grid_from_rasterdataset" title="hydromt.model.processes.grid.grid_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.grid.grid_from_rasterdataset</span></code></a>(...)</p></td>
+<td><p>Prepare data by resampling ds to grid_like.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.grid.grid_from_raster_reclass.html#hydromt.model.processes.grid.grid_from_raster_reclass" title="hydromt.model.processes.grid.grid_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.grid.grid_from_raster_reclass</span></code></a>(...)</p></td>
+<td><p>Prepare data variable(s) resampled to grid_like object by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">da</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.grid.grid_from_geodataframe.html#hydromt.model.processes.grid.grid_from_geodataframe" title="hydromt.model.processes.grid.grid_from_geodataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.grid.grid_from_geodataframe</span></code></a>(...[, ...])</p></td>
+<td><p>Prepare data variable(s) resampled to grid_like object by rasterizing the data from <code class="docutils literal notranslate"><span class="pre">gdf</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.grid.rotated_grid.html#hydromt.model.processes.grid.rotated_grid" title="hydromt.model.processes.grid.rotated_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.grid.rotated_grid</span></code></a>(pol, res[, ...])</p></td>
+<td><p>Return the origin (x0, y0), shape (mmax, nmax) and rotation of the rotated grid.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="mesh">
+<span id="workflows-mesh-api"></span><h3>Mesh<a class="headerlink" href="#mesh" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.create_mesh2d_from_region.html#hydromt.model.processes.mesh.create_mesh2d_from_region" title="hydromt.model.processes.mesh.create_mesh2d_from_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.mesh.create_mesh2d_from_region</span></code></a>(...)</p></td>
+<td><p>HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.create_mesh2d_from_mesh.html#hydromt.model.processes.mesh.create_mesh2d_from_mesh" title="hydromt.model.processes.mesh.create_mesh2d_from_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.mesh.create_mesh2d_from_mesh</span></code></a>(uds, ...)</p></td>
+<td><p>Create a 2D mesh from another mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.create_mesh2d_from_geom.html#hydromt.model.processes.mesh.create_mesh2d_from_geom" title="hydromt.model.processes.mesh.create_mesh2d_from_geom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.mesh.create_mesh2d_from_geom</span></code></a>(geom, ...)</p></td>
+<td><p>Create a regular 2D mesh from a boundary geometry.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.mesh2d_from_rasterdataset.html#hydromt.model.processes.mesh.mesh2d_from_rasterdataset" title="hydromt.model.processes.mesh.mesh2d_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.mesh.mesh2d_from_rasterdataset</span></code></a>(ds, ...)</p></td>
+<td><p>Resamples data in ds to mesh2d.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.mesh.mesh2d_from_raster_reclass.html#hydromt.model.processes.mesh.mesh2d_from_raster_reclass" title="hydromt.model.processes.mesh.mesh2d_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.mesh.mesh2d_from_raster_reclass</span></code></a>(da, ...)</p></td>
+<td><p>Resample data to <code class="docutils literal notranslate"><span class="pre">mesh2d</span></code> grid by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">da</span></code> based on <code class="docutils literal notranslate"><span class="pre">df_vars</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="region">
+<span id="workflows-region-api"></span><h3>Region<a class="headerlink" href="#region" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_basin.html#hydromt.model.processes.region.parse_region_basin" title="hydromt.model.processes.region.parse_region_basin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.region.parse_region_basin</span></code></a>(region, ...)</p></td>
+<td><p>Parse a basin /subbasin / interbasin region and return the GeoDataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_bbox.html#hydromt.model.processes.region.parse_region_bbox" title="hydromt.model.processes.region.parse_region_bbox"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.region.parse_region_bbox</span></code></a>(region, *)</p></td>
+<td><p>Parse a region of kind bbox and return the GeoDataFrame.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_geom.html#hydromt.model.processes.region.parse_region_geom" title="hydromt.model.processes.region.parse_region_geom"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.region.parse_region_geom</span></code></a>(region, *)</p></td>
+<td><p>Parse a region and return the GeoDataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_grid.html#hydromt.model.processes.region.parse_region_grid" title="hydromt.model.processes.region.parse_region_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.region.parse_region_grid</span></code></a>(region, ...)</p></td>
+<td><p>Parse a region of kind grid and return the corresponding xarray object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_other_model.html#hydromt.model.processes.region.parse_region_other_model" title="hydromt.model.processes.region.parse_region_other_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.region.parse_region_other_model</span></code></a>(region)</p></td>
+<td><p>Parse a region with a model path and return that whole Model in read mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_mesh.html#hydromt.model.processes.region.parse_region_mesh" title="hydromt.model.processes.region.parse_region_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.region.parse_region_mesh</span></code></a>(region)</p></td>
+<td><p>Parse a region with a mesh path and return that mesh in read mode.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="basin-mask">
+<span id="workflows-basin-api"></span><h3>Basin mask<a class="headerlink" href="#basin-mask" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.basin_mask.get_basin_geometry.html#hydromt.model.processes.basin_mask.get_basin_geometry" title="hydromt.model.processes.basin_mask.get_basin_geometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.basin_mask.get_basin_geometry</span></code></a>(ds)</p></td>
+<td><p>Return a geometry of the (sub)(inter)basin(s).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="river-bathymetry">
+<span id="workflows-rivers-api"></span><h3>River bathymetry<a class="headerlink" href="#river-bathymetry" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.rivers.river_width.html#hydromt.model.processes.rivers.river_width" title="hydromt.model.processes.rivers.river_width"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.rivers.river_width</span></code></a>(gdf_stream, ...)</p></td>
+<td><p>Return average river width along a segment based on a river mask raster.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.rivers.river_depth.html#hydromt.model.processes.rivers.river_depth" title="hydromt.model.processes.rivers.river_depth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.rivers.river_depth</span></code></a>(data, method[, ...])</p></td>
+<td><p>Derive river depth estimates based bankfull discharge.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="meteo">
+<span id="workflows-forcing-api"></span><h3>Meteo<a class="headerlink" href="#meteo" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.precip.html#hydromt.model.processes.meteo.precip" title="hydromt.model.processes.meteo.precip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.precip</span></code></a>(precip, da_like[, ...])</p></td>
+<td><p>Return the lazy reprojection of precipitation to model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.temp.html#hydromt.model.processes.meteo.temp" title="hydromt.model.processes.meteo.temp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.temp</span></code></a>(temp, dem_model[, ...])</p></td>
+<td><p>Return lazy reprojection of temperature to model grid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.press.html#hydromt.model.processes.meteo.press" title="hydromt.model.processes.meteo.press"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.press</span></code></a>(press, dem_model[, ...])</p></td>
+<td><p>Return lazy reprojection of pressure to model grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.pet.html#hydromt.model.processes.meteo.pet" title="hydromt.model.processes.meteo.pet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.pet</span></code></a>(ds, temp, dem_model[, ...])</p></td>
+<td><p>Determine reference evapotranspiration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.wind.html#hydromt.model.processes.meteo.wind" title="hydromt.model.processes.meteo.wind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.wind</span></code></a>(da_model[, wind, ...])</p></td>
+<td><p>Return lazy reprojection of wind speed to model grid.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.press_correction.html#hydromt.model.processes.meteo.press_correction" title="hydromt.model.processes.meteo.press_correction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.press_correction</span></code></a>(dem_model)</p></td>
+<td><p>Pressure correction based on elevation lapse_rate.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.temp_correction.html#hydromt.model.processes.meteo.temp_correction" title="hydromt.model.processes.meteo.temp_correction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.temp_correction</span></code></a>(dem[, ...])</p></td>
+<td><p>Temperature correction based on elevation data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.resample_time.html#hydromt.model.processes.meteo.resample_time" title="hydromt.model.processes.meteo.resample_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.resample_time</span></code></a>(da, freq[, ...])</p></td>
+<td><p>Resample data to destination frequency.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.delta_freq.html#hydromt.model.processes.meteo.delta_freq" title="hydromt.model.processes.meteo.delta_freq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.delta_freq</span></code></a>(da_or_freq, ...)</p></td>
+<td><p>Return relative difference between dataset mean timestep and destination freq.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.pet_debruin.html#hydromt.model.processes.meteo.pet_debruin" title="hydromt.model.processes.meteo.pet_debruin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.pet_debruin</span></code></a>(temp, press, ...)</p></td>
+<td><p>Determine De Bruin (2016) reference evapotranspiration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.pet_makkink.html#hydromt.model.processes.meteo.pet_makkink" title="hydromt.model.processes.meteo.pet_makkink"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.pet_makkink</span></code></a>(temp, press, k_in)</p></td>
+<td><p>Determnines Makkink reference evapotranspiration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.processes.meteo.pm_fao56.html#hydromt.model.processes.meteo.pm_fao56" title="hydromt.model.processes.meteo.pm_fao56"><code class="xref py py-obj docutils literal notranslate"><span class="pre">processes.meteo.pm_fao56</span></code></a>(temp, temp_max, ...)</p></td>
+<td><p>Estimate daily reference evapotranspiration (ETo).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../_generated/hydromt.gis.flw.dem_adjust.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">hydromt.gis.flw.dem_adjust</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../_generated/hydromt.model.Model.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">hydromt.model.Model</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-class">Model class</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#high-level-methods">High-level methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general-methods">General methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-attributes">Model attributes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modelroot">ModelRoot</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">General Methods</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-components">Model components</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#modelcomponent">ModelComponent</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#spatialmodelcomponent">SpatialModelComponent</a><ul class="nav section-nav flex-column">
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#configcomponent">ConfigComponent</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geomscomponent">GeomsComponent</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tablescomponent">TablesComponent</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#datasetscomponent">DatasetsComponent</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#spatialdatasetscomponent">SpatialDatasetsComponent</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gridcomponent">GridComponent</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#meshcomponent">MeshComponent</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#vectorcomponent">VectorComponent</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-processes">Model Processes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#grid">Grid</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mesh">Mesh</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#region">Region</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basin-mask">Basin mask</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#river-bathymetry">River bathymetry</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#meteo">Meteo</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/api/model.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/api/model.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,1075 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Developer’s guide &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=aa503ec8" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'guides/core_dev/contributing';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Adding Documentation" href="documentation.html" />
+    <link rel="prev" title="Core developer guide" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <script>document.write(`<img src="../../_static/hydromt-icon.svg" class="logo__image only-dark" alt=""/>`);</script>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../plugins.html">
+    Plugins
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../_generated/predefined_catalogs.html">
+    <no title>
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../changelog.html">
+    What’s new
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../plugins.html">
+    Plugins
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../_generated/predefined_catalogs.html">
+    <no title>
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
+    What’s new
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../user_guide/index.html">User Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/data_conventions.html">Data conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/data_existing_cat.html">Pre-defined data catalogs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/data_overview.html">Overview data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/hydromt_cli.html">HydroMT Command Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/installation.html">Installation guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/methods_main.html">Overview methods and processes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/model_workflow.html">Creating a Model Workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/model_build.html">Building a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/model_overview.html">Overview models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/model_region.html">Defining a model region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/model_update.html">Updating a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user_guide/terminology.html">Terminology</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../advanced_user/index.html">Advanced user guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../advanced_user/architecture.html">Architecture</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../advanced_user/data_prepare_cat.html">Preparing a Data Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced_user/data_types.html">Supported data types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced_user/hydromt_python.html">Using HydroMT in Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced_user/methods_stats.html">Statistical methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../advanced_user/model_components.html">Model components</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plugin_dev/index.html">Plugin Developer guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/plugin_quickstart.html">Starting your own HydroMT Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_catalog.html">Custom Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_component.html">Custom components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_driver.html">Custom Drivers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_model.html">Custom Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_resolver.html">Custom Resolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/migrating_to_v1.html">Migrating to v1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/workflows.html">Preparing a model workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/register_plugin.html">Implementing Custom behavior</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/testing_your_plugin.html">Testing your plugin</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Core developer guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Developer’s guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Adding Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev_install.html">Developer installation guide</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">User guide</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Core developer guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Developer’s guide</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="developer-s-guide">
+<span id="contributing"></span><h1>Developer’s guide<a class="headerlink" href="#developer-s-guide" title="Link to this heading">#</a></h1>
+<p>Welcome to the HydroMT project. All contributions, bug reports, bug fixes,
+documentation improvements, enhancements, and ideas are welcome. Here’s how we work.</p>
+<section id="rights">
+<h2>Rights<a class="headerlink" href="#rights" title="Link to this heading">#</a></h2>
+<p>The MIT <a class="reference external" href="https://github.com/Deltares/hydromt/blob/docs/LICENSE">license</a> applies to all contributions.</p>
+</section>
+<section id="issue-conventions">
+<span id="id1"></span><h2>Issue conventions<a class="headerlink" href="#issue-conventions" title="Link to this heading">#</a></h2>
+<p>The HydroMT <a class="reference external" href="https://github.com/Deltares/hydromt/issues">issue tracker</a> is the place to share any bugs or feature requests you might have.
+Please search existing issues, open and closed, before creating a new one.</p>
+<p>For bugs, please provide tracebacks and relevant log files to clarify the issue.
+<a class="reference external" href="https://stackoverflow.com/help/minimal-reproducible-example">Minimal reproducible examples</a>,
+are especially helpful! If you’re submiting a PR for a bug that does not yet have an
+associated issue, please create one together with your PR (unless it is something
+trivial). This is important for us to keep track of the changes made to core.</p>
+</section>
+<section id="checklist-pull-requests">
+<h2>Checklist pull requests<a class="headerlink" href="#checklist-pull-requests" title="Link to this heading">#</a></h2>
+<p>If you found a bug or an issue you would like to tackle or contribute to a new development, please make sure to do the following steps:</p>
+<ol class="arabic simple">
+<li><p>If it does not yet exist, create an issue following the <a class="reference internal" href="#issue-conventions"><span class="std std-ref">Issue conventions</span></a>.</p></li>
+<li><p>Make a fork of the repository. More information on how to do this can be found at
+<cite>the github documentation
+&lt;https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo&gt;_</cite>
+While you can develop on the main branch of your fork and submit PRs from there, we
+encourage you to make branches on your fork as well, especially if you plan on
+working on multiple issues at the same time. If you have commit rights on the
+repository you may also make your contributions there instead of on a fork.</p></li>
+<li><p>Create a new branch where you develop your new code, see also <a class="reference internal" href="#git-conventions"><span class="std std-ref">Git conventions</span></a>.</p></li>
+<li><p>Both in the case of a new feature and in the case of a bug please add a test that
+demonstrates the correctness of your code. If it is a bug, you should generally ad a
+test that reproduces the bug, and then your code should fix the behaviour. In the
+case of a new feature your test should show and verify how the new feature should be
+used and what assumptions can be made about it. Please make sure the tests pass on
+all environments in our CI. This should be checked in your PR with every commit you push.</p></li>
+<li><p>Make sure all pre-commit hooks pass, see  <a class="reference internal" href="#code-format"><span class="std std-ref">Code format</span></a>. For ipynb files make
+sure that you have cleared all results.</p></li>
+<li><p>Update docs/changelog.rst file with a summary of your changes and a link to your
+pull request. See for example the <a class="reference external" href="https://github.com/Deltares/hydromt/blob/main/docs/changelog.rst">hydromt changelog</a>.</p></li>
+<li><p>Push your commits to the github repository and open a draft pull request. The body of
+the pull request will be pre-filled with a template. Please fill out this template
+with the relevant information, and complete the checklist included. Filling out the
+template will greatly increase the chances of your PR getting a swift response.</p></li>
+<li><p>Once you’re satisfied with the changes mark the pull request as “as ready for review”
+and ask another contributor to review the code. The review should cover the
+implementation as well as steps 2-4.</p></li>
+<li><p>Depending on the PR, the reviewer may ask you to either make changes or accept your
+PR.</p></li>
+</ol>
+</section>
+<section id="git-conventions">
+<span id="id2"></span><h2>Git conventions<a class="headerlink" href="#git-conventions" title="Link to this heading">#</a></h2>
+<p>We follow the <a class="reference external" href="https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests-github-flow">GitHub workflow</a>
+to allow many people to work together on the project.</p>
+<p>After discussing a new proposal or implementation in the issue tracker, you can start
+working on the code. You write your code locally in a new branch of the HydroMT repo or in a
+branch of a fork. Once you’re done with your first iteration, you commit your code and
+push to your HydroMT repository.</p>
+<p>To create a new branch after you’ve downloaded the latest changes in the project:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>pull
+<span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>&lt;name-of-branch&gt;
+</pre></div>
+</div>
+<p>Develop your new code while keeping track of the status and differences using:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>status
+<span class="gp">$ </span>git<span class="w"> </span>diff
+</pre></div>
+</div>
+<p>Add and commit local changes, use clear commit messages and add the number of the
+related issue to that (first) commit message:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>&lt;file-name<span class="w"> </span>OR<span class="w"> </span>folder-name&gt;
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;this is my commit message. Ref #xxx&quot;</span>
+</pre></div>
+</div>
+<p>Regularly push local commits to the repository. For a new branch the remote and name
+of branch need to be added.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>push<span class="w"> </span>&lt;remote&gt;<span class="w"> </span>&lt;name-of-branch&gt;
+</pre></div>
+</div>
+<p>When your changes are ready for review, you can merge them into the main codebase with a
+pull request. We recommend creating a pull request as early as possible to give other
+developers a heads up and to provide an opportunity for valuable early feedback. You
+can create a pull request online or by pushing your branch to a feature-branch.</p>
+<section id="dealing-with-merge-conflicts">
+<h3>Dealing with merge conflicts<a class="headerlink" href="#dealing-with-merge-conflicts" title="Link to this heading">#</a></h3>
+<p>Because git facilitates many people working on the same piece of code, it can happen that someone else makes changes to the repository before you do.
+When this happens it’s important to synchronize the code base before merging to make sure the outcome will look as we expect. For example, imagine you’ve made a new feature by branching off main:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature-A
+<span class="gp">$ </span>touch<span class="w"> </span>hydromt/feature-A.py
+<span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>hydromt/feature-A.py
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;implement feature A!&quot;</span>
+</pre></div>
+</div>
+<p>in the mean time your colleague does the same:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature-B
+<span class="gp">$ </span>touch<span class="w"> </span>hydromt/feature-B.py
+<span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>hydromt/feature-B.py
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;implement feature B!&quot;</span>
+</pre></div>
+</div>
+<p>If you want to synchronize with your colleague, it is important that you both make sure that you have the up to date version by using the <cite>git pull</cite> command.
+After that you can bring your branch up to date this by using the <cite>git merge</cite> command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>pull
+<span class="gp">$ </span>git<span class="w"> </span>merge<span class="w"> </span>feature-A
+<span class="go">Merge made by the &#39;ort&#39; strategy.</span>
+<span class="go"> tmp-a.py | 0</span>
+<span class="go"> 1 file changed, 0 insertions(+), 0 deletions(-)</span>
+<span class="go"> create mode 100644 tmp-a.py</span>
+</pre></div>
+</div>
+<p>This means that git detected that you did not make changes to the same file and therefore no problem occurred. However if we imagine that you both make changes to the same file, things will be different:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature-c
+<span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;print(&quot;blue is the best colour&quot;)&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>feature-c.py
+<span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>feature-c.py
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;implement feature c!&quot;</span>
+<span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature-c-colleague
+<span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;print(&quot;Orange is the best colour&quot;)&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>feature-c.py
+<span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>feature-c.py
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;implement feature c!&quot;</span>
+<span class="gp">$ </span>git<span class="w"> </span>merge<span class="w"> </span>feature-c
+<span class="go">Auto-merging feature-c.py</span>
+<span class="go">CONFLICT (add/add): Merge conflict in feature-c.py</span>
+<span class="go">Automatic merge failed; fix conflicts and then commit the result.</span>
+</pre></div>
+</div>
+<p>If we open up the file we can see some changes have been made:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span> <span class="n">HEAD</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Orange is the best colour&quot;</span><span class="p">)</span>
+
+<span class="o">|||||||</span> <span class="o">&lt;</span><span class="nb">hash</span><span class="o">&gt;</span>
+<span class="o">=======</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;blue is the best colour&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span> <span class="n">feature</span><span class="o">-</span><span class="n">c</span>
+</pre></div>
+</div>
+<p>Here we see the contents of both the commits. The top one are the changes the branch made that initiated the merge, and the bottom one is the other branch. The branch name is also listed after the &gt;&gt;&gt;&gt;&gt;. If we try to commit now, it will not let us:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>commit
+<span class="go">U       feature-c.py</span>
+<span class="go">error: Committing is not possible because you have unmerged files.</span>
+<span class="go">hint: Fix them up in the work tree, and then use &#39;git add/rm &lt;file&gt;&#39;</span>
+<span class="go">hint: as appropriate to mark resolution and make a commit.</span>
+<span class="go">fatal: Exiting because of an unresolved conflict.</span>
+</pre></div>
+</div>
+<p>It’s telling us we first need to tell it what we want to do with the current conflict. To do this, simply edit the file how you’d like it to be, and add it to the staging, then continue with the merge like so:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;print(&quot;Purple is the best color&quot;) # a compromise&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>feature-c.py
+<span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>feature-c.py
+<span class="gp">$ </span>git<span class="w"> </span>commit
+<span class="go">[feature-c-colleague 7dd3f576] Merge branch &#39;feature-c&#39; into feature-c-colleague</span>
+</pre></div>
+</div>
+<p>Success!
+This is a simple introduction into a potentially very complicated subject. You can read more about the different possibilities here:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts">Merge Conflicts</a></p></li>
+<li><p><a class="reference external" href="https://www.atlassian.com/git/tutorials/using-branches/merge-strategy">Merge Strategies</a></p></li>
+</ul>
+</section>
+</section>
+<section id="hydromt-design-conventions">
+<h2>HydroMT design conventions<a class="headerlink" href="#hydromt-design-conventions" title="Link to this heading">#</a></h2>
+<section id="general">
+<h3>General<a class="headerlink" href="#general" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We use <a class="reference internal" href="../user_guide/data_conventions.html#data-convention"><span class="std std-ref">naming and unit conventions</span></a> for frequently used
+variables to assure consistency within HydroMT</p></li>
+</ul>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Currently, <a class="reference internal" href="../advanced_user/data_types.html#data-types"><span class="std std-ref">these data types</span></a> are supported, but this list can be extended based on demand.</p></li>
+<li><p>Input data is defined in the <a class="reference internal" href="../advanced_user/data_prepare_cat.html#data-yaml"><span class="std std-ref">data catalog</span></a> and parsed by HydroMT to the associated
+Python data type through the DataAdapter class. The goal of this class is to unify the internal representation
+of the data (its data type, variables names and units) through minimal preprocessing. When accessing data
+from the data catalog with any <code class="docutils literal notranslate"><span class="pre">DataCatalog.get_&lt;data_type&gt;</span></code> method, it is passed through the adapter to
+ensure a consistent representation of data within HydroMT. The <cite>get_*</cite> methods take additional arguments to
+define a spatial or temporal subset of the dataset.</p></li>
+</ul>
+</section>
+<section id="model-class">
+<h3>Model Class<a class="headerlink" href="#model-class" title="Link to this heading">#</a></h3>
+<p>The HydroMT <a class="reference internal" href="../../api/model.html#model-api"><span class="std std-ref">Model class</span></a> consists of several methods and attributes with specific design/naming conventions.
+To implement HydroMT for a specific model kernel/software, a child class named <cite>&lt;Name&gt;Model</cite> (e.g. SfincsModel for Sfincs)
+should be created with model-specific data readers, writers and setup methods as is appropriate.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../advanced_user/model_components.html"><span class="std std-ref">Model data components</span></a> are data attributes which together define a model instance and
+are identical for all models. Each component represents a specific model component and is parsed to a specific
+Python data object that should adhere to certain specifications. For instance, the <code class="docutils literal notranslate"><span class="pre">grid</span></code> component represent
+all static regular grids of a model in a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2024.9.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> object.</p></li>
+<li><p>Most model components have an associated <cite>write</cite> and <cite>read</cite> method to read/write with model
+specific data formats and parse to / from the model component. These methods may have additional optional arguments
+(i.e. with default values), but no required arguments. The results component does not have write method.</p></li>
+<li><p>All public model methods may only contain arguments which require one of the following basic python types:
+string, numeric integer and float, boolean, None, list and dict types. This is requirement makes it possible to
+expose these methods and their arguments via a <a class="reference internal" href="../user_guide/model_workflow.html#model-workflow"><span class="std std-ref">model workflow .yml file</span></a>.</p></li>
+<li><p>Data is exposed to each model method through the <code class="docutils literal notranslate"><span class="pre">Model.data_catalog</span></code> attribute which is an instance of the
+<code class="xref py py-class docutils literal notranslate"><span class="pre">hydromt.DataCatalog</span></code>. Data of <a class="reference internal" href="../advanced_user/data_types.html#data-types"><span class="std std-ref">supported data types</span></a> is provided to model methods
+by arguments which end with <code class="docutils literal notranslate"><span class="pre">_fn</span></code> (short for filename) which refer to a source in the data catalog
+based on the source name or a file based on the (relative) path to the file. Within a model method the data is read
+by calling any <code class="docutils literal notranslate"><span class="pre">DataCatalog.get_&lt;data_type&gt;</span></code> method which work for both source and file names.</p></li>
+<li><p>The Model class currently contains two high-level methods (<code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code>,
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code> is are common for all model plugins and
+exposed through the CLI. This list of methods might be extended going forward.</p></li>
+<li><p>A Model child class implementation for a specific model kernel can be exposed to HydroMT as a plugin by specifying a
+<code class="docutils literal notranslate"><span class="pre">hydromt.models</span></code> <a class="reference external" href="https://packaging.python.org/en/latest/specifications/entry-points/">entry-point</a> in the pyproject.toml file of a package.
+For a more detailed explanation of how to build a plugin please refer to the
+<a class="reference internal" href="../plugin_dev/register_plugin.html#register-plugins"><span class="std std-ref">Implementing Custom behavior</span></a> section.</p></li>
+<li><p>We highly recommend writing integration tests to ensure the correctness of your code.</p></li>
+</ul>
+</section>
+</section>
+<section id="code-conventions">
+<h2>Code conventions<a class="headerlink" href="#code-conventions" title="Link to this heading">#</a></h2>
+<section id="naming">
+<h3>Naming<a class="headerlink" href="#naming" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Please avoid using short abbreviations in function and variable names unless they are
+very well known, they generally make code harder to read and follow.</p></li>
+<li><p>Avoid using names that are too general or too wordy. Strike a good balance between the two.</p></li>
+<li><p>Folder and script names are always lowercase and preferably single words (no underscores)</p></li>
+<li><p>Python classes are written with CamelCase</p></li>
+<li><p>Methods are written with lowercase and might use underscores for readability.
+Specific names are used for methods of the Model class and any child classes, see
+above.</p></li>
+<li><p>Names of (global) constants should be all upper case.</p></li>
+<li><p>Internal (non-public) constants and methods start with an underscore, these should not
+be used outside of your package’s code.</p></li>
+</ul>
+</section>
+<section id="type-hinting">
+<h3>Type hinting<a class="headerlink" href="#type-hinting" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We use <a class="reference external" href="https://docs.python.org/3/library/typing.html">type hinting</a> for arguments and returns of all methods and classes
+Check this <a class="reference external" href="https://stackoverflow.com/questions/32557920/what-are-type-hints-in-python-3-5">stack overflow post</a> for more
+background about what typing is and how it can be used. In HydroMT we use it specifically to inform external libraries to
+about the type arguments of any HydroMT model method. This is work in progress.</p></li>
+</ul>
+</section>
+<section id="docstrings">
+<h3>Docstrings<a class="headerlink" href="#docstrings" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We use the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">numpy docstring format</a>.
+You can easily create these docstring once method arguments have type hints (see above) with
+the VSCode <a class="reference external" href="https://github.com/NilsJPWerner/autoDocstring">autoDocstring plugin</a>.</p></li>
+<li><p>please ensure that all public code you constribute has a valid docstring.</p></li>
+</ul>
+</section>
+<section id="code-format">
+<span id="id4"></span><h3>Code format<a class="headerlink" href="#code-format" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>We use the <a class="reference external" href="https://black.readthedocs.io/en/stable/the_black_code_style.html">black code style</a> and <a class="reference external" href="https://pre-commit.com">pre-commit</a> to keep everything formatted. We use the formatter included with <a class="reference external" href="https://docs.astral.sh/ruff/formatter/">ruff</a> which is black compatible, but much faster. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it’s installed correctly.</p></li>
+</ul>
+<p>You can install pre-commit by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>pre-commit
+</pre></div>
+</div>
+<p>It is best to install pre-commit in your existing environment. After that simply install the necessary hooks with</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+<p>After doing this pre-commit will check all your staged files when committing.</p>
+<p>For example say that you’ve added the following new feature:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;import os\nprint(&quot;This is a new exciting feature&quot;)&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>hydromt/new_feature.py
+</pre></div>
+</div>
+<p>(you do not have to do this, it is just for demonstration, but you can copy and execute this code to try for yourself.)</p>
+<p>Then you can add the new feature to the git staging area and try to commit as usual. However pre-commit will tell you that you should add some docstrings for example. You should see an output similar to the one below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>hydromt/new_feature.py
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;The feature you&#39;ve all been waiting for.&quot;</span>
+<span class="go">  Trim Trailing Whitespace.................................................Passed</span>
+<span class="go">  Fix End of Files.........................................................Failed</span>
+<span class="go">  - hook id: end-of-file-fixer</span>
+<span class="go">  - exit code: 1</span>
+<span class="go">  - files were modified by this hook</span>
+
+<span class="go">  Fixing hydromt/new_feature.py</span>
+
+<span class="go">  Check Yaml...........................................(no files to check)Skipped</span>
+<span class="go">  Check for added large files..............................................Passed</span>
+<span class="go">  Check python ast.........................................................Passed</span>
+<span class="go">  Check JSON...........................................(no files to check)Skipped</span>
+<span class="go">  Debug Statements (Python)................................................Passed</span>
+<span class="go">  Mixed line ending........................................................Passed</span>
+<span class="go">  Format YAML files....................................(no files to check)Skipped</span>
+<span class="go">  ruff.....................................................................Failed</span>
+<span class="go">  - hook id: ruff</span>
+<span class="go">  - exit code: 1</span>
+<span class="go">  - files were modified by this hook</span>
+
+<span class="go">  ruff-format..............................................................Passed</span>
+
+<span class="go">  hydromt/new_feature.py:1:1: D100 Missing docstring in public module</span>
+<span class="go">  Found 2 errors (1 fixed, 1 remaining).</span>
+</pre></div>
+</div>
+<p>This means that pre-commit has found issues in the code you submitted. In the case of the import it was able to fix it automatically. However <cite>ruff</cite> has also detected that you have not added a docstring for the new feature. You can find this out by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ruff<span class="w"> </span>.
+</pre></div>
+</div>
+<p>which will show you the same output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt/new_feature.py:1:1: D100 Missing docstring in public module</span>
+<span class="go">Found 1 error.</span>
+</pre></div>
+</div>
+<p>After you’ve fixed this problem by for example adding the docstring “””Implement the cool new feature””” at the top of the new file, you just have to add the new version to the staging area again and re-attempt the commit which should now succeed:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>hydromt/new_feature.py
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;The feature you&#39;ve all been waiting for.&quot;</span>
+<span class="go">Trim Trailing Whitespace.................................................Passed</span>
+<span class="go">Fix End of Files.........................................................Passed</span>
+<span class="go">Check Yaml...........................................(no files to check)Skipped</span>
+<span class="go">Check for added large files..............................................Passed</span>
+<span class="go">Check python ast.........................................................Passed</span>
+<span class="go">Check JSON...........................................(no files to check)Skipped</span>
+<span class="go">Debug Statements (Python)................................................Passed</span>
+<span class="go">Mixed line ending........................................................Passed</span>
+<span class="go">Format YAML files....................................(no files to check)Skipped</span>
+<span class="go">ruff.....................................................................Passed</span>
+<span class="go">[linting a5e9b683] The feature you&#39;ve all been waiting for.</span>
+<span class="go"> 1 file changed, 4 insertions(+)</span>
+<span class="go"> create mode 100644 hydromt/new_feature.py</span>
+</pre></div>
+</div>
+<p>Now you can push your commit as normal.</p>
+<p>From time to time you might see comments like these:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rioxarray</span> <span class="c1"># noqa: F401</span>
+</pre></div>
+</div>
+<p>The <cite>noqa</cite> is instructing the linters to ignore the specified rule for the line in question. Whenever possible, we try to avoid using these but it’s not always possible. The full list of rules can be found here: <a class="reference external" href="https://beta.ruff.rs/docs/rules/">Ruff Rules Section</a> Some common ones are:</p>
+<ul class="simple">
+<li><p>E501: Line too long.</p></li>
+<li><p>F401: Unused import.</p></li>
+<li><p>D102: Public methods should have docstrings.</p></li>
+</ul>
+</section>
+</section>
+<section id="test-and-ci">
+<h2>Test and CI<a class="headerlink" href="#test-and-ci" title="Link to this heading">#</a></h2>
+<p>We use <a class="reference external" href="https://pytest.org">pytest</a> for testing and <a class="reference external" href="https://docs.github.com/en/actions">github actions</a> for CI.
+- Unit tests are mandatory for new methods and workflows and integration tests are highly recommended for various
+- All tests should be contained in the tests directory in functions named <cite>test_*</cite>.
+- We use <a class="reference external" href="https://app.codecov.io/gh/Deltares/hydromt">CodeCov</a> to monitor the coverage of the tests and aim for high (&gt;90%) coverage. This is work in progress.
+- Checkout this <a class="reference external" href="https://levelup.gitconnected.com/a-comprehensive-guide-to-pytest-3676f05df5a0">comprehensive guide to pytest</a> for more info and tips.</p>
+<section id="running-the-tests">
+<h3>Running the tests<a class="headerlink" href="#running-the-tests" title="Link to this heading">#</a></h3>
+<p>HydroMT’s tests live in the tests folder and generally match the main package layout.
+Test should be run from the tests folder.</p>
+<p>To run the entire suite and the code coverage report:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>tests
+<span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>--verbose<span class="w"> </span>--cov<span class="o">=</span>hydromt<span class="w"> </span>--cov-report<span class="w"> </span>term-missing
+</pre></div>
+</div>
+<p>A single test file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>--verbose<span class="w"> </span>test_rio.py
+</pre></div>
+</div>
+<p>A single test:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>--verbose<span class="w"> </span>test_rio.py::test_object
+</pre></div>
+</div>
+</section>
+</section>
+<section id="creating-a-release">
+<h2>Creating a release<a class="headerlink" href="#creating-a-release" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Go to the <cite>actions</cite> tab on Github, select <cite>Create a release</cite> from the actions listen to the left, then use the <cite>run workflow</cite> button to start the release process. You will be asked whether it will be a <cite>major</cite>, <cite>minor</cite> or <cite>patch</cite> release. Choose the appropriate action.</p></li>
+<li><p>The action you just run will open a new PR for you with a new branch named <cite>release/v&lt;NEW_VERSION&gt;</cite>. (the <cite>NEW_VERSION</cite> will be calculated for you based on which kind of release you selected.) In the new PR, the changelog, hydromt version and sphinx <cite>switcher.json</cite> will be updated for you. Any changes you made to the <cite>pyproject.toml</cite> since the last release will be posted as a comment in the PR. You will need these during the Conda-forge release if there are any.</p></li>
+<li><p>Every commit to this new branch will trigger the creation (and testing) of release artifacts. In our case those are: Documentation, the PyPi package and docker image (the conda release happens separately). After the artifacts are created, they will be uploaded to the repository’s internal artifact cache. A bot will post links to these created artifacts in the PR which you can use to download and locally inspect them.</p></li>
+<li><p>When you are happy with the release in the PR, you can simply merge it. We suggest naming the commit something like “Release v&lt;NEW_VERSION&gt;”</p></li>
+<li><p>After the PR is merged, a action should start (though it will not show up under the PR itself) that will publish the latest artifacts created to their respective platform. After this, a bot will add a final commit to the <cite>main</cite> branch, setting the hydromt version back to a dev version, and adding new headers to the <cite>docs/changelog.rst</cite> for unreleased features. It will also create a tag and a github release for you automatically. The release is now done as far as this repo is concerned.</p></li>
+<li><p>The newly published PyPi package will trigger a new PR to the <a class="reference external" href="https://github.com/conda-forge/hydromt-feedstock">HydroMT feedstock repos of conda-forge</a>.
+Here you can use the comment posted to the release PR to see if the <cite>meta.yml</cite> needs to be updated. Merge the PR to release the new version on conda-forge.</p></li>
+<li><p>celebrate the new release!</p></li>
+</ol>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Core developer guide</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="documentation.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Adding Documentation</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rights">Rights</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#issue-conventions">Issue conventions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#checklist-pull-requests">Checklist pull requests</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#git-conventions">Git conventions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dealing-with-merge-conflicts">Dealing with merge conflicts</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydromt-design-conventions">HydroMT design conventions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#general">General</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data">Data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#model-class">Model Class</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#code-conventions">Code conventions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#naming">Naming</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#type-hinting">Type hinting</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#docstrings">Docstrings</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#code-format">Code format</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#test-and-ci">Test and CI</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-the-tests">Running the tests</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-a-release">Creating a release</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/guides/core_dev/contributing.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../../_sources/guides/core_dev/contributing.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.4.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
