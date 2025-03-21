@@ -67,7 +67,7 @@ jobs:
           check_artifacts: true
           if_no_artifact_found: fail
       - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.9.0
+        uses: pypa/gh-action-pypi-publish@v1.12.3
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
