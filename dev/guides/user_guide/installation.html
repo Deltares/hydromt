@@ -524,12 +524,13 @@
 <span id="id1"></span><h1>Installation guide<a class="headerlink" href="#installation-guide" title="Link to this heading">#</a></h1>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading">#</a></h2>
-<p>You’ll need <strong>Python 3.9, 3.10, 3.11, 3.12, or 3.13</strong> and a package manager. We recommend using pixi.</p>
+<p>You’ll need <strong>Python 3.9, 3.10, 3.11, 3.12, or 3.13</strong> and a package manager.
+We recommend using pixi.</p>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
-<p>HydroMT is available from pypi and conda-forge, but we recommend installing from
-conda-forge using the pixi package manager.</p>
+<p>HydroMT is available from pypi and conda-forge,
+but we recommend installing from conda-forge using the pixi package manager.</p>
 <section id="install-hydromt-cli">
 <h3>Install HydroMT CLI<a class="headerlink" href="#install-hydromt-cli" title="Link to this heading">#</a></h3>
 <div class="admonition tip">
@@ -541,8 +542,7 @@ conda-forge using the pixi package manager.</p>
 </pre></div>
 </div>
 <p>This will create a new isolated environment and install hydromt into it.
-To test whether the installation was successful you can run <code class="code docutils literal notranslate"><span class="pre">hydromt</span> <span class="pre">--plugins</span></code> and the output should
-look approximately like the one below:</p>
+To test whether the installation was successful you can run <code class="code docutils literal notranslate"><span class="pre">hydromt</span> <span class="pre">--plugins</span></code> and the output should look approximately like the one below:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>hydromt<span class="w"> </span>--plugins
 <span class="w">    </span>Model<span class="w"> </span>plugins:
 <span class="w">            </span>-<span class="w"> </span>model<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0<span class="o">)</span>
@@ -572,19 +572,18 @@ look approximately like the one below:</p>
 </section>
 <section id="installing-hydromt-in-a-python-environment">
 <h3>Installing HydroMT in a python environment<a class="headerlink" href="#installing-hydromt-in-a-python-environment" title="Link to this heading">#</a></h3>
-<p>If you wish to use hydromt through it’s Python API, you can use pixi to create an
-environment for this too. If you do not have a <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> yet you can make one
-by exectuing the command:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pixi<span class="w"> </span>init<span class="w"> </span>--pyproject
+<p>If you wish to use hydromt through it’s Python API, you can use pixi to create an environment for this too.
+If you do not have a <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> yet you can make one by executing the command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pixi<span class="w"> </span>init<span class="w"> </span>--format<span class="w"> </span>pyproject
 </pre></div>
 </div>
-<p>which will create it for you. after this simply add HydroMT as a dependency with the
-following command:</p>
+<p>Which will create it for you.
+After this simply add HydroMT as a dependency with the following command:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pixi<span class="w"> </span>add<span class="w"> </span>hydromt
 </pre></div>
 </div>
 <p>Once you have your new (or existing <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>) file install the pixi
-environement and activate it with the following commands to be able to start using it:</p>
+environment and activate it with the following commands to be able to start using it:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pixi<span class="w"> </span>install
 $<span class="w"> </span>pixi<span class="w"> </span>shell<span class="w"> </span>activate
 </pre></div>

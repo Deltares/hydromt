@@ -45,6 +45,8 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'overview/examples_index';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
@@ -56,7 +58,7 @@
     <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="User’s stories" href="use_case_examples.html" />
+    <link rel="next" title="Example: Reading geospatial point time-series" href="../_examples/reading_point_data.html" />
     <link rel="prev" title="Frequently asked questions" href="faq.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -414,7 +416,24 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="quick_overview.html">Quick overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently asked questions</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Examples</a></li>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Examples</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/reading_point_data.html">Example: Reading geospatial point time-series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/reading_raster_data.html">Example: Reading raster data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/reading_vector_data.html">Example: Reading vector data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/prep_data_catalog.html">Example: Preparing a data catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/export_data.html">Example: Exporting data from a data catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/working_with_models_basics.html">Example: Working with models from CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/working_with_meshcomponent.html">Example: Working with mesh components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/delineate_basin.html">Example: Define hydrological model regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/working_with_raster.html">Example: Working with raster data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/working_with_geodatasets.html">Example: Working with geodatasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../_examples/doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1"><a class="reference internal" href="use_case_examples.html">User’s stories</a></li>
 <li class="toctree-l1"><a class="reference internal" href="publications.html">Publications</a></li>
 <li class="toctree-l1"><a class="reference internal" href="team.html">Contributors</a></li>
@@ -480,40 +499,136 @@
                   
   <section id="examples">
 <span id="id1"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h1>
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples"><img alt="https://mybinder.org/badge_logo.svg" src="https://mybinder.org/badge_logo.svg" />
+</a>
+<p>Several iPython notebook examples have been prepared for <strong>HydroMT</strong> which you can
+use as a HydroMT tutorial.</p>
+<p>These examples can be run online or on your local machine.
+To run these examples online press the <strong>binder</strong> badge above.</p>
+<section id="local-installation">
+<h2>Local installation<a class="headerlink" href="#local-installation" title="Link to this heading">#</a></h2>
+<p>To run these examples on your local machine you need a copy of the repository and
+an installation of HydroMT including some additional packages. The most reliable
+way to do this installation is by creating a new environment as described below.</p>
+<section id="install-python-and-conda-mamba">
+<h3>1 - Install python and conda/mamba<a class="headerlink" href="#install-python-and-conda-mamba" title="Link to this heading">#</a></h3>
+<p>If not already done, you’ll need Python 3.9 or greater and a package manager such as conda or mamba. These package managers help you to install (Python) packages and
+<a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">manage environments</a> such that different installations do not conflict.</p>
+<p>We recommend using the <a class="reference external" href="https://github.com/conda-forge/miniforge#mambaforge">Mambaforge</a> Python distribution. This installs Python and the
+<a class="reference external" href="https://github.com/mamba-org/mamba">mamba package manager</a>. Alternatively, <a class="reference external" href="https://github.com/conda-forge/miniforge">Miniforge</a> and
+<a class="reference external" href="https://docs.conda.io/en/latest/miniconda.html">Miniconda</a> will install Python and the <a class="reference external" href="https://docs.conda.io/en/latest/">conda package manager</a>.</p>
+<p>If you already have a python &amp; conda installation but do not yet have mamba installed, we recommend installing it into your <em>base</em> environment using:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>install<span class="w"> </span>mamba<span class="w"> </span>-n<span class="w"> </span>base<span class="w"> </span>-c<span class="w"> </span>conda-forge
+</pre></div>
+</div>
+</section>
+<section id="install-hydromt-and-the-other-python-dependencies-in-a-separate-python-environment">
+<h3>2 - Install HydroMT and the other python dependencies in a separate Python environment<a class="headerlink" href="#install-hydromt-and-the-other-python-dependencies-in-a-separate-python-environment" title="Link to this heading">#</a></h3>
+<p>The next step is to install all the python dependencies required to run the notebooks, including HydroMT.</p>
+<p><strong>If you do not have HydroMT yet installed</strong>, first create a new empty environment with the base hydromt installation:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>mamba<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>hydromt<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span>hydromt
+</pre></div>
+</div>
+<p>To run the notebooks, you need to install the <code class="docutils literal notranslate"><span class="pre">slim</span></code> version of HydroMT using pip. The slim version installs additional dependencies to Hydromt
+such as jupyter notebook to run the notebooks, matplotlib to plot or xugrid to also try out examples for the MeshModel. It is a more complete
+installation of hydromt. To install or update in an existing environment (example hydromt environment), do:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>hydromt
+<span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hydromt[slim]&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="download-the-content-of-the-examples-and-notebooks">
+<h3>3 - Download the content of the examples and notebooks<a class="headerlink" href="#download-the-content-of-the-examples-and-notebooks" title="Link to this heading">#</a></h3>
+<p>To run the examples locally, you will need to download the content of the HydroMT repository.
+You have two options:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Download and unzip the examples manually</p></li>
+<li><p>Clone the HydroMT GitHub repository</p></li>
+</ol>
+</div></blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Depending on your installed version of HydroMT, you will need to download the correct versions of the examples.
+To check the version of HydroMT that you have installed, do:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>hydromt<span class="w"> </span>--version
+
+<span class="go">hydroMT version: 0.8.0</span>
+</pre></div>
+</div>
+</div>
+<p>** Option 1: manual download and unzip**</p>
+<p>To manually download the examples on Windows, do (!replace with your own hydromt version!):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>curl<span class="w"> </span>https://github.com/Deltares/hydromt/archive/refs/tags/v0.8.0.zip<span class="w"> </span>-O<span class="w"> </span>-L
+<span class="gp">$ </span>tar<span class="w"> </span>-xf<span class="w"> </span>v0.8.0.zip
+<span class="gp">$ </span>ren<span class="w"> </span>hydromt-0.8.0<span class="w"> </span>hydromt
+</pre></div>
+</div>
+<p>You can also download, unzip and rename manually if you prefer, rather than using the windows command prompt.</p>
+<p>** Option 2: cloning the hydromt repository**</p>
+<p>For git users, you can also get the examples by cloning the hydromt github repository and checking the version
+you have installed:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Deltares/hydromt.git
+<span class="gp">$ </span>git<span class="w"> </span>checkout<span class="w"> </span>v0.8.0
+</pre></div>
+</div>
+</section>
+<section id="running-the-examples">
+<h3>4 - Running the examples<a class="headerlink" href="#running-the-examples" title="Link to this heading">#</a></h3>
+<p>Finally, start a jupyter notebook inside the <code class="docutils literal notranslate"><span class="pre">examples</span></code> folder after activating the <code class="docutils literal notranslate"><span class="pre">hydromt</span></code> environment, see below.
+Alternatively, you can run the notebooks from <a class="reference external" href="https://code.visualstudio.com/download">Visual Studio Code</a> if you have that installed.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>conda<span class="w"> </span>activate<span class="w"> </span>hydromt
+<span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>hydromt/examples
+<span class="gp">$ </span>jupyter<span class="w"> </span>notebook
+</pre></div>
+</div>
+</section>
+</section>
 <section id="list-of-examples">
 <h2>List of examples<a class="headerlink" href="#list-of-examples" title="Link to this heading">#</a></h2>
 <p>For a static (non-interactive) view of the examples follow one of the links below:</p>
 <section id="data-and-datacatalog">
 <h3>Data and DataCatalog:<a class="headerlink" href="#data-and-datacatalog" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p><a class="reference external" href="../_examples/reading_raster_data.ipynb">Reading raster data</a></p></li>
-<li><p><a class="reference external" href="../_examples/reading_vector_data.ipynb">Reading vector data</a></p></li>
-<li><p><a class="reference external" href="../_examples/reading_point_data.ipynb">Reading geospatial point time-series data</a></p></li>
-<li><p><a class="reference external" href="../_examples/prep_data_catalog.ipynb">Preparing a data catalog</a></p></li>
-<li><p><a class="reference external" href="../_examples/export_data.ipynb">Exporting data</a></p></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_point_data.html">Example: Reading geospatial point time-series</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_raster_data.html">Example: Reading raster data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_tabular_data.html">Example: Reading 2D tabular data (DataFrame)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/reading_vector_data.html">Example: Reading vector data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/prep_data_catalog.html">Example: Preparing a data catalog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/export_data.html">Example: Exporting data from a data catalog</a></li>
 </ul>
+</div>
 </section>
 <section id="working-with-models">
 <h3>Working with models:<a class="headerlink" href="#working-with-models" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p><a class="reference external" href="../_examples/working_with_models_basics.ipynb">Working with (grid) models from CLI</a></p></li>
-<li><p><a class="reference external" href="../_examples/working_with_models.ipynb">Working with (grid) models in python</a></p></li>
-<li><p><a class="reference external" href="../_examples/working_with_meshmodel.ipynb">Working with mesh models</a></p></li>
-<li><p><a class="reference external" href="../_examples/delineate_basin.ipynb">Define hydrological model regions</a></p></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_models_basics.html">Example: Working with models from CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_models.html">Example: Working with models in Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_meshcomponent.html">Example: Working with mesh components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/delineate_basin.html">Example: Define hydrological model regions</a></li>
 </ul>
+</div>
 </section>
 <section id="gis-operations">
 <h3>GIS operations:<a class="headerlink" href="#gis-operations" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p><a class="reference external" href="../_examples/working_with_raster.ipynb">Working with raster data</a></p></li>
-<li><p><a class="reference external" href="../_examples/working_with_flow_directions.ipynb">Working with flow direction data</a></p></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_raster.html">Example: Working with raster data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_flow_directions.html">Example: Working with flow direction data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_geodatasets.html">Example: Working with geodatasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
 </ul>
+</div>
 </section>
 <section id="statistical-analysis">
 <h3>Statistical Analysis:<a class="headerlink" href="#statistical-analysis" title="Link to this heading">#</a></h3>
-<ul class="simple">
-<li><p><a class="reference external" href="../_examples/doing_extreme_value_analysis.ipynb">Extreme Value Analysis</a></p></li>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../_examples/doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
 </ul>
+</div>
 </section>
 </section>
 </section>
@@ -538,11 +653,11 @@
       </div>
     </a>
     <a class="right-next"
-       href="use_case_examples.html"
+       href="../_examples/reading_point_data.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">User’s stories</p>
+        <p class="prev-next-title">Example: Reading geospatial point time-series</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -565,6 +680,13 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#local-installation">Local installation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-python-and-conda-mamba">1 - Install python and conda/mamba</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install-hydromt-and-the-other-python-dependencies-in-a-separate-python-environment">2 - Install HydroMT and the other python dependencies in a separate Python environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#download-the-content-of-the-examples-and-notebooks">3 - Download the content of the examples and notebooks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#running-the-examples">4 - Running the examples</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#list-of-examples">List of examples</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-and-datacatalog">Data and DataCatalog:</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#working-with-models">Working with models:</a></li>
