@@ -1,0 +1,33 @@
+﻿hydromt.data\_catalog.PredefinedCatalog
+=======================================
+
+.. currentmodule:: hydromt.data_catalog
+
+.. autoclass:: PredefinedCatalog
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PredefinedCatalog.__init__
+      ~PredefinedCatalog.get_catalog_file
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PredefinedCatalog.base_url
+      ~PredefinedCatalog.name
+      ~PredefinedCatalog.pooch
+      ~PredefinedCatalog.registry
+      ~PredefinedCatalog.versions
+   
+   

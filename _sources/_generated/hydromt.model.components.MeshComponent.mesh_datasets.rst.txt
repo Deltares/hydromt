@@ -1,0 +1,6 @@
+﻿hydromt.model.components.MeshComponent.mesh\_datasets
+=====================================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoproperty:: MeshComponent.mesh_datasets

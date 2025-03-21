@@ -1,0 +1,6 @@
+﻿hydromt.model.components.SpatialDatasetsComponent.read
+======================================================
+
+.. currentmodule:: hydromt.model.components
+
+.. automethod:: SpatialDatasetsComponent.read

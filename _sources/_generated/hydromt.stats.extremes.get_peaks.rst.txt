@@ -1,0 +1,6 @@
+﻿hydromt.stats.extremes.get\_peaks
+=================================
+
+.. currentmodule:: hydromt.stats.extremes
+
+.. autofunction:: get_peaks

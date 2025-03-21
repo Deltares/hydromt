@@ -1,0 +1,6 @@
+﻿hydromt.model.components.TablesComponent.test\_equal
+====================================================
+
+.. currentmodule:: hydromt.model.components
+
+.. automethod:: TablesComponent.test_equal

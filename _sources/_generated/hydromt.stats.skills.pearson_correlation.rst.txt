@@ -1,0 +1,6 @@
+﻿hydromt.stats.skills.pearson\_correlation
+=========================================
+
+.. currentmodule:: hydromt.stats.skills
+
+.. autofunction:: pearson_correlation

@@ -1,0 +1,6 @@
+﻿hydromt.gis.Dataset.vector.index_dim
+====================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessorattribute:: gis.Dataset.vector.index_dim

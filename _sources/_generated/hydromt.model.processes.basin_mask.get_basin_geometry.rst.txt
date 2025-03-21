@@ -1,0 +1,6 @@
+﻿hydromt.model.processes.basin\_mask.get\_basin\_geometry
+========================================================
+
+.. currentmodule:: hydromt.model.processes.basin_mask
+
+.. autofunction:: get_basin_geometry

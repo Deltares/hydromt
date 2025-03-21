@@ -1,0 +1,6 @@
+﻿hydromt.model.components.GridComponent.root
+===========================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoproperty:: GridComponent.root

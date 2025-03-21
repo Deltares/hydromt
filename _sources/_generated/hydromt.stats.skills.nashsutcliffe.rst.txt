@@ -1,0 +1,6 @@
+﻿hydromt.stats.skills.nashsutcliffe
+==================================
+
+.. currentmodule:: hydromt.stats.skills
+
+.. autofunction:: nashsutcliffe

@@ -1,0 +1,6 @@
+﻿hydromt.model.Model.write\_data\_catalog
+========================================
+
+.. currentmodule:: hydromt.model
+
+.. automethod:: Model.write_data_catalog

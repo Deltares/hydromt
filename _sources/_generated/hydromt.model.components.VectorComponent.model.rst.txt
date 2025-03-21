@@ -1,0 +1,6 @@
+﻿hydromt.model.components.VectorComponent.model
+==============================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoproperty:: VectorComponent.model

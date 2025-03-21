@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.PredefinedCatalog.get\_catalog\_file
+==========================================================
+
+.. currentmodule:: hydromt.data_catalog
+
+.. automethod:: PredefinedCatalog.get_catalog_file

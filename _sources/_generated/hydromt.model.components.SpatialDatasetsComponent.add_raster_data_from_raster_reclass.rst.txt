@@ -1,0 +1,6 @@
+﻿hydromt.model.components.SpatialDatasetsComponent.add\_raster\_data\_from\_raster\_reclass
+==========================================================================================
+
+.. currentmodule:: hydromt.model.components
+
+.. automethod:: SpatialDatasetsComponent.add_raster_data_from_raster_reclass

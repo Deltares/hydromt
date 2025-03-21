@@ -1,0 +1,6 @@
+﻿hydromt.model.components.TablesComponent.model
+==============================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoproperty:: TablesComponent.model

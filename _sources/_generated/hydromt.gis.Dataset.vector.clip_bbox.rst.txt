@@ -1,0 +1,6 @@
+﻿hydromt.gis.Dataset.vector.clip_bbox
+====================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.Dataset.vector.clip_bbox

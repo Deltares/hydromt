@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.set_crs
+====================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.DataArray.raster.set_crs

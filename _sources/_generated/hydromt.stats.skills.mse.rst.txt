@@ -1,0 +1,6 @@
+﻿hydromt.stats.skills.mse
+========================
+
+.. currentmodule:: hydromt.stats.skills
+
+.. autofunction:: mse

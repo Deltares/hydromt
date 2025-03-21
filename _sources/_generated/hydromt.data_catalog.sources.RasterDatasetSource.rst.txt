@@ -1,0 +1,74 @@
+﻿hydromt.data\_catalog.sources.RasterDatasetSource
+=================================================
+
+.. currentmodule:: hydromt.data_catalog.sources
+
+.. autoclass:: RasterDatasetSource
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RasterDatasetSource.__init__
+      ~RasterDatasetSource.construct
+      ~RasterDatasetSource.copy
+      ~RasterDatasetSource.detect_bbox
+      ~RasterDatasetSource.detect_time_range
+      ~RasterDatasetSource.dict
+      ~RasterDatasetSource.from_orm
+      ~RasterDatasetSource.get_bbox
+      ~RasterDatasetSource.get_time_range
+      ~RasterDatasetSource.json
+      ~RasterDatasetSource.model_construct
+      ~RasterDatasetSource.model_copy
+      ~RasterDatasetSource.model_dump
+      ~RasterDatasetSource.model_dump_json
+      ~RasterDatasetSource.model_json_schema
+      ~RasterDatasetSource.model_parametrized_name
+      ~RasterDatasetSource.model_post_init
+      ~RasterDatasetSource.model_rebuild
+      ~RasterDatasetSource.model_validate
+      ~RasterDatasetSource.model_validate_json
+      ~RasterDatasetSource.model_validate_strings
+      ~RasterDatasetSource.parse_file
+      ~RasterDatasetSource.parse_obj
+      ~RasterDatasetSource.parse_raw
+      ~RasterDatasetSource.read_data
+      ~RasterDatasetSource.schema
+      ~RasterDatasetSource.schema_json
+      ~RasterDatasetSource.summary
+      ~RasterDatasetSource.to_file
+      ~RasterDatasetSource.to_stac_catalog
+      ~RasterDatasetSource.update_forward_refs
+      ~RasterDatasetSource.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~RasterDatasetSource.data_type
+      ~RasterDatasetSource.full_uri
+      ~RasterDatasetSource.model_computed_fields
+      ~RasterDatasetSource.model_config
+      ~RasterDatasetSource.model_extra
+      ~RasterDatasetSource.model_fields
+      ~RasterDatasetSource.model_fields_set
+      ~RasterDatasetSource.driver
+      ~RasterDatasetSource.data_adapter
+      ~RasterDatasetSource.name
+      ~RasterDatasetSource.uri
+      ~RasterDatasetSource.uri_resolver
+      ~RasterDatasetSource.root
+      ~RasterDatasetSource.version
+      ~RasterDatasetSource.provider
+      ~RasterDatasetSource.metadata
+   
+   

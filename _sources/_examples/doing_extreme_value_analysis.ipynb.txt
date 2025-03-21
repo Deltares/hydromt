@@ -1,0 +1,270 @@
+{
+ "cells": [
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "id": "0",
+   "metadata": {},
+   "source": [
+    "# Example: Doing Extreme Value Analysis (EVA) for time series "
+   ]
+  },
+  {
+   "attachments": {},
+   "cell_type": "markdown",
+   "id": "1",
+   "metadata": {},
+   "source": [
+    "This example illustrates how to use to perform Extreme Value Analysis (EVA) based on time series stored in a netcdf, for example, this could be performed on a xarray Dataset. \n",
+    "Typical steps needed to perform EVA are:\n",
+    "- extract peaks (high extremes) from a continuous time series\n",
+    "- fit a EV distribution on these peaks \n",
+    "- obtain return values for given return periods based on the distribution fitted and its parameters\n",
+    "- plot the distribution and empirical data \n",
+    "\n",
+    "All these steps are also combined in the function `eva` (see also the end of the example)\n",
+    "\n",
+    "We cover these steps in this example using randomly generated data. More details on the functions used can be found in the API reference description of the [Statistics and Extreme Value Analysis](../api/stats.rst#statistics-and-extreme-value-analysis)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2",
+   "metadata": {},
+   "source": [
+    "Note that here are also other packages for extreme valua analysis. \n",
+    "\n",
+    "- [scipy.stats](https://docs.scipy.org/doc/scipy/tutorial/stats.html) Library of many statistical distributions including extreme value distributions.\n",
+    "- [pyextremes](https://georgebv.github.io/pyextremes/) Very rich package for univariate extreme value analysis with many different fitting methods, builds on scipy.stats.\n",
+    "\n",
+    "Compared to these packages The HydroMT methods add the following features, but is generally much less feature rich:\n",
+    "- support for performing extreme valua analysis on ND Xarray Datasets\n",
+    "- support for lmoments fitting"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# import hydromt and functions needed for EVA\n",
+    "import matplotlib.pyplot as plt\n",
+    "import numpy as np\n",
+    "import xarray as xr\n",
+    "\n",
+    "from hydromt.stats import extremes"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4",
+   "metadata": {},
+   "source": [
+    "We load a random discharge time seriesaas a xarray DataArray `da` for two stations (stations 1 and 2). "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# We create some random continuous time series with some extremes\n",
+    "da = xr.open_dataarray(r\"./data/discharge.nc\")\n",
+    "da"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6",
+   "metadata": {},
+   "source": [
+    "Extreme value distribution fit is based either on block maxima (BM) or peaks-over-threshold (PoT). \n",
+    "\n",
+    "- If sampling of high extremes is done according to BM then, distributions to be fit are either Gumbel (later referred as `gumb`) or the Generalized Extreme Value (GEV) distribution (later referred as `gev`). Note that a GEV distribution with a shape paramater of 0 is equivalent to the Gumbel distribution.  \n",
+    "\n",
+    "- If sampling of high extremes is done according to PoT then, distributions to be fit are either exponential (later referred as `exp`) or the Generalized Pareto (GP) distribution (later referred as `gpd`). \n",
+    "\n",
+    "For this example, we will fit a GEV distribution based on annual maxima. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7",
+   "metadata": {},
+   "source": [
+    "## Step 1: Extracting peaks from continuous time series"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# We use the get_peaks function\n",
+    "bm_peaks = extremes.get_peaks(da, ev_type=\"BM\", period=\"365.25D\")\n",
+    "\n",
+    "fig, ax = plt.subplots(figsize=(10, 3))\n",
+    "da.to_pandas().plot(\n",
+    "    ax=ax, xlabel=\"time\", ylabel=\"discharge [m3/s]\", color=[\"orange\", \"green\"]\n",
+    ")\n",
+    "bm_peaks.to_pandas().plot(\n",
+    "    ax=ax,\n",
+    "    marker=\"o\",\n",
+    "    linestyle=\"none\",\n",
+    "    legend=False,\n",
+    "    color=[\"darkorange\", \"darkgreen\"],\n",
+    "    markersize=4,\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9",
+   "metadata": {},
+   "source": [
+    "The function extracts peaks, here, annual maxima, and set the rest of the time series to NaN. Here, the `extremes_rate` is equal to 1 as we have sampled the highest value per year."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "10",
+   "metadata": {},
+   "source": [
+    "## Step 2: fit a EV distribution on these peaks "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "11",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "da_params = extremes.fit_extremes(bm_peaks, ev_type=\"BM\", distribution=\"gev\")\n",
+    "da_params.load()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "12",
+   "metadata": {},
+   "source": [
+    "## Step 3: obtain return values for given return periods based on the distribution fitted and its parameters"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "13",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# We define the return periods for which we would like to know the return values\n",
+    "rps = np.array([2, 5, 25, 100, 500])\n",
+    "da_rps = extremes.get_return_value(da_params, rps=rps).load()\n",
+    "da_rps.to_pandas()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "14",
+   "metadata": {},
+   "source": [
+    "## Step 4: plot the distribution and empirical data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "15",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# We plot the fit obtained using the function plot_return_values!\n",
+    "\n",
+    "fig, axes = plt.subplots(2, 1, figsize=(5, 7), sharex=True)\n",
+    "\n",
+    "for i, ax, color in zip(da.stations.values, axes, [\"orange\", \"green\"]):\n",
+    "    extremes.plot_return_values(\n",
+    "        bm_peaks.sel(stations=i),\n",
+    "        da_params.sel(stations=i),\n",
+    "        \"gev\",\n",
+    "        color=color,\n",
+    "        nsample=1000,  # number of samples for confidence interval\n",
+    "        rps=rps,\n",
+    "        extremes_rate=1.0,\n",
+    "        ax=ax,\n",
+    "    )\n",
+    "    ax.set_title(f\"Station {i}\")\n",
+    "    ax.set_ylabel(\"discharge [m3/s]\")\n",
+    "    if i == da.stations.values[-1]:\n",
+    "        ax.set_xlabel(\"return period [years]\")\n",
+    "    else:\n",
+    "        ax.set_xlabel(\"\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "16",
+   "metadata": {},
+   "source": [
+    "## TL;DR\n",
+    "Note that the EV fit can be done within one function ([stats.extremes.eva]) that subsequently calls the functions used here ([stats.extremes.get_peaks], [stats.extremes.fit_extremes] and [stats.extremes.get_return_value])\n",
+    "\n",
+    "Steps 1 to 3 above could have been performed using [stats.extremes.eva] as follow. In this case, it will return an xarray.Dataset:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "17",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "da_bm_eva = extremes.eva(\n",
+    "    da, ev_type=\"BM\", period=\"365.25D\", distribution=\"gev\", rps=rps\n",
+    ").load()\n",
+    "\n",
+    "da_bm_eva"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "18",
+   "metadata": {},
+   "source": [
+    "Note that for this example:\n",
+    "- `da_bm_eva['peaks']` is the same as `bm_peaks`\n",
+    "- `da_bm_eva['parameters']` is the same as `da_params`\n",
+    "- `da_bm_eva['return_values']` is the same as `da_rps`"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "default",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.21"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

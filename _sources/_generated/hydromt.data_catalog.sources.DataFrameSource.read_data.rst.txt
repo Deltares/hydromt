@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.sources.DataFrameSource.read\_data
+========================================================
+
+.. currentmodule:: hydromt.data_catalog.sources
+
+.. automethod:: DataFrameSource.read_data

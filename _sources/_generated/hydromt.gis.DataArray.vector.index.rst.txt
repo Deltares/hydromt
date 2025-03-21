@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.vector.index
+==================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessorattribute:: gis.DataArray.vector.index

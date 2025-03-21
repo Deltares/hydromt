@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.vector.geom_type
+======================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessorattribute:: gis.DataArray.vector.geom_type

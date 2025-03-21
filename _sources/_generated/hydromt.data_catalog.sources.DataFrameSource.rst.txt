@@ -1,0 +1,70 @@
+﻿hydromt.data\_catalog.sources.DataFrameSource
+=============================================
+
+.. currentmodule:: hydromt.data_catalog.sources
+
+.. autoclass:: DataFrameSource
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~DataFrameSource.__init__
+      ~DataFrameSource.construct
+      ~DataFrameSource.copy
+      ~DataFrameSource.dict
+      ~DataFrameSource.from_orm
+      ~DataFrameSource.json
+      ~DataFrameSource.model_construct
+      ~DataFrameSource.model_copy
+      ~DataFrameSource.model_dump
+      ~DataFrameSource.model_dump_json
+      ~DataFrameSource.model_json_schema
+      ~DataFrameSource.model_parametrized_name
+      ~DataFrameSource.model_post_init
+      ~DataFrameSource.model_rebuild
+      ~DataFrameSource.model_validate
+      ~DataFrameSource.model_validate_json
+      ~DataFrameSource.model_validate_strings
+      ~DataFrameSource.parse_file
+      ~DataFrameSource.parse_obj
+      ~DataFrameSource.parse_raw
+      ~DataFrameSource.read_data
+      ~DataFrameSource.schema
+      ~DataFrameSource.schema_json
+      ~DataFrameSource.summary
+      ~DataFrameSource.to_file
+      ~DataFrameSource.to_stac_catalog
+      ~DataFrameSource.update_forward_refs
+      ~DataFrameSource.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~DataFrameSource.data_type
+      ~DataFrameSource.full_uri
+      ~DataFrameSource.model_computed_fields
+      ~DataFrameSource.model_config
+      ~DataFrameSource.model_extra
+      ~DataFrameSource.model_fields
+      ~DataFrameSource.model_fields_set
+      ~DataFrameSource.driver
+      ~DataFrameSource.data_adapter
+      ~DataFrameSource.name
+      ~DataFrameSource.uri
+      ~DataFrameSource.uri_resolver
+      ~DataFrameSource.root
+      ~DataFrameSource.version
+      ~DataFrameSource.provider
+      ~DataFrameSource.metadata
+   
+   

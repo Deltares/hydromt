@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.x_dim
+==================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessorattribute:: gis.DataArray.raster.x_dim

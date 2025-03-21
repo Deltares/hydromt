@@ -1,0 +1,6 @@
+﻿hydromt.stats.design\_events.get\_peak\_hydrographs
+===================================================
+
+.. currentmodule:: hydromt.stats.design_events
+
+.. autofunction:: get_peak_hydrographs

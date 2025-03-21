@@ -1,0 +1,43 @@
+﻿hydromt.plugins.Plugins
+=======================
+
+.. currentmodule:: hydromt.plugins
+
+.. autoclass:: Plugins
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Plugins.__init__
+      ~Plugins.catalog_summary
+      ~Plugins.component_summary
+      ~Plugins.driver_summary
+      ~Plugins.model_summary
+      ~Plugins.plugin_summary
+      ~Plugins.uri_resolver_summary
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Plugins.catalog_metadata
+      ~Plugins.catalog_plugins
+      ~Plugins.component_metadata
+      ~Plugins.component_plugins
+      ~Plugins.driver_metadata
+      ~Plugins.driver_plugins
+      ~Plugins.model_metadata
+      ~Plugins.model_plugins
+      ~Plugins.uri_resolver_metadata
+      ~Plugins.uri_resolver_plugins
+   
+   

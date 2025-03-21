@@ -1,0 +1,6 @@
+﻿hydromt.model.Model.root
+========================
+
+.. currentmodule:: hydromt.model
+
+.. autoattribute:: Model.root

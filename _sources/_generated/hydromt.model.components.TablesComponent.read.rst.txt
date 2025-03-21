@@ -1,0 +1,6 @@
+﻿hydromt.model.components.TablesComponent.read
+=============================================
+
+.. currentmodule:: hydromt.model.components
+
+.. automethod:: TablesComponent.read

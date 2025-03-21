@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.to_slippy_tiles
+============================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.DataArray.raster.to_slippy_tiles

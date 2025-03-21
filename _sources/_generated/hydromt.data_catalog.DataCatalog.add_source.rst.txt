@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.DataCatalog.add\_source
+=============================================
+
+.. currentmodule:: hydromt.data_catalog
+
+.. automethod:: DataCatalog.add_source

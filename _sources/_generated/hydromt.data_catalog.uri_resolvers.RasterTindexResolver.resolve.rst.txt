@@ -1,0 +1,6 @@
+﻿hydromt.data\_catalog.uri\_resolvers.RasterTindexResolver.resolve
+=================================================================
+
+.. currentmodule:: hydromt.data_catalog.uri_resolvers
+
+.. automethod:: RasterTindexResolver.resolve

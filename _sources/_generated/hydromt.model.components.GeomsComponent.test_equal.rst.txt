@@ -1,0 +1,6 @@
+﻿hydromt.model.components.GeomsComponent.test\_equal
+===================================================
+
+.. currentmodule:: hydromt.model.components
+
+.. automethod:: GeomsComponent.test_equal

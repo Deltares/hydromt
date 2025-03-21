@@ -1,0 +1,6 @@
+﻿hydromt.model.processes.meteo.wind
+==================================
+
+.. currentmodule:: hydromt.model.processes.meteo
+
+.. autofunction:: wind

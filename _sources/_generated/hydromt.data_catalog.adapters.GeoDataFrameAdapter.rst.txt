@@ -1,0 +1,59 @@
+﻿hydromt.data\_catalog.adapters.GeoDataFrameAdapter
+==================================================
+
+.. currentmodule:: hydromt.data_catalog.adapters
+
+.. autoclass:: GeoDataFrameAdapter
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~GeoDataFrameAdapter.__init__
+      ~GeoDataFrameAdapter.construct
+      ~GeoDataFrameAdapter.copy
+      ~GeoDataFrameAdapter.dict
+      ~GeoDataFrameAdapter.from_orm
+      ~GeoDataFrameAdapter.json
+      ~GeoDataFrameAdapter.model_construct
+      ~GeoDataFrameAdapter.model_copy
+      ~GeoDataFrameAdapter.model_dump
+      ~GeoDataFrameAdapter.model_dump_json
+      ~GeoDataFrameAdapter.model_json_schema
+      ~GeoDataFrameAdapter.model_parametrized_name
+      ~GeoDataFrameAdapter.model_post_init
+      ~GeoDataFrameAdapter.model_rebuild
+      ~GeoDataFrameAdapter.model_validate
+      ~GeoDataFrameAdapter.model_validate_json
+      ~GeoDataFrameAdapter.model_validate_strings
+      ~GeoDataFrameAdapter.parse_file
+      ~GeoDataFrameAdapter.parse_obj
+      ~GeoDataFrameAdapter.parse_raw
+      ~GeoDataFrameAdapter.schema
+      ~GeoDataFrameAdapter.schema_json
+      ~GeoDataFrameAdapter.transform
+      ~GeoDataFrameAdapter.update_forward_refs
+      ~GeoDataFrameAdapter.validate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~GeoDataFrameAdapter.model_computed_fields
+      ~GeoDataFrameAdapter.model_config
+      ~GeoDataFrameAdapter.model_extra
+      ~GeoDataFrameAdapter.model_fields
+      ~GeoDataFrameAdapter.model_fields_set
+      ~GeoDataFrameAdapter.unit_add
+      ~GeoDataFrameAdapter.unit_mult
+      ~GeoDataFrameAdapter.rename
+   
+   

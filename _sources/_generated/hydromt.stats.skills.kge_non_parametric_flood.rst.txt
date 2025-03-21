@@ -1,0 +1,6 @@
+﻿hydromt.stats.skills.kge\_non\_parametric\_flood
+================================================
+
+.. currentmodule:: hydromt.stats.skills
+
+.. autofunction:: kge_non_parametric_flood

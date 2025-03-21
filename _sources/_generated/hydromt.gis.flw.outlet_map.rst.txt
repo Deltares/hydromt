@@ -1,0 +1,6 @@
+﻿hydromt.gis.flw.outlet\_map
+===========================
+
+.. currentmodule:: hydromt.gis.flw
+
+.. autofunction:: outlet_map

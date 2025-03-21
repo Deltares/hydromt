@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.area_grid
+======================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.DataArray.raster.area_grid

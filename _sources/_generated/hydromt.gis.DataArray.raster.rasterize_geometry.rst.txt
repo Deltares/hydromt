@@ -1,0 +1,6 @@
+﻿hydromt.gis.DataArray.raster.rasterize_geometry
+===============================================
+
+.. currentmodule:: hydromt
+
+.. autoaccessormethod:: gis.DataArray.raster.rasterize_geometry

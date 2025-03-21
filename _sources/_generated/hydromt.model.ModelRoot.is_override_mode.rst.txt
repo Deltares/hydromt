@@ -1,0 +1,6 @@
+﻿hydromt.model.ModelRoot.is\_override\_mode
+==========================================
+
+.. currentmodule:: hydromt.model
+
+.. automethod:: ModelRoot.is_override_mode

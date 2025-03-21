@@ -1,0 +1,6 @@
+﻿hydromt.gis.flw.flwdir\_from\_da
+================================
+
+.. currentmodule:: hydromt.gis.flw
+
+.. autofunction:: flwdir_from_da

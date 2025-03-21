@@ -1,0 +1,41 @@
+﻿hydromt.model.components.VectorComponent
+========================================
+
+.. currentmodule:: hydromt.model.components
+
+.. autoclass:: VectorComponent
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~VectorComponent.__init__
+      ~VectorComponent.read
+      ~VectorComponent.set
+      ~VectorComponent.test_equal
+      ~VectorComponent.write
+      ~VectorComponent.write_region
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~VectorComponent.bounds
+      ~VectorComponent.crs
+      ~VectorComponent.data
+      ~VectorComponent.data_catalog
+      ~VectorComponent.geometry
+      ~VectorComponent.index_dim
+      ~VectorComponent.model
+      ~VectorComponent.region
+      ~VectorComponent.root
+   
+   

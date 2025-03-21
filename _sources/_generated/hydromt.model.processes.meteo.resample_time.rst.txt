@@ -1,0 +1,6 @@
+﻿hydromt.model.processes.meteo.resample\_time
+============================================
+
+.. currentmodule:: hydromt.model.processes.meteo
+
+.. autofunction:: resample_time
