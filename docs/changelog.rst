@@ -23,6 +23,7 @@ Fixed
 -----
 - Fixed incorrect arguments causing crashes in ``geom_component._region_data()`` (#1091)
 - Fixed binder integration dockerfile (#1098)
+- Examples are back in the documentation. (#796, #1088)
 
 Deprecated
 ----------
