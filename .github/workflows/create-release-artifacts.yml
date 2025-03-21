@@ -26,6 +26,7 @@ jobs:
         run: |
           pip install tomli flit twine
           pip install -U packaging pkginfo
+          pip install .
 
       - name: Build artifacts
         run: |
