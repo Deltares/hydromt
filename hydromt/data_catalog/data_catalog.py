@@ -93,10 +93,10 @@ class DataCatalog(object):
 
         Arguments
         ---------
-        data_libs: (list of) str, Path, optional
+        data_libs: List[str], str, Path, optional
             One or more paths to data catalog configuration files or names of predefined
             data catalogs. By default the data catalog is initiated without data
-            entries. See :py:func:`~hydromt.data_catalog.adapters.DataCatalog.from_yml` for
+            entries. See :py:func:`~hydromt.data_catalog.DataCatalog.from_yml` for
             accepted yaml format.
         fallback_lib:
             Name of pre-defined data catalog to read if no data_libs are provided,

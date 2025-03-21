@@ -15,7 +15,7 @@ dependencies = [
   "click",                  # CLI configuration
   "dask",                   # lazy computing
   "fsspec",                 # general file systems utilities
-  "geopandas>=0.10",        # pandas but geo, wraps fiona and shapely
+  "geopandas[all]>=0.10",   # pandas but geo, wraps fiona and shapely
   "importlib_metadata",     # entrypoints backport
   "mercantile",             # tile handling
   "netcdf4",                # netcfd IO
@@ -177,7 +177,7 @@ filterwarnings = [
   'ignore:pathlib\.Path\.__enter__:DeprecationWarning',                           # xugrid in python 3.11
   #   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
   "ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
-  'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning', # pooch tarfile in python 3.12
+  'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
 ]
 
 [tool.mypy]
@@ -217,6 +217,9 @@ python = "3.13.*"
 
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
+
+[tool.pixi.feature.doc.dependencies]
+pandoc = "*"
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
@@ -342,12 +345,12 @@ clean = { depends-on = [
   "clean-dist",
   "clean-docs-generated",
   "clean-docs-build",
-  "clean-docs-exmaples",
+  "clean-docs-examples",
 ] }
 clean-dist = { cmd = ["rm", "-rf", "dist"] }
 clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
 clean-docs-build = { cmd = ["rm", "-rf", "docs/_build"] }
-clean-docs-exmaples = { cmd = ["rm", "-rf", "docs/examples"] }
+clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 [tool.pixi.environments]
 default = { features = [
