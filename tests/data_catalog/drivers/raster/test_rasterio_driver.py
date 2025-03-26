@@ -1,4 +1,5 @@
 import glob
+import shutil
 from os.path import join
 from pathlib import Path
 from typing import Tuple
@@ -18,12 +19,20 @@ from tests.conftest import TEST_DATA_DIR
 
 
 class TestRasterioDriver:
+    @pytest.fixture
+    def vrt_tiled_raster_ds(self, tmp_path: Path) -> str:
+        # copy vrt data to test folder
+        name = "test_vrt_tiled_raster_ds"
+        root = tmp_path / name
+        shutil.copytree(join(TEST_DATA_DIR, "rioda_tiled"), root)
+        return str(root)
+
     @pytest.mark.usefixtures("test_settings")
-    def test_caches_tifs_from_vrt(self):
-        root = join(TEST_DATA_DIR, "rioda_tiled")
-        driver = RasterioDriver(options={"cache_dir": root})
-        driver.read(uris=[join(root, "tiled_zl0.vrt")])
-        assert len(list((Path(SETTINGS.cache_root) / root).glob("**/*.tif"))) == 16
+    def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
+        cache_dir: str = "tests_caches_tifs_from_vrt"
+        driver = RasterioDriver(options={"cache_dir": cache_dir})
+        driver.read(uris=[join(vrt_tiled_raster_ds, "tiled_zl0.vrt")])
+        assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
     @pytest.fixture
     def small_tif(self, tmp_path: Path, rioda: xr.DataArray) -> str:
