@@ -22,6 +22,7 @@ Fixed
 
 Deprecated
 ----------
+- Removed ``to_slippy_tiles`` and ``to_xyz_tiles`` methods from the raster module (#1110). We recommend to use the package cht_tiling instead.
 
 v1.0.1 (2025-03-21)
 ===================
