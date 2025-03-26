@@ -8,7 +8,6 @@ import pandas as pd
 
 from hydromt._typing import (
     NoDataStrategy,
-    SourceMetadata,
     StrPath,
     TimeRange,
     Variables,
@@ -32,13 +31,12 @@ class PandasDriver(DataFrameDriver):
         *,
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> pd.DataFrame:
         """Read in any compatible data source to a pandas `DataFrame`."""
         _warn_on_unused_kwargs(
             self.__class__.__name__,
-            {"time_range": time_range, "metadata": metadata},
+            {"time_range": time_range},
         )
         if len(uris) > 1:
             raise ValueError(
