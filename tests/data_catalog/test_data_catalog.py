@@ -880,15 +880,10 @@ class TestGetRasterDataset:
         assert not np.any(ds[ds.raster.x_dim] > 180)
 
     @pytest.mark.integration
-    def test_reads_slippy_map_output(self, tmp_dir: Path, rioda_large: xr.DataArray):
+    def test_reads_slippy_map_output(self):
         # write vrt data
         name = "tiled"
-        root = tmp_dir / name
-        rioda_large.raster.to_xyz_tiles(
-            root=root,
-            tile_size=256,
-            zoom_levels=[0],
-        )
+        root = Path(__file__).parent.parent.joinpath("data", "rioda_tiled")
         cat = DataCatalog(str(root / f"{name}.yml"), cache=True)
         cat.get_rasterdataset(name)
         assert len(glob.glob(join(root, "*", "*", "*.tif"))) == 16

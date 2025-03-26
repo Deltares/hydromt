@@ -1,0 +1,9 @@
+tiled:
+  data_type: RasterDataset
+  driver: rasterio
+  uri: tiled_zl{overview_level}.vrt
+  metadata:
+    zls_dict:
+      0: 0.004166666666666666
+    crs: 4326
+    nodata: -9999.0
