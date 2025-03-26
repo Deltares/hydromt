@@ -58,7 +58,6 @@ class DataFrameSource(DataSource):
             uris,
             variables=vrs,
             time_range=tr,
-            metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
 

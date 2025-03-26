@@ -18,6 +18,7 @@ Changed
 
 Fixed
 -----
+-  Pandas driver does not receive unnecessary metadata (#1141)
 
 Deprecated
 ----------
