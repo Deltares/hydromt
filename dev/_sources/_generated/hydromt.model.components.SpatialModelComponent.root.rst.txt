@@ -1,6 +1,0 @@
-﻿hydromt.model.components.SpatialModelComponent.root
-===================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: SpatialModelComponent.root

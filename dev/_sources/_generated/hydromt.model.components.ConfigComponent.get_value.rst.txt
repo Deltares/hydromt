@@ -1,6 +1,0 @@
-﻿hydromt.model.components.ConfigComponent.get\_value
-===================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: ConfigComponent.get_value

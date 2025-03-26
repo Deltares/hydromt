@@ -1,6 +1,0 @@
-﻿hydromt.model.components.ConfigComponent.data\_catalog
-======================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: ConfigComponent.data_catalog

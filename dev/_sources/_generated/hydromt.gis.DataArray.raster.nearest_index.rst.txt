@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.nearest_index
-==========================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.raster.nearest_index

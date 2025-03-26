@@ -1,6 +1,0 @@
-﻿hydromt.gis.Dataset.vector.from_netcdf
-======================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.Dataset.vector.from_netcdf

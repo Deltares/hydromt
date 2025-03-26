@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.vector.size
-=================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.DataArray.vector.size

@@ -1,6 +1,0 @@
-﻿hydromt.gis.Dataset.vector.clip_geom
-====================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.Dataset.vector.clip_geom

@@ -1,6 +1,0 @@
-﻿hydromt.gis.Dataset.raster.from_numpy
-=====================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.Dataset.raster.from_numpy

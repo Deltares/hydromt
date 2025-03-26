@@ -1,6 +1,0 @@
-﻿hydromt.model.components.GridComponent.test\_equal
-==================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: GridComponent.test_equal

@@ -1,6 +1,0 @@
-﻿hydromt.model.components.GridComponent.create\_from\_region
-===========================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: GridComponent.create_from_region

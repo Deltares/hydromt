@@ -1,6 +1,0 @@
-﻿hydromt.stats.skills.rsr
-========================
-
-.. currentmodule:: hydromt.stats.skills
-
-.. autofunction:: rsr

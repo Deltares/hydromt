@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.meteo.precip
-====================================
-
-.. currentmodule:: hydromt.model.processes.meteo
-
-.. autofunction:: precip

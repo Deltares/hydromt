@@ -1,6 +1,0 @@
-﻿hydromt.model.components.GridComponent.bounds
-=============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: GridComponent.bounds

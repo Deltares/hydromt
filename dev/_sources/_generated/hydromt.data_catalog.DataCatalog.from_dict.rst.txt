@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.DataCatalog.from\_dict
-============================================
-
-.. currentmodule:: hydromt.data_catalog
-
-.. automethod:: DataCatalog.from_dict

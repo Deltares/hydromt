@@ -1,6 +1,0 @@
-﻿hydromt.model.components.GridComponent.model
-============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: GridComponent.model

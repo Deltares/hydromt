@@ -1,6 +1,0 @@
-﻿hydromt.model.components.MeshComponent.bounds
-=============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: MeshComponent.bounds

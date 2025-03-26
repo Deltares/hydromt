@@ -1,6 +1,0 @@
-﻿hydromt.gis.flw.upscale\_flwdir
-===============================
-
-.. currentmodule:: hydromt.gis.flw
-
-.. autofunction:: upscale_flwdir

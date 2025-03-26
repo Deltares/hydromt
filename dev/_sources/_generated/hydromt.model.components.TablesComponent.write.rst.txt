@@ -1,6 +1,0 @@
-﻿hydromt.model.components.TablesComponent.write
-==============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: TablesComponent.write

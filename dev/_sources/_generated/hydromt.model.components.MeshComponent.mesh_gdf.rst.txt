@@ -1,6 +1,0 @@
-﻿hydromt.model.components.MeshComponent.mesh\_gdf
-================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: MeshComponent.mesh_gdf

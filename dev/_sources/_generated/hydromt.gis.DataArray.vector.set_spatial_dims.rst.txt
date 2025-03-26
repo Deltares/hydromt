@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.vector.set_spatial_dims
-=============================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.vector.set_spatial_dims

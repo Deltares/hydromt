@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.adapters.DataFrameAdapter.transform
-=========================================================
-
-.. currentmodule:: hydromt.data_catalog.adapters
-
-.. automethod:: DataFrameAdapter.transform

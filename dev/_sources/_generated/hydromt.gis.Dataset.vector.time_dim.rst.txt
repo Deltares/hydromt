@@ -1,6 +1,0 @@
-﻿hydromt.gis.Dataset.vector.time_dim
-===================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.Dataset.vector.time_dim

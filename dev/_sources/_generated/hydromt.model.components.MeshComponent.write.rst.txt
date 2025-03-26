@@ -1,6 +1,0 @@
-﻿hydromt.model.components.MeshComponent.write
-============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: MeshComponent.write

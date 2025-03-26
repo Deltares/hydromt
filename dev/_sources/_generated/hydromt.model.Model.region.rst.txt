@@ -1,6 +1,0 @@
-﻿hydromt.model.Model.region
-==========================
-
-.. currentmodule:: hydromt.model
-
-.. autoproperty:: Model.region

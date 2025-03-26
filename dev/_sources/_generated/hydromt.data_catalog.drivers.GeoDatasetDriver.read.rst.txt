@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.drivers.GeoDatasetDriver.read
-===================================================
-
-.. currentmodule:: hydromt.data_catalog.drivers
-
-.. automethod:: GeoDatasetDriver.read

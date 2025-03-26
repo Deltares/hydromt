@@ -1,6 +1,0 @@
-﻿hydromt.plugins.Plugins.model\_metadata
-=======================================
-
-.. currentmodule:: hydromt.plugins
-
-.. autoproperty:: Plugins.model_metadata

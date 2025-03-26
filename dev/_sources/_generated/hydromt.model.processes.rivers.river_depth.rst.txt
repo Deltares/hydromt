@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.rivers.river\_depth
-===========================================
-
-.. currentmodule:: hydromt.model.processes.rivers
-
-.. autofunction:: river_depth

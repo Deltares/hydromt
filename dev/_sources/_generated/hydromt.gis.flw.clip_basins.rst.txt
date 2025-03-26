@@ -1,6 +1,0 @@
-﻿hydromt.gis.flw.clip\_basins
-============================
-
-.. currentmodule:: hydromt.gis.flw
-
-.. autofunction:: clip_basins

@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.sources.GeoDatasetSource.detect\_bbox
-===========================================================
-
-.. currentmodule:: hydromt.data_catalog.sources
-
-.. automethod:: GeoDatasetSource.detect_bbox

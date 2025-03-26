@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.grid.create\_grid\_from\_region
-=======================================================
-
-.. currentmodule:: hydromt.model.processes.grid
-
-.. autofunction:: create_grid_from_region

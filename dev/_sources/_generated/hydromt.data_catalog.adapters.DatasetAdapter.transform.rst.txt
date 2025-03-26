@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.adapters.DatasetAdapter.transform
-=======================================================
-
-.. currentmodule:: hydromt.data_catalog.adapters
-
-.. automethod:: DatasetAdapter.transform

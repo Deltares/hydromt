@@ -1,6 +1,0 @@
-﻿hydromt.model.components.VectorComponent.write
-==============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: VectorComponent.write

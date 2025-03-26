@@ -1,6 +1,0 @@
-﻿hydromt.model.components.GridComponent.crs
-==========================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: GridComponent.crs

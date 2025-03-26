@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.meteo.press
-===================================
-
-.. currentmodule:: hydromt.model.processes.meteo
-
-.. autofunction:: press

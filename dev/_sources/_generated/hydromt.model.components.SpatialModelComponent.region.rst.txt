@@ -1,6 +1,0 @@
-﻿hydromt.model.components.SpatialModelComponent.region
-=====================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: SpatialModelComponent.region

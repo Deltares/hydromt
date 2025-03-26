@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.DataCatalog.get\_source\_bbox
-===================================================
-
-.. currentmodule:: hydromt.data_catalog
-
-.. automethod:: DataCatalog.get_source_bbox

@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.sources.GeoDataFrameSource.read\_data
-===========================================================
-
-.. currentmodule:: hydromt.data_catalog.sources
-
-.. automethod:: GeoDataFrameSource.read_data

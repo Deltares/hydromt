@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.nodata
-===================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.DataArray.raster.nodata

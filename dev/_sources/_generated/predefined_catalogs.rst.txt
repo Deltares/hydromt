@@ -1,4 +1,0 @@
-.. include:: ../_generated/deltares_data.rst
-.. include:: ../_generated/artifact_data.rst
-.. include:: ../_generated/aws_data.rst
-.. include:: ../_generated/gcs_cmip6_data.rst

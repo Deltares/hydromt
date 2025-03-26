@@ -1,6 +1,0 @@
-﻿hydromt.model.components.MeshComponent.data
-===========================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: MeshComponent.data

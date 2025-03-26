@@ -1,6 +1,0 @@
-﻿hydromt.model.Model.add\_component
-==================================
-
-.. currentmodule:: hydromt.model
-
-.. automethod:: Model.add_component

@@ -1,6 +1,0 @@
-﻿hydromt.model.components.SpatialModelComponent.test\_equal
-==========================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: SpatialModelComponent.test_equal

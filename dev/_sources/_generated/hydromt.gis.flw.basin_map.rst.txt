@@ -1,6 +1,0 @@
-﻿hydromt.gis.flw.basin\_map
-==========================
-
-.. currentmodule:: hydromt.gis.flw
-
-.. autofunction:: basin_map

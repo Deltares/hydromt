@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.interpolate_na
-===========================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.raster.interpolate_na

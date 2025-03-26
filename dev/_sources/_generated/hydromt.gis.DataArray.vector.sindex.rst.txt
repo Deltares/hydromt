@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.vector.sindex
-===================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.DataArray.vector.sindex

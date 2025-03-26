@@ -1,6 +1,0 @@
-﻿hydromt.gis.Dataset.vector.crs
-==============================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.Dataset.vector.crs

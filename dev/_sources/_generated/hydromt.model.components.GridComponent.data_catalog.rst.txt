@@ -1,6 +1,0 @@
-﻿hydromt.model.components.GridComponent.data\_catalog
-====================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: GridComponent.data_catalog

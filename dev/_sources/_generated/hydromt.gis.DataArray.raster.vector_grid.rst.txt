@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.vector_grid
-========================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.raster.vector_grid

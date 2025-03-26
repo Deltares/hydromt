@@ -1,6 +1,0 @@
-﻿hydromt.model.components.ConfigComponent.create
-===============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: ConfigComponent.create

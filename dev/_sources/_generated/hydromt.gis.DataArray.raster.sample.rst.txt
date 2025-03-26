@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.sample
-===================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.raster.sample

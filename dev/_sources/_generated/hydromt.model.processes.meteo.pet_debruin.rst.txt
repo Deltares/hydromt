@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.meteo.pet\_debruin
-==========================================
-
-.. currentmodule:: hydromt.model.processes.meteo
-
-.. autofunction:: pet_debruin

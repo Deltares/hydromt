@@ -1,6 +1,0 @@
-﻿hydromt.model.Model.data\_catalog
-=================================
-
-.. currentmodule:: hydromt.model
-
-.. autoattribute:: Model.data_catalog

@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.uri\_resolvers.URIResolver.resolve
-========================================================
-
-.. currentmodule:: hydromt.data_catalog.uri_resolvers
-
-.. automethod:: URIResolver.resolve

@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.idx_to_xy
-======================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.raster.idx_to_xy

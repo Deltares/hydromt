@@ -1,6 +1,0 @@
-﻿hydromt.model.components.SpatialModelComponent.crs
-==================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: SpatialModelComponent.crs

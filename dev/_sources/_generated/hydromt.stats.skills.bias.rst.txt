@@ -1,6 +1,0 @@
-﻿hydromt.stats.skills.bias
-=========================
-
-.. currentmodule:: hydromt.stats.skills
-
-.. autofunction:: bias

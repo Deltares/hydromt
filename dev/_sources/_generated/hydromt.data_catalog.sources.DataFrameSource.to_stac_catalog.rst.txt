@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.sources.DataFrameSource.to\_stac\_catalog
-===============================================================
-
-.. currentmodule:: hydromt.data_catalog.sources
-
-.. automethod:: DataFrameSource.to_stac_catalog

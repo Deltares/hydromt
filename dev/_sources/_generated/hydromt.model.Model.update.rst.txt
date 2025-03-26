@@ -1,6 +1,0 @@
-﻿hydromt.model.Model.update
-==========================
-
-.. currentmodule:: hydromt.model
-
-.. automethod:: Model.update

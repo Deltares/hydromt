@@ -466,7 +466,6 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">NoDataStrategy</span><span class="p">,</span>
-    <span class="n">SourceMetadata</span><span class="p">,</span>
     <span class="n">StrPath</span><span class="p">,</span>
     <span class="n">TimeRange</span><span class="p">,</span>
     <span class="n">Variables</span><span class="p">,</span>
@@ -494,13 +493,12 @@
         <span class="o">*</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Variables</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">time_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SourceMetadata</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read in any compatible data source to a pandas `DataFrame`.&quot;&quot;&quot;</span>
         <span class="n">_warn_on_unused_kwargs</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-            <span class="p">{</span><span class="s2">&quot;time_range&quot;</span><span class="p">:</span> <span class="n">time_range</span><span class="p">,</span> <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;time_range&quot;</span><span class="p">:</span> <span class="n">time_range</span><span class="p">},</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>

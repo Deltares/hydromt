@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.vector.ogr_compliant
-==========================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.vector.ogr_compliant

@@ -1,6 +1,0 @@
-﻿hydromt.gis.flw.gauge\_map
-==========================
-
-.. currentmodule:: hydromt.gis.flw
-
-.. autofunction:: gauge_map

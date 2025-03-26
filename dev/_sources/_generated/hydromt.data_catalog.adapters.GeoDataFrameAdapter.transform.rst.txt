@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.adapters.GeoDataFrameAdapter.transform
-============================================================
-
-.. currentmodule:: hydromt.data_catalog.adapters
-
-.. automethod:: GeoDataFrameAdapter.transform

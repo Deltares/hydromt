@@ -1,6 +1,0 @@
-﻿hydromt.model.components.VectorComponent.geometry
-=================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: VectorComponent.geometry

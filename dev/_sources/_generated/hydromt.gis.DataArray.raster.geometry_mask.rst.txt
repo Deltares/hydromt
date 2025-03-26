@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.geometry_mask
-==========================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.raster.geometry_mask

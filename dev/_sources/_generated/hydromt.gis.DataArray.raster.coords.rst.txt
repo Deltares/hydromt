@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.coords
-===================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.DataArray.raster.coords

@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.sources.RasterDatasetSource.detect\_bbox
-==============================================================
-
-.. currentmodule:: hydromt.data_catalog.sources
-
-.. automethod:: RasterDatasetSource.detect_bbox

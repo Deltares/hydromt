@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.transform
-======================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.DataArray.raster.transform

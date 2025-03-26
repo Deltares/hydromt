@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.mesh.create\_mesh2d\_from\_region
-=========================================================
-
-.. currentmodule:: hydromt.model.processes.mesh
-
-.. autofunction:: create_mesh2d_from_region

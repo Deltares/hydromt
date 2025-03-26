@@ -1,6 +1,0 @@
-﻿hydromt.stats.extremes.fit\_extremes
-====================================
-
-.. currentmodule:: hydromt.stats.extremes
-
-.. autofunction:: fit_extremes

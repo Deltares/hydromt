@@ -1,6 +1,0 @@
-﻿hydromt.stats.skills.rmse
-=========================
-
-.. currentmodule:: hydromt.stats.skills
-
-.. autofunction:: rmse

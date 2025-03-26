@@ -1,6 +1,0 @@
-﻿hydromt.model.components.SpatialDatasetsComponent.write
-=======================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: SpatialDatasetsComponent.write

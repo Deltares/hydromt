@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.meteo.delta\_freq
-=========================================
-
-.. currentmodule:: hydromt.model.processes.meteo
-
-.. autofunction:: delta_freq

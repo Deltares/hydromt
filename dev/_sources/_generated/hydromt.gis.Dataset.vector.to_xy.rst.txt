@@ -1,6 +1,0 @@
-﻿hydromt.gis.Dataset.vector.to_xy
-================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.Dataset.vector.to_xy

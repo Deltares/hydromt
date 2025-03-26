@@ -1,6 +1,0 @@
-﻿hydromt.model.components.ConfigComponent.test\_equal
-====================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: ConfigComponent.test_equal

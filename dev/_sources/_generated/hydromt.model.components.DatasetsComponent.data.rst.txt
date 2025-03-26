@@ -1,6 +1,0 @@
-﻿hydromt.model.components.DatasetsComponent.data
-===============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: DatasetsComponent.data

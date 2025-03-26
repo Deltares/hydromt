@@ -1,6 +1,0 @@
-﻿hydromt.model.components.GridComponent.read
-===========================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: GridComponent.read

@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.predefined\_catalog.create\_registry\_file
-================================================================
-
-.. currentmodule:: hydromt.data_catalog.predefined_catalog
-
-.. autofunction:: create_registry_file

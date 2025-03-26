@@ -1,6 +1,0 @@
-﻿hydromt.model.components.DatasetsComponent.read
-===============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: DatasetsComponent.read

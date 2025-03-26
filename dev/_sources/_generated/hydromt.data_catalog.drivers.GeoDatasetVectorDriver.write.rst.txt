@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.drivers.GeoDatasetVectorDriver.write
-==========================================================
-
-.. currentmodule:: hydromt.data_catalog.drivers
-
-.. automethod:: GeoDatasetVectorDriver.write

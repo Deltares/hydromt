@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.gdal_compliant
-===========================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.raster.gdal_compliant

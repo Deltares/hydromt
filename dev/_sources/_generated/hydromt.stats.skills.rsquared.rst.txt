@@ -1,6 +1,0 @@
-﻿hydromt.stats.skills.rsquared
-=============================
-
-.. currentmodule:: hydromt.stats.skills
-
-.. autofunction:: rsquared

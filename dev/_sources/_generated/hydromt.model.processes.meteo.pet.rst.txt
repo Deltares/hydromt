@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.meteo.pet
-=================================
-
-.. currentmodule:: hydromt.model.processes.meteo
-
-.. autofunction:: pet

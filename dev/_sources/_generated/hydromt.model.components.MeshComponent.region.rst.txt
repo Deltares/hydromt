@@ -1,6 +1,0 @@
-﻿hydromt.model.components.MeshComponent.region
-=============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: MeshComponent.region

@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.width
-==================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.DataArray.raster.width

@@ -1,6 +1,0 @@
-﻿hydromt.model.components.VectorComponent.set
-============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: VectorComponent.set

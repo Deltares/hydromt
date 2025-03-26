@@ -1,6 +1,0 @@
-﻿hydromt.model.Model.crs
-=======================
-
-.. currentmodule:: hydromt.model
-
-.. autoproperty:: Model.crs

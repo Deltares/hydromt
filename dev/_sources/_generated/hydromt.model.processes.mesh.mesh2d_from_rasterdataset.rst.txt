@@ -1,6 +1,0 @@
-﻿hydromt.model.processes.mesh.mesh2d\_from\_rasterdataset
-========================================================
-
-.. currentmodule:: hydromt.model.processes.mesh
-
-.. autofunction:: mesh2d_from_rasterdataset

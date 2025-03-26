@@ -1,6 +1,0 @@
-﻿hydromt.stats.skills.kge\_non\_parametric
-=========================================
-
-.. currentmodule:: hydromt.stats.skills
-
-.. autofunction:: kge_non_parametric

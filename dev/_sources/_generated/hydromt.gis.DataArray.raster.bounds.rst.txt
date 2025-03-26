@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.raster.bounds
-===================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.DataArray.raster.bounds

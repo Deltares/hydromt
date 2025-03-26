@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.vector.from_gdf
-=====================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessormethod:: gis.DataArray.vector.from_gdf

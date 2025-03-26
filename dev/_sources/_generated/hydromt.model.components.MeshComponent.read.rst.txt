@@ -1,6 +1,0 @@
-﻿hydromt.model.components.MeshComponent.read
-===========================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: MeshComponent.read

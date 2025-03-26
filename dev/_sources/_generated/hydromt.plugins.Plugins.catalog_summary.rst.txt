@@ -1,6 +1,0 @@
-﻿hydromt.plugins.Plugins.catalog\_summary
-========================================
-
-.. currentmodule:: hydromt.plugins
-
-.. automethod:: Plugins.catalog_summary

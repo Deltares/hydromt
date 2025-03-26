@@ -1,6 +1,0 @@
-﻿hydromt.model.components.MeshComponent.create\_2d\_from\_region
-===============================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: MeshComponent.create_2d_from_region

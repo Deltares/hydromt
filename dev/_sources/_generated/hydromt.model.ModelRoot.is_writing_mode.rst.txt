@@ -1,6 +1,0 @@
-﻿hydromt.model.ModelRoot.is\_writing\_mode
-=========================================
-
-.. currentmodule:: hydromt.model
-
-.. automethod:: ModelRoot.is_writing_mode

@@ -1,6 +1,0 @@
-﻿hydromt.data\_catalog.DataCatalog.to\_yml
-=========================================
-
-.. currentmodule:: hydromt.data_catalog
-
-.. automethod:: DataCatalog.to_yml

@@ -1,6 +1,0 @@
-﻿hydromt.gis.flw.d8\_from\_dem
-=============================
-
-.. currentmodule:: hydromt.gis.flw
-
-.. autofunction:: d8_from_dem

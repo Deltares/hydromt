@@ -1,6 +1,0 @@
-﻿hydromt.model.components.ConfigComponent.update
-===============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. automethod:: ConfigComponent.update

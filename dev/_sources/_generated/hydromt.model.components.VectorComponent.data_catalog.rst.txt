@@ -1,6 +1,0 @@
-﻿hydromt.model.components.VectorComponent.data\_catalog
-======================================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: VectorComponent.data_catalog

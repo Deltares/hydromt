@@ -1,6 +1,0 @@
-﻿hydromt.plugins.Plugins.driver\_metadata
-========================================
-
-.. currentmodule:: hydromt.plugins
-
-.. autoproperty:: Plugins.driver_metadata

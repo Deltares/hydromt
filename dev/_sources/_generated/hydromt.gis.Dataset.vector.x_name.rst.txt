@@ -1,6 +1,0 @@
-﻿hydromt.gis.Dataset.vector.x_name
-=================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.Dataset.vector.x_name

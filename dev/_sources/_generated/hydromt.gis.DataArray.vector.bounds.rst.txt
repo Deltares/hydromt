@@ -1,6 +1,0 @@
-﻿hydromt.gis.DataArray.vector.bounds
-===================================
-
-.. currentmodule:: hydromt
-
-.. autoaccessorattribute:: gis.DataArray.vector.bounds

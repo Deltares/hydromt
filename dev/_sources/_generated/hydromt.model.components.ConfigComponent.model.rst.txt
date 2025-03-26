@@ -1,6 +1,0 @@
-﻿hydromt.model.components.ConfigComponent.model
-==============================================
-
-.. currentmodule:: hydromt.model.components
-
-.. autoproperty:: ConfigComponent.model
