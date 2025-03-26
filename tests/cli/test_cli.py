@@ -1,7 +1,7 @@
 """Tests for the cli submodule."""
 
 from logging import NOTSET, WARNING, Logger, getLogger
-from os.path import abspath, dirname, join
+from os.path import join
 from pathlib import Path
 from typing import Generator
 
@@ -12,8 +12,7 @@ from hydromt import __version__
 from hydromt._typing import NoDataException
 from hydromt.cli.main import main as hydromt_cli
 from hydromt.model.components.grid import GridComponent
-
-DATADIR = join(dirname(abspath(__file__)), "..", "data")
+from tests.conftest import TEST_DATA_DIR
 
 
 def test_cli_verison():
@@ -225,7 +224,7 @@ def test_export_cli_catalog(tmpdir):
             "-s",
             "hydro_lakes",
             "-d",
-            join(DATADIR, "test_sources1.yml"),
+            join(TEST_DATA_DIR, "test_sources1.yml"),
         ],
         catch_exceptions=False,
     )

@@ -7,11 +7,12 @@ from hydromt.data_catalog.predefined_catalog import (
     PredefinedCatalog,
     create_registry_file,
 )
+from tests.conftest import DATA_DIR
 
 
 @pytest.fixture
 def cat_root() -> Path:
-    return Path(__file__).parents[2] / "data/catalogs"
+    return Path(DATA_DIR) / "catalogs"
 
 
 @pytest.fixture

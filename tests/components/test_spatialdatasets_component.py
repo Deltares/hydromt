@@ -1,5 +1,5 @@
 from os import makedirs
-from os.path import abspath, dirname, join
+from os.path import dirname
 from pathlib import Path
 
 import pytest
@@ -9,8 +9,7 @@ from pytest_mock import MockerFixture
 from hydromt.model import Model
 from hydromt.model.components.grid import GridComponent
 from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
-
-DATADIR = join(dirname(abspath(__file__)), "..", "data")
+from tests.conftest import DC_PARAM_PATH
 
 
 def test_model_spatialdataset_key_error(tmpdir: Path):
@@ -93,8 +92,7 @@ def test_add_raster_data_from_rasterdataset(demda, tmpdir, mocker: MockerFixture
 
 
 def test_add_raster_data_from_raster_reclass(tmpdir, demda, lulcda):
-    dc_param_path = join(DATADIR, "parameters_data.yml")
-    model = Model(root=tmpdir, data_libs=[dc_param_path], mode="w")
+    model = Model(root=tmpdir, data_libs=[DC_PARAM_PATH], mode="w")
 
     # add a grid and spatial component
     model.add_component("grid", GridComponent(model))

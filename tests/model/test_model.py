@@ -2,7 +2,7 @@
 """Tests for the hydromt.model module of HydroMT."""
 
 from os import listdir, makedirs
-from os.path import abspath, dirname, isdir, isfile, join
+from os.path import isdir, isfile, join
 from pathlib import Path
 from typing import List, cast
 from unittest.mock import Mock
@@ -24,9 +24,7 @@ from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
 from hydromt.model.components.tables import TablesComponent
 from hydromt.model.components.vector import VectorComponent
-
-DATADIR = join(dirname(abspath(__file__)), "..", "data")
-DC_PARAM_PATH = join(DATADIR, "parameters_data.yml")
+from tests.conftest import DC_PARAM_PATH
 
 
 def _patch_plugin_components(
