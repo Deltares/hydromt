@@ -14,7 +14,7 @@ dependencies = [
   "bottleneck",             # Spearmen rank computation
   "click",                  # CLI configuration
   "dask",                   # lazy computing
-  "fsspec",                 # general file systems utilities
+  "fsspec[http]",           # general file systems utilities
   "geopandas[all]>=0.10",   # pandas but geo, wraps fiona and shapely
   "importlib_metadata",     # entrypoints backport
   "mercantile",             # tile handling
