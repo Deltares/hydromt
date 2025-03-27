@@ -41,5 +41,5 @@ class BaseDriver(AbstractBaseModel, ABC):
     @classmethod
     def _load_plugins(cls):
         """Load Driver plugins."""
-        plugins: Dict[str, BaseDriver] = PLUGINS.uri_resolver_plugins
+        plugins: Dict[str, BaseDriver] = PLUGINS.driver_plugins
         logger.debug(f"loaded {cls.__name__} plugins: {plugins}")
