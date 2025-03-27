@@ -205,6 +205,7 @@ def test_catalog_entry_no_variant_round_trip(
     assert legacy_data_catalog2 == legacy_data_catalog
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_single_variant(aws_worldcover):
     _, aws_data_catalog = aws_worldcover
     assert len(aws_data_catalog) == 1
@@ -242,6 +243,7 @@ def legacy_aws_worldcover():
     return (legacy_yml_path, legacy_data_catalog)
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_single_variant_round_trip(
     aws_worldcover: Tuple[str, DataCatalog],
 ):
@@ -252,6 +254,7 @@ def test_catalog_entry_single_variant_round_trip(
     assert aws_data_catalog_read == aws_data_catalog
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_single_variant_unknown_provider(aws_worldcover):
     _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
@@ -260,6 +263,7 @@ def test_catalog_entry_single_variant_unknown_provider(aws_worldcover):
         )
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_single_variant_unknown_version(aws_worldcover):
     _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
@@ -268,12 +272,14 @@ def test_catalog_entry_single_variant_unknown_version(aws_worldcover):
         )
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_single_variant_unknown_source(aws_worldcover):
     _, aws_data_catalog = aws_worldcover
     with pytest.raises(KeyError):
         aws_data_catalog.get_source("asdfasdf", version="2021", provider="aws")
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_warns_on_override_version(
     aws_worldcover, caplog: pytest.LogCaptureFixture
 ):
@@ -284,6 +290,7 @@ def test_catalog_entry_warns_on_override_version(
         assert "overwriting data source" in caplog.text
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
     _, merged_catalog = merged_aws_worldcover
     # make sure we can read merged catalogs
@@ -300,6 +307,7 @@ def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
     # test round trip to and from dict
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
     _, merged_catalog = merged_aws_worldcover
     merged_dict = merged_catalog.to_dict()
@@ -309,6 +317,7 @@ def test_catalog_entry_merged_round_trip(merged_aws_worldcover):
     assert merged_catalog2 == merged_catalog
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
     aws_yml_path, _ = aws_worldcover
     legacy_yml_path, _ = legacy_aws_worldcover
@@ -326,6 +335,7 @@ def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
     assert Path(source_loc.uri).name == "esa-worldcover.vrt"
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover):
     aws_yml_path, _ = aws_worldcover
     legacy_yml_path, _ = legacy_aws_worldcover
@@ -387,6 +397,7 @@ def test_data_catalog_hydromt_version(tmpdir):
     data_catalog.to_yml(yml_path, meta={"hydromt_version": "0.7.0"})
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_used_sources():
     merged_yml_path = join(TEST_DATA_DIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_path)
@@ -417,6 +428,7 @@ def test_from_yml_with_archive(data_catalog: DataCatalog):
     assert yml_dst_path.parent == Path(source.full_uri).parent
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_from_predefined_catalogs(data_catalog):
     assert len(data_catalog.predefined_catalogs) > 0
     for name in data_catalog.predefined_catalogs:

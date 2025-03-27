@@ -5,6 +5,7 @@ import geopandas as gpd
 import pandas as pd
 import pytest
 
+from hydromt._compat import HAS_OPENPYXL
 from hydromt.data_catalog.drivers.geodataframe.table_driver import (
     GeoDataFrameTableDriver,
 )
@@ -37,9 +38,16 @@ class TestGeoDataFrameTableDriver:
 
     # lazy-fixtures not maintained:
     # https://github.com/TvoroG/pytest-lazy-fixture/issues/65#issuecomment-1914527162
+    uri_xls_param = pytest.param(
+        "uri_xls",
+        marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
+    )
+    uri_xlsx_param = pytest.param(
+        "uri_xlsx",
+        marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
+    )
     fixture_uris = pytest.mark.parametrize(
-        "uri",
-        ["uri_csv", "uri_parquet", "uri_xls", "uri_xlsx"],
+        "uri", ["uri_csv", "uri_parquet", uri_xls_param, uri_xlsx_param]
     )
 
     @pytest.fixture(scope="class")
