@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from ast import literal_eval
 from os.path import basename, dirname, isdir, isfile, join
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, cast
 
 import geopandas as gpd
 import numpy as np
@@ -24,9 +24,7 @@ logger = logging.getLogger(__name__)
 __all__ = ["_copy_to_local", "_cache_vrt_tiles"]
 
 
-def _copy_to_local(
-    src: str, dst: Path, fs: Optional[AbstractFileSystem] = None, block_size: int = 1024
-):
+def _copy_to_local(src: str, dst: Path, fs: Optional[AbstractFileSystem] = None):
     """Copy files from source uri to local file.
 
     Parameters
@@ -37,15 +35,13 @@ def _copy_to_local(
         Destination path
     fs : Optional[AbstractFileSystem], optional
         Fsspec filesystem. Will be inferred from src if not supplied.
-    block_size: int, optional
-        Block size of blocks sent over wire, by default 1024
     """
     if fs is None:
-        fs: AbstractFileSystem = url_to_fs(src)[0]
+        fs = cast(AbstractFileSystem, url_to_fs(src)[0])
     if not isdir(dirname(dst)):
         os.makedirs(dirname(dst), exist_ok=True)
 
-    fs.get(src, str(dst), block_size=block_size)
+    fs.get(src, str(dst))
 
 
 def _overlaps(source: ET.Element, affine: Affine, bbox: List[float]) -> bool:
