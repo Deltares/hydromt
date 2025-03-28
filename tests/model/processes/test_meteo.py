@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
+from hydromt._compat import HAS_PYET
 from hydromt.gis.raster import full_from_transform
 from hydromt.model.processes.meteo import (
     PET_METHODS,
@@ -153,6 +154,7 @@ def test_pet_makkink(era5_data):
     np.testing.assert_almost_equal(pet.mean(), 0.7113, decimal=4)
 
 
+@pytest.mark.skipif(not HAS_PYET, reason="pyet is not installed")
 def test_pm_fao56(era5_data, era5_dem):
     fake_dew = era5_data["temp"] - 2
     wind_out = wind(

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from hydromt._compat import HAS_OPENPYXL
 from hydromt.data_catalog.drivers.dataframe import PandasDriver
 
 
@@ -46,11 +47,19 @@ class TestPandasDriver:
 
     # lazy-fixtures not maintained:
     # https://github.com/TvoroG/pytest-lazy-fixture/issues/65#issuecomment-1914527162
+    uri_xls_param = pytest.param(
+        "uri_xls",
+        marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
+    )
+    uri_xlsx_param = pytest.param(
+        "uri_xlsx",
+        marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
+    )
     fixture_uris = pytest.mark.parametrize(
-        "uri", ["uri_csv", "uri_parquet", "uri_xls", "uri_xlsx", "uri_fwf"]
+        "uri", ["uri_csv", "uri_parquet", uri_xls_param, uri_xlsx_param, "uri_fwf"]
     )
     fixture_uris_no_fwf = pytest.mark.parametrize(
-        "uri", ["uri_csv", "uri_parquet", "uri_xls", "uri_xlsx"]
+        "uri", ["uri_csv", "uri_parquet", uri_xls_param, uri_xlsx_param]
     )
 
     @pytest.fixture(scope="class")
@@ -83,8 +92,17 @@ class TestPandasDriver:
         df: pd.DataFrame = driver.read(uris, variables=variables)
         assert df.columns.to_list() == variables
 
+    temp_xls_param = pytest.param(
+        "temp.xls",
+        marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
+    )
+    temp_xlsx_param = pytest.param(
+        "temp.xlsx",
+        marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
+    )
+
     @pytest.mark.parametrize(
-        "filename", ["temp.csv", "temp.parquet", "temp.xls", "temp.xlsx"]
+        "filename", ["temp.csv", "temp.parquet", temp_xls_param, temp_xlsx_param]
     )
     def test_write(
         self, filename: str, df: pd.DataFrame, tmp_dir: Path, driver: PandasDriver
@@ -94,7 +112,18 @@ class TestPandasDriver:
         reread = driver.read([str(df_path)])
         assert np.all(reread == df)
 
-    @pytest.mark.parametrize("filename", ["temp_2.csv", "temp_2.xls", "temp_2.xlsx"])
+    temp_2_xlsx_param = pytest.param(
+        "temp_2.xlsx",
+        marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
+    )
+    temp_2_xls_param = pytest.param(
+        "temp_2.xls",
+        marks=pytest.mark.skipif(not HAS_OPENPYXL, reason="openpyxl is not installed"),
+    )
+
+    @pytest.mark.parametrize(
+        "filename", ["temp_2.csv", temp_2_xls_param, temp_2_xlsx_param]
+    )
     def test_handles_index_col(self, filename: str, df: pd.DataFrame, tmp_dir: Path):
         df_path = tmp_dir / filename
         driver = PandasDriver(options={"index_col": 0})

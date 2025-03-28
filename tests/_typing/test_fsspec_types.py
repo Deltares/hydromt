@@ -3,6 +3,7 @@ from fsspec.implementations.local import LocalFileSystem
 from fsspec.implementations.memory import MemoryFileSystem
 from pydantic import BaseModel
 
+from hydromt._compat import HAS_S3FS
 from hydromt._typing.fsspec_types import FS, serialize_filesystem, validate_filesystem
 
 
@@ -43,5 +44,6 @@ class MyModel(BaseModel):
     fs: FS
 
 
+@pytest.mark.skipif(not HAS_S3FS, reason="s3fs is not installed")
 def test_deserializes_model():
     MyModel.model_validate({"fs": {"protocol": "s3", "anon": True}})

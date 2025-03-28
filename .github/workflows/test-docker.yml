@@ -16,15 +16,7 @@ on:
       - pyproject.toml
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
   test-binder:
-    needs: setup
     runs-on: ubuntu-latest
     concurrency:
       group: test-binder-${{ github.ref }}
@@ -47,7 +39,6 @@ jobs:
           pip install jupyter-repo2docker
           repo2docker . echo 'success!'
   test-docker:
-    needs: setup
     runs-on: ubuntu-latest
     concurrency:
       group: test-docker-${{ github.ref }}
