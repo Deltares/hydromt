@@ -501,7 +501,7 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_plugins</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load Driver plugins.&quot;&quot;&quot;</span>
-        <span class="n">plugins</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseDriver</span><span class="p">]</span> <span class="o">=</span> <span class="n">PLUGINS</span><span class="o">.</span><span class="n">uri_resolver_plugins</span>
+        <span class="n">plugins</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">BaseDriver</span><span class="p">]</span> <span class="o">=</span> <span class="n">PLUGINS</span><span class="o">.</span><span class="n">driver_plugins</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loaded </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> plugins: </span><span class="si">{</span><span class="n">plugins</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 </pre></div>

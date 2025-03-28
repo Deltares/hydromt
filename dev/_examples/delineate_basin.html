@@ -431,7 +431,6 @@
 <li class="toctree-l2"><a class="reference internal" href="working_with_raster.html">Example: Working with raster data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="working_with_flow_directions.html">Example: Working with flow direction data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="working_with_geodatasets.html">Example: Working with geodatasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="working_with_tiled_raster_data.html">Example: Reading tiled raster data with different zoom levels</a></li>
 <li class="toctree-l2"><a class="reference internal" href="doing_extreme_value_analysis.html">Example: Doing Extreme Value Analysis (EVA) for time series</a></li>
 </ul>
 </details></li>
@@ -573,7 +572,7 @@ been extended with a basin mask layer, which together with the basin index vecto
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-name=&#39;merit_hydro&#39; uri=&#39;merit_hydro/{variable}.tif&#39; data_adapter=RasterDatasetAdapter(unit_add={}, unit_mult={}, rename={}) driver=RasterioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f698ca3b340&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f698ca3b340&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=&#39;1.0&#39; provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+name=&#39;merit_hydro&#39; uri=&#39;merit_hydro/{variable}.tif&#39; data_adapter=RasterDatasetAdapter(unit_add={}, unit_mult={}, rename={}) driver=RasterioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f7dab8c5340&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f7dab8c5340&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=&#39;1.0&#39; provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -604,7 +603,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-name=&#39;merit_hydro_index&#39; uri=&#39;merit_hydro_index.gpkg&#39; data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}) driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f698ca3b340&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f698ca3b340&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=None provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+name=&#39;merit_hydro_index&#39; uri=&#39;merit_hydro_index.gpkg&#39; data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}) driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f7dab8c5340&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f7dab8c5340&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=None provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -701,7 +700,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4558/1510890054.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4428/1510890054.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = np.array(gdf_bas.buffer(0.1).total_bounds)[[0, 2, 1, 3]]
 </pre></div></div>
@@ -764,7 +763,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4558/3041410776.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4428/3041410776.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bounds.buffer(0.05).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>
@@ -844,7 +843,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4558/2647821985.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4428/2647821985.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bas.buffer(0.05).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>
@@ -905,7 +904,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4558/1881121779.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4428/1881121779.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bbox.buffer(0.02).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>
