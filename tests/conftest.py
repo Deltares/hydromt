@@ -66,7 +66,7 @@ def test_settings(tmp_path: Path) -> Generator[Settings, None, None]:
     cache_dir: Path = tmp_path / "test_caching"
     SETTINGS.cache_root = cache_dir
     yield SETTINGS
-    SETTINGS.cache_root = SETTINGS.model_fields["cache_root"].default
+    SETTINGS.cache_root = Settings.model_fields["cache_root"].default
 
 
 @pytest.fixture(autouse=True)
