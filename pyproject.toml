@@ -69,7 +69,6 @@ io = [
   "openpyxl",         # excel IO
   "fastparquet",      # parquet IO
   "pillow",           # image IO
-  "rio-vrt==0.2.0",   # write VRT files
   "s3fs",             # S3 file system
 ]
 extra = [

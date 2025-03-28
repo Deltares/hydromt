@@ -37,8 +37,9 @@ from hydromt.plugins import Plugins
 
 dask_config.set(scheduler="single-threaded")
 
-DATADIR = join(dirname(abspath(__file__)), "data")
-DC_PARAM_PATH = join(DATADIR, "parameters_data.yml")
+DATA_DIR = join(dirname(abspath(__file__)), "..", "data")
+TEST_DATA_DIR = join(dirname(abspath(__file__)), "data")
+DC_PARAM_PATH = join(TEST_DATA_DIR, "parameters_data.yml")
 
 
 def get_open_xarray_objects() -> List[tuple[Union[xr.Dataset, xr.DataArray], Path]]:
@@ -71,7 +72,7 @@ def test_settings(tmp_path: Path) -> Generator[Settings, None, None]:
 @pytest.fixture(autouse=True)
 def _local_catalog_eps(monkeypatch, PLUGINS):
     """Set entrypoints to local predefined catalogs."""
-    cat_root = Path(__file__).parent.parent / "data" / "catalogs"
+    cat_root = Path(DATA_DIR) / "catalogs"
     for name, cls in PLUGINS.catalog_plugins.items():
         monkeypatch.setattr(
             f"hydromt.data_catalog.predefined_catalog.{cls.__name__}.base_url",
@@ -117,7 +118,7 @@ def data_catalog(_local_catalog_eps) -> DataCatalog:
 
 @pytest.fixture(scope="session")
 def latest_dd_version_uri():
-    cat_root = Path(__file__).parent.parent / "data" / "catalogs" / "deltares_data"
+    cat_root = Path(DATA_DIR) / "catalogs" / "deltares_data"
     versions = [d.name for d in cat_root.iterdir() if d.is_dir()]
     latest_version = sorted(versions)[-1]
     return cat_root / latest_version / "data_catalog.yml"
@@ -268,7 +269,7 @@ def geodf(df):
 
 @pytest.fixture(scope="session")
 def world() -> gpd.GeoDataFrame:
-    return gpd.read_file(Path(DATADIR) / "world.gpkg")
+    return gpd.read_file(Path(TEST_DATA_DIR) / "world.gpkg")
 
 
 @pytest.fixture

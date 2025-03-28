@@ -1,20 +1,17 @@
 """Test for hydromt.gu submodule."""
 
-import os
 from pathlib import Path
 from typing import Any, Dict
 
 import geopandas as gpd
 import numpy as np
 import pytest
-import xarray as xr
 from affine import Affine
 from pyproj import CRS
 from rasterio.transform import from_origin
 from shapely import Polygon, box
 
-from hydromt._io import _open_raster
-from hydromt.gis import _create_vrt, _gis_utils, _raster_utils, _vector_utils
+from hydromt.gis import _gis_utils, _raster_utils, _vector_utils
 from hydromt.gis.raster import RasterDataArray, full_from_transform
 
 
@@ -134,28 +131,6 @@ def test_spread():
     assert ds_out["source_dst"].values[10, 10] == 0
     with pytest.raises(ValueError, match='"nodata" must be a finite value'):
         _raster_utils._spread2d(da_obs, nodata=np.nan)
-
-
-def test_create_vrt(tmpdir, rioda_large):
-    # NOTE: this method does not work in debug mode because of os.subprocess
-    path = str(tmpdir)
-    rioda_large.raster.to_xyz_tiles(
-        os.path.join(path, "dummy_xyz"),
-        tile_size=256,
-        zoom_levels=[0],
-    )
-    # test create_vrt
-    vrt_path = os.path.join(path, "dummy_xyz", "vrt", "zl0.vrt")
-    tif_path_glob = os.path.join(path, "dummy_xyz", "*", "*", "*.tif")
-    _create_vrt._create_vrt(vrt_path, files_path=tif_path_glob)
-    assert os.path.isfile(vrt_path)
-    assert isinstance(_open_raster(vrt_path).load(), xr.DataArray)  # try reading
-    with pytest.raises(ValueError, match="Either 'files' or 'files_path' is required"):
-        _create_vrt._create_vrt(vrt_path)
-    with pytest.raises(IOError, match="No files found at "):
-        _create_vrt._create_vrt(
-            vrt_path, files_path=os.path.join(path, "dummy_xyz", "*.abc")
-        )
 
 
 class TestBBoxFromFileAndFilters:

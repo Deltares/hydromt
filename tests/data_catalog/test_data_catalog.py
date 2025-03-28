@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from logging import WARNING
 from os import mkdir
-from os.path import abspath, basename, dirname, join
+from os.path import abspath, basename, join
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from uuid import uuid4
@@ -48,9 +48,9 @@ from hydromt.data_catalog.sources import (
 )
 from hydromt.data_catalog.sources.dataframe import DataFrameSource
 from hydromt.gis._gis_utils import _to_geographic_bbox
+from tests.conftest import DATA_DIR, TEST_DATA_DIR
 
-CATALOGDIR = join(dirname(abspath(__file__)), "..", "..", "data", "catalogs")
-DATADIR = join(dirname(abspath(__file__)), "..", "data")
+_CATALOG_DIR = join(DATA_DIR, "catalogs")
 
 
 def test_errors_on_no_root_found(tmpdir):
@@ -223,21 +223,21 @@ def test_catalog_entry_single_variant(aws_worldcover):
 
 @pytest.fixture
 def aws_worldcover():
-    aws_yml_path = join(DATADIR, "aws_esa_worldcover.yml")
+    aws_yml_path = join(TEST_DATA_DIR, "aws_esa_worldcover.yml")
     aws_data_catalog = DataCatalog(data_libs=[aws_yml_path])
     return (aws_yml_path, aws_data_catalog)
 
 
 @pytest.fixture
 def merged_aws_worldcover():
-    merged_yml_path = join(DATADIR, "merged_esa_worldcover.yml")
+    merged_yml_path = join(TEST_DATA_DIR, "merged_esa_worldcover.yml")
     merged_catalog = DataCatalog(data_libs=[merged_yml_path])
     return (merged_yml_path, merged_catalog)
 
 
 @pytest.fixture
 def legacy_aws_worldcover():
-    legacy_yml_path = join(DATADIR, "legacy_esa_worldcover.yml")
+    legacy_yml_path = join(TEST_DATA_DIR, "legacy_esa_worldcover.yml")
     legacy_data_catalog = DataCatalog(data_libs=[legacy_yml_path])
     return (legacy_yml_path, legacy_data_catalog)
 
@@ -388,7 +388,7 @@ def test_data_catalog_hydromt_version(tmpdir):
 
 
 def test_used_sources():
-    merged_yml_path = join(DATADIR, "merged_esa_worldcover.yml")
+    merged_yml_path = join(TEST_DATA_DIR, "merged_esa_worldcover.yml")
     data_catalog = DataCatalog(merged_yml_path)
     source = data_catalog.get_source("esa_worldcover")
     source._mark_as_used()
@@ -824,7 +824,7 @@ class TestGetRasterDataset:
 
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
     def test_aws_worldcover(self, test_settings: Settings):
-        catalog_fn = join(CATALOGDIR, "aws_data", "v1.0.0", "data_catalog.yml")
+        catalog_fn = join(_CATALOG_DIR, "aws_data", "v1.0.0", "data_catalog.yml")
         data_catalog = DataCatalog(data_libs=[catalog_fn])
         da = data_catalog.get_rasterdataset(
             "esa_worldcover_2020_v100",
@@ -868,7 +868,7 @@ class TestGetRasterDataset:
     @pytest.mark.skipif(not HAS_GCSFS, reason="GCSFS not installed.")
     def test_gcs_cmip6(self):
         # TODO switch to pre-defined catalogs when pushed to main
-        catalog_fn = join(CATALOGDIR, "gcs_cmip6_data", "v1.0.0", "data_catalog.yml")
+        catalog_fn = join(_CATALOG_DIR, "gcs_cmip6_data", "v1.0.0", "data_catalog.yml")
         data_catalog = DataCatalog(data_libs=[catalog_fn])
         ds = data_catalog.get_rasterdataset(
             "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
@@ -880,16 +880,11 @@ class TestGetRasterDataset:
         assert not np.any(ds[ds.raster.x_dim] > 180)
 
     @pytest.mark.integration
-    def test_reads_slippy_map_output(self, tmp_dir: Path, rioda_large: xr.DataArray):
+    def test_reads_slippy_map_output(self):
         # write vrt data
         name = "tiled"
-        root = tmp_dir / name
-        rioda_large.raster.to_xyz_tiles(
-            root=root,
-            tile_size=256,
-            zoom_levels=[0],
-        )
-        cat = DataCatalog(str(root / f"{name}.yml"), cache=True)
+        root = join(TEST_DATA_DIR, "rioda_tiled")
+        cat = DataCatalog(join(root, f"{name}.yml"), cache=True)
         cat.get_rasterdataset(name)
         assert len(glob.glob(join(root, "*", "*", "*.tif"))) == 16
 

@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from os.path import abspath, dirname, isdir, isfile, join
+from os.path import dirname, isdir, isfile, join
 from pathlib import Path
 from typing import cast
 
@@ -16,8 +16,7 @@ from pytest_mock import MockerFixture
 from hydromt.model import Model
 from hydromt.model.components.mesh import MeshComponent, _check_UGrid
 from hydromt.model.root import ModelRoot
-
-DATADIR = join(dirname(dirname(abspath(__file__))), "data")
+from tests.conftest import TEST_DATA_DIR
 
 
 def test_check_UGrid(mocker: MockerFixture):
@@ -363,7 +362,7 @@ def test_model_mesh_workflow(tmpdir: Path):
 
 @pytest.mark.integration
 def test_mesh_with_model(griduda, world, tmpdir):
-    dc_param_path = join(DATADIR, "parameters_data.yml")
+    dc_param_path = join(TEST_DATA_DIR, "parameters_data.yml")
     root = join(tmpdir, "mesh_component1")
     model = Model(root=root, data_libs=["artifact_data", dc_param_path])
     mesh_component = MeshComponent(model=model)

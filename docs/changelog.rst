@@ -22,6 +22,7 @@ Fixed
 
 Deprecated
 ----------
+- Removed ``to_slippy_tiles`` and ``to_xyz_tiles`` methods from the raster module (#1110). We recommend to use the package `cht_tiling <https://github.com/Deltares-research/cht_tiling>`_ instead. Although writing tiles is no longer available, HydroMT is still able to read .vrt-files.
 
 v1.0.1 (2025-03-21)
 ===================

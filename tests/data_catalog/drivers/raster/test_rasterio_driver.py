@@ -1,4 +1,5 @@
 import glob
+import shutil
 from os.path import join
 from pathlib import Path
 from typing import Tuple
@@ -14,28 +15,23 @@ from hydromt._typing import SourceMetadata
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.raster.rasterio_driver import RasterioDriver
 from hydromt.gis.raster import full_from_transform
+from tests.conftest import TEST_DATA_DIR
 
 
 class TestRasterioDriver:
     @pytest.fixture
-    def vrt_tiled_raster_ds(self, tmp_path: Path, rioda_large: xr.DataArray) -> str:
-        # write vrt data
+    def vrt_tiled_raster_ds(self, tmp_path: Path) -> str:
+        # copy vrt data to test folder
         name = "test_vrt_tiled_raster_ds"
         root = tmp_path / name
-        rioda_large.raster.to_xyz_tiles(
-            root=root,
-            tile_size=256,
-            zoom_levels=[0],
-        )
+        shutil.copytree(join(TEST_DATA_DIR, "rioda_tiled"), root)
         return str(root)
 
     @pytest.mark.usefixtures("test_settings")
     def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
         cache_dir: str = "tests_caches_tifs_from_vrt"
         driver = RasterioDriver(options={"cache_dir": cache_dir})
-        driver.read(
-            uris=[str(Path(vrt_tiled_raster_ds) / "test_vrt_tiled_raster_ds_zl0.vrt")]
-        )
+        driver.read(uris=[join(vrt_tiled_raster_ds, "tiled_zl0.vrt")])
         assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 
     @pytest.fixture

@@ -44,7 +44,6 @@ GIS operations:
     ../_examples/working_with_raster.ipynb
     ../_examples/working_with_flow_directions.ipynb
     ../_examples/working_with_geodatasets.ipynb
-    ../_examples/working_with_tiled_raster_data.ipynb
 
 Statistical Analysis:
 ***********************

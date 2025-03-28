@@ -1,5 +1,5 @@
 import logging
-from os.path import abspath, dirname, join
+from os.path import join
 from unittest.mock import MagicMock
 
 import geopandas as gpd
@@ -12,8 +12,7 @@ from pytest_mock import MockerFixture
 from hydromt.model.components.grid import GridComponent
 from hydromt.model.model import Model
 from hydromt.model.root import ModelRoot
-
-DATADIR = join(dirname(dirname(abspath(__file__))), "data")
+from tests.conftest import DC_PARAM_PATH
 
 
 def test_set_dataset(mock_model, hydds):
@@ -331,12 +330,11 @@ def test_add_data_from_geodataframe(
 @pytest.mark.integration
 def test_grid_component_model(tmpdir):
     # Initialize model
-    dc_param_path = join(DATADIR, "parameters_data.yml")
     root = join(tmpdir, "grid_model")
     model = Model(
         root=root,
         mode="w",
-        data_libs=["artifact_data", dc_param_path],
+        data_libs=["artifact_data", DC_PARAM_PATH],
     )
     grid_component = GridComponent(model=model)
     model.add_component(name="grid", component=grid_component)
