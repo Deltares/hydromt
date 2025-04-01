@@ -1,0 +1,51 @@
+name: SonarQube Scan and coverage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - v1
+    paths:
+      - tests/**/*
+      - hydromt/**/*
+      - data/**/*
+      - pyproject.toml
+      - pixi.lock
+      - .github/workflows/sonar.yml
+  pull_request:
+    branches:
+      - main
+      - v1
+    paths:
+      - tests/**/*
+      - hydromt/**/*
+      - data/**/*
+      - pyproject.toml
+      - pixi.lock
+      - .github/workflows/sonar.yml
+  workflow_run:
+    workflows: [Pixi auto update]
+    types:
+      - completed
+
+
+jobs:
+  scan:
+    defaults:
+      run:
+        shell: bash -e -l {0}
+
+    name: run test coverage and SonarQube scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0.8.2
+        with:
+          pixi-version: "v0.41.1"
+      - name: Test
+        run: pixi run --locked test-cov
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

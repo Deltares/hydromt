@@ -31,7 +31,7 @@ on:
 
 
 jobs:
-  build:
+  test:
     defaults:
       run:
         shell: bash -e -l {0}
@@ -57,4 +57,4 @@ jobs:
       - name: Test
         run: |
           export NUMBA_DISABLE_JIT=1
-          pixi run --locked -e ${{ matrix.dependencies }}-py${{ matrix.python-version }} test-cov
+          pixi run --locked -e ${{ matrix.dependencies }}-py${{ matrix.python-version }} test
