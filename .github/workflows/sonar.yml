@@ -44,10 +44,8 @@ jobs:
         with:
           pixi-version: "v0.41.1"
       - name: Test
-        run: |
-          export NUMBA_DISABLE_JIT=1
-          pixi run --locked test-cov
+        run: pixi run --locked test-cov
       - name: SonarQube Scan
-        uses: SonarSource/sonarcloud-github-action@v5
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
