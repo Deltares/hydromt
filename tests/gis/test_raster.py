@@ -6,14 +6,17 @@ from pathlib import Path
 import dask
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 import pytest
 import rasterio
 import xarray as xr
 from affine import Affine
+from shapely import Polygon
 from shapely.geometry import LineString, Point, box
 
 from hydromt._io import _open_raster
 from hydromt.gis import _gis_utils, raster
+from hydromt.model.processes.grid import create_rotated_grid_from_geom
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported
@@ -566,6 +569,17 @@ def test_rotated(transform, shape, tmpdir):
     dst_crs = _gis_utils._parse_crs("utm", da.raster.bounds)
     da2_reproj = da2.raster.reproject(dst_crs=dst_crs)
     assert np.all(da2.raster.box.intersects(da2_reproj.raster.box.to_crs(4326)))
+
+
+def test_create_rotated_grid_from_geom():
+    coords = [(0, 0), (10, 0), (10, 100), (0, 100), (0, 0)]
+    polygon = Polygon(coords)
+
+    # Create a GeoDataFrame
+    region = gpd.GeoDataFrame(pd.DataFrame({"id": [1]}), geometry=[polygon])
+    da = create_rotated_grid_from_geom(region, res=1, dec_origin=0, dec_rotation=0)
+    expected_shape = (100, 10)
+    assert da.raster.shape == expected_shape
 
 
 def test_to_raster(rioda: xr.DataArray, tmp_dir: Path):

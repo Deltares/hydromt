@@ -246,7 +246,7 @@ def create_rotated_grid_from_geom(
     )
     return raster.full_from_transform(
         transform,
-        shape=(mmax, nmax),
+        shape=(nmax, mmax),
         nodata=1,
         dtype=np.uint8,
         name="mask",
