@@ -19,6 +19,7 @@ Changed
 Fixed
 -----
 -  Pandas driver does not receive unnecessary metadata (#1141)
+- Transform total bounds of region to 4326 before guessing UTM crs in `grid_from_region` (#1154)
 
 Deprecated
 ----------
