@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from affine import Affine
-from pyproj import CRS
+from pyproj import CRS, Transformer
 from shapely.geometry import Polygon
 
 from hydromt._typing.type_def import Number
@@ -39,7 +39,7 @@ def create_grid_from_region(
     *,
     data_catalog: Optional[DataCatalog] = None,
     res: Optional[Number] = None,
-    crs: Optional[int] = None,
+    crs: Optional[Union[int, str]] = None,
     region_crs: int = 4326,
     rotated: bool = False,
     hydrography_path: Optional[str] = None,
@@ -69,8 +69,9 @@ def create_grid_from_region(
     res: float or int, optional
         Resolution used to generate 2D grid [unit of the CRS], required if region
         is not based on 'grid'.
-    crs : int, optional
-        EPSG code of the grid to create.
+    crs : int, or str optional
+        EPSG code of the grid to create, or 'utm'. if crs is 'utm' the closest utm grid will be
+        guessed at.
     region_crs : int, optional
         EPSG code of the region geometry, by default 4326. Only applies if
         region is of kind 'bbox' or if geom crs is not defined in the file itself.
@@ -120,13 +121,22 @@ def create_grid_from_region(
                 crs=region_crs,
                 data_catalog=data_catalog,
             )
-            if crs is not None:
-                geom = geom.to_crs(crs)
         else:
             geom = parse_region_bbox(region, crs=region_crs)
+
         if crs is not None:
-            crs = _gis_utils._parse_crs(crs, bbox=geom.total_bounds)
+            # bbox needs to be 4326 to find correct UTM zone
+            # we'll transform the bbox manually to avoid having to
+            # reproject the entire geom twice
+
+            # Create a transformer from the original CRS to EPSG:4326
+            transformer = Transformer.from_crs(geom.crs, "EPSG:4326", always_xy=True)
+
+            # Output transformed bounds
+            bounds_4326 = transformer.transform_bounds(*geom.total_bounds)
+            crs = _gis_utils._parse_crs(crs, bbox=bounds_4326)
             geom = geom.to_crs(crs)
+
         if rotated:
             grid = create_rotated_grid_from_geom(
                 geom, res=res, dec_origin=dec_origin, dec_rotation=dec_rotation

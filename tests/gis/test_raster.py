@@ -15,7 +15,10 @@ from shapely.geometry import LineString, Point, Polygon, box
 
 from hydromt._io import _open_raster
 from hydromt.gis import _gis_utils, raster
-from hydromt.model.processes.grid import create_rotated_grid_from_geom
+from hydromt.model.processes.grid import (
+    create_grid_from_region,
+    create_rotated_grid_from_geom,
+)
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported
@@ -621,3 +624,26 @@ def test_to_mapstack(rioda: xr.DataArray, tmp_dir: Path):
     ds.raster.to_mapstack(str(tmp_dir), prefix=prefix, mask=True, driver="GTiff")
     for name in ds.raster.vars:
         assert (tmp_dir / f"{prefix}{name}.tif").is_file()
+
+
+def test_grid_utm_parsing():
+    # Generate a simple quadrilateral polygon in a reasonable UTM 33N range
+    coords = [
+        (652586.4996784809, 5431261.715665519),
+        (582167.8955685529, 5682488.643002097),
+        (306934.9094089565, 5908444.4717937615),
+        (427948.6828043202, 5559713.185517933),
+        (525236.8723501079, 5513048.859599449),
+    ]
+
+    polygon = Polygon(coords)
+
+    # Create a GeoDataFrame
+    region = gpd.GeoDataFrame(pd.DataFrame({"id": [1]}), geometry=[polygon], crs=32633)
+
+    # Now finally call the function
+    _ = create_grid_from_region(
+        region={"geom": region},
+        crs="utm",
+        res=100,
+    )
