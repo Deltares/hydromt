@@ -541,7 +541,7 @@ formats which contain a spatial index, such as ‘GeoPackage (GPKG)’ or ‘Fla
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-GeoDataFrameSource(name=&#39;gadm_level3&#39;, uri=&#39;gadm_level3.gpkg&#39;, data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fc27d3bf400&gt;, options={}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fc27d3bf400&gt;, options={}), root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39;, version=&#39;1.0&#39;, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+GeoDataFrameSource(name=&#39;gadm_level3&#39;, uri=&#39;gadm_level3.gpkg&#39;, data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0a8da6c400&gt;, options={}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0a8da6c400&gt;, options={}), root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39;, version=&#39;1.0&#39;, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -873,7 +873,7 @@ number of rows: 28
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_5725/1248131901.py:7: UserWarning: Geometry is in a geographic CRS. Results from &#39;centroid&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_5534/1248131901.py:7: UserWarning: Geometry is in a geographic CRS. Results from &#39;centroid&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   data=np.vstack([gdf_subset.centroid.x, gdf_subset.centroid.y]).T,
 </pre></div></div>
@@ -971,7 +971,7 @@ number of rows: 28
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-GeoDataFrameSource(name=&#39;GADM_level3_centroids&#39;, uri=&#39;tmpdir/xy.csv&#39;, data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=GeoDataFrameTableDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fc27d3bf400&gt;, options={&#39;x_dim&#39;: &#39;x_centroid&#39;}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fc27d3bf400&gt;, options={}), root=None, version=None, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+GeoDataFrameSource(name=&#39;GADM_level3_centroids&#39;, uri=&#39;tmpdir/xy.csv&#39;, data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=GeoDataFrameTableDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0a8da6c400&gt;, options={&#39;x_dim&#39;: &#39;x_centroid&#39;}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0a8da6c400&gt;, options={}), root=None, version=None, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -999,7 +999,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-GeoDataFrameSource(name=&#39;GADM_level3_centroids&#39;, uri=&#39;tmpdir/xy.csv&#39;, data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=GeoDataFrameTableDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fc27d3bf400&gt;, options={&#39;x_dim&#39;: &#39;x_centroid&#39;}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fc27d3bf400&gt;, options={}), root=None, version=None, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+GeoDataFrameSource(name=&#39;GADM_level3_centroids&#39;, uri=&#39;tmpdir/xy.csv&#39;, data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=GeoDataFrameTableDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0a8da6c400&gt;, options={&#39;x_dim&#39;: &#39;x_centroid&#39;}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0a8da6c400&gt;, options={}), root=None, version=None, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
