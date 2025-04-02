@@ -19,6 +19,7 @@ Changed
 Fixed
 -----
 -  Pandas driver does not receive unnecessary metadata (#1141)
+- `create_rotated_grid_from_geom` now returns grids with dimensions (y,x) instead if (x,y). (#1153)
 
 Deprecated
 ----------
