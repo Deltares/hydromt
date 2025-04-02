@@ -571,7 +571,7 @@ def test_rotated(transform, shape, tmpdir):
     assert np.all(da2.raster.box.intersects(da2_reproj.raster.box.to_crs(4326)))
 
 
-def test_create_rotated_grid_from_geom():
+def test_create_rotated_grid_from_geom_axis_aligned():
     coords = [(0, 0), (10, 0), (10, 100), (0, 100), (0, 0)]
     polygon = Polygon(coords)
 
@@ -579,6 +579,24 @@ def test_create_rotated_grid_from_geom():
     region = gpd.GeoDataFrame(pd.DataFrame({"id": [1]}), geometry=[polygon])
     da = create_rotated_grid_from_geom(region, res=1, dec_origin=0, dec_rotation=0)
     expected_shape = (100, 10)
+    assert da.raster.shape == expected_shape
+
+
+def test_create_rotated_grid_from_geom_rotated():
+    # same square as test_create_rotated_grid_from_geom_axis_aligned but rotated 45 deg
+    coords = [
+        (36.81980515339464, 11.109127034739885),
+        (43.890872965260115, 18.18019484660536),
+        (-26.81980515339464, 88.89087296526012),
+        (-33.890872965260115, 81.81980515339464),
+        (36.81980515339464, 11.109127034739885),
+    ]
+    polygon = Polygon(coords)
+
+    # Create a GeoDataFrame
+    region = gpd.GeoDataFrame(pd.DataFrame({"id": [1]}), geometry=[polygon])
+    da = create_rotated_grid_from_geom(region, res=1, dec_origin=0, dec_rotation=0)
+    expected_shape = (10, 101)
     assert da.raster.shape == expected_shape
 
 
