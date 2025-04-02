@@ -11,8 +11,7 @@ import pytest
 import rasterio
 import xarray as xr
 from affine import Affine
-from shapely import Polygon
-from shapely.geometry import LineString, Point, box
+from shapely.geometry import LineString, Point, Polygon, box
 
 from hydromt._io import _open_raster
 from hydromt.gis import _gis_utils, raster
