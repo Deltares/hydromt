@@ -398,7 +398,7 @@ Test and CI
 We use `pytest <https://pytest.org>`__ for testing and `github actions <https://docs.github.com/en/actions>`_ for CI.
 - Unit tests are mandatory for new methods and workflows and integration tests are highly recommended for various
 - All tests should be contained in the tests directory in functions named `test_*`.
-- We use `CodeCov <https://app.codecov.io/gh/Deltares/hydromt>`_ to monitor the coverage of the tests and aim for high (>90%) coverage. This is work in progress.
+- We use `SonarQube <https://sonarcloud.io/project/overview?id=Deltares_hydromt>`_ to monitor the coverage of the tests and aim for high (>90%) coverage. This is work in progress.
 - Checkout this `comprehensive guide to pytest <https://levelup.gitconnected.com/a-comprehensive-guide-to-pytest-3676f05df5a0>`_ for more info and tips.
 
 Running the tests

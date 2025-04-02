@@ -4,7 +4,7 @@
 HydroMT: Automated and reproducible model building and analysis
 ===============================================================
 
-|pypi| |conda forge| |docs_latest| |docs_stable| |binder| |codecov| |sonarqube| |license| |doi| |joss_paper|
+|pypi| |conda forge| |docs_latest| |docs_stable| |binder| |license| |doi| |joss_paper| |sonarqube_coverage| |sonarqube|
 
 
 What is HydroMT?
@@ -93,9 +93,9 @@ happy to discuss how it can be implemented for your model.
     :alt: Conda-Forge
     :target: https://anaconda.org/conda-forge/hydromt
 
-.. |codecov| image:: https://codecov.io/gh/Deltares/hydromt/branch/main/graph/badge.svg?token=ss3EgmwHhH
+.. |sonarqube_coverage| image:: https://sonarcloud.io/api/project_badges/measure?project=Deltares_hydromt&metric=coverage
     :alt: Coverage
-    :target: https://codecov.io/gh/Deltares/hydromt
+    :target: https://sonarcloud.io/summary/new_code?id=Deltares_hydromt
 
 .. |docs_latest| image:: https://img.shields.io/badge/docs-latest-brightgreen.svg
     :alt: Latest developers docs
