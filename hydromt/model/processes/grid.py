@@ -39,7 +39,7 @@ def create_grid_from_region(
     *,
     data_catalog: Optional[DataCatalog] = None,
     res: Optional[Number] = None,
-    crs: Optional[int] = None,
+    crs: Optional[Union[int, str]] = None,
     region_crs: int = 4326,
     rotated: bool = False,
     hydrography_path: Optional[str] = None,
@@ -69,8 +69,9 @@ def create_grid_from_region(
     res: float or int, optional
         Resolution used to generate 2D grid [unit of the CRS], required if region
         is not based on 'grid'.
-    crs : int, optional
-        EPSG code of the grid to create.
+    crs : int, or str optional
+        EPSG code of the grid to create, or 'utm'. if crs is 'utm' the closest utm grid will be
+        guessed at.
     region_crs : int, optional
         EPSG code of the region geometry, by default 4326. Only applies if
         region is of kind 'bbox' or if geom crs is not defined in the file itself.
