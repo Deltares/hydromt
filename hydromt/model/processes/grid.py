@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from affine import Affine
-from pyproj import CRS
+from pyproj import CRS, Transformer
 from shapely.geometry import Polygon
 
 from hydromt._typing.type_def import Number
@@ -120,13 +120,22 @@ def create_grid_from_region(
                 crs=region_crs,
                 data_catalog=data_catalog,
             )
-            if crs is not None:
-                geom = geom.to_crs(crs)
         else:
             geom = parse_region_bbox(region, crs=region_crs)
+
         if crs is not None:
-            crs = _gis_utils._parse_crs(crs, bbox=geom.total_bounds)
+            # bbox needs to be 4326 to find correct UTM zone
+            # we'll transform the bbox manually to avoid having to
+            # reproject the entire geom twice
+
+            # Create a transformer from the original CRS to EPSG:4326
+            transformer = Transformer.from_crs(geom.crs, "EPSG:4326", always_xy=True)
+
+            # Output transformed bounds
+            bounds_4326 = transformer.transform_bounds(*geom.total_bounds)
+            crs = _gis_utils._parse_crs(crs, bbox=bounds_4326)
             geom = geom.to_crs(crs)
+
         if rotated:
             grid = create_rotated_grid_from_geom(
                 geom, res=res, dec_origin=dec_origin, dec_rotation=dec_rotation

@@ -58,7 +58,7 @@ def utm_crs(bbox):
     return CRS.from_epsg(epsg)
 
 
-def _parse_crs(crs: Any, bbox: List[float] = None) -> CRS:
+def _parse_crs(crs: Any, bbox: Optional[List[float]] = None) -> CRS:
     """Parse crs string to pyproj.CRS.
 
     Parameters
@@ -260,8 +260,7 @@ def _zoom_to_overview_level(
         overview_level = zoom
         if overview_level not in zls_dict:
             raise ValueError(
-                f"Overview level {overview_level} not defined."
-                f"Select from {zls_dict}."
+                f"Overview level {overview_level} not defined.Select from {zls_dict}."
             )
         dst_res = zls_dict[overview_level]
     elif (
