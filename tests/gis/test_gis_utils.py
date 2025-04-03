@@ -57,12 +57,12 @@ def test_meridian_offset():
             [-190, -2, -170, 2],  # bbox crossing -180
         ]:
             da2 = _raster_utils._meridian_offset(da, bbox=bbox)
-            assert (
-                da2.raster.bounds[0] <= bbox[0]
-            ), f"{da2.raster.bounds[0]} <= {bbox[0]}"
-            assert (
-                da2.raster.bounds[2] >= bbox[2]
-            ), f"{da2.raster.bounds[2]} >= {bbox[2]}"
+            assert da2.raster.bounds[0] <= bbox[0], (
+                f"{da2.raster.bounds[0]} <= {bbox[0]}"
+            )
+            assert da2.raster.bounds[2] >= bbox[2], (
+                f"{da2.raster.bounds[2]} >= {bbox[2]}"
+            )
 
     # test error
     with pytest.raises(ValueError, match="This method is only applicable to data"):

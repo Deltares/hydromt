@@ -308,7 +308,7 @@ def parse_region_mesh(region: dict) -> xu.UgridDataset:
         return xu.UgridDataset(value0.to_dataset(optional_attributes=True))
     else:
         raise ValueError(
-            f"Unrecognized type {type(value0)}." "Should be a path or xugrid object."
+            f"Unrecognized type {type(value0)}.Should be a path or xugrid object."
         )
 
 

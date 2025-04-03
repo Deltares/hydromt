@@ -197,12 +197,12 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
     for i in range(len(dfs_segmented_by_points)):
         test1 = ds.sel(id=i)["test1"]
         test2 = ds.sel(id=i)["test2"]
-        assert np.all(
-            np.equal(test1, np.arange(len(dfs_segmented_by_points)) * i)
-        ), test1
-        assert np.all(
-            np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)
-        ), test2
+        assert np.all(np.equal(test1, np.arange(len(dfs_segmented_by_points)) * i)), (
+            test1
+        )
+        assert np.all(np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)), (
+            test2
+        )
 
     # again but with a nameless csv index
     for i in range(len(df_paths)):
@@ -216,12 +216,12 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
     for i in range(len(dfs_segmented_by_points)):
         test1 = ds.sel(id=i)["test1"]
         test2 = ds.sel(id=i)["test2"]
-        assert np.all(
-            np.equal(test1, np.arange(len(dfs_segmented_by_points)) * i)
-        ), test1
-        assert np.all(
-            np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)
-        ), test2
+        assert np.all(np.equal(test1, np.arange(len(dfs_segmented_by_points)) * i)), (
+            test1
+        )
+        assert np.all(np.equal(test2, np.arange(len(dfs_segmented_by_points)) ** i)), (
+            test2
+        )
 
 
 def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
