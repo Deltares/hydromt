@@ -41,12 +41,12 @@ def _time_range_validate(tr: tuple[datetime, datetime]) -> tuple[datetime, datet
 def _validate_bbox(
     bbox: tuple[float, float, float, float],
 ) -> tuple[float, float, float, float]:
-    assert (
-        bbox[0] < bbox[2]
-    ), f"bbox minx: '{bbox[0]}' should be less than maxx: '{bbox[2]}'."
-    assert (
-        bbox[1] < bbox[3]
-    ), f"bbox miny: '{bbox[1]}' should be less than maxy: '{bbox[3]}'."
+    assert bbox[0] < bbox[2], (
+        f"bbox minx: '{bbox[0]}' should be less than maxx: '{bbox[2]}'."
+    )
+    assert bbox[1] < bbox[3], (
+        f"bbox miny: '{bbox[1]}' should be less than maxy: '{bbox[3]}'."
+    )
     return bbox
 
 
