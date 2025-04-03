@@ -17,6 +17,7 @@ jobs:
           python-version: "3.12"
       - uses: browniebroke/pre-commit-autoupdate-action@main
       - uses: peter-evans/create-pull-request@v7
+        if: always()
         with:
           token: ${{ secrets.CI_PR_PAT }}
           branch: update/pre-commit-hooks
