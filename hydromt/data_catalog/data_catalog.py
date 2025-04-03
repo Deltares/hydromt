@@ -1755,7 +1755,7 @@ class DataCatalog(object):
                 )
                 name = basename(data_like)
                 source = DataFrameSource(
-                    uri=data_like, name=name, driver=driver, **kwargs
+                    uri=str(data_like), name=name, driver=driver, **kwargs
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
