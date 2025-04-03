@@ -56,12 +56,12 @@ def _harmonise_dims(ds: xr.Dataset) -> xr.Dataset:
     if np.diff(ds[y_dim].values)[0] > 0:
         ds = ds.reindex({y_dim: ds[y_dim][::-1]})
     # Final check for lat-lon
-    assert (
-        np.diff(ds[y_dim].values)[0] < 0
-    ), "orientation not N->S after get_data preprocess set_lon_lat_axis"
-    assert (
-        np.diff(ds[x_dim].values)[0] > 0
-    ), "orientation not W->E after get_data preprocess set_lon_lat_axis"
+    assert np.diff(ds[y_dim].values)[0] < 0, (
+        "orientation not N->S after get_data preprocess set_lon_lat_axis"
+    )
+    assert np.diff(ds[x_dim].values)[0] > 0, (
+        "orientation not W->E after get_data preprocess set_lon_lat_axis"
+    )
     # Time
     if ds.indexes["time"].dtype == "O":
         ds = _to_datetimeindex(ds)

@@ -234,10 +234,12 @@ def resample_year(
     )
     ds = xr.open_mfdataset(paths, chunks=chunks, **kwargs)
     assert "expver" not in ds.coords
-    ds = ds.sel(time=slice(f"{year-1}-12-31 01:00", f"{year}-12-31 00:00"))
+    ds = ds.sel(time=slice(f"{year - 1}-12-31 01:00", f"{year}-12-31 00:00"))
     if ds["time"][-1].dt.hour != 0:  # clip incomplete days
         month, day = ds["time"][-1].dt.month.item(), ds["time"][-1].dt.day.item()
-        ds = ds.sel(time=slice(f"{year-1}-12-31 01:00", f"{year}-{month}-{day} 00:00"))
+        ds = ds.sel(
+            time=slice(f"{year - 1}-12-31 01:00", f"{year}-{month}-{day} 00:00")
+        )
 
     # resample to daily freq
     kwargs = dict(time="1D", label="right", closed="right")
