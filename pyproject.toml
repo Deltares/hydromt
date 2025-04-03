@@ -251,8 +251,8 @@ test-cov = { cmd = [
   "pytest",
   "--verbose",
   "--cov=hydromt",
-  "--cov-report",
-  "xml",
+  "--cov-report=xml",
+  "--cov-branch",
 ] }
 
 [tool.pixi.feature.dev.tasks]
