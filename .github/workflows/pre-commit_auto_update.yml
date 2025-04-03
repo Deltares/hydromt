@@ -19,7 +19,7 @@ jobs:
       - uses: peter-evans/create-pull-request@v7
         if: always()
         with:
-          token: ${{ secrets.CI_PR_PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           branch: update/pre-commit-hooks
           title: Update pre-commit hooks
           commit-message: "Update pre-commit hooks"
