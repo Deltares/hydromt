@@ -54,7 +54,6 @@ jobs:
 
   publish-pypi:
     runs-on: ubuntu-latest
-    # if: github.event.pull_request.merged == true
     steps:
       - id: download-artifact
         uses: dawidd6/action-download-artifact@v6
@@ -75,7 +74,6 @@ jobs:
 
   publish-docs:
     runs-on: ubuntu-latest
-    # if: github.event.pull_request.merged == true
     steps:
     - id: download-artifact
       uses: dawidd6/action-download-artifact@v6
@@ -87,6 +85,23 @@ jobs:
         path: docs/_build
         check_artifacts: true
         if_no_artifact_found: fail
+
+    - name: Determine release version
+      run: |
+        export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
+        echo "DOC_VERSION=v$CURRENT_VERSION" >> "$GITHUB_ENV"
+    - name: update doc symlinks
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+        git pull
+        git checkout gh-pages
+        # create new symlink replacing the old one at stable pointing to versions just published.
+        ln -s -f ${{ env.DOC_VERSION }} stable
+        git add stable
+        git commit -m "update symlinks"
+        git push
+
     - name: Upload to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4.0.0
       with:
@@ -109,7 +124,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Finalise PR
+      - name: Finalise Release
         run: |
             git pull
             git checkout main
@@ -123,6 +138,14 @@ jobs:
             git config user.name "GitHub Actions Bot"
             git config user.email "<>"
             git tag "v$RELEASE_VERSION"
+            git push origin tag "v$RELEASE_VERSION"
+            gh release create "v$RELEASE_VERSION" -F release_notes.rst -t "v$RELEASE_VERSION"
+
+      - name: Create post release PR
+        run: |
+
+            git checkout -b "post-v$NEW_VERSION-release"
+
             # post release stuff so we don't forget
             sed -i "s/v$RELEASE_VERSION/Unreleased\n==========\n\nNew\n---\n\nChanged\n-------\n\nFixed\n-----\n\nDeprecated\n----------\n\nv$RELEASE_VERSION/" docs/changelog.rst
             sed -i 's/__version__.*=.*"\(.*\)".*/__version__ = "\1.dev0"/' hydromt/__init__.py
@@ -136,6 +159,5 @@ jobs:
               # Capture lines between headers
               capture { print; }
             ' docs/changelog.rst > release_notes.rst
-            git push
-            git push origin tag "v$RELEASE_VERSION"
-            gh release create "v$RELEASE_VERSION" -F release_notes.rst -t "v$RELEASE_VERSION"
+
+            gh pr create -B "main" -H "post-v$NEW_VERSION-release" -t "Post v$NEW_VERSION release cleanup" -b "Add new changelog headers and set version back to dev"
