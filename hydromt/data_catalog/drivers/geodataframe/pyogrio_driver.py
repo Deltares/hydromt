@@ -11,7 +11,6 @@ from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom, SourceMetadata, StrPath
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -32,19 +31,18 @@ class PyogrioDriver(GeoDataFrameDriver):
         *,
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
-        predicate: str = "intersects",
+        predicate: Optional[str] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
 
-        args:
+        Warning
+        -------
+        The 'predicate' keyword argument is unused in this method and is only present
+        in the method's signature for compatibility with other functions.
         """
-        _warn_on_unused_kwargs(
-            self.__class__.__name__,
-            {"predicate": predicate, "metadata": metadata},
-        )
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
@@ -63,6 +61,14 @@ class PyogrioDriver(GeoDataFrameDriver):
             )
         if not isinstance(gdf, gpd.GeoDataFrame):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
+
+        crs = None
+        if metadata is not None:
+            crs = metadata.crs
+        if crs is not None:
+            if gdf.crs is not None:
+                logger.warning(f"Overwriting crs of GeoDataFrame to {crs}")
+            gdf.set_crs(crs)
 
         if gdf.index.size == 0:
             exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
