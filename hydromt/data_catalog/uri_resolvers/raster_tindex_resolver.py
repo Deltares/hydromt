@@ -32,7 +32,7 @@ class RasterTindexResolver(URIResolver):
         zoom: Optional[Zoom] = None,
         mask: Optional[gpd.GeoDataFrame] = None,
         variables: Union[int, tuple[float, str], None] = None,
-        metadata: Optional[SourceMetadata],
+        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> List[str]:
         """Resolve URIs of a raster tindex file.
