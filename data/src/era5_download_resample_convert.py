@@ -6,6 +6,7 @@ import os
 import shutil
 import time
 from os.path import basename, isfile, join
+from typing import Any, Dict, List, Optional
 
 import dask
 import numpy as np
@@ -82,7 +83,11 @@ daily_attrs = {
 
 
 def download_era5_year(
-    write_path: str, variable: str, year: int, months: list = None, days: list = None
+    write_path: str,
+    variable: str,
+    year: int,
+    months: Optional[List[str]] = None,
+    days: Optional[List[str]] = None,
 ) -> None:
     """Download a ERA5 variable for a single year from Copernicus Climate Data Store.
 
@@ -126,7 +131,7 @@ def download_era5_year(
                 "variable": variable,
                 "year": [year],
                 "month": months,
-                "day": _days,
+                "day": days,
                 "time": _hrs,
             },
             write_path,
@@ -178,11 +183,11 @@ def resample_year(
     ddir: str,
     outdir: str,
     var: str,
-    decimals: int = None,
-    nodata=-9999,
-    chunks: dict = None,
-    dask_kwargs: dict = None,
-) -> None:
+    decimals: Optional[int] = None,
+    nodata: int = -9999,
+    chunks: Optional[Dict[Any, Any]] = None,
+    dask_kwargs: Optional[Dict[Any, Any]] = None,
+) -> List[str]:
     """Resample hourly variables to daily timestep.
 
     The data is saved with the time labels at the end of the timestep.
@@ -423,11 +428,8 @@ def append_zarr(
             if dim == append_dim:
                 continue
             assert ds[v][dim].shape == ds0[v][dim].shape
-            # TODO: raise error instead of reindex
             if not np.allclose(ds0[v][dim], ds[v][dim]):
-                print(f"reindex {v}")
-                print(ds0[v][dim], ds[v][dim])
-                ds = ds.reindex({dim: ds0[v][dim]})
+                raise ValueError("ds0 and ds don't have the same dimensions")
 
     # write output using to_zarr with region argument
     # drop dims (already written)
@@ -508,7 +510,6 @@ def update_hourly_nc(
         paths = glob.glob(join(outdir, f"era5_{var}_*_hourly.nc"))
         for p in paths:
             flatten_era5_temp(p, dask_kwargs=dask_kwargs)
-            # TODO make plot at random point
 
     # write files from tmpdir to ddir
     if move_to_ddir:
@@ -640,8 +641,6 @@ def update_zarr(
                 with xr.open_zarr(zarr_path, consolidated=False) as ds_zarr:
                     if var in ds_zarr:
                         # check last date with valid values at single location
-                        # TODO: this takes long, find alternative way with zarr library
-                        # to find last date
                         da_zarr = (
                             ds_zarr[var].isel(latitude=0, longitude=0).dropna("time")
                         )
