@@ -18,7 +18,6 @@ from typing import (
     Optional,
     Set,
     Tuple,
-    Type,
     Union,
     cast,
 )
@@ -71,6 +70,8 @@ from hydromt.plugins import PLUGINS
 logger = logging.getLogger(__name__)
 
 __all__ = ["DataCatalog"]
+
+NO_DATA_AFTER_SLICE_MSG = "No data was left after slicing."
 
 
 class DataCatalog(object):
@@ -179,7 +180,8 @@ class DataCatalog(object):
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
         for _name, source in self.list_sources(used_only):
-            stac_child_catalog = source.to_stac_catalog(handle_nodata)
+            if source_names is not None and _name in source_names:
+                stac_child_catalog = source.to_stac_catalog(handle_nodata)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
@@ -220,21 +222,36 @@ class DataCatalog(object):
                     MediaType.COG,
                     MediaType.TIFF,
                 ]:
-                    Source: Type[DataSource] = RasterDatasetSource
+                    source: RasterDatasetSource = RasterDatasetSource(
+                        name=source_name,
+                        uri=asset.get_absolute_href(),
+                        driver=RasterDatasetSource._fallback_driver_read,
+                        handle_nodata=handle_nodata,
+                    )
                 elif asset.media_type in [MediaType.GEOPACKAGE, MediaType.FLATGEOBUF]:
-                    Source: Type[DataSource] = GeoDataFrameSource
+                    source: GeoDataFrameSource = GeoDataFrameSource(
+                        name=source_name,
+                        uri=asset.get_absolute_href(),
+                        driver=GeoDataFrameSource._fallback_driver_read,
+                        handle_nodata=handle_nodata,
+                    )
                 elif asset.media_type == MediaType.GEOJSON:
-                    Source: Type[DataSource] = GeoDatasetSource
+                    source: GeoDatasetSource = GeoDatasetSource(
+                        name=source_name,
+                        uri=asset.get_absolute_href(),
+                        driver=GeoDatasetSource._fallback_driver_read,
+                        handle_nodata=handle_nodata,
+                    )
                 elif asset.media_type == MediaType.JSON:
-                    Source: Type[DataSource] = DataFrameSource
+                    source: DataFrameSource = DataFrameSource(
+                        name=source_name,
+                        uri=asset.get_absolute_href(),
+                        driver=DataFrameSource._fallback_driver_read,
+                        handle_nodata=handle_nodata,
+                    )
                 else:
                     continue
 
-                source: DataSource = Source(
-                    name=source_name,
-                    uri=asset.get_absolute_href(),
-                    driver=Source._fallback_driver_read,
-                )
                 self.add_source(source_name, source)
 
         return self
@@ -605,7 +622,7 @@ class DataCatalog(object):
         name: str,
         version: str = "latest",
         sha256: Optional[str] = None,
-    ) -> str:
+    ) -> Path:
         """Cache a data archive to the cache directory.
 
         The archive is unpacked and cached to <cache_dir>/<name>/<version>
@@ -748,9 +765,7 @@ class DataCatalog(object):
         else:
             return version in requested
 
-    def _determine_catalog_root(
-        self, meta: Dict[str, Any], urlpath: Optional[StrPath] = None
-    ) -> Path:
+    def _determine_catalog_root(self, meta: Dict[str, Any]) -> Path:
         """Determine which of the roots provided in meta exists and should be used."""
         root = None
         to_check = meta.get("roots", [])
@@ -1308,7 +1323,7 @@ class DataCatalog(object):
             )
             if data_like is None:
                 exec_nodata_strat(
-                    "No data was left after slicing.",
+                    NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return _single_var_as_array(
@@ -1431,7 +1446,7 @@ class DataCatalog(object):
             )
             if data_like is None:
                 exec_nodata_strat(
-                    "No data was left after slicing.",
+                    NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return data_like
@@ -1567,7 +1582,7 @@ class DataCatalog(object):
             )
             if data_like is None:
                 exec_nodata_strat(
-                    "No data was left after slicing.",
+                    NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
@@ -1671,7 +1686,7 @@ class DataCatalog(object):
             )
             if data_like is None:
                 exec_nodata_strat(
-                    "No data was left after slicing.",
+                    NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
@@ -1762,7 +1777,7 @@ class DataCatalog(object):
             df = DataFrameAdapter._slice_data(data_like, variables, time_range)
             if df is None:
                 exec_nodata_strat(
-                    "No data was left after slicing.",
+                    NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return df
@@ -1817,18 +1832,6 @@ def _parse_data_source_dict(
 
     source["metadata"] = meta
 
-    # driver arguments
-    # driver_kwargs = source.pop("driver_kwargs", source.pop("kwargs", {}))
-    # TODO: remove code under this depending on subclasses
-    #       The DataCatalog should not have specific implementations for different drivers
-    # for driver_kwarg in driver_kwargs:
-    #     # required for geodataset where driver_kwargs can be a path
-    #     if "fn" in driver_kwarg:
-    #         driver_kwargs.update(
-    #             {driver_kwarg: abs_path(root, driver_kwargs[driver_kwarg])}
-    #         )
-    # source["driver_kwargs"] = driver_kwargs
-
     return create_source(source)
 
 
@@ -1868,7 +1871,6 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
                 name_copy = name
                 for k, v in zip(options.keys(), combination):
                     name_copy = name_copy.replace("{" + k + "}", v)
-                    # TODO: seems like the job for a URIResolver?
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
         else:
