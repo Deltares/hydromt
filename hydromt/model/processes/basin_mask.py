@@ -253,7 +253,7 @@ def get_basin_geometry(
             outmap = aoi.where(outlet_map(ds[flwdir_name], ftype=flwdir.ftype), False)
             if stream_kwargs:
                 outmap = outmap.where(stream_kwargs, False)
-            idxs_out = np.where(outmap.values.ravel())[0]
+            idxs_out = np.nonzero(outmap.values.ravel())[0]
             if not np.any(outmap):
                 raise ValueError("No outlets found with with given criteria.")
             xy = outmap.raster.idx_to_xy(idxs_out)
