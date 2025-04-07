@@ -1,5 +1,6 @@
 """Implementaions for downloading and resampling ERA5 data."""
 
+import argparse
 import glob
 import os
 import shutil
@@ -687,6 +688,14 @@ def update_zarr(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Implementaions for downloading and resampling ERA5 data."
+    )
+    parser.add_argument(
+        "--save-zarr", action="store_true", help="Save output to Zarr format"
+    )
+
+    args = parser.parse_args()
     os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
     dask_kwargs = {"n_workers": 4, "processes": True}
 
@@ -739,7 +748,7 @@ if __name__ == "__main__":
         move_to_ddir=True,
     )
 
-    if save_zarr:
+    if args.save_zarr:
         print("updating hourly zarr..")
         update_zarr(
             zarr_path=zarr_hour,
