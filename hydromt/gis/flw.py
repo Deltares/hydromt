@@ -497,7 +497,6 @@ def gauge_map(
         idxs = np.atleast_1d(idxs)
         ids = np.arange(1, idxs.size + 1, dtype=np.int32)
     # Snapping
-    # TODO: should we do the snapping similar to basin_map ??
     if stream is not None and flwdir is not None:
         idxs, dist = flwdir.snap(idxs=idxs, mask=stream, unit="m")
         if np.any(dist > max_dist):
