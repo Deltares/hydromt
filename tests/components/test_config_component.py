@@ -2,6 +2,8 @@ from os.path import abspath, isabs, isfile, join
 from pathlib import Path
 
 import pytest
+from tomli_w import dump as toml_dump
+from yaml import dump as yaml_dump
 
 from hydromt._io.readers import _config_read, _read_yaml
 from hydromt._io.writers import _write_yaml
@@ -21,7 +23,6 @@ def test_config_dict():
             "str": "test",
             "int": 1,
             "float": 2.3,
-            "None": None,
         },
         "section2": {
             "path": "config.yml",  # path exists -> Path
@@ -38,8 +39,7 @@ def test_config_dict():
 def test_rejects_non_yaml_format(tmpdir):
     config_file = tmpdir.join("config.toml")
     # hydromt just checks the extension, so an empty file is ok
-    with open(config_file, "w"):
-        pass
+    open(config_file, "w").close()
 
     with pytest.raises(ValueError, match="Unknown extension"):
         _ = _config_read(config_file, abs_path=True)
@@ -83,11 +83,37 @@ def test_raises_on_no_config_template_found(tmpdir):
         config_component.create()
 
 
+@pytest.mark.parametrize("extention", ["yaml", "yml"])
+def test_loads_from_config_template_yaml(tmpdir, extention, test_config_dict):
+    template_name = "default_config_template"
+    template_path = tmpdir / f"{template_name}.{extention}"
+    with open(template_path, "w") as fp:
+        yaml_dump(test_config_dict, fp)
+
+    model = Model(root=tmpdir, mode="w")
+    config_component = ConfigComponent(model, default_template_filename=template_path)
+    model.add_component("config", config_component)
+    config_component.read()
+
+    assert config_component._data == test_config_dict
+
+
+def test_loads_from_config_template_toml(tmpdir, test_config_dict):
+    template_path = join(tmpdir, "default_config_template.toml")
+    with open(template_path, "wb") as fp:
+        toml_dump(test_config_dict, fp)
+
+    model = Model(root=tmpdir, mode="w")
+    config_component = ConfigComponent(model, default_template_filename=template_path)
+    config_component.read()
+
+    assert config_component._data == test_config_dict
+
+
 def test_make_config_abs(tmpdir, test_config_dict):
     p = join(tmpdir, "config.yml")
     # create file so it will get parsed correctly
-    with open(p, "w"):
-        pass
+    open(p, "w").close()
     test_config_dict["section2"]["path"] = p
     test_config_dict["section2"]["path2"] = abspath(p)
     parsed_config = _make_config_paths_abs(test_config_dict, tmpdir)
@@ -99,8 +125,7 @@ def test_make_config_abs(tmpdir, test_config_dict):
 def test_make_rel_abs(tmpdir, test_config_dict):
     p = join(tmpdir, "config.yml")
     # create file so it will get parsed correctly
-    with open(p, "w"):
-        pass
+    open(p, "w").close()
     test_config_dict["section2"]["path"] = p
     test_config_dict["section2"]["path2"] = abspath(p)
     parsed_config = _make_config_paths_relative(test_config_dict, tmpdir)
