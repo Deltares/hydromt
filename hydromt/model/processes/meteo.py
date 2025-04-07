@@ -89,7 +89,7 @@ def precip(
         # make sure first dim is month
         if clim.raster.dim0 != "month":
             clim = clim.rename({clim.raster.dim0: "month"})
-        if not clim["month"].size == 12:
+        if clim["month"].size != 12:
             raise ValueError("Precip climatology does not contain 12 months.")
         # set missings to NaN
         clim = clim.raster.mask_nodata()
@@ -484,8 +484,8 @@ def pet(
 def press_correction(
     dem_model: xr.DataArray,
     g: float = 9.80665,
-    R_air: float = 8.3144621,
-    Mo: float = 0.0289644,
+    r_air: float = 8.3144621,
+    mo: float = 0.0289644,
     lapse_rate: float = -0.0065,
 ) -> xr.DataArray:
     """Pressure correction based on elevation lapse_rate.
@@ -509,8 +509,8 @@ def press_correction(
         pressure correction factor
     """
     # constant
-    pow = g * Mo / (R_air * lapse_rate)
-    press_fact = np.power(288.15 / (288.15 + lapse_rate * dem_model), pow).fillna(1.0)
+    power = g * mo / (r_air * lapse_rate)
+    press_fact = np.power(288.15 / (288.15 + lapse_rate * dem_model), power).fillna(1.0)
     return press_fact
 
 
@@ -542,7 +542,7 @@ def pet_debruin(
     timestep: int = 86400,
     cp: float = 1005.0,
     beta: float = 20.0,
-    Cs: float = 110.0,
+    cs: float = 110.0,
 ) -> xr.DataArray:
     """Determine De Bruin (2016) reference evapotranspiration.
 
@@ -582,7 +582,7 @@ def pet_debruin(
     # in J m-2 over whole period
     ep_joule = (
         (slope / (slope + gamma))
-        * (((1.0 - 0.23) * k_in) - (Cs * (k_in / (k_ext + 0.00001))))
+        * (((1.0 - 0.23) * k_in) - (cs * (k_in / (k_ext + 0.00001))))
     ) + beta
     ep_joule = xr.where(np.isclose(k_ext, 0.0), 0.0, ep_joule)
     pet = ((ep_joule / lam) * timestep).astype(np.float32)
