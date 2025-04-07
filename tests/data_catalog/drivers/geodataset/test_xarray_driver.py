@@ -64,7 +64,7 @@ class TestGeoDatasetXarrayDriver:
         )
         mock_xr_open.return_value = xr.Dataset()
 
-        uris: str = ["file.zarr"]
+        uris: List[str] = ["file.zarr"]
         driver = GeoDatasetXarrayDriver()
         _ = driver.read(uris)
         assert mock_xr_open.call_count == 1
