@@ -64,7 +64,7 @@ class RasterioDriver(RasterDatasetDriver):
             self.options.get("cache_root", SETTINGS.cache_root),
         )
 
-        if cache_root is not None and all([uri.endswith(".vrt") for uri in uris]):
+        if all([uri.endswith(".vrt") for uri in uris]):
             cache_dir = Path(cache_root) / self.options.get(
                 "cache_dir",
                 Path(

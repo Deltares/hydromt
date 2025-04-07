@@ -378,7 +378,7 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "numpy": ("https://numpy.org/doc/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy", None),
-    "numba": ("https://numba.pydata.org/numba-doc/latest", None),
+    "numba": ("https://numba.readthedocs.io/en/stable", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "dask": ("https://docs.dask.org/en/latest", None),
     "rasterio": ("https://rasterio.readthedocs.io/en/latest", None),
