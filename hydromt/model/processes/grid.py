@@ -377,9 +377,8 @@ def grid_from_rasterdataset(
     else:
         raise ValueError(f"reproject_method should have length 1 or {len(variables)}")
     # Masking
-    if mask_name is not None:
-        if mask_name in grid_like:
-            ds_out = ds_out.raster.mask(grid_like[mask_name])
+    if mask_name is not None and mask_name in grid_like:
+        ds_out = ds_out.raster.mask(grid_like[mask_name])
     # Rename
 
     return ds_out.rename(rename)
@@ -453,9 +452,8 @@ def grid_from_raster_reclass(
             f"reproject_method should have length 1 or {len(reclass_variables)}"
         )
     # Masking
-    if mask_name is not None:
-        if mask_name in grid_like:
-            ds_out = ds_out.raster.mask(grid_like[mask_name])
+    if mask_name is not None and mask_name in grid_like:
+        ds_out = ds_out.raster.mask(grid_like[mask_name])
     # Rename
     return ds_out.rename(rename)
 
@@ -517,19 +515,19 @@ def grid_from_geodataframe(
     rename = rename or dict()
     if rasterize_method == "value":
         ds_lst = []
-        vars = np.atleast_1d(variables)
+        variables = np.atleast_1d(variables)
         nodata = np.atleast_1d(nodata)
         # Check length of nodata
-        if len(nodata) != len(vars):
+        if len(nodata) != len(variables):
             if len(nodata) == 1:
-                nodata = np.repeat(nodata, len(vars))
+                nodata = np.repeat(nodata, len(variables))
             else:
                 raise ValueError(
                     f"Length of nodata ({len(nodata)}) should be equal to 1 "
-                    + f"or length of variables ({len(vars)})."
+                    + f"or length of variables ({len(variables)})."
                 )
         # Loop of variables and nodata
-        for var, nd in zip(vars, nodata):
+        for var, nd in zip(variables, nodata):
             # Rasterize
             da = grid_like.raster.rasterize(
                 gdf=gdf,
@@ -541,9 +539,8 @@ def grid_from_geodataframe(
             if var in rename.keys():
                 var = rename[var]
             # Masking
-            if mask_name is not None:
-                if mask_name in grid_like:
-                    da = da.raster.mask(grid_like[mask_name])
+            if mask_name is not None and mask_name in grid_like:
+                da = da.raster.mask(grid_like[mask_name])
             ds_lst.append(da.rename(var))
         # Merge
         ds_out = xr.merge(ds_lst)
@@ -672,7 +669,6 @@ def _extract_coords_from_basin(
             f"hydrography data {da_hyd.raster.res}",
         )
         res = da_hyd.raster.res
-    # TODO add warning on res value if crs is projected or not?
     if res != da_hyd.raster.res:
         if crs is not None and crs != da_hyd.raster.crs:
             crs = _gis_utils._parse_crs(crs, da_hyd.raster.bounds)
