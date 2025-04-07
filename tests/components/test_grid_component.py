@@ -270,7 +270,7 @@ def test_add_data_from_raster_reclass(
         match=f"raster_data {raster_data} should be a single variable. "
         "Please select one using the 'variable' argument",
     ):
-        result = grid_component.add_data_from_raster_reclass(
+        _ = grid_component.add_data_from_raster_reclass(
             raster_data=raster_data,
             fill_method="nearest",
             reclass_table_data=reclass_table_data,
