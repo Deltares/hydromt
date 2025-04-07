@@ -25,6 +25,8 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 
 logger: Logger = getLogger(__name__)
 
+ZARR_EXT = ".zarr"
+
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
     """RasterDatasetXarrayDriver."""
@@ -73,7 +75,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         else:
             first_ext: str = splitext(uris[0])[-1]
 
-        if first_ext == ".zarr":
+        if first_ext == ZARR_EXT:
             opn: Callable = partial(xr.open_zarr, **options)
             datasets = []
             for _uri in uris:
@@ -122,14 +124,14 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         """
         no_ext, ext = splitext(path)
         # set filepath if incompat
-        if ext not in {".zarr", ".nc", ".netcdf"}:
+        if ext not in {ZARR_EXT, ".nc", ".netcdf"}:
             logger.warning(
                 f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
                 "switching to zarr"
             )
-            path = no_ext + ".zarr"
-            ext = ".zarr"
-        if ext == ".zarr":
+            path = no_ext + ZARR_EXT
+            ext = ZARR_EXT
+        if ext == ZARR_EXT:
             ds.to_zarr(path, mode="w", **kwargs)
         else:
             ds.to_netcdf(path, **kwargs)
