@@ -203,7 +203,7 @@ def test_from_numpy_full_like():
     assert ds1["var1"].raster.nodata == da.raster.nodata
     assert da.raster.crs == ds1.raster.crs
     with pytest.raises(xr.MergeError, match="Data shapes do not match"):
-        ds1 = raster.RasterDataset.from_numpy(
+        _ = raster.RasterDataset.from_numpy(
             data_vars={"var0": da.values, "var1": da.values.T},
             transform=da.raster.transform,
         )
