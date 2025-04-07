@@ -190,8 +190,7 @@ class DataCatalog(object):
 
     def from_stac_catalog(
         self,
-        stac_like: Union[str, Path, StacCatalog, dict],
-        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+        stac_like: Union[str, Path, StacCatalog, Dict[Any, Any]],
     ):
         """Write data catalog to STAC format.
 
@@ -226,28 +225,24 @@ class DataCatalog(object):
                         name=source_name,
                         uri=asset.get_absolute_href(),
                         driver=RasterDatasetSource._fallback_driver_read,
-                        handle_nodata=handle_nodata,
                     )
                 elif asset.media_type in [MediaType.GEOPACKAGE, MediaType.FLATGEOBUF]:
                     source: GeoDataFrameSource = GeoDataFrameSource(
                         name=source_name,
                         uri=asset.get_absolute_href(),
                         driver=GeoDataFrameSource._fallback_driver_read,
-                        handle_nodata=handle_nodata,
                     )
                 elif asset.media_type == MediaType.GEOJSON:
                     source: GeoDatasetSource = GeoDatasetSource(
                         name=source_name,
                         uri=asset.get_absolute_href(),
                         driver=GeoDatasetSource._fallback_driver_read,
-                        handle_nodata=handle_nodata,
                     )
                 elif asset.media_type == MediaType.JSON:
                     source: DataFrameSource = DataFrameSource(
                         name=source_name,
                         uri=asset.get_absolute_href(),
                         driver=DataFrameSource._fallback_driver_read,
-                        handle_nodata=handle_nodata,
                     )
                 else:
                     continue
