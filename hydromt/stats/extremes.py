@@ -547,10 +547,6 @@ def get_frozen_dist(params, distribution: str):
 
 ## STATS
 
-# TODO add ks and cmv tests
-# cvm = stats.cramervonmises(x, frozen_dist.cdf)
-# ks = stats.kstest(x, frozen_dist.cdf)
-
 
 def _aic(x, params, distribution: str):
     """Return Akaike Information Criterion for a frozen distribution."""
@@ -611,7 +607,7 @@ def lmoment_ci(x, distribution, nsample=1000, alpha=0.9, rps=_RPS, extremes_rate
         return dist.isf(q, *p[:-2], loc=p[-2], scale=p[-1])
 
     # np.random.seed(12456)
-    x_sample = np.random.choice(x, size=[nsample, x.size], replace=True)
+    x_sample = np.random.Generator.choice(x, size=[nsample, x.size], replace=True)
     xrv = np.apply_along_axis(func, 1, x_sample)
 
     percentiles = np.array([(1 - alpha) / 2, 1 - (1 - alpha) / 2]) * 100
@@ -634,8 +630,6 @@ def plot_return_values(
     rps: NDArray[np.int_] = _RPS,
     extremes_rate: float = 1.0,
 ):
-    # TODO: add description to this function Dirk - done very simply now
-    # Maybe extremes_rate should be checked from the params?
     """Return figure of EVA fit and empirical data.
 
     Parameters
@@ -842,9 +836,7 @@ def _lmomentfit(lmom, distribution):
         array of distribution parameters
     """
     # l-moment ratios from l-moments
-    # tau  = lmom[2]/lmom[1]   # tau  = L-CV
-    tau3 = lmom[2] / lmom[1]  # tau3 = L-SK
-    # tau4 = lmom[4]/lmom[2]   # tau4 = L-KU
+    tau3 = lmom[2] / lmom[1]  # tau3 is in L-SK
 
     # derive parameters for selected distribution
     if distribution in ["gev", "genextreme"]:
@@ -941,19 +933,19 @@ def get_lmom(x, nmom=4):
     b0 = xs.mean(axis=0)
 
     for r in range(1, nmom):
-        Num1 = np.kron(np.ones((r, 1)), np.arange(r + 1, n + 1))
-        Num2 = np.kron(np.ones((n - r, 1)), np.arange(1, r + 1)).T
-        Num = np.prod(Num1 - Num2, axis=0)
+        num1 = np.kron(np.ones((r, 1)), np.arange(r + 1, n + 1))
+        num2 = np.kron(np.ones((n - r, 1)), np.arange(1, r + 1)).T
+        num = np.prod(num1 - num2, axis=0)
 
-        Den = np.prod(np.kron(np.ones((1, r)), n) - np.arange(1, r + 1))
-        bb[r - 1] = (((Num / Den) * xs[r:n]).sum()) / n
+        den = np.prod(np.kron(np.ones((1, r)), n) - np.arange(1, r + 1))
+        bb[r - 1] = (((num / den) * xs[r:n]).sum()) / n
 
     B = np.concatenate([np.array([b0]), bb.T])[::-1]
 
     for i in range(1, nmom):
-        Spc = np.zeros(len(B) - (i + 1))
-        Coeff = np.concatenate([Spc, legendre_shift_poly(i)])
-        ll[i - 1] = np.sum(Coeff * B)
+        spc = np.zeros(len(B) - (i + 1))
+        coeff = np.concatenate([spc, legendre_shift_poly(i)])
+        ll[i - 1] = np.sum(coeff * B)
 
     lmom = np.concatenate([np.array([b0]), ll.T])
 
