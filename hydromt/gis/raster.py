@@ -1455,7 +1455,7 @@ class XRasterBase(XGeoBase):
             gdf_grid = gdf_grid_all
         else:
             msktn = ds_like[mask_name]
-            idx_valid = np.where(msktn.values.flatten() != msktn.raster.nodata)[0]
+            idx_valid = np.nonzero(msktn.values.flatten() != msktn.raster.nodata)[0]
             gdf_grid = gdf_grid_all.loc[idx_valid]
 
         # intersect the gdf data with the grid
@@ -1491,7 +1491,7 @@ class XRasterBase(XGeoBase):
             da_out = da_area
         else:  # fraction
             # Mask grid cells that actually do intersect with the geometry
-            idx_area = np.where(da_area.values.flatten() != da_area.raster.nodata)[0]
+            idx_area = np.nonzero(da_area.values.flatten() != da_area.raster.nodata)[0]
             gdf_grid = gdf_grid_all.loc[idx_area]
             # Convert to frac using gdf grid in same crs
             # (area error when using ds_like.raster.area_grid)
