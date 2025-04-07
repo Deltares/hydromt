@@ -435,7 +435,9 @@ def check(
                 validate_region(region)
                 logger.info("Region is valid!")
 
-            except (ValidationError, ValueError, NotImplementedError) as e:
+            # validation error inherits from value error and thus
+            # does not have to be caught here
+            except (ValueError, NotImplementedError) as e:
                 logger.info("region has errors")
                 all_exceptions.append(e)
 
