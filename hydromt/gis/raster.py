@@ -776,7 +776,6 @@ class XRasterBase(XGeoBase):
             grid_map_attrs = crs.to_cf()
         except KeyError:
             grid_map_attrs = {}
-            pass
         # spatial_ref is for compatibility with GDAL
         crs_wkt = crs.to_wkt()
         grid_map_attrs["spatial_ref"] = crs_wkt
@@ -945,7 +944,7 @@ class XRasterBase(XGeoBase):
             x, y coordinates
         """
         idx = np.atleast_1d(idx)
-        nrow, ncol = self.shape
+        _, ncol = self.shape
         r, c = idx // ncol, idx % ncol
         return self.xy(r, c, mask=mask, mask_outside=mask_outside, nodata=nodata)
 
@@ -992,7 +991,6 @@ class XRasterBase(XGeoBase):
         ojb_out: xr.Dataset or xr.DataArray
             Output sample data
         """
-        # TODO: add method for line geometries
         if not np.all(gdf.geometry.type == "Point"):
             raise ValueError("Only point geometries accepted")
 
@@ -1318,7 +1316,6 @@ class XRasterBase(XGeoBase):
         xarray.DataSet or DataArray
             Data clipped to geometry
         """
-        # TODO make common geom to gdf with correct crs parsing
         if not hasattr(geom, "crs"):
             raise ValueError("geom should be geopandas GeoDataFrame object.")
         bbox = geom.total_bounds
@@ -1777,11 +1774,9 @@ class XRasterBase(XGeoBase):
         # Build a KD-tree with the source grid cell center coordinate pairs.
         # For each destination grid cell coordinate pair, search for the nearest
         # source grid cell in the KD-tree.
-        # TODO: benchmark against RTree or S2Index https://github.com/benbovy/pys2index
         tree = cKDTree(src_coords)
         _, indices = tree.query(dst_coords_reproj)
         # filter destination cells with center outside source bbox
-        # TODO filter for the rotated case
         w, s, e, n = self.bounds
         valid = np.logical_and(
             np.logical_and(dst_xx_reproj > w, dst_xx_reproj < e),
