@@ -205,13 +205,13 @@ def merge(
         # merge overlap
         w0, s0, e0, n0 = da.raster.bounds
         if y_res < 0:
-            top = np.where(ys <= n0)[0][0] if n0 < ys[0] else 0
-            bottom = np.where(ys < s0)[0][0] if s0 > ys[-1] else None
+            top = np.nonzero(ys <= n0)[0][0] if n0 < ys[0] else 0
+            bottom = np.nonzero(ys < s0)[0][0] if s0 > ys[-1] else None
         else:
-            top = np.where(ys > n0)[0][0] if n0 < ys[-1] else 0
-            bottom = np.where(ys >= s0)[0][0] if s0 > ys[0] else None
-        left = np.where(xs >= w0)[0][0] if w0 > xs[0] else 0
-        right = np.where(xs > e0)[0][0] if e0 < xs[-1] else None
+            top = np.nonzero(ys > n0)[0][0] if n0 < ys[-1] else 0
+            bottom = np.nonzero(ys >= s0)[0][0] if s0 > ys[0] else None
+        left = np.nonzero(xs >= w0)[0][0] if w0 > xs[0] else 0
+        right = np.nonzero(xs > e0)[0][0] if e0 < xs[-1] else None
         y_slice = slice(top, bottom)
         x_slice = slice(left, right)
         region = dest[y_slice, x_slice]
