@@ -1598,7 +1598,7 @@ def test_to_stac_raster_dataset(tmpdir, data_catalog):
         "chirps_global",
     ]
 
-    stac_catalog = data_catalog.to_stac_catalog(str(tmpdir), used_only=True)
+    stac_catalog = data_catalog.to_stac_catalog(root=str(tmpdir), used_only=True)
 
     assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
     # the two empty strings are for the root and self link which are destinct

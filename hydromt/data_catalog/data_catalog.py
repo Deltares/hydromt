@@ -150,8 +150,8 @@ class DataCatalog(object):
     def to_stac_catalog(
         self,
         root: Union[str, Path],
-        source_names: Optional[List] = None,
-        meta: Optional[Dict] = None,
+        source_names: Optional[List[str]] = None,
+        meta: Optional[Dict[str, Any]] = None,
         catalog_name: str = "hydromt-stac-catalog",
         description: str = "The stac catalog of hydromt",
         used_only: bool = False,
@@ -180,9 +180,8 @@ class DataCatalog(object):
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
         for _name, source in self.list_sources(used_only):
-            if source_names is not None and _name in source_names:
+            if source_names is None or _name in source_names:
                 stac_child_catalog = source.to_stac_catalog(handle_nodata)
-            if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
         stac_catalog.normalize_and_save(root, catalog_type=catalog_type)
