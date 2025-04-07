@@ -340,7 +340,7 @@ latex_documents = [
 
         master_doc,
         "hydromt.tex",
-    DOCS_TITLE,
+        DOCS_TITLE,
         [author],
         "manual",
     ),
