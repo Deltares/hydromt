@@ -109,7 +109,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
         gdf: gpd.GeoDataFrame,
         variables: Optional[Union[str, List[str]]] = None,
         mask: Optional[Geom] = None,
-        predicate: str = "intersects",  # TODO: enum available predicates
+        predicate: str = "intersects",
     ) -> Optional[gpd.GeoDataFrame]:
         """Filter the GeoDataFrame.
 
@@ -123,6 +123,8 @@ class GeoDataFrameAdapter(DataAdapterBase):
             filter by geometry, or keep all if None, by default None
         predicate : str, optional
             predicate to use for the geometry filter, by default "intersects"
+            should be one of the Shapley binary predicates
+            (https://shapely.readthedocs.io/en/latest/manual.html#binary-predicates)
 
         Returns
         -------
