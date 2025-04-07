@@ -584,7 +584,7 @@ def pet_debruin(
         (slope / (slope + gamma))
         * (((1.0 - 0.23) * k_in) - (Cs * (k_in / (k_ext + 0.00001))))
     ) + beta
-    ep_joule = xr.where(k_ext == 0.0, 0.0, ep_joule)
+    ep_joule = xr.where(np.isclose(k_ext, 0.0), 0.0, ep_joule)
     pet = ((ep_joule / lam) * timestep).astype(np.float32)
     pet = xr.where(pet > 0.0, pet, 0.0)
     return pet
