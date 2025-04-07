@@ -44,7 +44,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         zoom: Optional[Zoom] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
         """
         Read zarr data to an xarray DataSet.
@@ -82,7 +81,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 ext = splitext(_uri)[-1]
                 if ext != first_ext and not ext_override:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
-                    continue
                 else:
                     datasets.append(
                         preprocessor(opn(_uri)) if preprocessor else opn(_uri)
@@ -95,7 +93,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 ext = splitext(_uri)[-1]
                 if ext != first_ext:
                     logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
-                    continue
                 else:
                     filtered_uris.append(_uri)
 
