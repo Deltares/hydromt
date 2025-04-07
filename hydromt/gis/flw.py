@@ -400,7 +400,7 @@ def reproject_hydrography_like(
         rivupa = da_flw1.raster.rasterize(gdf_stream, col_name="uparea", nodata=0)
         rivmsk = np.logical_and(flwdir.distnc > river_len, rivupa > 0).values
         _edge = pyflwdir.gis_utils.get_edge(elv_mask.values)
-        inflow_idxs = np.where(np.logical_and(rivmsk, _edge).ravel())[0]
+        inflow_idxs = np.nonzero(np.logical_and(rivmsk, _edge).ravel())[0]
         if inflow_idxs.size > 0:
             # map nearest segment to each river edge cell;
             # keep cell which longest distance to outlet per river segment to
