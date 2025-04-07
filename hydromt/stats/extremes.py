@@ -606,8 +606,7 @@ def lmoment_ci(x, distribution, nsample=1000, alpha=0.9, rps=_RPS, extremes_rate
         p = lmoment_fit(x, distribution)
         return dist.isf(q, *p[:-2], loc=p[-2], scale=p[-1])
 
-    # np.random.seed(12456)
-    x_sample = np.random.Generator.choice(x, size=[nsample, x.size], replace=True)
+    x_sample = np.random.choice(x, size=[nsample, x.size], replace=True)
     xrv = np.apply_along_axis(func, 1, x_sample)
 
     percentiles = np.array([(1 - alpha) / 2, 1 - (1 - alpha) / 2]) * 100
