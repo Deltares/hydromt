@@ -109,7 +109,6 @@ def get_basin_geometry(
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=ds.raster.crs)
 
     # check basin index
-    # TODO understand pfafstetter codes
     gdf_bas = None
     if basin_index is not None:
         if isinstance(basin_index, GeoDataFrameSource):
