@@ -33,7 +33,7 @@ def test_from_da(flwda):
 def test_from_dem(demda, flwdir):
     flwda1 = flw.d8_from_dem(demda, outlets="min")
     # single outlet position
-    assert np.all(np.where(flwda1.values.ravel() == 0)[0] == 6)
+    assert np.all(np.nonzero(flwda1.values.ravel() == 0)[0] == 6)
     # with river shape; fixed depth
     upgrid = flwdir.upstream_area("cell")
     gdf_riv = gpd.GeoDataFrame.from_features(
@@ -107,8 +107,8 @@ def test_basin_map(hydds, flwdir):
     da_basins1 = flw.basin_map(hydds, flwdir, outlets=True)[0]
     assert np.all(da_basins == da_basins1)
     # subbasins with stream arguments
-    idxs = np.where(hydds["uparea"].values.ravel() == 5)
-    da_basins, xy = flw.basin_map(hydds, flwdir, idxs=idxs, uparea=5)
+    idxs = np.nonzero(hydds["uparea"].values.ravel() == 5)
+    da_basins, _xy = flw.basin_map(hydds, flwdir, idxs=idxs, uparea=5)
     assert np.all(hydds["uparea"].values[da_basins.values > 0] <= 5)
     # errors
     with pytest.raises(ValueError, match="Flwdir and ds dimensions do not match"):
