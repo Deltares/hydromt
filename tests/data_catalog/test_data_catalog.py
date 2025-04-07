@@ -491,7 +491,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
         bbox,
         time_range,
         source_names,
-        data_lib_path,
+        _data_lib_path,
     ) = export_test_slice_objects
     data_catalog.export_data(
         tmpdir,
