@@ -16,7 +16,7 @@ from dask.diagnostics import ProgressBar
 
 JOULE_PER_M_SQ = "J m**-2"
 
-# global vars
+# define global vars
 dt_era5t = pd.to_timedelta(95, unit="d")
 era5_variables = {
     "ssrd": "surface_solar_radiation_downwards",
