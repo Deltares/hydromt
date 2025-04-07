@@ -142,7 +142,7 @@ class DataFrameSource(DataSource):
                 f"Skipping {self.name} during stac conversion because"
                 "because detecting temporal extent failed."
             )
-            return
+            return None
         else:
             raise NotImplementedError(
                 "DataFrameSource does not support full stac conversion as it lacks"

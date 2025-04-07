@@ -36,11 +36,10 @@ def print_available_models(ctx, param, value):
     ----------
     ctx : click.Context
         The Click context object.
-    param : click.Parameter
-        The Click parameter object.
     value : bool
         The value of the parameter.
     """
+    # param is required by click though we don't use it
     if not value:
         return {}
     click.echo(f"{PLUGINS.model_summary()}")
@@ -59,6 +58,7 @@ def print_available_components(ctx, param, value):
     value : bool
         The value of the parameter.
     """
+    # param is required by click though we don't use it
     if not value:
         return {}
     click.echo(PLUGINS.component_summary())
@@ -77,6 +77,7 @@ def print_available_plugins(ctx, param, value):
     value : bool
         The value of the parameter.
     """
+    # param is required by click though we don't use it
     if not value:
         return {}
     click.echo(f"{PLUGINS.plugin_summary()}")
@@ -234,6 +235,7 @@ def build(
     bbox hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml  -r
     "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
+    # ctx is required by click though we don't use it
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log._setuplog(join(model_root, HYDROMT_LOG_PATH), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
@@ -330,6 +332,7 @@ def update(
     write the model to a directory:
     hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
+    # ctx is required by click though we don't use it
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
@@ -415,6 +418,7 @@ def check(
     hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{'bbox': [-1,-1,1,1]}' -v
 
     """  # noqa: E501
+    # ctx is required by click though we don't use it
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log._setuplog(join(".", HYDROMT_LOG_PATH), log_level=log_level)
@@ -496,7 +500,7 @@ def check(
 @verbose_opt
 @click.pass_context
 def export(
-    ctx: click.Context,
+    ctx,
     export_dest_path: Path,
     source: Optional[str],
     time_range: Optional[str],
@@ -524,6 +528,7 @@ def export(
     export data as detailed in an export config yaml file
     hydromt export -i /path/to/export_config.yaml path/to/output_dir
     """  # noqa: E501
+    # ctx is required by click though we don't use it
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log._setuplog(join(export_dest_path, HYDROMT_LOG_PATH), log_level=log_level)

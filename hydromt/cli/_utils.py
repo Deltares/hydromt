@@ -29,6 +29,8 @@ def parse_opt(ctx, param, value):
         }
     Note: `==VAL` breaks this as `str.split('=', 1)` is used.
     """
+    # param and ctx are required by click though we don't use them
+
     out = {}
     if not value:
         return out
@@ -60,6 +62,7 @@ def parse_json(ctx, param, value: str) -> Dict[str, Any]:
     If the object passed is a path pointing to a file, load it's contents and parse it.
     Otherwise attempt to parse the object as JSON itself.
     """
+    # param and ctx are required by click though we don't use them
     if isfile(value):
         with open(value, "r") as f:
             kwargs = json.load(f)
