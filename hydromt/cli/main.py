@@ -26,6 +26,8 @@ from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
 
+HYDROMT_LOG_PATH = "hydromt.log"
+
 
 def print_available_models(ctx, param, value):
     """Print the available models and exit.
@@ -233,7 +235,7 @@ def build(
     "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(model_root, "hydromt.log"), log_level=log_level, append=False)
+    log._setuplog(join(model_root, HYDROMT_LOG_PATH), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
     opt = _utils.parse_config(config, opt_cli=opt)
@@ -331,7 +333,7 @@ def update(
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(model_out, "hydromt.log"), log_level=log_level)
+    log._setuplog(join(model_out, HYDROMT_LOG_PATH), log_level=log_level)
     logger.info(f"Updating {model} model at {model_root} ({mode}).")
     logger.info(f"Output dir: {model_out}")
     # parse settings
@@ -415,7 +417,7 @@ def check(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(".", "hydromt.log"), log_level=log_level)
+    log._setuplog(join(".", HYDROMT_LOG_PATH), log_level=log_level)
     try:
         all_exceptions: List[Exception] = []
         for cat_path in data:
@@ -522,7 +524,7 @@ def export(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(export_dest_path, "hydromt.log"), log_level=log_level)
+    log._setuplog(join(export_dest_path, HYDROMT_LOG_PATH), log_level=log_level)
     logger.info(f"Output dir: {export_dest_path}")
 
     if error_on_empty:
