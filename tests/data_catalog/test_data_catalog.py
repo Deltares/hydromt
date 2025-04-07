@@ -131,7 +131,7 @@ def test_parser():
         datasource = _parse_data_source_dict(
             name,
             source,
-            root=root,  # TODO: do we need catalog_name="tmp"
+            root=root,
         )
         assert datasource.full_uri == abspath(join(root, dd["test"]["uri"]))
     # placeholder
@@ -167,11 +167,10 @@ def test_parser():
         datasource = _parse_data_source_dict(
             name,
             source,
-            root=root,  # TODO: do we need catalog_name="tmp"
+            root=root,
         )
         assert datasource.version == dd["test"]["variants"][i].get("version", None)
         assert datasource.provider == dd["test"]["variants"][i].get("provider", None)
-        # assert adapter.catalog_name == "tmp"
 
     # errors
     with pytest.raises(ValueError, match="DataSource needs 'data_type'"):
@@ -823,7 +822,6 @@ class TestGetRasterDataset:
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
     def test_s3(self, data_catalog: DataCatalog):
         data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
-        # TODO: use filesystem in driver
         da = data_catalog.get_rasterdataset(
             data,
             driver={
@@ -879,13 +877,12 @@ class TestGetRasterDataset:
     )
     @pytest.mark.skipif(not HAS_GCSFS, reason="GCSFS not installed.")
     def test_gcs_cmip6(self):
-        # TODO switch to pre-defined catalogs when pushed to main
         catalog_fn = join(_CATALOG_DIR, "gcs_cmip6_data", "v1.0.0", "data_catalog.yml")
         data_catalog = DataCatalog(data_libs=[catalog_fn])
         ds = data_catalog.get_rasterdataset(
             "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
             variables=["precip", "temp"],
-            time_range=(("1990-01-01", "1990-03-01")),
+            time_range=("1990-01-01", "1990-03-01"),
         )
         # Check reading and some preprocess
         assert "precip" in ds
@@ -1198,15 +1195,13 @@ class TestGetGeoDataset:
         assert da is None
 
     @pytest.mark.integration
-    def test_nodata_raises_nodata(
-        geodf: gpd.GeoDataFrame, nc_dataset: str, data_catalog: DataCatalog
-    ):
+    def test_nodata_raises_nodata(self, nc_dataset: str, data_catalog: DataCatalog):
         with pytest.raises(NoDataException):
             data_catalog.get_geodataset(
                 nc_dataset,
                 driver="geodataset_xarray",
                 # only really care that the bbox doesn't intersect with anythign
-                bbox=[12.5, 12.6, 12.7, 12.8],
+                bbox=(12.5, 12.6, 12.7, 12.8),
                 handle_nodata=NoDataStrategy.RAISE,
             )
 
