@@ -25,6 +25,8 @@ _DISTS = {
     "BM": ["gumb", "gev"],
 }
 
+DEFAULT_PERIOD_STR = "365.25D"
+
 ## high level methods
 
 
@@ -33,7 +35,7 @@ def eva(
     ev_type: str = "BM",
     min_dist: int = 0,
     qthresh: float = 0.9,
-    period: str = "365.25D",
+    period: str = DEFAULT_PERIOD_STR,
     min_sample_size: int = 0,
     distribution: Optional[str] = None,
     rps: NDArray[np.int_] = _RPS,
@@ -96,7 +98,7 @@ def eva(
 # In theory could be removed because redundant with eva
 def eva_block_maxima(
     da: xr.DataArray,
-    period: str = "365.25D",
+    period: str = DEFAULT_PERIOD_STR,
     min_dist: int = 0,
     min_sample_size: int = 0,
     distribution: Optional[str] = None,
@@ -156,7 +158,7 @@ def eva_peaks_over_threshold(
     qthresh: float = 0.9,
     min_dist: int = 0,
     min_sample_size: int = 0,
-    period: str = "365.25D",
+    period: str = DEFAULT_PERIOD_STR,
     distribution: Optional[str] = None,
     rps: NDArray[np.int_] = _RPS,
     criterium: str = "AIC",
