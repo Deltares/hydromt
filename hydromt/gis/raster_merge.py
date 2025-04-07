@@ -132,7 +132,7 @@ def merge(
     else:
         raise ValueError("dst_res not understood.")
     assert x_res > 0
-    # TODO test y_res > 0
+    assert y_res > 0
     dst_res = (x_res, -y_res)  # NOTE: y_res is multiplied with -1 in rasterio!
     # dst bounds
     if dst_bounds is None and mask is not None:
