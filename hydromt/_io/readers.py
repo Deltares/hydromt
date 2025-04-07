@@ -95,7 +95,6 @@ def _open_mfcsv(
     data : Dataset
         The newly created Dataset.
     """
-    ds = xr.Dataset()
     if variable_axis not in [0, 1]:
         raise ValueError(f"there is no axis {variable_axis} available in 2D csv files")
     if segmented_by not in ["id", "var"]:
@@ -125,13 +124,13 @@ def _open_mfcsv(
             # could have done this in one giant boolean expression but throught
             # this was clearer
             if df.index.name is None:
-                if not csv_index_name == "index":
+                if csv_index_name != "index":
                     logger.warning(
                         f"csv file {path} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
                     )
             else:
-                if not csv_index_name == df.index.name:
+                if csv_index_name != df.index.name:
                     logger.warning(
                         f"csv file {path} has inconsistent index name: {df.index.name}"
                         f"expected {csv_index_name} as it's the first one found."
