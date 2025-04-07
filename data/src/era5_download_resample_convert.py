@@ -13,6 +13,8 @@ import pandas as pd
 import xarray as xr
 from dask.diagnostics import ProgressBar
 
+JOULE_PER_M_SQ = "J m**-2"
+
 # global vars
 dt_era5t = pd.to_timedelta(95, unit="d")
 era5_variables = {
@@ -46,9 +48,9 @@ daily_attrs = {
         "long_name": "Mean sea level pressure",
         "standard_name": "air_pressure_at_mean_sea_level",
     },
-    "tisr": {"units": "J m**-2", "long_name": "TOA incident solar radiation"},
+    "tisr": {"units": JOULE_PER_M_SQ, "long_name": "TOA incident solar radiation"},
     "ssrd": {
-        "units": "J m**-2",
+        "units": JOULE_PER_M_SQ,
         "long_name": "Surface solar radiation downwards",
         "standard_name": "surface_downwelling_shortwave_flux_in_air",
     },
@@ -67,7 +69,7 @@ daily_attrs = {
         "standard_name": "10m_v_component_of_wind",
     },
     "ssr": {
-        "units": "J m**-2",
+        "units": JOULE_PER_M_SQ,
         "long_name": "Surface net solar radiation",
         "standard_name": "surface_net_downward_shortwave_flux",
     },
