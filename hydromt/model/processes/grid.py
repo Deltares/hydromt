@@ -377,7 +377,7 @@ def grid_from_rasterdataset(
     else:
         raise ValueError(f"reproject_method should have length 1 or {len(variables)}")
     # Masking
-    if mask_name is not None and mask_name in grid_like:
+    if mask_name in grid_like:
         ds_out = ds_out.raster.mask(grid_like[mask_name])
     # Rename
 

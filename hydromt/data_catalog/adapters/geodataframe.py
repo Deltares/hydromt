@@ -123,7 +123,7 @@ class GeoDataFrameAdapter(DataAdapterBase):
             filter by geometry, or keep all if None, by default None
         predicate : str, optional
             predicate to use for the geometry filter, by default "intersects"
-            should be one of the Shapley binary predicates
+            should be one of the Shapeley binary predicates
             (https://shapely.readthedocs.io/en/latest/manual.html#binary-predicates)
 
         Returns

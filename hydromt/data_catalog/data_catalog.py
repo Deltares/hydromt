@@ -71,7 +71,7 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["DataCatalog"]
 
-NO_DATA_AFTER_SLICE_MSG = "No data was left after slicing."
+_NO_DATA_AFTER_SLICE_MSG = "No data was left after slicing."
 
 
 class DataCatalog(object):

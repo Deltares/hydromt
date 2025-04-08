@@ -25,7 +25,7 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 
 logger: Logger = getLogger(__name__)
 
-ZARR_EXT = ".zarr"
+_ZARR_EXT = ".zarr"
 
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):

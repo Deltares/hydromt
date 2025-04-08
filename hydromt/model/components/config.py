@@ -17,8 +17,8 @@ if TYPE_CHECKING:
 
 logger: Logger = getLogger(__name__)
 
-YAML_EXTS = [".yml", ".yaml"]
-TOML_EXT = ".toml"
+_YAML_EXTS = [".yml", ".yaml"]
+_TOML_EXT = ".toml"
 
 
 class ConfigComponent(ModelComponent):

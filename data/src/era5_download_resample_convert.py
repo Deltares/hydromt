@@ -14,7 +14,7 @@ import pandas as pd
 import xarray as xr
 from dask.diagnostics import ProgressBar
 
-JOULE_PER_M_SQ = "J m**-2"
+_JOULE_PER_M_SQ = "J m**-2"
 
 # define global vars
 dt_era5t = pd.to_timedelta(95, unit="d")
@@ -186,7 +186,7 @@ def resample_year(
     decimals: Optional[int] = None,
     nodata: int = -9999,
     chunks: Optional[Dict[Any, Any]] = None,
-    dask_kwargs: Optional[Dict[Any, Any]] = None,
+    dask_kwargs: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """Resample hourly variables to daily timestep.
 

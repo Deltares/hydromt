@@ -25,7 +25,7 @@ _DISTS = {
     "BM": ["gumb", "gev"],
 }
 
-DEFAULT_PERIOD_STR = "365.25D"
+_DEFAULT_PERIOD_STR = "365.25D"
 
 ## high level methods
 
