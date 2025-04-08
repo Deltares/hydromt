@@ -180,8 +180,8 @@ class DataCatalog(object):
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
         for _name, source in self.list_sources(used_only):
-            if source_names is None or _name in source_names:
-                stac_child_catalog = source.to_stac_catalog(handle_nodata)
+            stac_child_catalog = source.to_stac_catalog(handle_nodata)
+            if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
         stac_catalog.normalize_and_save(root, catalog_type=catalog_type)
