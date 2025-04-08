@@ -501,7 +501,6 @@
         <span class="n">time_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="c1"># TODO: https://github.com/Deltares/hydromt/issues/802</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read zarr data to an xarray DataSet.</span>
@@ -533,7 +532,6 @@
                 <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">_uri</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">ext</span> <span class="o">!=</span> <span class="n">first_ext</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading zarr and </span><span class="si">{</span><span class="n">_uri</span><span class="si">}</span><span class="s2"> was not, skipping...&quot;</span><span class="p">)</span>
-                    <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">preprocessor</span><span class="p">(</span><span class="n">opn</span><span class="p">(</span><span class="n">_uri</span><span class="p">))</span> <span class="k">if</span> <span class="n">preprocessor</span> <span class="k">else</span> <span class="n">opn</span><span class="p">(</span><span class="n">_uri</span><span class="p">)</span>
@@ -546,7 +544,6 @@
                 <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">_uri</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">ext</span> <span class="o">!=</span> <span class="n">first_ext</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading netcdf and </span><span class="si">{</span><span class="n">_uri</span><span class="si">}</span><span class="s2"> was not, skipping...&quot;</span><span class="p">)</span>
-                    <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">filtered_uris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_uri</span><span class="p">)</span>
 

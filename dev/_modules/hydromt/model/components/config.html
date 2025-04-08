@@ -475,6 +475,9 @@
 
 <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
+<span class="n">_YAML_EXTS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]</span>
+<span class="n">_TOML_EXT</span> <span class="o">=</span> <span class="s2">&quot;.toml&quot;</span>
+
 
 <div class="viewcode-block" id="ConfigComponent">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.ConfigComponent.html#hydromt.model.components.ConfigComponent">[docs]</a>
@@ -555,9 +558,9 @@
 
             <span class="n">write_data</span> <span class="o">=</span> <span class="n">_make_config_paths_relative</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">p</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">_YAML_EXTS</span><span class="p">:</span>
                 <span class="n">_write_yaml</span><span class="p">(</span><span class="n">write_path</span><span class="p">,</span> <span class="n">write_data</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.toml&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="n">_TOML_EXT</span><span class="p">:</span>
                 <span class="n">_write_toml</span><span class="p">(</span><span class="n">write_path</span><span class="p">,</span> <span class="n">write_data</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown file extension: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -586,9 +589,9 @@
 
         <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">p</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="c1"># Always overwrite config when reading</span>
-        <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">_YAML_EXTS</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_read_yaml</span><span class="p">(</span><span class="n">read_path</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.toml&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="n">_TOML_EXT</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_read_toml</span><span class="p">(</span><span class="n">read_path</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown file extension: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
@@ -738,9 +741,9 @@
         <span class="n">template</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
         <span class="c1"># Here directly overwrite config with template</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating model config from </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> template: </span><span class="si">{</span><span class="n">template</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">template</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.yml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">template</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="n">_YAML_EXTS</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_read_yaml</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">template</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.toml&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">template</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="n">_TOML_EXT</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_read_toml</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown file extension: </span><span class="si">{</span><span class="n">template</span><span class="o">.</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>

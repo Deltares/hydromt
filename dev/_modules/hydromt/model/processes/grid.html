@@ -775,9 +775,8 @@
     <span class="c1"># Set nodata value</span>
     <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
     <span class="c1"># Masking</span>
-    <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
-            <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
+        <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">da</span></div>
 
@@ -846,9 +845,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;reproject_method should have length 1 or </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="c1"># Masking</span>
-    <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
-            <span class="n">ds_out</span> <span class="o">=</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
+        <span class="n">ds_out</span> <span class="o">=</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
     <span class="c1"># Rename</span>
 
     <span class="k">return</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">rename</span><span class="p">)</span></div>
@@ -925,9 +923,8 @@
             <span class="sa">f</span><span class="s2">&quot;reproject_method should have length 1 or </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">reclass_variables</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
     <span class="c1"># Masking</span>
-    <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
-            <span class="n">ds_out</span> <span class="o">=</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
+        <span class="n">ds_out</span> <span class="o">=</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
     <span class="c1"># Rename</span>
     <span class="k">return</span> <span class="n">ds_out</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">rename</span><span class="p">)</span></div>
 
@@ -992,19 +989,19 @@
     <span class="n">rename</span> <span class="o">=</span> <span class="n">rename</span> <span class="ow">or</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">rasterize_method</span> <span class="o">==</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span>
         <span class="n">ds_lst</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="nb">vars</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
         <span class="n">nodata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
         <span class="c1"># Check length of nodata</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">vars</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">nodata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">nodata</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">vars</span><span class="p">))</span>
+                <span class="n">nodata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">nodata</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Length of nodata (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span><span class="si">}</span><span class="s2">) should be equal to 1 &quot;</span>
-                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;or length of variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="nb">vars</span><span class="p">)</span><span class="si">}</span><span class="s2">).&quot;</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;or length of variables (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span><span class="si">}</span><span class="s2">).&quot;</span>
                 <span class="p">)</span>
         <span class="c1"># Loop of variables and nodata</span>
-        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">nd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">vars</span><span class="p">,</span> <span class="n">nodata</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">nd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">variables</span><span class="p">,</span> <span class="n">nodata</span><span class="p">):</span>
             <span class="c1"># Rasterize</span>
             <span class="n">da</span> <span class="o">=</span> <span class="n">grid_like</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span>
                 <span class="n">gdf</span><span class="o">=</span><span class="n">gdf</span><span class="p">,</span>
@@ -1016,9 +1013,8 @@
             <span class="k">if</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">rename</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">var</span> <span class="o">=</span> <span class="n">rename</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
             <span class="c1"># Masking</span>
-            <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
-                    <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
+                <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
             <span class="n">ds_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">var</span><span class="p">))</span>
         <span class="c1"># Merge</span>
         <span class="n">ds_out</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">ds_lst</span><span class="p">)</span>
@@ -1033,9 +1029,8 @@
             <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># Masking</span>
-        <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
-                <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">mask_name</span> <span class="ow">in</span> <span class="n">grid_like</span><span class="p">:</span>
+            <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">grid_like</span><span class="p">[</span><span class="n">mask_name</span><span class="p">])</span>
         <span class="n">ds_out</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">()</span>
 
     <span class="k">else</span><span class="p">:</span>
@@ -1151,7 +1146,6 @@
             <span class="sa">f</span><span class="s2">&quot;hydrography data </span><span class="si">{</span><span class="n">da_hyd</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">da_hyd</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span>
-    <span class="c1"># TODO add warning on res value if crs is projected or not?</span>
     <span class="k">if</span> <span class="n">res</span> <span class="o">!=</span> <span class="n">da_hyd</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">crs</span> <span class="o">!=</span> <span class="n">da_hyd</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">:</span>
             <span class="n">crs</span> <span class="o">=</span> <span class="n">_gis_utils</span><span class="o">.</span><span class="n">_parse_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="n">da_hyd</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>

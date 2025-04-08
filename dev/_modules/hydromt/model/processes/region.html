@@ -565,7 +565,6 @@
 
     <span class="n">_assert_parse_key</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;basin&quot;</span><span class="p">,</span> <span class="s2">&quot;interbasin&quot;</span><span class="p">,</span> <span class="s2">&quot;subbasin&quot;</span><span class="p">)</span>
 
-    <span class="c1"># TODO: Make this very specific to basin.</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="n">_parse_region_value</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">data_catalog</span><span class="o">=</span><span class="n">data_catalog</span><span class="p">)</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">var_thresh_kwargs</span><span class="p">)</span>
 
@@ -654,7 +653,6 @@
 
     <span class="n">_assert_parse_key</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;geom&quot;</span><span class="p">)</span>
 
-    <span class="c1"># TODO: Make this very specific to geom</span>
     <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_parse_region_value</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">data_catalog</span><span class="o">=</span><span class="n">data_catalog</span><span class="p">))</span>
 
     <span class="n">_assert_parsed_values</span><span class="p">(</span>

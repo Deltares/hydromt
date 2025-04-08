@@ -572,7 +572,7 @@ been extended with a basin mask layer, which together with the basin index vecto
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-name=&#39;merit_hydro&#39; uri=&#39;merit_hydro/{variable}.tif&#39; data_adapter=RasterDatasetAdapter(unit_add={}, unit_mult={}, rename={}) driver=RasterioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f9b76ba3310&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f9b76ba3310&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=&#39;1.0&#39; provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+name=&#39;merit_hydro&#39; uri=&#39;merit_hydro/{variable}.tif&#39; data_adapter=RasterDatasetAdapter(unit_add={}, unit_mult={}, rename={}) driver=RasterioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0cdcf9d2b0&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0cdcf9d2b0&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=&#39;1.0&#39; provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -603,7 +603,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-name=&#39;merit_hydro_index&#39; uri=&#39;merit_hydro_index.gpkg&#39; data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}) driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f9b76ba3310&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f9b76ba3310&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=None provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+name=&#39;merit_hydro_index&#39; uri=&#39;merit_hydro_index.gpkg&#39; data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}) driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0cdcf9d2b0&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0cdcf9d2b0&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=None provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -668,19 +668,7 @@ Datum: World Geodetic System 1984 ensemble
 <div class="highlight"><pre>
 object: ConventionResolver does not use kwarg mask with value                                             geometry
 0  POLYGON ((12.7 45.7, 12.7 45.9, 12.5 45.9, 12.....
-object: PyogrioDriver does not use kwarg predicate with value intersects.
-object: PyogrioDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
-Name: WGS 84
-Axis Info [ellipsoidal]:
-- Lat[north]: Geodetic latitude (degree)
-- Lon[east]: Geodetic longitude (degree)
-Area of Use:
-- name: World.
-- bounds: (-180.0, -90.0, 180.0, 90.0)
-Datum: World Geodetic System 1984 ensemble
-- Ellipsoid: WGS 84
-- Prime Meridian: Greenwich
- unit=None extent={} nodata=None attrs={} category=&#39;topography&#39; paper_doi=&#39;10.5194/hess-2020-582&#39; paper_ref=&#39;Eilander et al. (in review)&#39; license=&#39;CC-BY-NC 4.0&#39;.
+Overwriting crs of GeoDataFrame to EPSG:4326
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -700,7 +688,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4432/1510890054.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4319/1510890054.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = np.array(gdf_bas.buffer(0.1).total_bounds)[[0, 2, 1, 3]]
 </pre></div></div>
@@ -763,7 +751,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4432/3041410776.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4319/3041410776.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bounds.buffer(0.05).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>
@@ -810,19 +798,7 @@ Datum: World Geodetic System 1984 ensemble
 <div class="highlight"><pre>
 object: ConventionResolver does not use kwarg mask with value                                             geometry
 0  POLYGON ((12.7 45.72, 12.7 46, 12.5 46, 12.5 4....
-object: PyogrioDriver does not use kwarg predicate with value intersects.
-object: PyogrioDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
-Name: WGS 84
-Axis Info [ellipsoidal]:
-- Lat[north]: Geodetic latitude (degree)
-- Lon[east]: Geodetic longitude (degree)
-Area of Use:
-- name: World.
-- bounds: (-180.0, -90.0, 180.0, 90.0)
-Datum: World Geodetic System 1984 ensemble
-- Ellipsoid: WGS 84
-- Prime Meridian: Greenwich
- unit=None extent={} nodata=None attrs={} category=&#39;topography&#39; paper_doi=&#39;10.5194/hess-2020-582&#39; paper_ref=&#39;Eilander et al. (in review)&#39; license=&#39;CC-BY-NC 4.0&#39;.
+Overwriting crs of GeoDataFrame to EPSG:4326
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -843,7 +819,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4432/2647821985.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4319/2647821985.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bas.buffer(0.05).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>
@@ -904,7 +880,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4432/1881121779.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4319/1881121779.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bbox.buffer(0.02).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>

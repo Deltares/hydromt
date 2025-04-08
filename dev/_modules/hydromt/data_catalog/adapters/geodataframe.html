@@ -572,7 +572,7 @@
         <span class="n">gdf</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>  <span class="c1"># TODO: enum available predicates</span>
+        <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the GeoDataFrame.</span>
 
@@ -586,6 +586,8 @@
 <span class="sd">            filter by geometry, or keep all if None, by default None</span>
 <span class="sd">        predicate : str, optional</span>
 <span class="sd">            predicate to use for the geometry filter, by default &quot;intersects&quot;</span>
+<span class="sd">            should be one of the Shapeley binary predicates</span>
+<span class="sd">            (https://shapely.readthedocs.io/en/latest/manual.html#binary-predicates)</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>

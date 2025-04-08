@@ -574,10 +574,9 @@
         <span class="k">if</span> <span class="n">uri_is_url</span><span class="p">:</span>
             <span class="c1"># uri is fully self-describing</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uri</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">uri_is_url</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">_is_valid_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">):</span>
-                <span class="c1"># use &#39;/&#39; to connect url parts</span>
-                <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="ow">and</span> <span class="n">_is_valid_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">):</span>
+            <span class="c1"># use &#39;/&#39; to connect url parts</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="c1"># Local file, make absolute</span>
         <span class="k">return</span> <span class="n">_abs_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
 
@@ -591,7 +590,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_uri_basename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="o">**</span><span class="n">query_kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">if</span> <span class="s2">&quot;{&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">:</span>
             <span class="c1"># first resolve any placeholders</span>
-            <span class="c1"># FIXME: place me in the to_file interface</span>
             <span class="n">uris</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">uri_resolver</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span>
                 <span class="n">uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">full_uri</span><span class="p">,</span>
                 <span class="n">handle_nodata</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
