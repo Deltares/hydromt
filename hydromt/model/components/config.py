@@ -93,9 +93,9 @@ class ConfigComponent(ModelComponent):
 
             write_data = _make_config_paths_relative(self.data, self.root.path)
             ext = splitext(p)[-1]
-            if ext in YAML_EXTS:
+            if ext in _YAML_EXTS:
                 _write_yaml(write_path, write_data)
-            elif ext == TOML_EXT:
+            elif ext == _TOML_EXT:
                 _write_toml(write_path, write_data)
             else:
                 raise ValueError(f"Unknown file extension: {ext}")
@@ -121,9 +121,9 @@ class ConfigComponent(ModelComponent):
 
         ext = splitext(p)[-1]
         # Always overwrite config when reading
-        if ext in YAML_EXTS:
+        if ext in _YAML_EXTS:
             self._data = _read_yaml(read_path)
-        elif ext == TOML_EXT:
+        elif ext == _TOML_EXT:
             self._data = _read_toml(read_path)
         else:
             raise ValueError(f"Unknown file extension: {ext}")
@@ -264,9 +264,9 @@ class ConfigComponent(ModelComponent):
         template = Path(template)
         # Here directly overwrite config with template
         logger.info(f"Creating model config from {prefix} template: {template}")
-        if template.suffix in YAML_EXTS:
+        if template.suffix in _YAML_EXTS:
             self._data = _read_yaml(template)
-        elif template.suffix == TOML_EXT:
+        elif template.suffix == _TOML_EXT:
             self._data = _read_toml(template)
         else:
             raise ValueError(f"Unknown file extension: {template.suffix}")

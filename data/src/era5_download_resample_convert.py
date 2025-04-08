@@ -49,9 +49,9 @@ daily_attrs = {
         "long_name": "Mean sea level pressure",
         "standard_name": "air_pressure_at_mean_sea_level",
     },
-    "tisr": {"units": JOULE_PER_M_SQ, "long_name": "TOA incident solar radiation"},
+    "tisr": {"units": _JOULE_PER_M_SQ, "long_name": "TOA incident solar radiation"},
     "ssrd": {
-        "units": JOULE_PER_M_SQ,
+        "units": _JOULE_PER_M_SQ,
         "long_name": "Surface solar radiation downwards",
         "standard_name": "surface_downwelling_shortwave_flux_in_air",
     },
@@ -70,7 +70,7 @@ daily_attrs = {
         "standard_name": "10m_v_component_of_wind",
     },
     "ssr": {
-        "units": JOULE_PER_M_SQ,
+        "units": _JOULE_PER_M_SQ,
         "long_name": "Surface net solar radiation",
         "standard_name": "surface_net_downward_shortwave_flux",
     },

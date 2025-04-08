@@ -74,7 +74,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         else:
             first_ext: str = splitext(uris[0])[-1]
 
-        if first_ext == ZARR_EXT:
+        if first_ext == _ZARR_EXT:
             opn: Callable = partial(xr.open_zarr, **options)
             datasets = []
             for _uri in uris:
@@ -121,14 +121,14 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         """
         no_ext, ext = splitext(path)
         # set filepath if incompat
-        if ext not in {ZARR_EXT, ".nc", ".netcdf"}:
+        if ext not in {_ZARR_EXT, ".nc", ".netcdf"}:
             logger.warning(
                 f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
                 "switching to zarr"
             )
-            path = no_ext + ZARR_EXT
-            ext = ZARR_EXT
-        if ext == ZARR_EXT:
+            path = no_ext + _ZARR_EXT
+            ext = _ZARR_EXT
+        if ext == _ZARR_EXT:
             ds.to_zarr(path, mode="w", **kwargs)
         else:
             ds.to_netcdf(path, **kwargs)

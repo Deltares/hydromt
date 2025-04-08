@@ -1317,7 +1317,7 @@ class DataCatalog(object):
             )
             if data_like is None:
                 exec_nodata_strat(
-                    NO_DATA_AFTER_SLICE_MSG,
+                    _NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return _single_var_as_array(
@@ -1440,7 +1440,7 @@ class DataCatalog(object):
             )
             if data_like is None:
                 exec_nodata_strat(
-                    NO_DATA_AFTER_SLICE_MSG,
+                    _NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return data_like
@@ -1576,7 +1576,7 @@ class DataCatalog(object):
             )
             if data_like is None:
                 exec_nodata_strat(
-                    NO_DATA_AFTER_SLICE_MSG,
+                    _NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
@@ -1680,7 +1680,7 @@ class DataCatalog(object):
             )
             if data_like is None:
                 exec_nodata_strat(
-                    NO_DATA_AFTER_SLICE_MSG,
+                    _NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return _single_var_as_array(data_like, single_var_as_array, variables)
@@ -1771,7 +1771,7 @@ class DataCatalog(object):
             df = DataFrameAdapter._slice_data(data_like, variables, time_range)
             if df is None:
                 exec_nodata_strat(
-                    NO_DATA_AFTER_SLICE_MSG,
+                    _NO_DATA_AFTER_SLICE_MSG,
                     strategy=handle_nodata,
                 )
             return df
