@@ -273,7 +273,6 @@ class TestValidators:
             uri_resolver=mock_resolver,
             driver=driver_cls(),
         ).to_file(new_path)
-        # assert new_path.is_file()
         assert new_source.root is None
         assert new_source.driver.filesystem.protocol == ("file", "local")
 

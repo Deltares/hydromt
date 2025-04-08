@@ -109,7 +109,6 @@ def get_basin_geometry(
         geom = gpd.GeoDataFrame(geometry=[box(*bbox)], crs=ds.raster.crs)
 
     # check basin index
-    # TODO understand pfafstetter codes
     gdf_bas = None
     if basin_index is not None:
         if isinstance(basin_index, GeoDataFrameSource):
@@ -253,7 +252,7 @@ def get_basin_geometry(
             outmap = aoi.where(outlet_map(ds[flwdir_name], ftype=flwdir.ftype), False)
             if stream_kwargs:
                 outmap = outmap.where(stream_kwargs, False)
-            idxs_out = np.where(outmap.values.ravel())[0]
+            idxs_out = np.nonzero(outmap.values.ravel())[0]
             if not np.any(outmap):
                 raise ValueError("No outlets found with with given criteria.")
             xy = outmap.raster.idx_to_xy(idxs_out)

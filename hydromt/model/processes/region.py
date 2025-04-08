@@ -105,7 +105,6 @@ def parse_region_basin(
 
     _assert_parse_key(kind, "basin", "interbasin", "subbasin")
 
-    # TODO: Make this very specific to basin.
     kwargs = _parse_region_value(value0, data_catalog=data_catalog)
     kwargs.update(var_thresh_kwargs)
 
@@ -188,7 +187,6 @@ def parse_region_geom(
 
     _assert_parse_key(kind, "geom")
 
-    # TODO: Make this very specific to geom
     kwargs.update(_parse_region_value(value0, data_catalog=data_catalog))
 
     _assert_parsed_values(

@@ -111,10 +111,9 @@ class DataSource(BaseModel, ABC):
         if uri_is_url:
             # uri is fully self-describing
             return self.uri
-        if not uri_is_url and self.root:
-            if _is_valid_url(self.root):
-                # use '/' to connect url parts
-                return f"{self.root.rstrip('/')}/{self.uri}"
+        elif self.root and _is_valid_url(self.root):
+            # use '/' to connect url parts
+            return f"{self.root.rstrip('/')}/{self.uri}"
         # Local file, make absolute
         return _abs_path(self.root, self.uri)
 
@@ -128,7 +127,6 @@ class DataSource(BaseModel, ABC):
     def _get_uri_basename(self, handle_nodata: NoDataStrategy, **query_kwargs) -> str:
         if "{" in self.uri:
             # first resolve any placeholders
-            # FIXME: place me in the to_file interface
             uris: List[str] = self.uri_resolver.resolve(
                 uri=self.full_uri,
                 handle_nodata=handle_nodata,

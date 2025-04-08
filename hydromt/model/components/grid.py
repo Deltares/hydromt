@@ -120,9 +120,8 @@ class GridComponent(SpatialModelComponent):
             self._data = data
         else:
             for dvar in data.data_vars:
-                if dvar in self._data:
-                    if self.root.is_reading_mode():
-                        logger.warning(f"Replacing grid map: {dvar}")
+                if dvar in self._data and self.root.is_reading_mode():
+                    logger.warning(f"Replacing grid map: {dvar}")
                 self._data[dvar] = data[dvar]
 
     @hydromt_step

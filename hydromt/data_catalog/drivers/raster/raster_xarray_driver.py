@@ -25,6 +25,8 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 
 logger: Logger = getLogger(__name__)
 
+_ZARR_EXT = ".zarr"
+
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
     """RasterDatasetXarrayDriver."""
@@ -42,7 +44,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         zoom: Optional[Zoom] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
         """
         Read zarr data to an xarray DataSet.
@@ -73,14 +74,13 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         else:
             first_ext: str = splitext(uris[0])[-1]
 
-        if first_ext == ".zarr":
+        if first_ext == _ZARR_EXT:
             opn: Callable = partial(xr.open_zarr, **options)
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
                 if ext != first_ext and not ext_override:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
-                    continue
                 else:
                     datasets.append(
                         preprocessor(opn(_uri)) if preprocessor else opn(_uri)
@@ -93,7 +93,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 ext = splitext(_uri)[-1]
                 if ext != first_ext:
                     logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
-                    continue
                 else:
                     filtered_uris.append(_uri)
 
@@ -122,14 +121,14 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         """
         no_ext, ext = splitext(path)
         # set filepath if incompat
-        if ext not in {".zarr", ".nc", ".netcdf"}:
+        if ext not in {_ZARR_EXT, ".nc", ".netcdf"}:
             logger.warning(
                 f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
                 "switching to zarr"
             )
-            path = no_ext + ".zarr"
-            ext = ".zarr"
-        if ext == ".zarr":
+            path = no_ext + _ZARR_EXT
+            ext = _ZARR_EXT
+        if ext == _ZARR_EXT:
             ds.to_zarr(path, mode="w", **kwargs)
         else:
             ds.to_netcdf(path, **kwargs)

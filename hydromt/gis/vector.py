@@ -36,7 +36,6 @@ class GeoBase(raster.XGeoBase):
     @property
     def _all_names(self) -> list[Hashable]:
         """Return names of all variables and coordinates in the dataset/array."""
-        # TODO: move to geobase
         names = [n for n in self._obj.coords]
         if isinstance(self._obj, xr.Dataset):
             names = names + [n for n in self._obj.data_vars]
@@ -188,7 +187,6 @@ class GeoBase(raster.XGeoBase):
         """Return geometry type."""
         geom_types = self.geometry.type.values
         if len(set(geom_types)) > 1:
-            # TODO: can we safely assume there is multi geom?
             i = ["MULTI" in g.upper() for g in geom_types].index(True)
             geom_type = geom_types[i]
         else:
@@ -256,7 +254,6 @@ class GeoBase(raster.XGeoBase):
             return self._geometry
         # if no geometry is present return None self._geometry
         # rather than raising an error ->
-        # FIXME is this the right approach?
         try:
             self.set_spatial_dims()
         except ValueError:
@@ -561,7 +558,6 @@ class GeoBase(raster.XGeoBase):
         return self._obj.isel({self.index_dim: idx})
 
     ## wrap GeoSeries functions
-    # TODO write general wrapper
     def to_crs(self, dst_crs) -> Union[xr.DataArray, xr.Dataset]:
         """Transform spatial coordinates to a new coordinate reference system.
 

@@ -26,6 +26,8 @@ from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
 
+HYDROMT_LOG_PATH = "hydromt.log"
+
 
 def print_available_models(ctx, param, value):
     """Print the available models and exit.
@@ -34,18 +36,17 @@ def print_available_models(ctx, param, value):
     ----------
     ctx : click.Context
         The Click context object.
-    param : click.Parameter
-        The Click parameter object.
     value : bool
         The value of the parameter.
     """
+    # param is required by click though we don't use it
     if not value:
         return {}
     click.echo(f"{PLUGINS.model_summary()}")
     ctx.exit()
 
 
-def print_available_components(ctx, param, value):
+def print_available_components(ctx, _param, value):
     """Print the available components and exit.
 
     Parameters
@@ -63,7 +64,7 @@ def print_available_components(ctx, param, value):
     ctx.exit()
 
 
-def print_available_plugins(ctx, param, value):
+def print_available_plugins(ctx, _param, value):
     """Print the available plugins and exit.
 
     Parameters
@@ -208,7 +209,7 @@ def main(ctx, models, components, plugins):
 @quiet_opt
 @click.pass_context
 def build(
-    ctx,
+    _ctx: click.Context,
     model,
     model_root,
     opt,
@@ -233,7 +234,7 @@ def build(
     "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(model_root, "hydromt.log"), log_level=log_level, append=False)
+    log._setuplog(join(model_root, HYDROMT_LOG_PATH), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
     opt = _utils.parse_config(config, opt_cli=opt)
@@ -299,7 +300,7 @@ def build(
 @verbose_opt
 @click.pass_context
 def update(
-    ctx,
+    _ctx: click.Context,
     model,
     model_root,
     model_out,
@@ -331,7 +332,7 @@ def update(
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(model_out, "hydromt.log"), log_level=log_level)
+    log._setuplog(join(model_out, HYDROMT_LOG_PATH), log_level=log_level)
     logger.info(f"Updating {model} model at {model_root} ({mode}).")
     logger.info(f"Output dir: {model_out}")
     # parse settings
@@ -387,7 +388,7 @@ def update(
 @region_opt
 @click.pass_context
 def check(
-    ctx,
+    _ctx: click.Context,
     model: Optional[str],
     config,
     data,
@@ -415,7 +416,7 @@ def check(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(".", "hydromt.log"), log_level=log_level)
+    log._setuplog(join(".", HYDROMT_LOG_PATH), log_level=log_level)
     try:
         all_exceptions: List[Exception] = []
         for cat_path in data:
@@ -433,7 +434,7 @@ def check(
                 validate_region(region)
                 logger.info("Region is valid!")
 
-            except (ValidationError, ValueError, NotImplementedError) as e:
+            except (ValueError, NotImplementedError) as e:
                 logger.info("region has errors")
                 all_exceptions.append(e)
 
@@ -492,7 +493,7 @@ def check(
 @verbose_opt
 @click.pass_context
 def export(
-    ctx: click.Context,
+    _ctx: click.Context,
     export_dest_path: Path,
     source: Optional[str],
     time_range: Optional[str],
@@ -522,7 +523,7 @@ def export(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(export_dest_path, "hydromt.log"), log_level=log_level)
+    log._setuplog(join(export_dest_path, HYDROMT_LOG_PATH), log_level=log_level)
     logger.info(f"Output dir: {export_dest_path}")
 
     if error_on_empty:
