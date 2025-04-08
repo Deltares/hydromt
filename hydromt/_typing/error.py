@@ -46,4 +46,5 @@ def exec_nodata_strat(msg: str, strategy: NoDataStrategy) -> None:
     elif strategy == NoDataStrategy.WARN:
         logger.warning(msg)
     elif strategy == NoDataStrategy.IGNORE:
+        # do nothing
         pass

@@ -32,7 +32,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         time_range: Optional[TimeRange] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        # TODO: https://github.com/Deltares/hydromt/issues/802
     ) -> xr.Dataset:
         """
         Read tabular datafiles like csv or parquet into to an xarray DataSet.

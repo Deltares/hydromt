@@ -15,7 +15,7 @@ __all__ = ["parse_json", "parse_config", "parse_opt"]
 
 
 ### CLI callback methods ###
-def parse_opt(ctx, param, value):
+def parse_opt(_ctx, _param, value):
     """Parse extra cli options.
 
     Parse options like `--opt KEY1=VAL1 --opt SECT.KEY2=VAL2` and collect
@@ -54,7 +54,7 @@ def parse_opt(ctx, param, value):
     return out
 
 
-def parse_json(ctx, param, value: str) -> Dict[str, Any]:
+def parse_json(_ctx: click.Context, _param, value: str) -> Dict[str, Any]:
     """Parse json from object or file.
 
     If the object passed is a path pointing to a file, load it's contents and parse it.

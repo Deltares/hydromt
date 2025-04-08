@@ -1,10 +1,12 @@
 """Implementaions for downloading and resampling ERA5 data."""
 
+import argparse
 import glob
 import os
 import shutil
 import time
 from os.path import basename, isfile, join
+from typing import Any, Dict, List, Optional
 
 import dask
 import numpy as np
@@ -12,7 +14,9 @@ import pandas as pd
 import xarray as xr
 from dask.diagnostics import ProgressBar
 
-# global vars
+_JOULE_PER_M_SQ = "J m**-2"
+
+# define global vars
 dt_era5t = pd.to_timedelta(95, unit="d")
 era5_variables = {
     "ssrd": "surface_solar_radiation_downwards",
@@ -45,9 +49,9 @@ daily_attrs = {
         "long_name": "Mean sea level pressure",
         "standard_name": "air_pressure_at_mean_sea_level",
     },
-    "tisr": {"units": "J m**-2", "long_name": "TOA incident solar radiation"},
+    "tisr": {"units": _JOULE_PER_M_SQ, "long_name": "TOA incident solar radiation"},
     "ssrd": {
-        "units": "J m**-2",
+        "units": _JOULE_PER_M_SQ,
         "long_name": "Surface solar radiation downwards",
         "standard_name": "surface_downwelling_shortwave_flux_in_air",
     },
@@ -66,7 +70,7 @@ daily_attrs = {
         "standard_name": "10m_v_component_of_wind",
     },
     "ssr": {
-        "units": "J m**-2",
+        "units": _JOULE_PER_M_SQ,
         "long_name": "Surface net solar radiation",
         "standard_name": "surface_net_downward_shortwave_flux",
     },
@@ -79,7 +83,11 @@ daily_attrs = {
 
 
 def download_era5_year(
-    write_path: str, variable: str, year: int, months: list = None, days: list = None
+    write_path: str,
+    variable: str,
+    year: int,
+    months: Optional[List[str]] = None,
+    days: Optional[List[str]] = None,
 ) -> None:
     """Download a ERA5 variable for a single year from Copernicus Climate Data Store.
 
@@ -123,7 +131,7 @@ def download_era5_year(
                 "variable": variable,
                 "year": [year],
                 "month": months,
-                "day": _days,
+                "day": days,
                 "time": _hrs,
             },
             write_path,
@@ -175,11 +183,11 @@ def resample_year(
     ddir: str,
     outdir: str,
     var: str,
-    decimals: int = None,
-    nodata=-9999,
-    chunks: dict = None,
-    dask_kwargs: dict = None,
-) -> None:
+    decimals: Optional[int] = None,
+    nodata: int = -9999,
+    chunks: Optional[Dict[Any, Any]] = None,
+    dask_kwargs: Optional[Dict[str, Any]] = None,
+) -> List[str]:
     """Resample hourly variables to daily timestep.
 
     The data is saved with the time labels at the end of the timestep.
@@ -420,11 +428,8 @@ def append_zarr(
             if dim == append_dim:
                 continue
             assert ds[v][dim].shape == ds0[v][dim].shape
-            # TODO: raise error instead of reindex
             if not np.allclose(ds0[v][dim], ds[v][dim]):
-                print(f"reindex {v}")
-                print(ds0[v][dim], ds[v][dim])
-                ds = ds.reindex({dim: ds0[v][dim]})
+                raise ValueError("ds0 and ds don't have the same dimensions")
 
     # write output using to_zarr with region argument
     # drop dims (already written)
@@ -505,7 +510,6 @@ def update_hourly_nc(
         paths = glob.glob(join(outdir, f"era5_{var}_*_hourly.nc"))
         for p in paths:
             flatten_era5_temp(p, dask_kwargs=dask_kwargs)
-            # TODO make plot at random point
 
     # write files from tmpdir to ddir
     if move_to_ddir:
@@ -637,8 +641,6 @@ def update_zarr(
                 with xr.open_zarr(zarr_path, consolidated=False) as ds_zarr:
                     if var in ds_zarr:
                         # check last date with valid values at single location
-                        # TODO: this takes long, find alternative way with zarr library
-                        # to find last date
                         da_zarr = (
                             ds_zarr[var].isel(latitude=0, longitude=0).dropna("time")
                         )
@@ -687,6 +689,14 @@ def update_zarr(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Implementaions for downloading and resampling ERA5 data."
+    )
+    parser.add_argument(
+        "--save-zarr", action="store_true", help="Save output to Zarr format"
+    )
+
+    args = parser.parse_args()
     os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
     dask_kwargs = {"n_workers": 4, "processes": True}
 
@@ -739,7 +749,7 @@ if __name__ == "__main__":
         move_to_ddir=True,
     )
 
-    if save_zarr:
+    if args.save_zarr:
         print("updating hourly zarr..")
         update_zarr(
             zarr_path=zarr_hour,

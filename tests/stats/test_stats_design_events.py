@@ -15,7 +15,7 @@ def test_get_peak_hydrographs(ts_extremes):
     da = design_events.get_peak_hydrographs(
         ts_extremes, da_peaks, wdw_size=7, n_peaks=20, normalize=False
     ).load()
-    assert da.time.shape[0] == 7  # wdw_size=7
+    assert da.time.shape[0] == 7
     assert (da.argmax("time") == 3).all()  # peak at time=3
 
     # Testing if maximum values are the same as the top 20

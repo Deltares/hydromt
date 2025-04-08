@@ -1,6 +1,7 @@
 """Tests the RasterXarray driver."""
 
 from pathlib import Path
+from typing import List
 from uuid import uuid4
 
 import numpy as np
@@ -22,7 +23,7 @@ class TestRasterXarrayDriver:
         )
         mock_xr_open.return_value = xr.Dataset()
 
-        uris: str = ["file.netcdf"]
+        uris: List[str] = ["file.netcdf"]
         driver = DatasetXarrayDriver(
             options={"preprocess": "round_latlon"},
         )

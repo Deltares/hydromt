@@ -64,7 +64,7 @@ def test_crs_mismatch(basin_files, caplog: pytest.LogCaptureFixture):
     _, ds, gdf_bas, _ = basin_files
     caplog.set_level(logging.WARNING)
     gdf_bas.to_crs(epsg=6875, inplace=True)
-    gdf_bas, gdf_out = get_basin_geometry(
+    gdf_bas, _ = get_basin_geometry(
         ds.drop_vars("basins"),
         kind="basin",
         basin_index=gdf_bas,
@@ -151,9 +151,7 @@ def test_subbasin_stord(basin_files):
 def test_subbasin_with_bounds(basin_files, caplog: pytest.LogCaptureFixture):
     _, ds, _, _ = basin_files
     caplog.set_level(logging.WARNING)
-    gdf_bas, gdf_out = get_basin_geometry(
-        ds, kind="subbasin", bounds=[12.6, 45.5, 12.9, 45.7]
-    )
+    _ = get_basin_geometry(ds, kind="subbasin", bounds=[12.6, 45.5, 12.9, 45.7])
     assert "The subbasin does not include all upstream cells." in caplog.text
 
 
@@ -183,7 +181,7 @@ def test_interbasin_outlets(basin_files):
     )
     assert gdf_bas.index.size == 13
 
-    gdf_bas, gdf_out = get_basin_geometry(
+    gdf_bas, _ = get_basin_geometry(
         ds,
         kind="basin",
         basin_index=gdf_bas_index,

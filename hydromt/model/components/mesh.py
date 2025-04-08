@@ -104,10 +104,9 @@ class MeshComponent(SpatialModelComponent):
         """
         self._initialize()
         # Checks on data
-        data = _check_UGrid(data, name)
+        data = _check_ugrid(data, name)
 
         # Checks on grid topology
-        # TODO: check if we support setting multiple grids at once. For now just one
         if len(data.ugrid.grids) > 1:
             raise ValueError(
                 "set_mesh methods only supports adding data to one grid at a time."
@@ -645,7 +644,7 @@ class MeshComponent(SpatialModelComponent):
             return None
         else:
             # Check on crs
-            if not data.ugrid.grid.crs == self.crs:
+            if data.ugrid.grid.crs != self.crs:
                 raise ValueError("Data and Mesh should have the same CRS.")
             # Save crs as it will be lost when converting to xarray
             crs = self.crs
@@ -693,7 +692,6 @@ class MeshComponent(SpatialModelComponent):
                     # The xugrid check on grid equal does not work properly compared to
                     # our _grid_is_equal method. Add to xarray Dataset and convert back
                     grids[dvar] = data.ugrid.to_dataset()[dvar]
-                    # self._data[dvar] = data[dvar]
                 self._data = xu.UgridDataset(grids)
             else:
                 # We are potentially adding a new grid without any data variables
@@ -758,7 +756,7 @@ class MeshComponent(SpatialModelComponent):
             )
 
 
-def _check_UGrid(
+def _check_ugrid(
     data: Union[xu.UgridDataArray, xu.UgridDataset], name: Optional[str]
 ) -> xu.UgridDataset:
     if not isinstance(data, (xu.UgridDataArray, xu.UgridDataset)):

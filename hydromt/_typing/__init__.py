@@ -37,7 +37,7 @@ from .type_def import (
 
 __all__ = [
     "Bbox",
-    "Crs",  # TODO: Unify usage of CRS in the code https://github.com/Deltares/hydromt/issues/953
+    "Crs",
     "CRS",
     "StrPath",
     "DeferedFileClose",

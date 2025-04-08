@@ -14,29 +14,29 @@ import xugrid as xu
 from pytest_mock import MockerFixture
 
 from hydromt.model import Model
-from hydromt.model.components.mesh import MeshComponent, _check_UGrid
+from hydromt.model.components.mesh import MeshComponent, _check_ugrid
 from hydromt.model.root import ModelRoot
 from tests.conftest import TEST_DATA_DIR
 
 
-def test_check_UGrid(mocker: MockerFixture):
+def test_check_ugrid(mocker: MockerFixture):
     data = xr.DataArray()
     with pytest.raises(
         ValueError,
         match="New mesh data in set_mesh should be of type xu.UgridDataArray"
         " or xu.UgridDataset",
     ):
-        _check_UGrid(data=data, name=None)
+        _check_ugrid(data=data, name=None)
     data = mocker.create_autospec(xu.UgridDataArray)
     data.name = None
     with pytest.raises(
         ValueError,
         match=f"Cannot set mesh from {str(type(data).__name__)} without a name.",
     ):
-        _check_UGrid(data=data, name=None)
+        _check_ugrid(data=data, name=None)
 
-    data = xu.data.elevation_nl()  # TODO: maybe generate data instead
-    dataset = _check_UGrid(data=data, name="new_dataset")
+    data = xu.data.elevation_nl()
+    dataset = _check_ugrid(data=data, name="new_dataset")
     assert isinstance(dataset, xu.UgridDataset)
     assert "new_dataset" in dataset.data_vars.keys()
 
@@ -102,8 +102,8 @@ def test_set_raises_errors(mocker: MockerFixture, mock_model):
     data = mocker.create_autospec(xu.UgridDataset)
     data.name = "fakedata"
     data.ugrid.grids = [1, 2]
-    mock_check_Ugrid = mocker.patch("hydromt.model.components.mesh._check_UGrid")
-    mock_check_Ugrid.return_value = data
+    mock_check_ugrid = mocker.patch("hydromt.model.components.mesh._check_ugrid")
+    mock_check_ugrid.return_value = data
     with pytest.raises(
         ValueError,
         match="set_mesh methods only supports adding data to one grid at a time.",

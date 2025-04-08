@@ -106,7 +106,7 @@ def hydrograph_1d(
         normalized hydrographs
     """
     assert ts.shape == peaks.shape, "the shapes of ts and peaks mismatch"
-    idxs = np.where(peaks)[0]
+    idxs = np.nonzero(peaks)[0]
     n0 = idxs.size if n_peaks is None else int(n_peaks)
     out = np.full((n0, wdw_size), np.nan, ts.dtype)
     seq = np.argsort(ts[idxs])[::-1]  # sort from large to small

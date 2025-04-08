@@ -173,9 +173,8 @@ def create_mesh2d_from_mesh(
     grid_crs = grid.crs
     if crs is not None:
         bbox = None
-        if grid_crs is not None:
-            if grid_crs.to_epsg() == 4326:
-                bbox = mesh2d.ugrid.grid.bounds
+        if grid_crs is not None and grid_crs.to_epsg() == 4326:
+            bbox = mesh2d.ugrid.grid.bounds
         crs = _gis_utils._parse_crs(crs, bbox=bbox)
     else:
         crs = CRS.from_user_input(4326)

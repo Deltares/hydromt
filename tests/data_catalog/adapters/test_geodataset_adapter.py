@@ -27,17 +27,3 @@ class TestGeoDatasetAdapter:
         adapter = GeoDatasetAdapter()
         ds = adapter.transform(example_geo_ds, metadata=SourceMetadata())
         assert np.all(ds == example_geo_ds)
-
-    # TODO: https://github.com/Deltares/hydromt/issues/802
-    # def test_transform_nodata(self, example_geo_ds: xr.Dataset):
-    #     adapter = GeoDatasetAdapter()
-    #     mask = parse_geom_bbox_buffer(bbox=(40, 50, 41, 51))
-    # with pytest.raises(NoDataException):
-    #     adapter.transform(example_geo_ds, metadata=SourceMetadata(), mask=mask)
-    # ds = adapter.transform(
-    #     example_geo_ds,
-    #     metadata=SourceMetadata(),
-    #     mask=mask,
-    #     handle_nodata=NoDataStrategy.IGNORE,
-    # )
-    # assert ds is None

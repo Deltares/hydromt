@@ -76,7 +76,7 @@ class TestGeoDatasetVectorDriver:
         )
         mock_geods_open.return_value = Dataset()
 
-        uris: str = ["file.geojson"]
+        uris: List[str] = ["file.geojson"]
         driver = GeoDatasetVectorDriver()
         _ = driver.read(uris)
         assert mock_geods_open.call_count == 1

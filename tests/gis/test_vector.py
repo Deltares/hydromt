@@ -150,7 +150,7 @@ def test_from_gdf(geoda, geodf):
     with pytest.raises(ValueError, match="x is not a valid value for 'merge_index'"):
         GeoDataset.from_gdf(geodf, geoda0, merge_index="x")
     with pytest.raises(ValueError, match="No common indices found between gdf"):
-        ds1 = GeoDataset.from_gdf(
+        _ = GeoDataset.from_gdf(
             geodf.loc[[3]], geoda0.sel(index=[0]), merge_index="inner"
         )
     # errors GeoDataArray
@@ -161,7 +161,7 @@ def test_from_gdf(geoda, geodf):
     with pytest.raises(ValueError, match="x is not a valid value for 'merge_index'"):
         GeoDataArray.from_gdf(geodf, geoda0, merge_index="x")
     with pytest.raises(ValueError, match="No common indices found between gdf"):
-        ds1 = GeoDataArray.from_gdf(
+        _ = GeoDataArray.from_gdf(
             geodf.loc[[3]], geoda0.sel(index=[0]), merge_index="inner"
         )
 

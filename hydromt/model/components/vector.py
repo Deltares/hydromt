@@ -153,13 +153,10 @@ class VectorComponent(SpatialModelComponent):
         # 2. self.vector has a geometry
         else:
             # data has a geometry - check if it is the same as self.vector
-            if data.vector.geometry is not None:
-                if not np.all(
-                    data.vector.geometry.geom_equals_exact(
-                        self.geometry, tolerance=0.0001
-                    )
-                ):
-                    raise ValueError("Geometry of data and vector do not match")
+            if data.vector.geometry is not None and not np.all(
+                data.vector.geometry.geom_equals_exact(self.geometry, tolerance=0.0001)
+            ):
+                raise ValueError("Geometry of data and vector do not match")
             # add data (with check on index)
             for dvar in data.data_vars:
                 if dvar in self._data:

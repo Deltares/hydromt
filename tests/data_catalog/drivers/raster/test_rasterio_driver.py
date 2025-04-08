@@ -95,7 +95,6 @@ class TestOpenMFRaster:
         return uri_tif
 
     def test_open_raster_windowed_nodata(self, raster_file_masked_windowed: str):
-        # TODO window needs checking & better testing
         da_windowed = _open_raster(raster_file_masked_windowed)
         assert not np.any(np.isnan(da_windowed.values))
 

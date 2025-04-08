@@ -38,7 +38,7 @@ class DataFrameSource(DataSource):
         *,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        predicate: str = "intersects",  # TODO: https://github.com/Deltares/hydromt/issues/983
+        predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[pd.DataFrame]:
         """Use the resolver, driver, and data adapter to read and harmonize the data."""
@@ -142,7 +142,7 @@ class DataFrameSource(DataSource):
                 f"Skipping {self.name} during stac conversion because"
                 "because detecting temporal extent failed."
             )
-            return
+            return None
         else:
             raise NotImplementedError(
                 "DataFrameSource does not support full stac conversion as it lacks"

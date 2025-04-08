@@ -69,7 +69,7 @@ class TestConventionResolver:
         pat = "here-is-some-more-leading-{year}-text-for-{month}-you-{variable}.pq"
         example = "here-is-some-more-leading-2024-04-02-text-for-era5-you-0001.pq"
 
-        glob, keys, regex = _expand_uri_placeholders(pat)
+        glob, _keys, regex = _expand_uri_placeholders(pat)
         assert glob == "here-is-some-more-leading-*-text-for-*-you-*.pq"
         # we know regex will match, so type ignore is safe
         assert regex.match(example).groups() == ("2024-04-02", "era5", "0001")  # type: ignore

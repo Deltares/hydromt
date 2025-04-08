@@ -28,7 +28,7 @@ import hydromt.plugins
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 
-
+DOCS_TITLE = "HydroMT Documentation"
 def cli2rst(output, fn):
     with open(fn, "w") as f:
         f.write(".. code-block:: console\n\n")
@@ -337,9 +337,10 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (
+
         master_doc,
         "hydromt.tex",
-        "HydroMT Documentation",
+        DOCS_TITLE,
         [author],
         "manual",
     ),
@@ -350,7 +351,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "hydromt", "HydroMT Documentation", [author], 1)]
+man_pages = [(master_doc, "hydromt", DOCS_TITLE, [author], 1)]
 
 
 # -- Options for Texinfo output -------------------------------------------
@@ -362,7 +363,7 @@ texinfo_documents = [
     (
         master_doc,
         "hydromt",
-        "HydroMT Documentation",
+        DOCS_TITLE,
         author,
         "HydroMT",
         "Automated and reproducible model building and analysis",
@@ -370,28 +371,16 @@ texinfo_documents = [
     ),
 ]
 
-# FIXME exception while evaluating only directive expression: chunk after expression
-# nbsphinx_prolog = r"""
-# {% set docname = env.doc2path(env.docname, base=None) %}
-# .. only:: html
-#     .. role:: raw-html(raw)
-#         :format: html
-#     .. note::
-#         | This page was generated from `{{ docname }}`__.
-#         | Interactive online version: :raw-html:`<a href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples/{{ docname }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>`
-#         __ https://github.com/Deltares/hydromt/blob/main/examples/{{ docname }}
-# """
-
 # -- INTERSPHINX -----------------------------------------------------------
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
-    # "numpy": ("https://numpy.org/doc/stable", None),
-    # "scipy": ("https://docs.scipy.org/doc/scipy", None),
-    # "numba": ("https://numba.pydata.org/numba-doc/latest", None),
-    # "matplotlib": ("https://matplotlib.org/stable/", None),
-    # "dask": ("https://docs.dask.org/en/latest", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    "numba": ("https://numba.readthedocs.io/en/stable", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "dask": ("https://docs.dask.org/en/latest", None),
     "rasterio": ("https://rasterio.readthedocs.io/en/latest", None),
     "geopandas": ("https://geopandas.org/en/stable", None),
     "xarray": ("https://docs.xarray.dev/en/stable", None),
