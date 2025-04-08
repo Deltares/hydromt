@@ -90,6 +90,17 @@ jobs:
       run: |
         export CURRENT_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
         echo "DOC_VERSION=v$CURRENT_VERSION" >> "$GITHUB_ENV"
+
+
+    - name: Upload to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4.0.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/_build/html
+        exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
+        destination_dir: ./${{ env.DOC_VERSION }}
+        keep_files: false
+        full_commit_message: Deploy Release ${{ env.DOC_VERSION }} docs to GitHub Pages
     - name: update doc symlinks
       run: |
         git config user.name "GitHub Actions Bot"
@@ -101,16 +112,6 @@ jobs:
         git add stable
         git commit -m "update symlinks"
         git push
-
-    - name: Upload to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4.0.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/_build/html
-        exclude_assets: .buildinfo,_sources/*,_examples/*.ipynb
-        destination_dir: ./${{ env.DOC_VERSION }}
-        keep_files: false
-        full_commit_message: Deploy Release ${{ env.DOC_VERSION }} docs to GitHub Pages
 
 
   gh-release:
