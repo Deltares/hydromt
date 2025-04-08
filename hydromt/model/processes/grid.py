@@ -309,9 +309,8 @@ def grid_from_constant(
     # Set nodata value
     da.raster.set_nodata(nodata)
     # Masking
-    if mask_name is not None:
-        if mask_name in grid_like:
-            da = da.raster.mask(grid_like[mask_name])
+    if mask_name in grid_like:
+        da = da.raster.mask(grid_like[mask_name])
 
     return da
 
@@ -452,7 +451,7 @@ def grid_from_raster_reclass(
             f"reproject_method should have length 1 or {len(reclass_variables)}"
         )
     # Masking
-    if mask_name is not None and mask_name in grid_like:
+    if mask_name in grid_like:
         ds_out = ds_out.raster.mask(grid_like[mask_name])
     # Rename
     return ds_out.rename(rename)
@@ -539,7 +538,7 @@ def grid_from_geodataframe(
             if var in rename.keys():
                 var = rename[var]
             # Masking
-            if mask_name is not None and mask_name in grid_like:
+            if mask_name in grid_like:
                 da = da.raster.mask(grid_like[mask_name])
             ds_lst.append(da.rename(var))
         # Merge
@@ -555,9 +554,8 @@ def grid_from_geodataframe(
             nodata=nodata,
         )
         # Masking
-        if mask_name is not None:
-            if mask_name in grid_like:
-                da = da.raster.mask(grid_like[mask_name])
+        if mask_name in grid_like:
+            da = da.raster.mask(grid_like[mask_name])
         ds_out = da.to_dataset()
 
     else:
