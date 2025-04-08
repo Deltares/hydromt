@@ -107,9 +107,19 @@ class ConfigComponent(ModelComponent):
     def read(self, path: Optional[str] = None) -> None:
         """Read model config at <root>/{path}."""
         self._initialize(skip_read=True)
-        p = path or self._filename
-        # if path is abs, join will just return path
-        read_path = join(self.root.path, p)
+
+        if (
+            self._data is not None
+            and len(self._data) == 0
+            and self._default_template_filename
+        ):
+            p = path or self._default_template_filename
+            read_path = join(self.root.path, self._default_template_filename)
+        else:
+            p = path or self._filename
+            # if path is abs, join will just return path
+            read_path = join(self.root.path, p)
+
         if isfile(read_path):
             logger.info(f"Reading model config file from {read_path}.")
         else:
