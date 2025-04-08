@@ -125,26 +125,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Finalise Release
+        with:
+          fetch-depth: 0 # get the whole history not just the one commit
+          ref: main
+
+      - name: Determine relase version
+        id: calculate-release-version
         run: |
-            git pull
-            git checkout main
             export RELEASE_VERSION=$(grep "__version__" hydromt/__init__.py | cut -d= -f 2 | tr -d "\" ")
             if [ -z "$RELEASE_VERSION" ]; then
               echo "could not determine release version"
               echo "detection result: $RELEASE_VERSION"
               exit 1 # somthing went very wrong
             fi
-            ## seting up git
-            git config user.name "GitHub Actions Bot"
-            git config user.email "<>"
-            git tag "v$RELEASE_VERSION"
-            git push origin tag "v$RELEASE_VERSION"
-            gh release create "v$RELEASE_VERSION" -F release_notes.rst -t "v$RELEASE_VERSION"
+            echo "RELEASE_VERSION=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: generate release notes
+        run: |
+              awk '
+              BEGIN { capture = 0; }
+              # Match the first header and start capturing
+              /^v[0-9]+\.[0-9]+\.[0-9]+.*$/ { if (capture == 0) { capture = 1; } else { exit; } }
+              # Capture lines between headers
+              capture { print; }
+              ' docs/changelog.rst > release_notes.rst
+
+      - name: Create github release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.rst
+          name:  ${{ steps.calculate-release-version.outputs.RELEASE_VERSION }}
+          tag_name:  ${{ steps.calculate-release-version.outputs.RELEASE_VERSION }}
+          make_latest: true
 
       - name: Create post release PR
         run: |
-
+            git config user.name "GitHub Actions Bot"
+            git config user.email "<>"
             git checkout -b "post-v$NEW_VERSION-release"
 
             # post release stuff so we don't forget
@@ -153,12 +170,5 @@ jobs:
 
             git add hydromt/__init__.py docs/changelog.rst
             git commit -m "Post release v$RELEASE_VERSION"
-            awk '
-              BEGIN { capture = 0; }
-              # Match the first header and start capturing
-              /^v[0-9]+\.[0-9]+\.[0-9]+.*$/ { if (capture == 0) { capture = 1; } else { exit; } }
-              # Capture lines between headers
-              capture { print; }
-            ' docs/changelog.rst > release_notes.rst
 
             gh pr create -B "main" -H "post-v$NEW_VERSION-release" -t "Post v$NEW_VERSION release cleanup" -b "Add new changelog headers and set version back to dev"
