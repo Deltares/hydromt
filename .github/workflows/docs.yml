@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: checkout code
         uses: actions/checkout@v4
-      - uses: prefix-dev/setup-pixi@v0.8.2
+      - uses: prefix-dev/setup-pixi@v0.8.5
         with:
           pixi-version: "v0.41.1"
 
