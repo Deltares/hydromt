@@ -20,8 +20,9 @@ from hydromt._io.readers import (
     _open_timeseries_from_table,
     _open_vector,
     _open_vector_from_table,
+    _read_toml,
 )
-from hydromt._io.writers import _write_xy
+from hydromt._io.writers import _write_toml, _write_xy
 
 
 def test_open_vector(tmpdir, df, geodf, world):
@@ -241,3 +242,35 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         test2 = ds.sel(id=i)["test2"]
         assert np.all(np.equal(test1, np.arange(len(ids)) * int(i))), test1
         assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
+
+
+def test_toml_io(tmp_path):
+    toml_content = """
+    # This is an input section of a wflow toml config file
+
+    [input]
+    path_forcing = "inmaps.nc"
+    path_static = "staticmaps.nc"
+    ldd = "wflow_ldd"
+    river_location = "wflow_river"
+    subcatchment = "wflow_subcatch"
+    forcing = [ "vertical.precipitation", "vertical.temperature", "vertical.potential_evaporation",]
+    cyclic = [ "vertical.leaf_area_index",]
+    gauges = "wflow_gauges"
+    gauges_grdc = "wflow_gauges_grdc"
+
+    """
+    test_toml_fp = tmp_path / "test.toml"
+    with open(test_toml_fp, "w") as f:
+        f.write(toml_content)
+
+    # Read toml
+    config = _read_toml(test_toml_fp)
+
+    # Check if structure and comment is preserverd
+    assert config.as_string() == toml_content
+
+    # test write
+    _write_toml(test_toml_fp, config)
+    config2 = _read_toml(test_toml_fp)
+    assert config2 == config
