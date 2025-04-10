@@ -15,6 +15,7 @@ New
 
 Changed
 -------
+- TOML config files are now read and written with TOMLkit instead of tomli and tomli-w (#1179)
 
 Fixed
 -----
