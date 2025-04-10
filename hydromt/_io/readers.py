@@ -21,8 +21,6 @@ from pyproj import CRS
 from requests import get as fetch
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
-
-# from tomli import load as load_toml
 from tomlkit import load as load_toml
 from yaml import safe_load as load_yaml
 

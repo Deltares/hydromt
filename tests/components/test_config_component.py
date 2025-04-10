@@ -2,7 +2,7 @@ from os.path import abspath, isabs, isfile, join
 from pathlib import Path
 
 import pytest
-from tomli_w import dump as toml_dump
+from tomlkit import dump as toml_dump
 from yaml import dump as yaml_dump
 
 from hydromt._io.readers import _config_read, _read_yaml
@@ -100,7 +100,7 @@ def test_loads_from_config_template_yaml(tmpdir, extention, test_config_dict):
 
 def test_loads_from_config_template_toml(tmpdir, test_config_dict):
     template_path = join(tmpdir, "default_config_template.toml")
-    with open(template_path, "wb") as fp:
+    with open(template_path, "w") as fp:
         toml_dump(test_config_dict, fp)
 
     model = Model(root=tmpdir, mode="w")
