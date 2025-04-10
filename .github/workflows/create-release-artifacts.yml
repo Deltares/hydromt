@@ -7,7 +7,7 @@ on:
     branches:
       - 'release/**'
   workflow_run:
-    workflows: [Create a new release]
+    workflows: [Create a new release branch]
     types:
       - completed
 
