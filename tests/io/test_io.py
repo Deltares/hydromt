@@ -267,8 +267,8 @@ def test_toml_io(tmp_path):
     # Read toml
     config = _read_toml(test_toml_fp)
 
-    # Check if structure and comment is preserverd
-    assert config.as_string() == toml_content
+    # Check if structure and comment is preserved
+    assert config.as_string().replace("\r", "") == toml_content
 
     # test write
     _write_toml(test_toml_fp, config)
