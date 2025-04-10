@@ -121,6 +121,9 @@ jobs:
           git push --set-upstream origin "release/v$NEW_VERSION"
 
           # gh cli should return the url of the pr it just created. we'll store that so we can access it later
+          # regarding the comment about limitations: currently in github you can only base triggers on the base/target branch name
+          # not the branch that the PR is from. You can circumvent this with an if condition, but that would mean this workflow
+          # would run under every PR which I don't like, so for now this has to be a manual step.
           export PR_URL=$( gh pr create -B "main" -H "release/v$NEW_VERSION" -t "Release v$NEW_VERSION" -b "Hi there! This is an automated PR made for your release. If everything has gone well, all tests should now be running (though you might not see them below this PR). Once the release artifacts are ready I'll comment links to them so you can inspet them. Please check that the PR is as you would like it to be, and feel free to push any changes to this branch before merging.  Once you're happy with the state of the PR, just merge the PR, and run the `.github/workflows/finish-release.yml` workflow. (Due to Github limitations I can't do this for you, but my creator is working on a solution)" )
           gh co "release/v$NEW_VERSION"
 
