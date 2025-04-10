@@ -1,4 +1,4 @@
-name: Create a new release
+name: Create a new release branch
 
 on:
   workflow_dispatch:
@@ -76,12 +76,12 @@ jobs:
           	;;
           esac
 
-          ## seting up git
+          ## setting up git
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
 
           ## create release branch
-          git pull # make sure git doesn't reject our push becasue of unknown refs
+          git pull # make sure git doesn't reject our push because of unknown refs
           git checkout -b "release/v$NEW_VERSION"
 
           # update version in python file
@@ -93,7 +93,7 @@ jobs:
           # update changelog with new header
           sed -i "/Unreleased/{s/Unreleased/$NEW_CHANGELOG_HEADER/;n;s/=*/$NEW_HEADER_UNDERLINE/}" docs/changelog.rst
 
-          # update switcher.json while maintianing the correct order with some black jq incantations. I'll try and explain below
+          # update switcher.json while maintaining the correct order with some black jq incantations. I'll try and explain below
           cat docs/_static/switcher.json | jq "map(select(.version != \"latest\")) | . + [{\"name\":\"v$NEW_VERSION\",\"version\":\"$NEW_VERSION\",\"url\":\"https://deltares.github.io/hydromt/v$NEW_VERSION/\"}] | sort_by(.version|split(\".\")|map(tonumber)) | . + [{\"name\":\"latest\",\"version\":\"latest\",\"url\":\"https://deltares.github.io/hydromt/latest/\"}]" >tmp.json
 
           # map(select(.version != \"latest\"))
@@ -121,7 +121,7 @@ jobs:
           git push --set-upstream origin "release/v$NEW_VERSION"
 
           # gh cli should return the url of the pr it just created. we'll store that so we can access it later
-          export PR_URL=$( gh pr create -B "main" -H "release/v$NEW_VERSION" -t "Release v$NEW_VERSION" -b "Hi there! This is an automated PR made for your release. If everything has gone well, all tests should now be running. Please check that the PR is as you would like it to be, and feel free to push any changes to this branch before merging.  Once you're happy with the state of the PR, just approve and merge the PR and I'll take care of the rest! (I recommend squashing)" )
+          export PR_URL=$( gh pr create -B "main" -H "release/v$NEW_VERSION" -t "Release v$NEW_VERSION" -b "Hi there! This is an automated PR made for your release. If everything has gone well, all tests should now be running (though you might not see them below this PR). Once the release artifacts are ready I'll comment links to them so you can inspet them. Please check that the PR is as you would like it to be, and feel free to push any changes to this branch before merging.  Once you're happy with the state of the PR, just approve and merge the PR and I'll take care of the rest! (I recommend squashing)" )
           gh co "release/v$NEW_VERSION"
 
           # not fetched by default

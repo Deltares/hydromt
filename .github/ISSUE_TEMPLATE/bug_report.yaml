@@ -18,8 +18,8 @@ body:
     attributes:
       description: >
         Please provide a minimal, copy-pastable example or a link to a public repository that reproduces the behavior. If providing a copy pastable example,
-        you may assume your in a clean up to date version of hydromt with a python enviroment active. In the case of a repository, ensure the repository
-        has a README.md which includes intructions to reproduce the behaviour.
+        you may assume your in a clean up to date version of hydromt with a python environment active. In the case of a repository, ensure the repository
+        has a README.md which includes instructions to reproduce the behaviour.
       label: Reproducible Example
     validations:
       required: true
