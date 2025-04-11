@@ -49,7 +49,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.0.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.1.0';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -60,7 +60,7 @@
     <link rel="prev" title="Core developer guide" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.0.1.dev0" />
+  <meta name="docsearch:version" content="1.1.0.dev0" />
   </head>
   
   
@@ -892,7 +892,7 @@ Test should be run from the tests folder.</p>
 <li><p>The action you just run will open a new PR for you with a new branch named <cite>release/v&lt;NEW_VERSION&gt;</cite>. (the <cite>NEW_VERSION</cite> will be calculated for you based on which kind of release you selected.) In the new PR, the changelog, hydromt version and sphinx <cite>switcher.json</cite> will be updated for you. Any changes you made to the <cite>pyproject.toml</cite> since the last release will be posted as a comment in the PR. You will need these during the Conda-forge release if there are any.</p></li>
 <li><p>Every commit to this new branch will trigger the creation (and testing) of release artifacts. In our case those are: Documentation, the PyPi package and docker image (the conda release happens separately). After the artifacts are created, they will be uploaded to the repository’s internal artifact cache. A bot will post links to these created artifacts in the PR which you can use to download and locally inspect them.</p></li>
 <li><p>When you are happy with the release in the PR, you can simply merge it. We suggest naming the commit something like “Release v&lt;NEW_VERSION&gt;”</p></li>
-<li><p>After the PR is merged, a action should start (though it will not show up under the PR itself) that will publish the latest artifacts created to their respective platform. After this, a bot will add a final commit to the <cite>main</cite> branch, setting the hydromt version back to a dev version, and adding new headers to the <cite>docs/changelog.rst</cite> for unreleased features. It will also create a tag and a github release for you automatically. The release is now done as far as this repo is concerned.</p></li>
+<li><p>After the PR is merged, you will need to run the <cite>Finalise a new release</cite> action that will publish the latest artifacts created to their respective platform, it will also create a tag and a github release for you automatically.  After this, a bot will open a new PR to the <cite>main</cite> branch, setting the hydromt version back to a dev version, and adding new headers to the <cite>docs/changelog.rst</cite> for unreleased features. The release is now done as far as this repo is concerned.</p></li>
 <li><p>The newly published PyPi package will trigger a new PR to the <a class="reference external" href="https://github.com/conda-forge/hydromt-feedstock">HydroMT feedstock repos of conda-forge</a>.
 Here you can use the comment posted to the release PR to see if the <cite>meta.yml</cite> needs to be updated. Merge the PR to release the new version on conda-forge.</p></li>
 <li><p>celebrate the new release!</p></li>
