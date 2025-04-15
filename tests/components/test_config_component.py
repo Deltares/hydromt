@@ -169,3 +169,33 @@ def test_get_config_abs_path(tmpdir):
     config_component.set("global.file", "test.file")
     assert str(config_component.get_value("global.file")) == "test.file"
     assert str(config_component.get_value("global.file", abs_path=True)) == abs_path
+
+
+def test_config_default_toml_template(tmpdir):
+    model = Model(root=tmpdir)
+    template_fp = Path(__file__).parent.parent / "data/wflow_sbm.toml"
+    config_component = ConfigComponent(
+        model, filename="config.toml", default_template_filename=template_fp
+    )
+    config_component.read()
+    # Assert that comments are present in the toml config
+    config_dict = config_component.data
+    assert "# This is an example wflow config toml" in config_dict.as_string()
+    assert "# input section" in config_dict.as_string()
+
+    # Update config
+    config_component.set("input.path_forcing", "test.nc")
+    config_component.write()
+
+    config_component2 = ConfigComponent(
+        model, default_template_filename=tmpdir / config_component._filename
+    )
+    config_component2.read()
+
+    # Assert that comments still remain
+    config_dict2 = config_component2.data
+    assert "# This is an example wflow config toml" in config_dict2.as_string()
+    # assert "# input section" in config_dict2.as_string()
+
+    # Assert that changed value is still there
+    assert config_dict2["input"]["path_forcing"] == "test.nc"
