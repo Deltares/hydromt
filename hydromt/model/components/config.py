@@ -163,16 +163,7 @@ class ConfigComponent(ModelComponent):
             >> {'a': 99, 'b': {'c': {'d': 24}}}
         """
         self._initialize()
-        parts = key.split(".")
-        num_parts = len(parts)
-        current = cast(Dict[str, Any], self._data)
-        for i, part in enumerate(parts):
-            if part not in current or not isinstance(current[part], dict):
-                current[part] = {}
-            if i < num_parts - 1:
-                current = current[part]
-            else:
-                current[part] = value
+        self._set(key, value, self._data)
 
     def get_value(self, key: str, fallback=None, abs_path: bool = False) -> Any:
         """Get a config value at key(s).
@@ -311,6 +302,15 @@ class ConfigComponent(ModelComponent):
             logger.debug("Setting model config options.")
         for k, v in data.items():
             self.set(k, v)
+
+    def _set(self, key: str, value: Any, data: dict):
+        if "." in key:
+            parent_key, child_key = key.split(".", maxsplit=1)
+            if parent_key not in data:
+                data[parent_key] = {}
+            self._set(child_key, value, data[parent_key])
+        else:
+            data[key] = value
 
     def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
         """Test if two components are equal.
