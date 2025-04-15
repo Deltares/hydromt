@@ -25,6 +25,7 @@ jobs:
             echo "which is not a release branch. If this was accidental please run it "
             echo "on a release branch instead. If it happened as part of a workflow"
             echo "something went wrong. In that case please report this as a bug report"
+            exit 1
           fi
   pypi:
     runs-on: ubuntu-latest
