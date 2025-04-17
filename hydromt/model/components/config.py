@@ -30,7 +30,7 @@ class ConfigComponent(ModelComponent):
     in yaml or toml format. The component can be used to store model settings
     and parameters that are used in the model simulations or in the model
     settings. Toml config files will be read and written using `TOMLkit <https://tomlkit.readthedocs.io/en/latest/quickstart/>`__.
-    This package will preserve the order and comments in a toml file.
+    This package will preserve the order and comments in a toml file. Note, that any comments associated with sections that are to be updated will still disappear.
     """
 
     def __init__(
