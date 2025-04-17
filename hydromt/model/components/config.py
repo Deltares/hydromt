@@ -1,5 +1,6 @@
 """A component to write configuration files for model simulations/kernels."""
 
+from functools import reduce
 from logging import Logger, getLogger
 from os import makedirs
 from os.path import abspath, dirname, isabs, isfile, join, splitext
@@ -28,7 +29,8 @@ class ConfigComponent(ModelComponent):
     ``ConfigComponent`` data is stored as a dictionary and can be written to a file
     in yaml or toml format. The component can be used to store model settings
     and parameters that are used in the model simulations or in the model
-    settings.
+    settings. Toml config files will be read and written using `TOMLkit <https://tomlkit.readthedocs.io/en/latest/quickstart/>`__.
+    This package will preserve the order and comments in a toml file.
     """
 
     def __init__(
@@ -304,13 +306,15 @@ class ConfigComponent(ModelComponent):
             self.set(k, v)
 
     def _set(self, key: str, value: Any, data: dict):
-        if "." in key:
-            parent_key, child_key = key.split(".", maxsplit=1)
-            if parent_key not in data:
-                data[parent_key] = {}
-            self._set(child_key, value, data[parent_key])
-        else:
-            data[key] = value
+        # if "." in key:
+        #     parent_key, child_key = key.split(".", maxsplit=1)
+        #     if parent_key not in data:
+        #         data[parent_key] = {}
+        #     self._set(child_key, value, data[parent_key])
+        # else:
+        #     data[key] = value
+        keys = key.split(".")
+        reduce(lambda d, k: d.setdefault(k, {}), keys[:-1], data)[keys[-1]] = value
 
     def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
         """Test if two components are equal.
