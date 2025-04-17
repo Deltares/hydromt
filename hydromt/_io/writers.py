@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 import geopandas as gpd
 import numpy as np
 import xarray as xr
-from tomli_w import dump as dump_toml
+from tomlkit import dump as dump_toml
 from yaml import dump as dump_yaml
 
 from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
@@ -27,7 +27,7 @@ def _write_yaml(path: StrPath, data: Dict[str, Any]):
 
 def _write_toml(path: StrPath, data: Dict[str, Any]):
     """Write a dictionary to a toml formatted file."""
-    with open(path, "wb") as f:
+    with open(path, "w") as f:
         dump_toml(data, f)
 
 

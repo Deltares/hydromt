@@ -37,8 +37,7 @@ dependencies = [
   "rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
   "scipy",                  # scientific utilities
   "shapely>=2.0.0",         # geometry transforms
-  "tomli",                  # parsing toml files
-  "tomli-w",                # writing toml files
+  "tomlkit",                # parsing and writing toml files
   "universal_pathlib>=0.2", # provides path compatability between different filesystems
   "xarray",                 # ndim data arrays
   "xmltodict",              # xml parser also used to read VRT
