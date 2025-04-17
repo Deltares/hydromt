@@ -1,4 +1,4 @@
-# This is an example wflow config toml
+# This is an example wflow config toml for testing purposes, not to be used for a wflow workflow
 casename = "wflow_sbm"
 calendar = "proleptic_gregorian"
 starttime = "2010-02-02T00:00:00"
