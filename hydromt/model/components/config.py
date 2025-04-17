@@ -165,7 +165,7 @@ class ConfigComponent(ModelComponent):
             >> {'a': 99, 'b': {'c': {'d': 24}}}
         """
         self._initialize()
-        self._set(key, value, self._data)
+        self._set_nested_dict(key, value, self._data)
 
     def get_value(self, key: str, fallback=None, abs_path: bool = False) -> Any:
         """Get a config value at key(s).
@@ -305,14 +305,7 @@ class ConfigComponent(ModelComponent):
         for k, v in data.items():
             self.set(k, v)
 
-    def _set(self, key: str, value: Any, data: dict):
-        # if "." in key:
-        #     parent_key, child_key = key.split(".", maxsplit=1)
-        #     if parent_key not in data:
-        #         data[parent_key] = {}
-        #     self._set(child_key, value, data[parent_key])
-        # else:
-        #     data[key] = value
+    def _set_nested_dict(self, key: str, value: Any, data: dict):
         keys = key.split(".")
         reduce(lambda d, k: d.setdefault(k, {}), keys[:-1], data)[keys[-1]] = value
 
