@@ -192,10 +192,9 @@ def test_config_default_toml_template(tmpdir):
     )
     config_component2.read()
 
-    # Assert that comments still remain
+    # Assert that comment still remains
     config_dict2 = config_component2.data
     assert "# This is an example wflow config toml" in config_dict2.as_string()
-    # assert "# input section" in config_dict2.as_string()
 
     # Assert that changed value is still there
     assert config_dict2["input"]["path_forcing"] == "test.nc"
