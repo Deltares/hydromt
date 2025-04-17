@@ -15,11 +15,25 @@ on:
   #     - completed
 
 jobs:
+  safeguard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if NOT on a release branch
+        run: |
+          if [[ "${GITHUB_REF}" != "refs/heads/release/"* ]]; then
+            echo "You are running the create release artficats in a context"
+            echo "which is not a release branch. If this was accidental please run it "
+            echo "on a release branch instead. If it happened as part of a workflow"
+            echo "something went wrong. In that case please report this as a bug report"
+            exit 1
+          fi
   pypi:
     runs-on: ubuntu-latest
     outputs:
       url: ${{ steps.upload-pypi-release-artifacts.outputs.artifact-url }}
     if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - safeguard
     steps:
       - uses: actions/checkout@v4
         with:
@@ -57,6 +71,8 @@ jobs:
     outputs:
       url: ${{ steps.upload-docs-release-artifacts.outputs.artifact-url }}
     if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - safeguard
     steps:
       - uses: actions/checkout@v4
         with:
