@@ -88,12 +88,12 @@ class GeomsComponent(SpatialModelComponent):
         # Use the total bounds of all geometries as region
         if len(self.data) == 0:
             return None
-        bounds = np.column_stack([geom.bounds for geom in self.data.values()])
+        bounds = np.column_stack([geom.total_bounds for geom in self.data.values()])
         total_bounds = (
-            bounds[:, 0].min(),
-            bounds[:, 1].min(),
-            bounds[:, 2].max(),
-            bounds[:, 3].max(),
+            bounds[0, :].min(),
+            bounds[1, :].min(),
+            bounds[2, :].max(),
+            bounds[3, :].max(),
         )
         region = gpd.GeoDataFrame(geometry=[box(*total_bounds)], crs=self.model.crs)
 
