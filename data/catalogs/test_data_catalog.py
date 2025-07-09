@@ -22,17 +22,18 @@ In addition the passed data catalog yaml is checked if it is a valid data catalo
 
 import argparse
 import json
+import logging
 from os.path import exists
 
-from dask.distributed import Client
 from pydantic_core import ValidationError
 
 from hydromt import DataCatalog
-from hydromt._utils import _setuplog
 from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def test_dataset(args, datacatalog):
@@ -84,9 +85,7 @@ def test_data_catalog(args, datacatalog):
             continue
 
         else:
-            paths = source.driver.uri_resolver.resolve(
-                source.full_uri, source.driver.filesystem
-            )
+            paths = source.uri_resolver.resolve(source.full_uri)
             for path in paths:
                 if not exists(path):
                     logger.error(
@@ -99,8 +98,6 @@ def test_data_catalog(args, datacatalog):
 
 
 if __name__ == "__main__":
-    client = Client(processes=False)
-    logger = _setuplog()
     parser = argparse.ArgumentParser("Test predefined data catalog")
     parser.add_argument("data_catalog", help="The data catalog to test")
     parser.add_argument(
