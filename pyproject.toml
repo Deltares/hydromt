@@ -15,6 +15,7 @@ dependencies = [
   "click",                  # CLI configuration
   "dask",                   # lazy computing
   "fsspec[http]",           # general file systems utilities
+  "gdal>=3.5.0",            # Our favourite geospatial library
   "geopandas[all]>=0.10",   # pandas but geo, wraps fiona and shapely
   "importlib_metadata",     # entrypoints backport
   "mercantile",             # tile handling
@@ -199,12 +200,6 @@ disallow_any_generics = true
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64"]
 
-[tool.pixi.feature.py39.dependencies]
-python = "3.9.*"
-
-[tool.pixi.feature.py310.dependencies]
-python = "3.10.*"
-
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
 
@@ -213,6 +208,10 @@ python = "3.12.*"
 
 [tool.pixi.feature.py313.dependencies]
 python = "3.13.*"
+
+[tool.pixi.dependencies]
+gdal = ">=3.5.0"
+pyflwdir = ">=0.5.4"
 
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
@@ -353,14 +352,14 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 [tool.pixi.environments]
 default = { features = [
-  "py39",
+  "py311",
   "io",
   "extra",
   "dev",
   "test",
   "doc",
   "examples",
-], solve-group = "py39" }
+], solve-group = "py311" }
 
 full-latest = { features = [
   "py313",
@@ -410,25 +409,3 @@ full-py311 = { features = [
   "examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311", "test"], solve-group = "py311" }
-
-full-py310 = { features = [
-  "py310",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
-], solve-group = "py310" }
-min-py310 = { features = ["py310", "test"], solve-group = "py310" }
-
-full-py39 = { features = [
-  "py39",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
-], solve-group = "py39" }
-min-py39 = { features = ["py39", "test"], solve-group = "py39" }

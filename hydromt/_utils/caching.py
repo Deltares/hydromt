@@ -12,6 +12,7 @@ import geopandas as gpd
 import numpy as np
 from affine import Affine
 from fsspec import AbstractFileSystem, url_to_fs
+from osgeo import gdal
 from pyproj import CRS
 
 from hydromt._typing.type_def import StrPath
@@ -117,11 +118,8 @@ def _cache_vrt_tiles(
     # Strip scheme from base uri and get path to directory with vrt file
     scheme, stripped = _strip_scheme(vrt_uri)
 
-    vrt_destination_path = join(cache_dir, basename(vrt_uri))
-    if not isfile(vrt_destination_path):
-        _copy_to_local(vrt_uri, vrt_destination_path, fs)
     # read vrt file
-    with open(vrt_destination_path, "r") as f:
+    with open(vrt_uri, "r") as f:
         root = ET.fromstring(f.read())
 
     # get vrt transform and crs
@@ -199,10 +197,44 @@ def _cache_vrt_tiles(
             if not isfile(dst):  # Skip cached files
                 paths.append((src_uri, dst))
 
-    # Write new xml file
-    ET.ElementTree(root).write(vrt_destination_path)
+    # Define the output vrt
+    vrt_destination_path = Path(cache_dir, basename(vrt_uri))
 
+    # Copy the new files
     logger.info(f"Downloading {len(paths)} tiles to {cache_dir}")
     for src, dst in paths:
         _copy_to_local(src, dst, fs)
+
+    # Check for the newly cached files
+    new = [item[1] for item in paths]
+    if len(new) == 0:
+        if vrt_destination_path.is_file():
+            return vrt_destination_path
+        else:
+            return vrt_uri  # The original and try to work with that
+
+    # Second check for existing vrt and add the files to list to build the new vrt
+    if vrt_destination_path.is_file():
+        with open(vrt_destination_path, "r") as f:
+            root = ET.fromstring(f.read())
+        cur = [
+            Path(vrt_destination_path.parent, item.find("SourceFilename").text)
+            for item in root.find("VRTRasterBand").findall(source_name)
+        ]
+        # This shouldnt be possible, but just to be sure.
+        cur = [item for item in cur if item not in new]
+        # Add the current files in the vrt to the list and unlink the current vrt
+        new = new + cur
+        os.unlink(vrt_destination_path)
+
+    # Build the vrt with gdal
+    out_ds = gdal.BuildVRT(
+        destName=vrt_destination_path.as_posix(),
+        srcDSOrSrcDSTab=new,
+    )
+
+    # Close and dereference the gdal dataset
+    out_ds.Close()
+    out_ds = None
+
     return vrt_destination_path

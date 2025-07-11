@@ -44,6 +44,7 @@ class RasterioDriver(RasterDatasetDriver):
         time_range: Optional[TimeRange] = None,
         variables: Optional[Variables] = None,
         zoom: Optional[Zoom] = None,
+        chunks: Optional[dict] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:
@@ -103,6 +104,10 @@ class RasterioDriver(RasterDatasetDriver):
             if overview_level:
                 # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
                 kwargs.update(overview_level=overview_level - 1)
+
+        chunks = chunks or self.options.get("chunks")
+        if chunks is not None:
+            kwargs.update({"chunks": chunks})
 
         # If the metadata resolver has already resolved the overview level,
         # trying to open zoom levels here will result in an error.

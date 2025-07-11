@@ -1211,6 +1211,7 @@ class DataCatalog(object):
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom: Optional[Union[int, tuple]] = None,
         buffer: Union[float, int] = 0,
+        chunks: Optional[dict] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
         time_range: Optional[TimeRange] = None,
@@ -1247,6 +1248,10 @@ class DataCatalog(object):
             A geometry defining the area of interest, by default None
         zoom: Optional[Zoom], optional,
             Either an overview_level, or a tuple with the resolution and unit of the resolution.
+        chunks: Optional[dict], optional
+            Set the chunking of the data, this overrules the chunking set in the data
+            catalog. If not specified, the chunking defined in the data catalog will
+            be used. By default None
         buffer : Union[float, int], optional
             Buffer around the `bbox` or `geom` area of interest in meters, by default 0
         handle_nodata : NoDataStrategy, optional
@@ -1335,6 +1340,7 @@ class DataCatalog(object):
             mask=geom,
             buffer=buffer,
             zoom=zoom,
+            chunks=chunks,
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,
