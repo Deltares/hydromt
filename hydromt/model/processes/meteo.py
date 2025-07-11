@@ -772,8 +772,6 @@ def resample_time(
         logger.debug(
             f"{pre}sampling {da.name} using {resample}; conserve mass: {conserve_mass}"
         )
-        if not hasattr(xr.core.resample.DataArrayResample, resample):
-            raise ValueError(f"unknown resampling option {resample}")
         da_resampled = da.resample(time=freq, skipna=True, label=label, closed=closed)
         da_out = getattr(da_resampled, resample)()
         if conserve_mass:
