@@ -47,7 +47,7 @@ dependencies = [
   "zarr>=2,<3",             # zarr
 ]
 
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 readme = "README.rst"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -56,8 +56,6 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Hydrology",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -110,9 +108,6 @@ examples = [
   "notebook",   # jupyter integration
 ]
 
-full = ["hydromt[io,extra,dev,test,doc,examples]"]
-slim = ["hydromt[io,extra,examples]"]
-
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
 Source = "https://github.com/Deltares/hydromt"
@@ -140,7 +135,7 @@ description = { file = "hydromt/__init__.py" }
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py311"
 exclude = ["docs"]
 
 [tool.ruff.lint]
@@ -178,6 +173,7 @@ filterwarnings = [
   #   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
   "ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
   'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
+  "ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                 # Pillow 13
 ]
 
 [tool.mypy]
@@ -199,12 +195,6 @@ disallow_any_generics = true
 [tool.pixi.project]
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64"]
-
-[tool.pixi.feature.py39.dependencies]
-python = "3.9.*"
-
-[tool.pixi.feature.py310.dependencies]
-python = "3.10.*"
 
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
@@ -415,25 +405,3 @@ full-py311 = { features = [
   "examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311", "test"], solve-group = "py311" }
-
-full-py310 = { features = [
-  "py310",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
-], solve-group = "py310" }
-min-py310 = { features = ["py310", "test"], solve-group = "py310" }
-
-full-py39 = { features = [
-  "py39",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
-], solve-group = "py39" }
-min-py39 = { features = ["py39", "test"], solve-group = "py39" }

@@ -1869,7 +1869,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             for combination in itertools.product(*options.values()):
                 source_copy = copy.deepcopy(source)
                 name_copy = name
-                for k, v in zip(options.keys(), combination):
+                for k, v in zip(options.keys(), combination, strict=False):
                     name_copy = name_copy.replace("{" + k + "}", v)
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})

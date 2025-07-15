@@ -370,7 +370,7 @@ def grid_from_rasterdataset(
     # one reproject method per variable
     elif len(reproject_method) == len(variables):
         ds_list = []
-        for var, method in zip(variables, reproject_method):
+        for var, method in zip(variables, reproject_method, strict=False):
             ds_list.append(ds[var].raster.reproject_like(grid_like, method=method))
         ds_out = xr.merge(ds_list)
     else:
@@ -443,7 +443,7 @@ def grid_from_raster_reclass(
     # one reproject method per variable
     elif len(reproject_method) == len(reclass_variables):
         ds_list = []
-        for var, method in zip(reclass_variables, reproject_method):
+        for var, method in zip(reclass_variables, reproject_method, strict=False):
             ds_list.append(ds_out[var].raster.reproject_like(grid_like, method=method))
         ds_out = xr.merge(ds_list)
     else:
@@ -526,7 +526,7 @@ def grid_from_geodataframe(
                     + f"or length of variables ({len(variables)})."
                 )
         # Loop of variables and nodata
-        for var, nd in zip(variables, nodata):
+        for var, nd in zip(variables, nodata, strict=False):
             # Rasterize
             da = grid_like.raster.rasterize(
                 gdf=gdf,
