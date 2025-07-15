@@ -16,6 +16,7 @@ New
 
 Changed
 -------
+- Drop support for Python 3.9 and 3.10
 
 Fixed
 -----
