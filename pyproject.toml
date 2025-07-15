@@ -200,6 +200,12 @@ disallow_any_generics = true
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64"]
 
+[tool.pixi.feature.py39.dependencies]
+python = "3.9.*"
+
+[tool.pixi.feature.py310.dependencies]
+python = "3.10.*"
+
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
 
@@ -409,3 +415,25 @@ full-py311 = { features = [
   "examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311", "test"], solve-group = "py311" }
+
+full-py310 = { features = [
+  "py310",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py310" }
+min-py310 = { features = ["py310", "test"], solve-group = "py310" }
+
+full-py39 = { features = [
+  "py39",
+  "io",
+  "extra",
+  "dev",
+  "test",
+  "doc",
+  "examples",
+], solve-group = "py39" }
+min-py39 = { features = ["py39", "test"], solve-group = "py39" }
