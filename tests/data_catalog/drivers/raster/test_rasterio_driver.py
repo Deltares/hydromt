@@ -30,7 +30,7 @@ class TestRasterioDriver:
     @pytest.mark.usefixtures("test_settings")
     def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
         cache_dir: str = "tests_caches_tifs_from_vrt"
-        driver = RasterioDriver(options={"cache_dir": cache_dir})
+        driver = RasterioDriver(options={"cache": True, "cache_dir": cache_dir})
         driver.read(uris=[join(vrt_tiled_raster_ds, "tiled_zl0.vrt")])
         assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
 

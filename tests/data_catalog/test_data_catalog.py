@@ -860,17 +860,7 @@ class TestGetRasterDataset:
         ).open() as f:
             tree: ET.ElementTree = ET.parse(f)
         root: ET.Element = tree.getroot()
-        assert (
-            len(
-                list(
-                    filter(
-                        lambda el: el.text.startswith("map"),
-                        root.findall("VRTRasterBand/ComplexSource/SourceFilename"),
-                    )
-                )
-            )
-            == 1
-        )
+        assert len(root.findall("VRTRasterBand/ComplexSource/SourceFilename")) == 1
 
     @pytest.mark.skip(
         reason="Waiting for: https://github.com/Deltares/hydromt/issues/492"
