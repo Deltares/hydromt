@@ -119,8 +119,7 @@ def _cache_vrt_tiles(
     scheme, stripped = _strip_scheme(vrt_uri)
 
     # read vrt file
-    with open(vrt_uri, "r") as f:
-        root = ET.fromstring(f.read())
+    root = ET.fromstring(fs.read_text(vrt_uri))
 
     # get vrt transform and crs
     geotransform_el: Optional[ET.Element] = root.find("GeoTransform")
