@@ -12,12 +12,15 @@ Unreleased
 
 New
 ---
+- Setting the chunking size via `get_rasterdataset`
 
 Changed
 -------
 
 Fixed
 -----
+- Caching of vrt's now regenerates vrt files if new tiles are downloaded
+- Re-enables chunking based on driver options in the data-catalog
 
 Deprecated
 ----------
