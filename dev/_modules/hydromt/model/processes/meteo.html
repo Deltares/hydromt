@@ -465,7 +465,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xarray.core.resample</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">HAS_PYET</span>
 
@@ -793,9 +792,9 @@
 <div class="viewcode-block" id="pet">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.meteo.pet.html#hydromt.model.processes.meteo.pet">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">pet</span><span class="p">(</span>
-    <span class="n">ds</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
-    <span class="n">temp</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">dem_model</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">temp</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">dem_model</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">method</span><span class="p">:</span> <span class="n">PetMethods</span> <span class="o">=</span> <span class="s2">&quot;debruin&quot;</span><span class="p">,</span>
     <span class="n">press_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">wind_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -803,7 +802,7 @@
     <span class="n">reproj_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nearest_index&quot;</span><span class="p">,</span>
     <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">resample_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine reference evapotranspiration.</span>
 
 <span class="sd">    (lazy reprojection on model grid and resampling of time dimension to frequency).</span>
@@ -947,9 +946,7 @@
     <span class="n">pet_out</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s2">&quot;mm&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">resample_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">upsampling</span><span class="o">=</span><span class="s2">&quot;bfill&quot;</span><span class="p">,</span> <span class="n">downsampling</span><span class="o">=</span><span class="s2">&quot;sum&quot;</span><span class="p">)</span>
-        <span class="n">pet_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span>
-            <span class="n">pet_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span>
-        <span class="p">)</span>
+        <span class="n">pet_out</span> <span class="o">=</span> <span class="n">resample_time</span><span class="p">(</span><span class="n">pet_out</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">conserve_mass</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">resample_kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">pet_out</span></div>
 
 
@@ -1120,16 +1117,16 @@
 <div class="viewcode-block" id="pm_fao56">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.meteo.pm_fao56.html#hydromt.model.processes.meteo.pm_fao56">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">pm_fao56</span><span class="p">(</span>
-    <span class="n">temp</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">temp_max</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">temp_min</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">press</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">kin</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">wind</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">temp_dew</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">dem</span><span class="p">:</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">temp</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">temp_max</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">temp_min</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">press</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">kin</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">wind</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">temp_dew</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="n">dem</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
     <span class="n">var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;temp_dew&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xarray</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate daily reference evapotranspiration (ETo).</span>
 
 <span class="sd">    Based on a hypothetical short grass reference surface using the</span>
@@ -1265,8 +1262,6 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pre</span><span class="si">}</span><span class="s2">sampling </span><span class="si">{</span><span class="n">da</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> using </span><span class="si">{</span><span class="n">resample</span><span class="si">}</span><span class="s2">; conserve mass: </span><span class="si">{</span><span class="n">conserve_mass</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">resample</span><span class="o">.</span><span class="n">DataArrayResample</span><span class="p">,</span> <span class="n">resample</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown resampling option </span><span class="si">{</span><span class="n">resample</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">da_resampled</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="n">closed</span><span class="p">)</span>
         <span class="n">da_out</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">da_resampled</span><span class="p">,</span> <span class="n">resample</span><span class="p">)()</span>
         <span class="k">if</span> <span class="n">conserve_mass</span><span class="p">:</span>
