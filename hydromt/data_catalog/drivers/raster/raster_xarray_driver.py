@@ -1,6 +1,6 @@
 """RasterDatasetDriver for zarr data."""
 
-from copy import copy
+from copy import deepcopy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
@@ -42,6 +42,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom: Optional[Zoom] = None,
+        chunks: Optional[dict] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:
@@ -53,14 +54,12 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         _warn_on_unused_kwargs(
             self.__class__.__name__,
             {
-                "mask": mask,
-                "time_range": time_range,
-                "variables": variables,
                 "zoom": zoom,
-                "metadata": metadata,
             },
         )
-        options = copy(self.options)
+        options = deepcopy(self.options)
+
+        # Sort out the preprocessor
         preprocessor: Optional[Callable] = None
         preprocessor_name: Optional[str] = options.pop("preprocess", None)
         if preprocessor_name:
@@ -68,12 +67,14 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             if not preprocessor:
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
+        # Check for the override flag
         ext_override: Optional[str] = options.pop("ext_override", None)
         if ext_override is not None:
             first_ext: str = ext_override
         else:
             first_ext: str = splitext(uris[0])[-1]
 
+        # When is zarr, open like a zarr archive
         if first_ext == _ZARR_EXT:
             opn: Callable = partial(xr.open_zarr, **options)
             datasets = []
@@ -87,6 +88,8 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                     )
 
             ds: xr.Dataset = xr.merge(datasets)
+
+        # Normal netcdf file(s)
         elif first_ext in [".nc", ".netcdf"]:
             filtered_uris = []
             for _uri in uris:

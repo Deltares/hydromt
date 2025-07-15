@@ -1,5 +1,6 @@
 """Driver using rasterio for RasterDataset."""
 
+import copy
 from logging import Logger, getLogger
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -22,7 +23,6 @@ from hydromt._typing import (
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.caching import _cache_vrt_tiles
 from hydromt._utils.temp_env import temp_env
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers import RasterDatasetDriver
@@ -52,21 +52,21 @@ class RasterioDriver(RasterDatasetDriver):
         if metadata is None:
             metadata = SourceMetadata()
         # build up kwargs for open_raster
-        _warn_on_unused_kwargs(
-            self.__class__.__name__,
-            {"time_range": time_range},
-        )
-        kwargs: Dict[str, Any] = {}
+        options = copy.deepcopy(self.options)
         mosaic_kwargs: Dict[str, Any] = self.options.get("mosaic_kwargs", {})
-        mosaic: bool = self.options.get("mosaic", False) and len(uris) > 1
+        mosaic: bool = options.pop("mosaic", False) and len(uris) > 1
 
         # get source-specific options
         cache_root: str = str(
-            self.options.get("cache_root", SETTINGS.cache_root),
+            options.pop("cache_root", SETTINGS.cache_root),
         )
 
-        if all([uri.endswith(".vrt") for uri in uris]):
-            cache_dir = Path(cache_root) / self.options.get(
+        # Check for caching, default to false
+        cache_flag = options.pop("cache", False)
+
+        # Caching portion, only when the flag is True and the file format is vrt
+        if all([uri.endswith(".vrt") for uri in uris]) and cache_flag:
+            cache_dir = Path(cache_root) / options.pop(
                 "cache_dir",
                 Path(
                     _strip_scheme(uris[0])[1]
@@ -85,10 +85,10 @@ class RasterioDriver(RasterDatasetDriver):
 
         # get mosaic kwargs
         if mosaic_kwargs:
-            kwargs.update({"mosaic_kwargs": mosaic_kwargs})
+            options.update({"mosaic_kwargs": mosaic_kwargs})
 
         if np.issubdtype(type(metadata.nodata), np.number):
-            kwargs.update(nodata=metadata.nodata)
+            options.update(nodata=metadata.nodata)
 
         # Fix overview level
         if zoom:
@@ -103,11 +103,10 @@ class RasterioDriver(RasterDatasetDriver):
             )
             if overview_level:
                 # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
-                kwargs.update(overview_level=overview_level - 1)
+                options.update(overview_level=overview_level - 1)
 
-        chunks = chunks or self.options.get("chunks")
         if chunks is not None:
-            kwargs.update({"chunks": chunks})
+            options.update({"chunks": chunks})
 
         # If the metadata resolver has already resolved the overview level,
         # trying to open zoom levels here will result in an error.
@@ -115,11 +114,11 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> Union[xr.DataArray, xr.Dataset]:
             try:
-                return _open_mfraster(uris, mosaic=mosaic, **kwargs)
+                return _open_mfraster(uris, mosaic=mosaic, **options)
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
-                    kwargs.pop("overview_level")
-                    return _open_mfraster(uris, mosaic=mosaic, **kwargs)
+                    options.pop("overview_level")
+                    return _open_mfraster(uris, mosaic=mosaic, **options)
                 else:
                     raise
 
@@ -134,6 +133,12 @@ class RasterioDriver(RasterDatasetDriver):
                 ds = _open()
         else:
             ds = _open()
+
+        # Mosiac's can mess up the chunking, which can error during writing
+        # Or maybe setting
+        chunks = options.get("chunks")
+        if chunks is not None:
+            ds = ds.chunk(chunks=chunks)
 
         # rename ds with single band if single variable is requested
         if variables is not None and len(variables) == 1 and len(ds.data_vars) == 1:
