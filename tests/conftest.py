@@ -37,6 +37,7 @@ from hydromt.plugins import Plugins
 
 dask_config.set(scheduler="single-threaded")
 
+CURRENT_DIR = Path(__file__).parent
 DATA_DIR = join(dirname(abspath(__file__)), "..", "data")
 TEST_DATA_DIR = join(dirname(abspath(__file__)), "data")
 DC_PARAM_PATH = join(TEST_DATA_DIR, "parameters_data.yml")
@@ -58,6 +59,14 @@ def get_open_xarray_objects() -> List[tuple[Union[xr.Dataset, xr.DataArray], Pat
 def PLUGINS() -> Plugins:
     # make sure to start each test with a clean state
     return Plugins()
+
+
+@pytest.fixture(scope="session")
+def data_dir() -> Path:
+    p = Path(CURRENT_DIR, "data")
+    assert p.is_dir()
+    assert Path(p, "parameters_data.yml").is_file()
+    return p
 
 
 @pytest.fixture

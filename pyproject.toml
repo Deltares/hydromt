@@ -37,7 +37,7 @@ dependencies = [
   "requests",               # donwload stuff
   "rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
   "scipy",                  # scientific utilities
-  "shapely>=2.0.0",         # geometry transforms
+  "shapely>=2.1.0",         # geometry transforms
   "tomli",                  # parsing toml files
   "tomli-w",                # writing toml files
   "universal_pathlib>=0.2", # provides path compatability between different filesystems
@@ -180,7 +180,7 @@ filterwarnings = [
 # TODO: Re-enable the tests
 exclude = ["docs/.*", "tests/.*"]
 plugins = ["pydantic.mypy", "numpy.typing.mypy_plugin"]
-python_version = "3.9"
+python_version = "3.11"
 ignore_missing_imports = true
 
 warn_unused_configs = true

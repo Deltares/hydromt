@@ -596,7 +596,7 @@ def rotated_grid(
         """Distance between points."""
         return np.hypot(b[0] - a[0], b[1] - a[1])
 
-    mrr = pol.minimum_rotated_rectangle
+    mrr = pol.minimum_rotated_rectangle.normalize()
     coords = np.asarray(mrr.exterior.coords)[:-1, :]  # get coordinates of all corners
     # get origin based on the corner with the smallest distance to origin
     # after translation to account for possible negative coordinates

@@ -598,7 +598,7 @@ def test_create_rotated_grid_from_geom_rotated():
     # Create a GeoDataFrame
     region = gpd.GeoDataFrame(pd.DataFrame({"id": [1]}), geometry=[polygon])
     da = create_rotated_grid_from_geom(region, res=1, dec_origin=0, dec_rotation=0)
-    expected_shape = (101, 10)
+    expected_shape = (10, 101)
     assert da.raster.shape == expected_shape
 
 
