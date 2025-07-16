@@ -7,7 +7,6 @@ from typing import Dict, Literal, Optional, Union
 import numpy as np
 import pandas as pd
 import xarray as xr
-import xarray.core.resample
 
 from hydromt._compat import HAS_PYET
 
@@ -321,9 +320,9 @@ def wind(
 
 
 def pet(
-    ds: xarray.Dataset,
-    temp: xarray.DataArray,
-    dem_model: xarray.DataArray,
+    ds: xr.Dataset,
+    temp: xr.DataArray,
+    dem_model: xr.DataArray,
     method: PetMethods = "debruin",
     press_correction: bool = False,
     wind_correction: bool = True,
@@ -331,7 +330,7 @@ def pet(
     reproj_method: str = "nearest_index",
     freq: Optional[str] = None,
     resample_kwargs: Optional[Dict[str, str]] = None,
-) -> xarray.DataArray:
+) -> xr.DataArray:
     """Determine reference evapotranspiration.
 
     (lazy reprojection on model grid and resampling of time dimension to frequency).
@@ -475,9 +474,7 @@ def pet(
     pet_out.attrs.update(unit="mm")
     if freq is not None:
         resample_kwargs.update(upsampling="bfill", downsampling="sum")
-        pet_out = resample_time(
-            pet_out, freq, conserve_mass=True, logger=logger, **resample_kwargs
-        )
+        pet_out = resample_time(pet_out, freq, conserve_mass=True, **resample_kwargs)
     return pet_out
 
 
@@ -633,16 +630,16 @@ def pet_makkink(
 
 
 def pm_fao56(
-    temp: xarray.DataArray,
-    temp_max: xarray.DataArray,
-    temp_min: xarray.DataArray,
-    press: xarray.DataArray,
-    kin: xarray.DataArray,
-    wind: xarray.DataArray,
-    temp_dew: xarray.DataArray,
-    dem: xarray.DataArray,
+    temp: xr.DataArray,
+    temp_max: xr.DataArray,
+    temp_min: xr.DataArray,
+    press: xr.DataArray,
+    kin: xr.DataArray,
+    wind: xr.DataArray,
+    temp_dew: xr.DataArray,
+    dem: xr.DataArray,
     var: str = "temp_dew",
-) -> xarray.DataArray:
+) -> xr.DataArray:
     """Estimate daily reference evapotranspiration (ETo).
 
     Based on a hypothetical short grass reference surface using the
@@ -775,8 +772,6 @@ def resample_time(
         logger.debug(
             f"{pre}sampling {da.name} using {resample}; conserve mass: {conserve_mass}"
         )
-        if not hasattr(xr.core.resample.DataArrayResample, resample):
-            raise ValueError(f"unknown resampling option {resample}")
         da_resampled = da.resample(time=freq, skipna=True, label=label, closed=closed)
         da_out = getattr(da_resampled, resample)()
         if conserve_mass:
