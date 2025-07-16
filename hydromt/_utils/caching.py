@@ -55,12 +55,12 @@ def _overlaps(source: ET.Element, affine: Affine, bbox: List[float]) -> bool:
     affine : Affine
         Tile affine
     bbox : List[float]
-        requested bbox
+        Requested bbox
 
     Returns
     -------
     bool
-        whether the tile overlaps with the requested bbox.
+        Whether the tile overlaps with the requested bbox.
 
     Raises
     ------
@@ -88,7 +88,7 @@ def _cache_vrt_tiles(
     fs: Optional[AbstractFileSystem] = None,
     geom: Optional[gpd.GeoSeries] = None,
     cache_dir: StrPath = SETTINGS.cache_root,
-) -> str:
+) -> Path:
     """Cache vrt tiles that intersect with geom.
 
     Note that the vrt file must contain relative tile paths.
@@ -96,18 +96,18 @@ def _cache_vrt_tiles(
     Parameters
     ----------
     vrt_uri: str
-        path to source vrt
+        Path to source vrt
     fs : Optional[AbstractFileSystem], optional
         Fsspec filesystem. Will be inferred from src if not supplied.
     geom: geopandas.GeoSeries, optional
-        geometry to intersect tiles with
+        Geometry to intersect tiles with
     cache_dir: str, Path
-        path of the root folder where
+        Path of the root folder where
 
     Returns
     -------
-    vrt_destination_path : str
-        path to cached vrt
+    vrt_destination_path : Path
+        Path to cached vrt
     """
     if fs is None:
         fs: AbstractFileSystem = url_to_fs(vrt_uri)[0]
@@ -210,7 +210,7 @@ def _cache_vrt_tiles(
         if vrt_destination_path.is_file():
             return vrt_destination_path
         else:
-            return vrt_uri  # The original and try to work with that
+            return Path(vrt_uri)  # The original and try to work with that
 
     # Second check for existing vrt and add the files to list to build the new vrt
     if vrt_destination_path.is_file():

@@ -51,6 +51,7 @@ from hydromt.data_catalog.adapters import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
+from hydromt.data_catalog.drivers import RasterioDriver
 from hydromt.data_catalog.predefined_catalog import (
     PredefinedCatalog,
     _copy_file,
@@ -107,7 +108,7 @@ class DataCatalog(object):
             Set to true to cache data locally before reading.
             Currently only implemented for tiled rasterdatasets, by default False.
         cache_dir: str, Path, optional
-            Folder root path to cach data to, by default ~/.hydromt_data
+            Directory root path to cache data to, by default ~/.hydromt
         logger : logger object, optional
             The logger object used for logging messages. If not provided, the default
             logger will be used.
@@ -1334,6 +1335,10 @@ class DataCatalog(object):
             source = data_like
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
+
+        # This isnt briliant but works the best at this stage
+        if isinstance(source.driver, RasterioDriver):
+            source.driver.options.update({"cache": self.cache})
 
         return source.read_data(
             bbox=bbox,

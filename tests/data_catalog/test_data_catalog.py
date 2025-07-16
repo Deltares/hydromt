@@ -835,7 +835,7 @@ class TestGetRasterDataset:
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
     def test_aws_worldcover(self, test_settings: Settings):
         catalog_fn = join(_CATALOG_DIR, "aws_data", "v1.0.0", "data_catalog.yml")
-        data_catalog = DataCatalog(data_libs=[catalog_fn])
+        data_catalog = DataCatalog(data_libs=[catalog_fn], cache=True)
         da = data_catalog.get_rasterdataset(
             "esa_worldcover_2020_v100",
             bbox=[12.0, 46.0, 12.5, 46.50],
