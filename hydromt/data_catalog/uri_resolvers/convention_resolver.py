@@ -17,7 +17,6 @@ from hydromt._typing import (
     exec_nodata_strat,
 )
 from hydromt._utils.naming_convention import _expand_uri_placeholders
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.gis._gis_utils import _zoom_to_overview_level
 
 from .uri_resolver import URIResolver
@@ -117,8 +116,6 @@ class ConventionResolver(URIResolver):
         NoDataException
             when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`
         """
-        _warn_on_unused_kwargs(self.__class__.__name__, {"mask": mask})
-
         if metadata is None:
             metadata: SourceMetadata = SourceMetadata()
 

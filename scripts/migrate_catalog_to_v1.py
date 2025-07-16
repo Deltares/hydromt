@@ -5,7 +5,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
-from yaml import Loader, dump, load
+from yaml import Loader, SafeDumper, dump, load
 
 from hydromt.data_catalog import DataCatalog
 
@@ -41,6 +41,17 @@ DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
         "netcdf": "dataset_xarray",  # TODO: https://github.com/Deltares/hydromt/issues/878
     },
 }
+
+
+class CatalogDumper(SafeDumper):
+    """Small class for formatting yaml output."""
+
+    def write_line_break(self, data=None):
+        """Overwrite default behaviour to incorporate newlines."""
+        super().write_line_break(data)
+
+        if len(self.indents) == 1:
+            super().write_line_break()
 
 
 def prepare_path_out(path_out: Path, overwrite: bool):
@@ -209,7 +220,13 @@ def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
 
     # dump dict
     with open(path_out, mode="w") as f:
-        dump(new_catalog_dict, f, default_flow_style=False, sort_keys=False)
+        dump(
+            new_catalog_dict,
+            f,
+            default_flow_style=False,
+            sort_keys=False,
+            Dumper=CatalogDumper,
+        )
 
 
 def main(path_in: Path, path_out: Path, overwrite: bool, version: str):

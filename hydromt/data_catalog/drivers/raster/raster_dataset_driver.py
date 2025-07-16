@@ -35,6 +35,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         variables: Optional[Variables] = None,
         time_range: Optional[TimeRange] = None,
         zoom_level: Optional[Zoom] = None,
+        chunks: Optional[dict] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> xr.Dataset:

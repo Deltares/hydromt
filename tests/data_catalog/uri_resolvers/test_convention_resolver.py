@@ -22,7 +22,7 @@ class TestConventionResolver:
             variables, years, months
         )
         formats: Iterator[Dict[str, Any]] = map(
-            lambda _vars: dict(zip(("variable", "year", "month"), _vars)),
+            lambda _vars: dict(zip(("variable", "year", "month"), _vars, strict=False)),
             carthesian_prod,
         )
 

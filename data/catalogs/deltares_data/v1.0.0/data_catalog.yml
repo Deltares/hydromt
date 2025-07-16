@@ -1,8 +1,9 @@
 meta:
   root: p:/wflow_global/hydromt
   version: v1.0.0
-  hydromt_version: '>=0.9, <1.0'
+  hydromt_version: '>=1.0a, <2'
   name: deltares_data
+
 hydro_basin_atlas_level12:
   data_type: GeoDataFrame
   version: 10
@@ -25,6 +26,7 @@ hydro_basin_atlas_level12:
         East: 180.001
         North: 83.626
     crs: 4326
+
 chelsa:
   data_type: RasterDataset
   version: 1.2
@@ -48,6 +50,7 @@ chelsa:
         East: 180.0
         North: 84.0
     crs: 4326
+
 chirps:
   data_type: RasterDataset
   version: 2.0
@@ -83,6 +86,7 @@ chirps:
       precipitation: precip
     unit_add:
       time: 86400
+
 chirps_global:
   data_type: RasterDataset
   version: 2.0
@@ -118,6 +122,7 @@ chirps_global:
       precipitation: precip
     unit_add:
       time: 86400
+
 copdem30:
   data_type: RasterDataset
   version: 2021.1
@@ -142,6 +147,7 @@ copdem30:
   data_adapter:
     rename:
       copdem: elevtn
+
 copdem30_mask:
   data_type: RasterDataset
   version: 2021.1
@@ -166,6 +172,7 @@ copdem30_mask:
   data_adapter:
     rename:
       copdem_mask: mask
+
 copdem30_masked:
   data_type: RasterDataset
   version: 2021.1
@@ -189,6 +196,7 @@ copdem30_masked:
   data_adapter:
     rename:
       copdem_masked: elevtn
+
 corine:
   data_type: RasterDataset
   version: 2020_20u1
@@ -210,6 +218,7 @@ corine:
         South: 900000.0
         East: 7400000.0
         North: 5500000.0
+
 dtu10mdt:
   data_type: RasterDataset
   version: 2010
@@ -233,6 +242,7 @@ dtu10mdt:
         East: 179.992
         North: 89.992
     crs: 4326
+
 dtu10mdt_egm96:
   data_type: RasterDataset
   version: 2010
@@ -258,6 +268,7 @@ dtu10mdt_egm96:
         East: 179.995
         North: 89.992
     crs: 4326
+
 eobs:
   data_type: RasterDataset
   variants:
@@ -337,6 +348,7 @@ eobs:
       tg: temp
     unit_add:
       time: 86400
+
 eobs_orography:
   data_type: RasterDataset
   variants:
@@ -374,6 +386,7 @@ eobs_orography:
   data_adapter:
     rename:
       elevation: elevtn
+
 era5:
   data_type: RasterDataset
   variants:
@@ -436,6 +449,7 @@ era5:
       temp_dew: -273.15
       temp_max: -273.15
       temp_min: -273.15
+
 era5_hourly:
   data_type: RasterDataset
   variants:
@@ -494,6 +508,7 @@ era5_hourly:
     unit_add:
       temp: -273.15
       temp_dew: -273.15
+
 era5_ocean:
   data_type: RasterDataset
   uri: ocean/era5/{variable}/era5_{variable}_{year}_hourly.nc
@@ -524,6 +539,7 @@ era5_ocean:
         start: '1979-01-01'
         end: '2022-04-08'
     crs: 4326
+
 era5_orography:
   data_type: RasterDataset
   uri: meteo/era5/meta/era5_orography_2018.nc
@@ -555,6 +571,7 @@ era5_orography:
       elevtn: 0.10197162129779283
     rename:
       z: elevtn
+
 esa_worldcover:
   data_type: RasterDataset
   version: 100
@@ -580,6 +597,7 @@ esa_worldcover:
         start: '2020-01-01'
         end: '2020-12-31'
     crs: 4326
+
 fabdem:
   data_type: RasterDataset
   version: 1.0
@@ -606,6 +624,7 @@ fabdem:
   data_adapter:
     rename:
       fabdem: elevtn
+
 gadm:
   data_type: GeoDataFrame
   version: 4.1
@@ -626,6 +645,7 @@ gadm:
         East: 180.0
         North: 83.658
     crs: 4326
+
 gadm_level1:
   data_type: GeoDataFrame
   version: 4.1
@@ -646,6 +666,7 @@ gadm_level1:
         East: 180.0
         North: 83.658
     crs: 4326
+
 gadm_level2:
   data_type: GeoDataFrame
   version: 4.1
@@ -666,6 +687,7 @@ gadm_level2:
         East: 180.0
         North: 83.658
     crs: 4326
+
 gadm_level3:
   data_type: GeoDataFrame
   version: 4.1
@@ -686,6 +708,7 @@ gadm_level3:
         East: 180.0
         North: 83.658
     crs: 4326
+
 gcn250:
   data_type: RasterDataset
   version: 1
@@ -714,6 +737,7 @@ gcn250:
       GCN250_ARCI: cn_dry
       GCN250_ARCII: cn_avg
       GCN250_ARCIII: cn_wet
+
 gdp_world:
   data_type: GeoDataFrame
   version: 1.0
@@ -738,6 +762,7 @@ gdp_world:
       gdp: 0.001
     rename:
       GDP: gdp
+
 gebco:
   data_type: RasterDataset
   version: 2020
@@ -766,6 +791,7 @@ gebco:
   data_adapter:
     rename:
       gebco: elevtn
+
 ghs_pop_2015:
   data_type: RasterDataset
   version: R2019A_v1.0
@@ -790,6 +816,7 @@ ghs_pop_2015:
         East: 180.0
         North: 83.628
     crs: 4326
+
 ghs_pop_2015_54009:
   data_type: RasterDataset
   version: R2019A_v1.0
@@ -813,6 +840,7 @@ ghs_pop_2015_54009:
         East: 18041000.0
         North: 9000000.0
     crs: ESRI:54009
+
 ghs_smod_2015:
   data_type: RasterDataset
   variants:
@@ -844,6 +872,7 @@ ghs_smod_2015:
         East: 18041000.0
         North: 9000000.0
     crs: ESRI:54009
+
 globcover:
   data_type: RasterDataset
   version: 2.3
@@ -867,6 +896,7 @@ globcover:
         East: 179.999
         North: 90.001
     crs: 4326
+
 glofas_era5:
   data_type: RasterDataset
   version: 31
@@ -902,6 +932,7 @@ glofas_era5:
   data_adapter:
     rename:
       dis24: discharge
+
 glofas_uparea:
   data_type: RasterDataset
   version: 31
@@ -930,6 +961,7 @@ glofas_uparea:
       uparea: 1.0e-06
     rename:
       glofas_v31_uparea: uparea
+
 glw_buffaloes:
   data_type: RasterDataset
   version: 3
@@ -955,6 +987,7 @@ glw_buffaloes:
         East: 180.0
         North: 90.0
     crs: 4326
+
 glw_cattle:
   data_type: RasterDataset
   version: 3
@@ -979,6 +1012,7 @@ glw_cattle:
         East: 180.0
         North: 90.0
     crs: 4326
+
 glw_chicken:
   data_type: RasterDataset
   version: 3
@@ -1003,6 +1037,7 @@ glw_chicken:
         East: 180.0
         North: 90.0
     crs: 4326
+
 glw_ducks:
   data_type: RasterDataset
   version: 3
@@ -1027,6 +1062,7 @@ glw_ducks:
         East: 180.0
         North: 90.0
     crs: 4326
+
 glw_goats:
   data_type: RasterDataset
   version: 3
@@ -1051,6 +1087,7 @@ glw_goats:
         East: 180.0
         North: 90.0
     crs: 4326
+
 glw_horses:
   data_type: RasterDataset
   version: 3
@@ -1075,6 +1112,7 @@ glw_horses:
         East: 180.0
         North: 90.0
     crs: 4326
+
 glw_pigs:
   data_type: RasterDataset
   version: 3
@@ -1099,6 +1137,7 @@ glw_pigs:
         East: 180.0
         North: 90.0
     crs: 4326
+
 glw_sheeps:
   data_type: RasterDataset
   version: 3
@@ -1123,6 +1162,7 @@ glw_sheeps:
         East: 180.0
         North: 90.0
     crs: 4326
+
 grdc:
   data_type: GeoDataFrame
   uri: hydro/grdc/GRDC_Stations.csv
@@ -1139,6 +1179,7 @@ grdc:
   data_adapter:
     rename:
       area: uparea
+
 grip_roads:
   data_type: GeoDataFrame
   version: 4
@@ -1163,6 +1204,7 @@ grip_roads:
     rename:
       GP_RTP: road_type
       GP_RCY: country_code
+
 grwl:
   data_type: GeoDataFrame
   version: 1.01
@@ -1181,6 +1223,7 @@ grwl:
         South: -54.31
         East: 180.0
         North: 82.311
+
 grwl_mask:
   data_type: RasterDataset
   version: 1.01
@@ -1204,6 +1247,7 @@ grwl_mask:
     url: https://doi.org/10.5281/zenodo.1297434
     license: CC BY 4.0
     nodata: 0
+
 gswo:
   data_type: RasterDataset
   version: 1.1
@@ -1226,6 +1270,7 @@ gswo:
         East: 180.0
         North: 80.0
     nodata: 255
+
 guf_bld_2012:
   data_type: RasterDataset
   version: 2
@@ -1249,6 +1294,7 @@ guf_bld_2012:
         East: 180.0
         North: 85.0
     crs: 4326
+
 hydro_lakes:
   data_type: GeoDataFrame
   version: 1.0
@@ -1278,6 +1324,7 @@ hydro_lakes:
       Pour_lat: yout
       Pour_long: xout
       Vol_total: Vol_avg
+
 hydro_reservoirs:
   data_type: GeoDataFrame
   version: 1.0
@@ -1318,6 +1365,7 @@ hydro_reservoirs:
       Pour_lat: yout
       Pour_long: xout
       Vol_total: Vol_avg
+
 koppen_geiger:
   data_type: RasterDataset
   version: 2017
@@ -1341,6 +1389,7 @@ koppen_geiger:
         North: 90.0
     crs: 4326
     nodata: 0
+
 hydro_lake_atlas_pol:
   data_type: GeoDataFrame
   version: 10
@@ -1366,6 +1415,7 @@ hydro_lake_atlas_pol:
   data_adapter:
     rename:
       dis_m3_pyr: Dis_avg
+
 mdt_cnes_cls18:
   data_type: RasterDataset
   version: 18
@@ -1390,6 +1440,7 @@ mdt_cnes_cls18:
         East: 180.0
         North: 90.0
     crs: 4326
+
 merit:
   data_type: RasterDataset
   version: 1.0.3
@@ -1417,6 +1468,7 @@ merit:
   data_adapter:
     rename:
       elevation: elevtn
+
 merit_hydro:
   data_type: RasterDataset
   version: 1.0
@@ -1452,6 +1504,7 @@ merit_hydro:
       upa: uparea
       upg: upgrid
       wth: rivwth
+
 merit_hydro_ihu:
   data_type: RasterDataset
   version: 1.0
@@ -1486,6 +1539,7 @@ merit_hydro_ihu:
       30sec_uparea: uparea
       30sec_rivlen: rivlen
       30sec_rivslp: rivslp
+
 merit_hydro_ihu_index:
   data_type: GeoDataFrame
   version: 1.0
@@ -1506,6 +1560,7 @@ merit_hydro_ihu_index:
         East: 190.35
         North: 83.683
     crs: 4326
+
 merit_hydro_index:
   data_type: GeoDataFrame
   version: 1.0
@@ -1524,6 +1579,7 @@ merit_hydro_index:
         East: 190.338
         North: 83.661
     crs: 4326
+
 merit_hydro_patch:
   data_type: RasterDataset
   version: 1.0
@@ -1560,6 +1616,7 @@ merit_hydro_patch:
       upa: uparea
       upg: upgrid
       wth: rivwth
+
 modis_lai:
   data_type: RasterDataset
   version: 6
@@ -1592,6 +1649,7 @@ modis_lai:
   data_adapter:
     unit_mult:
       LAI: 0.1
+
 osm_coastlines:
   data_type: GeoDataFrame
   version: 1.0
@@ -1614,6 +1672,7 @@ osm_coastlines:
   data_adapter:
     rename:
       fid: coastline_id
+
 osm_landareas:
   data_type: GeoDataFrame
   version: 1.0
@@ -1636,6 +1695,7 @@ osm_landareas:
   data_adapter:
     rename:
       fid: land_id
+
 pcr_globwb:
   data_type: RasterDataset
   variants:
@@ -1681,6 +1741,7 @@ pcr_globwb:
       industryGrossDemand: ind_gross
       livestockNettoDemand: lsk_net
       livestockGrossDemand: lsk_gross
+
 rgi:
   data_type: GeoDataFrame
   version: 6.0
@@ -1707,6 +1768,7 @@ rgi:
       GLIMSID: GLIMS_id
       ID: simple_id
       RGIID: RGI_id
+
 hydro_river_atlas:
   data_type: GeoDataFrame
   version: 10
@@ -1730,6 +1792,7 @@ hydro_river_atlas:
   data_adapter:
     rename:
       dis_m3_pyr: Dis_avg
+
 hydro_rivers_lin:
   data_type: GeoDataFrame
   version: 1
@@ -1753,6 +1816,7 @@ hydro_rivers_lin:
     rename:
       width_m: rivwth
       Q2: qbankfull
+
 simard:
   data_type: RasterDataset
   version: 2011
@@ -1775,6 +1839,7 @@ simard:
         East: 180.0
         North: 90.0
     crs: 4326
+
 SM2RAIN_ASCAT_monthly_025:
   data_type: RasterDataset
   version: 1.4
@@ -1807,6 +1872,7 @@ SM2RAIN_ASCAT_monthly_025:
   data_adapter:
     rename:
       rainfall: precip
+
 SM2RAIN_ASCAT_monthly_05:
   data_type: RasterDataset
   version: 1.4
@@ -1839,6 +1905,7 @@ SM2RAIN_ASCAT_monthly_05:
   data_adapter:
     rename:
       rainfall: precip
+
 soilgrids:
   data_type: RasterDataset
   version: 1.0
@@ -1940,6 +2007,7 @@ soilgrids:
       SNDPPT_M_sl7_250m_ll: sndppt_sl7
       SoilThickness_250m_ll: soilthickness
       TAXOUSDA_250m_ll: tax_usda
+
 vito_2015:
   data_type: RasterDataset
   version: 2.0.2
@@ -1962,6 +2030,7 @@ vito_2015:
         East: 180.0
         North: 80.0
     crs: 4326
+
 vito_2016:
   data_type: RasterDataset
   version: 3.0.1
@@ -1984,6 +2053,7 @@ vito_2016:
         East: 180.0
         North: 80.0
     crs: 4326
+
 vito_2017:
   data_type: RasterDataset
   version: 3.0.1
@@ -2006,6 +2076,7 @@ vito_2017:
         East: 180.0
         North: 80.0
     crs: 4326
+
 vito_2018:
   data_type: RasterDataset
   version: 3.0.1
@@ -2028,6 +2099,7 @@ vito_2018:
         East: 180.0
         North: 80.0
     crs: 4326
+
 vito_2019:
   data_type: RasterDataset
   version: 3.0.1
@@ -2050,6 +2122,7 @@ vito_2019:
         East: 180.0
         North: 80.0
     crs: 4326
+
 wb_countries:
   data_type: GeoDataFrame
   version: 20200319
@@ -2078,6 +2151,7 @@ wb_countries:
       POP_EST: population
       GDP_MD_EST: gdp_pc
       GDP_kD_PPP: gdp
+
 worldclim:
   data_type: RasterDataset
   version: 2.0
@@ -2104,6 +2178,7 @@ worldclim:
   data_adapter:
     rename:
       prec: precip
+
 worldpop_2020_constrained:
   data_type: RasterDataset
   uri: socio_economic/worldpop/ppp_2020_constrained.vrt
@@ -2128,6 +2203,7 @@ worldpop_2020_constrained:
   data_adapter:
     rename:
       ppp_2020_constrained: population
+
 worldpop_2020_UNadj_constrained:
   data_type: RasterDataset
   uri: socio_economic/worldpop/ppp_2020_UNadj_constrained.vrt
@@ -2146,6 +2222,7 @@ worldpop_2020_UNadj_constrained:
   data_adapter:
     rename:
       ppp_2020_UNadj_constrained: population
+
 wsf_bld_2015:
   data_type: RasterDataset
   version: 1
