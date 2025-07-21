@@ -1,7 +1,5 @@
 """Utility functions for hydromt that have no other home."""
 
-from osgeo import gdal
-
 from .caching import _cache_vrt_tiles, _copy_to_local
 from .dataset import (
     _rename_vars,
@@ -45,8 +43,6 @@ __all__ = [
     "_make_config_paths_abs",
     "_make_config_paths_relative",
 ]
-
-gdal.UseExceptions()
 
 
 class _classproperty(property):

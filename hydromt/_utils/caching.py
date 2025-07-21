@@ -12,15 +12,19 @@ import geopandas as gpd
 import numpy as np
 from affine import Affine
 from fsspec import AbstractFileSystem, url_to_fs
-from osgeo import gdal
 from pyproj import CRS
 
+from hydromt._compat import HAS_GDAL
 from hydromt._typing.type_def import StrPath
 from hydromt._utils.uris import _strip_scheme, _strip_vsi
 from hydromt.config import SETTINGS
 
-logger = logging.getLogger(__name__)
+if HAS_GDAL:
+    from osgeo import gdal
 
+    gdal.UseExceptions()
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["_copy_to_local", "_cache_vrt_tiles"]
 
@@ -109,6 +113,10 @@ def _cache_vrt_tiles(
     vrt_destination_path : Path
         Path to cached vrt
     """
+    if not HAS_GDAL:
+        raise ImportError("Can't cache vrt's without GDAL installed.")
+
+    # Get the filesystem type
     if fs is None:
         fs: AbstractFileSystem = url_to_fs(vrt_uri)[0]
 

@@ -10,6 +10,7 @@ import pytest
 import rasterio
 import xarray as xr
 
+from hydromt._compat import HAS_GDAL
 from hydromt._io import _open_mfraster, _open_raster
 from hydromt._typing import SourceMetadata
 from hydromt.config import SETTINGS
@@ -27,6 +28,7 @@ class TestRasterioDriver:
         shutil.copytree(join(TEST_DATA_DIR, "rioda_tiled"), root)
         return str(root)
 
+    @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
     @pytest.mark.usefixtures("test_settings")
     def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
         cache_dir: str = "tests_caches_tifs_from_vrt"

@@ -6,6 +6,7 @@ import geopandas as gpd
 import pytest
 import rasterio as rio
 
+from hydromt._compat import HAS_GDAL
 from hydromt._utils.caching import (
     _cache_vrt_tiles,
     _copy_to_local,
@@ -48,6 +49,7 @@ def test__overlaps_false(vrt_dataset: ET.Element, vrt_affine: rio.Affine):
     assert not out
 
 
+@pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
 def test__cache_vrt_files(
     vrt_path: Path,
     vrt_cache_dir: Path,
@@ -72,6 +74,22 @@ def test__cache_vrt_files(
     assert len(root.findall("VRTRasterBand/SimpleSource")) == 1
 
 
+@pytest.mark.skipif(HAS_GDAL, reason="GDAL installed.")
+def test__cache_vrt_files_import_error(
+    vrt_path: Path,
+):
+    # With should error on the basis that gdal is not installed
+    with pytest.raises(
+        ImportError,
+        match="Can't cache vrt's without GDAL installed.",
+    ):
+        # Call the function
+        _ = _cache_vrt_tiles(
+            vrt_uri=vrt_path.as_posix(),
+        )
+
+
+@pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
 def test__cache_vrt_files_append(
     vrt_path: Path,
     vrt_cache_dir: Path,
@@ -102,6 +120,7 @@ def test__cache_vrt_files_append(
     assert len(root.findall("VRTRasterBand/SimpleSource")) == 2
 
 
+@pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
 def test__cache_vrt_files_exists(
     vrt_path: Path,
     vrt_cache_dir: Path,
@@ -126,6 +145,7 @@ def test__cache_vrt_files_exists(
     assert out == out2
 
 
+@pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
 def test__cache_vrt_files_not_found(
     vrt_path: Path,
     vrt_cache_dir: Path,
@@ -142,6 +162,7 @@ def test__cache_vrt_files_not_found(
     assert out == vrt_path
 
 
+@pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
 def test__cache_vrt_files_meta_errors(
     tmp_path: Path,
     vrt_dataset: ET.Element,
@@ -167,6 +188,7 @@ def test__cache_vrt_files_meta_errors(
         _ = _cache_vrt_tiles(p.as_posix())
 
 
+@pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
 def test__cache_vrt_files_source_errors(
     tmp_path: Path,
     vrt_dataset: ET.Element,

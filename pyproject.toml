@@ -15,7 +15,6 @@ dependencies = [
   "click",                  # CLI configuration
   "dask",                   # lazy computing
   "fsspec[http]",           # general file systems utilities
-  "gdal>=3.5.0",            # Our favourite geospatial library
   "geopandas[all]>=0.10",   # pandas but geo, wraps fiona and shapely
   "importlib_metadata",     # entrypoints backport
   "mercantile",             # tile handling
@@ -65,8 +64,9 @@ dynamic = ['version', 'description']
 [project.optional-dependencies]
 io = [
   "gcsfs>=2023.12.1", # google cloud file system
-  "openpyxl",         # excel IO
+  "gdal>=3.5.0",      # Our favourite geospatial library
   "fastparquet",      # parquet IO
+  "openpyxl",         # excel IO
   "pillow",           # image IO
   "s3fs",             # S3 file system
 ]
@@ -205,15 +205,15 @@ python = "3.12.*"
 [tool.pixi.feature.py313.dependencies]
 python = "3.13.*"
 
-[tool.pixi.dependencies]
-gdal = ">=3.5.0"
-pyflwdir = ">=0.5.4"
-
 [tool.pixi.pypi-dependencies]
 hydromt = { path = ".", editable = true }
 
 [tool.pixi.feature.doc.dependencies]
 pandoc = "*"
+
+[tool.pixi.feature.io.dependencies]
+gdal = ">=3.5.0"
+pyflwdir = ">=0.5.4"
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
@@ -366,6 +366,7 @@ full-latest = { features = [
   "doc",
   "examples",
 ], solve-group = "py313" }
+min-latest = { features = ["py313", "test"], solve-group = "py313" }
 slim-latest = { features = [
   "py313",
   "io",
