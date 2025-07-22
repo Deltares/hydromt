@@ -122,14 +122,14 @@ jobs:
         run: |
             git config user.name "GitHub Actions Bot"
             git config user.email "<>"
-            git checkout -b "post-v$RELEASE_VERSION-release"
+            git checkout -b "post-$RELEASE_VERSION-release"
 
             # post release stuff so we don't forget
-            sed -i "s/v$RELEASE_VERSION/Unreleased\n==========\n\nNew\n---\n\nChanged\n-------\n\nFixed\n-----\n\nDeprecated\n----------\n\nv$RELEASE_VERSION/" docs/changelog.rst
+            sed -i "s/$RELEASE_VERSION/Unreleased\n==========\n\nNew\n---\n\nChanged\n-------\n\nFixed\n-----\n\nDeprecated\n----------\n\n$RELEASE_VERSION/" docs/changelog.rst
             sed -i 's/__version__.*=.*"\(.*\)".*/__version__ = "\1.dev0"/' hydromt/__init__.py
 
             git add hydromt/__init__.py docs/changelog.rst
-            git commit -m "Post release v$RELEASE_VERSION"
-            git push --set-upstream origin "post-v$RELEASE_VERSION-release"
+            git commit -m "Post release $RELEASE_VERSION"
+            git push --set-upstream origin "post-$RELEASE_VERSION-release"
 
-            gh pr create -B "main" -H "post-v$RELEASE_VERSION-release" -t "Post v$RELEASE_VERSION release cleanup" -b "Add new changelog headers and set version back to dev"
+            gh pr create -B "main" -H "post-$RELEASE_VERSION-release" -t "Post $RELEASE_VERSION release cleanup" -b "Add new changelog headers and set version back to dev"
