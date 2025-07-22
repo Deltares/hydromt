@@ -480,19 +480,19 @@
 <div class="viewcode-block" id="get_basin_geometry">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.basin_mask.get_basin_geometry.html#hydromt.model.processes.basin_mask.get_basin_geometry">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_basin_geometry</span><span class="p">(</span>
-    <span class="n">ds</span><span class="p">,</span>
-    <span class="n">basin_index</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;basin&quot;</span><span class="p">,</span>
-    <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">bbox</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">geom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">xy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">basid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">outlets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">basins_name</span><span class="o">=</span><span class="s2">&quot;basins&quot;</span><span class="p">,</span>
-    <span class="n">flwdir_name</span><span class="o">=</span><span class="s2">&quot;flwdir&quot;</span><span class="p">,</span>
-    <span class="n">ftype</span><span class="o">=</span><span class="s2">&quot;infer&quot;</span><span class="p">,</span>
-    <span class="n">buffer</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">basin_index</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;basin&quot;</span><span class="p">,</span>
+    <span class="n">bounds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bbox</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">geom</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">xy</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">basid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">outlets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">basins_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;basins&quot;</span><span class="p">,</span>
+    <span class="n">flwdir_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flwdir&quot;</span><span class="p">,</span>
+    <span class="n">ftype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;infer&quot;</span><span class="p">,</span>
+    <span class="n">buffer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
     <span class="o">**</span><span class="n">stream_kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a geometry of the (sub)(inter)basin(s).</span>
@@ -506,45 +506,42 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    ds : xarray.Dataset</span>
-<span class="sd">        dataset containing basin and flow direction variables</span>
-<span class="sd">    basin_index: geopandas.GeoDataFrame or GeoDataFrameAdapter</span>
+<span class="sd">    ds : xr.Dataset</span>
+<span class="sd">        Dataset containing basin and flow direction variables</span>
+<span class="sd">    basin_index: gpd.GeoDataFrame</span>
 <span class="sd">        Dataframe with basin geomtries or bounding boxes with &quot;basid&quot; column</span>
 <span class="sd">        corresponding to the ``ds[&lt;basins_name&gt;]`` map.</span>
-<span class="sd">    kind : {&quot;basin&quot;, &quot;subbasin&quot;, &quot;interbasin&quot;}</span>
-<span class="sd">        kind of basin description</span>
-<span class="sd">    bounds: array_like of float, optional</span>
+<span class="sd">    kind : str</span>
+<span class="sd">        Kind of basin description, choose from &quot;basin&quot;, &quot;subbasin&quot; or &quot;interbasin&quot;</span>
+<span class="sd">    bounds : list[float] | tuple[float], optional</span>
 <span class="sd">        [xmin, ymin, xmax, ymax] coordinates of total bounding box, i.e. the data is</span>
-<span class="sd">        clipped to this domain before futher processing.</span>
-<span class="sd">    bbox : array_like of float, optional</span>
-<span class="sd">        [xmin, ymin, xmax, ymax] coordinates to infer (sub)(inter)basin(s)</span>
-<span class="sd">    geom : geopandas.GeoDataFrame, optional</span>
-<span class="sd">        polygon geometry describing area of interest</span>
-<span class="sd">    xy : tuple of array_like of float, optional</span>
-<span class="sd">        x, y coordinates of (sub)basin outlet locations</span>
-<span class="sd">    basid : int or array_like of int, optional</span>
-<span class="sd">        basin IDs, must match values in basin maps</span>
-<span class="sd">    outlets: bool, optional</span>
-<span class="sd">        If True, include (sub)basins of outlets within domain only.</span>
-<span class="sd">    flwdir_name : str, optional</span>
-<span class="sd">        Name of flow direction variable in source, by default &quot;flwdir&quot;</span>
+<span class="sd">        clipped to this domain before futher processing. By default None</span>
+<span class="sd">    bbox : list[float] | tuple[float], optional</span>
+<span class="sd">        [xmin, ymin, xmax, ymax] coordinates to infer (sub)(inter)basin(s),</span>
+<span class="sd">        by default None</span>
+<span class="sd">    geom : gpd.GeoDataFrame, optional</span>
+<span class="sd">        Polygon geometry describing area of interest</span>
+<span class="sd">    xy : list[float] | tuple[float], optional</span>
+<span class="sd">        x, y coordinates of (sub)basin outlet locations, by default None</span>
+<span class="sd">    basid : int | list[int], optional</span>
+<span class="sd">        Basin IDs, must match values in basin maps, by default None</span>
+<span class="sd">    outlets : bool, optional</span>
+<span class="sd">        If True, include (sub)basins of outlets within domain only. By default False</span>
 <span class="sd">    basins_name : str, optional</span>
 <span class="sd">        Name of flow direction variable in source, by default &quot;basins&quot;</span>
+<span class="sd">    flwdir_name : str, optional</span>
+<span class="sd">        Name of flow direction variable in source, by default &quot;flwdir&quot;</span>
 <span class="sd">    ftype : {&#39;d8&#39;, &#39;ldd&#39;, &#39;nextxy&#39;}, optional</span>
-<span class="sd">        name of flow direction type, by default None; use input ftype.</span>
-<span class="sd">    stream_kwargs : key-word arguments</span>
-<span class="sd">        name of variable in ds and threshold value</span>
-<span class="sd">    buffer:</span>
-<span class="sd">        The buffer to apply.</span>
-<span class="sd">    logger:</span>
-<span class="sd">        The logger to use.</span>
+<span class="sd">        Name of flow direction type, by default None; use input ftype.</span>
+<span class="sd">    buffer : int, optional</span>
+<span class="sd">        The buffer to apply, by default 10</span>
+<span class="sd">    **stream_kwargs : dict</span>
+<span class="sd">        Name of variable in ds and threshold value</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    basin_geom : geopandas.geoDataFrame</span>
-<span class="sd">        geometry the (sub)basin(s)</span>
-<span class="sd">    outlet_geom : geopandas.geoDataFrame</span>
-<span class="sd">        geometry the outlet point location</span>
+<span class="sd">    tuple[gpd.GeoDataFrame]</span>
+<span class="sd">        Geometry of the (sub)basin(s) and geometry of the outlet point location</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">kind_lst</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;basin&quot;</span><span class="p">,</span> <span class="s2">&quot;subbasin&quot;</span><span class="p">,</span> <span class="s2">&quot;interbasin&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kind_lst</span><span class="p">:</span>
@@ -749,10 +746,7 @@
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="o">*</span><span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">threshold</span>
     <span class="p">):</span>  <span class="c1"># 12e3 ** 2 &gt; 10x10 degree at 3 arcsec</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s2">&quot;Loading very large spatial domain to derive a subbasin. &quot;</span>
-            <span class="s2">&quot;Provide initial &#39;bounds&#39; if this takes too long.&quot;</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Loading very large spatial domain to derive a subbasin.&quot;</span><span class="p">)</span>
 </pre></div>
 
                 </article>
