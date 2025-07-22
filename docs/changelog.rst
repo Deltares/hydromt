@@ -12,12 +12,16 @@ Unreleased
 
 New
 ---
+- Setting the chunking size via `get_rasterdataset`
 
 Changed
 -------
+- Drop support for Python 3.9 and 3.10
 
 Fixed
 -----
+- Caching of vrt's now regenerates vrt files if new tiles are downloaded
+- Re-enables chunking based on driver options in the data-catalog
 
 Deprecated
 ----------

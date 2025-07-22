@@ -36,7 +36,7 @@ dependencies = [
   "requests",               # donwload stuff
   "rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
   "scipy",                  # scientific utilities
-  "shapely>=2.0.0",         # geometry transforms
+  "shapely>=2.1.0",         # geometry transforms
   "tomli",                  # parsing toml files
   "tomli-w",                # writing toml files
   "universal_pathlib>=0.2", # provides path compatability between different filesystems
@@ -46,7 +46,7 @@ dependencies = [
   "zarr>=2,<3",             # zarr
 ]
 
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 readme = "README.rst"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -55,8 +55,6 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Hydrology",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -66,8 +64,9 @@ dynamic = ['version', 'description']
 [project.optional-dependencies]
 io = [
   "gcsfs>=2023.12.1", # google cloud file system
-  "openpyxl",         # excel IO
+  "gdal>=3.5.0",      # Our favourite geospatial library
   "fastparquet",      # parquet IO
+  "openpyxl",         # excel IO
   "pillow",           # image IO
   "s3fs",             # S3 file system
 ]
@@ -109,9 +108,6 @@ examples = [
   "notebook",   # jupyter integration
 ]
 
-full = ["hydromt[io,extra,dev,test,doc,examples]"]
-slim = ["hydromt[io,extra,examples]"]
-
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
 Source = "https://github.com/Deltares/hydromt"
@@ -139,7 +135,7 @@ description = { file = "hydromt/__init__.py" }
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py311"
 exclude = ["docs"]
 
 [tool.ruff.lint]
@@ -177,13 +173,14 @@ filterwarnings = [
   #   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
   "ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
   'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
+  "ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                 # Pillow 13
 ]
 
 [tool.mypy]
 # TODO: Re-enable the tests
 exclude = ["docs/.*", "tests/.*"]
 plugins = ["pydantic.mypy", "numpy.typing.mypy_plugin"]
-python_version = "3.9"
+python_version = "3.11"
 ignore_missing_imports = true
 
 warn_unused_configs = true
@@ -199,12 +196,6 @@ disallow_any_generics = true
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64"]
 
-[tool.pixi.feature.py39.dependencies]
-python = "3.9.*"
-
-[tool.pixi.feature.py310.dependencies]
-python = "3.10.*"
-
 [tool.pixi.feature.py311.dependencies]
 python = "3.11.*"
 
@@ -219,6 +210,10 @@ hydromt = { path = ".", editable = true }
 
 [tool.pixi.feature.doc.dependencies]
 pandoc = "*"
+
+[tool.pixi.feature.io.dependencies]
+gdal = ">=3.5.0"
+pyflwdir = ">=0.5.4"
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
@@ -353,14 +348,14 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 [tool.pixi.environments]
 default = { features = [
-  "py39",
+  "py311",
   "io",
   "extra",
   "dev",
   "test",
   "doc",
   "examples",
-], solve-group = "py39" }
+], solve-group = "py311" }
 
 full-latest = { features = [
   "py313",
@@ -371,6 +366,7 @@ full-latest = { features = [
   "doc",
   "examples",
 ], solve-group = "py313" }
+min-latest = { features = ["py313", "test"], solve-group = "py313" }
 slim-latest = { features = [
   "py313",
   "io",
@@ -410,25 +406,3 @@ full-py311 = { features = [
   "examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311", "test"], solve-group = "py311" }
-
-full-py310 = { features = [
-  "py310",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
-], solve-group = "py310" }
-min-py310 = { features = ["py310", "test"], solve-group = "py310" }
-
-full-py39 = { features = [
-  "py39",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
-], solve-group = "py39" }
-min-py39 = { features = ["py39", "test"], solve-group = "py39" }

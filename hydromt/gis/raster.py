@@ -545,7 +545,9 @@ class XRasterBase(XGeoBase):
         rs = np.array([0, self.height, self.height, 0, 0])
         cs = np.array([0, 0, self.width, self.width, 0])
         xs, ys = transform * (cs, rs)
-        return gpd.GeoDataFrame(geometry=[Polygon([*zip(xs, ys)])], crs=self.crs)
+        return gpd.GeoDataFrame(
+            geometry=[Polygon([*zip(xs, ys, strict=False)])], crs=self.crs
+        )
 
     @property
     def res(self) -> tuple[float, float]:
@@ -1115,7 +1117,7 @@ class XRasterBase(XGeoBase):
         if len(out) == 0:
             raise IndexError("All geometries outside raster domain")
 
-        dss, idx = zip(*out)
+        dss, idx = zip(*out, strict=False)
         ds_out = xr.concat(dss, "index")
         ds_out["index"] = xr.IndexVariable("index", gdf.index.values[np.array(idx)])
 
@@ -1172,7 +1174,7 @@ class XRasterBase(XGeoBase):
         # apply for each parameter
         for param in params:
             values = reclass_table[param].values
-            d = dict(zip(keys, values))
+            d = dict(zip(keys, values, strict=False))
             da_param = xr.apply_ufunc(
                 reclass_exact,
                 da,
@@ -1254,7 +1256,7 @@ class XRasterBase(XGeoBase):
             if gdf_bbox_clip.type[0] == "Point":  # if bbox only touches a corner
                 xs, ys = gdf_bbox_clip.geometry.x, gdf_bbox_clip.geometry.y
             else:  # Polygon if bbox overlaps with rotated box
-                xs, ys = zip(*gdf_bbox_clip.boundary[0].coords[:])
+                xs, ys = zip(*gdf_bbox_clip.boundary[0].coords[:], strict=False)
         cs, rs = ~self.transform * (np.array(xs), np.array(ys))
         # use round to get integer slices, max to avoid negative indices
         c0 = max(int(np.round(cs.min() - buffer)), 0)
@@ -1383,7 +1385,7 @@ class XRasterBase(XGeoBase):
             dtype = values.dtype if dtype is None else dtype
             if dtype == np.int64:
                 dtype = np.int32  # max integer accuracy accepted
-            shapes = list(zip(geoms, values))
+            shapes = list(zip(geoms, values, strict=False))
             raster = np.full(self.shape, nodata, dtype=dtype)
             features.rasterize(
                 shapes,
@@ -1589,10 +1591,10 @@ class XRasterBase(XGeoBase):
             # horizontal lines
             for i in range(nrow + 1):
                 xs, ys = transform * (np.array([0, ncol]), np.array([i, i]))
-                geoms.append(LineString(zip(xs, ys)))
+                geoms.append(LineString(zip(xs, ys, strict=False)))
             for i in range(ncol + 1):
                 xs, ys = transform * (np.array([i, i]), np.array([0, nrow]))
-                geoms.append(LineString(zip(xs, ys)))
+                geoms.append(LineString(zip(xs, ys, strict=False)))
         elif geom_type.lower().startswith("point"):
             x, y = _raster_utils._affine_to_meshgrid(transform, (nrow, ncol))
             geoms = gpd.points_from_xy(x.ravel(), y.ravel())

@@ -5,10 +5,25 @@ from packaging.version import Version
 
 __all__: List[str] = []
 
-HAS_PYET = False
 HAS_GCSFS = False
-HAS_S3FS = False
+HAS_GDAL = False
 HAS_OPENPYXL = False
+HAS_PYET = False
+HAS_S3FS = False
+
+try:
+    import gcsfs
+
+    HAS_GCSFS = True
+except ImportError:
+    pass
+
+try:
+    from osgeo import gdal
+
+    HAS_GDAL = True
+except ImportError:
+    pass
 
 try:
     import openpyxl
@@ -18,29 +33,18 @@ except ImportError:
     pass
 
 try:
-    import gcsfs
+    import pyet
 
-    HAS_GCSFS = True
-
-except ImportError:
+    HAS_PYET = True
+except ModuleNotFoundError:
     pass
 
 try:
     import s3fs
 
     HAS_S3FS = True
-
 except ImportError:
     pass
-
-try:
-    import pyet
-
-    HAS_PYET = True
-
-except ModuleNotFoundError:
-    pass
-
 
 # entrypoints in standard library only compatible from 3.10 onwards
 py_version = sys.version_info

@@ -50,6 +50,7 @@ class RasterDatasetSource(DataSource):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         zoom: Optional[Zoom] = None,
+        chunks: Optional[dict] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Union[xr.Dataset, xr.DataArray]:
@@ -82,6 +83,7 @@ class RasterDatasetSource(DataSource):
             time_range=tr,
             variables=vrs,
             zoom=zoom,
+            chunks=chunks,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )

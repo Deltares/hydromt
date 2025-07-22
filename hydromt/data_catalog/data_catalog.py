@@ -51,6 +51,7 @@ from hydromt.data_catalog.adapters import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
+from hydromt.data_catalog.drivers import RasterioDriver
 from hydromt.data_catalog.predefined_catalog import (
     PredefinedCatalog,
     _copy_file,
@@ -105,9 +106,11 @@ class DataCatalog(object):
             If None, no default data catalog is used.
         cache: bool, optional
             Set to true to cache data locally before reading.
-            Currently only implemented for tiled rasterdatasets, by default False.
+            Currently only implemented for tiled rasterdatasets.
+            Requires the installation of GDAL and it's python bindings.
+            By default False.
         cache_dir: str, Path, optional
-            Folder root path to cach data to, by default ~/.hydromt_data
+            Directory root path to cache data to, by default ~/.hydromt
         logger : logger object, optional
             The logger object used for logging messages. If not provided, the default
             logger will be used.
@@ -1211,6 +1214,7 @@ class DataCatalog(object):
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom: Optional[Union[int, tuple]] = None,
         buffer: Union[float, int] = 0,
+        chunks: Optional[dict] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
         time_range: Optional[TimeRange] = None,
@@ -1247,6 +1251,10 @@ class DataCatalog(object):
             A geometry defining the area of interest, by default None
         zoom: Optional[Zoom], optional,
             Either an overview_level, or a tuple with the resolution and unit of the resolution.
+        chunks: Optional[dict], optional
+            Set the chunking of the data, this overrules the chunking set in the data
+            catalog. If not specified, the chunking defined in the data catalog will
+            be used. By default None
         buffer : Union[float, int], optional
             Buffer around the `bbox` or `geom` area of interest in meters, by default 0
         handle_nodata : NoDataStrategy, optional
@@ -1330,11 +1338,16 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown raster data type "{type(data_like).__name__}"')
 
+        # This isnt briliant but works the best at this stage
+        if isinstance(source.driver, RasterioDriver):
+            source.driver.options.update({"cache": self.cache})
+
         return source.read_data(
             bbox=bbox,
             mask=geom,
             buffer=buffer,
             zoom=zoom,
+            chunks=chunks,
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,
@@ -1863,7 +1876,7 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             for combination in itertools.product(*options.values()):
                 source_copy = copy.deepcopy(source)
                 name_copy = name
-                for k, v in zip(options.keys(), combination):
+                for k, v in zip(options.keys(), combination, strict=False):
                     name_copy = name_copy.replace("{" + k + "}", v)
                     source_copy["uri"] = source_copy["uri"].replace("{" + k + "}", v)
                 data_dicts.append({name_copy: source_copy})
