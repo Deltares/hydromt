@@ -20,19 +20,19 @@ __all__ = ["get_basin_geometry"]
 
 
 def get_basin_geometry(
-    ds,
-    basin_index=None,
-    kind="basin",
-    bounds=None,
-    bbox=None,
-    geom=None,
-    xy=None,
-    basid=None,
-    outlets=False,
-    basins_name="basins",
-    flwdir_name="flwdir",
-    ftype="infer",
-    buffer=10,
+    ds: xr.Dataset,
+    basin_index: gpd.GeoDataFrame = None,
+    kind: str = "basin",
+    bounds: list[float] | tuple[float] | None = None,
+    bbox: list[float] | tuple[float] | None = None,
+    geom: gpd.GeoDataFrame | None = None,
+    xy: list[float] | tuple[float] | None = None,
+    basid: int | list[int] | None = None,
+    outlets: bool = False,
+    basins_name: str = "basins",
+    flwdir_name: str = "flwdir",
+    ftype: str = "infer",
+    buffer: int = 10,
     **stream_kwargs,
 ):
     """Return a geometry of the (sub)(inter)basin(s).
@@ -46,45 +46,42 @@ def get_basin_geometry(
 
     Parameters
     ----------
-    ds : xarray.Dataset
-        dataset containing basin and flow direction variables
-    basin_index: geopandas.GeoDataFrame or GeoDataFrameAdapter
+    ds : xr.Dataset
+        Dataset containing basin and flow direction variables
+    basin_index: gpd.GeoDataFrame
         Dataframe with basin geomtries or bounding boxes with "basid" column
         corresponding to the ``ds[<basins_name>]`` map.
-    kind : {"basin", "subbasin", "interbasin"}
-        kind of basin description
-    bounds: array_like of float, optional
+    kind : str
+        Kind of basin description, choose from "basin", "subbasin" or "interbasin"
+    bounds : list[float] | tuple[float], optional
         [xmin, ymin, xmax, ymax] coordinates of total bounding box, i.e. the data is
-        clipped to this domain before futher processing.
-    bbox : array_like of float, optional
-        [xmin, ymin, xmax, ymax] coordinates to infer (sub)(inter)basin(s)
-    geom : geopandas.GeoDataFrame, optional
-        polygon geometry describing area of interest
-    xy : tuple of array_like of float, optional
-        x, y coordinates of (sub)basin outlet locations
-    basid : int or array_like of int, optional
-        basin IDs, must match values in basin maps
-    outlets: bool, optional
-        If True, include (sub)basins of outlets within domain only.
-    flwdir_name : str, optional
-        Name of flow direction variable in source, by default "flwdir"
+        clipped to this domain before futher processing. By default None
+    bbox : list[float] | tuple[float], optional
+        [xmin, ymin, xmax, ymax] coordinates to infer (sub)(inter)basin(s),
+        by default None
+    geom : gpd.GeoDataFrame, optional
+        Polygon geometry describing area of interest
+    xy : list[float] | tuple[float], optional
+        x, y coordinates of (sub)basin outlet locations, by default None
+    basid : int | list[int], optional
+        Basin IDs, must match values in basin maps, by default None
+    outlets : bool, optional
+        If True, include (sub)basins of outlets within domain only. By default False
     basins_name : str, optional
         Name of flow direction variable in source, by default "basins"
+    flwdir_name : str, optional
+        Name of flow direction variable in source, by default "flwdir"
     ftype : {'d8', 'ldd', 'nextxy'}, optional
-        name of flow direction type, by default None; use input ftype.
-    stream_kwargs : key-word arguments
-        name of variable in ds and threshold value
-    buffer:
-        The buffer to apply.
-    logger:
-        The logger to use.
+        Name of flow direction type, by default None; use input ftype.
+    buffer : int, optional
+        The buffer to apply, by default 10
+    **stream_kwargs : dict
+        Name of variable in ds and threshold value
 
     Returns
     -------
-    basin_geom : geopandas.geoDataFrame
-        geometry the (sub)basin(s)
-    outlet_geom : geopandas.geoDataFrame
-        geometry the outlet point location
+    tuple[gpd.GeoDataFrame]
+        Geometry of the (sub)basin(s) and geometry of the outlet point location
     """
     kind_lst = ["basin", "subbasin", "interbasin"]
     if kind not in kind_lst:
@@ -288,7 +285,4 @@ def _check_size(ds, threshold=12e3**2):
     if (
         np.multiply(*ds.raster.shape) > threshold
     ):  # 12e3 ** 2 > 10x10 degree at 3 arcsec
-        logger.warning(
-            "Loading very large spatial domain to derive a subbasin. "
-            "Provide initial 'bounds' if this takes too long."
-        )
+        logger.warning("Loading very large spatial domain to derive a subbasin.")

@@ -12,16 +12,18 @@ Unreleased
 
 New
 ---
-- Setting the chunking size via `get_rasterdataset`
+- Setting the chunking size via `get_rasterdataset` (#1193)
 
 Changed
 -------
-- Drop support for Python 3.9 and 3.10
+- Drop support for Python 3.9 and 3.10 (#1215)
 
 Fixed
 -----
-- Caching of vrt's now regenerates vrt files if new tiles are downloaded
-- Re-enables chunking based on driver options in the data-catalog
+- Caching of vrt's now regenerates vrt files if new tiles are downloaded (#1193)
+- Re-enables chunking based on driver options in the data-catalog (#1193)
+- Warning on the mask when requesting data from data catalog (#1195)
+- Warning on basin size when loading data, it mentioned setting of a region before (#1209)
 
 Deprecated
 ----------
