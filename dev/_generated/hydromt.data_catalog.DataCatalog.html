@@ -41,7 +41,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -955,8 +955,10 @@ accepted yaml format.</p></li>
 by default ‘artifact_data’.
 If None, no default data catalog is used.</p></li>
 <li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Set to true to cache data locally before reading.
-Currently only implemented for tiled rasterdatasets, by default False.</p></li>
-<li><p><strong>cache_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <em>optional</em>) – Folder root path to cach data to, by default ~/.hydromt_data</p></li>
+Currently only implemented for tiled rasterdatasets.
+Requires the installation of GDAL and it’s python bindings.
+By default False.</p></li>
+<li><p><strong>cache_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <em>optional</em>) – Directory root path to cache data to, by default ~/.hydromt</p></li>
 <li><p><strong>logger</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">logger</span> <span class="pre">object</span></code>, <em>optional</em>) – The logger object used for logging messages. If not provided, the default
 logger will be used.</p></li>
 </ul>
@@ -979,8 +981,10 @@ accepted yaml format.</p></li>
 by default ‘artifact_data’.
 If None, no default data catalog is used.</p></li>
 <li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Set to true to cache data locally before reading.
-Currently only implemented for tiled rasterdatasets, by default False.</p></li>
-<li><p><strong>cache_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <em>optional</em>) – Folder root path to cach data to, by default ~/.hydromt_data</p></li>
+Currently only implemented for tiled rasterdatasets.
+Requires the installation of GDAL and it’s python bindings.
+By default False.</p></li>
+<li><p><strong>cache_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code>, <em>optional</em>) – Directory root path to cache data to, by default ~/.hydromt</p></li>
 <li><p><strong>logger</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">logger</span> <span class="pre">object</span></code>, <em>optional</em>) – The logger object used for logging messages. If not provided, the default
 logger will be used.</p></li>
 </ul>
@@ -1192,7 +1196,7 @@ logger will be used.</p></li>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>

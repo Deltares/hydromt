@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -458,6 +458,7 @@
   <h1>Source code for hydromt.data_catalog.drivers.raster.rasterio_driver</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Driver using rasterio for RasterDataset.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
@@ -480,7 +481,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.caching</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cache_vrt_tiles</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.temp_env</span><span class="w"> </span><span class="kn">import</span> <span class="n">temp_env</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.unused_kwargs</span><span class="w"> </span><span class="kn">import</span> <span class="n">_warn_on_unused_kwargs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.uris</span><span class="w"> </span><span class="kn">import</span> <span class="n">_strip_scheme</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SETTINGS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterDatasetDriver</span>
@@ -506,6 +506,7 @@
         <span class="n">time_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Variables</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zoom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Zoom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SourceMetadata</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
@@ -513,21 +514,21 @@
         <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span> <span class="o">=</span> <span class="n">SourceMetadata</span><span class="p">()</span>
         <span class="c1"># build up kwargs for open_raster</span>
-        <span class="n">_warn_on_unused_kwargs</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-            <span class="p">{</span><span class="s2">&quot;time_range&quot;</span><span class="p">:</span> <span class="n">time_range</span><span class="p">},</span>
-        <span class="p">)</span>
-        <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
         <span class="n">mosaic_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mosaic_kwargs&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="n">mosaic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mosaic&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="n">mosaic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;mosaic&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
         <span class="c1"># get source-specific options</span>
         <span class="n">cache_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;cache_root&quot;</span><span class="p">,</span> <span class="n">SETTINGS</span><span class="o">.</span><span class="n">cache_root</span><span class="p">),</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cache_root&quot;</span><span class="p">,</span> <span class="n">SETTINGS</span><span class="o">.</span><span class="n">cache_root</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">uri</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.vrt&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">]):</span>
-            <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_root</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="c1"># Check for caching, default to false</span>
+        <span class="n">cache_flag</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;cache&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># Caching portion, only when the flag is True and the file format is vrt</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">uri</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.vrt&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">])</span> <span class="ow">and</span> <span class="n">cache_flag</span><span class="p">:</span>
+            <span class="n">cache_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_root</span><span class="p">)</span> <span class="o">/</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
                 <span class="s2">&quot;cache_dir&quot;</span><span class="p">,</span>
                 <span class="n">Path</span><span class="p">(</span>
                     <span class="n">_strip_scheme</span><span class="p">(</span><span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">1</span><span class="p">]</span>
@@ -546,10 +547,10 @@
 
         <span class="c1"># get mosaic kwargs</span>
         <span class="k">if</span> <span class="n">mosaic_kwargs</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;mosaic_kwargs&quot;</span><span class="p">:</span> <span class="n">mosaic_kwargs</span><span class="p">})</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;mosaic_kwargs&quot;</span><span class="p">:</span> <span class="n">mosaic_kwargs</span><span class="p">})</span>
 
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">nodata</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nodata</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nodata</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">nodata</span><span class="p">)</span>
 
         <span class="c1"># Fix overview level</span>
         <span class="k">if</span> <span class="n">zoom</span><span class="p">:</span>
@@ -564,7 +565,10 @@
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">overview_level</span><span class="p">:</span>
                 <span class="c1"># NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs</span>
-                <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">overview_level</span><span class="o">=</span><span class="n">overview_level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">overview_level</span><span class="o">=</span><span class="n">overview_level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;chunks&quot;</span><span class="p">:</span> <span class="n">chunks</span><span class="p">})</span>
 
         <span class="c1"># If the metadata resolver has already resolved the overview level,</span>
         <span class="c1"># trying to open zoom levels here will result in an error.</span>
@@ -572,11 +576,11 @@
         <span class="c1"># Then we can implement looking for a overview level in the driver.</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">_open</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">_open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">RasterioIOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;Cannot open overview level&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
-                    <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;overview_level&quot;</span><span class="p">)</span>
-                    <span class="k">return</span> <span class="n">_open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;overview_level&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">_open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span>
 
@@ -591,6 +595,12 @@
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">_open</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">_open</span><span class="p">()</span>
+
+        <span class="c1"># Mosiac&#39;s can mess up the chunking, which can error during writing</span>
+        <span class="c1"># Or maybe setting</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;chunks&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">)</span>
 
         <span class="c1"># rename ds with single band if single variable is requested</span>
         <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -683,7 +693,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>

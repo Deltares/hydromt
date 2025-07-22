@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
     <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
@@ -475,7 +475,6 @@
     <span class="n">exec_nodata_strat</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.naming_convention</span><span class="w"> </span><span class="kn">import</span> <span class="n">_expand_uri_placeholders</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.unused_kwargs</span><span class="w"> </span><span class="kn">import</span> <span class="n">_warn_on_unused_kwargs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis._gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_zoom_to_overview_level</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.uri_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">URIResolver</span>
@@ -579,8 +578,6 @@
 <span class="sd">        NoDataException</span>
 <span class="sd">            when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_warn_on_unused_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">mask</span><span class="p">})</span>
-
         <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">=</span> <span class="n">SourceMetadata</span><span class="p">()</span>
 
@@ -681,7 +678,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.7.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     <br/>
   </p>
 </div>
