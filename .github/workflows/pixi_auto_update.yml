@@ -39,4 +39,4 @@ jobs:
           delete-branch: true
           add-paths: |
             pixi.lock
-            hydromt-sbom.json
+            hydromt-core-sbom.json

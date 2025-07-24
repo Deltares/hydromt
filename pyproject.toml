@@ -243,7 +243,7 @@ generate-sbom = { cmd = [
   "--module",
   "hydromt",
   "--output-file",
-  "hydromt-sbom.json",
+  "hydromt-core-sbom.json",
   "--sbom",
   "spdx",
   "--format",
