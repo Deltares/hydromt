@@ -1,4 +1,4 @@
-name: Update Pixi lockfile
+name: Update Pixi lockfile and SBOM
 permissions:
   contents: write
   pull-requests: write
@@ -22,6 +22,11 @@ jobs:
         run: |
           set -o pipefail
           pixi update --json | pixi exec pixi-diff-to-markdown >> diff.md
+      - name: Generate SBOM
+        run: |
+          set -o pipefail
+          pixi run generate-sbom
+
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
@@ -32,4 +37,6 @@ jobs:
           branch: update/pixi-lock
           base: main
           delete-branch: true
-          add-paths: pixi.lock
+          add-paths: |
+            pixi.lock
+            hydromt-sbom.json
