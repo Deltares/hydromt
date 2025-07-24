@@ -7496,7 +7496,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.2.0.dev0
-  sha256: 0fe96059ea0f81e0dd6fe6dfbb7d03f8773803c03da1cb56268d77c2944c8f5f
+  sha256: 23d0662c46de422057ebc2602d844fd4224f8ec91899381b3445929991b41ce7
   requires_dist:
   - affine
   - bottleneck
@@ -7550,7 +7550,7 @@ packages:
   - sphinx ; extra == 'doc'
   - sphinx-design ; extra == 'doc'
   - sphinx-click ; extra == 'doc'
-  - sbom4python==0.12.3 ; extra == 'doc'
+  - sbom4python ; extra == 'doc'
   - cartopy ; extra == 'examples'
   - jupyterlab ; extra == 'examples'
   - notebook ; extra == 'examples'

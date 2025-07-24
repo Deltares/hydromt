@@ -101,7 +101,7 @@ doc = [
   "sphinx",                       # build docks
   "sphinx_design",                # doc layout
   "sphinx-click",                 # click integration
-  "sbom4python ==0.12.3",         # generate software bill of materials
+  "sbom4python",                  # generate software bill of materials
 ]
 examples = [
   "cartopy",    # plotting examples

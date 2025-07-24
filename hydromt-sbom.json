@@ -6,12 +6,12 @@
     "creators": [
       "Tool: sbom4python-0.12.3"
     ],
-    "created": "2025-07-24T10:59:46Z",
+    "created": "2025-07-24T11:03:03Z",
     "licenseListVersion": "3.26"
   },
   "name": "Python-hydromt",
   "dataLicense": "CC0-1.0",
-  "documentNamespace": "http://spdx.org/spdxdocs/Python-hydromt-6e3bfcd9-634e-4efd-87ae-955c0e475bd7",
+  "documentNamespace": "http://spdx.org/spdxdocs/Python-hydromt-a36bd26a-1948-4f3f-9c97-f1dff1e5d855",
   "packages": [
     {
       "SPDXID": "SPDXRef-1-hydromt",
@@ -2649,11 +2649,17 @@
       "downloadLocation": "https://pypi.org/project/numcodecs/0.15.1/#files",
       "filesAnalyzed": false,
       "homepage": "https://github.com/zarr-developers/numcodecs",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "698f1d59511488b8fe215fadc1e679a4c70d894de2cca6d8bf2ab770eed34dfd"
+        }
+      ],
       "licenseConcluded": "MIT",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "summary": "A Python package providing buffer compression and transformation codecs for use in data storage and communication applications.",
-      "releaseDate": "2023-09-19T17:11:18Z",
+      "releaseDate": "2025-02-10T10:23:01Z",
       "externalRefs": [
         {
           "referenceCategory": "OTHER",
