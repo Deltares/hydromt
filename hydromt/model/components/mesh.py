@@ -27,7 +27,7 @@ from hydromt.model.steps import hydromt_step
 if TYPE_CHECKING:
     from hydromt.model import Model
 
-__all__ = ["MeshComponent"]
+__all__ = ["MeshComponent", "MeshComponentExtra"]
 
 
 logger: Logger = getLogger(__name__)
@@ -227,80 +227,6 @@ class MeshComponent(SpatialModelComponent):
 
             self._data = uds
 
-    @hydromt_step
-    def create_2d_from_region(
-        self,
-        region: Dict[str, Any],
-        *,
-        res: Optional[float] = None,
-        crs: Optional[int] = None,
-        region_crs: int = 4326,
-        grid_name: str = "mesh2d",
-        align: bool = True,
-    ) -> xu.UgridDataset:
-        """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
-
-        Grids are read according to UGRID conventions. An 2D unstructured mesh
-        will be created as 2D rectangular grid from a geometry (geom_filename) or bbox.
-        If an existing 2D mesh is given, then no new mesh will be generated but an extent
-        can be extracted using the `bounds` argument of region.
-
-        Note Only existing meshed with only 2D grid can be read.
-
-        Parameters
-        ----------
-        region : dict
-            Dictionary describing region of interest, bounds can be provided for type 'mesh'.
-            In case of 'mesh', if the file includes several grids, the specific 2D grid can
-            be selected using the 'grid_name' argument.
-            CRS for 'bbox' and 'bounds' should be 4326; e.g.:
-
-            * {'bbox': [xmin, ymin, xmax, ymax]}
-            * {'geom': 'path/to/polygon_geometry'}
-            * {'mesh': 'path/to/2dmesh_file'}
-            * {'mesh': 'path/to/mesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
-
-        res : float, optional
-            Resolution used to generate 2D mesh [unit of the CRS], required if region
-            is not based on 'mesh'.
-        crs : int, optional
-            Optional EPSG code of the model.
-            If None using the one from region, and else 4326.
-        region_crs : int, optional
-            EPSG code of the region geometry, by default None. Only applies if region is
-            of kind 'bbox'or if geom crs is not defined in the file itself.
-        align : bool, default True
-            Align the mesh to the resolution.
-            Required for 'bbox' and 'geom' region types.
-        grid_name : str, optional
-            Name of the 2D grid in the mesh, by default 'mesh2d'.
-
-        Returns
-        -------
-        mesh2d : xu.UgridDataset
-            Generated mesh2d.
-        """
-        logger.info("Preparing 2D mesh.")
-
-        # Check if this component's region is a reference to another component
-        if self._region_component is not None:
-            raise ValueError(
-                "Region is a reference to another component. Cannot create grid."
-            )
-
-        mesh2d = create_mesh2d_from_region(
-            region,
-            res=res,
-            crs=crs,
-            region_crs=region_crs,
-            align=align,
-            data_catalog=self.data_catalog,
-        )
-        self.set(mesh2d, grid_name=grid_name)
-        if self.crs is None:
-            self._crs = crs
-        return mesh2d
-
     @property
     def data(self) -> Union[xu.UgridDataArray, xu.UgridDataset]:
         """
@@ -446,6 +372,174 @@ class MeshComponent(SpatialModelComponent):
 
         else:
             return self.mesh_grids[grid_name]
+
+    def _add_mesh(
+        self, data: xu.UgridDataset, grid_name: str, overwrite_grid: bool
+    ) -> Optional[CRS]:
+        if len(self.data) == 0:
+            # Check on crs
+            if not data.ugrid.grid.crs:
+                raise ValueError("Data should have CRS.")
+            crs = data.ugrid.grid.crs  # Save crs
+            # Needed for grid equality checking when adding new data
+            data = xu.UgridDataset(data.ugrid.to_dataset())
+            data.grid.set_crs(crs)
+            self._data = data
+            return None
+        else:
+            # Check on crs
+            if data.ugrid.grid.crs != self.crs:
+                raise ValueError("Data and Mesh should have the same CRS.")
+            # Save crs as it will be lost when converting to xarray
+            crs = self.crs
+            # Check on new grid topology
+            if grid_name in self.mesh_names:
+                # This makes sure the data has the same coordinates as the existing data
+                # check if the two grids are the same
+                data = xu.UgridDataset(
+                    data.ugrid.to_dataset()
+                )  # add nFaces coordinates to grid
+                if not self._grid_is_equal(grid_name, data):
+                    if not overwrite_grid:
+                        raise ValueError(
+                            f"Grid {grid_name} already exists in mesh"
+                            " and has a different topology. "
+                            "Use overwrite_grid=True to overwrite the grid"
+                            " topology and related data."
+                        )
+                    else:
+                        # Remove grid and all corresponding data variables from mesh
+                        logger.warning(
+                            f"Overwriting grid {grid_name} and the corresponding"
+                            " data variables in mesh."
+                        )
+                        grids: List[xr.Dataset] = [
+                            self.mesh_datasets[g].ugrid.to_dataset(
+                                optional_attributes=True
+                            )
+                            for g in self.mesh_names
+                            if g != grid_name
+                        ]
+                        # Re-define _data
+                        grids = xr.merge(objects=grids)
+                        self._data = xu.UgridDataset(grids)
+            # Check again mesh_names, could have changed if overwrite_grid=True
+            if grid_name in self.mesh_names:
+                grids: List[xr.Dataset] = [
+                    self.mesh_datasets[g].ugrid.to_dataset(optional_attributes=True)
+                    for g in self.mesh_names
+                ]
+                grids = xr.merge(objects=grids)
+                for dvar in data.data_vars:
+                    if dvar in self._data:
+                        logger.warning(f"Replacing mesh parameter: {dvar}")
+                    # The xugrid check on grid equal does not work properly compared to
+                    # our _grid_is_equal method. Add to xarray Dataset and convert back
+                    grids[dvar] = data.ugrid.to_dataset()[dvar]
+                self._data = xu.UgridDataset(grids)
+            else:
+                # We are potentially adding a new grid without any data variables
+                self._data = xu.UgridDataset(
+                    xr.merge(
+                        [
+                            self.data.ugrid.to_dataset(optional_attributes=True),
+                            data.ugrid.to_dataset(optional_attributes=True),
+                        ]
+                    )
+                )
+            if crs:  # Restore crs
+                for grid in self.data.ugrid.grids:
+                    grid.set_crs(crs)
+            return None
+
+    def _grid_is_equal(self, grid_name: str, data: xu.UgridDataset) -> bool:
+        return (
+            self.mesh_grids[grid_name]
+            .to_dataset(optional_attributes=True)
+            .equals(data.grid.to_dataset(optional_attributes=True))
+        )
+
+
+class MeshComponentExtra(MeshComponent):
+    """ModelComponent class for mesh components.
+
+    This class is used to manage unstructured mesh data in a model. The mesh component
+    data stored in the ``data`` property is a xugrid.UgridDataset object.
+    """
+
+    @hydromt_step
+    def create_2d_from_region(
+        self,
+        region: Dict[str, Any],
+        *,
+        res: Optional[float] = None,
+        crs: Optional[int] = None,
+        region_crs: int = 4326,
+        grid_name: str = "mesh2d",
+        align: bool = True,
+    ) -> xu.UgridDataset:
+        """HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.
+
+        Grids are read according to UGRID conventions. An 2D unstructured mesh
+        will be created as 2D rectangular grid from a geometry (geom_filename) or bbox.
+        If an existing 2D mesh is given, then no new mesh will be generated but an extent
+        can be extracted using the `bounds` argument of region.
+
+        Note Only existing meshed with only 2D grid can be read.
+
+        Parameters
+        ----------
+        region : dict
+            Dictionary describing region of interest, bounds can be provided for type 'mesh'.
+            In case of 'mesh', if the file includes several grids, the specific 2D grid can
+            be selected using the 'grid_name' argument.
+            CRS for 'bbox' and 'bounds' should be 4326; e.g.:
+
+            * {'bbox': [xmin, ymin, xmax, ymax]}
+            * {'geom': 'path/to/polygon_geometry'}
+            * {'mesh': 'path/to/2dmesh_file'}
+            * {'mesh': 'path/to/mesh_file', 'grid_name': 'mesh2d', 'bounds': [xmin, ymin, xmax, ymax]}
+
+        res : float, optional
+            Resolution used to generate 2D mesh [unit of the CRS], required if region
+            is not based on 'mesh'.
+        crs : int, optional
+            Optional EPSG code of the model.
+            If None using the one from region, and else 4326.
+        region_crs : int, optional
+            EPSG code of the region geometry, by default None. Only applies if region is
+            of kind 'bbox'or if geom crs is not defined in the file itself.
+        align : bool, default True
+            Align the mesh to the resolution.
+            Required for 'bbox' and 'geom' region types.
+        grid_name : str, optional
+            Name of the 2D grid in the mesh, by default 'mesh2d'.
+
+        Returns
+        -------
+        mesh2d : xu.UgridDataset
+            Generated mesh2d.
+        """
+        logger.info("Preparing 2D mesh.")
+
+        # Check if this component's region is a reference to another component
+        if self._region_component is not None:
+            raise ValueError(
+                "Region is a reference to another component. Cannot create grid."
+            )
+
+        mesh2d = create_mesh2d_from_region(
+            region,
+            res=res,
+            crs=crs,
+            region_crs=region_crs,
+            align=align,
+            data_catalog=self.data_catalog,
+        )
+        self.set(mesh2d, grid_name=grid_name)
+        if self.crs is None:
+            self._crs = crs
+        return mesh2d
 
     @hydromt_step
     def add_2d_data_from_rasterdataset(
@@ -628,92 +722,6 @@ class MeshComponent(SpatialModelComponent):
         self.set(uds_sample, grid_name=grid_name, overwrite_grid=False)
 
         return list(uds_sample.data_vars.keys())
-
-    def _add_mesh(
-        self, data: xu.UgridDataset, grid_name: str, overwrite_grid: bool
-    ) -> Optional[CRS]:
-        if len(self.data) == 0:
-            # Check on crs
-            if not data.ugrid.grid.crs:
-                raise ValueError("Data should have CRS.")
-            crs = data.ugrid.grid.crs  # Save crs
-            # Needed for grid equality checking when adding new data
-            data = xu.UgridDataset(data.ugrid.to_dataset())
-            data.grid.set_crs(crs)
-            self._data = data
-            return None
-        else:
-            # Check on crs
-            if data.ugrid.grid.crs != self.crs:
-                raise ValueError("Data and Mesh should have the same CRS.")
-            # Save crs as it will be lost when converting to xarray
-            crs = self.crs
-            # Check on new grid topology
-            if grid_name in self.mesh_names:
-                # This makes sure the data has the same coordinates as the existing data
-                # check if the two grids are the same
-                data = xu.UgridDataset(
-                    data.ugrid.to_dataset()
-                )  # add nFaces coordinates to grid
-                if not self._grid_is_equal(grid_name, data):
-                    if not overwrite_grid:
-                        raise ValueError(
-                            f"Grid {grid_name} already exists in mesh"
-                            " and has a different topology. "
-                            "Use overwrite_grid=True to overwrite the grid"
-                            " topology and related data."
-                        )
-                    else:
-                        # Remove grid and all corresponding data variables from mesh
-                        logger.warning(
-                            f"Overwriting grid {grid_name} and the corresponding"
-                            " data variables in mesh."
-                        )
-                        grids: List[xr.Dataset] = [
-                            self.mesh_datasets[g].ugrid.to_dataset(
-                                optional_attributes=True
-                            )
-                            for g in self.mesh_names
-                            if g != grid_name
-                        ]
-                        # Re-define _data
-                        grids = xr.merge(objects=grids)
-                        self._data = xu.UgridDataset(grids)
-            # Check again mesh_names, could have changed if overwrite_grid=True
-            if grid_name in self.mesh_names:
-                grids: List[xr.Dataset] = [
-                    self.mesh_datasets[g].ugrid.to_dataset(optional_attributes=True)
-                    for g in self.mesh_names
-                ]
-                grids = xr.merge(objects=grids)
-                for dvar in data.data_vars:
-                    if dvar in self._data:
-                        logger.warning(f"Replacing mesh parameter: {dvar}")
-                    # The xugrid check on grid equal does not work properly compared to
-                    # our _grid_is_equal method. Add to xarray Dataset and convert back
-                    grids[dvar] = data.ugrid.to_dataset()[dvar]
-                self._data = xu.UgridDataset(grids)
-            else:
-                # We are potentially adding a new grid without any data variables
-                self._data = xu.UgridDataset(
-                    xr.merge(
-                        [
-                            self.data.ugrid.to_dataset(optional_attributes=True),
-                            data.ugrid.to_dataset(optional_attributes=True),
-                        ]
-                    )
-                )
-            if crs:  # Restore crs
-                for grid in self.data.ugrid.grids:
-                    grid.set_crs(crs)
-            return None
-
-    def _grid_is_equal(self, grid_name: str, data: xu.UgridDataset) -> bool:
-        return (
-            self.mesh_grids[grid_name]
-            .to_dataset(optional_attributes=True)
-            .equals(data.grid.to_dataset(optional_attributes=True))
-        )
 
     def _get_mesh_grid_data(self, grid_name: str) -> Union[xu.Ugrid1d, xu.Ugrid2d]:
         if self._region_component is not None:

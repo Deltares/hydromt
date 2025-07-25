@@ -486,7 +486,7 @@ def mesh_model(tmpdir):
     mesh_model = Model(
         root=str(tmpdir),
         data_libs=["artifact_data", DC_PARAM_PATH],
-        components={"mesh": {"type": "MeshComponent"}},
+        components={"mesh": {"type": "MeshComponentExtra"}},
         region_component="mesh",
     )
 
