@@ -1,6 +1,7 @@
 """Xarrays component."""
 
 from logging import Logger, getLogger
+from pathlib import Path
 from shutil import move
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
@@ -8,7 +9,7 @@ import xarray as xr
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt._io.readers import _read_nc
+from hydromt._io.readers import _read_ncs
 from hydromt._io.writers import _write_nc
 from hydromt._typing.type_def import DeferedFileClose, XArrayDict
 from hydromt.model.components.base import ModelComponent
@@ -133,7 +134,7 @@ class DatasetsComponent(ModelComponent):
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
         filename_template = filename or self._filename
-        ncs = _read_nc(
+        ncs = _read_ncs(
             filename_template,
             root=self.root.path,
             single_var_as_array=single_var_as_array,
@@ -189,16 +190,19 @@ class DatasetsComponent(ModelComponent):
             return
 
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
-        _write_nc(
-            self.data,
-            filename_template=filename or self._filename,
-            force_overwrite=self.root.mode.is_override_mode(),
-            root=self.root.path,
-            gdal_compliant=gdal_compliant,
-            rename_dims=rename_dims,
-            force_sn=force_sn,
-            **kwargs,
-        )
+
+        filename = filename or self._filename
+        for name, ds in self.data.items():
+            filepath = Path(self.root.path, filename.format(name=name))
+            _write_nc(
+                ds,
+                filepath=filepath,
+                gdal_compliant=gdal_compliant,
+                rename_dims=rename_dims,
+                force_sn=force_sn,
+                force_overwrite=self.root.mode.is_override_mode(),
+                **kwargs,
+            )
 
     def _cleanup(
         self, forceful_overwrite=False, max_close_attempts=2

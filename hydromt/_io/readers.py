@@ -46,6 +46,7 @@ __all__ = [
     "_open_geodataset",
     "_open_vector_from_table",
     "_open_timeseries_from_table",
+    "_read_nc",
     "_read_yaml",
     "_read_toml",
 ]
@@ -868,6 +869,57 @@ def _parse_values(
 
 
 def _read_nc(
+    filepath: Path | str,
+    *,
+    mask_and_scale: bool = False,
+    single_var_as_array: bool = True,
+    load: bool = False,
+    **kwargs,
+) -> xr.Dataset:
+    """Read a netcdf file.
+
+    Parameters
+    ----------
+    filepath : Path | str
+        Full path to the file.
+    mask_and_scale : bool, optional
+        If True, replace array values equal to _FillValue with NA and scale values
+        according to the formula original_values * scale_factor + add_offset, where
+        _FillValue, scale_factor and add_offset are taken from variable attributes
+        (if they exist), by default False
+    single_var_as_array : bool, optional
+        If True, return a DataArray if the dataset consists of a single variable.
+        If False, always return a Dataset, by default True
+    load : bool, optional
+        If True, the data is loaded into memory, by default False
+    **kwargs : dict
+        Additional keyword arguments that are passed to the `xr.open_dataset`
+        function.
+
+    Returns
+    -------
+    xr.Dataset
+        Read dataset
+    """
+    if load:
+        ds: Union[xr.Dataset, xr.DataArray] = xr.open_dataset(
+            filepath, mask_and_scale=mask_and_scale, **kwargs
+        ).load()
+        ds.close()
+    else:
+        ds = xr.open_dataset(filepath, mask_and_scale=mask_and_scale, **kwargs)
+    # set geo coord if present as coordinate of dataset
+    if GEO_MAP_COORD in ds.data_vars:
+        ds = ds.set_coords(GEO_MAP_COORD)
+    # single-variable Dataset to DataArray
+    if single_var_as_array and len(ds.data_vars) == 1:
+        (ds,) = ds.data_vars.values()
+
+    # Return the dataset
+    return ds
+
+
+def _read_ncs(
     filename_template: StrPath,
     root: Path,
     *,
@@ -916,19 +968,13 @@ def _read_nc(
     for path in paths:
         name = ".".join(regex.match(path).groups())  # type: ignore
         # Load data to allow overwriting in r+ mode
-        if load:
-            ds: Union[xr.Dataset, xr.DataArray] = xr.open_dataset(
-                path, mask_and_scale=mask_and_scale, **kwargs
-            ).load()
-            ds.close()
-        else:
-            ds = xr.open_dataset(path, mask_and_scale=mask_and_scale, **kwargs)
-        # set geo coord if present as coordinate of dataset
-        if GEO_MAP_COORD in ds.data_vars:
-            ds = ds.set_coords(GEO_MAP_COORD)
-        # single-variable Dataset to DataArray
-        if single_var_as_array and len(ds.data_vars) == 1:
-            (ds,) = ds.data_vars.values()
+        ds = _read_nc(
+            filepath=path,
+            mask_and_scale=mask_and_scale,
+            single_var_as_array=single_var_as_array,
+            load=load,
+            **kwargs,
+        )
         ncs.update({name: ds})
     return ncs
 

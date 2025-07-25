@@ -4,6 +4,7 @@
 import os
 from logging import Logger, getLogger
 from os.path import basename, dirname, isfile, join
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union, cast
 
 import geopandas as gpd
@@ -13,7 +14,7 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import _read_nc
+from hydromt._io.readers import _read_ncs
 from hydromt._io.writers import _write_nc
 from hydromt.gis.vector import GeoDataset
 from hydromt.model.components.base import ModelComponent
@@ -220,7 +221,7 @@ class VectorComponent(SpatialModelComponent):
             # to avoid issues with reading object dtype data
             if "chunks" not in kwargs:
                 kwargs["chunks"] = None
-            ds = xr.merge(_read_nc(filename, root=self.root.path, **kwargs).values())
+            ds = xr.merge(_read_ncs(filename, root=self.root.path, **kwargs).values())
             # check if ds is empty (default filename has a value)
             if len(ds.sizes) == 0:
                 filename = None
@@ -332,10 +333,9 @@ class VectorComponent(SpatialModelComponent):
                 ds = ds.vector.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
             # write_nc requires dict - use dummy key
             _write_nc(
-                {"vector": ds},
-                filename,
+                ds,
+                filepath=Path(self.root.path, filename),
                 engine="netcdf4",
-                root=self.root.path,
                 force_overwrite=self.root.mode.is_override_mode(),
                 **kwargs,
             )
@@ -352,9 +352,8 @@ class VectorComponent(SpatialModelComponent):
             gdf.to_file(join(self.root.path, geometry_filename))
             # write_nc requires dict - use dummy key
             _write_nc(
-                {"vector": ds.drop_vars("geometry")},
-                filename,
-                root=self.root.path,
+                ds.drop_vars("geometry"),
+                filepath=Path(self.root.path, filename),
                 **kwargs,
             )
 
