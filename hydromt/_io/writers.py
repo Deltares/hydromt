@@ -215,7 +215,7 @@ def _write_nc(
 
     # Focus on the encoding and set these for all dims, coords and data vars
     encoding = kwargs.pop("encoding", {})
-    for var in set(list(ds.coords) + list(ds.data_vars)):
+    for var in set(ds.coords) | set(ds.data_vars):
         if var not in encoding:
             encoding[var] = {}
 
