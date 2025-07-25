@@ -16,7 +16,7 @@ from pytest_mock import MockerFixture
 from hydromt.model import Model
 from hydromt.model.components.mesh import (
     MeshComponent,
-    MeshComponentExtra,
+    MeshExtraComponent,
     _check_ugrid,
 )
 from hydromt.model.root import ModelRoot
@@ -126,7 +126,7 @@ def test_model_mesh_sets_correctly(tmpdir: Path):
 
 
 def test_create(mock_model, mocker: MockerFixture):
-    mesh_component = MeshComponentExtra(mock_model)
+    mesh_component = MeshExtraComponent(mock_model)
     mesh_component.root.is_reading_mode.return_value = False
     region = {"bbox": [-1, -1, 1, 1]}
     res = 20
@@ -232,7 +232,7 @@ def test_get_mesh(mock_model):
 def test_add_2d_data_from_rasterdataset(
     mock_model, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
 ):
-    mesh_component = MeshComponentExtra(mock_model)
+    mesh_component = MeshExtraComponent(mock_model)
     mesh_component.data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
     mock_data.grid.set_crs(28992)
@@ -264,7 +264,7 @@ def test_add_2d_data_from_rasterdataset(
 def test_add_2d_data_from_raster_reclass(
     mock_model, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
 ):
-    mesh_component = MeshComponentExtra(mock_model)
+    mesh_component = MeshExtraComponent(mock_model)
     mesh_component.data_catalog.get_rasterdataset.return_value = xr.Dataset()
     mock_data = xu.data.elevation_nl().to_dataset()
     mock_data.grid.set_crs(28992)
@@ -341,8 +341,8 @@ def test_read(mock_model, caplog: pytest.LogCaptureFixture, tmpdir, griduda):
 
 def test_model_mesh_workflow(tmpdir: Path):
     m = Model(root=str(tmpdir), mode="r+")
-    m.add_component("mesh", MeshComponentExtra(m))
-    component = cast(MeshComponentExtra, m.mesh)
+    m.add_component("mesh", MeshExtraComponent(m))
+    component = cast(MeshExtraComponent, m.mesh)
     region = {
         "bbox": [11.949099, 45.9722, 12.004855, 45.998441]
     }  # small area in Piave basin
@@ -369,7 +369,7 @@ def test_mesh_with_model(griduda, world, tmpdir):
     dc_param_path = join(TEST_DATA_DIR, "parameters_data.yml")
     root = join(tmpdir, "mesh_component1")
     model = Model(root=root, data_libs=["artifact_data", dc_param_path])
-    mesh_component = MeshComponentExtra(model=model)
+    mesh_component = MeshExtraComponent(model=model)
     model.add_component(name="mesh", component=mesh_component)
     region = {"geom": world[world.name == "Italy"]}
     model.mesh.create_2d_from_region(region, res=10000, crs=3857, grid_name="mesh2d")
@@ -377,7 +377,7 @@ def test_mesh_with_model(griduda, world, tmpdir):
 
     region = {"mesh": griduda}
     model1 = Model(root=root, data_libs=["artifact_data", dc_param_path])
-    mesh_component = MeshComponentExtra(model=model1)
+    mesh_component = MeshExtraComponent(model=model1)
     model1.add_component(name="mesh", component=mesh_component)
     model1.mesh.create_2d_from_region(region, grid_name="mesh2d")
     model1.mesh.add_2d_data_from_rasterdataset(
@@ -403,7 +403,7 @@ def test_mesh_with_model(griduda, world, tmpdir):
 
     # Read model
     written_model = Model(root=root, mode="r")
-    mesh_component = MeshComponentExtra(model=written_model)
+    mesh_component = MeshExtraComponent(model=written_model)
     written_model.add_component(name="mesh", component=mesh_component)
     written_model.read()
     variables = ["roughness_manning", "vito", "landuse"]

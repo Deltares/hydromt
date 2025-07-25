@@ -27,7 +27,7 @@ from hydromt.model.steps import hydromt_step
 if TYPE_CHECKING:
     from hydromt.model import Model
 
-__all__ = ["MeshComponent", "MeshComponentExtra"]
+__all__ = ["MeshComponent", "MeshExtraComponent"]
 
 
 logger: Logger = getLogger(__name__)
@@ -460,7 +460,7 @@ class MeshComponent(SpatialModelComponent):
         )
 
 
-class MeshComponentExtra(MeshComponent):
+class MeshExtraComponent(MeshComponent):
     """ModelComponent class for mesh components.
 
     This class is used to manage unstructured mesh data in a model. The mesh component
