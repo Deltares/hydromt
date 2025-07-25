@@ -937,8 +937,10 @@ def _read_ncs(
 
     Parameters
     ----------
-    file : str
-        filename relative to model root, may contain wildcards
+    filename_template : str
+        Filename relative to model root, may contain wildcards
+    root : Path
+        The path to the model directory in which to write
     mask_and_scale : bool, optional
         If True, replace array values equal to _FillValue with NA and scale values
         according to the formula original_values * scale_factor + add_offset, where

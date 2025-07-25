@@ -163,7 +163,7 @@ def _write_nc(
     force_overwrite: bool = False,
     **kwargs,
 ) -> Optional[DeferedFileClose]:
-    """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
+    """Write xarray.Dataset and/or xarray.DataArray to netcdf file.
 
     Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
     files, using :py:meth:`~hydromt.raster.gdal_compliant`.
@@ -177,7 +177,7 @@ def _write_nc(
     Parameters
     ----------
     ds : xr.DataArray | xr.Dataset
-        Data to be written to the drive
+        Dataset to be written to the drive
     filepath : Path | str
         Full path to the outgoing file
     compress : bool, optional
