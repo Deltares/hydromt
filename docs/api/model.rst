@@ -228,13 +228,20 @@ GridComponent
    components.GridComponent.data
    components.GridComponent.write
    components.GridComponent.read
-   components.GridComponent.create_from_region
-   components.GridComponent.add_data_from_constant
-   components.GridComponent.add_data_from_rasterdataset
-   components.GridComponent.add_data_from_raster_reclass
-   components.GridComponent.add_data_from_geodataframe
    components.GridComponent.set
    components.GridComponent.test_equal
+
+GridExtraComponent
+=============
+
+.. autosummary::
+   :toctree: ../_generated
+
+   components.GridExtraComponent.create_from_region
+   components.GridExtraComponent.add_data_from_constant
+   components.GridExtraComponent.add_data_from_rasterdataset
+   components.GridExtraComponent.add_data_from_raster_reclass
+   components.GridExtraComponent.add_data_from_geodataframe
 
 MeshComponent
 =============
@@ -256,11 +263,17 @@ MeshComponent
    components.MeshComponent.mesh_gdf
    components.MeshComponent.write
    components.MeshComponent.read
-   components.MeshComponent.create_2d_from_region
-   components.MeshComponent.add_2d_data_from_rasterdataset
-   components.MeshComponent.add_2d_data_from_raster_reclass
    components.MeshComponent.set
    components.MeshComponent.get_mesh
+
+MeshExtraComponent
+=============
+
+.. autosummary::
+   :toctree: ../_generated
+   components.MeshExtraComponent.create_2d_from_region
+   components.MeshExtraComponent.add_2d_data_from_rasterdataset
+   components.MeshExtraComponent.add_2d_data_from_raster_reclass
 
 VectorComponent
 ===============
