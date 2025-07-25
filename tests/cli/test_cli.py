@@ -11,7 +11,7 @@ from click.testing import CliRunner, Result
 from hydromt import __version__
 from hydromt._typing import NoDataException
 from hydromt.cli.main import main as hydromt_cli
-from hydromt.model.components.grid import GridComponent
+from hydromt.model.components.grid import GridExtraComponent
 from tests.conftest import TEST_DATA_DIR
 
 
@@ -32,7 +32,7 @@ def test_cli_components():
     r = CliRunner().invoke(hydromt_cli, "--components")
     assert r.exit_code == 0
     assert "Component plugins" in r.output
-    assert GridComponent.__name__ in r.output
+    assert GridExtraComponent.__name__ in r.output
 
 
 def test_cli_help():

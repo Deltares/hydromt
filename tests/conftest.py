@@ -454,7 +454,7 @@ def grid_model(demda, world, obsda, tmpdir):
     mod = Model(
         root=str(tmpdir),
         data_libs=["artifact_data", DC_PARAM_PATH],
-        components={"grid": {"type": "GridComponent"}},
+        components={"grid": {"type": "GridExtraComponent"}},
         region_component="grid",
     )
 

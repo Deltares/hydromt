@@ -220,7 +220,7 @@ def test_model_build_update(tmpdir, demda, obsda):
     model = Model(
         root=str(tmpdir),
         mode="w",
-        components={"grid": {"type": "GridComponent"}},
+        components={"grid": {"type": "GridExtraComponent"}},
         region_component="grid",
     )
     geoms_component = GeomsComponent(model)
@@ -273,7 +273,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
     model = Model(
         root=str(tmpdir),
         components={
-            "grid": {"type": "GridComponent"},
+            "grid": {"type": "GridExtraComponent"},
             "maps": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
             "forcing": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
             "geoms": {"type": "GeomsComponent"},
@@ -381,7 +381,7 @@ def test_setup_region_basin(model):
 def test_maps_setup():
     mod = Model(
         data_libs=["artifact_data", DC_PARAM_PATH],
-        components={"grid": {"type": "GridComponent"}},
+        components={"grid": {"type": "GridExtraComponent"}},
         region_component="grid",
         mode="w",
     )
@@ -421,7 +421,7 @@ def test_gridmodel(demda, tmpdir):
     grid_model = Model(
         root=str(tmpdir),
         data_libs=["artifact_data", DC_PARAM_PATH],
-        components={"grid": {"type": "GridComponent"}},
+        components={"grid": {"type": "GridExtraComponent"}},
         region_component="grid",
         mode="w",
     )
@@ -447,7 +447,7 @@ def test_gridmodel(demda, tmpdir):
     model1 = Model(
         root=str(tmpdir),
         data_libs=["artifact_data", DC_PARAM_PATH],
-        components={"grid": {"type": "GridComponent"}},
+        components={"grid": {"type": "GridExtraComponent"}},
         region_component="grid",
         mode="r",
     )
@@ -464,7 +464,7 @@ def test_gridmodel(demda, tmpdir):
     model1 = Model(
         root=update_root,
         data_libs=["artifact_data", DC_PARAM_PATH],
-        components={"grid": {"type": "GridComponent"}},
+        components={"grid": {"type": "GridExtraComponent"}},
         region_component="grid",
         mode="r+",
     )
@@ -507,7 +507,7 @@ def test_setup_grid_from_wrong_kind_no_mask(grid_model):
     bbox = [12.05, 45.30, 12.85, 45.65]
     grid_model_tmp = Model(
         data_libs=["artifact_data", DC_PARAM_PATH],
-        components={"grid": {"type": "GridComponent"}},
+        components={"grid": {"type": "GridExtraComponent"}},
         region_component="grid",
     )
     grid_model_tmp.grid.create_from_region(
@@ -540,7 +540,7 @@ def test_setup_grid_from_geodataframe(grid_model):
     bbox = [12.05, 45.30, 12.85, 45.65]
     grid_model_tmp = Model(
         data_libs=["artifact_data", DC_PARAM_PATH],
-        components={"grid": {"type": "GridComponent"}},
+        components={"grid": {"type": "GridExtraComponent"}},
         region_component="grid",
     )
     grid_model_tmp.grid.create_from_region(

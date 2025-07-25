@@ -30,7 +30,7 @@ from hydromt.model.steps import hydromt_step
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-__all__ = ["GridComponent"]
+__all__ = ["GridComponent", "GridExtraComponent"]
 
 logger: Logger = getLogger(__name__)
 
@@ -49,7 +49,7 @@ class GridComponent(SpatialModelComponent):
         *,
         filename: str = "grid/grid.nc",
         region_component: Optional[str] = None,
-        region_filename: str = "grid/grid_region.geojson",
+        region_filename: Optional[str] = "grid/grid_region.geojson",
     ):
         """
         Initialize a GridComponent.
@@ -63,13 +63,14 @@ class GridComponent(SpatialModelComponent):
             By default "grid/grid.nc".
         region_component: str, optional
             The name of the region component to use as reference for this component's region.
+            If provided, the region is not written to disk.
             If None, the region will be set to the grid extent. Note that the create
             method only works if the region_component is None. For add_data_from_*
             methods, the other region_component should be a reference to another
             grid component for correct reprojection.
-        region_filename: str
-            The path to use for reading and writing of the region data by default.
-            By default "grid/grid_region.geojson".
+        region_filename: Optional[str] = "grid/grid_region.geojson",
+            The path to use for writing the region data to a file.
+            By default "grid/grid_region.geojson". If None, the region is not written to disk.
         """
         # region_component referencing is not possible for grids. The region should be passed via create().
         super().__init__(
@@ -108,12 +109,17 @@ class GridComponent(SpatialModelComponent):
         if isinstance(data, np.ndarray):
             if data.shape != self._data.raster.shape:
                 raise ValueError("Shape of data and grid maps do not match")
+            if data.size == 0:
+                raise ValueError("Cannot set grid data with empty array")
             data = xr.DataArray(dims=self._data.raster.dims, data=data, name=name)
-        elif isinstance(data, xr.DataArray):
+            data = data.where(self._data.raster.mask)
+
+        if isinstance(data, xr.DataArray):
             if name is not None:
                 data.name = name
             data = data.to_dataset()
-        elif not isinstance(data, xr.Dataset):
+
+        if not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
 
         if len(self._data) == 0:  # empty grid
@@ -161,7 +167,18 @@ class GridComponent(SpatialModelComponent):
         """
         self.root._assert_write_mode()
         region_options = region_options or {}
-        self.write_region(**region_options)
+
+        if self._region_component is None:
+            if self._region_filename:
+                self.write_region(**region_options)
+            else:
+                logger.debug(
+                    "Skip writing region to disk: no region component or filename provided to GridComponent."
+                )
+        else:
+            logger.debug(
+                f"Skip writing region to disk: region component `{self._region_component}` was provided to GridComponent --- it should handle writing."
+            )
 
         if len(self.data) == 0:
             exec_nodata_strat(
@@ -169,7 +186,7 @@ class GridComponent(SpatialModelComponent):
                 strategy=NoDataStrategy.WARN,
             )
             return None
-        self.write_region()
+
         # write_nc requires dict - use dummy 'grid' key
         return _write_nc(
             {"grid": self.data},
@@ -221,6 +238,120 @@ class GridComponent(SpatialModelComponent):
         )
         for ds in loaded_nc_files.values():
             self.set(ds)
+
+    @property
+    def res(self) -> Optional[Tuple[float, float]]:
+        """Returns the resolution of the model grid."""
+        if len(self.data) > 0:
+            return self.data.raster.res
+        exec_nodata_strat(
+            msg="No grid data found for deriving resolution",
+            strategy=NoDataStrategy.WARN,
+        )
+        return None
+
+    @property
+    def transform(self) -> Optional[Affine]:
+        """Returns spatial transform of the model grid."""
+        if len(self.data) > 0:
+            return self.data.raster.transform
+        exec_nodata_strat(
+            msg="No grid data found for deriving transform",
+            strategy=NoDataStrategy.WARN,
+        )
+        return None
+
+    @property
+    def crs(self) -> Optional[CRS]:
+        """Returns coordinate reference system embedded in the model grid."""
+        if self.data.raster is None:
+            exec_nodata_strat(
+                msg="No grid data found for deriving crs",
+                strategy=NoDataStrategy.WARN,
+            )
+            return None
+        if self.data.raster.crs is None:
+            exec_nodata_strat(
+                msg="No crs found in grid data",
+                strategy=NoDataStrategy.WARN,
+            )
+            return None
+        return CRS(self.data.raster.crs)
+
+    @property
+    def bounds(self) -> Optional[Tuple[float, float, float, float]]:
+        """Returns the bounding box of the model grid."""
+        if len(self.data) > 0:
+            return self.data.raster.bounds
+        exec_nodata_strat(
+            msg="No grid data found for deriving bounds",
+            strategy=NoDataStrategy.WARN,
+        )
+        return None
+
+    @property
+    def _region_data(self) -> Optional[gpd.GeoDataFrame]:
+        """Returns the geometry of the model area of interest."""
+        if len(self.data) > 0:
+            crs: Optional[Union[int, CRS]] = self.crs
+            if crs is not None and hasattr(crs, "to_epsg"):
+                crs = crs.to_epsg()  # not all CRS have an EPSG code
+            return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
+        exec_nodata_strat(
+            msg="No grid data found for deriving region", strategy=NoDataStrategy.WARN
+        )
+        return None
+
+    @property
+    def data(self) -> xr.Dataset:
+        """Model static gridded data as xarray.Dataset."""
+        if self._data is None:
+            self._initialize_grid()
+        assert self._data is not None
+        return self._data
+
+    def _initialize_grid(self, skip_read: bool = False) -> None:
+        """Initialize grid object."""
+        if self._data is None:
+            self._data = xr.Dataset()
+            if self.root.is_reading_mode() and not skip_read:
+                self.read()
+
+    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+        """Test if two components are equal.
+
+        Parameters
+        ----------
+        other : ModelComponent
+            The component to compare against.
+
+        Returns
+        -------
+        Tuple[bool, Dict[str, str]]
+            True if the components are equal, and a dict with the associated errors per property checked.
+        """
+        eq, errors = super().test_equal(other)
+        if not eq:
+            return eq, errors
+        other_grid = cast(GridComponent, other)
+        try:
+            xr.testing.assert_allclose(self.data, other_grid.data)
+        except AssertionError as e:
+            errors["data"] = str(e)
+
+        return len(errors) == 0, errors
+
+
+class GridExtraComponent(GridComponent):
+    """ModelComponent class for grid components with extra functions for creating and adding data.
+
+    This class is used for setting, creating, writing, and reading regular grid data for a
+    HydroMT model. The grid component data stored in the ``data`` property of this class is of the
+    hydromt.gis.raster.RasterDataset type which is an extension of xarray.Dataset for regular grid.
+
+    Compared to the GridComponent, this class contains additional methods for creating
+    grid data from a region, adding data from constants, raster datasets, and geodataframes.
+    """
 
     @hydromt_step
     def create_from_region(
@@ -319,84 +450,6 @@ class GridComponent(SpatialModelComponent):
         )
         self.set(grid)
         return grid
-
-    @property
-    def res(self) -> Optional[Tuple[float, float]]:
-        """Returns the resolution of the model grid."""
-        if len(self.data) > 0:
-            return self.data.raster.res
-        exec_nodata_strat(
-            msg="No grid data found for deriving resolution",
-            strategy=NoDataStrategy.WARN,
-        )
-        return None
-
-    @property
-    def transform(self) -> Optional[Affine]:
-        """Returns spatial transform of the model grid."""
-        if len(self.data) > 0:
-            return self.data.raster.transform
-        exec_nodata_strat(
-            msg="No grid data found for deriving transform",
-            strategy=NoDataStrategy.WARN,
-        )
-        return None
-
-    @property
-    def crs(self) -> Optional[CRS]:
-        """Returns coordinate reference system embedded in the model grid."""
-        if self.data.raster is None:
-            exec_nodata_strat(
-                msg="No grid data found for deriving crs",
-                strategy=NoDataStrategy.WARN,
-            )
-            return None
-        if self.data.raster.crs is None:
-            exec_nodata_strat(
-                msg="No crs found in grid data",
-                strategy=NoDataStrategy.WARN,
-            )
-            return None
-        return CRS(self.data.raster.crs)
-
-    @property
-    def bounds(self) -> Optional[Tuple[float, float, float, float]]:
-        """Returns the bounding box of the model grid."""
-        if len(self.data) > 0:
-            return self.data.raster.bounds
-        exec_nodata_strat(
-            msg="No grid data found for deriving bounds",
-            strategy=NoDataStrategy.WARN,
-        )
-        return None
-
-    @property
-    def _region_data(self) -> Optional[gpd.GeoDataFrame]:
-        """Returns the geometry of the model area of interest."""
-        if len(self.data) > 0:
-            crs: Optional[Union[int, CRS]] = self.crs
-            if crs is not None and hasattr(crs, "to_epsg"):
-                crs = crs.to_epsg()  # not all CRS have an EPSG code
-            return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
-        exec_nodata_strat(
-            msg="No grid data found for deriving region", strategy=NoDataStrategy.WARN
-        )
-        return None
-
-    @property
-    def data(self) -> xr.Dataset:
-        """Model static gridded data as xarray.Dataset."""
-        if self._data is None:
-            self._initialize_grid()
-        assert self._data is not None
-        return self._data
-
-    def _initialize_grid(self, skip_read: bool = False) -> None:
-        """Initialize grid object."""
-        if self._data is None:
-            self._data = xr.Dataset()
-            if self.root.is_reading_mode() and not skip_read:
-                self.read()
 
     @hydromt_step
     def add_data_from_constant(
@@ -685,30 +738,6 @@ class GridComponent(SpatialModelComponent):
         self.set(ds)
 
         return list(ds.data_vars.keys())
-
-    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
-        """Test if two components are equal.
-
-        Parameters
-        ----------
-        other : ModelComponent
-            The component to compare against.
-
-        Returns
-        -------
-        Tuple[bool, Dict[str, str]]
-            True if the components are equal, and a dict with the associated errors per property checked.
-        """
-        eq, errors = super().test_equal(other)
-        if not eq:
-            return eq, errors
-        other_grid = cast(GridComponent, other)
-        try:
-            xr.testing.assert_allclose(self.data, other_grid.data)
-        except AssertionError as e:
-            errors["data"] = str(e)
-
-        return len(errors) == 0, errors
 
     def _get_grid_data(self) -> Union[xr.DataArray, xr.Dataset]:
         """Get grid data as xarray.DataArray from this component or the reference."""
