@@ -34,7 +34,7 @@ Below is an example of the YAML format used in HydroMT:
   global:
     components:
       grid:
-        type: GridComponent
+        type: GridExtraComponent
       config:
         type: ConfigComponent
 

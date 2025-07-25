@@ -119,11 +119,11 @@ The ``model`` module has a ``processes`` submodule. This module contains some fu
 to work with different kinds of model in- and ouput.
 
 * :ref:`grid <workflows_grid_api>`: generic workflows to prepare regular gridded data.
-    Used with the :class:`~grid.GridComponent`. For example to prepare regular grid data from constant,
-    from RasterDataset (with or without reclassification) or from GeoDataFrame.
+    Used with the :class:`~grid.GridComponent` or :class:`~mesh.GridExtraComponent`.
+    For example to prepare regular grid data from constant, from RasterDataset (with or without reclassification) or from GeoDataFrame.
 * :ref:`mesh <workflows_mesh_api>`: generic workflows to prepare unstructured mesh
-    data. Used with the :class:`~mesh.MeshComponent`. For example to create a mesh grid or prepare
-    unstructured mesh data from RasterDataset.
+    data. Used with :class:`~mesh.MeshComponent` or :class:`~mesh.MeshExtraComponent`.
+    For example to create a mesh grid or prepare unstructured mesh data from RasterDataset.
 * :ref:`basin_mask <workflows_basin_api>`: workflows to prepare a basin mask based on
     different region definitions (bounding box, point coordinates, polygon etc.)
 * :ref:`rivers <workflows_rivers_api>`: workflows to prepare river profile data like

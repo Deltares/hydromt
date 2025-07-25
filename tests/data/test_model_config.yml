@@ -4,7 +4,7 @@ modeltype: model
 global:
   components:
     grid:
-      type: GridComponent
+      type: GridExtraComponent
     config:
       type: ConfigComponent
 

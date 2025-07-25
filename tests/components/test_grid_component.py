@@ -9,7 +9,7 @@ import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
 
-from hydromt.model.components.grid import GridComponent
+from hydromt.model.components.grid import GridComponent, GridExtraComponent
 from hydromt.model.model import Model
 from hydromt.model.root import ModelRoot
 from tests.conftest import DC_PARAM_PATH
@@ -82,7 +82,7 @@ def test_read(tmpdir, mock_model, hydds, mocker: MockerFixture):
 
 
 def test_create_grid_from_bbox_rotated(mock_model):
-    grid_component = GridComponent(model=mock_model)
+    grid_component = GridExtraComponent(model=mock_model)
     grid_component.root.is_reading_mode.return_value = False
     grid_component.create_from_region(
         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
@@ -99,7 +99,7 @@ def test_create_grid_from_bbox_rotated(mock_model):
 
 
 def test_create_grid_from_bbox(mock_model):
-    grid_component = GridComponent(model=mock_model)
+    grid_component = GridExtraComponent(model=mock_model)
     grid_component.root.is_reading_mode.return_value = False
     bbox = [12.05, 45.30, 12.85, 45.65]
     grid_component.create_from_region(
@@ -115,7 +115,7 @@ def test_create_grid_from_bbox(mock_model):
 
 
 def test_create_raise_errors(mock_model):
-    grid_component = GridComponent(mock_model)
+    grid_component = GridExtraComponent(mock_model)
     # Wrong region kind
     with pytest.raises(ValueError, match="Region for grid must be of kind"):
         grid_component.create_from_region(region={"vector_model": "test_model"})
@@ -135,7 +135,7 @@ def test_create_basin_grid(tmpdir):
         mode="w",
         data_libs=["artifact_data"],
     )
-    grid_component = GridComponent(model=model)
+    grid_component = GridExtraComponent(model=model)
     grid_component.create_from_region(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
@@ -187,7 +187,7 @@ def test_initialize_grid(mock_model, tmpdir):
 
 
 def test_add_data_from_constant(mock_model, demda, mocker: MockerFixture):
-    grid_component = GridComponent(mock_model)
+    grid_component = GridExtraComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
     demda.name = "demda"
     mocker.patch("hydromt.model.components.grid.grid_from_constant", return_value=demda)
@@ -205,7 +205,7 @@ def test_add_data_from_rasterdataset(
     mock_grid_from_rasterdataset = mocker.patch(
         "hydromt.model.components.grid.grid_from_rasterdataset"
     )
-    grid_component = GridComponent(mock_model)
+    grid_component = GridExtraComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
     mock_grid_from_rasterdataset.return_value = demda
     mock_get_rasterdataset = mocker.patch.object(
@@ -235,7 +235,7 @@ def test_add_data_from_rasterdataset(
 def test_add_data_from_raster_reclass(
     caplog: pytest.LogCaptureFixture, demda, mock_model, mocker: MockerFixture
 ):
-    grid_component = GridComponent(mock_model)
+    grid_component = GridExtraComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
     caplog.set_level(logging.INFO)
     raster_data = "vito"
@@ -284,7 +284,7 @@ def test_add_data_from_raster_reclass(
 def test_add_data_from_geodataframe(
     caplog: pytest.LogCaptureFixture, geodf, demda, mock_model, mocker: MockerFixture
 ):
-    grid_component = GridComponent(mock_model)
+    grid_component = GridExtraComponent(mock_model)
     grid_component.root.is_reading_mode.return_value = False
     caplog.set_level(logging.INFO)
     demda.name = "name"
@@ -338,7 +338,7 @@ def test_grid_component_model(tmpdir):
         mode="w",
         data_libs=["artifact_data", DC_PARAM_PATH],
     )
-    grid_component = GridComponent(model=model)
+    grid_component = GridExtraComponent(model=model)
     model.add_component(name="grid", component=grid_component)
     # Add region
     model.grid.create_from_region(
@@ -409,7 +409,7 @@ def test_grid_component_model(tmpdir):
 
     # Read model
     written_model = Model(root=root, mode="r")
-    grid_component = GridComponent(model=written_model)
+    grid_component = GridExtraComponent(model=written_model)
     written_model.add_component(name="grid", component=grid_component)
     written_model.read()
     grid_data_checks(mod=written_model)

@@ -4,8 +4,8 @@ from .base import ModelComponent
 from .config import ConfigComponent
 from .datasets import DatasetsComponent
 from .geoms import GeomsComponent
-from .grid import GridComponent
-from .mesh import MeshComponent
+from .grid import GridComponent, GridExtraComponent
+from .mesh import MeshComponent, MeshExtraComponent
 from .spatial import SpatialModelComponent
 from .spatialdatasets import SpatialDatasetsComponent
 from .tables import TablesComponent
@@ -16,7 +16,9 @@ __all__ = [
     "DatasetsComponent",
     "GeomsComponent",
     "GridComponent",
+    "GridExtraComponent",
     "MeshComponent",
+    "MeshExtraComponent",
     "ModelComponent",
     "SpatialDatasetsComponent",
     "SpatialModelComponent",
@@ -31,7 +33,9 @@ __hydromt_eps__ = [
     "DatasetsComponent",
     "GeomsComponent",
     "GridComponent",
+    "GridExtraComponent",
     "MeshComponent",
+    "MeshExtraComponent",
     "SpatialDatasetsComponent",
     "TablesComponent",
     "VectorComponent",
