@@ -461,10 +461,14 @@ class MeshComponent(SpatialModelComponent):
 
 
 class MeshExtraComponent(MeshComponent):
-    """ModelComponent class for mesh components.
+    """ModelComponent class for mesh components with extra utility methods for adding/reading data.
 
     This class is used to manage unstructured mesh data in a model. The mesh component
     data stored in the ``data`` property is a xugrid.UgridDataset object.
+
+    Compared to the MeshComponent, this class provides additional methods
+    for creating and adding data to the mesh from various sources, such as
+    raster datasets and reclassification tables.
     """
 
     @hydromt_step
