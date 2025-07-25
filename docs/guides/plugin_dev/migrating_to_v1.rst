@@ -45,23 +45,23 @@ To access the grid component data you call `model.grid.data` instead of `model.g
 In the core of HydroMT, the available components are:
 
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
-| v0.x                                                      | v1.x                     				| Description                               	|
+| v0.x                                                      | v1.x                                  | Description                                   |
 +===========================================================+=======================================+===============================================+
-| Model.config                                              | ConfigComponent          				| Component for managing model configuration	|
+| Model.config                                              | ConfigComponent                       | Component for managing model configuration    |
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
-| Model.geoms                                               | GeomsComponent           				| Component for managing 1D vector data     	|
+| Model.geoms                                               | GeomsComponent                        | Component for managing 1D vector data         |
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
-| Model.tables                                              | TablesComponent          				| Component for managing non-geospatial data	|
+| Model.tables                                              | TablesComponent                       | Component for managing non-geospatial data    |
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
-| -                                                         | DatasetsComponent        				| Component for managing non-geospatial data	|
+| -                                                         | DatasetsComponent                     | Component for managing non-geospatial data    |
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
-| Model.maps / Model.forcing / Model.results / Model.states | SpatialDatasetsComponent 				| Component for managing geospatial data    	|
+| Model.maps / Model.forcing / Model.results / Model.states | SpatialDatasetsComponent              | Component for managing geospatial data        |
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
-| GridModel.grid                                            | GridComponent / GridExtraComponent 	| Component for managing regular gridded data	|
+| GridModel.grid                                            | GridComponent or GridExtraComponent   | Component for managing regular gridded data   |
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
-| MeshModel.mesh                                            | MeshComponent / MeshExtraComponent 	| Component for managing unstructured grids 	|
+| MeshModel.mesh                                            | MeshComponent or MeshExtraComponent   | Component for managing unstructured grids     |
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
-| VectorModel.vector                                        | VectorComponent          				| Component for managing geospatial vector data	|
+| VectorModel.vector                                        | VectorComponent                       | Component for managing geospatial vector data |
 +-----------------------------------------------------------+---------------------------------------+-----------------------------------------------+
 
 Changes to the `yaml` HydroMT configuration file format

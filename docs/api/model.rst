@@ -232,7 +232,7 @@ GridComponent
    components.GridComponent.test_equal
 
 GridExtraComponent
-=============
+==================
 
 .. autosummary::
    :toctree: ../_generated
@@ -267,10 +267,11 @@ MeshComponent
    components.MeshComponent.get_mesh
 
 MeshExtraComponent
-=============
+==================
 
 .. autosummary::
    :toctree: ../_generated
+
    components.MeshExtraComponent.create_2d_from_region
    components.MeshExtraComponent.add_2d_data_from_rasterdataset
    components.MeshExtraComponent.add_2d_data_from_raster_reclass
