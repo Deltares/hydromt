@@ -11,6 +11,7 @@ from .readers import (
     _open_vector,
     _open_vector_from_table,
     _read_nc,
+    _read_ncs,
     _read_toml,
     _read_yaml,
 )
@@ -35,6 +36,7 @@ __all__ = [
     "_open_vector",
     "_open_vector_from_table",
     "_read_nc",
+    "_read_ncs",
     "_read_toml",
     "_read_yaml",
     "_write_nc",

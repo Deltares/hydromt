@@ -3,7 +3,7 @@
 import os
 from logging import Logger, getLogger
 from os import makedirs
-from os.path import dirname, exists, isdir, isfile, join
+from os.path import dirname, exists, isdir, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Union, cast
@@ -11,10 +11,11 @@ from typing import Any, Dict, List, Optional, Union, cast
 import geopandas as gpd
 import numpy as np
 import xarray as xr
+from dask.diagnostics import ProgressBar
 from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
-from hydromt._typing.type_def import DeferedFileClose, StrPath, XArrayDict
+from hydromt._typing.type_def import DeferedFileClose, StrPath
 
 logger: Logger = getLogger(__name__)
 
@@ -119,18 +120,50 @@ def _zarr_writer(
     return write_path
 
 
+def _compute_nc(
+    ds: xr.Dataset,
+    filepath: Path,
+    compute: bool = True,
+    **kwargs,
+):
+    """Write and compute the dataset.
+
+    Either compute directly or with a progressbar.
+
+    Parameters
+    ----------
+    ds : xr.Dataset
+        The dataset to be written.
+    filepath : Path
+        The full path to the outgoing file.
+    compute : bool, optional
+        Whether to compute the output directly, by default True
+    """
+    obj = ds.to_netcdf(
+        filepath,
+        compute=compute,
+        **kwargs,
+    )
+    if compute:
+        return
+
+    with ProgressBar():
+        obj.compute()
+    obj = None
+
+
 def _write_nc(
-    nc_dict: XArrayDict,
-    filename_template: str,
-    root: Path,
+    ds: xr.DataArray | xr.Dataset,
+    filepath: Path | str,
     *,
+    compress: bool = False,
     gdal_compliant: bool = False,
     rename_dims: bool = False,
     force_sn: bool = False,
     force_overwrite: bool = False,
     **kwargs,
 ) -> Optional[DeferedFileClose]:
-    """Write dictionnary of xarray.Dataset and/or xarray.DataArray to netcdf files.
+    """Write xarray.Dataset and/or xarray.DataArray to netcdf file.
 
     Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
     files, using :py:meth:`~hydromt.raster.gdal_compliant`.
@@ -143,54 +176,82 @@ def _write_nc(
 
     Parameters
     ----------
-    nc_dict: dict
-        Dictionary of xarray.Dataset and/or xarray.DataArray to write
-    path: str
-        filename relative to model root and should contain a {name} placeholder
-    temp_data_dir: StrPath, optional
-            Temporary directory to write grid to. If not given a TemporaryDirectory
-            is generated.
-    gdal_compliant: bool, optional
+    ds : xr.DataArray | xr.Dataset
+        Dataset to be written to the drive
+    filepath : Path | str
+        Full path to the outgoing file
+    compress : bool, optional
+        Whether or not to compress the data, by default False
+    gdal_compliant : bool, optional
         If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
-        format using :py:meth:`~hydromt.raster.gdal_compliant`
-    rename_dims: bool, optional
+        format using :py:meth:`~hydromt.raster.gdal_compliant`, by default False
+    rename_dims : bool, optional
         If True, rename x_dim and y_dim to standard names depending on the CRS
         (x/y for projected and lat/lon for geographic). Only used if
-        ``gdal_compliant`` is set to True. By default, False.
-    force_sn: bool, optional
+        ``gdal_compliant`` is set to True. By default False
+    force_sn : bool, optional
         If True, forces the dataset to have South -> North orientation. Only used
-        if ``gdal_compliant`` is set to True. By default, False.
-    **kwargs:
+        if ``gdal_compliant`` is set to True. By default False
+    **kwargs : dict
         Additional keyword arguments that are passed to the `to_netcdf`
-        function.
+        function
     """
-    for name, ds in nc_dict.items():
-        if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
-            logger.error(f"{name} object of type {type(ds).__name__} not recognized")
-            continue
-        logger.debug(f"Writing file {filename_template.format(name=name)}")
-        _path = join(root, filename_template.format(name=name))
-        if isfile(_path) and not force_overwrite:
-            raise IOError(f"File {_path} already exists")
-        if not isdir(dirname(_path)):
-            os.makedirs(dirname(_path))
-        if gdal_compliant:
-            ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
-        try:
-            ds.to_netcdf(_path, **kwargs)
-        except PermissionError:
-            logger.warning(f"Could not write to file {_path}, defering write")
-            temp_data_dir = TemporaryDirectory()
+    # Force typing
+    filepath = Path(filepath)
+    # Check the typing
+    if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
+        logger.error(f"Dataset object of type {type(ds).__name__} not recognized")
+        return
+    if isinstance(ds, xr.DataArray):
+        if ds.name is None:
+            ds.name = filepath.stem
+        ds = ds.to_dataset()
+    logger.debug(f"Writing file {filepath.as_posix()}")
+    # Check whether the file already exists
+    if filepath.is_file() and not force_overwrite:
+        raise IOError(f"File {filepath.as_posix()} already exists")
+    if not filepath.parent.is_dir():
+        filepath.parent.mkdir(parents=True)
 
-            temp_path = join(str(temp_data_dir), f"{_path}.tmp")
-            ds.to_netcdf(temp_path, **kwargs)
+    # Focus on the encoding and set these for all dims, coords and data vars
+    encoding = kwargs.pop("encoding", {})
+    for var in set(ds.coords) | set(ds.data_vars):
+        if var not in encoding:
+            encoding[var] = {}
 
-            return DeferedFileClose(
-                ds=ds,
-                original_path=join(str(temp_data_dir), _path),
-                temp_path=temp_path,
-                close_attempts=1,
-            )
+    # Remove the nodata val specifier for the dimensions, CF compliant that is
+    for dim in ds.dims:
+        ds[dim].attrs.pop("_FillValue", None)
+        if dim in encoding:
+            encoding[dim].update({"_FillValue": None})
+
+    # Set compression if True
+    if compress:
+        for var in ds.data_vars:
+            encoding[var].update({"zlib": True})
+    kwargs["encoding"] = encoding
+
+    # Make gdal compliant if True, only in case of a spatial dataset
+    if gdal_compliant:
+        ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
+
+    # Try to write the file
+    try:
+        _compute_nc(ds, filepath=filepath, **kwargs)
+    except PermissionError:
+        logger.warning(f"Could not write to file {filepath.as_posix()}, defering write")
+        temp_data_dir = TemporaryDirectory()
+
+        temp_filepath = Path(temp_data_dir.name, filepath.name)
+        _compute_nc(ds, filepath=temp_filepath, **kwargs)
+
+        return DeferedFileClose(
+            ds=ds,
+            original_path=filepath,
+            temp_path=temp_filepath,
+            close_attempts=1,
+        )
+
     return None
 
 

@@ -177,7 +177,9 @@ def _cache_vrt_tiles(
                 if scheme is None:
                     # local path
                     # Get relative uri that the vrt points to
-                    relative_uri_ref: Path = Path(vrt_ref.lstrip(stripped))
+                    relative_uri_ref: Path = Path(
+                        os.path.relpath(vrt_ref, dirname(stripped))
+                    )
                     # Set download uri to match vrt_uri
                     src_uri: str = vrt_ref
                 else:
