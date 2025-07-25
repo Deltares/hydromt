@@ -462,6 +462,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">basename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">isfile</span><span class="p">,</span> <span class="n">join</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
@@ -471,7 +472,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_nc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_ncs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_write_nc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.vector</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
@@ -688,7 +689,7 @@
             <span class="c1"># to avoid issues with reading object dtype data</span>
             <span class="k">if</span> <span class="s2">&quot;chunks&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;chunks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">_read_nc</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">_read_ncs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="c1"># check if ds is empty (default filename has a value)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">sizes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">filename</span> <span class="o">=</span> <span class="kc">None</span>
@@ -803,10 +804,9 @@
                 <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">update_geometry</span><span class="p">(</span><span class="n">geom_format</span><span class="o">=</span><span class="s2">&quot;wkt&quot;</span><span class="p">,</span> <span class="n">geom_name</span><span class="o">=</span><span class="s2">&quot;ogc_wkt&quot;</span><span class="p">)</span>
             <span class="c1"># write_nc requires dict - use dummy key</span>
             <span class="n">_write_nc</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;vector&quot;</span><span class="p">:</span> <span class="n">ds</span><span class="p">},</span>
-                <span class="n">filename</span><span class="p">,</span>
+                <span class="n">ds</span><span class="p">,</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span>
                 <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;netcdf4&quot;</span><span class="p">,</span>
-                <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
                 <span class="n">force_overwrite</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">is_override_mode</span><span class="p">(),</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
@@ -823,9 +823,8 @@
             <span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">geometry_filename</span><span class="p">))</span>
             <span class="c1"># write_nc requires dict - use dummy key</span>
             <span class="n">_write_nc</span><span class="p">(</span>
-                <span class="p">{</span><span class="s2">&quot;vector&quot;</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)},</span>
-                <span class="n">filename</span><span class="p">,</span>
-                <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">),</span>
+                <span class="n">filepath</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span></div>
 

@@ -471,7 +471,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_nc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_ncs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.raster</span><span class="w"> </span><span class="kn">import</span> <span class="n">GEO_MAP_COORD</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpatialModelComponent</span>
@@ -666,7 +666,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">skip_read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="n">_read_nc</span><span class="p">(</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">_read_ncs</span><span class="p">(</span>
             <span class="n">filename</span><span class="p">,</span>
             <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
             <span class="n">single_var_as_array</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
