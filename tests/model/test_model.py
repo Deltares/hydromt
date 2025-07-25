@@ -834,7 +834,7 @@ def test_empty_mesh_model(mesh_model):
     # read model
     mesh_model2 = Model(
         data_libs=["artifact_data"],
-        components={"mesh": {"type": "MeshComponent"}},
+        components={"mesh": {"type": "MeshExtraComponent"}},
         region_component="mesh",
         mode="r",
     )
