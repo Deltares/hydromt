@@ -43,7 +43,7 @@ dependencies = [
   "xarray",                 # ndim data arrays
   "xmltodict",              # xml parser also used to read VRT
   "xugrid>=0.9.0",          # xarray wrapper for mesh processing
-  "zarr>=2,<3",             # zarr
+  "zarr>=2,<4",             # zarr
 ]
 
 requires-python = ">=3.11"
