@@ -10,7 +10,7 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import _read_nc
+from hydromt._io.readers import _read_ncs
 from hydromt._io.writers import _write_nc
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
@@ -180,9 +180,8 @@ class GridComponent(SpatialModelComponent):
 
         # write_nc requires dict - use dummy 'grid' key
         return _write_nc(
-            {"grid": self.data},
-            filename or self._filename,
-            root=self.model.root.path,
+            self.data,
+            filepath=Path(self.root.path, filename or self._filename),
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
             force_overwrite=self.root.mode.is_override_mode(),
@@ -220,7 +219,7 @@ class GridComponent(SpatialModelComponent):
         # Load grid data in r+ mode to allow overwriting netcdf files
         if self.root.is_reading_mode() and self.root.is_writing_mode():
             kwargs["load"] = True
-        loaded_nc_files = _read_nc(
+        loaded_nc_files = _read_ncs(
             filename or self._filename,
             self.root.path,
             single_var_as_array=False,

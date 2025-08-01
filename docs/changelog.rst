@@ -12,12 +12,15 @@ Unreleased
 
 New
 ---
+- Added option for delayed compute in writing netcdf files
+- Set compression in `_write_nc`
 
 Changed
 -------
 
 Fixed
 -----
+- CF compliant dimensions in netcdf files
 
 Deprecated
 ----------
