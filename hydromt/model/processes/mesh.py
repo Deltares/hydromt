@@ -171,27 +171,36 @@ def create_mesh2d_from_mesh(
 
     # Check crs and reproject to model crs
     grid_crs = grid.crs
+    idx = [g.name for g in mesh2d.ugrid.grids].index(grid.name)
+
     if crs is not None:
         bbox = None
         if grid_crs is not None and grid_crs.to_epsg() == 4326:
-            bbox = mesh2d.ugrid.grid.bounds
+            bbox = mesh2d.ugrid.grids[idx].bounds
         crs = _gis_utils._parse_crs(crs, bbox=bbox)
     else:
         crs = CRS.from_user_input(4326)
     if grid_crs is not None:  # parse crs
-        mesh2d.ugrid.grid.set_crs(grid_crs)
+        mesh2d.ugrid.grids[idx].set_crs(grid_crs)
     else:
         # Assume model crs
         logger.warning(
             f"Mesh data from mesh file doesn't have a CRS. Assuming crs option {crs}"
         )
-        mesh2d.ugrid.grid.set_crs(crs)
+        mesh2d.ugrid.grids[idx].set_crs(crs)
+
+    for g in mesh2d.ugrid.grids:
+        if g.crs is None:
+            g.set_crs(crs)
+
     mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
 
     # If bounds are provided in region, extract mesh for bounds
     if bounds is not None:
         bounds_geom = gpd.GeoDataFrame(geometry=[box(*bounds)], crs=4326)
-        xmin, ymin, xmax, ymax = bounds_geom.to_crs(mesh2d.ugrid.grid.crs).total_bounds
+        xmin, ymin, xmax, ymax = bounds_geom.to_crs(
+            mesh2d.ugrid.grids[idx].crs
+        ).total_bounds
         subset = mesh2d.ugrid.sel(y=slice(ymin, ymax), x=slice(xmin, xmax))
         # Check if still cells after clipping
         err = (
@@ -199,7 +208,10 @@ def create_mesh2d_from_mesh(
             "Check that bounds were given in the correct crs 4326"
         )
         subset = subset.ugrid.assign_node_coords()
-        if subset.ugrid.grid.node_x.size == 0 or subset.ugrid.grid.node_y.size == 0:
+        if (
+            subset.ugrid.grids[idx].node_x.size == 0
+            or subset.ugrid.grids[idx].node_y.size == 0
+        ):
             raise IndexError(err)
         mesh2d = subset
 
