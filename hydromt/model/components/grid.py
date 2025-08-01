@@ -99,10 +99,10 @@ class GridComponent(SpatialModelComponent):
         if name is None and name_required:
             raise ValueError(f"Unable to set {type(data).__name__} data without a name")
         if isinstance(data, np.ndarray):
-            if data.shape != self._data.raster.shape:
-                raise ValueError("Shape of data and grid maps do not match")
             if data.size == 0:
                 raise ValueError("Cannot set grid data with empty array")
+            if data.shape != self._data.raster.shape:
+                raise ValueError("Shape of data and grid maps do not match")
             data = xr.DataArray(dims=self._data.raster.dims, data=data, name=name)
             data = data.where(self._data.raster.mask)
 
