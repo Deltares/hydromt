@@ -233,7 +233,11 @@ def _write_nc(
 
     # Make gdal compliant if True, only in case of a spatial dataset
     if gdal_compliant:
+        y_old, x_old = ds.raster.dims
         ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
+        y_dim, x_dim = ds.raster.dims
+        encoding[y_dim] = encoding.pop(y_old)
+        encoding[x_dim] = encoding.pop(x_old)
 
     # Try to write the file
     try:
