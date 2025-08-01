@@ -47,7 +47,7 @@ Below is an example of the YAML format used in HydroMT:
 
     - grid.read:
         filename: grid.nc
-          
+
     - write:
         components:
           - config

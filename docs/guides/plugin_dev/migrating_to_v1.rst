@@ -374,8 +374,8 @@ The `GridMixin` and `GridModel` have been restructured into one `GridComponent` 
 a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
 `read_grid`, and `setup_grid` have been changed to the more generically named `set`,
 `write`, `read`, and `create` methods respectively. Also, the `setup_grid_from_*`
-methods have been removed with the goal of simplifying the API. Removed functionality 
-was moved to the `hydromt.model.processes.grid` submodule containing the workflow functions. 
+methods have been removed with the goal of simplifying the API. Removed functionality
+was moved to the `hydromt.model.processes.grid` submodule containing the workflow functions.
 The functionality of the GridComponent has not been changed compared to the GridModel.
 
 +------------------------------+-------------------------------------------+
