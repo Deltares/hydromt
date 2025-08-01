@@ -1,6 +1,7 @@
 """Grid Component."""
 
 from logging import Logger, getLogger
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
