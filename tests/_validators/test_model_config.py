@@ -7,48 +7,15 @@ from hydromt._validators.model_config import (
     HydromtModelStep,
 )
 from hydromt.model.components.base import ModelComponent
-from hydromt.model.components.grid import GridComponent, GridExtraComponent
+from hydromt.model.components.grid import (
+    GridComponent,
+)
 from hydromt.model.model import Model
 
 
-def test_setup_grid_from_constant_validation():
-    d = {
-        "constant": 0.01,
-        "name": "c1",
-        "dtype": "float32",
-        "nodata": -99.0,
-    }
-    HydromtModelStep(fn=GridExtraComponent.add_data_from_constant, args=d)
-
-
-def test_setup_grid_from_rasterdataset_validation():
-    d = {
-        "raster_data": "merit_hydro_1k",
-        "variables": ["elevtn", "basins"],
-        "reproject_method": ["average", "mode"],
-    }
-    HydromtModelStep(fn=GridExtraComponent.add_data_from_rasterdataset, args=d)
-
-
-def test_setup_grid_from_geodataframe_validation():
-    d = {
-        "vector_data": "hydro_lakes",
-        "variables": ["waterbody_id", "Depth_avg"],
-        "nodata": [-1, -999.0],
-        "rasterize_method": "value",
-        "rename": {"waterbody_id": "lake_id", "Detph_avg": "lake_depth"},
-    }
-    HydromtModelStep(fn=GridExtraComponent.add_data_from_geodataframe, args=d)
-
-
-def test_setup_grid_from_raster_reclass_validation():
-    d = {
-        "raster_data": "vito",
-        "reclass_table_data": "vito_reclass",
-        "reclass_variables": ["manning"],
-        "reproject_method": ["average"],
-    }
-    HydromtModelStep(fn=GridExtraComponent.add_data_from_raster_reclass, args=d)
+@pytest.fixture
+def mock_component(mock_model):
+    return GridComponent(mock_model)
 
 
 def test_write_validation_validation():

@@ -34,7 +34,7 @@ Below is an example of the YAML format used in HydroMT:
   global:
     components:
       grid:
-        type: GridExtraComponent
+        type: GridComponent
       config:
         type: ConfigComponent
 
@@ -45,63 +45,9 @@ Below is an example of the YAML format used in HydroMT:
           timers.end: '2010-02-15'
           timers.start: '2010-02-05'
 
-    - grid.create_from_region:
-        region:
-          bbox: [12.05, 45.30, 12.85, 45.65]
-        res: 0.01
-        crs: 4326
-        basin_index_path: merit_hydro_index
-        hydrography_path: merit_hydro
-
-    - grid.add_data_from_constant:
-        constant: 0.01
-        name: c1
-        dtype: float32
-        nodata: -99.0
-
-    - grid.add_data_from_rasterdataset:
-        raster_data: merit_hydro_1k
-        variables:
-          - elevtn
-          - basins
-        reproject_method:
-          - average
-          - mode
-
-    - grid.add_data_from_rasterdataset:
-        raster_data: vito
-        fill_method: nearest
-        reproject_method: mode
-        rename:
-          vito: landuse
-
-    - grid.add_data_from_raster_reclass:
-        raster_data: vito
-        reclass_table_data: vito_reclass
-        reclass_variables:
-          - manning
-        reproject_method:
-          - average
-
-    - grid.add_data_from_geodataframe:
-        vector_data: hydro_lakes
-        variables:
-          - waterbody_id
-          - Depth_avg
-        nodata:
-          - -1
-          - -999.0
-        rasterize_method: value
-        rename:
-          waterbody_id: lake_id
-          Depth_avg: lake_depth
-
-    - grid.add_data_from_geodataframe:
-        vector_data: hydro_lakes
-        rasterize_method: fraction
-        rename:
-          hydro_lakes: water_frac
-
+    - grid.read:
+        filename: grid.nc
+          
     - write:
         components:
           - config
@@ -110,11 +56,7 @@ Below is an example of the YAML format used in HydroMT:
 ### Explanation of Key Methods
 
 - **`config.update`**: Updates configuration settings. In the example, it sets parameters like `header.settings`, and start and end times for the model run.
-- **`grid.create_from_region`**: Creates a grid based on a specified bounding box (bbox), resolution, and coordinate reference system (CRS). Additional options include setting basin and hydrography paths.
-- **`grid.add_data_from_constant`**: Adds a constant value to the grid. Parameters like `name`, `dtype`, and `nodata` specify how the constant data is handled.
-- **`grid.add_data_from_rasterdataset`**: Adds data from a raster dataset. It includes options to specify variables, reprojection methods, and renaming rules for variables.
-- **`grid.add_data_from_raster_reclass`**: Reclassifies raster data based on a specified reclassification table and applies transformations to the grid.
-- **`grid.add_data_from_geodataframe`**: Adds vector data to the grid, rasterizing specific attributes, handling nodata values, and renaming variables.
+- **`grid.read`**: Reads the grid data from a specified file (e.g., `grid.nc`). You can generate and customize this file by using the workflow functions in the submodule `hydromt.model.processes.grid.py`.
 - **`write`**: Specifies which components of the model (e.g., `config`, `grid`) should be written to disk at the end of the workflow. By default, all files are written unless specified otherwise.
 
 It should be noted that, by default, the HydroMT `build` and `update` commands write all output files at the end of the workflow using the `write` method. This behavior can be customized by explicitly specifying the `write` step in the YAML file, allowing more granular control over which files are written and when.
