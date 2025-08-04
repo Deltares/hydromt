@@ -284,15 +284,12 @@ def test_create_mesh2d_from_mesh():
     geom = gpd.GeoDataFrame(geometry=[box(xmin, ymin, xmax, ymax)], crs=crs)
     mesh_orig = xu.Ugrid2d.from_geodataframe(geom)
     uds = xu.UgridDataset(mesh_orig.copy().to_dataset())
-
-    # Assign a grid name for testing grid_name functionality
-    mesh_orig.name = "test_grid"
-    uds.grids[0].name = "test_grid"
+    grid_name = mesh_orig.attrs["name"]
 
     # Act: Without bounds
     mesh_out = create_mesh2d_from_mesh(
         uds=uds,
-        grid_name="test_grid",
+        grid_name=grid_name,
         crs=crs,
         bounds=None,
     )
@@ -315,7 +312,7 @@ def test_create_mesh2d_from_mesh():
 
     mesh_clipped = create_mesh2d_from_mesh(
         uds=uds,
-        grid_name="test_grid",
+        grid_name=grid_name,
         crs=crs,
         bounds=tuple(bounds_wgs84),
     )
