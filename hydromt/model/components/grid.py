@@ -77,6 +77,7 @@ class GridComponent(SpatialModelComponent):
         self,
         data: Union[xr.DataArray, xr.Dataset, np.ndarray],
         name: Optional[str] = None,
+        mask: Optional[Union[str, xr.DataArray]] = None,
     ):
         """Add data to grid.
 
@@ -89,6 +90,10 @@ class GridComponent(SpatialModelComponent):
         name: str, optional
             Name of new map layer, this is used to overwrite the name of a DataArray
             and ignored if data is a Dataset
+        mask: xr.DataArray, optional
+            Name of the mask layer in the grid data, or directly the mask layer to use.
+            Can be a DataArray where `.raster.nodata` is used to define the mask.
+            If None or not present as a layer, no masking is applied.
         """
         self._initialize_grid()
         assert self._data is not None
@@ -117,13 +122,12 @@ class GridComponent(SpatialModelComponent):
         if data.raster.res[1] > 0:
             data = data.raster.flipud()
 
-        # Determine the masking layer
-        mask = self.get_mask_layer(self.model._MAPS.get("basins"), self.data, data)
-
         # Set the data per layer
         if len(self._data) == 0:  # empty grid
             self._data = data
         else:
+            mask = self.get_mask_layer(mask, self.data, data)
+
             for dvar in data.data_vars:
                 if dvar in self._data:
                     logger.warning(f"Replacing grid map: {dvar}")

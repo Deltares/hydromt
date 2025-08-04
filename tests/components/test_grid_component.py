@@ -165,3 +165,151 @@ def test_initialize_grid(mock_model, tmpdir):
     grid_component._initialize_grid()
     assert isinstance(grid_component._data, xr.Dataset)
     assert grid_component.read.called
+
+
+@pytest.fixture
+def base_grid():
+    return xr.Dataset(
+        data_vars={"base": (["y", "x"], np.ones((5, 5)))},
+        coords={"x": np.arange(5), "y": np.arange(5)},
+    )
+
+
+@pytest.fixture
+def grid_component(mock_model, base_grid):
+    """Fixture to create a GridComponent with a base grid."""
+    comp = GridComponent(model=mock_model)
+    comp._data = base_grid.copy(deep=True)
+    return comp
+
+
+def test_set_no_mask(grid_component: GridComponent):
+    grid_size = 5
+    target = 7
+    new_data = xr.DataArray(
+        np.full((grid_size, grid_size), target), dims=("y", "x"), name="layer1"
+    )
+    grid_component.set(new_data)
+    assert "layer1" in grid_component._data
+    assert (grid_component._data["layer1"] == target).all()
+
+
+def test_set_mask_array(grid_component: GridComponent):
+    grid_size = 5
+    nodata = -9999
+    one_d_mask = [1, nodata, 2, nodata, 3]
+    target = 8
+    mask = xr.DataArray(
+        np.array([one_d_mask] * grid_size),
+        dims=("y", "x"),
+        name="mask",
+        attrs={"nodata": nodata},
+    )
+
+    new_data = xr.DataArray(
+        np.full((grid_size, grid_size), target),
+        dims=("y", "x"),
+        name="layer2",
+        attrs={"nodata": nodata},
+    )
+    grid_component.set(new_data, mask=mask)
+
+    result = grid_component._data["layer2"].values
+    assert (
+        result[result == target].size
+        == (len(one_d_mask) - one_d_mask.count(nodata)) * grid_size
+    )
+    assert (result[result != target] == nodata).all()
+
+
+def test_set_mask_by_name_from_data(grid_component: GridComponent):
+    nodata = -9999
+    one_d_mask = [nodata, 1, nodata, 1, nodata]
+    grid_size = 5
+    target = 9
+
+    layer3 = xr.DataArray(
+        np.full((grid_size, grid_size), target),
+        dims=("y", "x"),
+        name="layer3",
+        attrs={"nodata": nodata},
+    )
+    mask = xr.DataArray(
+        np.array([one_d_mask] * grid_size),
+        dims=("y", "x"),
+        name="mask",
+        attrs={"nodata": nodata},
+    )
+    data = xr.Dataset({"layer3": layer3, "mask": mask}, attrs={"nodata": nodata})
+
+    grid_component.set(data, mask="mask")
+    result = grid_component._data["layer3"]
+    assert result.values[result == target].size == one_d_mask.count(1) * grid_size
+    assert (result.values[result != target] == nodata).all()
+
+
+def test_set_mask_by_name_from_existing(grid_component: GridComponent):
+    grid_size = 5
+    nodata = -9999
+    one_d_mask = [1, nodata, 1, nodata, 1]
+    target = 10
+
+    mask = xr.DataArray(
+        np.array([one_d_mask] * grid_size),
+        dims=("y", "x"),
+        name="mask",
+        attrs={"nodata": nodata},
+    )
+    grid_component.set(mask)
+
+    new_data = xr.DataArray(
+        np.full((grid_size, grid_size), target),
+        dims=("y", "x"),
+        name="layer4",
+        attrs={"nodata": nodata},
+    )
+
+    grid_component.set(new_data, mask="mask")
+    result = grid_component._data["layer4"]
+
+    assert (
+        result.values[result == target].size
+        == (len(one_d_mask) - one_d_mask.count(nodata)) * grid_size
+    )
+    assert (result.values[result != target] == nodata).all()
+
+
+def test_set_mask_not_found(grid_component: GridComponent):
+    grid_size = 5
+    target = 11
+
+    new_data = xr.DataArray(
+        np.full((grid_size, grid_size), target), dims=("y", "x"), name="layer5"
+    )
+
+    grid_component.set(new_data, mask="not_found")
+    # Should not raise, just no masking
+    assert (grid_component._data["layer5"] == target).all()
+
+
+def test_boolean_layer_with_mask(grid_component: GridComponent):
+    grid_size = 5
+    nodata = -9999
+    one_d_mask = [1, nodata, 1, nodata, 1]
+
+    layer = xr.DataArray(
+        np.ones((grid_size, grid_size), dtype=bool), dims=("y", "x"), name="bool_layer"
+    )
+    mask = xr.DataArray(
+        np.array([one_d_mask] * grid_size),
+        dims=("y", "x"),
+        name="mask",
+        attrs={"nodata": nodata},
+    )
+
+    grid_component.set(mask)
+    grid_component.set(layer, mask="mask")
+
+    result = grid_component._data["bool_layer"]
+    assert result.dtype == bool
+    assert result.values[result == False].size == one_d_mask.count(nodata) * grid_size
