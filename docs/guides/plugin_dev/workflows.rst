@@ -56,7 +56,7 @@ Below is an example of the YAML format used in HydroMT:
 ### Explanation of Key Methods
 
 - **`config.update`**: Updates configuration settings. In the example, it sets parameters like `header.settings`, and start and end times for the model run.
-- **`grid.read`**: Reads the grid data from a specified file (e.g., `grid.nc`). 
+- **`grid.read`**: Reads the grid data from a specified file (e.g., `grid.nc`).
 - **`write`**: Specifies which components of the model (e.g., `config`, `grid`) should be written to disk at the end of the workflow. By default, all files are written unless specified otherwise.
 
 It should be noted that, by default, the HydroMT `build` and `update` commands write all output files at the end of the workflow using the `write` method. This behavior can be customized by explicitly specifying the `write` step in the YAML file, allowing more granular control over which files are written and when.

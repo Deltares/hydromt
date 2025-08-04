@@ -379,7 +379,9 @@ class GridComponent(SpatialModelComponent):
         if isinstance(mask, xr.DataArray):
             return mask != mask.raster.nodata
         if not isinstance(mask, str):
-            raise ValueError(f"Unknown type for determining mask: {type(mask).__name__}")
+            raise ValueError(
+                f"Unknown type for determining mask: {type(mask).__name__}"
+            )
         for ds in args:
             if mask in ds:
                 return ds[mask] != ds[mask].raster.nodata
