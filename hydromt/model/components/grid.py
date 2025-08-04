@@ -104,7 +104,6 @@ class GridComponent(SpatialModelComponent):
             if data.shape != self._data.raster.shape:
                 raise ValueError("Shape of data and grid maps do not match")
             data = xr.DataArray(dims=self._data.raster.dims, data=data, name=name)
-            data = data.where(self._data.raster.mask)
 
         if isinstance(data, xr.DataArray):
             if name is not None:
@@ -114,12 +113,25 @@ class GridComponent(SpatialModelComponent):
         if not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
 
+        # Check if noth is really up and south therefore is down
+        if data.raster.res[1] > 0:
+            data = data.raster.flipud()
+
+        # Determine the masking layer
+        mask = self.get_mask_layer(self.model._MAPS.get("basins"), self.data, data)
+
+        # Set the data per layer
         if len(self._data) == 0:  # empty grid
             self._data = data
         else:
             for dvar in data.data_vars:
-                if dvar in self._data and self.root.is_reading_mode():
+                if dvar in self._data:
                     logger.warning(f"Replacing grid map: {dvar}")
+                if mask is not None:
+                    if data[dvar].dtype != np.bool:
+                        data[dvar] = data[dvar].where(mask, data[dvar].raster.nodata)
+                    else:
+                        data[dvar] = data[dvar].where(mask, False)
                 self._data[dvar] = data[dvar]
 
     @hydromt_step
@@ -349,3 +361,26 @@ class GridComponent(SpatialModelComponent):
         if self._data is None:
             raise ValueError("Unable to get grid data from this component.")
         return self._data
+
+    @staticmethod
+    def get_mask_layer(mask: str | xr.DataArray | None, *args) -> xr.DataArray | None:
+        """Get the proper mask layer based on itself or a layer in a Dataset.
+
+        Parameters
+        ----------
+        mask : str | xr.DataArray | None
+            The mask itself or the name of the mask layer in another dataset.
+        *args : list
+            These have to be xarray Datasets in which the mask (as a string)
+            can be present
+        """
+        if mask is None:
+            return None
+        if isinstance(mask, xr.DataArray):
+            return mask != mask.raster.nodata
+        if not isinstance(mask, str):
+            raise ValueError(f"Unknown type for determining mask: {type(mask).__name__}")
+        for ds in args:
+            if mask in ds:
+                return ds[mask] != ds[mask].raster.nodata
+        return None  # Nothin found
