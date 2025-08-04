@@ -165,7 +165,7 @@ class GridComponent(SpatialModelComponent):
                 self.write_region(**region_options)
             else:
                 logger.debug(
-                    "Skip writing region to disk: no region component or filename provided to GridComponent."
+                    "Skip writing region to disk: no region component filename provided to GridComponent."
                 )
         else:
             logger.debug(
