@@ -376,7 +376,6 @@ a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
 `write`, `read`, and `create` methods respectively. Also, the `setup_grid_from_*`
 methods have been removed with the goal of simplifying the API. Removed functionality
 was moved to the `hydromt.model.processes.grid` submodule containing the workflow functions.
-The functionality of the GridComponent has not been changed compared to the GridModel.
 
 +------------------------------+-------------------------------------------+
 | v0.x                         | v1                                        |
