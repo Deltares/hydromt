@@ -3,7 +3,7 @@
 import os
 from logging import Logger, getLogger
 from os.path import dirname, isdir, join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import xarray as xr
@@ -13,6 +13,7 @@ from shapely.geometry import box
 
 from hydromt._io.readers import _read_ncs
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
 
@@ -469,3 +470,43 @@ class MeshComponent(SpatialModelComponent):
                 )
             return data.to_dataset()
         return data
+
+    def _get_mesh_grid_data(self, grid_name: str) -> Union[xu.Ugrid1d, xu.Ugrid2d]:
+        if self._region_component is not None:
+            reference_component = self.model.get_component(self._region_component)
+            self._check_mesh_component(grid_name, reference_component)
+            mesh_component = cast(MeshComponent, reference_component)
+            return mesh_component.mesh_grids[grid_name]
+        if self.data is None:
+            raise ValueError("No mesh data available.")
+        if grid_name not in self.mesh_names:
+            raise ValueError(f"Grid {grid_name} not found in mesh.")
+        return self.mesh_grids[grid_name]
+
+    def _get_mesh_gdf_data(self, grid_name: str) -> gpd.GeoDataFrame:
+        if self._region_component is not None:
+            reference_component = self.model.get_component(self._region_component)
+            self._check_mesh_component(grid_name, reference_component)
+            mesh_component = cast(MeshComponent, reference_component)
+            return mesh_component.mesh_gdf[grid_name]
+        if self.data is None:
+            raise ValueError("No mesh data available.")
+        if grid_name not in self.mesh_names:
+            raise ValueError("No region data available.")
+        return self.mesh_gdf[grid_name]
+
+    def _check_mesh_component(
+        self, grid_name: str, reference_component: ModelComponent
+    ):
+        if not isinstance(reference_component, MeshComponent):
+            raise ValueError(
+                f"Referenced region component is not a MeshComponent: '{self._region_component}'."
+            )
+        if reference_component.data is None:
+            raise ValueError(
+                f"Unable to get mesh data from the referenced region component: '{self._region_component}'"
+            )
+        if grid_name not in reference_component.mesh_names:
+            raise ValueError(
+                f"Grid '{grid_name}' not found in mesh of '{self._region_component}'."
+            )
