@@ -17,6 +17,7 @@ New
 
 Changed
 -------
+When setting data in the GridComponent, mask the new data using the existing data as a mask. (#1229)
 
 Fixed
 -----
@@ -24,6 +25,11 @@ Fixed
 
 Deprecated
 ----------
+
+Removed
+-------
+- From the `GridComponent`, the functions `create_from_region`, `add_data_from_constant`, `add_data_from_rasterdataset`, `add_data_from_raster_reclass`, `add_data_from_geodataframe`. (#1229)
+- From the `MeshComponent`, the functions `create_2d_from_region`, `add_2d_data_from_rasterdataset`, `add_2d_data_from_raster_reclass`. (#1229)
 
 v1.2.0 (2025-07-22)
 ===================
