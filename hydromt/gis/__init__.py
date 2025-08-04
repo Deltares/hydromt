@@ -3,15 +3,16 @@
 # required for accessor style documentation
 from xarray import DataArray, Dataset  # noqa: F401
 
-from ._gis_utils import utm_crs
-from .raster import (
+from hydromt.gis import flw
+from hydromt.gis._gis_utils import utm_crs
+from hydromt.gis.raster import (
     RasterDataArray,
     RasterDataset,
     full,
     full_from_transform,
     full_like,
 )
-from .vector import GeoDataArray, GeoDataset
+from hydromt.gis.vector import GeoDataArray, GeoDataset
 
 __all__ = [
     "RasterDataArray",
@@ -22,4 +23,5 @@ __all__ = [
     "full_from_transform",
     "full_like",
     "utm_crs",
+    "flw",
 ]
