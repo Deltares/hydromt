@@ -169,16 +169,6 @@ def create_mesh2d_from_mesh(
 
     # Continues with a 2D grid
     mesh2d = xu.UgridDataset(grid.to_dataset())
-    if "name" not in mesh2d.ugrid.grid.attrs:
-        mesh2d.ugrid.grid.attrs["name"] = grid.name
-    else:
-        u_name = mesh2d.ugrid.grid.attrs["name"]
-        if grid.name != u_name:
-            logger.warning(
-                f"Grid name `{grid.name}` does not match mesh2d name `{u_name}`. "
-                "Setting mesh2d name to grid name."
-            )
-            mesh2d.ugrid.grid.attrs["name"] = grid.name
 
     # Check crs and reproject to model crs
     grid_crs = grid.crs
