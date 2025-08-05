@@ -91,7 +91,7 @@ class GridComponent(SpatialModelComponent):
             Name of new map layer, this is used to overwrite the name of a DataArray
             and ignored if data is a Dataset
         mask: xr.DataArray, optional
-            Name of the mask layer in the grid data, or directly the mask layer to use.
+            Name of the mask layer in the grid (self) or data, or directly the mask layer to use.
             Can be a DataArray where `.raster.nodata` is used to define the mask.
             If None or not present as a layer, no masking is applied.
         """
