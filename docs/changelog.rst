@@ -28,8 +28,8 @@ Deprecated
 
 Removed
 -------
-- From the `GridComponent`, the functions `create_from_region`, `add_data_from_constant`, `add_data_from_rasterdataset`, `add_data_from_raster_reclass`, `add_data_from_geodataframe`. (#1229)
-- From the `MeshComponent`, the functions `create_2d_from_region`, `add_2d_data_from_rasterdataset`, `add_2d_data_from_raster_reclass`. (#1229)
+- From the `GridComponent`, the functions `create_from_region`, `add_data_from_constant`, `add_data_from_rasterdataset`, `add_data_from_raster_reclass`, `add_data_from_geodataframe`. (#1229) Equivalent workflows are still available.
+- From the `MeshComponent`, the functions `create_2d_from_region`, `add_2d_data_from_rasterdataset`, `add_2d_data_from_raster_reclass`. (#1229) Equivalent workflows are still available.
 
 v1.2.0 (2025-07-22)
 ===================
