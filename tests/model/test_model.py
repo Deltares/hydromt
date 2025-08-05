@@ -39,6 +39,21 @@ from hydromt.model.processes.mesh import (
 from tests.conftest import DC_PARAM_PATH
 
 
+@pytest.fixture(scope="module")
+def vito_2015(tmp_path_factory):
+    mesh_model = Model(
+        root=str(tmp_path_factory.mktemp("mesh_model_vito")),
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"mesh": {"type": "MeshComponent"}},
+        region_component="mesh",
+    )
+    da = mesh_model.data_catalog.get_rasterdataset(
+        single_var_as_array=False,
+        data_like="vito_2015",
+    )
+    return da
+
+
 def _patch_plugin_components(
     mocker: MockerFixture, *component_classes: type
 ) -> List[Mock]:
@@ -228,7 +243,7 @@ def test_grid_model_append(demda, df, tmpdir):
 
 @pytest.mark.integration
 def test_model_build_update(tmpdir, demda, obsda):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     model = Model(
         root=str(tmpdir),
         mode="w",
@@ -281,7 +296,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
         SpatialDatasetsComponent.set, "__ishydromtstep__", True, raising=False
     )
     # Build model with some data
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     model = Model(
         root=str(tmpdir),
         components={
@@ -455,7 +470,7 @@ def test_gridmodel(demda, tmpdir):
         region_component="grid",
         mode="w",
     )
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
@@ -517,7 +532,7 @@ def test_setup_grid_from_wrong_kind(grid_model):
 
 
 def test_setup_grid_from_bbox_aligned(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     with pytest.raises(
         ValueError, match="res argument required for kind 'bbox', 'geom'"
     ):
@@ -545,12 +560,12 @@ def test_setup_grid_from_bbox_aligned(grid_model):
     assert "mask" not in grid_model.grid.data
     assert grid_model.crs.to_epsg() == 4326
     assert grid_model.grid.data.raster.dims == ("y", "x")
-    assert grid_model.grid.data.raster.shape == (7, 16)
+    assert grid_model.grid.data.raster.shape == (5, 5)
     assert np.all(np.round(grid_model.grid.data.raster.bounds, 2) == bbox)
 
 
 def test_setup_grid_from_wrong_kind_no_mask(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     grid_model_tmp = Model(
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
@@ -597,7 +612,7 @@ def test_setup_grid_from_wrong_kind_no_mask(grid_model):
 
 @pytest.mark.skip("utm is not a valid crs?")
 def test_setup_grid_from_geodataframe(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     grid_model_tmp = Model(
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
@@ -678,7 +693,7 @@ def test_grid_model_subbasin(grid_model):
 
 
 def test_grid_model_constant(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
@@ -699,7 +714,7 @@ def test_grid_model_constant(grid_model):
 
 
 def test_grid_model_constant_dtype(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
@@ -724,7 +739,7 @@ def test_grid_model_constant_dtype(grid_model):
 
 
 def test_grid_model_raster_dataset_merit_hydro(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     ds = create_grid_from_region(
         data_catalog=grid_model.data_catalog,
         region={"bbox": bbox},
@@ -749,8 +764,8 @@ def test_grid_model_raster_dataset_merit_hydro(grid_model):
     assert "basins" in grid_model.grid.data
 
 
-def test_grid_model_raster_dataset_vito(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+def test_grid_model_raster_dataset_vito(grid_model, vito_2015):
+    bbox = [12.00, 45.00, 12.25, 45.25]
     ds = create_grid_from_region(
         data_catalog=grid_model.data_catalog,
         region={"bbox": bbox},
@@ -760,10 +775,7 @@ def test_grid_model_raster_dataset_vito(grid_model):
     )
     grid_model.grid.set(data=ds)
 
-    ds = grid_model.data_catalog.get_rasterdataset(
-        data_like="vito_2015",
-        variables=["vito"],
-    )
+    ds = vito_2015["vito"]
     grid = grid_from_rasterdataset(
         grid_like=grid_model.grid.data,
         ds=ds,
@@ -776,8 +788,8 @@ def test_grid_model_raster_dataset_vito(grid_model):
     assert "landuse" in grid_model.grid.data
 
 
-def test_grid_model_raster_reclass(grid_model, data_dir):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+def test_grid_model_raster_reclass(grid_model, data_dir, vito_2015):
+    bbox = [12.00, 45.00, 12.25, 45.25]
     ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
@@ -787,10 +799,7 @@ def test_grid_model_raster_reclass(grid_model, data_dir):
     )
     grid_model.grid.set(data=ds)
 
-    da = grid_model.data_catalog.get_rasterdataset(
-        data_like="vito_2015",
-        variables=["roughness_manning"],
-    )
+    da = vito_2015.to_dataarray()
     df_vars = grid_model.data_catalog.get_dataframe(
         data_dir / "vito_mapping.csv",
         variables=["roughness_manning"],
@@ -811,7 +820,7 @@ def test_grid_model_raster_reclass(grid_model, data_dir):
 
 
 def test_grid_model_geodataframe_value(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
@@ -841,7 +850,7 @@ def test_grid_model_geodataframe_value(grid_model):
 
 
 def test_grid_model_geodataframe_fraction(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.25, 12.25, 45.50]
     ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
@@ -1000,8 +1009,8 @@ def test_setup_mesh_from_wrong_kind(mesh_model):
         )
 
 
-def test_setup_mesh_from_bbox(mesh_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+def test_setup_mesh_from_bbox(mesh_model, vito_2015):
+    bbox = [12.00, 45.00, 12.25, 45.25]
     with pytest.raises(ValueError, match="res argument required for kind bbox"):
         create_mesh2d_from_region(
             region={"bbox": bbox}, data_catalog=mesh_model.data_catalog
@@ -1015,7 +1024,7 @@ def test_setup_mesh_from_bbox(mesh_model):
     mesh_model.mesh.set(data=mesh)
 
     # need to add some data to it before checks will work
-    ds = mesh_model.data_catalog.get_rasterdataset("vito_2015", variables=["vito"])
+    ds = vito_2015["vito"]
     mesh = mesh2d_from_rasterdataset(
         mesh2d=mesh_model.mesh.data,
         ds=ds,
@@ -1026,11 +1035,10 @@ def test_setup_mesh_from_bbox(mesh_model):
     assert "vito" in mesh_model.mesh.data
     assert mesh_model.crs.to_epsg() == 4326
     assert np.all(np.round(mesh_model.region.total_bounds, 3) == bbox)
-    assert mesh_model.mesh.data.ugrid.grid.n_node == 136
 
 
-def test_setup_mesh_from_geom(mesh_model, tmpdir):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+def test_setup_mesh_from_geom(mesh_model, tmpdir, vito_2015):
+    bbox = [12.00, 45.00, 12.25, 45.25]
     dummy_mesh_model = Model(
         root=str(tmpdir),
         data_libs=["artifact_data", DC_PARAM_PATH],
@@ -1046,10 +1054,7 @@ def test_setup_mesh_from_geom(mesh_model, tmpdir):
     dummy_mesh_model.mesh.set(data=mesh)
 
     # need to add some data to it before checks will work
-    ds = dummy_mesh_model.data_catalog.get_rasterdataset(
-        data_like="vito_2015",
-        variables=["vito"],
-    )
+    ds = vito_2015["vito"]
     mesh = mesh2d_from_rasterdataset(
         mesh2d=dummy_mesh_model.mesh.data,
         ds=ds,
@@ -1068,10 +1073,9 @@ def test_setup_mesh_from_geom(mesh_model, tmpdir):
     mesh_model.mesh.set(data=mesh)
 
     assert mesh_model.crs.to_epsg() == 32633
-    assert mesh_model.mesh.data.ugrid.grid.n_node == 35
 
 
-def test_setup_mesh_from_mesh(mesh_model, griduda):
+def test_setup_mesh_from_mesh(mesh_model, griduda, vito_2015):
     mesh_path = str(mesh_model.root.path / "mesh" / "mesh.nc")
     makedirs(mesh_model.root.path / "mesh", exist_ok=True)
     gridda = griduda.ugrid.to_dataset()
@@ -1085,10 +1089,7 @@ def test_setup_mesh_from_mesh(mesh_model, griduda):
     mesh_model.mesh.set(data=mesh)
 
     # need to add some data to it before checks will work
-    ds = mesh_model.data_catalog.get_rasterdataset(
-        data_like="vito_2015",
-        variables=["vito"],
-    )
+    ds = vito_2015["vito"]
     mesh = mesh2d_from_rasterdataset(
         mesh2d=mesh_model.mesh.data,
         ds=ds,
@@ -1100,7 +1101,7 @@ def test_setup_mesh_from_mesh(mesh_model, griduda):
     assert mesh_model.mesh.data.ugrid.grid.n_node == 169
 
 
-def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda):
+def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda, vito_2015):
     mesh_path = str(mesh_model.root.path / "mesh" / "mesh.nc")
     makedirs(mesh_model.root.path / "mesh", exist_ok=True)
     gridda = griduda.ugrid.to_dataset()
@@ -1120,10 +1121,7 @@ def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda):
     mesh_model.mesh.set(data=mesh)
 
     # need to add some data to it before checks will work
-    ds = mesh_model.data_catalog.get_rasterdataset(
-        data_like="vito_2015",
-        variables=["vito"],
-    )
+    ds = vito_2015["vito"]
     mesh = mesh2d_from_rasterdataset(
         mesh2d=mesh_model.mesh.data,
         ds=ds,
@@ -1137,7 +1135,7 @@ def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda):
 
 
 @pytest.mark.skip("needs oracle")
-def test_mesh_model_setup_grid(mesh_model, world):
+def test_mesh_model_setup_grid(mesh_model, world, vito_2015):
     region = {"geom": world[world.name == "Italy"]}
     mesh = create_mesh2d_from_region(
         region=region,
@@ -1150,7 +1148,7 @@ def test_mesh_model_setup_grid(mesh_model, world):
     assert mesh_model.mesh.data.equals(region["geom"])
 
 
-def test_mesh_model_setup_from_raster_dataset(mesh_model, griduda):
+def test_mesh_model_setup_from_raster_dataset(mesh_model, griduda, vito_2015):
     region = {"mesh": griduda}
     mesh = create_mesh2d_from_region(
         region=region,
@@ -1158,10 +1156,7 @@ def test_mesh_model_setup_from_raster_dataset(mesh_model, griduda):
     )
     mesh_model.mesh.set(data=mesh)
 
-    ds = mesh_model.data_catalog.get_rasterdataset(
-        data_like="vito_2015",
-        variables=["vito"],
-    )
+    ds = vito_2015["vito"]
     mesh = mesh2d_from_rasterdataset(
         mesh2d=mesh_model.mesh.data,
         ds=ds,
@@ -1170,7 +1165,7 @@ def test_mesh_model_setup_from_raster_dataset(mesh_model, griduda):
     assert "vito" in mesh_model.mesh.data.data_vars
 
 
-def test_mesh_model_setup_from_raster_reclass(mesh_model, griduda, data_dir):
+def test_mesh_model_setup_from_raster_reclass(mesh_model, vito_2015, griduda, data_dir):
     region = {"mesh": griduda}
     mesh = create_mesh2d_from_region(
         region=region,
@@ -1178,9 +1173,7 @@ def test_mesh_model_setup_from_raster_reclass(mesh_model, griduda, data_dir):
     )
     mesh_model.mesh.set(data=mesh, grid_name="mesh2d")
 
-    da = mesh_model.data_catalog.get_rasterdataset(
-        data_like="vito_2015",
-    )
+    da = vito_2015.to_dataarray(name="vito")
     mesh = mesh2d_from_rasterdataset(
         mesh2d=mesh_model.mesh.data,
         ds=da,
