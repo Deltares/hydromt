@@ -92,7 +92,7 @@ class GridComponent(SpatialModelComponent):
             and ignored if data is a Dataset
         mask: xr.DataArray, optional
             Name of the mask layer in the grid (self) or data, or directly the mask layer to use.
-            Can be a DataArray where `.raster.nodata` is used to define the mask.
+            Should be a DataArray where `.raster.nodata` is used to define the mask.
             If None or not present as a layer, no masking is applied.
         """
         self._initialize_grid()
