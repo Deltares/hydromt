@@ -44,7 +44,7 @@ jobs:
 
     name: pytest ${{ matrix.dependencies }}-${{ matrix.python-version }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     concurrency:
       group: ${{ github.workflow }}-${{ matrix.os }}-${{ matrix.dependencies }}-${{ matrix.python-version }}-${{ github.ref }}
       cancel-in-progress: true
