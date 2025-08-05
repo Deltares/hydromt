@@ -17,7 +17,7 @@ New
 
 Changed
 -------
-When setting data in the GridComponent, mask the new data using the existing data as a mask. (#1229)
+Allow masking in `GridComponent.set`. (#1229)
 
 Fixed
 -----
