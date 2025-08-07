@@ -160,7 +160,7 @@ include = ["hydromt"]
 exclude = ["docs", "examples", "envs", "tests", "binder", ".github"]
 
 [tool.pytest.ini_options]
-addopts = "--ff -vvv"
+addopts = "--ff"
 testpaths = ["tests"]
 markers = ["integration: marks tests as being integration tests"]
 
