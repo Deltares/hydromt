@@ -14,10 +14,7 @@ New
 ---
 - Added option for delayed compute in writing netcdf files
 - Set compression in `_write_nc`
-
-Changed
--------
-Allow masking in `GridComponent.set`. (#1229)
+- Allow masking in `GridComponent.set`. (#1229)
 
 Fixed
 -----

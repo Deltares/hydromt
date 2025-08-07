@@ -316,17 +316,17 @@ def test_boolean_layer_with_mask(grid_component: GridComponent):
 
 
 @pytest.mark.parametrize(
-    ("lats", "north_is_up", "should_flip"),
+    ("lats", "force_sn", "should_flip"),
     [
-        ([1.0, 2.0], True, False),  # South to North, north is up => no flip
-        ([2.0, 1.0], True, True),  # North to South, north is up => flip
-        ([1.0, 2.0], False, True),  # South to North, north is down => flip
-        ([2.0, 1.0], False, False),  # North to South, north is down => no flip
+        ([1.0, 2.0], True, False),  # data=SN, force_sn=True => no flip
+        ([2.0, 1.0], True, True),  # data=NS, force_sn=True => flip
+        ([1.0, 2.0], False, True),  # data=SN, force_sn=False => flip
+        ([2.0, 1.0], False, False),  # data=NS, force_sn=False => no flip
     ],
 )
 def test_set_with_flipud(
     lats: list[float],
-    north_is_up: bool,
+    force_sn: bool,
     should_flip: bool,
     grid_component: GridComponent,
 ):
@@ -339,6 +339,6 @@ def test_set_with_flipud(
         dims=["lat", "lon"],
         name="test_var",
     )
-    grid_component.set(data_array, north_is_up=north_is_up)
+    grid_component.set(data_array, force_sn=force_sn)
 
     assert (grid_component.data["test_var"].values == expected_data).all()
