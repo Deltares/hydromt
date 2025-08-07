@@ -2,11 +2,10 @@
 
 from logging import NOTSET, WARNING, Logger, getLogger
 from os.path import join
-from pathlib import Path
 from typing import Generator
 
 import pytest
-from click.testing import CliRunner, Result
+from click.testing import CliRunner
 
 from hydromt import __version__
 from hydromt._typing import NoDataException
@@ -143,34 +142,6 @@ def test_export_cli_no_data_ignore(tmpdir):
         )
 
 
-@pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_override(tmpdir):
-    root = str(tmpdir.join("grid_model_region"))
-    cmd = [
-        "build",
-        "test_model",
-        root,
-        "-i",
-        "tests/data/test_model_config.yml",
-        "-d",
-        "artifact_data",
-        "-d",
-        Path(__name__).absolute().parents[0]
-        / "examples"
-        / "data"
-        / "vito_reclass.yml",  # for reclass data
-    ]
-    res: Result = CliRunner().invoke(hydromt_cli, cmd)
-    assert not res.exception
-
-    # test force overwrite
-    with pytest.raises(IOError, match="File.*already exists"):
-        CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
-
-    r = CliRunner().invoke(hydromt_cli, cmd + ["--fo"])
-    assert r.exit_code == 0
-
-
 def test_export_skips_overwrite(tmpdir, caplog: pytest.LogCaptureFixture):
     with caplog.at_level(WARNING):
         # export twice
@@ -258,20 +229,5 @@ def test_export_cli_config_file(tmpdir):
         hydromt_cli,
         ["export", str(tmpdir), "-i", "tests/data/export_config.yml"],
         catch_exceptions=False,
-    )
-    assert r.exit_code == 0, r.output
-
-
-@pytest.mark.skip("Needs validator overhaul")
-def test_check_cli():
-    r = CliRunner().invoke(
-        hydromt_cli,
-        [
-            "check",
-            "-d",
-            "tests/data/test_sources1.yml",
-            "-i",
-            "tests/data/test_model_config.yml",
-        ],
     )
     assert r.exit_code == 0, r.output

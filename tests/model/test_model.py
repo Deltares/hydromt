@@ -13,6 +13,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
+from shapely import box
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.model import Model
@@ -24,7 +25,34 @@ from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
 from hydromt.model.components.tables import TablesComponent
 from hydromt.model.components.vector import VectorComponent
+from hydromt.model.processes.grid import (
+    create_grid_from_region,
+    grid_from_constant,
+    grid_from_geodataframe,
+    grid_from_raster_reclass,
+    grid_from_rasterdataset,
+)
+from hydromt.model.processes.mesh import (
+    create_mesh2d_from_region,
+    mesh2d_from_raster_reclass,
+    mesh2d_from_rasterdataset,
+)
 from tests.conftest import DC_PARAM_PATH
+
+
+@pytest.fixture(scope="module")
+def vito_2015(tmp_path_factory):
+    mesh_model = Model(
+        root=str(tmp_path_factory.mktemp("mesh_model_vito")),
+        data_libs=["artifact_data", DC_PARAM_PATH],
+        components={"mesh": {"type": "MeshComponent"}},
+        region_component="mesh",
+    )
+    da = mesh_model.data_catalog.get_rasterdataset(
+        single_var_as_array=False,
+        data_like="vito_2015",
+    )
+    return da
 
 
 def _patch_plugin_components(
@@ -216,7 +244,7 @@ def test_grid_model_append(demda, df, tmpdir):
 
 @pytest.mark.integration
 def test_model_build_update(tmpdir, demda, obsda):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     model = Model(
         root=str(tmpdir),
         mode="w",
@@ -225,18 +253,18 @@ def test_model_build_update(tmpdir, demda, obsda):
     )
     geoms_component = GeomsComponent(model)
     model.add_component("geoms", geoms_component)
-    model.build(
-        steps=[
-            {"grid.create_from_region": {"region": {"bbox": bbox}, "res": 0.01}},
-            {
-                "grid.add_data_from_constant": {
-                    "constant": 0.01,
-                    "name": "c1",
-                    "nodata": -99.0,
-                }
-            },
-        ]
+
+    ds = create_grid_from_region(
+        region={"bbox": bbox}, data_catalog=model.data_catalog, res=0.01
     )
+    model.grid.set(data=ds)
+
+    ds = grid_from_constant(
+        grid_like=model.grid.data, constant=0.01, name="c1", nodata=-99.0
+    )
+    model.grid.set(data=ds)
+    model.write()
+
     assert isfile(join(model.root.path, "hydromt.log"))
     assert isdir(join(model.root.path, "grid")), listdir(model.root.path)
     assert isfile(join(model.root.path, "grid", "grid_region.geojson")), listdir(
@@ -269,7 +297,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
         SpatialDatasetsComponent.set, "__ishydromtstep__", True, raising=False
     )
     # Build model with some data
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     model = Model(
         root=str(tmpdir),
         components={
@@ -281,15 +309,14 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
         region_component="grid",
         mode="w+",
     )
+
+    ds = create_grid_from_region(
+        region={"bbox": bbox}, res=0.01, crs=4326, data_catalog=model.data_catalog
+    )
+    model.grid.set(data=ds)
+
     model.build(
         steps=[
-            {
-                "grid.create_from_region": {
-                    "region": {"bbox": bbox},
-                    "res": 0.01,
-                    "crs": 4326,
-                }
-            },
             {
                 "maps.set": {
                     "data": demda,
@@ -337,7 +364,11 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
 
 def test_setup_region_geom(grid_model, bbox):
     # geom
-    grid_model.grid.create_from_region({"geom": bbox}, res=0.001)
+    ds = create_grid_from_region(
+        region={"geom": bbox}, res=0.001, data_catalog=grid_model.data_catalog
+    )
+    grid_model.grid.set(data=ds)
+
     gpd.testing.assert_geodataframe_equal(
         bbox, grid_model.region, check_less_precise=True
     )
@@ -356,7 +387,11 @@ def test_setup_region_geom_catalog(grid_model, bbox, tmpdir):
             }
         }
     )
-    grid_model.grid.create_from_region({"geom": "region"}, res=0.01)
+    ds = create_grid_from_region(
+        region={"geom": "region"}, res=0.001, data_catalog=grid_model.data_catalog
+    )
+    grid_model.grid.set(data=ds)
+
     gpd.testing.assert_geodataframe_equal(
         bbox, grid_model.region, check_less_precise=True
     )
@@ -366,14 +401,21 @@ def test_setup_region_grid(grid_model, demda, tmpdir):
     # grid
     grid_path = str(tmpdir.join("grid.tif"))
     demda.raster.to_raster(grid_path)
-    grid_model.grid.create_from_region({"grid": grid_path})
+    ds = create_grid_from_region(
+        region={"grid": grid_path}, data_catalog=grid_model.data_catalog
+    )
+    grid_model.grid.set(data=ds)
+
     assert np.all(demda.raster.bounds == grid_model.region.total_bounds)
 
 
 @pytest.mark.skip(reason="needs fix with hydrography_path?")
 def test_setup_region_basin(model):
     # basin
-    model.grid.create_from_region({"basin": [12.2, 45.833333333333329]})
+    ds = create_grid_from_region(
+        region={"basin": [12.2, 45.833333333333329]}, data_catalog=model.data_catalog
+    )
+    model.region.set(data=ds)
     assert np.all(model.region["value"] == 210000039)  # basin id
 
 
@@ -387,7 +429,11 @@ def test_maps_setup():
     )
     bbox = [11.80, 46.10, 12.10, 46.50]  # Piava river
 
-    mod.grid.create_from_region({"bbox": bbox}, res=0.1)
+    ds = create_grid_from_region(
+        region={"bbox": bbox}, res=0.1, data_catalog=mod.data_catalog
+    )
+    mod.grid.set(data=ds)
+
     config_component = ConfigComponent(mod)
     config_component.set("header.setting", "value")
     mod.add_component("config", config_component)
@@ -425,17 +471,23 @@ def test_gridmodel(demda, tmpdir):
         region_component="grid",
         mode="w",
     )
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_model.grid.create_from_region(
+    bbox = [12.00, 45.00, 12.25, 45.25]
+    ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
         crs=4326,
+        data_catalog=grid_model.data_catalog,
     )
-    grid_model.grid.add_data_from_constant(
+    grid_model.grid.set(data=ds)
+
+    ds = grid_from_constant(
+        grid_like=grid_model.grid.data,
         constant=0.01,
         name="c1",
         nodata=-99.0,
     )
+    grid_model.grid.set(data=ds)
+
     # grid specific attributes
     assert np.all(grid_model.grid.res == grid_model.grid.data.raster.res)
     assert np.all(grid_model.grid.bounds == grid_model.grid.data.raster.bounds)
@@ -475,102 +527,140 @@ def test_gridmodel(demda, tmpdir):
 
 def test_setup_grid_from_wrong_kind(grid_model):
     with pytest.raises(ValueError, match="Region for grid must be of kind"):
-        grid_model.grid.create_from_region({"vector_model": "test_model"})
+        create_grid_from_region(
+            region={"vector_model": "test_model"}, data_catalog=grid_model.data_catalog
+        )
 
 
 def test_setup_grid_from_bbox_aligned(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     with pytest.raises(
         ValueError, match="res argument required for kind 'bbox', 'geom'"
     ):
-        grid_model.grid.create_from_region({"bbox": bbox})
+        create_grid_from_region(
+            region={"bbox": bbox}, data_catalog=grid_model.data_catalog
+        )
 
-    grid_model.grid.create_from_region(
+    ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
+        data_catalog=grid_model.data_catalog,
     )
-    grid_model.grid.add_data_from_constant(
+    grid_model.grid.set(data=ds)
+
+    ds = grid_from_constant(
+        grid_model.grid.data,
         constant=0.01,
         name="c1",
         nodata=-99.0,
     )
+    grid_model.grid.set(data=ds)
+
     assert "mask" not in grid_model.grid.data
     assert grid_model.crs.to_epsg() == 4326
     assert grid_model.grid.data.raster.dims == ("y", "x")
-    assert grid_model.grid.data.raster.shape == (7, 16)
+    assert grid_model.grid.data.raster.shape == (5, 5)
     assert np.all(np.round(grid_model.grid.data.raster.bounds, 2) == bbox)
 
 
 def test_setup_grid_from_wrong_kind_no_mask(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     grid_model_tmp = Model(
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
-    grid_model_tmp.grid.create_from_region(
-        region={"bbox": bbox}, res=0.05, add_mask=False, align=True, crs=4326
+    ds = create_grid_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+        crs=4326,
     )
-    grid_model_tmp.grid.add_data_from_constant(
+    grid_model_tmp.grid.set(data=ds)
+
+    ds = grid_from_constant(
+        grid_like=grid_model_tmp.grid.data,
         constant=0.01,
         name="c1",
         nodata=-99.0,
     )
+    grid_model_tmp.grid.set(data=ds)
 
     region = grid_model_tmp.region
     grid = grid_model_tmp.grid.data
-    grid_model.grid.create_from_region(
+    ds = create_grid_from_region(
         region={"geom": region},
         res=0.05,
         add_mask=False,
+        data_catalog=grid_model.data_catalog,
     )
-    grid_model.grid.add_data_from_constant(
+    grid_model.grid.set(data=ds)
+
+    ds = grid_from_constant(
+        grid_like=grid_model.grid.data,
         constant=0.01,
         name="c1",
         nodata=-99.0,
     )
+    grid_model.grid.set(data=ds)
+
     gpd.testing.assert_geodataframe_equal(region, grid_model.region)
     xr.testing.assert_allclose(grid, grid_model.grid.data)
 
 
 @pytest.mark.skip("utm is not a valid crs?")
 def test_setup_grid_from_geodataframe(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+    bbox = [12.00, 45.00, 12.25, 45.25]
     grid_model_tmp = Model(
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
-    grid_model_tmp.grid.create_from_region(
-        region={"bbox": bbox}, res=0.05, add_mask=False, align=True, crs=4326
+    ds = create_grid_from_region(
+        region={"bbox": bbox},
+        res=0.05,
+        add_mask=False,
+        align=True,
+        crs=4326,
+        data_catalog=grid_model_tmp.data_catalog,
     )
-    grid_model_tmp.grid.add_data_from_constant(
+    grid_model_tmp.grid.set(data=ds)
+    ds = grid_from_constant(
+        grid_like=grid_model_tmp.grid.data,
         constant=0.01,
         name="c1",
         nodata=-99.0,
     )
+    grid_model_tmp.grid.set(data=ds)
+
     region = grid_model_tmp.region
-    grid_model.grid.create_from_region(
+    ds = create_grid_from_region(
         region={"geom": region},
         res=10000,
         crs="utm",
         add_mask=True,
+        data_catalog=grid_model.data_catalog,
     )
+    grid_model.grid.set(data=ds)
+
     assert "mask" in grid_model.grid.data
     assert grid_model.crs.to_epsg() == 32633
     assert grid_model.grid.data.raster.res == (10000, -10000)
 
 
 def test_setup_grid_from_bbox_rotated(grid_model):
-    grid_model.grid.create_from_region(
+    ds = create_grid_from_region(
         region={"bbox": [12.65, 45.50, 12.85, 45.60]},
         res=0.05,
         crs=4326,
         rotated=True,
         add_mask=True,
+        data_catalog=grid_model.data_catalog,
     )
+    grid_model.grid.set(data=ds)
     assert "xc" in grid_model.grid.data.coords
     assert grid_model.grid.data.raster.y_dim == "y"
     assert np.isclose(grid_model.grid.data.raster.res[0], 0.05)
@@ -580,143 +670,208 @@ def test_setup_grid_from_grid(grid_model, demda):
     # grid
     grid_path = str(grid_model.root.path / "grid.tif")
     demda.raster.to_raster(grid_path)
-    grid_model.grid.create_from_region({"grid": grid_path})
+    ds = create_grid_from_region(
+        region={"grid": grid_path},
+        data_catalog=grid_model.data_catalog,
+    )
+    grid_model.grid.set(data=ds)
     assert np.all(demda.raster.bounds == grid_model.region.bounds)
 
 
 def test_grid_model_subbasin(grid_model):
-    grid_model.grid.create_from_region(
+    ds = create_grid_from_region(
         {"subbasin": [12.319, 46.320], "uparea": 50},
         res=0.008333,
         hydrography_path="merit_hydro",
         basin_index_path="merit_hydro_index",
         add_mask=True,
+        data_catalog=grid_model.data_catalog,
     )
+    grid_model.grid.set(data=ds)
+
     assert not np.all(grid_model.grid.data["mask"].values is True)
     assert grid_model.grid.data.raster.shape == (50, 93)
 
 
 def test_grid_model_constant(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_model.grid.create_from_region(
+    bbox = [12.00, 45.00, 12.25, 45.25]
+    ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
+        data_catalog=grid_model.data_catalog,
     )
-    grid_model.grid.add_data_from_constant(
+    grid_model.grid.set(data=ds)
+
+    ds = grid_from_constant(
+        grid_like=grid_model.grid.data,
         constant=0.01,
         name="c1",
         nodata=-99.0,
     )
+    grid_model.grid.set(data=ds)
     assert "c1" in grid_model.grid.data
 
 
 def test_grid_model_constant_dtype(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_model.grid.create_from_region(
+    bbox = [12.00, 45.00, 12.25, 45.25]
+    ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
+        data_catalog=grid_model.data_catalog,
     )
-    grid_model.grid.add_data_from_constant(
+    grid_model.grid.set(data=ds)
+
+    ds = grid_from_constant(
+        grid_like=grid_model.grid.data,
         constant=2,
         name="c2",
         dtype=np.int8,
         nodata=-1,
     )
+    grid_model.grid.set(data=ds)
+
     assert np.unique(grid_model.grid.data["c2"]).size == 1
     assert np.isin([2], np.unique(grid_model.grid.data["c2"])).all()
     assert "c2" in grid_model.grid.data
 
 
 def test_grid_model_raster_dataset_merit_hydro(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_model.grid.create_from_region(
+    bbox = [12.00, 45.00, 12.25, 45.25]
+    ds = create_grid_from_region(
+        data_catalog=grid_model.data_catalog,
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
     )
-    grid_model.grid.add_data_from_rasterdataset(
-        raster_data="merit_hydro",
+    grid_model.grid.set(data=ds)
+
+    ds = grid_model.data_catalog.get_rasterdataset(
+        data_like="merit_hydro",
+        variables=["elevtn", "basins"],
+    )
+    grid = grid_from_rasterdataset(
+        grid_like=grid_model.grid.data,
+        ds=ds,
         variables=["elevtn", "basins"],
         reproject_method=["average", "mode"],
         mask_name="mask",
     )
+    grid_model.grid.set(data=grid)
     assert "basins" in grid_model.grid.data
 
 
-def test_grid_model_raster_dataset_vito(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_model.grid.create_from_region(
+def test_grid_model_raster_dataset_vito(grid_model, vito_2015):
+    bbox = [12.00, 45.00, 12.25, 45.25]
+    ds = create_grid_from_region(
+        data_catalog=grid_model.data_catalog,
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
     )
-    grid_model.grid.add_data_from_rasterdataset(
-        raster_data="vito_2015",
+    grid_model.grid.set(data=ds)
+
+    ds = vito_2015["vito"]
+    grid = grid_from_rasterdataset(
+        grid_like=grid_model.grid.data,
+        ds=ds,
+        variables=["vito"],
         fill_method="nearest",
         reproject_method="mode",
         rename={"vito": "landuse"},
     )
+    grid_model.grid.set(data=grid)
     assert "landuse" in grid_model.grid.data
 
 
-def test_grid_model_raster_reclass(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_model.grid.create_from_region(
+def test_grid_model_raster_reclass(grid_model, data_dir, vito_2015):
+    bbox = [12.00, 45.00, 12.25, 45.25]
+    ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
+        data_catalog=grid_model.data_catalog,
     )
-    grid_model.grid.add_data_from_raster_reclass(
-        raster_data="vito_2015",
+    grid_model.grid.set(data=ds)
+
+    da = vito_2015.to_dataarray()
+    df_vars = grid_model.data_catalog.get_dataframe(
+        data_dir / "vito_mapping.csv",
+        variables=["roughness_manning"],
+    )
+
+    grid = grid_from_raster_reclass(
+        grid_like=grid_model.grid.data,
+        da=da,
         fill_method="nearest",
-        reclass_table_data="vito_mapping",
+        reclass_table=df_vars,
         reclass_variables=["roughness_manning"],
         reproject_method=["average"],
     )
+    grid_model.grid.set(data=grid)
 
-    assert grid_model.grid.data["roughness_manning"].raster.nodata == -999.0
+    assert np.isnan(grid_model.grid.data["roughness_manning"].raster.nodata)
     assert "roughness_manning" in grid_model.grid.data
 
 
 def test_grid_model_geodataframe_value(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_model.grid.create_from_region(
+    bbox = [12.00, 45.00, 12.25, 45.25]
+    ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
+        data_catalog=grid_model.data_catalog,
     )
-    grid_model.grid.add_data_from_geodataframe(
-        vector_data="hydro_lakes",
+    grid_model.grid.set(data=ds)
+
+    gdf = grid_model.data_catalog.get_geodataframe(
+        data_like="hydro_lakes",
+        variables=["waterbody_id", "Depth_avg"],
+    )
+
+    ds = grid_from_geodataframe(
+        grid_like=grid_model.grid.data,
+        gdf=gdf,
         variables=["waterbody_id", "Depth_avg"],
         nodata=[-1, -999.0],
         rasterize_method="value",
         rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
     )
+    grid_model.grid.set(data=ds)
+
     assert grid_model.grid.data["lake_depth"].raster.nodata == -999.0
     assert "lake_depth" in grid_model.grid.data
 
 
 def test_grid_model_geodataframe_fraction(grid_model):
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_model.grid.create_from_region(
+    bbox = [12.00, 45.25, 12.25, 45.50]
+    ds = create_grid_from_region(
         region={"bbox": bbox},
         res=0.05,
         add_mask=False,
         align=True,
+        data_catalog=grid_model.data_catalog,
     )
-    grid_model.grid.add_data_from_geodataframe(
-        vector_data="hydro_lakes",
+    grid_model.grid.set(data=ds)
+
+    gdf = grid_model.data_catalog.get_geodataframe(
+        data_like="hydro_lakes",
+        variables=["waterbody_id", "Depth_avg"],
+    )
+    ds = grid_from_geodataframe(
+        grid_model.grid.data,
+        gdf=gdf,
         rasterize_method="fraction",
-        rename={"hydro_lakes": "water_frac"},
+        rename="water_frac",
     )
+    grid_model.grid.set(data=ds)
 
     assert "water_frac" in grid_model.grid.data
 
@@ -848,61 +1003,57 @@ def test_setup_mesh_from_wrong_kind(mesh_model):
     with pytest.raises(
         ValueError, match="Unsupported region kind 'basin' found in grid creation."
     ):
-        mesh_model.mesh.create_2d_from_region(
+        create_mesh2d_from_region(
             region={"basin": [12.5, 45.5]},
             res=0.05,
+            data_catalog=mesh_model.data_catalog,
         )
 
 
 def test_setup_mesh_from_bbox(mesh_model):
     bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(ValueError, match="res argument required for kind bbox"):
-        mesh_model.mesh.create_2d_from_region({"bbox": bbox})
+        create_mesh2d_from_region(
+            region={"bbox": bbox}, data_catalog=mesh_model.data_catalog
+        )
 
-    mesh_model.mesh.create_2d_from_region(
+    mesh = create_mesh2d_from_region(
         region={"bbox": bbox},
         res=0.05,
         crs=4326,
-        grid_name="mesh2d",
     )
-    # need to add some data to it before checks will work
-    mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito_2015", grid_name="mesh2d", resampling_method="mode"
-    )
+    mesh_model.mesh.set(data=mesh)
 
-    assert "vito" in mesh_model.mesh.data
-    assert mesh_model.crs.to_epsg() == 4326
-    assert np.all(np.round(mesh_model.region.total_bounds, 3) == bbox)
-    assert mesh_model.mesh.data.ugrid.grid.n_node == 136
+    assert mesh_model.mesh.data.ugrid.crs["mesh2d"].to_epsg() == 4326
+    assert np.all(np.round(mesh_model.mesh.data.ugrid.total_bounds, 3) == bbox)
 
 
-def test_setup_mesh_from_geom(mesh_model, tmpdir):
-    bbox = [12.05, 45.30, 12.85, 45.65]
+def test_setup_mesh_from_geom(tmpdir):
+    bbox = [12.00, 45.00, 12.25, 45.25]
     dummy_mesh_model = Model(
         root=str(tmpdir),
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
     )
-    dummy_mesh_model.mesh.create_2d_from_region(
-        region={"bbox": bbox},
-        res=0.05,
-        crs=4326,
-        grid_name="mesh2d",
+    region = gpd.GeoDataFrame(
+        {"geometry": [box(*bbox)]},
+        crs="EPSG:4326",
     )
-    # need to add some data to it before checks will work
-    dummy_mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito_2015", grid_name="mesh2d", resampling_method="mode"
-    )
-    region = dummy_mesh_model.mesh.region
-    mesh_model.mesh.create_2d_from_region(
+    mesh = create_mesh2d_from_region(
         region={"geom": region},
-        res=10000,
+        res=10_000,
         crs="utm",
-        grid_name="mesh2d",
+        data_catalog=dummy_mesh_model.data_catalog,
     )
-    assert mesh_model.crs.to_epsg() == 32633
-    assert mesh_model.mesh.data.ugrid.grid.n_node == 35
+    dummy_mesh_model.mesh.set(data=mesh)
+
+    assert dummy_mesh_model.mesh.region.crs.to_epsg() == 32633
+    # round to resolution: 10_000 m
+    assert np.all(
+        np.round(dummy_mesh_model.mesh.region.total_bounds, -4)
+        == np.round(region.to_crs(epsg=32633).total_bounds, -4)
+    )
 
 
 def test_setup_mesh_from_mesh(mesh_model, griduda):
@@ -912,16 +1063,13 @@ def test_setup_mesh_from_mesh(mesh_model, griduda):
     gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
     gridda.to_netcdf(mesh_path)
 
-    mesh_model.mesh.create_2d_from_region(
+    mesh = create_mesh2d_from_region(
         region={"mesh": mesh_path},
-        grid_name="mesh2d",
+        data_catalog=mesh_model.data_catalog,
     )
-    # need to add some data to it before checks will work
-    mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito_2015", grid_name="mesh2d", resampling_method="mode"
-    )
+    mesh_model.mesh.set(data=mesh)
 
-    assert np.all(griduda.ugrid.total_bounds == mesh_model.mesh.region.total_bounds)
+    assert np.all(griduda.ugrid.total_bounds == mesh_model.mesh.data.ugrid.total_bounds)
     assert mesh_model.mesh.data.ugrid.grid.n_node == 169
 
 
@@ -932,56 +1080,65 @@ def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda):
     gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
     gridda.to_netcdf(mesh_path)
 
-    mesh_model.mesh.create_2d_from_region(
-        region={"mesh": mesh_path},
-        grid_name="mesh2d",
-    )
     bounds = [12.095, 46.495, 12.10, 46.50]
-    mesh_model.mesh.create_2d_from_region(
+    mesh = create_mesh2d_from_region(
         {"mesh": mesh_path, "bounds": bounds},
-        grid_name="mesh1",
     )
-    # need to add some data to it before checks will work
-    mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito_2015", grid_name="mesh1", resampling_method="mode"
-    )
-    assert "vito" in mesh_model.mesh.data, mesh_model.mesh.data
+    mesh_model.mesh.set(data=mesh)
+
     assert mesh_model.mesh.data.ugrid.grid.n_node == 49
-    assert np.all(np.round(mesh_model.region.total_bounds, 3) == bounds)
+    assert np.all(np.round(mesh_model.mesh.data.ugrid.total_bounds, 3) == bounds)
 
 
 @pytest.mark.skip("needs oracle")
 def test_mesh_model_setup_grid(mesh_model, world):
     region = {"geom": world[world.name == "Italy"]}
-    mesh_model.mesh.create_2d_from_region(
-        region, res=10000, crs=3857, grid_name="mesh2d"
+    mesh = create_mesh2d_from_region(
+        region=region,
+        res=10000,
+        crs=3857,
+        data_catalog=mesh_model.data_catalog,
     )
+    mesh_model.mesh.set(data=mesh)
+
     assert mesh_model.mesh.data.equals(region["geom"])
 
 
-def test_mesh_model_setup_from_raster_dataset(mesh_model, griduda):
-    region = {"mesh": griduda}
-    mesh_model.mesh.create_2d_from_region(region, grid_name="mesh2d")
-    mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito_2015", grid_name="mesh2d", resampling_method="mode"
+def test_mesh_model_setup_from_raster_dataset_and_reclass(
+    mesh_model, griduda, vito_2015, data_dir
+):
+    # Part 1: from raster dataset
+    mesh = create_mesh2d_from_region(
+        region={"mesh": griduda},
+        data_catalog=mesh_model.data_catalog,
     )
+    mesh_model.mesh.set(data=mesh)
+    ds = vito_2015["vito"]
+    mesh = mesh2d_from_rasterdataset(
+        mesh2d=mesh_model.mesh.data,
+        ds=ds,
+        resampling_method="mode",
+    )
+    mesh_model.mesh.set(data=mesh)
     assert "vito" in mesh_model.mesh.data.data_vars
 
-
-def test_mesh_model_setup_from_raster_reclass(mesh_model, griduda):
-    region = {"mesh": griduda}
-    mesh_model.mesh.create_2d_from_region(region, grid_name="mesh2d")
-    mesh_model.mesh.add_2d_data_from_rasterdataset(
-        "vito_2015", grid_name="mesh2d", resampling_method="mode"
+    # Part 2: reclass
+    da = vito_2015.to_dataarray(name="vito")
+    df_vars = mesh_model.data_catalog.get_dataframe(
+        data_dir / "vito_mapping.csv",
     )
-    mesh_model.mesh.add_2d_data_from_raster_reclass(
-        raster_filename="vito_2015",
-        reclass_table_filename="vito_mapping",
+    df_vars = df_vars.set_index("vito")
+    df_vars.index = df_vars.index.astype(da.dtype)
+    mesh = mesh2d_from_raster_reclass(
+        mesh2d=mesh_model.mesh.data,
+        da=da,
+        df_vars=df_vars,
         reclass_variables=["landuse", "roughness_manning"],
         resampling_method=["mode", "centroid"],
-        grid_name="mesh2d",
     )
+    mesh_model.mesh.set(data=mesh, grid_name="mesh2d")
     ds_mesh2d = mesh_model.mesh.get_mesh("mesh2d", include_data=True)
+
     assert "vito" in ds_mesh2d
     assert "roughness_manning" in mesh_model.mesh.data.data_vars
     assert np.all(

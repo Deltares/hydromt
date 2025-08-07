@@ -44,25 +44,26 @@ To access the grid component data you call `model.grid.data` instead of `model.g
 
 In the core of HydroMT, the available components are:
 
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
-| v0.x                                                      | v1.x                     | Description                                            |
-+===========================================================+==========================+========================================================+
-| Model.config                                              | ConfigComponent          | Component for managing model configuration             |
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
-| Model.geoms                                               | GeomsComponent           | Component for managing 1D vector data                  |
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
-| Model.tables                                              | TablesComponent          | Component for managing non-geospatial data             |
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
-| -                                                         | DatasetsComponent        | Component for managing non-geospatial data             |
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
-| Model.maps / Model.forcing / Model.results / Model.states | SpatialDatasetsComponent | Component for managing geospatial data                 |
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
-| GridModel.grid                                            | GridComponent            | Component for managing regular gridded data            |
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
-| MeshModel.mesh                                            | MeshComponent            | Component for managing unstructured grids              |
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
-| VectorModel.vector                                        | VectorComponent          | Component for managing geospatial vector data          |
-+-----------------------------------------------------------+--------------------------+--------------------------------------------------------+
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+| v0.x                                                      | v1.x                       | Description                                   |
++===========================================================+============================+===============================================+
+| Model.config                                              | ConfigComponent            | Component for managing model configuration    |
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+| Model.geoms                                               | GeomsComponent             | Component for managing 1D vector data         |
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+| Model.tables                                              | TablesComponent            | Component for managing non-geospatial data    |
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+| -                                                         | DatasetsComponent          | Component for managing non-geospatial data    |
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+| Model.maps / Model.forcing / Model.results / Model.states | SpatialDatasetsComponent   | Component for managing geospatial data        |
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+| GridModel.grid                                            | GridComponent              | Component for managing regular gridded data   |
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+| MeshModel.mesh                                            | MeshComponent              | Component for managing unstructured grids     |
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+| VectorModel.vector                                        | VectorComponent            | Component for managing geospatial vector data |
++-----------------------------------------------------------+----------------------------+-----------------------------------------------+
+
 
 Changes to the `yaml` HydroMT configuration file format
 -------------------------------------------------------
@@ -374,8 +375,8 @@ The `GridMixin` and `GridModel` have been restructured into one `GridComponent` 
 a weak reference to one general `Model` instance. The `set_grid`, `write_grid`,
 `read_grid`, and `setup_grid` have been changed to the more generically named `set`,
 `write`, `read`, and `create` methods respectively. Also, the `setup_grid_from_*`
-methods have been changed to `add_data_from_*`. The functionality of the GridComponent
-has not been changed compared to the GridModel.
+methods have been removed with the goal of simplifying the API. Removed functionality
+was moved to the `hydromt.model.processes.grid` submodule containing the workflow functions.
 
 +------------------------------+-------------------------------------------+
 | v0.x                         | v1                                        |
@@ -385,10 +386,6 @@ has not been changed compared to the GridModel.
 | model.read_grid(...)         | model.grid.read(...)                      |
 +------------------------------+-------------------------------------------+
 | model.write_grid(...)        | model.grid.write(...)                     |
-+------------------------------+-------------------------------------------+
-| model.setup_grid(...)        | model.grid.create_from_region(...)        |
-+------------------------------+-------------------------------------------+
-| model.setup_grid_from_*(...) | model.grid.add_data_from_*(...)           |
 +------------------------------+-------------------------------------------+
 
 **VectorComponent**
@@ -424,10 +421,6 @@ as the `GridComponent`.
 | model.read_mesh(...)           | model.mesh.read(...)                      |
 +--------------------------------+-------------------------------------------+
 | model.write_mesh(...)          | model.mesh.write(...)                     |
-+--------------------------------+-------------------------------------------+
-| model.setup_mesh(...)          | model.mesh.create_2d_from_region(...)     |
-+--------------------------------+-------------------------------------------+
-| model.setup_mesh2d_from_*(...) | model.mesh.add_2d_data_from_*(...)        |
 +--------------------------------+-------------------------------------------+
 
 **TablesComponent**

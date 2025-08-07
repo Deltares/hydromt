@@ -1,18 +1,17 @@
 import logging
-from os.path import join
 from unittest.mock import MagicMock
 
 import geopandas as gpd
 import numpy as np
-import pandas as pd
 import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
 
-from hydromt.model.components.grid import GridComponent
+from hydromt.model.components.grid import (
+    GridComponent,
+)
 from hydromt.model.model import Model
 from hydromt.model.root import ModelRoot
-from tests.conftest import DC_PARAM_PATH
 
 
 def test_set_dataset(mock_model, hydds):
@@ -49,6 +48,12 @@ def test_set_raise_errors(mock_model, hydds):
         grid_component.set(ndarray, name="ndarray")
 
 
+def test_set_empty_ndarray_raises(mock_model):
+    grid = GridComponent(model=mock_model)
+    with pytest.raises(ValueError, match="empty array"):
+        grid.set(np.array([]), name="empty_layer")
+
+
 def test_write(
     mock_model, tmpdir, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
 ):
@@ -66,6 +71,48 @@ def test_write(
         grid_component.write()
 
 
+def test_write_should_write_region(tmpdir):
+    model = Model(
+        root=tmpdir,
+        mode="w",
+        data_libs=["artifact_data"],
+    )
+    region_filename = "region/test_region.geojson"
+    grid = GridComponent(
+        model=model, region_component=None, region_filename=region_filename
+    )
+    grid._data = xr.Dataset(
+        data_vars={"dummy": (["y", "x"], np.ones((5, 5)))},
+        coords={"x": np.arange(5), "y": np.arange(5)},
+        attrs={"crs": "EPSG:4326"},
+    )
+    grid.write()
+    assert (grid.root.path / grid._filename).exists()
+    assert (grid.root.path / region_filename).exists()
+
+
+def test_write_should_not_write_region(tmpdir):
+    model = Model(
+        root=tmpdir,
+        mode="w",
+        data_libs=["artifact_data"],
+    )
+    region_filename = "region/test_region.geojson"
+    grid = GridComponent(
+        model=model,
+        region_component="other_component",
+        region_filename=region_filename,
+    )
+    grid._data = xr.Dataset(
+        data_vars={"dummy": (["y", "x"], np.ones((5, 5)))},
+        coords={"x": np.arange(5), "y": np.arange(5)},
+        attrs={"crs": "EPSG:4326"},
+    )
+    grid.write()
+    assert (grid.root.path / grid._filename).exists()
+    assert not (grid.root.path / region_filename).exists()
+
+
 def test_read(tmpdir, mock_model, hydds, mocker: MockerFixture):
     # Test for raising IOError when model is in writing mode
     grid_component = GridComponent(model=mock_model)
@@ -79,72 +126,6 @@ def test_read(tmpdir, mock_model, hydds, mocker: MockerFixture):
     )
     grid_component.read()
     assert grid_component.data == hydds
-
-
-def test_create_grid_from_bbox_rotated(mock_model):
-    grid_component = GridComponent(model=mock_model)
-    grid_component.root.is_reading_mode.return_value = False
-    grid_component.create_from_region(
-        region={"bbox": [12.65, 45.50, 12.85, 45.60]},
-        res=0.05,
-        crs=4326,
-        region_crs=4326,
-        rotated=True,
-        add_mask=True,
-    )
-    assert "xc" in grid_component.data.coords
-    assert grid_component.data.raster.y_dim == "y"
-    assert np.isclose(grid_component.data.raster.res[0], 0.05)
-    assert isinstance(grid_component.region, gpd.GeoDataFrame)
-
-
-def test_create_grid_from_bbox(mock_model):
-    grid_component = GridComponent(model=mock_model)
-    grid_component.root.is_reading_mode.return_value = False
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    grid_component.create_from_region(
-        region={"bbox": bbox},
-        res=0.05,
-        add_mask=True,
-        align=True,
-    )
-    assert grid_component.data.raster.dims == ("y", "x")
-    assert grid_component.data.raster.shape == (7, 16)
-    assert np.all(np.round(grid_component.data.raster.bounds, 2) == bbox)
-    assert isinstance(grid_component.region, gpd.GeoDataFrame)
-
-
-def test_create_raise_errors(mock_model):
-    grid_component = GridComponent(mock_model)
-    # Wrong region kind
-    with pytest.raises(ValueError, match="Region for grid must be of kind"):
-        grid_component.create_from_region(region={"vector_model": "test_model"})
-    # bbox
-    bbox = [12.05, 45.30, 12.85, 45.65]
-    with pytest.raises(
-        ValueError, match="res argument required for kind 'bbox', 'geom'"
-    ):
-        grid_component.create_from_region(region={"bbox": bbox})
-
-
-@pytest.mark.integration
-def test_create_basin_grid(tmpdir):
-    root = join(tmpdir, "grid_model")
-    model = Model(
-        root=root,
-        mode="w",
-        data_libs=["artifact_data"],
-    )
-    grid_component = GridComponent(model=model)
-    grid_component.create_from_region(
-        region={"subbasin": [12.319, 46.320], "uparea": 50},
-        res=1000,
-        crs="utm",
-        hydrography_path="merit_hydro",
-        basin_index_path="merit_hydro_index",
-    )
-    assert not np.all(grid_component.data["mask"].values is True)
-    assert grid_component.data.raster.shape == (47, 61)
 
 
 def test_properties(caplog: pytest.LogCaptureFixture, demda, mock_model):
@@ -186,230 +167,178 @@ def test_initialize_grid(mock_model, tmpdir):
     assert grid_component.read.called
 
 
-def test_add_data_from_constant(mock_model, demda, mocker: MockerFixture):
-    grid_component = GridComponent(mock_model)
-    grid_component.root.is_reading_mode.return_value = False
-    demda.name = "demda"
-    mocker.patch("hydromt.model.components.grid.grid_from_constant", return_value=demda)
-    name = grid_component.add_data_from_constant(constant=0.01, name="demda")
-    assert name == ["demda"]
-    assert grid_component.data == demda
+@pytest.fixture
+def base_grid():
+    return xr.Dataset(
+        data_vars={"base": (["y", "x"], np.ones((5, 5)))},
+        coords={"x": np.arange(5), "y": np.arange(5)},
+    )
 
 
-def test_add_data_from_rasterdataset(
-    demda, caplog: pytest.LogCaptureFixture, mock_model, mocker: MockerFixture
-):
-    caplog.set_level(logging.INFO)
-    demda.name = "demda"
-    demda = demda.to_dataset()
-    mock_grid_from_rasterdataset = mocker.patch(
-        "hydromt.model.components.grid.grid_from_rasterdataset"
-    )
-    grid_component = GridComponent(mock_model)
-    grid_component.root.is_reading_mode.return_value = False
-    mock_grid_from_rasterdataset.return_value = demda
-    mock_get_rasterdataset = mocker.patch.object(
-        grid_component.data_catalog, "get_rasterdataset"
-    )
-    mock_get_rasterdataset.return_value = demda
-    raster_data = "your_raster_file.tif"
-    result = grid_component.add_data_from_rasterdataset(
-        raster_data=raster_data,
-        variables=["variable1", "variable2"],
-        fill_method="mean",
-        reproject_method="nearest",
-        mask_name="mask",
-        rename={"old_var": "new_var"},
-    )
-    # Test logging
-    assert f"Preparing grid data from raster source {raster_data}" in caplog.text
-    # Test whether get_rasterdataset and grid_from_rasterdataset are called
-    mock_get_rasterdataset.assert_called_once()
-    mock_grid_from_rasterdataset.assert_called_once()
-    # Test if grid_component.set() succeeded
-    assert grid_component.data == demda
-    # Test returned result from add_data_from_rasterdataset
-    assert all([x in result for x in demda.data_vars.keys()])
+@pytest.fixture
+def grid_component(mock_model, base_grid):
+    """Fixture to create a GridComponent with a base grid."""
+    comp = GridComponent(model=mock_model)
+    comp._data = base_grid.copy(deep=True)
+    return comp
 
 
-def test_add_data_from_raster_reclass(
-    caplog: pytest.LogCaptureFixture, demda, mock_model, mocker: MockerFixture
-):
-    grid_component = GridComponent(mock_model)
-    grid_component.root.is_reading_mode.return_value = False
-    caplog.set_level(logging.INFO)
-    raster_data = "vito"
-    reclass_table_data = "vito_mapping"
-    demda.name = "name"
-    grid_component.data_catalog.get_rasterdataset.return_value = demda
-    grid_component.data_catalog.get_dataframe.return_value = pd.DataFrame()
-    mock_grid_from_raster_reclass = mocker.patch(
-        "hydromt.model.components.grid.grid_from_raster_reclass"
+def test_set_no_mask(grid_component: GridComponent):
+    grid_size = 5
+    target = 7
+    new_data = xr.DataArray(
+        np.full((grid_size, grid_size), target), dims=("y", "x"), name="layer1"
     )
-    mock_grid_from_raster_reclass.return_value = demda.to_dataset()
+    grid_component.set(new_data)
+    assert "layer1" in grid_component._data
+    assert (grid_component._data["layer1"] == target).all()
 
-    result = grid_component.add_data_from_raster_reclass(
-        raster_data=raster_data,
-        fill_method="nearest",
-        reclass_table_data=reclass_table_data,
-        reclass_variables=["roughness_manning"],
-        reproject_method=["average"],
+
+def test_set_mask_array(grid_component: GridComponent):
+    grid_size = 5
+    nodata = -9999
+    one_d_mask = [1, nodata, 2, nodata, 3]
+    target = 8
+    mask = xr.DataArray(
+        np.array([one_d_mask] * grid_size),
+        dims=("y", "x"),
+        name="mask",
+        attrs={"nodata": nodata},
     )
-    # Test logging
+
+    new_data = xr.DataArray(
+        np.full((grid_size, grid_size), target),
+        dims=("y", "x"),
+        name="layer2",
+        attrs={"nodata": nodata},
+    )
+    grid_component.set(new_data, mask=mask)
+
+    result = grid_component._data["layer2"].values
     assert (
-        f"Preparing grid data by reclassifying the data in {raster_data} based "
-        f"on {reclass_table_data}"
-    ) in caplog.text
-    mock_grid_from_raster_reclass.assert_called_once()
-    assert grid_component.data == demda
-    # Test returned result from add_data_from_rasterdataset
-    assert all([x in result for x in demda.to_dataset().data_vars.keys()])
-
-    grid_component.data_catalog.get_rasterdataset.return_value = demda.to_dataset()
-
-    with pytest.raises(
-        ValueError,
-        match=f"raster_data {raster_data} should be a single variable. "
-        "Please select one using the 'variable' argument",
-    ):
-        _ = grid_component.add_data_from_raster_reclass(
-            raster_data=raster_data,
-            fill_method="nearest",
-            reclass_table_data=reclass_table_data,
-            reclass_variables=["roughness_manning"],
-            reproject_method=["average"],
-        )
-
-
-def test_add_data_from_geodataframe(
-    caplog: pytest.LogCaptureFixture, geodf, demda, mock_model, mocker: MockerFixture
-):
-    grid_component = GridComponent(mock_model)
-    grid_component.root.is_reading_mode.return_value = False
-    caplog.set_level(logging.INFO)
-    demda.name = "name"
-    grid_component.data_catalog.get_geodataframe.return_value = geodf
-    mock_grid_from_geodataframe = mocker.patch(
-        "hydromt.model.components.grid.grid_from_geodataframe"
+        result[result == target].size
+        == (len(one_d_mask) - one_d_mask.count(nodata)) * grid_size
     )
-    mock_grid_from_geodataframe.return_value = demda.to_dataset()
-    vector_data = "hydro_lakes"
-    result = grid_component.add_data_from_geodataframe(
-        vector_data=vector_data,
-        variables=["waterbody_id", "Depth_avg"],
-        nodata=[-1, -999.0],
-        rasterize_method="value",
-        rename={
-            "waterbody_id": "lake_id",
-            "Depth_avg": "lake_depth",
-            vector_data: "hydrolakes",
-        },
+    assert (result[result != target] == nodata).all()
+
+
+def test_set_mask_by_name_from_data(grid_component: GridComponent):
+    nodata = -9999
+    one_d_mask = [nodata, 1, nodata, 1, nodata]
+    grid_size = 5
+    target = 9
+
+    layer3 = xr.DataArray(
+        np.full((grid_size, grid_size), target),
+        dims=("y", "x"),
+        name="layer3",
+        attrs={"nodata": nodata},
     )
-    assert f"Preparing grid data from vector '{vector_data}'." in caplog.text
-    mock_grid_from_geodataframe.assert_called_once()
-    assert grid_component.data == demda
-    assert all([x in result for x in demda.to_dataset().data_vars.keys()])
-    grid_component.data_catalog.get_geodataframe.return_value = gpd.GeoDataFrame()
-    caplog.set_level(logging.WARNING)
-    result = grid_component.add_data_from_geodataframe(
-        vector_data=vector_data,
-        variables=["waterbody_id", "Depth_avg"],
-        nodata=[-1, -999.0],
-        rasterize_method="value",
-        rename={
-            "waterbody_id": "lake_id",
-            "Depth_avg": "lake_depth",
-            vector_data: "hydrolakes",
-        },
+    mask = xr.DataArray(
+        np.array([one_d_mask] * grid_size),
+        dims=("y", "x"),
+        name="mask",
+        attrs={"nodata": nodata},
     )
+    data = xr.Dataset({"layer3": layer3, "mask": mask}, attrs={"nodata": nodata})
+
+    grid_component.set(data, mask="mask")
+    result = grid_component._data["layer3"]
+    assert result.values[result == target].size == one_d_mask.count(1) * grid_size
+    assert (result.values[result != target] == nodata).all()
+
+
+def test_set_mask_by_name_from_existing(grid_component: GridComponent):
+    grid_size = 5
+    nodata = -9999
+    one_d_mask = [1, nodata, 1, nodata, 1]
+    target = 10
+
+    mask = xr.DataArray(
+        np.array([one_d_mask] * grid_size),
+        dims=("y", "x"),
+        name="mask",
+        attrs={"nodata": nodata},
+    )
+    grid_component.set(mask)
+
+    new_data = xr.DataArray(
+        np.full((grid_size, grid_size), target),
+        dims=("y", "x"),
+        name="layer4",
+        attrs={"nodata": nodata},
+    )
+
+    grid_component.set(new_data, mask="mask")
+    result = grid_component._data["layer4"]
+
     assert (
-        f"No shapes of {vector_data} found within region,"
-        " skipping add_data_from_geodataframe."
-    ) in caplog.text
-    assert result is None
-
-
-@pytest.mark.integration
-def test_grid_component_model(tmpdir):
-    # Initialize model
-    root = join(tmpdir, "grid_model")
-    model = Model(
-        root=root,
-        mode="w",
-        data_libs=["artifact_data", DC_PARAM_PATH],
+        result.values[result == target].size
+        == (len(one_d_mask) - one_d_mask.count(nodata)) * grid_size
     )
-    grid_component = GridComponent(model=model)
-    model.add_component(name="grid", component=grid_component)
-    # Add region
-    model.grid.create_from_region(
-        region={"subbasin": [12.319, 46.320], "uparea": 50},
-        res=0.008333,
-        hydrography_path="merit_hydro",
-        basin_index_path="merit_hydro_index",
-        add_mask=True,
+    assert (result.values[result != target] == nodata).all()
+
+
+def test_set_mask_not_found(grid_component: GridComponent):
+    grid_size = 5
+    target = 11
+
+    new_data = xr.DataArray(
+        np.full((grid_size, grid_size), target), dims=("y", "x"), name="layer5"
     )
 
-    # Add data with add_data_from_* methods
-    model.grid.add_data_from_constant(constant=0.01, name="c1", nodata=-99.0)
-    model.grid.add_data_from_constant(constant=2, name="c2", nodata=-1, dtype=np.int8)
-    model.grid.add_data_from_rasterdataset(
-        raster_data="merit_hydro",
-        variables=["elevtn", "basins"],
-        reproject_method=["average", "mode"],
-        mask_name="mask",
+    grid_component.set(new_data, mask="not_found")
+    # Should not raise, just no masking
+    assert (grid_component._data["layer5"] == target).all()
+
+
+def test_boolean_layer_with_mask(grid_component: GridComponent):
+    grid_size = 5
+    nodata = -9999
+    one_d_mask = [1, nodata, 1, nodata, 1]
+
+    layer = xr.DataArray(
+        np.ones((grid_size, grid_size), dtype=bool), dims=("y", "x"), name="bool_layer"
     )
-    model.grid.add_data_from_rasterdataset(
-        raster_data="vito_2015",
-        fill_method="nearest",
-        reproject_method="mode",
-        rename={"vito": "landuse"},
-    )
-    model.grid.add_data_from_raster_reclass(
-        raster_data="vito_2015",
-        fill_method="nearest",
-        reclass_table_data="vito_mapping",
-        reclass_variables=["roughness_manning"],
-        reproject_method=["average"],
-    )
-    model.grid.add_data_from_geodataframe(
-        vector_data="hydro_lakes",
-        variables=["waterbody_id", "Depth_avg"],
-        nodata=[-1, -999.0],
-        rasterize_method="value",
-        rename={"waterbody_id": "lake_id", "Depth_avg": "lake_depth"},
-    )
-    model.grid.add_data_from_geodataframe(
-        vector_data="hydro_lakes",
-        rasterize_method="fraction",
-        rename={"hydro_lakes": "water_frac"},
+    mask = xr.DataArray(
+        np.array([one_d_mask] * grid_size),
+        dims=("y", "x"),
+        name="mask",
+        attrs={"nodata": nodata},
     )
 
-    def grid_data_checks(mod):
-        assert len(mod.grid.data) == 10
-        for v in [
-            "mask",
-            "c1",
-            "basins",
-            "roughness_manning",
-            "lake_depth",
-            "water_frac",
-        ]:
-            assert v in mod.grid.data
+    grid_component.set(mask)
+    grid_component.set(layer, mask="mask")
 
-        assert mod.grid.data["lake_depth"].raster.nodata == -999.0
-        assert mod.grid.data["roughness_manning"].raster.nodata == -999.0
+    result = grid_component._data["bool_layer"]
+    assert result.dtype == bool
+    assert result.values[result == False].size == one_d_mask.count(nodata) * grid_size
 
-        assert np.unique(mod.grid.data["c2"]).size == 2
-        assert np.isin([-1, 2], np.unique(mod.grid.data["c2"])).all()
 
-    grid_data_checks(model)
+@pytest.mark.parametrize(
+    ("lats", "force_sn", "should_flip"),
+    [
+        ([1.0, 2.0], True, False),  # data=SN, force_sn=True => no flip
+        ([2.0, 1.0], True, True),  # data=NS, force_sn=True => flip
+        ([1.0, 2.0], False, False),  # data=SN, force_sn=False => no flip
+        ([2.0, 1.0], False, False),  # data=NS, force_sn=False => no flip
+    ],
+)
+def test_set_with_flipud(
+    lats: list[float],
+    force_sn: bool,
+    should_flip: bool,
+    grid_component: GridComponent,
+):
+    original_data = np.array([[1, 2], [3, 4]])
+    expected_data = np.flipud(original_data) if should_flip else original_data
 
-    # write model
-    model.write()
+    data_array = xr.DataArray(
+        data=original_data,
+        coords={"lat": lats, "lon": [10.0, 11.0]},
+        dims=["lat", "lon"],
+        name="test_var",
+    )
+    grid_component.set(data_array, force_sn=force_sn)
 
-    # Read model
-    written_model = Model(root=root, mode="r")
-    grid_component = GridComponent(model=written_model)
-    written_model.add_component(name="grid", component=grid_component)
-    written_model.read()
-    grid_data_checks(mod=written_model)
+    assert (grid_component.data["test_var"].values == expected_data).all()

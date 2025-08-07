@@ -166,11 +166,13 @@ def create_mesh2d_from_mesh(
     # Check if 2d mesh file else throw error
     if grid.topology_dimension != 2:
         raise ValueError("Grid in mesh file for create_mesh2d is not 2D.")
+
     # Continues with a 2D grid
     mesh2d = xu.UgridDataset(grid.to_dataset())
 
     # Check crs and reproject to model crs
     grid_crs = grid.crs
+
     if crs is not None:
         bbox = None
         if grid_crs is not None and grid_crs.to_epsg() == 4326:
@@ -186,6 +188,7 @@ def create_mesh2d_from_mesh(
             f"Mesh data from mesh file doesn't have a CRS. Assuming crs option {crs}"
         )
         mesh2d.ugrid.grid.set_crs(crs)
+
     mesh2d = mesh2d.drop_vars(GEO_MAP_COORD, errors="ignore")
 
     # If bounds are provided in region, extract mesh for bounds

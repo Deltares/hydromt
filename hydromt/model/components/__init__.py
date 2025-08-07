@@ -1,15 +1,15 @@
 """Implementations of the core ModelComponents."""
 
-from .base import ModelComponent
-from .config import ConfigComponent
-from .datasets import DatasetsComponent
-from .geoms import GeomsComponent
-from .grid import GridComponent
-from .mesh import MeshComponent
-from .spatial import SpatialModelComponent
-from .spatialdatasets import SpatialDatasetsComponent
-from .tables import TablesComponent
-from .vector import VectorComponent
+from hydromt.model.components.base import ModelComponent
+from hydromt.model.components.config import ConfigComponent
+from hydromt.model.components.datasets import DatasetsComponent
+from hydromt.model.components.geoms import GeomsComponent
+from hydromt.model.components.grid import GridComponent
+from hydromt.model.components.mesh import MeshComponent
+from hydromt.model.components.spatial import SpatialModelComponent
+from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
+from hydromt.model.components.tables import TablesComponent
+from hydromt.model.components.vector import VectorComponent
 
 __all__ = [
     "ConfigComponent",

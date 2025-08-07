@@ -353,10 +353,14 @@ class Model(object, metaclass=ABCMeta):
                 for param, arg in signature(method).parameters.items()
                 if arg.default != _empty
             }
-            merged = {**params, **kwargs}
+            merged = {}
+            if params:
+                merged.update(**params)
+            if kwargs:
+                merged.update(**kwargs)
             for k, v in merged.items():
                 logger.info(f"{method}.{k}: {v}")
-            method(**kwargs)
+            method(**merged)
 
         # If there are any write options included in the steps,
         # we don't need to write the whole model.
