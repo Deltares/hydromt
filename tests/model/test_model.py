@@ -13,6 +13,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 from pytest_mock import MockerFixture
+from shapely import box
 
 from hydromt.data_catalog import DataCatalog
 from hydromt.model import Model
@@ -1009,8 +1010,8 @@ def test_setup_mesh_from_wrong_kind(mesh_model):
         )
 
 
-def test_setup_mesh_from_bbox(mesh_model, vito_2015):
-    bbox = [12.00, 45.00, 12.25, 45.25]
+def test_setup_mesh_from_bbox(mesh_model):
+    bbox = [12.05, 45.30, 12.85, 45.65]
     with pytest.raises(ValueError, match="res argument required for kind bbox"):
         create_mesh2d_from_region(
             region={"bbox": bbox}, data_catalog=mesh_model.data_catalog
@@ -1023,21 +1024,11 @@ def test_setup_mesh_from_bbox(mesh_model, vito_2015):
     )
     mesh_model.mesh.set(data=mesh)
 
-    # need to add some data to it before checks will work
-    ds = vito_2015["vito"]
-    mesh = mesh2d_from_rasterdataset(
-        mesh2d=mesh_model.mesh.data,
-        ds=ds,
-        resampling_method="mode",
-    )
-    mesh_model.mesh.set(data=mesh)
-
-    assert "vito" in mesh_model.mesh.data
-    assert mesh_model.crs.to_epsg() == 4326
-    assert np.all(np.round(mesh_model.region.total_bounds, 3) == bbox)
+    assert mesh_model.mesh.data.ugrid.crs["mesh2d"].to_epsg() == 4326
+    assert np.all(np.round(mesh_model.mesh.data.ugrid.total_bounds, 3) == bbox)
 
 
-def test_setup_mesh_from_geom(mesh_model, tmpdir, vito_2015):
+def test_setup_mesh_from_geom(tmpdir):
     bbox = [12.00, 45.00, 12.25, 45.25]
     dummy_mesh_model = Model(
         root=str(tmpdir),
@@ -1045,37 +1036,27 @@ def test_setup_mesh_from_geom(mesh_model, tmpdir, vito_2015):
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
     )
+    region = gpd.GeoDataFrame(
+        {"geometry": [box(*bbox)]},
+        crs="EPSG:4326",
+    )
     mesh = create_mesh2d_from_region(
-        region={"bbox": bbox},
-        res=0.05,
-        crs=4326,
+        region={"geom": region},
+        res=10_000,
+        crs="utm",
         data_catalog=dummy_mesh_model.data_catalog,
     )
     dummy_mesh_model.mesh.set(data=mesh)
 
-    # need to add some data to it before checks will work
-    ds = vito_2015["vito"]
-    mesh = mesh2d_from_rasterdataset(
-        mesh2d=dummy_mesh_model.mesh.data,
-        ds=ds,
-        resampling_method="mode",
+    assert dummy_mesh_model.mesh.region.crs.to_epsg() == 32633
+    # round to resolution: 10_000 m
+    assert np.all(
+        np.round(dummy_mesh_model.mesh.region.total_bounds, -4)
+        == np.round(region.to_crs(epsg=32633).total_bounds, -4)
     )
-    dummy_mesh_model.mesh.set(data=mesh)
-
-    region = dummy_mesh_model.mesh.region
-
-    mesh = create_mesh2d_from_region(
-        region={"geom": region},
-        res=10000,
-        crs="utm",
-        data_catalog=mesh_model.data_catalog,
-    )
-    mesh_model.mesh.set(data=mesh)
-
-    assert mesh_model.crs.to_epsg() == 32633
 
 
-def test_setup_mesh_from_mesh(mesh_model, griduda, vito_2015):
+def test_setup_mesh_from_mesh(mesh_model, griduda):
     mesh_path = str(mesh_model.root.path / "mesh" / "mesh.nc")
     makedirs(mesh_model.root.path / "mesh", exist_ok=True)
     gridda = griduda.ugrid.to_dataset()
@@ -1088,31 +1069,16 @@ def test_setup_mesh_from_mesh(mesh_model, griduda, vito_2015):
     )
     mesh_model.mesh.set(data=mesh)
 
-    # need to add some data to it before checks will work
-    ds = vito_2015["vito"]
-    mesh = mesh2d_from_rasterdataset(
-        mesh2d=mesh_model.mesh.data,
-        ds=ds,
-        resampling_method="mode",
-    )
-    mesh_model.mesh.set(data=mesh)
-
-    assert np.all(griduda.ugrid.total_bounds == mesh_model.mesh.region.total_bounds)
+    assert np.all(griduda.ugrid.total_bounds == mesh_model.mesh.data.ugrid.total_bounds)
     assert mesh_model.mesh.data.ugrid.grid.n_node == 169
 
 
-def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda, vito_2015):
+def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda):
     mesh_path = str(mesh_model.root.path / "mesh" / "mesh.nc")
     makedirs(mesh_model.root.path / "mesh", exist_ok=True)
     gridda = griduda.ugrid.to_dataset()
     gridda = gridda.rio.write_crs(griduda.ugrid.grid.crs)
     gridda.to_netcdf(mesh_path)
-
-    mesh = create_mesh2d_from_region(
-        region={"mesh": mesh_path},
-        data_catalog=mesh_model.data_catalog,
-    )
-    mesh_model.mesh.set(data=mesh)
 
     bounds = [12.095, 46.495, 12.10, 46.50]
     mesh = create_mesh2d_from_region(
@@ -1120,22 +1086,12 @@ def test_setup_mesh_from_mesh_with_bounds(mesh_model, griduda, vito_2015):
     )
     mesh_model.mesh.set(data=mesh)
 
-    # need to add some data to it before checks will work
-    ds = vito_2015["vito"]
-    mesh = mesh2d_from_rasterdataset(
-        mesh2d=mesh_model.mesh.data,
-        ds=ds,
-        resampling_method="mode",
-    )
-    mesh_model.mesh.set(data=mesh)
-
-    assert "vito" in mesh_model.mesh.data, mesh_model.mesh.data
     assert mesh_model.mesh.data.ugrid.grid.n_node == 49
-    assert np.all(np.round(mesh_model.region.total_bounds, 3) == bounds)
+    assert np.all(np.round(mesh_model.mesh.data.ugrid.total_bounds, 3) == bounds)
 
 
 @pytest.mark.skip("needs oracle")
-def test_mesh_model_setup_grid(mesh_model, world, vito_2015):
+def test_mesh_model_setup_grid(mesh_model, world):
     region = {"geom": world[world.name == "Italy"]}
     mesh = create_mesh2d_from_region(
         region=region,
@@ -1148,45 +1104,31 @@ def test_mesh_model_setup_grid(mesh_model, world, vito_2015):
     assert mesh_model.mesh.data.equals(region["geom"])
 
 
-def test_mesh_model_setup_from_raster_dataset(mesh_model, griduda, vito_2015):
-    region = {"mesh": griduda}
+def test_mesh_model_setup_from_raster_dataset_and_reclass(
+    mesh_model, griduda, vito_2015, data_dir
+):
+    # Part 1: from raster dataset
     mesh = create_mesh2d_from_region(
-        region=region,
+        region={"mesh": griduda},
         data_catalog=mesh_model.data_catalog,
     )
     mesh_model.mesh.set(data=mesh)
-
     ds = vito_2015["vito"]
     mesh = mesh2d_from_rasterdataset(
         mesh2d=mesh_model.mesh.data,
         ds=ds,
+        resampling_method="mode",
     )
     mesh_model.mesh.set(data=mesh)
     assert "vito" in mesh_model.mesh.data.data_vars
 
-
-def test_mesh_model_setup_from_raster_reclass(mesh_model, vito_2015, griduda, data_dir):
-    region = {"mesh": griduda}
-    mesh = create_mesh2d_from_region(
-        region=region,
-        data_catalog=mesh_model.data_catalog,
-    )
-    mesh_model.mesh.set(data=mesh, grid_name="mesh2d")
-
+    # Part 2: reclass
     da = vito_2015.to_dataarray(name="vito")
-    mesh = mesh2d_from_rasterdataset(
-        mesh2d=mesh_model.mesh.data,
-        ds=da,
-        resampling_method="mode",
-    )
-    mesh_model.mesh.set(data=mesh)
-
     df_vars = mesh_model.data_catalog.get_dataframe(
         data_dir / "vito_mapping.csv",
     )
     df_vars = df_vars.set_index("vito")
     df_vars.index = df_vars.index.astype(da.dtype)
-
     mesh = mesh2d_from_raster_reclass(
         mesh2d=mesh_model.mesh.data,
         da=da,
@@ -1195,8 +1137,8 @@ def test_mesh_model_setup_from_raster_reclass(mesh_model, vito_2015, griduda, da
         resampling_method=["mode", "centroid"],
     )
     mesh_model.mesh.set(data=mesh, grid_name="mesh2d")
-
     ds_mesh2d = mesh_model.mesh.get_mesh("mesh2d", include_data=True)
+
     assert "vito" in ds_mesh2d
     assert "roughness_manning" in mesh_model.mesh.data.data_vars
     assert np.all(
