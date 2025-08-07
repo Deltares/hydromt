@@ -78,7 +78,7 @@ class GridComponent(SpatialModelComponent):
         data: Union[xr.DataArray, xr.Dataset, np.ndarray],
         name: Optional[str] = None,
         mask: Optional[Union[str, xr.DataArray]] = None,
-        force_sn: bool = True,
+        force_sn: bool = False,
     ):
         """Add data to grid.
 
@@ -95,9 +95,9 @@ class GridComponent(SpatialModelComponent):
             Name of the mask layer in the grid (self) or data, or directly the mask layer to use.
             Should be a DataArray where `.raster.nodata` is used to define the mask.
             If None or not present as a layer, no masking is applied.
-        force_sn: bool, optional, default=True
+        force_sn: bool, optional, default=False
             If True, the y-axis is oriented such that increasing y values go from South to North.
-            If False, the y-axis is oriented such that increasing y values go from North to South.
+            If False, incoming data is used as is.
         """
         self._initialize_grid()
         assert self._data is not None
@@ -122,12 +122,8 @@ class GridComponent(SpatialModelComponent):
         if not isinstance(data, xr.Dataset):
             raise ValueError(f"cannot set data of type {type(data).__name__}")
 
-        if data.raster.res[1] > 0:  # increasing y = South to North
-            if not force_sn:
-                data = data.raster.flipud()
-        elif data.raster.res[1] < 0:  # increasing y = North to South
-            if force_sn:
-                data = data.raster.flipud()
+        if data.raster.res[1] < 0 and force_sn:
+            data = data.raster.flipud()
 
         # Set the data per layer
         if len(self._data) == 0:  # empty grid

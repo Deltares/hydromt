@@ -320,7 +320,7 @@ def test_boolean_layer_with_mask(grid_component: GridComponent):
     [
         ([1.0, 2.0], True, False),  # data=SN, force_sn=True => no flip
         ([2.0, 1.0], True, True),  # data=NS, force_sn=True => flip
-        ([1.0, 2.0], False, True),  # data=SN, force_sn=False => flip
+        ([1.0, 2.0], False, False),  # data=SN, force_sn=False => no flip
         ([2.0, 1.0], False, False),  # data=NS, force_sn=False => no flip
     ],
 )
