@@ -27,5 +27,5 @@ class TestDataFrameAdapter:
             attrs={"longitude": {"attr1": 1}}, url="www.example.com"
         )
         res = adapter.transform(df, metadata)
-        assert res["longitude"].attrs["attr1"] == 1
+        assert res.attrs["longitude"]["attr1"] == 1
         assert res.attrs["url"] == "www.example.com"
