@@ -129,7 +129,7 @@ class DataFrameAdapter(DataAdapterBase):
         if time_range is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"Slicing time dime {time_range}")
             try:
-                df = df[df.index.slice_indexer(*time_range)]
+                df = df.iloc[df.index.slice_indexer(*time_range)]
             except IndexError:
                 df = pd.DataFrame()
 
@@ -146,17 +146,23 @@ class DataFrameAdapter(DataAdapterBase):
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)
-            df[name] = df[name] * m + a
+            df.loc[:, name] = df.loc[:, name] * m + a
         return df
 
     def _set_metadata(
         self, df: pd.DataFrame, metadata: "SourceMetadata"
     ) -> pd.DataFrame:
-        df.attrs.update(metadata.model_dump(exclude={"attrs"}))
-
-        # set column attributes
-        for col in metadata.attrs:
-            if col in df.columns:
-                df[col].attrs.update(**metadata.attrs[col])
+        # .`attrs` is not a stable part of the (geo)pandas API, see: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.attrs.html#pandas.DataFrame.attrs
+        # There are some issues and bug reports from its usage that are very similar to this.
+        # (Geo)Pandas' current recommendation is to avoid setting attrs on series within a (Geo)DataFrame and only have one global attrs dict per (Geo)DataFrame.
+        # https://github.com/pandas-dev/pandas/issues/35425
+        # https://github.com/dask/dask/pull/6742
+        # https://github.com/pandas-dev/pandas/issues/41572
+        # https://stackoverflow.com/questions/72803056/why-do-attrs-of-series-in-a-pandas-dataframes-change-to-the-dataframe-attrs
+        meta = metadata.model_dump()
+        attrs = meta.pop("attrs", {})
+        for k, v in attrs.items():
+            meta[k] = v
+        df.attrs.update(**meta)
 
         return df

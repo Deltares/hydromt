@@ -120,7 +120,7 @@ class TestGeoDataFrameSource:
         source = artifact_data.get_source("gadm_level1")
         source.metadata.attrs = {"NAME_0": {"long_name": "Country names"}}
         gdf = source.read_data()
-        assert gdf["NAME_0"].attrs["long_name"] == "Country names"
+        assert gdf.attrs["NAME_0"]["long_name"] == "Country names"
 
     def test_to_stac_geodataframe(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
         gdf_path = str(tmp_dir / "test.geojson")

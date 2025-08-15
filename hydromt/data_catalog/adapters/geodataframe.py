@@ -170,8 +170,8 @@ class GeoDataFrameAdapter(DataAdapterBase):
             for c in cols:
                 mv = no_data_dict.get(c, None)
                 if mv is not None:
-                    is_nodata = np.isin(gdf[c], np.atleast_1d(mv))
-                    gdf[c] = np.where(is_nodata, np.nan, gdf[c])
+                    is_nodata = np.isin(gdf.loc[:, c], np.atleast_1d(mv))
+                    gdf.loc[:, c] = np.where(is_nodata, np.nan, gdf.loc[:, c])
         return gdf
 
     def _apply_unit_conversions(self, gdf: gpd.GeoDataFrame):
@@ -183,16 +183,21 @@ class GeoDataFrameAdapter(DataAdapterBase):
         for name in list(set(unit_names)):  # unique
             m = self.unit_mult.get(name, 1)
             a = self.unit_add.get(name, 0)
-            gdf[name] = gdf[name] * m + a
+            gdf.loc[:, name] = gdf.loc[:, name] * m + a
         return gdf
 
     def _set_metadata(self, gdf: gpd.GeoDataFrame, metadata: "SourceMetadata"):
-        # set meta data
-        gdf.attrs.update(metadata)
-
-        # set column attributes
-        for col in metadata.attrs:
-            if col in gdf.columns:
-                gdf[col].attrs.update(**metadata.attrs[col])
+        # .`attrs` is not a stable part of the (geo)pandas API, see: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.attrs.html#pandas.DataFrame.attrs
+        # There are some issues and bug reports from its usage that are very similar to this.
+        # (Geo)Pandas' current recommendation is to avoid setting attrs on series within a (Geo)DataFrame and only have one global attrs dict per (Geo)DataFrame.
+        # https://github.com/pandas-dev/pandas/issues/35425
+        # https://github.com/dask/dask/pull/6742
+        # https://github.com/pandas-dev/pandas/issues/41572
+        # https://stackoverflow.com/questions/72803056/why-do-attrs-of-series-in-a-pandas-dataframes-change-to-the-dataframe-attrs
+        meta = metadata.model_dump()
+        attrs = meta.pop("attrs", {})
+        for k, v in attrs.items():
+            meta[k] = v
+        gdf.attrs.update(**meta)
 
         return gdf

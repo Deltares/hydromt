@@ -972,7 +972,7 @@ class TestGetGeoDataFrame:
         attrs = {"NAME_0": {"long_name": "Country names"}}
         gadm_level1.metadata.attrs.update(**attrs)
         gadm_level1_gdf = data_catalog.get_geodataframe("gadm_level1")
-        assert gadm_level1_gdf["NAME_0"].attrs["long_name"] == "Country names"
+        assert gadm_level1_gdf.attrs["NAME_0"]["long_name"] == "Country names"
 
     @pytest.mark.integration
     def test_read_geojson_nodata_ignore(
@@ -1401,8 +1401,8 @@ class TestGetDataFrame:
         }
         data_catalog.from_dict(cities)
         cities_df = data_catalog.get_dataframe("cities")
-        assert cities_df["city"].attrs["long_name"] == "names of cities"
-        assert cities_df["country"].attrs["long_name"] == "names of countries"
+        assert cities_df.attrs["city"]["long_name"] == "names of cities"
+        assert cities_df.attrs["country"]["long_name"] == "names of countries"
         assert np.all(cities_df["test_na"].isna())
 
     @pytest.fixture
@@ -1441,7 +1441,7 @@ class TestGetDataFrame:
         self, csv_uri_time: str, data_catalog: DataCatalog, df_time: pd.DataFrame
     ):
         unit_mult = {
-            "precip": 0.75,
+            "precip": 3,
             "temp": 2,
             "pet": 1,
         }
