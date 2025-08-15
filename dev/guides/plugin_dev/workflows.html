@@ -557,62 +557,8 @@ type, like <cite>GridComponent</cite> or <cite>ConfigComponent</cite>.</p></li>
 <span class="w">        </span><span class="nt">timers.end</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2010-02-15&#39;</span>
 <span class="w">        </span><span class="nt">timers.start</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2010-02-05&#39;</span>
 
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">grid.create_from_region</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">region</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">bbox</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">12.05</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">45.30</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">12.85</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">45.65</span><span class="p p-Indicator">]</span>
-<span class="w">      </span><span class="nt">res</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
-<span class="w">      </span><span class="nt">crs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4326</span>
-<span class="w">      </span><span class="nt">basin_index_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">merit_hydro_index</span>
-<span class="w">      </span><span class="nt">hydrography_path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">merit_hydro</span>
-
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">grid.add_data_from_constant</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">constant</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">c1</span>
-<span class="w">      </span><span class="nt">dtype</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">float32</span>
-<span class="w">      </span><span class="nt">nodata</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-99.0</span>
-
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">grid.add_data_from_rasterdataset</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">raster_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">merit_hydro_1k</span>
-<span class="w">      </span><span class="nt">variables</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">elevtn</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">basins</span>
-<span class="w">      </span><span class="nt">reproject_method</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">average</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mode</span>
-
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">grid.add_data_from_rasterdataset</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">raster_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vito</span>
-<span class="w">      </span><span class="nt">fill_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">nearest</span>
-<span class="w">      </span><span class="nt">reproject_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mode</span>
-<span class="w">      </span><span class="nt">rename</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">vito</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">landuse</span>
-
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">grid.add_data_from_raster_reclass</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">raster_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vito</span>
-<span class="w">      </span><span class="nt">reclass_table_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vito_reclass</span>
-<span class="w">      </span><span class="nt">reclass_variables</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manning</span>
-<span class="w">      </span><span class="nt">reproject_method</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">average</span>
-
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">grid.add_data_from_geodataframe</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">vector_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hydro_lakes</span>
-<span class="w">      </span><span class="nt">variables</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">waterbody_id</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Depth_avg</span>
-<span class="w">      </span><span class="nt">nodata</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-999.0</span>
-<span class="w">      </span><span class="nt">rasterize_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">value</span>
-<span class="w">      </span><span class="nt">rename</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">waterbody_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lake_id</span>
-<span class="w">        </span><span class="nt">Depth_avg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lake_depth</span>
-
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">grid.add_data_from_geodataframe</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">vector_data</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hydro_lakes</span>
-<span class="w">      </span><span class="nt">rasterize_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fraction</span>
-<span class="w">      </span><span class="nt">rename</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">hydro_lakes</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_frac</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">grid.read</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grid.nc</span>
 
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">write</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">components</span><span class="p">:</span>
@@ -623,11 +569,7 @@ type, like <cite>GridComponent</cite> or <cite>ConfigComponent</cite>.</p></li>
 <p>### Explanation of Key Methods</p>
 <ul class="simple">
 <li><p><strong>`config.update`</strong>: Updates configuration settings. In the example, it sets parameters like <cite>header.settings</cite>, and start and end times for the model run.</p></li>
-<li><p><strong>`grid.create_from_region`</strong>: Creates a grid based on a specified bounding box (bbox), resolution, and coordinate reference system (CRS). Additional options include setting basin and hydrography paths.</p></li>
-<li><p><strong>`grid.add_data_from_constant`</strong>: Adds a constant value to the grid. Parameters like <cite>name</cite>, <cite>dtype</cite>, and <cite>nodata</cite> specify how the constant data is handled.</p></li>
-<li><p><strong>`grid.add_data_from_rasterdataset`</strong>: Adds data from a raster dataset. It includes options to specify variables, reprojection methods, and renaming rules for variables.</p></li>
-<li><p><strong>`grid.add_data_from_raster_reclass`</strong>: Reclassifies raster data based on a specified reclassification table and applies transformations to the grid.</p></li>
-<li><p><strong>`grid.add_data_from_geodataframe`</strong>: Adds vector data to the grid, rasterizing specific attributes, handling nodata values, and renaming variables.</p></li>
+<li><p><strong>`grid.read`</strong>: Reads the grid data from a specified file (e.g., <cite>grid.nc</cite>).</p></li>
 <li><p><strong>`write`</strong>: Specifies which components of the model (e.g., <cite>config</cite>, <cite>grid</cite>) should be written to disk at the end of the workflow. By default, all files are written unless specified otherwise.</p></li>
 </ul>
 <p>It should be noted that, by default, the HydroMT <cite>build</cite> and <cite>update</cite> commands write all output files at the end of the workflow using the <cite>write</cite> method. This behavior can be customized by explicitly specifying the <cite>write</cite> step in the YAML file, allowing more granular control over which files are written and when.</p>

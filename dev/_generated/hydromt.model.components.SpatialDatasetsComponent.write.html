@@ -749,11 +749,6 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.data.html">hydromt.model.components.GridComponent.data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.write.html">hydromt.model.components.GridComponent.write</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.read.html">hydromt.model.components.GridComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.create_from_region.html">hydromt.model.components.GridComponent.create_from_region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.add_data_from_constant.html">hydromt.model.components.GridComponent.add_data_from_constant</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.add_data_from_rasterdataset.html">hydromt.model.components.GridComponent.add_data_from_rasterdataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.add_data_from_raster_reclass.html">hydromt.model.components.GridComponent.add_data_from_raster_reclass</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.add_data_from_geodataframe.html">hydromt.model.components.GridComponent.add_data_from_geodataframe</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.set.html">hydromt.model.components.GridComponent.set</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.test_equal.html">hydromt.model.components.GridComponent.test_equal</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.html">hydromt.model.components.MeshComponent</a></li>
@@ -770,9 +765,6 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_gdf.html">hydromt.model.components.MeshComponent.mesh_gdf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.write.html">hydromt.model.components.MeshComponent.write</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.read.html">hydromt.model.components.MeshComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.create_2d_from_region.html">hydromt.model.components.MeshComponent.create_2d_from_region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset.html">hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass.html">hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.set.html">hydromt.model.components.MeshComponent.set</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.get_mesh.html">hydromt.model.components.MeshComponent.get_mesh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.html">hydromt.model.components.VectorComponent</a></li>
@@ -947,7 +939,7 @@ The function will first try to directly write to file. In case of
 PermissionError, it will first write a temporary file and add to the
 self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
 will be done by calling the self._cleanup function.</p>
-<p>key-word arguments are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.to_netcdf.html#xarray.Dataset.to_netcdf" title="(in xarray v2025.7.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">xarray.Dataset.to_netcdf()</span></code></a></p>
+<p>key-word arguments are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.to_netcdf.html#xarray.Dataset.to_netcdf" title="(in xarray v2025.8.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">xarray.Dataset.to_netcdf()</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

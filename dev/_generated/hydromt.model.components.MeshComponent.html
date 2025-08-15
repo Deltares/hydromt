@@ -749,11 +749,6 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.data.html">hydromt.model.components.GridComponent.data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.write.html">hydromt.model.components.GridComponent.write</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.read.html">hydromt.model.components.GridComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.create_from_region.html">hydromt.model.components.GridComponent.create_from_region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.add_data_from_constant.html">hydromt.model.components.GridComponent.add_data_from_constant</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.add_data_from_rasterdataset.html">hydromt.model.components.GridComponent.add_data_from_rasterdataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.add_data_from_raster_reclass.html">hydromt.model.components.GridComponent.add_data_from_raster_reclass</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.add_data_from_geodataframe.html">hydromt.model.components.GridComponent.add_data_from_geodataframe</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.set.html">hydromt.model.components.GridComponent.set</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.test_equal.html">hydromt.model.components.GridComponent.test_equal</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">hydromt.model.components.MeshComponent</a></li>
@@ -770,9 +765,6 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_gdf.html">hydromt.model.components.MeshComponent.mesh_gdf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.write.html">hydromt.model.components.MeshComponent.write</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.read.html">hydromt.model.components.MeshComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.create_2d_from_region.html">hydromt.model.components.MeshComponent.create_2d_from_region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset.html">hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass.html">hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.set.html">hydromt.model.components.MeshComponent.set</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.get_mesh.html">hydromt.model.components.MeshComponent.get_mesh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.html">hydromt.model.components.VectorComponent</a></li>
@@ -988,31 +980,22 @@ by default “mesh/mesh_region.geojson”.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#hydromt.model.components.MeshComponent.__init__" title="hydromt.model.components.MeshComponent.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model, *[, filename, ...])</p></td>
 <td><p>Initialize a MeshComponent.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass.html#hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass" title="hydromt.model.components.MeshComponent.add_2d_data_from_raster_reclass"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_2d_data_from_raster_reclass</span></code></a>(...[, ...])</p></td>
-<td><p>HYDROMT CORE METHOD: Add data variable(s) to 2D <code class="docutils literal notranslate"><span class="pre">grid_name</span></code> in mesh object by reclassifying the data in <code class="docutils literal notranslate"><span class="pre">raster_filename</span></code> based on <code class="docutils literal notranslate"><span class="pre">reclass_table_filename</span></code>.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset.html#hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset" title="hydromt.model.components.MeshComponent.add_2d_data_from_rasterdataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_2d_data_from_rasterdataset</span></code></a>(...[, ...])</p></td>
-<td><p>HYDROMT CORE METHOD: Add data variable(s) from <code class="docutils literal notranslate"><span class="pre">raster_filename</span></code> to 2D <code class="docutils literal notranslate"><span class="pre">grid_name</span></code> in mesh object.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.create_2d_from_region.html#hydromt.model.components.MeshComponent.create_2d_from_region" title="hydromt.model.components.MeshComponent.create_2d_from_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_2d_from_region</span></code></a>(region, *[, res, crs, ...])</p></td>
-<td><p>HYDROMT CORE METHOD: Create an 2D unstructured mesh or reads an existing 2D mesh according UGRID conventions.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.get_mesh.html#hydromt.model.components.MeshComponent.get_mesh" title="hydromt.model.components.MeshComponent.get_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_mesh</span></code></a>(grid_name[, include_data])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.get_mesh.html#hydromt.model.components.MeshComponent.get_mesh" title="hydromt.model.components.MeshComponent.get_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_mesh</span></code></a>(grid_name[, include_data])</p></td>
 <td><p>Return a specific grid topology from mesh based on grid_name.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.read.html#hydromt.model.components.MeshComponent.read" title="hydromt.model.components.MeshComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([filename, crs])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.read.html#hydromt.model.components.MeshComponent.read" title="hydromt.model.components.MeshComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([filename, crs])</p></td>
 <td><p>Read model mesh data at &lt;root&gt;/&lt;filename&gt; and add to mesh property.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.set.html#hydromt.model.components.MeshComponent.set" title="hydromt.model.components.MeshComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(data, *[, name, grid_name, overwrite_grid])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.set.html#hydromt.model.components.MeshComponent.set" title="hydromt.model.components.MeshComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(data, *[, name, grid_name, overwrite_grid])</p></td>
 <td><p>Add data to mesh.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_equal</span></code>(other)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_equal</span></code>(other)</p></td>
 <td><p>Test if two components are equal.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.write.html#hydromt.model.components.MeshComponent.write" title="hydromt.model.components.MeshComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>([filename, region_options, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.write.html#hydromt.model.components.MeshComponent.write" title="hydromt.model.components.MeshComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>([filename, region_options, ...])</p></td>
 <td><p>Write model grid data to a netCDF file at &lt;root&gt;/&lt;filename&gt;.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_region</span></code>(*[, filename, to_wgs84])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_region</span></code>(*[, filename, to_wgs84])</p></td>
 <td><p>Write the model region to file.</p></td>
 </tr>
 </tbody>

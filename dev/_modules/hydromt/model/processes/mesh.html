@@ -629,11 +629,13 @@
     <span class="c1"># Check if 2d mesh file else throw error</span>
     <span class="k">if</span> <span class="n">grid</span><span class="o">.</span><span class="n">topology_dimension</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Grid in mesh file for create_mesh2d is not 2D.&quot;</span><span class="p">)</span>
+
     <span class="c1"># Continues with a 2D grid</span>
     <span class="n">mesh2d</span> <span class="o">=</span> <span class="n">xu</span><span class="o">.</span><span class="n">UgridDataset</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">())</span>
 
     <span class="c1"># Check crs and reproject to model crs</span>
     <span class="n">grid_crs</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">crs</span>
+
     <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">bbox</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">grid_crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">grid_crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">==</span> <span class="mi">4326</span><span class="p">:</span>
@@ -649,6 +651,7 @@
             <span class="sa">f</span><span class="s2">&quot;Mesh data from mesh file doesn&#39;t have a CRS. Assuming crs option </span><span class="si">{</span><span class="n">crs</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
         <span class="n">mesh2d</span><span class="o">.</span><span class="n">ugrid</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
+
     <span class="n">mesh2d</span> <span class="o">=</span> <span class="n">mesh2d</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="n">GEO_MAP_COORD</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
 
     <span class="c1"># If bounds are provided in region, extract mesh for bounds</span>

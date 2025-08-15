@@ -477,10 +477,8 @@
 <ul class="simple">
 <li><p>Added option for delayed compute in writing netcdf files</p></li>
 <li><p>Set compression in <cite>_write_nc</cite></p></li>
+<li><p>Allow masking in <cite>GridComponent.set</cite>. (#1229)</p></li>
 </ul>
-</section>
-<section id="changed">
-<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading">#</a></h3>
 </section>
 <section id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">#</a></h3>
@@ -491,6 +489,13 @@
 <section id="deprecated">
 <h3>Deprecated<a class="headerlink" href="#deprecated" title="Link to this heading">#</a></h3>
 </section>
+<section id="removed">
+<h3>Removed<a class="headerlink" href="#removed" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>From the <cite>GridComponent</cite>, the functions <cite>create_from_region</cite>, <cite>add_data_from_constant</cite>, <cite>add_data_from_rasterdataset</cite>, <cite>add_data_from_raster_reclass</cite>, <cite>add_data_from_geodataframe</cite>. (#1229) Equivalent workflows are still available.</p></li>
+<li><p>From the <cite>MeshComponent</cite>, the functions <cite>create_2d_from_region</cite>, <cite>add_2d_data_from_rasterdataset</cite>, <cite>add_2d_data_from_raster_reclass</cite>. (#1229) Equivalent workflows are still available.</p></li>
+</ul>
+</section>
 </section>
 <section id="v1-2-0-2025-07-22">
 <h2>v1.2.0 (2025-07-22)<a class="headerlink" href="#v1-2-0-2025-07-22" title="Link to this heading">#</a></h2>
@@ -500,14 +505,14 @@
 <li><p>Setting the chunking size via <cite>get_rasterdataset</cite> (#1193)</p></li>
 </ul>
 </section>
-<section id="id2">
-<h3>Changed<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<section id="changed">
+<h3>Changed<a class="headerlink" href="#changed" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Drop support for Python 3.9 and 3.10 (#1215)</p></li>
 </ul>
 </section>
-<section id="id3">
-<h3>Fixed<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<section id="id2">
+<h3>Fixed<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Caching of vrt’s now regenerates vrt files if new tiles are downloaded (#1193)</p></li>
 <li><p>Re-enables chunking based on driver options in the data-catalog (#1193)</p></li>
@@ -515,20 +520,20 @@
 <li><p>Warning on basin size when loading data, it mentioned setting of a region before (#1209)</p></li>
 </ul>
 </section>
-<section id="id4">
-<h3>Deprecated<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<section id="id3">
+<h3>Deprecated<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
 </section>
 </section>
 <section id="v1-1-0-2025-04-11">
 <h2>v1.1.0 (2025-04-11)<a class="headerlink" href="#v1-1-0-2025-04-11" title="Link to this heading">#</a></h2>
+<section id="id4">
+<h3>New<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+</section>
 <section id="id5">
-<h3>New<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<h3>Changed<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
 </section>
 <section id="id6">
-<h3>Changed<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
-</section>
-<section id="id7">
-<h3>Fixed<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<h3>Fixed<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Pandas driver does not receive unnecessary metadata (#1141)</p></li>
 <li><p>Transform total bounds of region to 4326 before guessing UTM crs in <cite>grid_from_region</cite> (#1154)</p></li>
@@ -536,8 +541,8 @@
 <li><p><cite>ConfigComponent</cite> now actually reads from provided default template files if no data is present (#1171)</p></li>
 </ul>
 </section>
-<section id="id8">
-<h3>Deprecated<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
+<section id="id7">
+<h3>Deprecated<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Removed <code class="docutils literal notranslate"><span class="pre">to_slippy_tiles</span></code> and <code class="docutils literal notranslate"><span class="pre">to_xyz_tiles</span></code> methods from the raster module (#1110). We recommend to use the package <a class="reference external" href="https://github.com/Deltares-research/cht_tiling">cht_tiling</a> instead. Although writing tiles is no longer available, HydroMT is still able to read .vrt-files.</p></li>
 </ul>
@@ -545,29 +550,29 @@
 </section>
 <section id="v1-0-1-2025-03-21">
 <h2>v1.0.1 (2025-03-21)<a class="headerlink" href="#v1-0-1-2025-03-21" title="Link to this heading">#</a></h2>
-<section id="id9">
-<h3>New<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
+<section id="id8">
+<h3>New<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Add support for python 3.12 and 3.13 (#540)</p></li>
 <li><p>Support all versions of pyarrow (#1105)</p></li>
 </ul>
 </section>
-<section id="id10">
-<h3>Changed<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
+<section id="id9">
+<h3>Changed<a class="headerlink" href="#id9" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Rasterio have as been limited to <code class="docutils literal notranslate"><span class="pre">&lt;1.4.0</span></code> (#1097)</p></li>
 </ul>
 </section>
-<section id="id11">
-<h3>Fixed<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
+<section id="id10">
+<h3>Fixed<a class="headerlink" href="#id10" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Fixed incorrect arguments causing crashes in <code class="docutils literal notranslate"><span class="pre">geom_component._region_data()</span></code> (#1091)</p></li>
 <li><p>Fixed binder integration dockerfile (#1098)</p></li>
 <li><p>Examples are back in the documentation. (#796, #1088)</p></li>
 </ul>
 </section>
-<section id="id12">
-<h3>Deprecated<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
+<section id="id11">
+<h3>Deprecated<a class="headerlink" href="#id11" title="Link to this heading">#</a></h3>
 </section>
 </section>
 <section id="v1">
@@ -591,8 +596,8 @@
 <li><p>Added <cite>RasterTindexResolver</cite> to handle URIs in raster tindex files. (#928)</p></li>
 </ul>
 </section>
-<section id="id13">
-<h3>Changed<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
+<section id="id12">
+<h3>Changed<a class="headerlink" href="#id12" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>The data catalog format has been refactored to better represent the individual v1 components. (#912)</p></li>
 <li><p>The <cite>root</cite> meta key of data catalogs yaml files has become <cite>roots</cite> (#786)</p></li>
@@ -605,8 +610,8 @@
 <li><p>Implemented reading using <cite>zoom</cite> instead of the ambiguous <cite>zoom_level</cite> (#875)</p></li>
 </ul>
 </section>
-<section id="removed">
-<h3>Removed<a class="headerlink" href="#removed" title="Link to this heading">#</a></h3>
+<section id="id13">
+<h3>Removed<a class="headerlink" href="#id13" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>support for <cite>**artifact_keys</cite> when initializing the DataCatalog has been removed. (#786)</p></li>
 <li><p>support for dictionary like features on the DataCatalog have been removed. (#790)</p></li>
@@ -1377,36 +1382,36 @@ in the documentation and in Binder.</p>
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#unreleased">Unreleased</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#new">New</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#changed">Changed</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fixed">Fixed</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#deprecated">Deprecated</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#removed">Removed</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-2-0-2025-07-22">v1.2.0 (2025-07-22)</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">New</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Changed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Fixed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Deprecated</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#changed">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Deprecated</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-1-0-2025-04-11">v1.1.0 (2025-04-11)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">New</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Changed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Fixed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Deprecated</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">New</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Deprecated</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-0-1-2025-03-21">v1.0.1 (2025-03-21)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">New</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Changed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">Fixed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Deprecated</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">New</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Fixed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">Deprecated</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1">V1</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#added">Added</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Changed</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#removed">Removed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Changed</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">Removed</a></li>
 </ul>
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#v1-0-0-2024-09-26">v1.0.0 (2024-09-26)</a><ul class="nav section-nav flex-column">

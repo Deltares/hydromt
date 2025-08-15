@@ -539,6 +539,7 @@
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hydromt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hydromt.gis.flw</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">flw</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.processes.basin_mask</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_basin_geometry</span>
 </pre></div>
 </div>
@@ -572,7 +573,7 @@ been extended with a basin mask layer, which together with the basin index vecto
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-name=&#39;merit_hydro&#39; uri=&#39;merit_hydro/{variable}.tif&#39; data_adapter=RasterDatasetAdapter(unit_add={}, unit_mult={}, rename={}) driver=RasterioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f4429c54910&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f4429c54910&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=&#39;1.0&#39; provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+name=&#39;merit_hydro&#39; uri=&#39;merit_hydro/{variable}.tif&#39; data_adapter=RasterDatasetAdapter(unit_add={}, unit_mult={}, rename={}) driver=RasterioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f565a799f50&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f565a799f50&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=&#39;1.0&#39; provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -603,7 +604,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-name=&#39;merit_hydro_index&#39; uri=&#39;merit_hydro_index.gpkg&#39; data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}) driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f4429c54910&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f4429c54910&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=None provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+name=&#39;merit_hydro_index&#39; uri=&#39;merit_hydro_index.gpkg&#39; data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}) driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f565a799f50&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f565a799f50&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=None provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -622,7 +623,7 @@ Datum: World Geodetic System 1984 ensemble
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># derive river geometry based on stream order &gt;= 7 (for plotting only)</span>
-<span class="n">flwdir</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">gis</span><span class="o">.</span><span class="n">flw</span><span class="o">.</span><span class="n">flwdir_from_da</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;flwdir&quot;</span><span class="p">],</span> <span class="n">ftype</span><span class="o">=</span><span class="s2">&quot;d8&quot;</span><span class="p">)</span>
+<span class="n">flwdir</span> <span class="o">=</span> <span class="n">flw</span><span class="o">.</span><span class="n">flwdir_from_da</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;flwdir&quot;</span><span class="p">],</span> <span class="n">ftype</span><span class="o">=</span><span class="s2">&quot;d8&quot;</span><span class="p">)</span>
 <span class="n">feats</span> <span class="o">=</span> <span class="n">flwdir</span><span class="o">.</span><span class="n">streams</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;strord&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">)</span>
 <span class="n">gdf_riv</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">feats</span><span class="p">)</span>
 
@@ -686,7 +687,7 @@ Overwriting crs of GeoDataFrame to EPSG:4326
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4440/1510890054.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4906/1510890054.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = np.array(gdf_bas.buffer(0.1).total_bounds)[[0, 2, 1, 3]]
 </pre></div></div>
@@ -749,7 +750,7 @@ Overwriting crs of GeoDataFrame to EPSG:4326
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4440/3041410776.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4906/3041410776.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bounds.buffer(0.05).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>
@@ -815,7 +816,7 @@ Overwriting crs of GeoDataFrame to EPSG:4326
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4440/2647821985.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4906/2647821985.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bas.buffer(0.05).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>
@@ -876,7 +877,7 @@ Overwriting crs of GeoDataFrame to EPSG:4326
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/tmp/ipykernel_4440/1881121779.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
+/tmp/ipykernel_4906/1881121779.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
 
   extent = gdf_bbox.buffer(0.02).total_bounds[[0, 2, 1, 3]]
 </pre></div></div>

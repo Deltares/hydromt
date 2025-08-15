@@ -895,8 +895,8 @@ the `region</cite> property will error. You can specify this in the configuratio
 a weak reference to one general <cite>Model</cite> instance. The <cite>set_grid</cite>, <cite>write_grid</cite>,
 <cite>read_grid</cite>, and <cite>setup_grid</cite> have been changed to the more generically named <cite>set</cite>,
 <cite>write</cite>, <cite>read</cite>, and <cite>create</cite> methods respectively. Also, the <cite>setup_grid_from_*</cite>
-methods have been changed to <cite>add_data_from_*</cite>. The functionality of the GridComponent
-has not been changed compared to the GridModel.</p>
+methods have been removed with the goal of simplifying the API. Removed functionality
+was moved to the <cite>hydromt.model.processes.grid</cite> submodule containing the workflow functions.</p>
 <div class="pst-scrollable-table-container"><table class="table">
 <thead>
 <tr class="row-odd"><th class="head"><p>v0.x</p></th>
@@ -912,12 +912,6 @@ has not been changed compared to the GridModel.</p>
 </tr>
 <tr class="row-even"><td><p>model.write_grid(…)</p></td>
 <td><p>model.grid.write(…)</p></td>
-</tr>
-<tr class="row-odd"><td><p>model.setup_grid(…)</p></td>
-<td><p>model.grid.create_from_region(…)</p></td>
-</tr>
-<tr class="row-even"><td><p>model.setup_grid_from_*(…)</p></td>
-<td><p>model.grid.add_data_from_*(…)</p></td>
 </tr>
 </tbody>
 </table>
@@ -967,12 +961,6 @@ as the <cite>GridComponent</cite>.</p>
 </tr>
 <tr class="row-even"><td><p>model.write_mesh(…)</p></td>
 <td><p>model.mesh.write(…)</p></td>
-</tr>
-<tr class="row-odd"><td><p>model.setup_mesh(…)</p></td>
-<td><p>model.mesh.create_2d_from_region(…)</p></td>
-</tr>
-<tr class="row-even"><td><p>model.setup_mesh2d_from_*(…)</p></td>
-<td><p>model.mesh.add_2d_data_from_*(…)</p></td>
 </tr>
 </tbody>
 </table>
