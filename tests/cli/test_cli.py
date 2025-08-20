@@ -1,7 +1,7 @@
 """Tests for the cli submodule."""
 
 from logging import NOTSET, WARNING, Logger, getLogger
-from os.path import join, isfile
+from os.path import isfile, join
 from typing import Generator
 
 import pytest
@@ -15,6 +15,7 @@ from tests.conftest import TEST_DATA_DIR
 
 BUILD_CONFIG_PATH = join(TEST_DATA_DIR, "build_config.yml")
 UPDATE_CONFIG_PATH = join(TEST_DATA_DIR, "update_config.yml")
+
 
 def test_cli_version():
     r = CliRunner().invoke(hydromt_cli, "--version")
@@ -60,6 +61,7 @@ def _reset_log_level() -> Generator[None, None, None]:
     yield
     main_logger: Logger = getLogger("hydromt")
     main_logger.setLevel(NOTSET)  # Most verbose so all messages get passed
+
 
 @pytest.mark.usefixtures("_reset_log_level")
 def test_cli_build_update_model(tmpdir):
@@ -108,19 +110,26 @@ def test_cli_build_update_model(tmpdir):
     assert '[model]\ntype = "model"' in content
     assert "endtime " in content
 
+
 @pytest.mark.usefixtures("_reset_log_level")
 def test_cli_build_no_config(tmpdir):
     root = str(tmpdir.join("model_region"))
-    with pytest.raises(ValueError, match="Config path is required. Use -i or --config <path>"):
-        cmd = [
-            "build",
-            "model",
-            root,
-            "-d",
-            "artifact_data",
-            "-vv",
-        ]
-        r = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+    with pytest.raises(
+        ValueError, match="Config path is required. Use -i or --config <path>"
+    ):
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "build",
+                "model",
+                root,
+                "-d",
+                "artifact_data",
+                "-vv",
+            ],
+            catch_exceptions=False,
+        )
+
 
 @pytest.mark.usefixtures("_reset_log_level")
 def test_cli_build_unknown_option(tmpdir):

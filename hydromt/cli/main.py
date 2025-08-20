@@ -218,9 +218,9 @@ def build(
 
     To build a wflow model:
     hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml
-    -d deltares_data -d /path/to/data_catalog.yml -v 
-    
-    To build a sfincs model: 
+    -d deltares_data -d /path/to/data_catalog.yml -v
+
+    To build a sfincs model:
     hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml
     -d /path/to/data_catalog.yml -v
     """  # noqa: E501

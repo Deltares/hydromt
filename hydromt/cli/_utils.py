@@ -2,7 +2,6 @@
 """Utils for parsing cli options and arguments."""
 
 import json
-from ast import literal_eval
 from os.path import isfile
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
@@ -11,49 +10,10 @@ import click
 
 from hydromt._io import _config_read
 
-__all__ = ["parse_json", "parse_config", "parse_opt"]
+__all__ = ["parse_json", "parse_config"]
 
 
 ### CLI callback methods ###
-def parse_opt(_ctx, _param, value):
-    """Parse extra cli options.
-
-    Parse options like `--opt KEY1=VAL1 --opt SECT.KEY2=VAL2` and collect
-    in a dictionary like the one below, which is what the CLI function receives.
-    If no value or `None` is received then an empty dictionary is returned.
-        {
-            'KEY1': 'VAL1',
-            'SECT': {
-                'KEY2': 'VAL2'
-                }
-        }
-    Note: `==VAL` breaks this as `str.split('=', 1)` is used.
-    """
-    out = {}
-    if not value:
-        return out
-    for pair in value:
-        if "=" not in pair:
-            raise click.BadParameter("Invalid syntax for KEY=VAL arg: {}".format(pair))
-        else:
-            k, v = pair.split("=", 1)
-            k = k.lower()
-            s = None
-            if "." in k:
-                s, k = k.split(".", 1)
-            try:
-                v = literal_eval(v)
-            except Exception:
-                pass
-            if s:
-                if s not in out:
-                    out[s] = dict()
-                out[s].update({k: v})
-            else:
-                out.update({k: v})
-    return out
-
-
 def parse_json(_ctx: click.Context, _param, value: str) -> Dict[str, Any]:
     """Parse json from object or file.
 
