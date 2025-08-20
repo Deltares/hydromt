@@ -117,7 +117,9 @@ class Model(object, metaclass=ABCMeta):
 
         self._region_component_name = self._determine_region_component(region_component)
 
-    def _determine_region_component(self, region_component: Optional[str]) -> str:
+    def _determine_region_component(
+        self, region_component: Optional[str]
+    ) -> str | None:
         if region_component is not None:
             if region_component not in self.components:
                 raise KeyError(f"Component {region_component} not found in components.")
