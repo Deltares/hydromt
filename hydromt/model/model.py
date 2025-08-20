@@ -404,9 +404,7 @@ class Model(object, metaclass=ABCMeta):
 
     @staticmethod
     def _options_contain_write(steps: List[Dict[str, Dict[str, Any]]]) -> bool:
-        return any(
-            next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps
-        )
+        return any("write" in next(iter(step_dict)) for step_dict in steps)
 
     @hydromt_step
     def write_data_catalog(
