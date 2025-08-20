@@ -1,7 +1,7 @@
 """Tests for the cli submodule."""
 
 from logging import NOTSET, WARNING, Logger, getLogger
-from os.path import join
+from os.path import join, isfile
 from typing import Generator
 
 import pytest
@@ -13,8 +13,10 @@ from hydromt.cli.main import main as hydromt_cli
 from hydromt.model.components.grid import GridComponent
 from tests.conftest import TEST_DATA_DIR
 
+BUILD_CONFIG_PATH = join(TEST_DATA_DIR, "build_config.yml")
+UPDATE_CONFIG_PATH = join(TEST_DATA_DIR, "update_config.yml")
 
-def test_cli_verison():
+def test_cli_version():
     r = CliRunner().invoke(hydromt_cli, "--version")
     assert r.exit_code == 0
     assert r.output.split()[-1] == __version__
@@ -59,19 +61,83 @@ def _reset_log_level() -> Generator[None, None, None]:
     main_logger: Logger = getLogger("hydromt")
     main_logger.setLevel(NOTSET)  # Most verbose so all messages get passed
 
-
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_grid_model(tmpdir):
-    root = str(tmpdir.join("grid_model_region"))
+def test_cli_build_update_model(tmpdir):
+    root = str(tmpdir.join("model_region"))
     cmd = [
         "build",
-        "grid_model",
+        "model",
+        root,
+        "-i",
+        BUILD_CONFIG_PATH,
+        "-d",
+        "artifact_data",
+        "-vv",
+    ]
+    r = CliRunner().invoke(hydromt_cli, cmd)
+
+    assert r.exit_code == 0
+    assert isfile(join(root, "run_config.toml"))
+    # Open and check content
+    with open(join(root, "run_config.toml")) as f:
+        content = f.read()
+    assert "starttime = 2010-01-01" in content
+    assert '[model]\ntype = "model"' in content
+    assert "endtime " not in content
+
+    # We need to build before we can update
+    root_out = str(tmpdir.join("model_region_update"))
+    cmd = [
+        "update",
+        "model",
+        root,
+        "-o",
+        root_out,
+        "-i",
+        UPDATE_CONFIG_PATH,
+        "-vv",
+    ]
+    r = CliRunner().invoke(hydromt_cli, cmd)
+
+    assert r.exit_code == 0
+    assert isfile(join(root_out, "run_config.toml"))
+    # Open and check content
+    with open(join(root_out, "run_config.toml")) as f:
+        content = f.read()
+    assert "starttime = 2020-01-01" in content
+    assert '[model]\ntype = "model"' in content
+    assert "endtime " in content
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_build_no_config(tmpdir):
+    root = str(tmpdir.join("model_region"))
+    with pytest.raises(ValueError, match="Config path is required. Use -i or --config <path>"):
+        cmd = [
+            "build",
+            "model",
+            root,
+            "-d",
+            "artifact_data",
+            "-vv",
+        ]
+        r = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_build_unknown_option(tmpdir):
+    root = str(tmpdir.join("model_region"))
+    cmd = [
+        "build",
+        "model",
         root,
         "--opt",
         "setup_grid.res=0.05",
         "-vv",
     ]
-    _ = CliRunner().invoke(hydromt_cli, cmd)
+    r = CliRunner().invoke(hydromt_cli, cmd)
+
+    # Check that "Error: No such option: --opt" is in the output
+    assert r.exit_code == 2
+    assert "Error: No such option: --opt" in r.output
 
 
 @pytest.mark.usefixtures("_reset_log_level")
@@ -83,6 +149,8 @@ def test_cli_build_unknown_model(tmpdir):
                 "build",
                 "test_model",
                 str(tmpdir),
+                "-i",
+                BUILD_CONFIG_PATH,
             ],
             catch_exceptions=False,
         )
@@ -97,10 +165,8 @@ def test_cli_update_unknown_model(tmpdir):
                 "update",
                 "test_model",
                 str(tmpdir),
-                "-c",
-                "component",
-                "--opt",
-                "key=value",
+                "-i",
+                UPDATE_CONFIG_PATH,
             ],
             catch_exceptions=False,
         )

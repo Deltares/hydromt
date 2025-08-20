@@ -75,24 +75,14 @@ def parse_json(_ctx: click.Context, _param, value: str) -> Dict[str, Any]:
 
 ### general parsing methods ##
 def parse_config(
-    path: Optional[Union[Path, str]] = None, opt_cli: Optional[Dict[str, Any]] = None
+    path: Optional[Union[Path, str]] = None,
 ) -> Dict[str, Any]:
-    """Parse config from `path` and combine with command line options `opt_cli`."""
+    """Parse config from `path`."""
     opt = {}
     if path is not None and isfile(path):
         opt = _config_read(path, abs_path=True, skip_abspath_sections=["setup_config"])
     elif path is not None:
         raise IOError(f"Config not found at {path}")
-    if opt_cli is not None:
-        for section in opt_cli:
-            if not isinstance(opt_cli[section], dict):
-                raise ValueError(
-                    "No section found in --opt values: "
-                    "use <section>.<option>=<value> notation."
-                )
-            if section not in opt:
-                opt[section] = opt_cli[section]
-                continue
-            for option, value in opt_cli[section].items():
-                opt[section].update({option: value})
+    else:
+        raise ValueError("Config path is required. Use -i or --config <path>")
     return opt

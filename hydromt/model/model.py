@@ -141,7 +141,7 @@ class Model(object, metaclass=ABCMeta):
                 )
             if len(has_region_components) == 0:
                 logger.warning("No region component found in components.")
-                return ""
+                return None
             return has_region_components[0][0]
 
     def _add_components(self, components: Dict[str, Any]) -> None:
@@ -307,8 +307,8 @@ class Model(object, metaclass=ABCMeta):
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
             This is a list of nested dictionary where the first-level keys are the names
-            of a component followed by the name of the method to run seperated by a dot.
-            anny subsequent pairs will be passed to the method as arguments.
+            of a component followed by the name of the method to run separated by a dot.
+            any subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
 
@@ -339,7 +339,7 @@ class Model(object, metaclass=ABCMeta):
             self.root.set(model_out, mode=mode)
 
         # check if model has a region
-        if self.region is None:
+        if self._region_component_name is not None and self.region is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
         # loop over methods from config file
