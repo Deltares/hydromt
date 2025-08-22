@@ -1213,7 +1213,7 @@ class DataCatalog(object):
         bbox: Optional[Bbox] = None,
         geom: Optional[gpd.GeoDataFrame] = None,
         zoom: Optional[Union[int, tuple]] = None,
-        buffer: Union[float, int] = 0,
+        buffer: int = 0,
         chunks: Optional[dict] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
@@ -1255,8 +1255,9 @@ class DataCatalog(object):
             Set the chunking of the data, this overrules the chunking set in the data
             catalog. If not specified, the chunking defined in the data catalog will
             be used. By default None
-        buffer : Union[float, int], optional
-            Buffer around the `bbox` or `geom` area of interest in meters, by default 0
+        buffer : int, optional
+            Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,
+            by default 0
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
         variables : Optional[List], optional

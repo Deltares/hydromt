@@ -19,6 +19,7 @@ New
 Fixed
 -----
 - CF compliant dimensions in netcdf files
+- `buffer` argument in `DataCatalog.get_rasterdataset` now is an integer expressed in resolution multiplicity instead of in meters.
 
 Deprecated
 ----------

@@ -69,6 +69,9 @@ class RasterDatasetAdapter(DataAdapterBase):
             how to handle no data being present in the result, by default NoDataStrategy.RAISE
         single_var_as_array : bool, optional
             whether to return a xr.DataArray if only a single variable is present, by default True
+        buffer : int, optional
+            Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,
+            by default 0
 
         Returns
         -------
@@ -170,6 +173,9 @@ class RasterDatasetAdapter(DataAdapterBase):
             resolution to align the bounding box, by default None
         time_range : Optional[TimeRange], optional
             filter start and end times, by default None
+        buffer : int, optional
+            Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,
+            by default 0
 
         Returns
         -------
