@@ -127,9 +127,6 @@ dask-worker-space/
 .envrc
 pyrightconfig.json
 
-# VsCode
-.vscode/launch.json
-
 # Pixi
 .pixi
 
