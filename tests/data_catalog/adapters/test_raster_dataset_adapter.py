@@ -18,19 +18,17 @@ class TestRasterDatasetAdapter:
         temp = 15 + 8 * np.random.randn(nx, ny, nt)
         precip = 10 * np.random.rand(nx, ny, nt)
 
-        # create lon/lat grids spanning a small bounding box
-        lon = np.linspace(xmin, xmax, nx)
-        lat = np.linspace(ymin, ymax, ny)
-        lon2d, lat2d = np.meshgrid(lon, lat, indexing="ij")
+        x = np.linspace(xmin, xmax, nx)
+        y = np.linspace(ymax, ymin, ny)  # decreasing, top-left origin
 
         ds = xr.Dataset(
             {
-                "temperature": (["x", "y", "time"], temp),
-                "precipitation": (["x", "y", "time"], precip),
+                "temperature": (["y", "x", "time"], temp),
+                "precipitation": (["y", "x", "time"], precip),
             },
             coords={
-                "lon": (["x", "y"], lon2d),
-                "lat": (["x", "y"], lat2d),
+                "x": x,
+                "y": y,
                 "time": pd.date_range("2014-09-06", periods=nt),
                 "reference_time": pd.Timestamp("2014-09-05"),
             },
@@ -85,6 +83,7 @@ class TestRasterDatasetAdapter:
         returned_bounds = ds.raster.bounds
         mask_bounds = mask.total_bounds
         dx, dy = example_raster_ds.raster.res
+        dx, dy = abs(dx), abs(dy)
 
         assert returned_bounds[0] > orig_bounds[0]
         assert np.isclose(returned_bounds[0], mask_bounds[0], atol=dx)
@@ -120,6 +119,7 @@ class TestRasterDatasetAdapter:
         returned_bounds = ds.raster.bounds
         mask_bounds = mask.total_bounds
         dx, dy = example_raster_ds.raster.res
+        dx, dy = abs(dx), abs(dy)
 
         # Mask smaller than original
         assert mask_bounds[0] > orig_bounds[0]
