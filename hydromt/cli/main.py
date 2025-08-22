@@ -89,6 +89,13 @@ opt_config = click.option(
     type=click.Path(resolve_path=True),
     help="Path to hydroMT configuration file, for the model specific implementation.",
 )
+req_config = click.option(
+    "-i",
+    "--config",
+    type=click.Path(resolve_path=True),
+    help="Path to hydroMT configuration file, for the model specific implementation.",
+    required=True,
+)
 export_dest_path = click.argument(
     "export_dest_path",
     type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
@@ -191,7 +198,7 @@ def main(ctx, models, components, plugins):
     type=str,
 )
 @arg_root
-@opt_config
+@req_config
 @data_opt
 @deltares_data_opt
 @overwrite_opt
@@ -275,7 +282,7 @@ def build(
     default=None,
     callback=lambda c, p, v: v if v else c.params["model_root"],
 )
-@opt_config
+@req_config
 @data_opt
 @deltares_data_opt
 @overwrite_opt

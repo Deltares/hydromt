@@ -4,7 +4,7 @@
 import json
 from os.path import isfile
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 
 import click
 
@@ -34,15 +34,9 @@ def parse_json(_ctx: click.Context, _param, value: str) -> Dict[str, Any]:
 
 
 ### general parsing methods ##
-def parse_config(
-    path: Optional[Union[Path, str]] = None,
-) -> Dict[str, Any]:
+def parse_config(path: Union[Path, str]) -> Dict[str, Any]:
     """Parse config from `path`."""
-    opt = {}
-    if path is not None and isfile(path):
-        opt = _config_read(path, abs_path=True, skip_abspath_sections=["setup_config"])
-    elif path is not None:
+    if not isfile(path):
         raise IOError(f"Config not found at {path}")
-    else:
-        raise ValueError("Config path is required. Use -i or --config <path>")
-    return opt
+
+    return _config_read(path, abs_path=True, skip_abspath_sections=["setup_config"])

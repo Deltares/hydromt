@@ -114,21 +114,19 @@ def test_cli_build_update_model(tmpdir):
 @pytest.mark.usefixtures("_reset_log_level")
 def test_cli_build_no_config(tmpdir):
     root = str(tmpdir.join("model_region"))
-    with pytest.raises(
-        ValueError, match="Config path is required. Use -i or --config <path>"
-    ):
-        _ = CliRunner().invoke(
-            hydromt_cli,
-            [
-                "build",
-                "model",
-                root,
-                "-d",
-                "artifact_data",
-                "-vv",
-            ],
-            catch_exceptions=False,
-        )
+    result = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "build",
+            "model",
+            root,
+            "-d",
+            "artifact_data",
+            "-vv",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "Error: Missing option '-i' / '--config'." in result.output
 
 
 @pytest.mark.usefixtures("_reset_log_level")
