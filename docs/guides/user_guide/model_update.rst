@@ -24,12 +24,7 @@ The ``hydromt update`` command line interface (CLI) method can be run from the c
 By default, the model is updated in place, overwriting the existing model schematization.
 To save a copy of the model provide a new output model root directory with the ``-o`` option.
 
-By default, all model methods in the .yaml configuration file provided with ``-i`` will be updated.
-To update only certain methods, the ``-c <method>`` option can be used to select methods
-in combination with :ref:`.yaml file <model_workflow>`.
-Besides the .yaml file, method arguments can be set from the CLI with ``--opt <method.argument=value>``.
-If used in combination with an .yaml file, it will overwrite the same arguments in the .yaml file.
-Both ``-c`` and ``-opt`` can be used repeatedly in a single update.
+All model methods in the .yaml configuration file provided with ``-i`` will be updated.
 
 
 **Example usage**

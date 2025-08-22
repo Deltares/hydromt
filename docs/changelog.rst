@@ -18,6 +18,8 @@ New
 
 Fixed
 -----
+- CLI update command was not working. (#1244)
+- Allow models to not have a spatial component (allows updating if region is None). (#1244)
 - CF compliant dimensions in netcdf files
 
 Deprecated
@@ -25,6 +27,7 @@ Deprecated
 
 Removed
 -------
+- opt and components CLI options for build and update. A configuration workflow file is now mandatory. (#1244)
 - From the `GridComponent`, the functions `create_from_region`, `add_data_from_constant`, `add_data_from_rasterdataset`, `add_data_from_raster_reclass`, `add_data_from_geodataframe`. (#1229) Equivalent workflows are still available.
 - From the `MeshComponent`, the functions `create_2d_from_region`, `add_2d_data_from_rasterdataset`, `add_2d_data_from_raster_reclass`. (#1229) Equivalent workflows are still available.
 

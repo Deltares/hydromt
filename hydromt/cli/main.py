@@ -89,6 +89,13 @@ opt_config = click.option(
     type=click.Path(resolve_path=True),
     help="Path to hydroMT configuration file, for the model specific implementation.",
 )
+req_config = click.option(
+    "-i",
+    "--config",
+    type=click.Path(resolve_path=True),
+    help="Path to hydroMT configuration file, for the model specific implementation.",
+    required=True,
+)
 export_dest_path = click.argument(
     "export_dest_path",
     type=click.Path(resolve_path=True, dir_okay=True, file_okay=False),
@@ -111,14 +118,6 @@ region_opt = click.option(
 verbose_opt = click.option("--verbose", "-v", count=True, help="Increase verbosity.")
 
 quiet_opt = click.option("--quiet", "-q", count=True, help="Decrease verbosity.")
-
-opt_cli = click.option(
-    "--opt",
-    multiple=True,
-    callback=_utils.parse_opt,
-    help="Method specific keyword arguments, see the method documentation "
-    "of the specific model for more information about the arguments.",
-)
 
 data_opt = click.option(
     "-d",
@@ -199,8 +198,7 @@ def main(ctx, models, components, plugins):
     type=str,
 )
 @arg_root
-@opt_cli
-@opt_config
+@req_config
 @data_opt
 @deltares_data_opt
 @overwrite_opt
@@ -212,7 +210,6 @@ def build(
     _ctx: click.Context,
     model,
     model_root,
-    opt,
     config,
     data,
     dd,
@@ -226,18 +223,19 @@ def build(
     Example usage:
     --------------
 
-    To build a wflow model for a subbasin using a point coordinates snapped to cells
-    with upstream area >= 50 km2
-    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml -d
-    deltares_data -d /path/to/data_catalog.yml -v To build a sfincs model based on a
-    bbox hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml  -r
-    "{'bbox': [4.6891,52.9750,4.9576,53.1994]}"  -d /path/to/data_catalog.yml -v
+    To build a wflow model:
+    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml
+    -d deltares_data -d /path/to/data_catalog.yml -v
+
+    To build a sfincs model:
+    hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml
+    -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log._setuplog(join(model_root, HYDROMT_LOG_PATH), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
-    opt = _utils.parse_config(config, opt_cli=opt)
+    opt = _utils.parse_config(config)
     kwargs = opt.pop("global", {})
     modeltype = opt.pop("modeltype", model)
     # parse data catalog options from global section in config and cli options
@@ -284,14 +282,7 @@ def build(
     default=None,
     callback=lambda c, p, v: v if v else c.params["model_root"],
 )
-@opt_config
-@click.option(
-    "-c",
-    "--components",
-    multiple=True,
-    help="Model methods from configuration file to run",
-)
-@opt_cli
+@req_config
 @data_opt
 @deltares_data_opt
 @overwrite_opt
@@ -305,8 +296,6 @@ def update(
     model_root,
     model_out,
     config,
-    components,
-    opt,
     data,
     dd,
     fo,
@@ -322,9 +311,6 @@ def update(
     Example usage:
     --------------
 
-    Update (overwrite!) landuse-landcover based maps in a Wflow model:
-    hydromt update wflow /path/to/model_root -c setup_lulcmaps --opt lulc_fn=vito -d /path/to/data_catalog.yml -v
-
     Update Wflow model components outlined in an .yml configuration file and
     write the model to a directory:
     hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
@@ -336,10 +322,8 @@ def update(
     logger.info(f"Updating {model} model at {model_root} ({mode}).")
     logger.info(f"Output dir: {model_out}")
     # parse settings
-    if len(components) == 1 and not isinstance(opt.get(components[0]), dict):
-        opt = {components[0]: opt}
     logger.info("User settings:")
-    opt = _utils.parse_config(config, opt_cli=opt)
+    opt = _utils.parse_config(config)
     kwargs = opt.pop("global", {})
     modeltype = opt.pop("modeltype", model)
     if modeltype not in PLUGINS.model_plugins:
@@ -358,12 +342,7 @@ def update(
             **kwargs,
         )
         mod.data_catalog.cache = cache
-        # keep only components + setup_config
-        if len(components) > 0:
-            opt0 = opt.get("setup_config", {})
-            opt = {c: opt.get(c, {}) for c in components}
-            opt.update({"setup_config": opt0})
-        mod.update(model_out=model_out, opt=opt, forceful_overwrite=fo)
+        mod.update(model_out=model_out, steps=opt["steps"], forceful_overwrite=fo)
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
