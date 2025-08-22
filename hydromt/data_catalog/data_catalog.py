@@ -1322,6 +1322,7 @@ class DataCatalog(object):
                 variables=variables,
                 mask=mask,
                 time_range=time_range,
+                buffer=buffer,
             )
             if data_like is None:
                 exec_nodata_strat(

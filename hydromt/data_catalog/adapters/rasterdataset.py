@@ -49,6 +49,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
+        buffer: int = 0,
     ) -> Union[xr.Dataset, xr.DataArray, None]:
         """Filter and harmonize the input RasterDataset.
 
@@ -97,6 +98,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 mask,
                 align,
                 time_range,
+                buffer=buffer,
             )
             if _has_no_data(ds):
                 raise NoDataException()
@@ -152,6 +154,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         mask: Optional[Geom] = None,
         align: Optional[float] = None,
         time_range: Optional[TimeRange] = None,
+        buffer: int = 0,
     ) -> Optional[xr.Dataset]:
         """Filter the RasterDataset.
 
@@ -196,7 +199,9 @@ class RasterDatasetAdapter(DataAdapterBase):
         if time_range is not None:
             ds = _slice_temporal_dimension(ds, time_range)
         if mask is not None:
-            ds = RasterDatasetAdapter._slice_spatial_dimensions(ds, mask, align)
+            ds = RasterDatasetAdapter._slice_spatial_dimensions(
+                ds, mask, buffer=buffer, align=align
+            )
 
         if _has_no_data(ds):
             return None
@@ -208,6 +213,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         ds: Data,
         mask: Optional[Geom] = None,
         align: Optional[float] = None,
+        buffer: int = 0,
     ):
         # make sure bbox is in data crs
         bbox = None
@@ -238,7 +244,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 )
 
             logger.debug(f"Clip to [{bbox_str}] (epsg:{epsg}))")
-            ds = ds.raster.clip_bbox(bbox, align=align)
+            ds = ds.raster.clip_bbox(bbox, align=align, buffer=buffer)
 
         if _has_no_data(ds):
             return None
