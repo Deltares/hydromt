@@ -483,7 +483,10 @@
 <section id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p>CLI update command was not working. (#1244)</p></li>
+<li><p>Allow models to not have a spatial component (allows updating if region is None). (#1244)</p></li>
 <li><p>CF compliant dimensions in netcdf files</p></li>
+<li><p>Improved logging information for build and update functions. (#1237)</p></li>
 </ul>
 </section>
 <section id="deprecated">
@@ -492,6 +495,7 @@
 <section id="removed">
 <h3>Removed<a class="headerlink" href="#removed" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p>opt and components CLI options for build and update. A configuration workflow file is now mandatory. (#1244)</p></li>
 <li><p>From the <cite>GridComponent</cite>, the functions <cite>create_from_region</cite>, <cite>add_data_from_constant</cite>, <cite>add_data_from_rasterdataset</cite>, <cite>add_data_from_raster_reclass</cite>, <cite>add_data_from_geodataframe</cite>. (#1229) Equivalent workflows are still available.</p></li>
 <li><p>From the <cite>MeshComponent</cite>, the functions <cite>create_2d_from_region</cite>, <cite>add_2d_data_from_rasterdataset</cite>, <cite>add_2d_data_from_raster_reclass</cite>. (#1229) Equivalent workflows are still available.</p></li>
 </ul>

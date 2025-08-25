@@ -580,7 +580,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_region_component_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_region_component</span><span class="p">(</span><span class="n">region_component</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_determine_region_component</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_component</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_determine_region_component</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">region_component</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">region_component</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">region_component</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Component </span><span class="si">{</span><span class="n">region_component</span><span class="si">}</span><span class="s2"> not found in components.&quot;</span><span class="p">)</span>
@@ -604,7 +606,7 @@
                 <span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">has_region_components</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No region component found in components.&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">return</span> <span class="kc">None</span>
             <span class="k">return</span> <span class="n">has_region_components</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_add_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -733,13 +735,13 @@
                 <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="o">!=</span> <span class="n">_empty</span>
             <span class="p">}</span>
-            <span class="n">merged</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">merged</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
                 <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">merged</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
             <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">merged</span><span class="p">)</span>
 
@@ -781,8 +783,8 @@
 <span class="sd">            Model build configuration. The configuration can be parsed from a</span>
 <span class="sd">            configuration file using :py:meth:`~hydromt.io.readers.configread`.</span>
 <span class="sd">            This is a list of nested dictionary where the first-level keys are the names</span>
-<span class="sd">            of a component followed by the name of the method to run seperated by a dot.</span>
-<span class="sd">            anny subsequent pairs will be passed to the method as arguments.</span>
+<span class="sd">            of a component followed by the name of the method to run separated by a dot.</span>
+<span class="sd">            any subsequent pairs will be passed to the method as arguments.</span>
 
 <span class="sd">            .. code-block:: text</span>
 
@@ -813,7 +815,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">model_out</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
 
         <span class="c1"># check if model has a region</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_component_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model region not found, setup model using `build` first.&quot;</span><span class="p">)</span>
 
         <span class="c1"># loop over methods from config file</span>
@@ -833,7 +835,7 @@
             <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
                 <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">merged</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">merged</span><span class="p">)</span>
 
         <span class="c1"># If there are any write options included in the steps,</span>
@@ -883,9 +885,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_options_contain_write</span><span class="p">(</span><span class="n">steps</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span>
-            <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">step_dict</span><span class="p">))</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;write&quot;</span> <span class="k">for</span> <span class="n">step_dict</span> <span class="ow">in</span> <span class="n">steps</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;write&quot;</span> <span class="ow">in</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">step_dict</span><span class="p">))</span> <span class="k">for</span> <span class="n">step_dict</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Model.write_data_catalog">
 <a class="viewcode-back" href="../../../_generated/hydromt.model.Model.write_data_catalog.html#hydromt.model.Model.write_data_catalog">[docs]</a>

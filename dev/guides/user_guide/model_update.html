@@ -537,12 +537,7 @@ but the model methods (i.e. sections and options in the <a class="reference inte
 <p>The <code class="docutils literal notranslate"><span class="pre">hydromt</span> <span class="pre">update</span></code> command line interface (CLI) method can be run from the command line after the right conda environment is activated.</p>
 <p>By default, the model is updated in place, overwriting the existing model schematization.
 To save a copy of the model provide a new output model root directory with the <code class="docutils literal notranslate"><span class="pre">-o</span></code> option.</p>
-<p>By default, all model methods in the .yaml configuration file provided with <code class="docutils literal notranslate"><span class="pre">-i</span></code> will be updated.
-To update only certain methods, the <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">&lt;method&gt;</span></code> option can be used to select methods
-in combination with <a class="reference internal" href="model_workflow.html#model-workflow"><span class="std std-ref">.yaml file</span></a>.
-Besides the .yaml file, method arguments can be set from the CLI with <code class="docutils literal notranslate"><span class="pre">--opt</span> <span class="pre">&lt;method.argument=value&gt;</span></code>.
-If used in combination with an .yaml file, it will overwrite the same arguments in the .yaml file.
-Both <code class="docutils literal notranslate"><span class="pre">-c</span></code> and <code class="docutils literal notranslate"><span class="pre">-opt</span></code> can be used repeatedly in a single update.</p>
+<p>All model methods in the .yaml configuration file provided with <code class="docutils literal notranslate"><span class="pre">-i</span></code> will be updated.</p>
 <p><strong>Example usage</strong></p>
 <p>In the following example a Wflow model at <code class="docutils literal notranslate"><span class="pre">/path/to/model</span></code> is updated and the results are written to a new directory <code class="docutils literal notranslate"><span class="pre">/path/to/model_out</span></code>.
 The pipeline with methods which are updated are outlined in the <code class="docutils literal notranslate"><span class="pre">wflow_config.yaml</span></code> configuration file and used data sources
