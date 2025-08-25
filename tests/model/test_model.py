@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.model module of HydroMT."""
 
+import logging
 from os import listdir, makedirs
 from os.path import isdir, isfile, join
 from pathlib import Path
@@ -287,7 +288,8 @@ def test_model_build_update(tmpdir, demda, obsda):
 
 
 @pytest.mark.integration
-def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
+def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch, caplog):
+    caplog.set_level(logging.INFO)
     # users will not have a use for `set` in their yaml file because there is
     # nothing they will have access to then that they cat set it to
     # so we want to keep `SpatialDatasetsComponent.set` a non-hydromt-step
@@ -360,6 +362,10 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch):
     assert "elevtn2" in model.maps.data
     assert "precip" in model.forcing.data
     assert "temp" in model.forcing.data
+
+    assert any(
+        log_record.message == "maps.set.name=elevtn2" for log_record in caplog.records
+    )
 
 
 def test_setup_region_geom(grid_model, bbox):
