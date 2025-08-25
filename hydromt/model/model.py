@@ -264,13 +264,13 @@ class Model(object, metaclass=ABCMeta):
                 for param, arg in signature(method).parameters.items()
                 if arg.default != _empty
             }
-            merged = {}
+            merged: dict[str, Any] = {}
             if params:
                 merged.update(**params)
             if kwargs:
                 merged.update(**kwargs)
             for k, v in merged.items():
-                logger.info(f"{method}.{k}: {v}")
+                logger.info(f"{step}.{k}={v}")
 
             method(**merged)
 
@@ -361,7 +361,7 @@ class Model(object, metaclass=ABCMeta):
             if kwargs:
                 merged.update(**kwargs)
             for k, v in merged.items():
-                logger.info(f"{method}.{k}: {v}")
+                logger.info(f"{step}.{k}={v}")
             method(**merged)
 
         # If there are any write options included in the steps,
