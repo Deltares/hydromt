@@ -819,6 +819,51 @@ class TestGetRasterDataset:
         assert np.allclose(da.raster.bounds, bbox)
 
     @pytest.mark.integration
+    def test_bbox_buffer_from_ds(self, data_catalog: DataCatalog):
+        name = "koppen_geiger"
+        da = data_catalog.get_rasterdataset(name)
+        dx, dy = da.raster.res
+        dx, dy = abs(dx), abs(dy)
+        buffer = 2
+        bbox = [12.2, 45.5, 12.8, 46.0]
+        da_masked = data_catalog.get_rasterdataset(da, bbox=bbox, buffer=buffer)
+
+        expected_minx = bbox[0] - buffer * dx
+        expected_miny = bbox[1] - buffer * dy
+        expected_maxx = bbox[2] + buffer * dx
+        expected_maxy = bbox[3] + buffer * dy
+        returned_bounds = da_masked.raster.bounds
+        assert isinstance(da_masked, xr.DataArray)
+
+        # Allow 1 cell tolerance for alignment
+        assert np.isclose(returned_bounds[0], expected_minx, atol=dx)
+        assert np.isclose(returned_bounds[1], expected_miny, atol=dy)
+        assert np.isclose(returned_bounds[2], expected_maxx, atol=dx)
+        assert np.isclose(returned_bounds[3], expected_maxy, atol=dy)
+
+    @pytest.mark.integration
+    def test_bbox_buffer_from_source(self, data_catalog: DataCatalog):
+        name = "koppen_geiger"
+        buffer = 2
+        bbox = [12.2, 45.5, 12.8, 46.0]
+        da_masked = data_catalog.get_rasterdataset(name, bbox=bbox, buffer=buffer)
+        dx, dy = da_masked.raster.res
+        dx, dy = abs(dx), abs(dy)
+
+        expected_minx = bbox[0] - buffer * dx
+        expected_miny = bbox[1] - buffer * dy
+        expected_maxx = bbox[2] + buffer * dx
+        expected_maxy = bbox[3] + buffer * dy
+        returned_bounds = da_masked.raster.bounds
+        assert isinstance(da_masked, xr.DataArray)
+
+        # Allow 1 cell tolerance for alignment
+        assert np.isclose(returned_bounds[0], expected_minx, atol=dx)
+        assert np.isclose(returned_bounds[1], expected_miny, atol=dy)
+        assert np.isclose(returned_bounds[2], expected_maxx, atol=dx)
+        assert np.isclose(returned_bounds[3], expected_maxy, atol=dy)
+
+    @pytest.mark.integration
     @pytest.mark.skipif(not HAS_S3FS, reason="S3FS not installed.")
     def test_s3(self, data_catalog: DataCatalog):
         data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
@@ -899,10 +944,9 @@ class TestGetRasterDataset:
         with pytest.raises(NoDataException):
             data_catalog.get_rasterdataset("test1.tif")
 
-
-def test_get_rasterdataset_unknown_key(data_catalog):
-    with pytest.raises(ValueError, match="Unknown keys in requested data"):
-        data_catalog.get_rasterdataset({"name": "test"})
+    def test_get_rasterdataset_unknown_key(self, data_catalog: DataCatalog):
+        with pytest.raises(ValueError, match="Unknown keys in requested data"):
+            data_catalog.get_rasterdataset({"name": "test"})
 
 
 class TestGetGeoDataFrame:
