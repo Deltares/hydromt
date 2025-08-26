@@ -93,6 +93,7 @@ An example of a fictional Wflow YAML file would be:
 		data_libs: deltares_data
 		components:
 			config:
+				type: ConfigComponent
 				filename: wflow_sbm_calibrated.toml
 	steps:
 		- setup_basemaps:

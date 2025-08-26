@@ -12,6 +12,7 @@ from .extremes import (
 )
 from .skills import (
     bias,
+    kge,
     kge_2012,
     kge_non_parametric,
     kge_non_parametric_flood,
@@ -29,6 +30,7 @@ from .skills import (
 
 __all__ = [
     "bias",
+    "kge",
     "kge_2012",
     "kge_non_parametric",
     "kge_non_parametric_flood",
