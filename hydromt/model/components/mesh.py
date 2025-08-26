@@ -159,7 +159,6 @@ class MeshComponent(SpatialModelComponent):
             # save crs to spatial_ref coordinate
             ds_out = ds_out.rio.write_crs(self.crs)
         ds_out.to_netcdf(_filename, **kwargs)
-        self.write_region()
 
     @hydromt_step
     def read(
