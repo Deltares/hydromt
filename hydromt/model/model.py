@@ -117,7 +117,9 @@ class Model(object, metaclass=ABCMeta):
 
         self._region_component_name = self._determine_region_component(region_component)
 
-    def _determine_region_component(self, region_component: Optional[str]) -> str:
+    def _determine_region_component(
+        self, region_component: Optional[str]
+    ) -> str | None:
         if region_component is not None:
             if region_component not in self.components:
                 raise KeyError(f"Component {region_component} not found in components.")
@@ -141,7 +143,7 @@ class Model(object, metaclass=ABCMeta):
                 )
             if len(has_region_components) == 0:
                 logger.warning("No region component found in components.")
-                return ""
+                return None
             return has_region_components[0][0]
 
     def _add_components(self, components: Dict[str, Any]) -> None:
@@ -262,13 +264,13 @@ class Model(object, metaclass=ABCMeta):
                 for param, arg in signature(method).parameters.items()
                 if arg.default != _empty
             }
-            merged = {}
+            merged: dict[str, Any] = {}
             if params:
                 merged.update(**params)
             if kwargs:
                 merged.update(**kwargs)
             for k, v in merged.items():
-                logger.info(f"{method}.{k}: {v}")
+                logger.info(f"{step}.{k}={v}")
 
             method(**merged)
 
@@ -307,8 +309,8 @@ class Model(object, metaclass=ABCMeta):
             Model build configuration. The configuration can be parsed from a
             configuration file using :py:meth:`~hydromt.io.readers.configread`.
             This is a list of nested dictionary where the first-level keys are the names
-            of a component followed by the name of the method to run seperated by a dot.
-            anny subsequent pairs will be passed to the method as arguments.
+            of a component followed by the name of the method to run separated by a dot.
+            any subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
 
@@ -339,7 +341,7 @@ class Model(object, metaclass=ABCMeta):
             self.root.set(model_out, mode=mode)
 
         # check if model has a region
-        if self.region is None:
+        if self._region_component_name is not None and self.region is None:
             raise ValueError("Model region not found, setup model using `build` first.")
 
         # loop over methods from config file
@@ -359,7 +361,7 @@ class Model(object, metaclass=ABCMeta):
             if kwargs:
                 merged.update(**kwargs)
             for k, v in merged.items():
-                logger.info(f"{method}.{k}: {v}")
+                logger.info(f"{step}.{k}={v}")
             method(**merged)
 
         # If there are any write options included in the steps,
@@ -402,9 +404,7 @@ class Model(object, metaclass=ABCMeta):
 
     @staticmethod
     def _options_contain_write(steps: List[Dict[str, Dict[str, Any]]]) -> bool:
-        return any(
-            next(iter(step_dict)).split(".")[-1] == "write" for step_dict in steps
-        )
+        return any("write" in next(iter(step_dict)) for step_dict in steps)
 
     @hydromt_step
     def write_data_catalog(

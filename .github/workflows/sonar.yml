@@ -41,10 +41,10 @@ jobs:
     name: run test coverage and SonarQube scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.8.14
+      - uses: prefix-dev/setup-pixi@v0.9.0
         with:
           pixi-version: "v0.49.0"
       - name: Test
