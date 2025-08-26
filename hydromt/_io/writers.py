@@ -201,7 +201,7 @@ def _write_nc(
     # Check the typing
     if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
         logger.error(f"Dataset object of type {type(ds).__name__} not recognized")
-        return
+        return None
     if isinstance(ds, xr.DataArray):
         if ds.name is None:
             ds.name = filepath.stem
@@ -243,7 +243,9 @@ def _write_nc(
     try:
         _compute_nc(ds, filepath=filepath, **kwargs)
     except PermissionError:
-        logger.warning(f"Could not write to file {filepath.as_posix()}, defering write")
+        logger.warning(
+            f"Could not write to file {filepath.as_posix()}, deferring write"
+        )
         temp_data_dir = TemporaryDirectory()
 
         temp_filepath = Path(temp_data_dir.name, filepath.name)
@@ -274,7 +276,7 @@ def _write_region(
     if not exists(base_name):
         makedirs(base_name, exist_ok=True)
 
-    logger.info(f"writing region data to {write_path}")
+    logger.debug(f"writing region data to {write_path}")
     gdf = cast(gpd.GeoDataFrame, region.copy())
 
     if to_wgs84 and (

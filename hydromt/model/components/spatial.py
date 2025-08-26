@@ -108,13 +108,13 @@ class SpatialModelComponent(ModelComponent, ABC):
         """
         self.root._assert_write_mode()
         if self._region_component is not None:
-            logger.info(
+            logger.debug(
                 "Region is a reference to another component. Skipping writing..."
             )
             return
 
         if self.region is None:
-            logger.info("No region data available to write.")
+            logger.warning("No region data available to write.")
             return
 
         _write_region(

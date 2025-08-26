@@ -179,17 +179,7 @@ class GridComponent(SpatialModelComponent):
         self.root._assert_write_mode()
         region_options = region_options or {}
 
-        if self._region_component is None:
-            if self._region_filename:
-                self.write_region(**region_options)
-            else:
-                logger.debug(
-                    "Skip writing region to disk: no region component filename provided to GridComponent."
-                )
-        else:
-            logger.debug(
-                f"Skip writing region to disk: region component `{self._region_component}` was provided to GridComponent --- it should handle writing."
-            )
+        self.write_region(**region_options)
 
         if len(self.data) == 0:
             exec_nodata_strat(

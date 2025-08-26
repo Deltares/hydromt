@@ -5,7 +5,7 @@ import os
 from logging import Logger, getLogger
 from os.path import basename, dirname, isfile, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -251,6 +251,7 @@ class VectorComponent(SpatialModelComponent):
         filename: Optional[str] = "vector/vector.nc",
         geometry_filename: Optional[str] = "vector/vector.geojson",
         ogr_compliant: bool = False,
+        region_options: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         """Write model vector to combined netcdf and geojson files.
@@ -284,6 +285,10 @@ class VectorComponent(SpatialModelComponent):
             If filename only, write the netCDF4 file in an ogr compliant format
             This makes it readable as a vector file in e.g. QGIS
             see :py:meth:`~hydromt.vector.GeoBase.ogr_compliant` for more details.
+        region_options: dict, optional
+            Options to pass to the write_region method.
+            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
+            If `filename` is not provided, `self.region_filename` will be used.
         **kwargs:
             Additional keyword arguments that are passed to the `write_nc`
             function.
@@ -293,6 +298,8 @@ class VectorComponent(SpatialModelComponent):
             logger.debug("No vector data found, skip writing.")
             return
         self.root._assert_write_mode()
+        region_options = region_options or {}
+        self.write_region(**region_options)
 
         if filename is None and geometry_filename is None:
             raise ValueError(
