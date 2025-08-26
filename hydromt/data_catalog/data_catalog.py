@@ -65,7 +65,7 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
     create_source,
 )
-from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
+from hydromt.gis._gis_utils import _parse_geom_bbox
 from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
@@ -1152,7 +1152,7 @@ class DataCatalog(object):
 
                             bbox: Optional[Bbox] = query_kwargs.get("bbox")
                             if bbox is not None:
-                                mask = _parse_geom_bbox_buffer(bbox=bbox)
+                                mask = _parse_geom_bbox(bbox=bbox)
                             else:
                                 mask = None
 
@@ -1315,7 +1315,7 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             if geom is not None or bbox is not None:
-                mask = _parse_geom_bbox_buffer(geom, bbox, buffer)
+                mask = _parse_geom_bbox(geom, bbox)
             else:
                 mask = None
             data_like = RasterDatasetAdapter._slice_data(
@@ -1424,7 +1424,7 @@ class DataCatalog(object):
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if geom is not None or bbox is not None:
-            mask = _parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+            mask = _parse_geom_bbox(geom=geom, bbox=bbox)
         else:
             mask = None
         if isinstance(data_like, dict):
@@ -1551,7 +1551,7 @@ class DataCatalog(object):
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
         if geom is not None or bbox is not None:
-            mask = _parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
+            mask = _parse_geom_bbox(geom=geom, bbox=bbox)
         else:
             mask = None
 
