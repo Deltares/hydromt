@@ -21,7 +21,7 @@ Fixed
 - CLI update command was not working. (#1244)
 - Allow models to not have a spatial component (allows updating if region is None). (#1244)
 - CF compliant dimensions in netcdf files
-- `buffer` argument in `DataCatalog.get_rasterdataset` now is an integer expressed in resolution multiplicity instead of in meters.
+- `buffer` argument in `DataCatalog.get_rasterdataset` now is an integer expressed in resolution multiplicity instead of in meters. (#1245)
 - Improved logging information for build and update functions. (#1237)
 
 Deprecated
