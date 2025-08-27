@@ -13,7 +13,6 @@ from shapely.geometry import box
 
 from hydromt._io.readers import _read_ncs
 from hydromt._io.writers import _write_nc
-from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -179,13 +178,11 @@ class GridComponent(SpatialModelComponent):
         self.root._assert_write_mode()
         region_options = region_options or {}
 
+        # TODO: Remove all these functions calls. Also check if region_options was used anywhere and remove that from the arguments.
         self.write_region(**region_options)
 
         if len(self.data) == 0:
-            exec_nodata_strat(
-                msg="No grid data found, skip writing.",
-                strategy=NoDataStrategy.WARN,
-            )
+            logger.warning("No grid data found, skip writing.")
             return None
 
         # write_nc requires dict - use dummy 'grid' key
@@ -244,10 +241,7 @@ class GridComponent(SpatialModelComponent):
         """Returns the resolution of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.res
-        exec_nodata_strat(
-            msg="No grid data found for deriving resolution",
-            strategy=NoDataStrategy.WARN,
-        )
+        logger.warning("No grid data found for deriving resolution")
         return None
 
     @property
@@ -255,26 +249,18 @@ class GridComponent(SpatialModelComponent):
         """Returns spatial transform of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.transform
-        exec_nodata_strat(
-            msg="No grid data found for deriving transform",
-            strategy=NoDataStrategy.WARN,
-        )
+        logger.warning("No grid data found for deriving transform")
         return None
 
     @property
     def crs(self) -> Optional[CRS]:
         """Returns coordinate reference system embedded in the model grid."""
         if self.data.raster is None:
-            exec_nodata_strat(
-                msg="No grid data found for deriving crs",
-                strategy=NoDataStrategy.WARN,
-            )
+            logger.warning("No grid data found for deriving crs")
             return None
         if self.data.raster.crs is None:
-            exec_nodata_strat(
-                msg="No crs found in grid data",
-                strategy=NoDataStrategy.WARN,
-            )
+            # TODO: All of these need to be logger.warning.
+            logger.warning("No crs found in grid data")
             return None
         return CRS(self.data.raster.crs)
 
@@ -283,10 +269,7 @@ class GridComponent(SpatialModelComponent):
         """Returns the bounding box of the model grid."""
         if len(self.data) > 0:
             return self.data.raster.bounds
-        exec_nodata_strat(
-            msg="No grid data found for deriving bounds",
-            strategy=NoDataStrategy.WARN,
-        )
+        logger.warning("No grid data found for deriving bounds")
         return None
 
     @property
@@ -297,9 +280,7 @@ class GridComponent(SpatialModelComponent):
             if crs is not None and hasattr(crs, "to_epsg"):
                 crs = crs.to_epsg()  # not all CRS have an EPSG code
             return gpd.GeoDataFrame(geometry=[box(*self.bounds)], crs=crs)
-        exec_nodata_strat(
-            msg="No grid data found for deriving region", strategy=NoDataStrategy.WARN
-        )
+        logger.warning("No grid data found for deriving region")
         return None
 
     @property
