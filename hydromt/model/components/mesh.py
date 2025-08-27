@@ -3,7 +3,7 @@
 import os
 from logging import Logger, getLogger
 from os.path import dirname, isdir, join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import xarray as xr
@@ -115,7 +115,6 @@ class MeshComponent(SpatialModelComponent):
         self,
         filename: Optional[str] = None,
         *,
-        region_options: Optional[Dict[str, Any]] = None,
         write_optional_ugrid_attributes: bool = False,
         **kwargs,
     ) -> None:
@@ -130,17 +129,11 @@ class MeshComponent(SpatialModelComponent):
         write_optional_ugrid_attributes : bool, optional
             If True, write optional ugrid attributes to the netCDF file, by default
             True.
-        region_options : dict, optional
-            Options to pass to the write_region method.
-            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
-            If `filename` is not provided, `self.region_filename` will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the
             `xarray.Dataset.to_netcdf` method.
         """
         self.root._assert_write_mode()
-        region_options = region_options or {}
-        self.write_region(**region_options)
 
         if len(self.data) < 1:
             logger.debug("No mesh data found, skip writing.")

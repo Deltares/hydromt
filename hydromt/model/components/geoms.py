@@ -5,7 +5,7 @@ from glob import glob
 from logging import Logger, getLogger
 from os.path import dirname, isdir, join
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -158,7 +158,6 @@ class GeomsComponent(SpatialModelComponent):
         filename: Optional[str] = None,
         *,
         to_wgs84: bool = False,
-        region_options: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         r"""Write model geometries to a vector file (by default GeoJSON) at <root>/<filename>.
@@ -173,18 +172,11 @@ class GeomsComponent(SpatialModelComponent):
             if None, the path that was provided at init will be used.
         to_wgs84: bool, optional
             If True, the geoms will be reprojected to WGS84(EPSG:4326) before they are written.
-        region_options: dict, optional
-            Options to pass to the write_region method.
-            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
-            If `filename` is not provided, `self.region_filename` will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
             `geopandas.to_file` function.
         """
         self.root._assert_write_mode()
-
-        region_options = region_options or {}
-        self.write_region(**region_options)
 
         if len(self.data) == 0:
             logger.debug("No geoms data found, skip writing.")

@@ -2,7 +2,7 @@
 
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -148,7 +148,6 @@ class GridComponent(SpatialModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
-        region_options: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> Optional[DeferedFileClose]:
         """Write model grid data to netcdf file at <root>/<fn>.
@@ -168,18 +167,10 @@ class GridComponent(SpatialModelComponent):
         force_sn: bool, optional
             If True and gdal_compliant, forces the dataset to have
             South -> North orientation.
-        region_options : dict, optional
-            Options to pass to the write_region method.
-            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
-            If `filename` is not provided, self.region_filename will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the `write_nc` method.
         """
         self.root._assert_write_mode()
-        region_options = region_options or {}
-
-        # TODO: Remove all these functions calls. Also check if region_options was used anywhere and remove that from the arguments.
-        self.write_region(**region_options)
 
         if len(self.data) == 0:
             logger.warning("No grid data found, skip writing.")
