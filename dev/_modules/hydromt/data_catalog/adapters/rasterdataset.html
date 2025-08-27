@@ -511,6 +511,7 @@
         <span class="n">time_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
         <span class="n">single_var_as_array</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter and harmonize the input RasterDataset.</span>
 
@@ -530,6 +531,9 @@
 <span class="sd">            how to handle no data being present in the result, by default NoDataStrategy.RAISE</span>
 <span class="sd">        single_var_as_array : bool, optional</span>
 <span class="sd">            whether to return a xr.DataArray if only a single variable is present, by default True</span>
+<span class="sd">        buffer : int, optional</span>
+<span class="sd">            Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,</span>
+<span class="sd">            by default 0</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -559,6 +563,7 @@
                 <span class="n">mask</span><span class="p">,</span>
                 <span class="n">align</span><span class="p">,</span>
                 <span class="n">time_range</span><span class="p">,</span>
+                <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">_has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">NoDataException</span><span class="p">()</span>
@@ -615,6 +620,7 @@
         <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">align</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">time_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the RasterDataset.</span>
 
@@ -630,6 +636,9 @@
 <span class="sd">            resolution to align the bounding box, by default None</span>
 <span class="sd">        time_range : Optional[TimeRange], optional</span>
 <span class="sd">            filter start and end times, by default None</span>
+<span class="sd">        buffer : int, optional</span>
+<span class="sd">            Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,</span>
+<span class="sd">            by default 0</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -659,7 +668,9 @@
         <span class="k">if</span> <span class="n">time_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">_slice_temporal_dimension</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">time_range</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">RasterDatasetAdapter</span><span class="o">.</span><span class="n">_slice_spatial_dimensions</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">align</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">RasterDatasetAdapter</span><span class="o">.</span><span class="n">_slice_spatial_dimensions</span><span class="p">(</span>
+                <span class="n">ds</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">align</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">_has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -671,6 +682,7 @@
         <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">align</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># make sure bbox is in data crs</span>
         <span class="n">bbox</span> <span class="o">=</span> <span class="kc">None</span>
@@ -701,7 +713,7 @@
                 <span class="p">)</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clip to [</span><span class="si">{</span><span class="n">bbox_str</span><span class="si">}</span><span class="s2">] (epsg:</span><span class="si">{</span><span class="n">epsg</span><span class="si">}</span><span class="s2">))&quot;</span><span class="p">)</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_bbox</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">clip_bbox</span><span class="p">(</span><span class="n">bbox</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">align</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">_has_no_data</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>

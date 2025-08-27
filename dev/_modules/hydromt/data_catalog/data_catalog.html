@@ -1711,7 +1711,7 @@
         <span class="n">bbox</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">geom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zoom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">buffer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">buffer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">chunks</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1753,8 +1753,9 @@
 <span class="sd">            Set the chunking of the data, this overrules the chunking set in the data</span>
 <span class="sd">            catalog. If not specified, the chunking defined in the data catalog will</span>
 <span class="sd">            be used. By default None</span>
-<span class="sd">        buffer : Union[float, int], optional</span>
-<span class="sd">            Buffer around the `bbox` or `geom` area of interest in meters, by default 0</span>
+<span class="sd">        buffer : int, optional</span>
+<span class="sd">            Buffer around the `bbox` or `geom` area of interest expressed in resolution multiplicity,</span>
+<span class="sd">            by default 0</span>
 <span class="sd">        handle_nodata : NoDataStrategy, optional</span>
 <span class="sd">            How to react when no data is found, by default NoDataStrategy.RAISE</span>
 <span class="sd">        variables : Optional[List], optional</span>
@@ -1812,7 +1813,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">geom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">mask</span> <span class="o">=</span> <span class="n">_parse_geom_bbox_buffer</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
+                <span class="c1"># buffer will be applied in _slice_data</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">_parse_geom_bbox_buffer</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">bbox</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">data_like</span> <span class="o">=</span> <span class="n">RasterDatasetAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>
@@ -1820,6 +1822,7 @@
                 <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span>
                 <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
                 <span class="n">time_range</span><span class="o">=</span><span class="n">time_range</span><span class="p">,</span>
+                <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">data_like</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">exec_nodata_strat</span><span class="p">(</span>
