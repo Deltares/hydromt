@@ -1315,7 +1315,8 @@ class DataCatalog(object):
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
             if geom is not None or bbox is not None:
-                mask = _parse_geom_bbox_buffer(geom, bbox, buffer)
+                # buffer will be applied in _slice_data
+                mask = _parse_geom_bbox_buffer(geom, bbox)
             else:
                 mask = None
             data_like = RasterDatasetAdapter._slice_data(
