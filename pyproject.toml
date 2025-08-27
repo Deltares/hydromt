@@ -5,108 +5,108 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "hydromt"
 authors = [
-  { name = "Dirk Eilander", email = "dirk.eilander@deltares.nl" },
-  { name = "Hélène Boisgontier", email = "helene.boisgontier@deltares.nl" },
-  { name = "Sam Vente", email = "sam.vente@deltares.nl" },
+	{ name = "Dirk Eilander", email = "dirk.eilander@deltares.nl" },
+	{ name = "Hélène Boisgontier", email = "helene.boisgontier@deltares.nl" },
+	{ name = "Sam Vente", email = "sam.vente@deltares.nl" },
 ]
 dependencies = [
-  "affine",                 # Spatial rasterers affine transformations (bbox pixel coalision)
-  "bottleneck",             # Spearmen rank computation
-  "click",                  # CLI configuration
-  "dask",                   # lazy computing
-  "fsspec[http]",           # general file systems utilities
-  "geopandas[all]>=0.10",   # pandas but geo, wraps fiona and shapely
-  "importlib_metadata",     # entrypoints backport
-  "mercantile",             # tile handling
-  "netcdf4",                # netcfd IO
-  "numba",                  # speed up computations (used in e.g. stats)
-  "numpy",                  # pin necessary to ensure compatability with C headers
-  "packaging",              # compare versions of hydromt
-  "pandas",                 # Dataframes
-  "pooch",                  # data fetching
-  "pyarrow",
-  "pydantic~=2.4",          # Validation
-  "pydantic-settings~=2.2", # Settings Management
-  "pyflwdir>=0.5.4",        # Hight models and derivatives
-  "pyogrio>=0.6",           # io for geopandas dataframes
-  "pyproj",                 # projections for Coordinate reference systems
-  "pystac",                 # STAC integration
-  "pyyaml",                 # yaml interface
-  "rasterio",               # raster wrapper around gdal
-  "requests",               # donwload stuff
-  "rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
-  "scipy",                  # scientific utilities
-  "shapely>=2.1.0",         # geometry transforms
-  "tomli",                  # parsing toml files
-  "tomli-w",                # writing toml files
-  "universal_pathlib>=0.2", # provides path compatability between different filesystems
-  "xarray",                 # ndim data arrays
-  "xmltodict",              # xml parser also used to read VRT
-  "xugrid>=0.9.0",          # xarray wrapper for mesh processing
-  "zarr>=2,<3",             # zarr
+	"affine",                 # Spatial rasterers affine transformations (bbox pixel coalision)
+	"bottleneck",             # Spearmen rank computation
+	"click",                  # CLI configuration
+	"dask",                   # lazy computing
+	"fsspec[http]",           # general file systems utilities
+	"geopandas[all]>=0.10",   # pandas but geo, wraps fiona and shapely
+	"importlib_metadata",     # entrypoints backport
+	"mercantile",             # tile handling
+	"netcdf4",                # netcfd IO
+	"numba",                  # speed up computations (used in e.g. stats)
+	"numpy",                  # pin necessary to ensure compatability with C headers
+	"packaging",              # compare versions of hydromt
+	"pandas",                 # Dataframes
+	"pooch",                  # data fetching
+	"pyarrow",
+	"pydantic~=2.4",          # Validation
+	"pydantic-settings~=2.2", # Settings Management
+	"pyflwdir>=0.5.4",        # Hight models and derivatives
+	"pyogrio>=0.6",           # io for geopandas dataframes
+	"pyproj",                 # projections for Coordinate reference systems
+	"pystac",                 # STAC integration
+	"pyyaml",                 # yaml interface
+	"rasterio",               # raster wrapper around gdal
+	"requests",               # donwload stuff
+	"rioxarray",              # wraps rasterio and xarray. Almost superceded by hydromt/raster.py
+	"scipy",                  # scientific utilities
+	"shapely>=2.1.0",         # geometry transforms
+	"tomli",                  # parsing toml files
+	"tomli-w",                # writing toml files
+	"universal_pathlib>=0.2", # provides path compatability between different filesystems
+	"xarray",                 # ndim data arrays
+	"xmltodict",              # xml parser also used to read VRT
+	"xugrid>=0.9.0",          # xarray wrapper for mesh processing
+	"zarr>=2,<4",             # zarr
 ]
 
 requires-python = ">=3.11"
 readme = "README.rst"
 classifiers = [
-  "Development Status :: 5 - Production/Stable",
-  "Intended Audience :: Developers",
-  "Intended Audience :: Science/Research",
-  "Topic :: Scientific/Engineering :: Hydrology",
-  "License :: OSI Approved :: MIT License",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
+	"Development Status :: 5 - Production/Stable",
+	"Intended Audience :: Developers",
+	"Intended Audience :: Science/Research",
+	"Topic :: Scientific/Engineering :: Hydrology",
+	"License :: OSI Approved :: MIT License",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
 ]
 dynamic = ['version', 'description']
 
 [project.optional-dependencies]
 io = [
-  "gcsfs>=2023.12.1", # google cloud file system
-  "gdal>=3.5.0",      # Our favourite geospatial library
-  "fastparquet",      # parquet IO
-  "openpyxl",         # excel IO
-  "pillow",           # image IO
-  "s3fs",             # S3 file system
+	"gcsfs>=2023.12.1", # google cloud file system
+	"gdal>=3.5.0",      # Our favourite geospatial library
+	"fastparquet",      # parquet IO
+	"openpyxl",         # excel IO
+	"pillow",           # image IO
+	"s3fs",             # S3 file system
 ]
 extra = [
-  "matplotlib", # plotting; required for slippy tiles
-  "pyet",       # calc evapotraspiration, quite well used, used in all wflow models but domain specific
+	"matplotlib", # plotting; required for slippy tiles
+	"pyet",       # calc evapotraspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
-  "flit",            # needed to publish to pypi
-  "mypy",            # static type checking
-  "pandas-stubs",    # type hints for pandas
-  "pre-commit",      # linting
-  "ruff",            # linting
-  "twine",           # needed to publish to pypi
-  "types-openpyxl",  # type hints for openpyxl
-  "types-PyYAML",    # type hints for pyyaml
-  "types-Pillow",    # type hints for pillow
-  "types-requests",  # type hints for requests
-  "types-xmltodict", # type hints for xmltodict
+	"flit",            # needed to publish to pypi
+	"mypy",            # static type checking
+	"pandas-stubs",    # type hints for pandas
+	"pre-commit",      # linting
+	"ruff",            # linting
+	"twine",           # needed to publish to pypi
+	"types-openpyxl",  # type hints for openpyxl
+	"types-PyYAML",    # type hints for pyyaml
+	"types-Pillow",    # type hints for pillow
+	"types-requests",  # type hints for requests
+	"types-xmltodict", # type hints for xmltodict
 ]
 test = [
-  "pytest>=8",      # testing framework
-  "pytest-cov",     # test coverage
-  "pytest-mock",    # mocking
-  "pytest-timeout", # darn hanging tests
+	"pytest>=8",      # testing framework
+	"pytest-cov",     # test coverage
+	"pytest-mock",    # mocking
+	"pytest-timeout", # darn hanging tests
 ]
 doc = [
-  "hydromt[examples,extra]",      # examples are included in the docs
-  "nbsphinx",                     # build notebooks in docs
-  "pydata-sphinx-theme>=0.15.2",  # theme
-  "sphinx_autosummary_accessors", # doc layout
-  "sphinx",                       # build docks
-  "sphinx_design",                # doc layout
-  "sphinx-click",                 # click integration
-  "sbom4python",                  # generate software bill of materials
+	"hydromt[examples,extra]",      # examples are included in the docs
+	"nbsphinx",                     # build notebooks in docs
+	"pydata-sphinx-theme>=0.15.2",  # theme
+	"sphinx_autosummary_accessors", # doc layout
+	"sphinx",                       # build docks
+	"sphinx_design",                # doc layout
+	"sphinx-click",                 # click integration
+	"sbom4python",                  # generate software bill of materials
 ]
 examples = [
-  "cartopy",    # plotting examples
-  "jupyterlab", # run examples in jupyter notebook
-  "notebook",   # jupyter integration
+	"cartopy",    # plotting examples
+	"jupyterlab", # run examples in jupyter notebook
+	"notebook",   # jupyter integration
 ]
 
 [project.urls]
@@ -165,16 +165,16 @@ testpaths = ["tests"]
 markers = ["integration: marks tests as being integration tests"]
 
 filterwarnings = [
-  "error",
-  # "ignore::rasterio.errors.NotGeoreferencedWarning",                              # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
-  "ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
-  "ignore::ResourceWarning",                                                      # upstream issue with aoihttp, can remove once aoihttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
-  "ignore::pytest.PytestUnraisableExceptionWarning",                              # combine with the above: https://github.com/pytest-dev/pytest/issues/9825
-  'ignore:pathlib\.Path\.__enter__:DeprecationWarning',                           # xugrid in python 3.11
-  #   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
-  "ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
-  'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
-  "ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                 # Pillow 13
+	"error",
+	# "ignore::rasterio.errors.NotGeoreferencedWarning",                              # upstream issue with rasterio, see https://github.com/rasterio/rasterio/issues/2497
+	"ignore:Detected a customized `__new__` method in subclass:DeprecationWarning", #upstream error in universal_pathlib see https://github.com/fsspec/universal_pathlib?tab=readme-ov-file#migrating-to-v020
+	"ignore::ResourceWarning",                                                      # upstream issue with aoihttp, can remove once aoihttp 4.0 is stable: https://github.com/aio-libs/aiohttp/issues/5426
+	"ignore::pytest.PytestUnraisableExceptionWarning",                              # combine with the above: https://github.com/pytest-dev/pytest/issues/9825
+	'ignore:pathlib\.Path\.__enter__:DeprecationWarning',                           # xugrid in python 3.11
+	#   "ignore:Implicit None on return values is deprecated and will raise KeyErrors:DeprecationWarning"
+	"ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
+	'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
+	"ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                 # Pillow 13
 ]
 
 [tool.mypy]
@@ -218,36 +218,36 @@ pyflwdir = ">=0.5.4"
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
-  "sphinx-build",
-  "-M",
-  "doctest",
-  "docs",
-  "docs/_build",
-  "-W",
+	"sphinx-build",
+	"-M",
+	"doctest",
+	"docs",
+	"docs/_build",
+	"-W",
 ] }
 docs-build = { cmd = [
-  "sphinx-build",
-  "-M",
-  "html",
-  "docs",
-  "docs/_build",
-  "-W",
+	"sphinx-build",
+	"-M",
+	"html",
+	"docs",
+	"docs/_build",
+	"-W",
 ], depends-on = [
-  "doctest",
+	"doctest",
 ] }
 docs = { depends-on = ["docs-build"] } # alias
 doc = { depends-on = ["docs-build"] } # alias
 serve = { cmd = ["python", "-m", "http.server", "-d", "docs/_build/html"] }
 generate-sbom = { cmd = [
-  "sbom4python",
-  "--module",
-  "hydromt",
-  "--output-file",
-  "hydromt-core-sbom.json",
-  "--sbom",
-  "spdx",
-  "--format",
-  "json",
+	"sbom4python",
+	"--module",
+	"hydromt",
+	"--output-file",
+	"hydromt-core-sbom.json",
+	"--sbom",
+	"spdx",
+	"--format",
+	"json",
 ] }
 
 [tool.pixi.feature.test.tasks]
@@ -255,11 +255,11 @@ test = { cmd = ["pytest"] }
 test-lf = { cmd = ["pytest", "--lf", "--tb=short"] }
 test-err-warn = { cmd = ["pytest", "--tb=short", "-W", "error"] }
 test-cov = { cmd = [
-  "pytest",
-  "--verbose",
-  "--cov=hydromt",
-  "--cov-report=xml",
-  "--cov-branch",
+	"pytest",
+	"--verbose",
+	"--cov=hydromt",
+	"--cov-report=xml",
+	"--cov-branch",
 ] }
 
 [tool.pixi.feature.dev.tasks]
@@ -269,77 +269,77 @@ lint = { cmd = ["pre-commit", "run", "--all"] }
 mypy = "mypy ."
 
 docker-build = { cmd = [
-  "docker",
-  "build",
-  "-t",
-  "deltares/hydromt:$DOCKER_TAG",
-  "--target=$DOCKER_TARGET",
-  "--build-arg",
-  "PIXIENV=$DOCKER_TARGET-latest",
-  ".",
+	"docker",
+	"build",
+	"-t",
+	"deltares/hydromt:$DOCKER_TAG",
+	"--target=$DOCKER_TARGET",
+	"--build-arg",
+	"PIXIENV=$DOCKER_TARGET-latest",
+	".",
 ], env = { DOCKER_TAG = "<DOCKER_TAG>", DOCKER_TARGET = "<DOCKER_TARGET>" } }
 docker-build-min = { cmd = [
-  "pixi",
-  "run",
-  "docker-build",
+	"pixi",
+	"run",
+	"docker-build",
 ], env = { DOCKER_TAG = "min", DOCKER_TARGET = "min" } }
 docker-build-full = { cmd = [
-  "pixi",
-  "run",
-  "docker-build",
+	"pixi",
+	"run",
+	"docker-build",
 ], env = { DOCKER_TAG = "full", DOCKER_TARGET = "full" } }
 docker-build-slim = { cmd = [
-  "pixi",
-  "run",
-  "docker-build",
+	"pixi",
+	"run",
+	"docker-build",
 ], env = { DOCKER_TAG = "slim", DOCKER_TARGET = "slim" } }
 docker-build-latest = { cmd = [
-  "pixi",
-  "run",
-  "docker-build",
+	"pixi",
+	"run",
+	"docker-build",
 ], env = { DOCKER_TAG = "latest", DOCKER_TARGET = "slim" } }
 
 docker-publish-min = { cmd = [
-  "docker",
-  "push",
-  "deltares/hydromt:min",
+	"docker",
+	"push",
+	"deltares/hydromt:min",
 ], depends-on = [
-  "docker-build-min",
+	"docker-build-min",
 ] }
 docker-publish-slim = { cmd = [
-  "docker",
-  "push",
-  "deltares/hydromt:slim",
+	"docker",
+	"push",
+	"deltares/hydromt:slim",
 ], depends-on = [
-  "docker-build-slim",
+	"docker-build-slim",
 ] }
 docker-publish-latest = { cmd = [
-  "docker",
-  "push",
-  "deltares/hydromt:latest",
+	"docker",
+	"push",
+	"deltares/hydromt:latest",
 ], depends-on = [
-  "docker-build-latest",
+	"docker-build-latest",
 ] }
 docker-publish-full = { cmd = [
-  "docker",
-  "push",
-  "deltares/hydromt:full",
+	"docker",
+	"push",
+	"deltares/hydromt:full",
 ], depends-on = [
-  "docker-build-full",
+	"docker-build-full",
 ] }
 docker-publish = { depends-on = [
-  "docker-publish-min",
-  "docker-publish-slim",
-  "docker-publish-latest",
-  "docker-publish-full",
+	"docker-publish-min",
+	"docker-publish-slim",
+	"docker-publish-latest",
+	"docker-publish-full",
 ] }
 docker-clean = { cmd = ["docker", "system", "prune", "-f"] }
 
 pypi = { depends-on = [
-  "pypi-git-clean",
-  "pypi-git-restore",
-  "pypi-flit-build",
-  "pypi-twine",
+	"pypi-git-clean",
+	"pypi-git-restore",
+	"pypi-flit-build",
+	"pypi-twine",
 ] }
 pypi-git-clean = { cmd = ["git", "clean", "-xdf"] }
 pypi-git-resore = { cmd = ["git", "restore", "-SW", "."] }
@@ -348,10 +348,10 @@ pypi-twine = { cmd = ["python", "-m", "twine", "check", "dist/*"] }
 
 # clean
 clean = { depends-on = [
-  "clean-dist",
-  "clean-docs-generated",
-  "clean-docs-build",
-  "clean-docs-examples",
+	"clean-dist",
+	"clean-docs-generated",
+	"clean-docs-build",
+	"clean-docs-examples",
 ] }
 clean-dist = { cmd = ["rm", "-rf", "dist"] }
 clean-docs-generated = { cmd = ["rm", "-rf", "docs/_generated"] }
@@ -360,61 +360,61 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 
 [tool.pixi.environments]
 default = { features = [
-  "py311",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py311",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py311" }
 
 full-latest = { features = [
-  "py313",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py313",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py313" }
 min-latest = { features = ["py313", "test"], solve-group = "py313" }
 slim-latest = { features = [
-  "py313",
-  "io",
-  "extra",
-  "examples",
+	"py313",
+	"io",
+	"extra",
+	"examples",
 ], solve-group = "py313" }
 
 full-py313 = { features = [
-  "py313",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py313",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py313" }
 min-py313 = { features = ["py313", "test"], solve-group = "py313" }
 
 full-py312 = { features = [
-  "py312",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py312",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py312" }
 min-py312 = { features = ["py312", "test"], solve-group = "py312" }
 
 full-py311 = { features = [
-  "py311",
-  "io",
-  "extra",
-  "dev",
-  "test",
-  "doc",
-  "examples",
+	"py311",
+	"io",
+	"extra",
+	"dev",
+	"test",
+	"doc",
+	"examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311", "test"], solve-group = "py311" }
