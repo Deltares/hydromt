@@ -32,7 +32,7 @@ def _write_toml(path: StrPath, data: Dict[str, Any]):
         dump_toml(data, f)
 
 
-def _write_xy(path, gdf, fmt="%.4f"):
+def write_xy(path, gdf, fmt="%.4f"):
     """Write geopandas.GeoDataFrame with Point geometries to point xy files.
 
     Parameters
@@ -51,7 +51,7 @@ def _write_xy(path, gdf, fmt="%.4f"):
         np.savetxt(f, xy, fmt=fmt)
 
 
-def _netcdf_writer(
+def netcdf_writer(
     obj: Union[xr.Dataset, xr.DataArray],
     data_root: Union[str, Path],
     data_name: str,
@@ -91,7 +91,7 @@ def _netcdf_writer(
     return write_path
 
 
-def _zarr_writer(
+def zarr_writer(
     obj: Union[xr.Dataset, xr.DataArray],
     data_root: Union[str, Path],
     data_name: str,
@@ -152,7 +152,7 @@ def _compute_nc(
     obj = None
 
 
-def _write_nc(
+def write_nc(
     ds: xr.DataArray | xr.Dataset,
     filepath: Path | str,
     *,

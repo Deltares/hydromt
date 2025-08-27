@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
 from hydromt._io.readers import _read_toml, _read_yaml
-from hydromt._io.writers import _write_toml, _write_yaml
+from hydromt._io.writers import write_toml, write_yaml
 from hydromt._utils.path import _make_config_paths_relative
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
@@ -94,9 +94,9 @@ class ConfigComponent(ModelComponent):
             write_data = _make_config_paths_relative(self.data, self.root.path)
             ext = splitext(p)[-1]
             if ext in _YAML_EXTS:
-                _write_yaml(write_path, write_data)
+                write_yaml(write_path, write_data)
             elif ext == _TOML_EXT:
-                _write_toml(write_path, write_data)
+                write_toml(write_path, write_data)
             else:
                 raise ValueError(f"Unknown file extension: {ext}")
 

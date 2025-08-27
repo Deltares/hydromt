@@ -12,7 +12,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt._io.readers import _read_ncs
-from hydromt._io.writers import _write_nc
+from hydromt._io.writers import write_nc
 from hydromt._typing.type_def import DeferedFileClose
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -177,7 +177,7 @@ class GridComponent(SpatialModelComponent):
             return None
 
         # write_nc requires dict - use dummy 'grid' key
-        return _write_nc(
+        return write_nc(
             self.data,
             filepath=Path(self.root.path, filename or self._filename),
             gdal_compliant=gdal_compliant,

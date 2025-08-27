@@ -15,7 +15,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt._io.readers import _read_ncs
-from hydromt._io.writers import _write_nc
+from hydromt._io.writers import write_nc
 from hydromt.gis.vector import GeoDataset
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -332,7 +332,7 @@ class VectorComponent(SpatialModelComponent):
             else:
                 ds = ds.vector.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
             # write_nc requires dict - use dummy key
-            _write_nc(
+            write_nc(
                 ds,
                 filepath=Path(self.root.path, filename),
                 engine="netcdf4",
@@ -355,7 +355,7 @@ class VectorComponent(SpatialModelComponent):
             logger.debug(f"Writing file {full_path}")
             gdf.to_file(full_path)
             # write_nc requires dict - use dummy key
-            _write_nc(
+            write_nc(
                 ds.drop_vars("geometry"),
                 filepath=Path(self.root.path, filename),
                 **kwargs,
