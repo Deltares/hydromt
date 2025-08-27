@@ -33,7 +33,7 @@ jobs:
   publish-docs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - id: download-artifact
       uses: dawidd6/action-download-artifact@v11
       with:
@@ -82,7 +82,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # get the whole history not just the one commit
           ref: main
