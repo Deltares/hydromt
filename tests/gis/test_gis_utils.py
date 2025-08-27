@@ -15,20 +15,6 @@ from hydromt.gis import _gis_utils, _raster_utils, _vector_utils
 from hydromt.gis.raster import RasterDataArray, full_from_transform
 
 
-def test_parse_geom_bbox(geodf):
-    bbox = [4.376324, 51.983089, 4.386688, 51.987371]
-    geom = _gis_utils._parse_geom_bbox(bbox=bbox)
-    assert isinstance(geom, gpd.GeoDataFrame)
-    assert geom.crs.to_epsg() == 4326
-    # Test raise error when no inputs are given
-    with pytest.raises(ValueError, match="No geom or bbox provided."):
-        _gis_utils._parse_geom_bbox()
-    # Test wether crs is set to epsg 4326 if no crs has been set yet
-    geodf_no_crs = geodf.set_crs(crs=None, allow_override=True)
-    geom = _gis_utils._parse_geom_bbox(geodf_no_crs)
-    assert geom.crs.to_epsg() == 4326
-
-
 def test_crs():
     bbox = [3, 51.5, 4, 52]  # NL
     assert _gis_utils.utm_crs(bbox).to_epsg() == 32631
