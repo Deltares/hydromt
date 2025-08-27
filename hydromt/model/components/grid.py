@@ -250,7 +250,6 @@ class GridComponent(SpatialModelComponent):
             logger.warning("No grid data found for deriving crs")
             return None
         if self.data.raster.crs is None:
-            # TODO: All of these need to be logger.warning.
             logger.warning("No crs found in grid data")
             return None
         return CRS(self.data.raster.crs)
