@@ -1,9 +1,8 @@
 """All of the types for handeling errors within HydroMT."""
 
+import inspect
+import logging
 from enum import Enum
-from logging import Logger, getLogger
-
-logger: Logger = getLogger(__name__)
 
 
 class DeprecatedError(Exception):
@@ -40,7 +39,18 @@ class NoDataException(Exception):
 
 
 def exec_nodata_strat(msg: str, strategy: NoDataStrategy) -> None:
-    """Execute nodata strategy."""
+    """Execute nodata strategy.
+
+    Uses the logger from the calling module if it has a logger.
+    Otherwise creates a new logger with the calling module's name.
+    Otherwise uses a backup logger from this current module.
+    """
+    frame = inspect.currentframe()
+    caller_frame = frame.f_back if frame else None
+    module = inspect.getmodule(caller_frame) if caller_frame else None
+    logger_name = getattr(module, "__name__", __name__)
+    logger = getattr(module, "logger", logging.getLogger(logger_name))
+
     if strategy == NoDataStrategy.RAISE:
         raise NoDataException(msg)
     elif strategy == NoDataStrategy.WARN:
