@@ -66,9 +66,18 @@ class PyogrioDriver(GeoDataFrameDriver):
         if metadata is not None:
             crs = metadata.crs
         if crs is not None:
-            if gdf.crs is not None:
-                logger.warning(f"Overwriting crs of GeoDataFrame to {crs}")
-            gdf.set_crs(crs)
+            if gdf.crs is None:
+                logger.info(f"Setting crs of GeoDataFrame from catalog crs: {crs}")
+                gdf.set_crs(crs)
+            elif gdf.crs != crs:
+                logger.warning(
+                    f"CRS of GeoDataFrame {gdf.crs} does not match catalog metadata "
+                    f"CRS: {crs}. Keeping the original CRS."
+                )
+        elif gdf.crs is None:
+            raise ValueError(
+                "The GeoDataFrame has no CRS. Set one using the crs option."
+            )
 
         if gdf.index.size == 0:
             exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
