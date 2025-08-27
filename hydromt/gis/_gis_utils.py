@@ -23,7 +23,7 @@ __all__ = [
     "_axes_attrs",
     "_bbox_from_file_and_filters",
     "_parse_crs",
-    "_parse_geom_bbox",
+    "_parse_geom_bbox_buffer",
     "_zoom_to_overview_level",
     "_to_geographic_bbox",
     "utm_crs",
@@ -112,12 +112,13 @@ def _axes_attrs(crs):
     return x_dim, y_dim, x_attrs, y_attrs
 
 
-def _parse_geom_bbox(
+def _parse_geom_bbox_buffer(
     geom: Optional[Geom] = None,
     bbox: Optional[Bbox] = None,
+    buffer: float = 0.0,
     crs: Optional[CRS] = None,
 ) -> Geom:
-    """Parse geom or bbox to a geometry.
+    """Parse geom or bbox to a (buffered) geometry.
 
     Arguments
     ---------
@@ -126,6 +127,8 @@ def _parse_geom_bbox(
     bbox : array-like of floats, optional
         (xmin, ymin, xmax, ymax) bounding box of area of interest
         (in WGS84 coordinates).
+    buffer : float, optional
+        Buffer around the `bbox` or `geom` area of interest in meters. By default 0.
     crs: pyproj.CRS, optional
         projection of the bbox or geometry. If the geometry already has a crs, this
         argument is ignored. Defaults to EPSG:4236.
@@ -144,6 +147,12 @@ def _parse_geom_bbox(
         raise ValueError("No geom or bbox provided.")
     elif geom.crs is None:
         geom = geom.set_crs(crs)
+
+    if buffer > 0:
+        # make sure geom is projected > buffer in meters!
+        if geom.crs.is_geographic:
+            geom = geom.to_crs(3857)
+        geom = geom.buffer(buffer)
     return geom
 
 

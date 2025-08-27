@@ -24,7 +24,7 @@ from hydromt._typing import (
 )
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
-from hydromt.gis._gis_utils import _parse_geom_bbox
+from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
 
 from .data_source import DataSource
 
@@ -57,7 +57,7 @@ class GeoDataFrameSource(DataSource):
         """Use the driver and data adapter to read and harmonize the data."""
         self._used = True
         if bbox is not None or (mask is not None and buffer > 0):
-            mask = _parse_geom_bbox(mask, bbox)
+            mask = _parse_geom_bbox_buffer(mask, bbox, buffer)
 
         vrs: Optional[List[str]] = self.data_adapter._to_source_variables(variables)
 
