@@ -1,3 +1,4 @@
+import logging
 import warnings
 from pathlib import Path
 
@@ -58,12 +59,16 @@ class TestGeoDataFrameTableDriver:
 
     @fixture_uris
     def test_reads_correctly(
-        self, uri: str, request: pytest.FixtureRequest, geodf: gpd.GeoDataFrame
+        self, uri: str, request: pytest.FixtureRequest, geodf: gpd.GeoDataFrame, caplog
     ):
+        caplog.set_level(logging.WARNING)
         uri = request.getfixturevalue(uri)
         driver = GeoDataFrameTableDriver()
         gdf = driver.read(uris=[uri])
         pd.testing.assert_frame_equal(gdf, geodf)
+
+    def test_does_not_raise_warning_for_mask(self):
+        pass
 
     def test_unknown_extension(self):
         driver = GeoDataFrameTableDriver()
