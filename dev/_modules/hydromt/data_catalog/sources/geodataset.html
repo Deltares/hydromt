@@ -520,6 +520,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mark_as_used</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_start_read_data</span><span class="p">()</span>
 
         <span class="c1"># Transform time_range and variables to match the data source</span>
         <span class="n">tr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">_to_source_timerange</span><span class="p">(</span><span class="n">time_range</span><span class="p">)</span>

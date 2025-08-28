@@ -517,7 +517,9 @@
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Use the driver and data adapter to read and harmonize the data.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_used</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mark_as_used</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_start_read_data</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">buffer</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="n">_parse_geom_bbox_buffer</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">bbox</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
 

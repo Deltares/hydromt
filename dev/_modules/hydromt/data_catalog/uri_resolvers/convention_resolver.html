@@ -578,10 +578,10 @@
 <span class="sd">        NoDataException</span>
 <span class="sd">            when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;attempting to resolve uri: </span><span class="si">{</span><span class="n">uri</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">=</span> <span class="n">SourceMetadata</span><span class="p">()</span>
-
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;attempting to resolve uri: </span><span class="si">{</span><span class="n">uri</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">uri_expanded</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_expand_uri_placeholders</span><span class="p">(</span>
             <span class="n">uri</span><span class="p">,</span>

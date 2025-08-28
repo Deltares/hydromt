@@ -505,6 +505,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Use the resolver, driver, and data adapter to read and harmonize the data.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mark_as_used</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_start_read_data</span><span class="p">()</span>
 
         <span class="n">tr</span><span class="p">:</span> <span class="n">TimeRange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">_to_source_timerange</span><span class="p">(</span><span class="n">time_range</span><span class="p">)</span>
         <span class="n">vrs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_adapter</span><span class="o">.</span><span class="n">_to_source_variables</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>

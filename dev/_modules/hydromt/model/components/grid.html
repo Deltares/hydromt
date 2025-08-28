@@ -460,7 +460,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -471,7 +471,6 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_ncs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_write_nc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferedFileClose</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpatialModelComponent</span>
@@ -617,7 +616,6 @@
         <span class="n">gdal_compliant</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">rename_dims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">force_sn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">region_options</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeferedFileClose</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write model grid data to netcdf file at &lt;root&gt;/&lt;fn&gt;.</span>
@@ -637,33 +635,13 @@
 <span class="sd">        force_sn: bool, optional</span>
 <span class="sd">            If True and gdal_compliant, forces the dataset to have</span>
 <span class="sd">            South -&gt; North orientation.</span>
-<span class="sd">        region_options : dict, optional</span>
-<span class="sd">            Options to pass to the write_region method.</span>
-<span class="sd">            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.</span>
-<span class="sd">            If `filename` is not provided, self.region_filename will be used.</span>
 <span class="sd">        **kwargs : dict</span>
 <span class="sd">            Additional keyword arguments to be passed to the `write_nc` method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_write_mode</span><span class="p">()</span>
-        <span class="n">region_options</span> <span class="o">=</span> <span class="n">region_options</span> <span class="ow">or</span> <span class="p">{}</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_component</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_filename</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">write_region</span><span class="p">(</span><span class="o">**</span><span class="n">region_options</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                    <span class="s2">&quot;Skip writing region to disk: no region component filename provided to GridComponent.&quot;</span>
-                <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Skip writing region to disk: region component `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_region_component</span><span class="si">}</span><span class="s2">` was provided to GridComponent --- it should handle writing.&quot;</span>
-            <span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;No grid data found, skip writing.&quot;</span><span class="p">,</span>
-                <span class="n">strategy</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No grid data found, skip writing.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># write_nc requires dict - use dummy &#39;grid&#39; key</span>
@@ -726,10 +704,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the resolution of the model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">res</span>
-        <span class="n">exec_nodata_strat</span><span class="p">(</span>
-            <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;No grid data found for deriving resolution&quot;</span><span class="p">,</span>
-            <span class="n">strategy</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No grid data found for deriving resolution&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
@@ -737,26 +712,17 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns spatial transform of the model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform</span>
-        <span class="n">exec_nodata_strat</span><span class="p">(</span>
-            <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;No grid data found for deriving transform&quot;</span><span class="p">,</span>
-            <span class="n">strategy</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No grid data found for deriving transform&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">crs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CRS</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns coordinate reference system embedded in the model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;No grid data found for deriving crs&quot;</span><span class="p">,</span>
-                <span class="n">strategy</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No grid data found for deriving crs&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;No crs found in grid data&quot;</span><span class="p">,</span>
-                <span class="n">strategy</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No crs found in grid data&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">CRS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 
@@ -765,10 +731,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the bounding box of the model grid.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
-        <span class="n">exec_nodata_strat</span><span class="p">(</span>
-            <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;No grid data found for deriving bounds&quot;</span><span class="p">,</span>
-            <span class="n">strategy</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No grid data found for deriving bounds&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
@@ -779,9 +742,7 @@
             <span class="k">if</span> <span class="n">crs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">crs</span><span class="p">,</span> <span class="s2">&quot;to_epsg&quot;</span><span class="p">):</span>
                 <span class="n">crs</span> <span class="o">=</span> <span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span>  <span class="c1"># not all CRS have an EPSG code</span>
             <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">box</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">)],</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">)</span>
-        <span class="n">exec_nodata_strat</span><span class="p">(</span>
-            <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;No grid data found for deriving region&quot;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">WARN</span>
-        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No grid data found for deriving region&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>

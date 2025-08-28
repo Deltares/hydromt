@@ -555,31 +555,33 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">to_wgs84</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">to_wgs84</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">write_kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the model region to file.</span>
 
-<span class="sd">        This function should be called from within the `write` function of the component inheriting from this class.</span>
+<span class="sd">        The region is an auxiliary file that is often not required by the model,</span>
+<span class="sd">        but can be useful for getting data from the data catalog.</span>
+<span class="sd">        Plugin implementors may choose to write this file on write for a specific component.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        filename : str, optional</span>
 <span class="sd">            The filename to write the region to. If None, the filename provided at initialization is used.</span>
-<span class="sd">        to_wgs84 : bool, optional</span>
+<span class="sd">        to_wgs84 : bool</span>
 <span class="sd">            If True, the region is reprojected to WGS84 before writing.</span>
 <span class="sd">        **write_kwargs:</span>
 <span class="sd">            Additional keyword arguments passed to the `geopandas.GeoDataFrame.to_file` function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_write_mode</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_component</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                 <span class="s2">&quot;Region is a reference to another component. Skipping writing...&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;No region data available to write.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No region data available to write.&quot;</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="n">_write_region</span><span class="p">(</span>

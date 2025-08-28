@@ -521,7 +521,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_used</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mark_as_used</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_start_read_data</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="n">bbox</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># buffer will be applied in transform</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="n">_parse_geom_bbox_buffer</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">bbox</span><span class="p">)</span>
