@@ -90,31 +90,33 @@ class SpatialModelComponent(ModelComponent, ABC):
         self,
         *,
         filename: Optional[StrPath] = None,
-        to_wgs84=False,
+        to_wgs84: bool = False,
         **write_kwargs,
     ) -> None:
         """Write the model region to file.
 
-        This function should be called from within the `write` function of the component inheriting from this class.
+        The region is an auxiliary file that is often not required by the model,
+        but can be useful for getting data from the data catalog.
+        Plugin implementors may choose to write this file on write for a specific component.
 
         Parameters
         ----------
         filename : str, optional
             The filename to write the region to. If None, the filename provided at initialization is used.
-        to_wgs84 : bool, optional
+        to_wgs84 : bool
             If True, the region is reprojected to WGS84 before writing.
         **write_kwargs:
             Additional keyword arguments passed to the `geopandas.GeoDataFrame.to_file` function.
         """
         self.root._assert_write_mode()
         if self._region_component is not None:
-            logger.info(
+            logger.debug(
                 "Region is a reference to another component. Skipping writing..."
             )
             return
 
         if self.region is None:
-            logger.info("No region data available to write.")
+            logger.warning("No region data available to write.")
             return
 
         _write_region(

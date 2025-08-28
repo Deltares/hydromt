@@ -43,6 +43,7 @@ class DataFrameSource(DataSource):
     ) -> Optional[pd.DataFrame]:
         """Use the resolver, driver, and data adapter to read and harmonize the data."""
         self._mark_as_used()
+        self._log_start_read_data()
 
         tr: TimeRange = self.data_adapter._to_source_timerange(time_range)
         vrs: Optional[List[str]] = self.data_adapter._to_source_variables(variables)

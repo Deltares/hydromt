@@ -341,15 +341,19 @@ class VectorComponent(SpatialModelComponent):
             )
         # write to geojson only
         elif filename is None:
-            os.makedirs(dirname(join(self.root.path, geometry_filename)), exist_ok=True)
+            full_path = join(self.root.path, geometry_filename)
+            os.makedirs(dirname(full_path), exist_ok=True)
             gdf = ds.vector.to_gdf(**kwargs)
-            gdf.to_file(join(self.root.path, geometry_filename))
+            logger.debug(f"Writing file {full_path}")
+            gdf.to_file(full_path)
         # write data to netcdf and geometry to geojson
         else:
-            os.makedirs(dirname(join(self.root.path, geometry_filename)), exist_ok=True)
+            full_path = join(self.root.path, geometry_filename)
+            os.makedirs(dirname(full_path), exist_ok=True)
             # write geometry
             gdf = ds.vector.geometry.to_frame("geometry")
-            gdf.to_file(join(self.root.path, geometry_filename))
+            logger.debug(f"Writing file {full_path}")
+            gdf.to_file(full_path)
             # write_nc requires dict - use dummy key
             _write_nc(
                 ds.drop_vars("geometry"),

@@ -32,6 +32,7 @@ Removed
 - opt and components CLI options for build and update. A configuration workflow file is now mandatory. (#1244)
 - From the `GridComponent`, the functions `create_from_region`, `add_data_from_constant`, `add_data_from_rasterdataset`, `add_data_from_raster_reclass`, `add_data_from_geodataframe`. (#1229) Equivalent workflows are still available.
 - From the `MeshComponent`, the functions `create_2d_from_region`, `add_2d_data_from_rasterdataset`, `add_2d_data_from_raster_reclass`. (#1229) Equivalent workflows are still available.
+- `GridComponent`, `MeshComponent`, `GeomsComponent`, and `VectorComponent` no longer write the region on `write`. The function `SpatialModelComponent.write_region` is still available for plugin implementors.
 
 v1.2.0 (2025-07-22)
 ===================

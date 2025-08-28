@@ -64,6 +64,8 @@ class RasterTindexResolver(URIResolver):
         NoDataException
             when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`
         """
+        logger.debug(f"attempting to resolve uri: {uri}")
+
         if mask is None:
             raise ValueError(f"Resolver {self.name} needs a mask")
         gdf = gpd.read_file(uri)

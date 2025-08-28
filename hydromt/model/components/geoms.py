@@ -156,6 +156,7 @@ class GeomsComponent(SpatialModelComponent):
     def write(
         self,
         filename: Optional[str] = None,
+        *,
         to_wgs84: bool = False,
         **kwargs,
     ) -> None:
