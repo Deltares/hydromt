@@ -85,10 +85,10 @@ SourceSpecDict = TypedDict(
     "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
 )
 
-DeferedFileClose = TypedDict(
-    "DeferedFileClose",
+DeferredFileClose = TypedDict(
+    "DeferredFileClose",
     {
-        "ds": Union[Dataset, DataArray],
+        "ds": Dataset,
         "original_path": str,
         "temp_path": str,
         "close_attempts": int,

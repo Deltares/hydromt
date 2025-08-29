@@ -15,7 +15,7 @@ from dask.diagnostics import ProgressBar
 from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
-from hydromt._typing.type_def import DeferedFileClose, StrPath
+from hydromt._typing.type_def import DeferredFileClose, StrPath
 
 logger: Logger = getLogger(__name__)
 
@@ -162,7 +162,7 @@ def _write_nc(
     force_sn: bool = False,
     force_overwrite: bool = False,
     **kwargs,
-) -> Optional[DeferedFileClose]:
+) -> Optional[DeferredFileClose]:
     """Write xarray.Dataset and/or xarray.DataArray to netcdf file.
 
     Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
@@ -251,7 +251,7 @@ def _write_nc(
         temp_filepath = Path(temp_data_dir.name, filepath.name)
         _compute_nc(ds, filepath=temp_filepath, **kwargs)
 
-        return DeferedFileClose(
+        return DeferredFileClose(
             ds=ds,
             original_path=filepath,
             temp_path=temp_filepath,

@@ -15,7 +15,7 @@ from pyproj import CRS
 
 from hydromt._io.readers import _read_yaml
 from hydromt._typing import StrPath
-from hydromt._typing.type_def import DeferedFileClose
+from hydromt._typing.type_def import DeferredFileClose
 from hydromt._utils import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
@@ -108,7 +108,7 @@ class Model(object, metaclass=ABCMeta):
         self.components: Dict[str, ModelComponent] = {}
         self._add_components(components)
 
-        self._defered_file_closes: List[DeferedFileClose] = []
+        self._deferred_file_closes: List[DeferredFileClose] = []
 
         model_metadata = cast(Dict[str, str], PLUGINS.model_metadata[self.name])
         logger.info(

@@ -13,7 +13,7 @@ from shapely.geometry import box
 
 from hydromt._io.readers import _read_ncs
 from hydromt._io.writers import _write_nc
-from hydromt._typing.type_def import DeferedFileClose
+from hydromt._typing.type_def import DeferredFileClose
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -149,7 +149,7 @@ class GridComponent(SpatialModelComponent):
         rename_dims: bool = False,
         force_sn: bool = False,
         **kwargs,
-    ) -> Optional[DeferedFileClose]:
+    ) -> Optional[DeferredFileClose]:
         """Write model grid data to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`~hydromt.model.Model.write_nc`

@@ -12,7 +12,7 @@ from xarray import DataArray, Dataset
 
 from hydromt._io.readers import _read_ncs
 from hydromt._io.writers import _write_nc
-from hydromt._typing.type_def import DeferedFileClose, XArrayDict
+from hydromt._typing.type_def import DeferredFileClose, XArrayDict
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -58,7 +58,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         """
         self._data: Optional[XArrayDict] = None
         self._filename: str = filename
-        self._defered_file_closes: List[DeferedFileClose] = []
+        self._deferred_file_closes: List[DeferredFileClose] = []
         super().__init__(
             model=model,
             region_component=region_component,
@@ -181,7 +181,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         files, using :py:meth:`~hydromt.raster.gdal_compliant`.
         The function will first try to directly write to file. In case of
         PermissionError, it will first write a temporary file and add to the
-        self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
+        self._deferred_file_closes attribute. Renaming and closing of netcdf filehandles
         will be done by calling the self._cleanup function.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
@@ -244,8 +244,8 @@ class SpatialDatasetsComponent(SpatialModelComponent):
 
         """
         failed_closes = []
-        while len(self._defered_file_closes) > 0:
-            close_handle = self._defered_file_closes.pop()
+        while len(self._deferred_file_closes) > 0:
+            close_handle = self._deferred_file_closes.pop()
             if close_handle["close_attempts"] > max_close_attempts:
                 # already tried to close this to many times so give up
                 logger.error(
@@ -265,7 +265,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
                     "because the following error was raised: {e}"
                 )
                 close_handle["close_attempts"] += 1
-                self._defered_file_closes.append(close_handle)
+                self._deferred_file_closes.append(close_handle)
                 failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
 
         return list(set(failed_closes))
