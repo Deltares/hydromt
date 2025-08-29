@@ -620,6 +620,7 @@ def artifact_data():
 @pytest.fixture
 def mock_model(tmpdir, mocker: MockerFixture):
     model = mocker.create_autospec(Model)
+    model.components = {}
     model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
     model.root.path.return_value = tmpdir
     model.data_catalog = mocker.create_autospec(DataCatalog)

@@ -6,7 +6,7 @@ from tomli_w import dump as toml_dump
 from yaml import dump as yaml_dump
 
 from hydromt._io.readers import _config_read, _read_yaml
-from hydromt._io.writers import _write_yaml
+from hydromt._io.writers import write_yaml
 from hydromt._utils.path import _make_config_paths_abs, _make_config_paths_relative
 from hydromt.model import Model
 from hydromt.model.components.config import ConfigComponent
@@ -49,7 +49,7 @@ def test_config_create_always_reads(tmpdir):
     filename = "myconfig.yaml"
     config_path = join(tmpdir, filename)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
-    _write_yaml(config_path, config_data)
+    write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
     config_component = ConfigComponent(
@@ -65,7 +65,7 @@ def test_config_does_not_read_at_lazy_init(tmpdir):
     filename = "myconfig.yaml"
     config_path = join(tmpdir, filename)
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
-    _write_yaml(config_path, config_data)
+    write_yaml(config_path, config_data)
     # notice the write mode
     model = Model(root=tmpdir, mode="w")
     config_component = ConfigComponent(

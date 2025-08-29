@@ -1,6 +1,6 @@
 import logging
 import os
-from os.path import dirname, isdir, isfile, join
+from os.path import dirname, join
 from pathlib import Path
 from typing import cast
 
@@ -124,10 +124,12 @@ def test_model_mesh_sets_correctly(tmpdir: Path):
 
 def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmpdir):
     mesh_component = MeshComponent(mock_model)
-    caplog.set_level(logging.DEBUG)
     mesh_component.root.is_reading_mode.return_value = False
+    mock_model.components["mesh"] = mesh_component
+    mock_model.name = "foo"
+    caplog.set_level(logging.INFO)
     mesh_component.write()
-    assert "No mesh data found, skip writing." in caplog.text
+    assert "foo.mesh: No mesh data found, skip writing." in caplog.text
     mock_model.root = ModelRoot(path=tmpdir, mode="r")
     mesh_component._data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(IOError, match="Model opened in read-only mode"):
@@ -136,11 +138,10 @@ def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmpdir):
     write_path = "mesh/fake_mesh.nc"
     mesh_component._data.grid.crs = 28992
     mesh_component.write(filename=write_path)
-    file_dir = join(mesh_component.root.path, dirname(write_path))
-    file_path = join(tmpdir, write_path)
-    assert isdir(file_dir)
-    assert f"Writing file {write_path}" in caplog.text
-    assert isfile(file_path)
+    file_path = Path(tmpdir / write_path)
+    assert file_path.parent.is_dir()
+    assert f"foo.mesh: Writing mesh to {file_path}" in caplog.text
+    assert file_path.is_file()
     ds = xr.open_dataset(file_path)
     assert "elevation" in ds.data_vars
     assert "28992" in ds.spatial_ref.crs_wkt

@@ -11,7 +11,7 @@ from pandas import DataFrame
 from xarray import DataArray, Dataset
 
 from hydromt._io.readers import _read_ncs
-from hydromt._io.writers import _write_nc
+from hydromt._io.writers import write_nc
 from hydromt._typing.type_def import DeferedFileClose, XArrayDict
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -80,7 +80,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     def _initialize(self, skip_read=False) -> None:
         """Initialize geoms."""
         if self._data is None:
-            self._data = dict()
+            self._data = {}
             if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
@@ -170,6 +170,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     def write(
         self,
         filename: Optional[str] = None,
+        *,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
@@ -209,16 +210,24 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            logger.debug("No data found, skiping writing.")
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: No data found, skipping writing."
+            )
             return
 
-        kwargs = {**{"engine": "netcdf4"}, **kwargs}
+        kwargs.setdefault("engine", "netcdf4")
         filename = filename or self._filename
+
         for name, ds in self.data.items():
-            filepath = Path(self.root.path, filename.format(name=name))
-            _write_nc(
+            file_path = self.root.path / filename.format(name=name)
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: Writing spatial dataset to {file_path}."
+            )
+
+            write_nc(
                 ds,
-                filepath=filepath,
+                file_path=file_path,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
                 force_sn=force_sn,

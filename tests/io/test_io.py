@@ -21,7 +21,7 @@ from hydromt._io.readers import (
     _open_vector,
     _open_vector_from_table,
 )
-from hydromt._io.writers import _write_xy
+from hydromt._io.writers import write_xy
 
 
 def test_open_vector(tmpdir, df, geodf, world):
@@ -37,7 +37,7 @@ def test_open_vector(tmpdir, df, geodf, world):
     if _compat.HAS_OPENPYXL:
         df.to_excel(xls_path)
     geodf.to_file(geojson_path, driver="GeoJSON")
-    _write_xy(xy_path, geodf)
+    write_xy(xy_path, geodf)
     geodf.to_file(shp_path)
     geodf.to_file(gpkg_path, driver="GPKG")
     # read csv
