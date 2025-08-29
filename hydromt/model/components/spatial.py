@@ -9,7 +9,6 @@ from geopandas import GeoDataFrame
 from pyproj import CRS
 
 from hydromt._io.writers import write_region
-from hydromt._typing.type_def import StrPath
 from hydromt.model.components.base import ModelComponent
 
 if TYPE_CHECKING:
@@ -88,8 +87,8 @@ class SpatialModelComponent(ModelComponent, ABC):
 
     def write_region(
         self,
+        filename: Optional[str] = None,
         *,
-        filename: Optional[StrPath] = None,
         to_wgs84: bool = False,
         **write_kwargs,
     ) -> None:
@@ -110,20 +109,28 @@ class SpatialModelComponent(ModelComponent, ABC):
         """
         self.root._assert_write_mode()
         if self._region_component is not None:
-            logger.debug(
+            logger.info(
                 "Region is a reference to another component. Skipping writing..."
             )
             return
 
         if self.region is None:
-            logger.warning("No region data available to write.")
+            logger.warning(
+                f"{self.model.name}.{self.name_in_model}: No region data available to write."
+            )
             return
+
+        filename = filename or self._region_filename
+        full_path = self.root.path / filename
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(
+            f"{self.model.name}.{self.name_in_model}: Writing region to {full_path}."
+        )
 
         write_region(
             self.region,
-            filename=filename or self._region_filename,
+            file_path=full_path,
             to_wgs84=to_wgs84,
-            root_path=self.root.path,
             **write_kwargs,
         )
 

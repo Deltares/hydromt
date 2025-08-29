@@ -2,8 +2,7 @@
 
 import os
 from logging import Logger, getLogger
-from os import makedirs
-from os.path import dirname, exists, isdir, join
+from os.path import isdir, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Union, cast
@@ -20,24 +19,24 @@ from hydromt._typing.type_def import DeferedFileClose, StrPath
 logger: Logger = getLogger(__name__)
 
 
-def _write_yaml(path: StrPath, data: Dict[str, Any]):
+def write_yaml(path: StrPath, data: Dict[str, Any]):
     """Write a dictionary to a yaml formatted file."""
     with open(path, "w") as f:
         dump_yaml(data, f)
 
 
-def _write_toml(path: StrPath, data: Dict[str, Any]):
+def write_toml(path: StrPath, data: Dict[str, Any]):
     """Write a dictionary to a toml formatted file."""
     with open(path, "wb") as f:
         dump_toml(data, f)
 
 
-def write_xy(path, gdf, fmt="%.4f"):
+def write_xy(path: StrPath, gdf, fmt="%.4f"):
     """Write geopandas.GeoDataFrame with Point geometries to point xy files.
 
     Parameters
     ----------
-    path: str
+    path: str or Path
         Path to the output file.
     gdf: geopandas.GeoDataFrame
         GeoDataFrame to write to point file.
@@ -122,7 +121,7 @@ def zarr_writer(
 
 def _compute_nc(
     ds: xr.Dataset,
-    filepath: Path,
+    file_path: Path,
     compute: bool = True,
     **kwargs,
 ):
@@ -134,13 +133,13 @@ def _compute_nc(
     ----------
     ds : xr.Dataset
         The dataset to be written.
-    filepath : Path
+    file_path : Path
         The full path to the outgoing file.
     compute : bool, optional
         Whether to compute the output directly, by default True
     """
     obj = ds.to_netcdf(
-        filepath,
+        file_path,
         compute=compute,
         **kwargs,
     )
@@ -154,7 +153,7 @@ def _compute_nc(
 
 def write_nc(
     ds: xr.DataArray | xr.Dataset,
-    filepath: Path | str,
+    file_path: Path,
     *,
     compress: bool = False,
     gdal_compliant: bool = False,
@@ -178,7 +177,7 @@ def write_nc(
     ----------
     ds : xr.DataArray | xr.Dataset
         Dataset to be written to the drive
-    filepath : Path | str
+    file_path : Path
         Full path to the outgoing file
     compress : bool, optional
         Whether or not to compress the data, by default False
@@ -196,22 +195,18 @@ def write_nc(
         Additional keyword arguments that are passed to the `to_netcdf`
         function
     """
-    # Force typing
-    filepath = Path(filepath)
     # Check the typing
     if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
         logger.error(f"Dataset object of type {type(ds).__name__} not recognized")
         return None
     if isinstance(ds, xr.DataArray):
         if ds.name is None:
-            ds.name = filepath.stem
+            ds.name = file_path.stem
         ds = ds.to_dataset()
-    logger.debug(f"Writing file {filepath.as_posix()}")
     # Check whether the file already exists
-    if filepath.is_file() and not force_overwrite:
-        raise IOError(f"File {filepath.as_posix()} already exists")
-    if not filepath.parent.is_dir():
-        filepath.parent.mkdir(parents=True)
+    if file_path.exists() and not force_overwrite:
+        raise IOError(f"File {file_path.as_posix()} already exists")
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Focus on the encoding and set these for all dims, coords and data vars
     encoding = kwargs.pop("encoding", {})
@@ -241,48 +236,40 @@ def write_nc(
 
     # Try to write the file
     try:
-        _compute_nc(ds, filepath=filepath, **kwargs)
+        _compute_nc(ds, file_path=file_path, **kwargs)
     except PermissionError:
-        logger.warning(
-            f"Could not write to file {filepath.as_posix()}, deferring write"
-        )
+        logger.debug(f"Could not write to file {file_path.as_posix()}, deferring write")
         temp_data_dir = TemporaryDirectory()
 
-        temp_filepath = Path(temp_data_dir.name, filepath.name)
-        _compute_nc(ds, filepath=temp_filepath, **kwargs)
+        temp_file_path = Path(temp_data_dir.name, file_path.name)
+        _compute_nc(ds, file_path=temp_file_path, **kwargs)
 
         return DeferedFileClose(
             ds=ds,
-            original_path=filepath,
-            temp_path=temp_filepath,
+            original_path=str(file_path),
+            temp_path=str(temp_file_path),
             close_attempts=1,
         )
 
     return None
 
 
-def _write_region(
+def write_region(
     region: gpd.GeoDataFrame,
+    file_path: Path,
     *,
-    filename: StrPath,
-    root_path: StrPath,
     to_wgs84=False,
     **write_kwargs,
 ):
     """Write the model region to a file."""
-    write_path = join(root_path, filename)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    base_name = dirname(write_path)
-    if not exists(base_name):
-        makedirs(base_name, exist_ok=True)
-
-    logger.debug(f"writing region data to {write_path}")
     gdf = cast(gpd.GeoDataFrame, region.copy())
 
     if to_wgs84 and (
         write_kwargs.get("driver") == "GeoJSON"
-        or str(filename).lower().endswith(".geojson")
+        or file_path.suffix.lower() == ".geojson"
     ):
         gdf = gdf.to_crs(4326)
 
-    gdf.to_file(write_path, **write_kwargs)
+    gdf.to_file(file_path, **write_kwargs)

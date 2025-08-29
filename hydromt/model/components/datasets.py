@@ -1,9 +1,16 @@
 """Xarrays component."""
 
 from logging import Logger, getLogger
-from pathlib import Path
 from shutil import move
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 import xarray as xr
 from pandas import DataFrame
@@ -147,6 +154,7 @@ class DatasetsComponent(ModelComponent):
     def write(
         self,
         filename: Optional[str] = None,
+        *,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
@@ -167,16 +175,17 @@ class DatasetsComponent(ModelComponent):
         ----------
         nc_dict: dict
             Dictionary of xarray.Dataset and/or xarray.DataArray to write
-        fn: str
+        filename: str, optional
             filename relative to model root and should contain a {name} placeholder
-        gdal_compliant: bool, optional
+            Can be a relative path.
+        gdal_compliant: bool
             If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant
             format using :py:meth:`~hydromt.raster.gdal_compliant`
-        rename_dims: bool, optional
+        rename_dims: bool
             If True, rename x_dim and y_dim to standard names depending on the CRS
             (x/y for projected and lat/lon for geographic). Only used if
             ``gdal_compliant`` is set to True. By default, False.
-        force_sn: bool, optional
+        force_sn: bool
             If True, forces the dataset to have South -> North orientation. Only used
             if ``gdal_compliant`` is set to True. By default, False.
         **kwargs:
@@ -186,17 +195,24 @@ class DatasetsComponent(ModelComponent):
         self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            logger.debug("No data found, skipping writing.")
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: No data found, skipping writing."
+            )
             return
 
-        kwargs = {**{"engine": "netcdf4"}, **kwargs}
+        kwargs.setdefault("engine", "netcdf4")
 
         filename = filename or self._filename
+
         for name, ds in self.data.items():
-            filepath = Path(self.root.path, filename.format(name=name))
+            file_path = self.root.path / filename.format(name=name)
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: Writing datasets to {file_path}."
+            )
             write_nc(
                 ds,
-                filepath=filepath,
+                file_path=file_path,
                 gdal_compliant=gdal_compliant,
                 rename_dims=rename_dims,
                 force_sn=force_sn,

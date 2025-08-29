@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 """HydroMT VectorComponent class definition."""
 
-import os
 from logging import Logger, getLogger
 from os.path import basename, dirname, isfile, join
-from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union, cast
 
 import geopandas as gpd
@@ -247,8 +245,8 @@ class VectorComponent(SpatialModelComponent):
     @hydromt_step
     def write(
         self,
-        *,
         filename: Optional[str] = "vector/vector.nc",
+        *,
         geometry_filename: Optional[str] = "vector/vector.geojson",
         ogr_compliant: bool = False,
         **kwargs,
@@ -288,11 +286,14 @@ class VectorComponent(SpatialModelComponent):
             Additional keyword arguments that are passed to the `write_nc`
             function.
         """
+        self.root._assert_write_mode()
+
         ds = self.data
         if len(ds) == 0:
-            logger.debug("No vector data found, skip writing.")
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: No vector data found, skip writing."
+            )
             return
-        self.root._assert_write_mode()
 
         if filename is None and geometry_filename is None:
             raise ValueError(
@@ -307,7 +308,7 @@ class VectorComponent(SpatialModelComponent):
             sdims = [ds.vector.attrs.get(n) for n in snames if n in ds.vector.attrs]
             if "spatial_ref" in ds:
                 sdims.append("spatial_ref")
-            for name in list(set(ds.vector._all_names) - set(sdims)):
+            for name in set(ds.vector._all_names) - set(sdims):
                 dims = ds[name].dims
                 # check 1D variables with matching index_dim
                 if len(dims) > 1 or dims[0] != ds.vector.index_dim:
@@ -324,7 +325,6 @@ class VectorComponent(SpatialModelComponent):
         # write to netcdf only
         if geometry_filename is None:
             assert filename is not None
-            os.makedirs(dirname(join(self.root.path, filename)), exist_ok=True)
             # cannot call directly ds.vector.to_netcdf
             # because of possible PermissionError
             if ogr_compliant:
@@ -332,32 +332,43 @@ class VectorComponent(SpatialModelComponent):
             else:
                 ds = ds.vector.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
             # write_nc requires dict - use dummy key
+            geojson_path = self.root.path / filename
+            geojson_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: Writing vector to {geojson_path}."
+            )
             write_nc(
                 ds,
-                filepath=Path(self.root.path, filename),
+                file_path=geojson_path,
                 engine="netcdf4",
                 force_overwrite=self.root.mode.is_override_mode(),
                 **kwargs,
             )
         # write to geojson only
         elif filename is None:
-            full_path = join(self.root.path, geometry_filename)
-            os.makedirs(dirname(full_path), exist_ok=True)
+            geojson_path = self.root.path / geometry_filename
+            geojson_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: Writing vector to {geojson_path}."
+            )
             gdf = ds.vector.to_gdf(**kwargs)
-            logger.debug(f"Writing file {full_path}")
-            gdf.to_file(full_path)
+            gdf.to_file(geojson_path)
         # write data to netcdf and geometry to geojson
         else:
-            full_path = join(self.root.path, geometry_filename)
-            os.makedirs(dirname(full_path), exist_ok=True)
-            # write geometry
+            geojson_path = self.root.path / geometry_filename
+            geojson_path.parent.mkdir(parents=True, exist_ok=True)
+            nc_path = self.root.path / filename
+            nc_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: Writing geometry to {geojson_path} and data to {nc_path}."
+            )
+
             gdf = ds.vector.geometry.to_frame("geometry")
-            logger.debug(f"Writing file {full_path}")
-            gdf.to_file(full_path)
-            # write_nc requires dict - use dummy key
+            gdf.to_file(geojson_path)
+
             write_nc(
                 ds.drop_vars("geometry"),
-                filepath=Path(self.root.path, filename),
+                file_path=nc_path,
                 **kwargs,
             )
 

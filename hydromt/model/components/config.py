@@ -1,8 +1,7 @@
 """A component to write configuration files for model simulations/kernels."""
 
 from logging import Logger, getLogger
-from os import makedirs
-from os.path import abspath, dirname, isabs, isfile, join, splitext
+from os.path import isfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
@@ -16,9 +15,6 @@ if TYPE_CHECKING:
     from hydromt.model import Model
 
 logger: Logger = getLogger(__name__)
-
-_YAML_EXTS = [".yml", ".yaml"]
-_TOML_EXT = ".toml"
 
 
 class ConfigComponent(ModelComponent):
@@ -73,35 +69,44 @@ class ConfigComponent(ModelComponent):
     def _initialize(self, skip_read=False) -> None:
         """Initialize the model config."""
         if self._data is None:
-            self._data = dict()
+            self._data = {}
             if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     @hydromt_step
-    def write(
-        self,
-        path: Optional[str] = None,
-    ) -> None:
-        """Write model config at <root>/{path}."""
+    def write(self, file_path: Optional[str] = None) -> None:
+        """Write model config at <root>/{path}.
+
+        Parameters
+        ----------
+        filename: str, optional
+            The name of the file to write the config to. If not provided, the default
+            filename will be used.
+            Can be a relative path.
+        """
         self.root._assert_write_mode()
-        if self.data:
-            p = path or self._filename
 
-            write_path = join(self.root.path, p)
-            logger.info(f"Writing model config to {write_path}.")
-            makedirs(dirname(write_path), exist_ok=True)
+        if not self.data:
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: No config data found, skip writing."
+            )
+            return
 
-            write_data = _make_config_paths_relative(self.data, self.root.path)
-            ext = splitext(p)[-1]
-            if ext in _YAML_EXTS:
-                write_yaml(write_path, write_data)
-            elif ext == _TOML_EXT:
-                write_toml(write_path, write_data)
-            else:
-                raise ValueError(f"Unknown file extension: {ext}")
+        file_path = file_path or self._filename
+        file_path = self.root.path / file_path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(
+            f"{self.model.name}.{self.name_in_model}: Writing model config to {file_path}."
+        )
 
-        else:
-            logger.debug("Model config has no data, skip writing.")
+        write_data = _make_config_paths_relative(self.data, self.root.path)
+        match file_path.suffix.lower():
+            case ".yaml" | ".yml":
+                write_yaml(file_path, write_data)
+            case ".toml":
+                write_toml(file_path, write_data)
+            case _:
+                raise ValueError(f"Unknown file extension: {file_path.suffix}")
 
     @hydromt_step
     def read(self, path: Optional[str] = None) -> None:
@@ -113,12 +118,10 @@ class ConfigComponent(ModelComponent):
             and len(self._data) == 0
             and self._default_template_filename
         ):
-            p = path or self._default_template_filename
-            read_path = join(self.root.path, self._default_template_filename)
+            read_path = self.root.path / self._default_template_filename
         else:
             p = path or self._filename
-            # if path is abs, join will just return path
-            read_path = join(self.root.path, p)
+            read_path = self.root.path / p
 
         if isfile(read_path):
             logger.info(f"Reading model config file from {read_path}.")
@@ -129,14 +132,14 @@ class ConfigComponent(ModelComponent):
             )
             return
 
-        ext = splitext(p)[-1]
         # Always overwrite config when reading
-        if ext in _YAML_EXTS:
-            self._data = _read_yaml(read_path)
-        elif ext == _TOML_EXT:
-            self._data = _read_toml(read_path)
-        else:
-            raise ValueError(f"Unknown file extension: {ext}")
+        match read_path.suffix.lower():
+            case ".yaml" | ".yml":
+                self._data = _read_yaml(read_path)
+            case ".toml":
+                self._data = _read_toml(read_path)
+            case _:
+                raise ValueError(f"Unknown file extension: {read_path.suffix}")
 
     def set(self, key: str, value: Any):
         """Update the config dictionary at key(s) with values.
@@ -219,8 +222,8 @@ class ConfigComponent(ModelComponent):
 
         if abs_path and isinstance(value, (str, Path)):
             value = Path(value)
-            if not isabs(value):
-                value = Path(abspath(join(self.root.path, value)))
+            if not value.is_absolute():
+                value = self.root.path / value
 
         return value
 
@@ -259,8 +262,6 @@ class ConfigComponent(ModelComponent):
             )
 
         if template is not None:
-            if isinstance(template, str):
-                template = Path(template)
             prefix = "user-defined"
         elif self._default_template_filename is not None:
             template = self._default_template_filename
@@ -274,12 +275,13 @@ class ConfigComponent(ModelComponent):
         template = Path(template)
         # Here directly overwrite config with template
         logger.info(f"Creating model config from {prefix} template: {template}")
-        if template.suffix in _YAML_EXTS:
-            self._data = _read_yaml(template)
-        elif template.suffix == _TOML_EXT:
-            self._data = _read_toml(template)
-        else:
-            raise ValueError(f"Unknown file extension: {template.suffix}")
+        match template.suffix.lower():
+            case ".yaml" | ".yml":
+                self._data = _read_yaml(template)
+            case ".toml":
+                self._data = _read_toml(template)
+            case _:
+                raise ValueError(f"Unknown file extension: {template.suffix}")
 
     @hydromt_step
     def update(self, data: Dict[str, Any]):
