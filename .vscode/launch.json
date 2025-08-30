@@ -9,7 +9,8 @@
             "console": "integratedTerminal",
             "purpose": [
                 "debug-test"
-            ]
+            ],
+            "justMyCode": false
         }
     ]
 }

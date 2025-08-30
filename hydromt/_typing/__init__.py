@@ -1,6 +1,7 @@
 """A module for all of the type definitions used in HydroMT."""
 
 from .crs import CRS
+from .deferred_file_close import DeferredFileClose
 from .error import (
     NoDataException,
     NoDataStrategy,
@@ -14,7 +15,6 @@ from .type_def import (
     Crs,
     Data,
     DataType,
-    DeferedFileClose,
     ExportConfigDict,
     GeoDataframeSource,
     GeoDatasetSource,
@@ -40,7 +40,7 @@ __all__ = [
     "Crs",
     "CRS",
     "StrPath",
-    "DeferedFileClose",
+    "DeferredFileClose",
     "ExportConfigDict",
     "FS",
     "GeoDataframeSource",
