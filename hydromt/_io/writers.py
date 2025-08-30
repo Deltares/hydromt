@@ -1,21 +1,22 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
 
+import hashlib
 import os
+import time
 from logging import Logger, getLogger
 from os import makedirs
 from os.path import dirname, exists, isdir, join
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
 import xarray as xr
-from dask.diagnostics import ProgressBar
 from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
-from hydromt._typing.type_def import DeferredFileClose, StrPath
+from hydromt._typing.deferred_file_close import DeferredFileClose
+from hydromt._typing.type_def import StrPath
 
 logger: Logger = getLogger(__name__)
 
@@ -120,38 +121,6 @@ def _zarr_writer(
     return write_path
 
 
-def _compute_nc(
-    ds: xr.Dataset,
-    filepath: Path,
-    compute: bool = True,
-    **kwargs,
-):
-    """Write and compute the dataset.
-
-    Either compute directly or with a progressbar.
-
-    Parameters
-    ----------
-    ds : xr.Dataset
-        The dataset to be written.
-    filepath : Path
-        The full path to the outgoing file.
-    compute : bool, optional
-        Whether to compute the output directly, by default True
-    """
-    obj = ds.to_netcdf(
-        filepath,
-        compute=compute,
-        **kwargs,
-    )
-    if compute:
-        return
-
-    with ProgressBar():
-        obj.compute()
-    obj = None
-
-
 def _write_nc(
     ds: xr.DataArray | xr.Dataset,
     filepath: Path | str,
@@ -162,15 +131,13 @@ def _write_nc(
     force_sn: bool = False,
     force_overwrite: bool = False,
     **kwargs,
-) -> Optional[DeferredFileClose]:
+) -> DeferredFileClose | None:
     """Write xarray.Dataset and/or xarray.DataArray to netcdf file.
 
     Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
     files, using :py:meth:`~hydromt.raster.gdal_compliant`.
     The function will first try to directly write to file. In case of
-    PermissionError, it will first write a temporary file and add to the
-    self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
-    will be done by calling the self._cleanup function.
+    PermissionError, it will first write a temporary file and move the file over.
 
     key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -241,22 +208,17 @@ def _write_nc(
 
     # Try to write the file
     try:
-        _compute_nc(ds, filepath=filepath, **kwargs)
+        ds.to_netcdf(filepath, **kwargs)
     except PermissionError:
         logger.warning(
             f"Could not write to file {filepath.as_posix()}, deferring write"
         )
-        temp_data_dir = TemporaryDirectory()
 
-        temp_filepath = Path(temp_data_dir.name, filepath.name)
-        _compute_nc(ds, filepath=temp_filepath, **kwargs)
+        hash_str = hashlib.sha256(f"{filepath}_{time.time()}".encode()).hexdigest()[:6]
+        temp_filepath = filepath.with_stem(f"{filepath.stem}_{hash_str}")
+        ds.to_netcdf(temp_filepath, **kwargs)
 
-        return DeferredFileClose(
-            ds=ds,
-            original_path=filepath,
-            temp_path=temp_filepath,
-            close_attempts=1,
-        )
+        return DeferredFileClose(original_path=filepath, temp_path=temp_filepath)
 
     return None
 

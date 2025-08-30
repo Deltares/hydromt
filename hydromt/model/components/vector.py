@@ -14,7 +14,7 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import _read_ncs
+from hydromt._io.readers import read_ncs
 from hydromt._io.writers import _write_nc
 from hydromt.gis.vector import GeoDataset
 from hydromt.model.components.base import ModelComponent
@@ -219,9 +219,10 @@ class VectorComponent(SpatialModelComponent):
         if filename is not None:
             # Disable lazy loading of data
             # to avoid issues with reading object dtype data
-            if "chunks" not in kwargs:
-                kwargs["chunks"] = None
-            ds = xr.merge(_read_ncs(filename, root=self.root.path, **kwargs).values())
+            kwargs.setdefault("chunks", None)
+            files = read_ncs(filename, root=self.root.path, **kwargs).values()
+            self._open_datasets.extend(files)
+            ds = xr.merge(files)
             # check if ds is empty (default filename has a value)
             if len(ds.sizes) == 0:
                 filename = None
@@ -247,9 +248,9 @@ class VectorComponent(SpatialModelComponent):
     @hydromt_step
     def write(
         self,
-        *,
         filename: Optional[str] = "vector/vector.nc",
         geometry_filename: Optional[str] = "vector/vector.geojson",
+        *,
         ogr_compliant: bool = False,
         **kwargs,
     ) -> None:
@@ -332,13 +333,15 @@ class VectorComponent(SpatialModelComponent):
             else:
                 ds = ds.vector.update_geometry(geom_format="wkt", geom_name="ogc_wkt")
             # write_nc requires dict - use dummy key
-            _write_nc(
+            close_handle = _write_nc(
                 ds,
                 filepath=Path(self.root.path, filename),
                 engine="netcdf4",
                 force_overwrite=self.root.mode.is_override_mode(),
                 **kwargs,
             )
+            if close_handle is not None:
+                self._deferred_file_close_handles.append(close_handle)
         # write to geojson only
         elif filename is None:
             full_path = join(self.root.path, geometry_filename)
@@ -354,12 +357,13 @@ class VectorComponent(SpatialModelComponent):
             gdf = ds.vector.geometry.to_frame("geometry")
             logger.debug(f"Writing file {full_path}")
             gdf.to_file(full_path)
-            # write_nc requires dict - use dummy key
-            _write_nc(
+            close_handle = _write_nc(
                 ds.drop_vars("geometry"),
                 filepath=Path(self.root.path, filename),
                 **kwargs,
             )
+            if close_handle is not None:
+                self._deferred_file_close_handles.append(close_handle)
 
     # Other vector properties
     @property

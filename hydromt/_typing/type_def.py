@@ -85,15 +85,6 @@ SourceSpecDict = TypedDict(
     "SourceSpecDict", {"source": str, "provider": str, "version": Union[str, int]}
 )
 
-DeferredFileClose = TypedDict(
-    "DeferredFileClose",
-    {
-        "ds": Dataset,
-        "original_path": str,
-        "temp_path": str,
-        "close_attempts": int,
-    },
-)
 XArrayDict = Dict[str, Union[DataArray, Dataset]]
 
 ExportConfigDict = TypedDict(

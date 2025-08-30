@@ -352,7 +352,6 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch, caplog)
             {"forcing2.set": {"data": obsda * 0.2, "name": "precip"}},
         ]
     )
-    assert len(model._deferred_file_closes) == 0
     # Check that variables from build AND update are present
     assert "elevtn" in model.maps.data
     assert "elevtn2" in model.maps.data
