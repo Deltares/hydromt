@@ -1101,7 +1101,7 @@ components.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent._region_data.html#hydromt.model.components.SpatialModelComponent._region_data" title="hydromt.model.components.SpatialModelComponent._region_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent._region_data</span></code></a></p></td>
 <td><p>Implement this property in order to provide the region.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.write_region.html#hydromt.model.components.SpatialModelComponent.write_region" title="hydromt.model.components.SpatialModelComponent.write_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.write_region</span></code></a>(*)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.write_region.html#hydromt.model.components.SpatialModelComponent.write_region" title="hydromt.model.components.SpatialModelComponent.write_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.write_region</span></code></a>([...])</p></td>
 <td><p>Write the model region to file.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.SpatialModelComponent.test_equal.html#hydromt.model.components.SpatialModelComponent.test_equal" title="hydromt.model.components.SpatialModelComponent.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.SpatialModelComponent.test_equal</span></code></a>(other)</p></td>
@@ -1130,7 +1130,7 @@ components.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.data.html#hydromt.model.components.ConfigComponent.data" title="hydromt.model.components.ConfigComponent.data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.data</span></code></a></p></td>
 <td><p>Model config values.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.write.html#hydromt.model.components.ConfigComponent.write" title="hydromt.model.components.ConfigComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.write</span></code></a>([path])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.write.html#hydromt.model.components.ConfigComponent.write" title="hydromt.model.components.ConfigComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.write</span></code></a>([file_path])</p></td>
 <td><p>Write model config at &lt;root&gt;/{path}.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.read.html#hydromt.model.components.ConfigComponent.read" title="hydromt.model.components.ConfigComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.ConfigComponent.read</span></code></a>([path])</p></td>
@@ -1214,10 +1214,10 @@ components.</p>
 <td><p>Model tables.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.write.html#hydromt.model.components.TablesComponent.write" title="hydromt.model.components.TablesComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.write</span></code></a>([filename])</p></td>
-<td><p>Write tables at provided or default filepath if none is provided.</p></td>
+<td><p>Write tables at provided or default file path if none is provided.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.read.html#hydromt.model.components.TablesComponent.read" title="hydromt.model.components.TablesComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.read</span></code></a>([filename])</p></td>
-<td><p>Read tables at provided or default filepath if none is provided.</p></td>
+<td><p>Read tables at provided or default file path if none is provided.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.TablesComponent.set.html#hydromt.model.components.TablesComponent.set" title="hydromt.model.components.TablesComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.TablesComponent.set</span></code></a>(tables[, name])</p></td>
 <td><p>Add (a) table(s) &lt;pandas.DataFrame&gt; to model.</p></td>
@@ -1445,7 +1445,7 @@ components.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.read.html#hydromt.model.components.VectorComponent.read" title="hydromt.model.components.VectorComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.read</span></code></a>(*[, ...])</p></td>
 <td><p>Read model vector from combined netcdf and geojson file.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.write.html#hydromt.model.components.VectorComponent.write" title="hydromt.model.components.VectorComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.write</span></code></a>(*[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.write.html#hydromt.model.components.VectorComponent.write" title="hydromt.model.components.VectorComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.write</span></code></a>([filename, ...])</p></td>
 <td><p>Write model vector to combined netcdf and geojson files.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../_generated/hydromt.model.components.VectorComponent.set.html#hydromt.model.components.VectorComponent.set" title="hydromt.model.components.VectorComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">components.VectorComponent.set</span></code></a>([data, name, ...])</p></td>

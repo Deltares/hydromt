@@ -459,16 +459,23 @@
 <span></span><span class="sd">&quot;&quot;&quot;Xarrays component.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">move</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">TYPE_CHECKING</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_ncs</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_write_nc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_nc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferedFileClose</span><span class="p">,</span> <span class="n">XArrayDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.steps</span><span class="w"> </span><span class="kn">import</span> <span class="n">hydromt_step</span>
@@ -618,6 +625,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">gdal_compliant</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">rename_dims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">force_sn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -638,16 +646,17 @@
 <span class="sd">        ----------</span>
 <span class="sd">        nc_dict: dict</span>
 <span class="sd">            Dictionary of xarray.Dataset and/or xarray.DataArray to write</span>
-<span class="sd">        fn: str</span>
+<span class="sd">        filename: str, optional</span>
 <span class="sd">            filename relative to model root and should contain a {name} placeholder</span>
-<span class="sd">        gdal_compliant: bool, optional</span>
+<span class="sd">            Can be a relative path.</span>
+<span class="sd">        gdal_compliant: bool</span>
 <span class="sd">            If True, convert xarray.Dataset and/or xarray.DataArray to gdal compliant</span>
 <span class="sd">            format using :py:meth:`~hydromt.raster.gdal_compliant`</span>
-<span class="sd">        rename_dims: bool, optional</span>
+<span class="sd">        rename_dims: bool</span>
 <span class="sd">            If True, rename x_dim and y_dim to standard names depending on the CRS</span>
 <span class="sd">            (x/y for projected and lat/lon for geographic). Only used if</span>
 <span class="sd">            ``gdal_compliant`` is set to True. By default, False.</span>
-<span class="sd">        force_sn: bool, optional</span>
+<span class="sd">        force_sn: bool</span>
 <span class="sd">            If True, forces the dataset to have South -&gt; North orientation. Only used</span>
 <span class="sd">            if ``gdal_compliant`` is set to True. By default, False.</span>
 <span class="sd">        **kwargs:</span>
@@ -657,17 +666,24 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_write_mode</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No data found, skipping writing.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: No data found, skipping writing.&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="p">{</span><span class="s2">&quot;engine&quot;</span><span class="p">:</span> <span class="s2">&quot;netcdf4&quot;</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;engine&quot;</span><span class="p">,</span> <span class="s2">&quot;netcdf4&quot;</span><span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span>
+
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">filename</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
-            <span class="n">_write_nc</span><span class="p">(</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">filename</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">file_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: Writing datasets to </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">write_nc</span><span class="p">(</span>
                 <span class="n">ds</span><span class="p">,</span>
-                <span class="n">filepath</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span>
+                <span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
                 <span class="n">gdal_compliant</span><span class="o">=</span><span class="n">gdal_compliant</span><span class="p">,</span>
                 <span class="n">rename_dims</span><span class="o">=</span><span class="n">rename_dims</span><span class="p">,</span>
                 <span class="n">force_sn</span><span class="o">=</span><span class="n">force_sn</span><span class="p">,</span>

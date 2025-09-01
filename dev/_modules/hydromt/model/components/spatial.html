@@ -466,8 +466,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_write_region</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrPath</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_region</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -553,8 +552,8 @@
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.SpatialModelComponent.write_region.html#hydromt.model.components.SpatialModelComponent.write_region">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_region</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">to_wgs84</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">write_kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -575,20 +574,28 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_write_mode</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_component</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s2">&quot;Region is a reference to another component. Skipping writing...&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No region data available to write.&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: No region data available to write.&quot;</span>
+            <span class="p">)</span>
             <span class="k">return</span>
 
-        <span class="n">_write_region</span><span class="p">(</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_filename</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">filename</span>
+        <span class="n">full_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: Writing region to </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">write_region</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">region</span><span class="p">,</span>
-            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_filename</span><span class="p">,</span>
+            <span class="n">file_path</span><span class="o">=</span><span class="n">full_path</span><span class="p">,</span>
             <span class="n">to_wgs84</span><span class="o">=</span><span class="n">to_wgs84</span><span class="p">,</span>
-            <span class="n">root_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
             <span class="o">**</span><span class="n">write_kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 

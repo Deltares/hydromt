@@ -987,7 +987,7 @@ the data dictionary.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.GeomsComponent.write.html#hydromt.model.components.GeomsComponent.write" title="hydromt.model.components.GeomsComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>([filename, to_wgs84])</p></td>
 <td><p>Write model geometries to a vector file (by default GeoJSON) at &lt;root&gt;/&lt;filename&gt;.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_region</span></code>(*[, filename, to_wgs84])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_region</span></code>([filename, to_wgs84])</p></td>
 <td><p>Write the model region to file.</p></td>
 </tr>
 </tbody>
@@ -1011,10 +1011,13 @@ the data dictionary.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.GeomsComponent.model.html#hydromt.model.components.GeomsComponent.model" title="hydromt.model.components.GeomsComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
 <td><p>Return the model object this component is associated with.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.GeomsComponent.region.html#hydromt.model.components.GeomsComponent.region" title="hydromt.model.components.GeomsComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name_in_model</span></code></p></td>
+<td><p>Find the name of the component in the parent model components.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.GeomsComponent.region.html#hydromt.model.components.GeomsComponent.region" title="hydromt.model.components.GeomsComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region</span></code></a></p></td>
 <td><p>Provide access to the underlying GeoDataFrame data of the model region.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.GeomsComponent.root.html#hydromt.model.components.GeomsComponent.root" title="hydromt.model.components.GeomsComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.GeomsComponent.root.html#hydromt.model.components.GeomsComponent.root" title="hydromt.model.components.GeomsComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></a></p></td>
 <td><p>Return the root of the model this component is associated with.</p></td>
 </tr>
 </tbody>

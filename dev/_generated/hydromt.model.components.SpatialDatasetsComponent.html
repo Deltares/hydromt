@@ -994,7 +994,7 @@ data dictionary.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.write.html#hydromt.model.components.SpatialDatasetsComponent.write" title="hydromt.model.components.SpatialDatasetsComponent.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>([filename, gdal_compliant, ...])</p></td>
 <td><p>Write dictionary of xarray.Dataset and/or xarray.DataArray to netcdf files.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_region</span></code>(*[, filename, to_wgs84])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_region</span></code>([filename, to_wgs84])</p></td>
 <td><p>Write the model region to file.</p></td>
 </tr>
 </tbody>
@@ -1018,10 +1018,13 @@ data dictionary.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.model.html#hydromt.model.components.SpatialDatasetsComponent.model" title="hydromt.model.components.SpatialDatasetsComponent.model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">model</span></code></a></p></td>
 <td><p>Return the model object this component is associated with.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.region.html#hydromt.model.components.SpatialDatasetsComponent.region" title="hydromt.model.components.SpatialDatasetsComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name_in_model</span></code></p></td>
+<td><p>Find the name of the component in the parent model components.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.region.html#hydromt.model.components.SpatialDatasetsComponent.region" title="hydromt.model.components.SpatialDatasetsComponent.region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region</span></code></a></p></td>
 <td><p>Provide access to the underlying GeoDataFrame data of the model region.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.root.html#hydromt.model.components.SpatialDatasetsComponent.root" title="hydromt.model.components.SpatialDatasetsComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.root.html#hydromt.model.components.SpatialDatasetsComponent.root" title="hydromt.model.components.SpatialDatasetsComponent.root"><code class="xref py py-obj docutils literal notranslate"><span class="pre">root</span></code></a></p></td>
 <td><p>Return the root of the model this component is associated with.</p></td>
 </tr>
 </tbody>
