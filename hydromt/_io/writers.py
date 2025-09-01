@@ -2,7 +2,7 @@
 
 import hashlib
 import os
-import time
+import uuid
 from logging import Logger, getLogger
 from os import makedirs
 from os.path import dirname, exists, isdir, join
@@ -214,7 +214,8 @@ def _write_nc(
             f"Could not write to file {filepath.as_posix()}, deferring write"
         )
 
-        hash_str = hashlib.sha256(f"{filepath}_{time.time()}".encode()).hexdigest()[:6]
+        unique_str = f"{filepath}_{uuid.uuid4()}"
+        hash_str = hashlib.sha256(unique_str.encode()).hexdigest()[:8]
         temp_filepath = filepath.with_stem(f"{filepath.stem}_{hash_str}")
         ds.to_netcdf(temp_filepath, **kwargs)
 
