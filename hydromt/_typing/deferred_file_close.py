@@ -11,10 +11,8 @@ class DeferredFileClose:
         self._temp_path = temp_path
         self._close_attempts = 0
 
-    def close(self, max_close_attempts: int = 2):
-        self._close_attempts += 1
-
-        while self._close_attempts <= max_close_attempts:
+    def close(self, max_close_attempts: int = 2) -> None:
+        while self._close_attempts < max_close_attempts:
             try:
                 shutil.move(self._temp_path, self._original_path)
                 return
@@ -27,6 +25,7 @@ class DeferredFileClose:
                 logger.warning(
                     f"Could not find temporary file {self._temp_path}. It was likely already deleted by another component that updates the same dataset."
                 )
+                return
 
         # already tried to close this too many times
         logger.error(
