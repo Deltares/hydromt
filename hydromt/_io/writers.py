@@ -4,8 +4,7 @@ import hashlib
 import os
 import uuid
 from logging import Logger, getLogger
-from os import makedirs
-from os.path import dirname, exists, isdir, join
+from os.path import isdir, join
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, cast
 
@@ -21,24 +20,24 @@ from hydromt._typing.type_def import StrPath
 logger: Logger = getLogger(__name__)
 
 
-def _write_yaml(path: StrPath, data: Dict[str, Any]):
+def write_yaml(path: StrPath, data: Dict[str, Any]):
     """Write a dictionary to a yaml formatted file."""
     with open(path, "w") as f:
         dump_yaml(data, f)
 
 
-def _write_toml(path: StrPath, data: Dict[str, Any]):
+def write_toml(path: StrPath, data: Dict[str, Any]):
     """Write a dictionary to a toml formatted file."""
     with open(path, "wb") as f:
         dump_toml(data, f)
 
 
-def _write_xy(path, gdf, fmt="%.4f"):
+def write_xy(path: StrPath, gdf, fmt="%.4f"):
     """Write geopandas.GeoDataFrame with Point geometries to point xy files.
 
     Parameters
     ----------
-    path: str
+    path: str or Path
         Path to the output file.
     gdf: geopandas.GeoDataFrame
         GeoDataFrame to write to point file.
@@ -52,7 +51,7 @@ def _write_xy(path, gdf, fmt="%.4f"):
         np.savetxt(f, xy, fmt=fmt)
 
 
-def _netcdf_writer(
+def netcdf_writer(
     obj: Union[xr.Dataset, xr.DataArray],
     data_root: Union[str, Path],
     data_name: str,
@@ -92,7 +91,7 @@ def _netcdf_writer(
     return write_path
 
 
-def _zarr_writer(
+def zarr_writer(
     obj: Union[xr.Dataset, xr.DataArray],
     data_root: Union[str, Path],
     data_name: str,
@@ -121,9 +120,9 @@ def _zarr_writer(
     return write_path
 
 
-def _write_nc(
+def write_nc(
     ds: xr.DataArray | xr.Dataset,
-    filepath: Path | str,
+    file_path: Path,
     *,
     compress: bool = False,
     gdal_compliant: bool = False,
@@ -145,7 +144,7 @@ def _write_nc(
     ----------
     ds : xr.DataArray | xr.Dataset
         Dataset to be written to the drive
-    filepath : Path | str
+    file_path : Path
         Full path to the outgoing file
     compress : bool, optional
         Whether or not to compress the data, by default False
@@ -163,22 +162,18 @@ def _write_nc(
         Additional keyword arguments that are passed to the `to_netcdf`
         function
     """
-    # Force typing
-    filepath = Path(filepath)
     # Check the typing
     if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
         logger.error(f"Dataset object of type {type(ds).__name__} not recognized")
         return None
     if isinstance(ds, xr.DataArray):
         if ds.name is None:
-            ds.name = filepath.stem
+            ds.name = file_path.stem
         ds = ds.to_dataset()
-    logger.debug(f"Writing file {filepath.as_posix()}")
     # Check whether the file already exists
-    if filepath.is_file() and not force_overwrite:
-        raise IOError(f"File {filepath.as_posix()} already exists")
-    if not filepath.parent.is_dir():
-        filepath.parent.mkdir(parents=True)
+    if file_path.exists() and not force_overwrite:
+        raise IOError(f"File {file_path.as_posix()} already exists")
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Focus on the encoding and set these for all dims, coords and data vars
     encoding = kwargs.pop("encoding", {})
@@ -208,44 +203,36 @@ def _write_nc(
 
     # Try to write the file
     try:
-        ds.to_netcdf(filepath, **kwargs)
+        ds.to_netcdf(file_path, **kwargs)
     except PermissionError:
-        logger.warning(
-            f"Could not write to file {filepath.as_posix()}, deferring write"
-        )
+        logger.debug(f"Could not write to file {file_path.as_posix()}, deferring write")
 
-        unique_str = f"{filepath}_{uuid.uuid4()}"
+        unique_str = f"{file_path}_{uuid.uuid4()}"
         hash_str = hashlib.sha256(unique_str.encode()).hexdigest()[:8]
-        temp_filepath = filepath.with_stem(f"{filepath.stem}_{hash_str}")
+        temp_filepath = file_path.with_stem(f"{file_path.stem}_{hash_str}")
         ds.to_netcdf(temp_filepath, **kwargs)
 
-        return DeferredFileClose(original_path=filepath, temp_path=temp_filepath)
+        return DeferredFileClose(original_path=file_path, temp_path=temp_filepath)
 
     return None
 
 
-def _write_region(
+def write_region(
     region: gpd.GeoDataFrame,
+    file_path: Path,
     *,
-    filename: StrPath,
-    root_path: StrPath,
     to_wgs84=False,
     **write_kwargs,
 ):
     """Write the model region to a file."""
-    write_path = join(root_path, filename)
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    base_name = dirname(write_path)
-    if not exists(base_name):
-        makedirs(base_name, exist_ok=True)
-
-    logger.debug(f"writing region data to {write_path}")
     gdf = cast(gpd.GeoDataFrame, region.copy())
 
     if to_wgs84 and (
         write_kwargs.get("driver") == "GeoJSON"
-        or str(filename).lower().endswith(".geojson")
+        or file_path.suffix.lower() == ".geojson"
     ):
         gdf = gdf.to_crs(4326)
 
-    gdf.to_file(write_path, **write_kwargs)
+    gdf.to_file(file_path, **write_kwargs)

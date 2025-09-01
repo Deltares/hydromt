@@ -15,7 +15,7 @@ ModelComponent API now contains functions for `ModelComponent.cleanup` and `Mode
 New
 ---
 - Added option for delayed compute in writing netcdf files
-- Set compression in `_write_nc`
+- Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
 - `_io.readers.read_nc` and `_io.readers.read_ncs` always return an `xr.Dataset`. This Dataset is the one that needs to be closed before overwriting on disk.
 - All `ModelComponent`s return an optional `DeferredFileClose` that can be called after the open `xr.Dataset`s are closed.

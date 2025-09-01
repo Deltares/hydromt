@@ -1,7 +1,6 @@
 """Grid Component."""
 
 from logging import Logger, getLogger
-from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -12,7 +11,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt._io.readers import read_ncs
-from hydromt._io.writers import _write_nc
+from hydromt._io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -172,12 +171,21 @@ class GridComponent(SpatialModelComponent):
         self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            logger.warning("No grid data found, skip writing.")
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: No grid data found, skip writing."
+            )
             return
 
-        close_handle = _write_nc(
+        filename = filename or self._filename
+        full_path = self.root.path / filename
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(
+            f"{self.model.name}.{self.name_in_model}: Writing grid data to {full_path}."
+        )
+
+        close_handle = write_nc(
             self.data,
-            filepath=Path(self.root.path, filename or self._filename),
+            file_path=full_path,
             gdal_compliant=gdal_compliant,
             rename_dims=rename_dims,
             force_overwrite=self.root.mode.is_override_mode(),

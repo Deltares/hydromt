@@ -57,11 +57,13 @@ def test_write(
     mock_model, tmpdir, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
 ):
     grid_component = GridComponent(model=mock_model)
+    mock_model.components["grid"] = grid_component
+    mock_model.name = "foo"
     grid_component.root.is_reading_mode.return_value = False
     # Test skipping writing when no grid data has been set
-    caplog.set_level(logging.WARNING)
-    grid_component.write()
-    assert "No grid data found, skip writing" in caplog.text
+    with caplog.at_level(logging.INFO):
+        grid_component.write()
+    assert "foo.grid: No grid data found, skip writing" in caplog.text
     # Test raise IOerror when model is in read only mode
     mock_model.root = ModelRoot(tmpdir, mode="r")
     grid_component = GridComponent(model=mock_model)
