@@ -25,7 +25,7 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
-from hydromt._io.writers import _write_xy
+from hydromt._io.writers import write_xy
 from hydromt._typing import Bbox, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy
 from hydromt.config import Settings
@@ -1139,7 +1139,7 @@ class TestGetGeoDataset:
     @pytest.fixture
     def xy_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
         uri_csv_locs = str(tmp_dir / "test_locs.xy")
-        _write_xy(uri_csv_locs, geodf)
+        write_xy(uri_csv_locs, geodf)
         return uri_csv_locs
 
     @pytest.fixture

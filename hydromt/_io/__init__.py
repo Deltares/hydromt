@@ -16,17 +16,17 @@ from .readers import (
     _read_yaml,
 )
 from .writers import (
-    _netcdf_writer,
-    _write_nc,
-    _write_toml,
-    _write_xy,
-    _write_yaml,
-    _zarr_writer,
+    netcdf_writer,
+    write_nc,
+    write_toml,
+    write_xy,
+    write_yaml,
+    zarr_writer,
 )
 
 __all__ = [
     "_config_read",
-    "_netcdf_writer",
+    "netcdf_writer",
     "_open_geodataset",
     "_open_mfcsv",
     "_open_raster",
@@ -39,9 +39,9 @@ __all__ = [
     "_read_ncs",
     "_read_toml",
     "_read_yaml",
-    "_write_nc",
-    "_write_toml",
-    "_write_xy",
-    "_write_yaml",
-    "_zarr_writer",
+    "write_nc",
+    "write_toml",
+    "write_xy",
+    "write_yaml",
+    "zarr_writer",
 ]
