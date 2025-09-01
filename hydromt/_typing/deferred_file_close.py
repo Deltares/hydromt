@@ -30,6 +30,6 @@ class DeferredFileClose:
 
         # already tried to close this too many times
         logger.error(
-            f"Max write attempts to file {self._original_path} exceeded. Skipping..."
-            f"Instead data was written to a temporary file: {self._temp_path}."
+            f"Max write attempts to file {self._original_path} exceeded. Skipping... "
+            f"Instead, data was written to a temporary file: {self._temp_path}."
         )
