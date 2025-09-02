@@ -76,6 +76,10 @@ class DataSource(BaseModel, ABC):
         """Mark the data adapter as used."""
         self._used = True
 
+    def _log_start_read_data(self):
+        """Log the start of the read data process."""
+        logger.info(f"Reading {self.name} {self.data_type} data from {self.full_uri}")
+
     @model_validator(mode="before")
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:

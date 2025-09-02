@@ -1,6 +1,5 @@
 """Driver for DataFrames using the pandas library."""
 
-from logging import Logger, getLogger
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -15,8 +14,6 @@ from hydromt._typing import (
 )
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
-
-logger: Logger = getLogger(__name__)
 
 
 class PandasDriver(DataFrameDriver):
@@ -48,7 +45,6 @@ class PandasDriver(DataFrameDriver):
         else:
             uri = uris[0]
             extension: str = uri.split(".")[-1]
-            logger.info(f"Reading using {self.name} driver from {uri}")
             if extension == "csv":
                 variables = self._unify_variables_and_pandas_kwargs(
                     uri, pd.read_csv, variables
@@ -105,8 +101,6 @@ class PandasDriver(DataFrameDriver):
             extension: str = path.suffix[1:]
         else:
             raise ValueError(f"unknown pathlike: {path}")
-
-        logger.info(f"Writing dataframe using {self.name} driver to {str(path)}")
 
         if extension == "csv":
             df.to_csv(path, **kwargs)

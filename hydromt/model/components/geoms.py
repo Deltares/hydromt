@@ -1,10 +1,7 @@
 """Geoms component."""
 
-import os
 from glob import glob
 from logging import Logger, getLogger
-from os.path import dirname, isdir, join
-from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -156,6 +153,7 @@ class GeomsComponent(SpatialModelComponent):
     def write(
         self,
         filename: Optional[str] = None,
+        *,
         to_wgs84: bool = False,
         **kwargs,
     ) -> None:
@@ -169,6 +167,7 @@ class GeomsComponent(SpatialModelComponent):
             filename relative to model root. should contain a {name} placeholder
             which will be used to determine the names/keys of the geometries.
             if None, the path that was provided at init will be used.
+            Can be a relative path.
         to_wgs84: bool, optional
             If True, the geoms will be reprojected to WGS84(EPSG:4326) before they are written.
         **kwargs:
@@ -178,32 +177,29 @@ class GeomsComponent(SpatialModelComponent):
         self.root._assert_write_mode()
 
         if len(self.data) == 0:
-            logger.debug("No geoms data found, skip writing.")
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: No geoms data found, skip writing."
+            )
             return
+
+        filename = filename or self._filename
 
         for name, gdf in self.data.items():
             if len(gdf) == 0:
-                logger.warning(f"{name} is empty. Skipping...")
+                logger.warning(
+                    f"{self.model.name}.{self.name_in_model}: {name} is empty. Skipping..."
+                )
                 continue
 
-            geom_filename = filename or self._filename
-
-            write_path = Path(
-                join(
-                    self.root.path,
-                    geom_filename.format(name=name),
-                )
+            write_path = self.root.path / filename.format(name=name)
+            write_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: Writing geoms to {write_path}."
             )
-
-            logger.debug(f"Writing file {write_path}")
-
-            write_folder = dirname(write_path)
-            if not isdir(write_folder):
-                os.makedirs(write_folder, exist_ok=True)
 
             if to_wgs84 and (
                 kwargs.get("driver") == "GeoJSON"
-                or str(write_path).lower().endswith(".geojson")
+                or write_path.suffix.lower() == ".geojson"
             ):
                 gdf.to_crs(epsg=4326, inplace=True)
 
