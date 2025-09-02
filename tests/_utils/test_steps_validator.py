@@ -94,7 +94,7 @@ def test_validate_steps_blacklisted_function():
     with pytest.raises(
         AttributeError, match="Method build is not allowed to be called on model."
     ):
-        _validate_steps(model, [{"build": None}]) # type: ignore
+        _validate_steps(model, [{"build": None}])
 
 
 def test_validate_steps_correct_with_defaults():
@@ -102,9 +102,3 @@ def test_validate_steps_correct_with_defaults():
     model.add_component("foo", FooComponent(model))
     _validate_steps(model, [{"foo.with_defaults": {"a": 1}}])
     _validate_steps(model, [{"foo.with_defaults": {"a": 1, "b": "3"}}])
-
-def test_validate_missing_arg_workflow_error_msg():
-    model = Model()
-
-def test_validate_v0x_workflow_error_msg():
-    ...

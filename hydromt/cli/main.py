@@ -237,7 +237,10 @@ def build(
     logger.info("User settings:")
     opt = _utils.parse_config(config)
     if "steps" not in opt:
-        error_msg =f"It seems your workflow file at {config} does not " "contain a `steps` section. Perhaps you're using a v0.x format? " 
+        error_msg = (
+            f"It seems your workflow file at {config} does not "
+            "contain a `steps` section. Perhaps you're using a v0.x format? "
+        )
         logger.error(error_msg)
         raise RuntimeError(error_msg)
 
@@ -331,7 +334,10 @@ def update(
     opt = _utils.parse_config(config)
 
     if "steps" not in opt:
-        error_msg =f"It seems your workflow file at {config} does not " "contain a `steps` section. Perhaps you're using a v0.x format? " 
+        error_msg = (
+            f"It seems your workflow file at {config} does not "
+            "contain a `steps` section. Perhaps you're using a v0.x format? "
+        )
         logger.error(error_msg)
         raise RuntimeError(error_msg)
 

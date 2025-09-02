@@ -87,5 +87,3 @@ def test_validate_global_config_components_wrong_input():
         HydromtGlobalConfig(components={"grid": "foo"})
     with pytest.raises(TypeError, match="'NoneType' object is not a mapping"):
         HydromtGlobalConfig(components={"grid": None})
-
-

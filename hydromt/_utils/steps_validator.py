@@ -25,8 +25,10 @@ def _validate_steps(model: "Model", steps: list[dict[str, dict[str, Any]]]) -> N
         # Throws if bind fails.
         sig = inspect.signature(attr)
         options = options or {}
-        try: 
+        try:
             _ = sig.bind(**options)
         except TypeError as e:
             # TODO: decide whether this should be 0 or 1 indexed
-            raise TypeError(f"Validation of step {i+1} ({step}) failed because of the following error: {e}")
+            raise TypeError(
+                f"Validation of step {i + 1} ({step}) failed because of the following error: {e}"
+            )
