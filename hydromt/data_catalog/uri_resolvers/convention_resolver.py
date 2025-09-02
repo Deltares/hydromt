@@ -116,10 +116,10 @@ class ConventionResolver(URIResolver):
         NoDataException
             when no data is found and `handle_nodata` is `NoDataStrategy.RAISE`
         """
+        logger.debug(f"attempting to resolve uri: {uri}")
+
         if metadata is None:
             metadata: SourceMetadata = SourceMetadata()
-
-        logger.debug(f"attempting to resolve uri: {uri}")
 
         uri_expanded, keys, _ = _expand_uri_placeholders(
             uri,

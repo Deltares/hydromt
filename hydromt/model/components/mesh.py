@@ -1,9 +1,7 @@
 """Mesh Component."""
 
-import os
 from logging import Logger, getLogger
-from os.path import dirname, isdir, join
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import xarray as xr
@@ -115,7 +113,6 @@ class MeshComponent(SpatialModelComponent):
         self,
         filename: Optional[str] = None,
         *,
-        region_options: Optional[Dict[str, Any]] = None,
         write_optional_ugrid_attributes: bool = False,
         **kwargs,
     ) -> None:
@@ -130,36 +127,32 @@ class MeshComponent(SpatialModelComponent):
         write_optional_ugrid_attributes : bool, optional
             If True, write optional ugrid attributes to the netCDF file, by default
             True.
-        region_options : dict, optional
-            Options to pass to the write_region method.
-            Can contain `filename`, `to_wgs84`, and anything that will be passed to `GeoDataFrame.to_file`.
-            If `filename` is not provided, `self.region_filename` will be used.
         **kwargs : dict
             Additional keyword arguments to be passed to the
             `xarray.Dataset.to_netcdf` method.
         """
         self.root._assert_write_mode()
-        region_options = region_options or {}
-        self.write_region(**region_options)
 
-        if len(self.data) < 1:
-            logger.debug("No mesh data found, skip writing.")
+        if len(self.data) == 0:
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: No mesh data found, skip writing."
+            )
             return
 
-        # filename
-        filename = filename or str(self._filename)
-        _filename = join(self.root.path, filename)
-        if not isdir(dirname(_filename)):
-            os.makedirs(dirname(_filename), exist_ok=True)
-        logger.debug(f"Writing file {filename}")
+        filename = filename or self._filename
+        full_path = self.root.path / filename
+        logger.info(
+            f"{self.model.name}.{self.name_in_model}: Writing mesh to {full_path}."
+        )
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+
         ds_out = self.data.ugrid.to_dataset(
             optional_attributes=write_optional_ugrid_attributes,
         )
         if self.crs is not None:
             # save crs to spatial_ref coordinate
             ds_out = ds_out.rio.write_crs(self.crs)
-        ds_out.to_netcdf(_filename, **kwargs)
-        self.write_region()
+        ds_out.to_netcdf(full_path, **kwargs)
 
     @hydromt_step
     def read(

@@ -1,5 +1,6 @@
 """Provides the base class for model components."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, cast
 from weakref import ReferenceType, ref
@@ -9,6 +10,8 @@ from hydromt.data_catalog import DataCatalog
 if TYPE_CHECKING:
     from hydromt.model import Model
     from hydromt.model.root import ModelRoot
+
+logger = logging.getLogger(__name__)
 
 
 class ModelComponent(ABC):
@@ -31,6 +34,14 @@ class ModelComponent(ABC):
     def model(self) -> "Model":
         """Return the model object this component is associated with."""
         return cast("Model", self.__model_ref())
+
+    @property
+    def name_in_model(self) -> str:
+        """Find the name of the component in the parent model components."""
+        for name, component in self.model.components.items():
+            if component is self:
+                return name
+        raise ValueError("Component not found in model components.")
 
     @property
     def data_catalog(self) -> DataCatalog:

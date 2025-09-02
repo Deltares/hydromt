@@ -55,7 +55,9 @@ class GeoDataFrameSource(DataSource):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> Optional[gpd.GeoDataFrame]:
         """Use the driver and data adapter to read and harmonize the data."""
-        self._used = True
+        self._mark_as_used()
+        self._log_start_read_data()
+
         if bbox is not None or (mask is not None and buffer > 0):
             mask = _parse_geom_bbox_buffer(mask, bbox, buffer)
 

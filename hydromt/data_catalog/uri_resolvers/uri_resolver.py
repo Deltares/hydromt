@@ -67,5 +67,5 @@ class URIResolver(AbstractBaseModel, ABC):
     @classmethod
     def _load_plugins(cls):
         """Load URIResolver plugins."""
-        plugins: Dict[str, URIResolver] = PLUGINS.uri_resolver_plugins
-        logger.debug(f"loaded {cls.__name__} plugins: {plugins}")
+        plugins = PLUGINS.uri_resolver_plugins.keys()
+        logger.debug(f"loaded {cls.__name__} plugins: {', '.join(plugins)}")

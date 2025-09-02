@@ -59,9 +59,12 @@ class RasterDatasetSource(DataSource):
 
         Args:
         """
-        self._used = True
-        if bbox is not None or (mask is not None and buffer > 0):
-            mask = _parse_geom_bbox_buffer(mask, bbox, buffer)
+        self._mark_as_used()
+        self._log_start_read_data()
+
+        if bbox is not None:
+            # buffer will be applied in transform
+            mask = _parse_geom_bbox_buffer(mask, bbox)
 
         # Transform time_range and variables to match the data source
         tr = self.data_adapter._to_source_timerange(time_range)
@@ -94,6 +97,7 @@ class RasterDatasetSource(DataSource):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
+            buffer=buffer,
         )
 
     def to_file(
