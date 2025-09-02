@@ -1,0 +1,13 @@
+
+global:
+  components:
+    config:
+      type: ConfigComponent
+      filename: run_config.toml
+steps:
+  - config.update:
+      starttime: 2020-01-01
+      endtime: 2020-12-31
+  - write:
+      components:
+        - config

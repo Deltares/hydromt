@@ -236,6 +236,11 @@ def build(
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
     opt = _utils.parse_config(config)
+    if "steps" not in opt:
+        error_msg =f"It seems your workflow file at {config} does not " "contain a `steps` section. Perhaps you're using a v0.x format? " 
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+
     kwargs = opt.pop("global", {})
     modeltype = opt.pop("modeltype", model)
     # parse data catalog options from global section in config and cli options
@@ -324,6 +329,12 @@ def update(
     # parse settings
     logger.info("User settings:")
     opt = _utils.parse_config(config)
+
+    if "steps" not in opt:
+        error_msg =f"It seems your workflow file at {config} does not " "contain a `steps` section. Perhaps you're using a v0.x format? " 
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+
     kwargs = opt.pop("global", {})
     modeltype = opt.pop("modeltype", model)
     if modeltype not in PLUGINS.model_plugins:
