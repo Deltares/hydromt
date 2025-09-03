@@ -20,8 +20,10 @@ from hydromt._io.readers import (
     _open_timeseries_from_table,
     _open_vector,
     _open_vector_from_table,
+    read_nc,
 )
 from hydromt._io.writers import write_xy
+from hydromt.gis.raster import GEO_MAP_COORD
 
 
 def test_open_vector(tmpdir, df, geodf, world):
@@ -241,3 +243,17 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         test2 = ds.sel(id=i)["test2"]
         assert np.all(np.equal(test1, np.arange(len(ids)) * int(i))), test1
         assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
+
+
+def test_read_nc_geo_map_coord_sets_close(tmpdir):
+    # Create a simple netcdf file with GEO_MAP_COORD as a data variable
+    data = np.arange(10)
+    ds = xr.Dataset({GEO_MAP_COORD: ("x", data)})
+    nc_path = tmpdir.join("test_geo_map.nc")
+    ds.to_netcdf(nc_path)
+
+    # Call read_nc and ensure line 891 is hit (GEO_MAP_COORD in ds.data_vars)
+    ds2 = read_nc(str(nc_path))
+    assert len(ds2.data_vars) == 0
+    assert GEO_MAP_COORD in ds2.coords
+    assert ds2._close is not None

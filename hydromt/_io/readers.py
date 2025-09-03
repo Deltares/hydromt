@@ -887,8 +887,9 @@ def read_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     ds = xr.open_dataset(filepath, **kwargs)
     # set geo coord if present as coordinate of dataset
     if GEO_MAP_COORD in ds.data_vars:
-        # TODO: Check if the close functionality applies to the new Dataset.
+        org_close = ds._close
         ds = ds.set_coords(GEO_MAP_COORD)
+        ds.set_close(org_close)
 
     # Return the dataset
     return ds
@@ -916,7 +917,7 @@ def read_ncs(
     Dict[str, xr.Dataset]
         dict of xarray.Dataset. Don't forget to close them when you're done!
     """
-    ncs = dict()
+    ncs = {}
     path_template = root / filename_template
 
     path_glob, _, regex = _expand_uri_placeholders(
