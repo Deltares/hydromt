@@ -10,7 +10,7 @@ __all__ = ["_validate_steps"]
 
 
 def _validate_steps(model: "Model", steps: list[dict[str, dict[str, Any]]]) -> None:
-    for step_dict in steps:
+    for i, step_dict in enumerate(steps):
         step, options = next(iter(step_dict.items()))
         attr = _rgetattr(model, step, None)
         if attr is None:
@@ -25,4 +25,9 @@ def _validate_steps(model: "Model", steps: list[dict[str, dict[str, Any]]]) -> N
         # Throws if bind fails.
         sig = inspect.signature(attr)
         options = options or {}
-        _ = sig.bind(**options)
+        try:
+            _ = sig.bind(**options)
+        except TypeError as e:
+            raise TypeError(
+                f"Validation of step {i + 1} ({step}) failed because of the following error: {e}"
+            )
