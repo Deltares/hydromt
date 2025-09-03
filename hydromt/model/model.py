@@ -275,13 +275,7 @@ class Model(object, metaclass=ABCMeta):
         if write and not self._options_contain_write(steps):
             self.write()
 
-        # Clean up all components
-        for c in self.components.values():
-            c.cleanup()
-
-        # Finish all deferred file closes
-        for c in self.components.values():
-            c.finish_write()
+        self.close()
 
     def update(
         self,
@@ -373,9 +367,12 @@ class Model(object, metaclass=ABCMeta):
         if write and not self._options_contain_write(steps):
             self.write()
 
-        # Clean up all components
+        self.close()
+
+    def close(self) -> None:
+        """Close all components by closing their open files."""
         for c in self.components.values():
-            c.cleanup()
+            c.close()
 
         # Finish all deferred file closes
         for c in self.components.values():

@@ -79,7 +79,7 @@ class ModelComponent(ABC):
             errors["__class__"] = f"other does not inherit from {self.__class__}."
         return len(errors) == 0, errors
 
-    def cleanup(self):
+    def close(self) -> None:
         """Clean up all open datasets. Method to be called before finish_write."""
         for ds in self._open_datasets:
             ds.close()

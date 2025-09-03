@@ -128,7 +128,7 @@ def test_spatialdataset_updates_netcdf(raster_ds, tmpdir: Path, caplog):
     xr.testing.assert_equal(raster_ds, component_data)
 
     dataset_component.write()
-    dataset_component.cleanup()
+    dataset_component.close()
     dataset_component.finish_write()
 
     # Check that there were no more permission errors during cleanup and files have been updated.
