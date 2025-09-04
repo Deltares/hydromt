@@ -6,38 +6,47 @@ import pytest
 from pydantic import AnyUrl, ValidationError
 
 from hydromt._io.readers import _yml_from_uri_or_path
-from hydromt._validators.data_catalog import (
-    DataCatalogItem,
-    DataCatalogMetaData,
-    DataCatalogValidator,
+from hydromt._validators.data_catalog_v1x import (
+    DataCatalogV1Item,
+    DataCatalogV1MetaData,
+    DataCatalogV1Validator,
 )
 
 
-@pytest.mark.skip("validators need  to be updated to newest format")
-def test_deltares_data_catalog(latest_dd_version_uri):
+def test_deltares_data_catalog_v1(latest_dd_version_uri):
     yml_dict = _yml_from_uri_or_path(latest_dd_version_uri)
     # would raise error if something goes wrong
-    _ = DataCatalogValidator.from_dict(yml_dict)
+    _ = DataCatalogV1Validator.from_dict(yml_dict)
 
 
-def test_geodataframe_entry_validation():
+def test_geodataframe_v1_entry_validation():
     d = {
-        "crs": 4326,
-        "data_type": "GeoDataFrame",
-        "driver": "vector",
-        "kwargs": {"layer": "BasinATLAS_v10_lev12"},
-        "meta": {
-            "category": "hydrography",
-            "notes": "renaming and units might require some revision",
-            "paper_doi": "10.1038/s41597-019-0300-6",
-            "paper_ref": "Linke et al. (2019)",
-            "source_license": "CC BY 4.0",
-            "source_url": "https://www.hydrosheds.org/hydroatlas",
-            "source_version": "10",
-        },
-        "path": "hydrography/hydro_atlas/basin_atlas_v10.gpkg",
-    }
-    entry = DataCatalogItem.from_dict(d, name="basin_atlas_level12_v10")
+        "hydro_basin_atlas_level12":{
+            "data_type": "GeoDataFrame",
+            "version": 10,
+            "uri": "hydrography/hydro_atlas/basin_atlas_v10.gpkg",
+            "driver":{
+
+                "name": "pyogrio",
+                "options":{
+                    "layer": "BasinATLAS_v10_lev12"
+                }},
+            "metadata":{
+                "category": "hydrography",
+                "notes": "renaming and units might require some revision",
+                "paper_doi": "10.1038/s41597-019-0300-6",
+                "paper_ref": "Linke et al. (2019)",
+                "url": "https://www.hydrosheds.org/hydroatlas",
+                "license": "CC BY 4.0",
+                "extent":{
+                    "bbox":{
+                        "West": -180.0,
+                        "South": -55.988,
+                        "East": 180.001,
+                        "North": 83.626,
+                    }}
+            }}}
+    entry = DataCatalogV1Item.from_dict(d, name="basin_atlas_level12_v10")
 
     assert entry.crs == 4326
     assert entry.data_type == "GeoDataFrame"
@@ -54,7 +63,7 @@ def test_geodataframe_entry_validation():
     assert entry.path == Path("hydrography/hydro_atlas/basin_atlas_v10.gpkg")
 
 
-def test_valid_catalog_variants():
+def test_valid_v1_catalog_variants():
     d = {
         "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "esa_worldcover": {
@@ -90,25 +99,25 @@ def test_valid_catalog_variants():
             ],
         },
     }
-    _ = DataCatalogValidator.from_dict(d)
+    _ = DataCatalogV1Validator.from_dict(d)
 
 
-def test_no_hydromt_version_logs_warning(caplog: pytest.LogCaptureFixture):
+def test_no_hydromt_version_in_v1_catalog_logs_warning(caplog: pytest.LogCaptureFixture):
     d = {
         "meta": {"roots": [""]},
     }
 
-    _ = DataCatalogValidator.from_dict(d)
+    _ = DataCatalogV1Validator.from_dict(d)
     assert "No hydromt version" in caplog.text
 
 
-def test_catalog_metadata_validation():
+def test_catalog_v1_metadata_validation():
     d = {
         "hydromt_version": ">=1.0a,<2",
         "roots": ["p:/wflow_global/hydromt", "/mnt/p/wflow_global/hydromt"],
         "version": "2023.3",
     }
-    catalog_metadata = DataCatalogMetaData.from_dict(d)
+    catalog_metadata = DataCatalogV1MetaData.from_dict(d)
     assert catalog_metadata.roots == [
         Path("p:/wflow_global/hydromt"),
         Path("/mnt/p/wflow_global/hydromt"),
@@ -116,7 +125,7 @@ def test_catalog_metadata_validation():
     assert catalog_metadata.version == "2023.3"
 
 
-def test_raster_dataset_entry_validation():
+def test_raster_dataset_v1_entry_validation():
     d = {
         "crs": 4326,
         "data_type": "RasterDataset",
@@ -138,7 +147,7 @@ def test_raster_dataset_entry_validation():
         "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
     }
 
-    entry = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+    entry = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
     assert entry.name == "chelsa_v1.2"
     assert entry.crs == 4326
     assert entry.data_type == "RasterDataset"
@@ -154,7 +163,7 @@ def test_raster_dataset_entry_validation():
     assert entry.meta.source_version == "1.2"
 
 
-def test_dataset_entry_with_typo_validation():
+def test_dataset_v1_entry_with_typo_validation():
     d = {
         "crs_num": 4326,
         "datatype": "RasterDataset",
@@ -172,26 +181,27 @@ def test_dataset_entry_with_typo_validation():
     #  - missing crs, data_type and driver (3)
     #  - extra crs_num, datatype, diver, and filepath (5)
     with pytest.raises(ValidationError, match="7 validation errors"):
-        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+        _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
 
 
-def test_data_type_typo():
+def test_data_type_v1_typo():
     d = {
         "crs": 4326,
         "data_type": "RaserDataset",
         "driver": "raster",
-        "path": ".",
+        "uri": ".",
     }
     with pytest.raises(ValidationError, match="1 validation error"):
-        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+        _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
 
 
-def test_data_invalid_crs():
+def test_data_invalid_crs_v1():
     d = {
+        "metadata": {
         "crs": 123456789,
+            },
         "data_type": "RasterDataset",
-        "driver": "raster",
-        "path": ".",
+        "uri": ".",
     }
-    with pytest.raises(ValidationError, match="1 validation error"):
-        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+    with pytest.raises(ValidationError, match=" validation error for chelsea_v1.2"):
+        _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")

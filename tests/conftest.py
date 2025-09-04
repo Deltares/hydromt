@@ -129,6 +129,10 @@ def data_catalog(_local_catalog_eps) -> DataCatalog:
     """DataCatalog instance that points to local predefined catalogs."""
     return DataCatalog("artifact_data=v1.0.0")
 
+@pytest.fixture
+def dd_v0_catalog():
+    cat_root = Path(DATA_DIR) / "catalogs" / "deltares_data"
+    return cat_root / "v0.7.0"/ "data_catalog.yml"
 
 @pytest.fixture(scope="session")
 def latest_dd_version_uri():

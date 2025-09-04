@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-from pydantic import AnyUrl, BaseModel, ConfigDict, model_validator
+from pydantic import AnyUrl, BaseModel, ConfigDict, ValidationError, model_validator
 from pydantic.fields import Field
 from pydantic_core import Url
 from pyproj import CRS
@@ -48,20 +48,24 @@ class Extent(BaseModel):
     bbox: Bbox
 
 
-class DataCatalogMetaData(BaseModel):
+class DataCatalogV0MetaData(BaseModel):
     """The metadata section of a Hydromt data catalog."""
 
     roots: Optional[List[Path]] = None
     version: Optional[Union[str, Number]] = None
     hydromt_version: Optional[str] = None
     name: Optional[str] = None
+    validate_hydromt_version: bool = True
     model_config = ConfigDict(
         str_strip_whitespace=True,
         extra="allow",
     )
 
     @model_validator(mode="after")
-    def _check_version_compatible(self) -> "DataCatalogMetaData":
+    def _check_version_compatible(self) -> "DataCatalogV0MetaData":
+        if not self.validate_hydromt_version:
+            return self 
+
         if self.hydromt_version is None:
             warning(
                 f"No hydromt version was specified for the data catalog, thus compatibility between used hydromt version ({HYDROMT_VERSION}) and the catalog could not be determined."
@@ -78,12 +82,12 @@ class DataCatalogMetaData(BaseModel):
             )
 
     @staticmethod
-    def from_dict(input_dict: Dict[str, Any]) -> "DataCatalogMetaData":
+    def from_dict(input_dict: Dict[str, Any]) -> "DataCatalogV0MetaData":
         """Convert a dictionary into a validated data catalog metadata item."""
-        return DataCatalogMetaData(**input_dict)
+        return DataCatalogV0MetaData(**input_dict)
 
 
-class DataCatalogItemMetadata(BaseModel):
+class DataCatalogV0ItemMetadata(BaseModel):
     """The metadata for a data source."""
 
     category: Optional[str] = None
@@ -102,15 +106,15 @@ class DataCatalogItemMetadata(BaseModel):
     def from_dict(input_dict):
         """Convert a dictionary into a validated source metadata item."""
         if input_dict is None:
-            return DataCatalogItemMetadata()
+            return DataCatalogV0ItemMetadata()
         else:
             item_source_url = input_dict.pop("source_url", None)
             if item_source_url:
                 Url(item_source_url)
-            return DataCatalogItemMetadata(**input_dict, source_url=item_source_url)
+            return DataCatalogV0ItemMetadata(**input_dict, source_url=item_source_url)
 
 
-class DataCatalogItem(BaseModel):
+class DataCatalogV0Item(BaseModel):
     """A validated data source."""
 
     name: str
@@ -138,7 +142,7 @@ class DataCatalogItem(BaseModel):
     placeholders: Optional[Dict[str, Any]] = None
     rename: Dict[str, str] = Field(default_factory=dict)
     nodata: Optional[Number] = None
-    meta: Optional[DataCatalogItemMetadata] = None
+    meta: Optional[DataCatalogV0ItemMetadata] = None
     unit_add: Optional[Dict[str, Number]] = None
     unit_mult: Optional[Dict[str, Number]] = None
     variants: Optional[List[SourceVariant]] = None
@@ -150,7 +154,7 @@ class DataCatalogItem(BaseModel):
     )
 
     @model_validator(mode="after")
-    def _check_valid_crs(self) -> "DataCatalogItem":
+    def _check_valid_crs(self) -> "DataCatalogV0Item":
         try:
             if self.crs:
                 _ = CRS.from_user_input(self.crs)
@@ -166,23 +170,26 @@ class DataCatalogItem(BaseModel):
             entry_name = dict_name
         else:
             entry_name = name
-        item_metadata = DataCatalogItemMetadata.from_dict(input_dict.pop("meta", {}))
-        item_kwargs = input_dict.pop("kwargs", {})
-        item_storage_options = input_dict.pop("storage_options", {})
-        return DataCatalogItem(
-            **input_dict,
-            name=entry_name,
-            kwargs=item_kwargs,
-            storage_options=item_storage_options,
-            meta=item_metadata,
-        )
+        try:
+            item_metadata = DataCatalogV0ItemMetadata.from_dict(input_dict.pop("meta", {}))
+            item_kwargs = input_dict.pop("kwargs", {})
+            item_storage_options = input_dict.pop("storage_options", {})
+            return DataCatalogV0Item(
+                **input_dict,
+                name=entry_name,
+                kwargs=item_kwargs,
+                storage_options=item_storage_options,
+                meta=item_metadata,
+            )
+        except ValidationError as e:
+                raise ValidationError.from_exception_data(entry_name or "nameless entry", e.errors(), 'python')
 
 
-class DataCatalogValidator(BaseModel):
+class DataCatalogV0Validator(BaseModel):
     """A validated complete data catalog."""
 
-    meta: Optional[DataCatalogMetaData] = None
-    sources: Dict[str, DataCatalogItem] = Field(default_factory=dict)
+    meta: Optional[DataCatalogV0MetaData] = None
+    sources: Dict[str, DataCatalogV0Item] = Field(default_factory=dict)
 
     model_config = ConfigDict(
         str_strip_whitespace=True,
@@ -193,20 +200,20 @@ class DataCatalogValidator(BaseModel):
     def from_dict(input_dict):
         """Create a validated datacatalog from a dictionary."""
         if input_dict is None:
-            return DataCatalogValidator()
+            return DataCatalogV0Validator()
         else:
             meta = input_dict.pop("meta", None)
-            catalog_meta = DataCatalogMetaData.from_dict(meta)
+            catalog_meta = DataCatalogV0MetaData.from_dict(meta)
             catalog_entries = {}
             for entry_name, entry_dict in input_dict.items():
-                catalog_entries[entry_name] = DataCatalogItem.from_dict(
+                catalog_entries[entry_name] = DataCatalogV0Item.from_dict(
                     entry_dict, name=entry_name
                 )
 
-            return DataCatalogValidator(meta=catalog_meta, sources=catalog_entries)
+            return DataCatalogV0Validator(meta=catalog_meta, sources=catalog_entries)
 
     @staticmethod
     def from_yml(path: str):
         """Create a validated data catalog loaded from the provided path."""
         yml_dict = _yml_from_uri_or_path(path)
-        return DataCatalogValidator.from_dict(yml_dict)
+        return DataCatalogV0Validator.from_dict(yml_dict)
