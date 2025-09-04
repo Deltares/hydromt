@@ -4,6 +4,8 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+_MAX_CLOSE_ATTEMPTS = 2
+
 
 class DeferredFileClose:
     def __init__(self, *, original_path: Path, temp_path: Path):
@@ -11,8 +13,8 @@ class DeferredFileClose:
         self._temp_path = temp_path
         self._close_attempts = 0
 
-    def close(self, max_close_attempts: int = 2) -> None:
-        while self._close_attempts < max_close_attempts:
+    def close(self) -> None:
+        while self._close_attempts < _MAX_CLOSE_ATTEMPTS:
             try:
                 shutil.move(self._temp_path, self._original_path)
                 return
