@@ -17,7 +17,7 @@ from hydromt import __version__
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import log
-from hydromt._validators.data_catalog import DataCatalogValidator
+from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt._validators.region import validate_region
 from hydromt.cli import _utils
@@ -418,7 +418,7 @@ def check(
         for cat_path in data:
             logger.info(f"Validating catalog at {cat_path}")
             try:
-                DataCatalogValidator.from_yml(cat_path)
+                DataCatalogV0Validator.from_yml(cat_path)
                 logger.info("Catalog is valid!")
             except ValidationError as e:
                 all_exceptions.append(e)
