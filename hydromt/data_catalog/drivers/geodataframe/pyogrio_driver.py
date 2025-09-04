@@ -19,7 +19,11 @@ logger: Logger = getLogger(__name__)
 
 
 class PyogrioDriver(GeoDataFrameDriver):
-    """Driver to read GeoDataFrames using the `pyogrio` package."""
+    """
+    Driver to read GeoDataFrames using the `pyogrio` package.
+
+    Options in this driver are passed to `pyogrio.read_dataframe`.
+    """
 
     name = "pyogrio"
     supports_writing = True
@@ -40,8 +44,9 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         Warning
         -------
-        The 'predicate' keyword argument is unused in this method and is only present
-        in the method's signature for compatibility with other functions.
+        The 'predicate' and 'metadata' keyword arguments are unused in this method and
+        are only present in the method's signature for compatibility with other
+        functions.
         """
         if len(uris) > 1:
             raise ValueError(
@@ -61,14 +66,6 @@ class PyogrioDriver(GeoDataFrameDriver):
             )
         if not isinstance(gdf, gpd.GeoDataFrame):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
-
-        crs = None
-        if metadata is not None:
-            crs = metadata.crs
-        if crs is not None:
-            if gdf.crs is not None:
-                logger.warning(f"Overwriting crs of GeoDataFrame to {crs}")
-            gdf.set_crs(crs)
 
         if gdf.index.size == 0:
             exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
