@@ -18,7 +18,7 @@ New
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
 - `_io.readers.read_nc` and `_io.readers.read_ncs` always return an `xr.Dataset`. This Dataset is the one that needs to be closed before overwriting on disk.
-- All `ModelComponent`s return an optional `DeferredFileClose` that can be called after the open `xr.Dataset`s are closed.
+- All `ModelComponent.write` calls return an optional `DeferredFileClose` that can be called after the open ``xr.Dataset`` objects are closed.
 - `_io.writers.write_nc` writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well.
 
 Fixed
