@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import ClassVar, List, Optional, Set
+from typing import List, Optional
 
 import geopandas as gpd
 
@@ -15,8 +15,6 @@ logger: Logger = getLogger(__name__)
 
 class GeoDataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
-
-    _supported_extensions: ClassVar[Set[str]] = set()
 
     @abstractmethod
     def read(

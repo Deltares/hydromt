@@ -271,6 +271,6 @@ class GeoDataFrameSource(DataSource):
     def _infer_default_driver(cls, uri: str) -> GeoDataFrameDriver:
         _, extension = splitext(uri)
         for driver in GeoDataFrameDriver._find_all_possible_types():
-            if extension in driver._supported_extensions:
+            if extension in driver.SUPPORTED_EXTENSIONS:
                 return driver.name
         return cls._fallback_driver_read

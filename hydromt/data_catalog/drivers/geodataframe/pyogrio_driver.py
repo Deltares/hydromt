@@ -27,7 +27,7 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     name = "pyogrio"
     supports_writing = True
-    _supported_extensions: ClassVar[Set[str]] = {".gpkg", ".shp", ".geojson", ".fgb"}
+    SUPPORTED_EXTENSIONS: ClassVar[Set[str]] = {".gpkg", ".shp", ".geojson", ".fgb"}
 
     def read(
         self,
