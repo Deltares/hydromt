@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Literal, Optional, Union
 
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-from pydantic import AnyUrl, BaseModel, ConfigDict, model_validator
+from pydantic import AnyUrl, BaseModel, ConfigDict, ValidationError, model_validator
 from pydantic.fields import Field
 from pydantic_core import Url
 from pyproj import CRS
@@ -55,6 +55,7 @@ class DataCatalogV0MetaData(BaseModel):
     version: Optional[Union[str, Number]] = None
     hydromt_version: Optional[str] = None
     name: Optional[str] = None
+    validate_hydromt_version: bool = True
     model_config = ConfigDict(
         str_strip_whitespace=True,
         extra="allow",
@@ -62,6 +63,9 @@ class DataCatalogV0MetaData(BaseModel):
 
     @model_validator(mode="after")
     def _check_version_compatible(self) -> "DataCatalogV0MetaData":
+        if not self.validate_hydromt_version:
+            return self 
+
         if self.hydromt_version is None:
             warning(
                 f"No hydromt version was specified for the data catalog, thus compatibility between used hydromt version ({HYDROMT_VERSION}) and the catalog could not be determined."
@@ -166,16 +170,19 @@ class DataCatalogV0Item(BaseModel):
             entry_name = dict_name
         else:
             entry_name = name
-        item_metadata = DataCatalogV0ItemMetadata.from_dict(input_dict.pop("meta", {}))
-        item_kwargs = input_dict.pop("kwargs", {})
-        item_storage_options = input_dict.pop("storage_options", {})
-        return DataCatalogV0Item(
-            **input_dict,
-            name=entry_name,
-            kwargs=item_kwargs,
-            storage_options=item_storage_options,
-            meta=item_metadata,
-        )
+        try:
+            item_metadata = DataCatalogV0ItemMetadata.from_dict(input_dict.pop("meta", {}))
+            item_kwargs = input_dict.pop("kwargs", {})
+            item_storage_options = input_dict.pop("storage_options", {})
+            return DataCatalogV0Item(
+                **input_dict,
+                name=entry_name,
+                kwargs=item_kwargs,
+                storage_options=item_storage_options,
+                meta=item_metadata,
+            )
+        except ValidationError as e:
+                raise ValidationError.from_exception_data(entry_name or "nameless entry", e.errors(), 'python')
 
 
 class DataCatalogV0Validator(BaseModel):

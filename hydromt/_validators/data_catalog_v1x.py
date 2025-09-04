@@ -8,7 +8,7 @@ from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 from pydantic import AnyUrl, BaseModel, ConfigDict, model_validator
 from pydantic.fields import Field
-from pydantic_core import Url
+from pydantic_core import Url, ValidationError
 from pyproj import CRS
 from pyproj.exceptions import CRSError
 
@@ -109,26 +109,16 @@ class DataCatalogV1ItemMetadata(BaseModel):
                 Url(item_source_url)
             return DataCatalogV1ItemMetadata(**input_dict, source_url=item_source_url)
 
+class DataCatalogV1DriverItem(BaseModel):
+    pass
 
 class DataCatalogV1Item(BaseModel):
     """A validated data source."""
 
     name: str
     data_type: Literal["RasterDataset", "GeoDataset", "GeoDataFrame", "DataFrame"]
-    driver: Literal[
-        "csv",
-        "fwf",
-        "netcdf",
-        "parquet",
-        "raster",
-        "raster_tindex",
-        "vector",
-        "vector_table",
-        "xls",
-        "xlsx",
-        "zarr",
-    ]
-    path: Path | None = None
+    driver: DataCatalogV1DriverItem
+    uri: str 
     crs: int | str | None = None
     filesystem: str | None = None
     provider: str | None = None
@@ -166,16 +156,21 @@ class DataCatalogV1Item(BaseModel):
             entry_name = dict_name
         else:
             entry_name = name
-        item_metadata = DataCatalogV1ItemMetadata.from_dict(input_dict.pop("meta", {}))
-        item_kwargs = input_dict.pop("kwargs", {})
-        item_storage_options = input_dict.pop("storage_options", {})
-        return DataCatalogV1Item(
-            **input_dict,
-            name=entry_name,
-            kwargs=item_kwargs,
-            storage_options=item_storage_options,
-            meta=item_metadata,
-        )
+        try: 
+            item_kwargs = input_dict.pop("kwargs", {})
+            item_storage_options = input_dict.pop("storage_options", {})
+            item_metadata = DataCatalogV1ItemMetadata.from_dict(input_dict.pop("meta", {}))
+
+            return DataCatalogV1Item(
+                **input_dict,
+                name=entry_name,
+                kwargs=item_kwargs,
+                storage_options=item_storage_options,
+                meta=item_metadata,
+            )
+        except ValidationError as e:
+                raise ValidationError.from_exception_data(entry_name or "nameless entry", e.errors(), 'python')
+
 
 
 class DataCatalogV1Validator(BaseModel):

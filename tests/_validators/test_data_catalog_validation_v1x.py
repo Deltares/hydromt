@@ -13,8 +13,7 @@ from hydromt._validators.data_catalog_v1x import (
 )
 
 
-@pytest.mark.skip("validators need  to be updated to newest format")
-def test_deltares_data_catalog(latest_dd_version_uri):
+def test_deltares_data_catalog_v1(latest_dd_version_uri):
     yml_dict = _yml_from_uri_or_path(latest_dd_version_uri)
     # would raise error if something goes wrong
     _ = DataCatalogV1Validator.from_dict(yml_dict)
@@ -22,21 +21,31 @@ def test_deltares_data_catalog(latest_dd_version_uri):
 
 def test_geodataframe_v1_entry_validation():
     d = {
-        "crs": 4326,
-        "data_type": "GeoDataFrame",
-        "driver": "vector",
-        "kwargs": {"layer": "BasinATLAS_v10_lev12"},
-        "meta": {
-            "category": "hydrography",
-            "notes": "renaming and units might require some revision",
-            "paper_doi": "10.1038/s41597-019-0300-6",
-            "paper_ref": "Linke et al. (2019)",
-            "source_license": "CC BY 4.0",
-            "source_url": "https://www.hydrosheds.org/hydroatlas",
-            "source_version": "10",
-        },
-        "path": "hydrography/hydro_atlas/basin_atlas_v10.gpkg",
-    }
+        "hydro_basin_atlas_level12":{
+            "data_type": "GeoDataFrame",
+            "version": 10,
+            "uri": "hydrography/hydro_atlas/basin_atlas_v10.gpkg",
+            "driver":{
+
+                "name": "pyogrio",
+                "options":{
+                    "layer": "BasinATLAS_v10_lev12"
+                }},
+            "metadata":{
+                "category": "hydrography",
+                "notes": "renaming and units might require some revision",
+                "paper_doi": "10.1038/s41597-019-0300-6",
+                "paper_ref": "Linke et al. (2019)",
+                "url": "https://www.hydrosheds.org/hydroatlas",
+                "license": "CC BY 4.0",
+                "extent":{
+                    "bbox":{
+                        "West": -180.0,
+                        "South": -55.988,
+                        "East": 180.001,
+                        "North": 83.626,
+                    }}
+            }}}
     entry = DataCatalogV1Item.from_dict(d, name="basin_atlas_level12_v10")
 
     assert entry.crs == 4326
@@ -180,7 +189,7 @@ def test_data_type_v1_typo():
         "crs": 4326,
         "data_type": "RaserDataset",
         "driver": "raster",
-        "path": ".",
+        "uri": ".",
     }
     with pytest.raises(ValidationError, match="1 validation error"):
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
@@ -188,10 +197,11 @@ def test_data_type_v1_typo():
 
 def test_data_invalid_crs_v1():
     d = {
+        "metadata": {
         "crs": 123456789,
+            },
         "data_type": "RasterDataset",
-        "driver": "raster",
-        "path": ".",
+        "uri": ".",
     }
-    with pytest.raises(ValidationError, match="1 validation error"):
+    with pytest.raises(ValidationError, match=" validation error for chelsea_v1.2"):
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
