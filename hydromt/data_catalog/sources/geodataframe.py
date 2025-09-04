@@ -266,3 +266,11 @@ class GeoDataFrameSource(DataSource):
 
             stac_catalog.add_item(stac_item)
             return stac_catalog
+
+    @classmethod
+    def _infer_default_driver(cls, uri: str) -> GeoDataFrameDriver:
+        _, extension = splitext(uri)
+        for driver in GeoDataFrameDriver._find_all_possible_types():
+            if extension in driver._supported_extensions:
+                return driver.name
+        return cls._fallback_driver_read

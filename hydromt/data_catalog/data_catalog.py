@@ -51,7 +51,7 @@ from hydromt.data_catalog.adapters import (
     GeoDatasetAdapter,
     RasterDatasetAdapter,
 )
-from hydromt.data_catalog.drivers import GeoDataFrameTableDriver, RasterioDriver
+from hydromt.data_catalog.drivers import RasterioDriver
 from hydromt.data_catalog.predefined_catalog import (
     PredefinedCatalog,
     _copy_file,
@@ -1439,16 +1439,7 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                if "driver" in kwargs:
-                    driver = kwargs.pop("driver")
-                # Check if file extension corresponds to the geodataframe_table driver
-                elif (
-                    Path(data_like).suffix
-                    in GeoDataFrameTableDriver._supported_extensions
-                ):
-                    driver = GeoDataFrameTableDriver.name
-                else:
-                    driver = GeoDataFrameSource._fallback_driver_read
+                driver = kwargs.pop("driver", None)
                 name = basename(data_like)
                 source = GeoDataFrameSource(
                     name=name, uri=str(data_like), driver=driver, **kwargs
