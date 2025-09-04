@@ -2,6 +2,7 @@
 
 from logging import NOTSET, WARNING, Logger, getLogger
 from os.path import isfile, join
+from pathlib import Path
 from typing import Generator
 
 import pytest
@@ -61,6 +62,79 @@ def _reset_log_level() -> Generator[None, None, None]:
     yield
     main_logger: Logger = getLogger("hydromt")
     main_logger.setLevel(NOTSET)  # Most verbose so all messages get passed
+
+
+def test_cli_build_missing_arg_workflow(tmpdir):
+    cmd = [
+        "build",
+        "model",
+        str(tmpdir),
+        "-i",
+        Path(TEST_DATA_DIR) / "missing_data_workflow.yml",
+        "-vv",
+    ]
+    r = CliRunner().invoke(hydromt_cli, cmd)
+
+    assert r.exit_code == 1
+    assert (
+        "Validation of step 1 (config.update) failed because of the following error:"
+        in r.output
+    )
+
+
+def test_cli_build_v0x_workflow(tmpdir):
+    cmd = [
+        "build",
+        "model",
+        str(tmpdir),
+        "-i",
+        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        "-vv",
+    ]
+    r = CliRunner().invoke(hydromt_cli, cmd)
+
+    assert r.exit_code == 1
+    assert (
+        "does not contain a `steps` section. Perhaps you're using a v0.x format?"
+        in r.output
+    )
+
+
+def test_cli_update_missing_arg(tmpdir):
+    cmd = [
+        "update",
+        "model",
+        str(tmpdir),
+        "-i",
+        Path(TEST_DATA_DIR) / "missing_data_workflow.yml",
+        "-vv",
+    ]
+    r = CliRunner().invoke(hydromt_cli, cmd)
+
+    assert r.exit_code == 1
+    print(r)
+    assert (
+        "Validation of step 1 (config.update) failed because of the following error:"
+        in r.output
+    )
+
+
+def test_cli_update_v0x_workflow(tmpdir):
+    cmd = [
+        "update",
+        "model",
+        str(tmpdir),
+        "-i",
+        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        "-vv",
+    ]
+    r = CliRunner().invoke(hydromt_cli, cmd)
+
+    assert r.exit_code == 1
+    assert (
+        "does not contain a `steps` section. Perhaps you're using a v0.x format?"
+        in r.output
+    )
 
 
 @pytest.mark.usefixtures("_reset_log_level")

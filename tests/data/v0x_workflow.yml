@@ -1,0 +1,10 @@
+
+---
+setup_config:
+  header.settings: value
+  timers.end: '2010-02-15'
+  timers.start: '2010-02-05'
+
+write:
+  components:
+    - config
