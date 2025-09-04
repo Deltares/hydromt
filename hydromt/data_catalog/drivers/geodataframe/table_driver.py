@@ -26,6 +26,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
     """Driver for reading in GeoDataFrames from tabular formats."""
 
     name: ClassVar[str] = "geodataframe_table"
+    _supported_extensions: ClassVar[Set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
 
     def read(
         self,
