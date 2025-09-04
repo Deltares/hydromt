@@ -1,9 +1,8 @@
 """Tables component."""
 
 import glob
-import os
 from logging import Logger, getLogger
-from os.path import basename, dirname, join
+from os.path import basename, join
 from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import pandas as pd
@@ -64,23 +63,32 @@ class TablesComponent(ModelComponent):
 
     @hydromt_step
     def write(self, filename: Optional[str] = None, **kwargs) -> None:
-        """Write tables at provided or default filepath if none is provided."""
+        """Write tables at provided or default file path if none is provided."""
         self.root._assert_write_mode()
-        fn = filename or self._filename
-        if len(self.data) > 0:
-            logger.info("Writing table files.")
-            local_kwargs = {"index": False, "header": True, "sep": ","}
-            local_kwargs.update(**kwargs)
-            for name in self.data:
-                write_path = join(self.root.path, fn.format(name=name))
-                os.makedirs(dirname(write_path), exist_ok=True)
-                self.data[name].to_csv(write_path, **local_kwargs)
-        else:
-            logger.debug("No tables found, skip writing.")
+
+        if len(self.data) == 0:
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: No tables found, skip writing."
+            )
+            return
+
+        filename = filename or self._filename
+
+        kwargs.setdefault("index", False)
+        kwargs.setdefault("header", True)
+        kwargs.setdefault("sep", ",")
+
+        for name, value in self.data.items():
+            write_path = self.root.path / filename.format(name=name)
+            write_path.parent.mkdir(parents=True, exist_ok=True)
+            logger.info(
+                f"{self.model.name}.{self.name_in_model}: Writing table to {write_path}."
+            )
+            value.to_csv(write_path, **kwargs)
 
     @hydromt_step
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
-        """Read tables at provided or default filepath if none is provided."""
+        """Read tables at provided or default file path if none is provided."""
         self.root._assert_read_mode()
         self._initialize_tables(skip_read=True)
         logger.info("Reading model table files.")

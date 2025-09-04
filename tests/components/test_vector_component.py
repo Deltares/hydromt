@@ -23,7 +23,10 @@ def test_write_empty_data(
     model = mocker.Mock(set=Model)
     model.root = mocker.Mock(set=ModelRoot)
     model.root.path = tmpdir
+    model.name = "foo"
     vector = VectorComponent(model)
+    model.components = {}
+    model.components["vector"] = vector
     with caplog.at_level(DEBUG):
         vector.write()
-    assert "No vector data found, skip writing." in caplog.text
+    assert "foo.vector: No vector data found, skip writing." in caplog.text

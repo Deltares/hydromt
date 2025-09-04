@@ -59,7 +59,9 @@ class RasterDatasetSource(DataSource):
 
         Args:
         """
-        self._used = True
+        self._mark_as_used()
+        self._log_start_read_data()
+
         if bbox is not None:
             # buffer will be applied in transform
             mask = _parse_geom_bbox_buffer(mask, bbox)

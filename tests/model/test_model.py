@@ -268,9 +268,6 @@ def test_model_build_update(tmpdir, demda, obsda):
 
     assert isfile(join(model.root.path, "hydromt.log"))
     assert isdir(join(model.root.path, "grid")), listdir(model.root.path)
-    assert isfile(join(model.root.path, "grid", "grid_region.geojson")), listdir(
-        model.root.path
-    )
 
     # read and update model
     model = Model(
@@ -284,7 +281,6 @@ def test_model_build_update(tmpdir, demda, obsda):
     model_out = str(tmpdir.join("update"))
     model.update(model_out=model_out, steps=[])  # write only
     assert isdir(join(model_out, "grid")), listdir(model_out)
-    assert isfile(join(model_out, "grid", "grid_region.geojson")), listdir(model_out)
 
 
 @pytest.mark.integration

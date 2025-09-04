@@ -8,8 +8,7 @@ import geopandas as gpd
 from geopandas import GeoDataFrame
 from pyproj import CRS
 
-from hydromt._io.writers import _write_region
-from hydromt._typing.type_def import StrPath
+from hydromt._io.writers import write_region
 from hydromt.model.components.base import ModelComponent
 
 if TYPE_CHECKING:
@@ -88,20 +87,22 @@ class SpatialModelComponent(ModelComponent, ABC):
 
     def write_region(
         self,
+        filename: Optional[str] = None,
         *,
-        filename: Optional[StrPath] = None,
-        to_wgs84=False,
+        to_wgs84: bool = False,
         **write_kwargs,
     ) -> None:
         """Write the model region to file.
 
-        This function should be called from within the `write` function of the component inheriting from this class.
+        The region is an auxiliary file that is often not required by the model,
+        but can be useful for getting data from the data catalog.
+        Plugin implementors may choose to write this file on write for a specific component.
 
         Parameters
         ----------
         filename : str, optional
             The filename to write the region to. If None, the filename provided at initialization is used.
-        to_wgs84 : bool, optional
+        to_wgs84 : bool
             If True, the region is reprojected to WGS84 before writing.
         **write_kwargs:
             Additional keyword arguments passed to the `geopandas.GeoDataFrame.to_file` function.
@@ -114,14 +115,22 @@ class SpatialModelComponent(ModelComponent, ABC):
             return
 
         if self.region is None:
-            logger.info("No region data available to write.")
+            logger.warning(
+                f"{self.model.name}.{self.name_in_model}: No region data available to write."
+            )
             return
 
-        _write_region(
+        filename = filename or self._region_filename
+        full_path = self.root.path / filename
+        full_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info(
+            f"{self.model.name}.{self.name_in_model}: Writing region to {full_path}."
+        )
+
+        write_region(
             self.region,
-            filename=filename or self._region_filename,
+            file_path=full_path,
             to_wgs84=to_wgs84,
-            root_path=self.root.path,
             **write_kwargs,
         )
 
