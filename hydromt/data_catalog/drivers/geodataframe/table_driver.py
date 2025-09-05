@@ -1,7 +1,7 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
 
 from logging import Logger, getLogger
-from typing import ClassVar, List, Optional, Set
+from typing import ClassVar, List, Optional
 
 import geopandas as gpd
 import pandas as pd
@@ -26,6 +26,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
     """Driver for reading in GeoDataFrames from tabular formats."""
 
     name: ClassVar[str] = "geodataframe_table"
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
 
     def read(
         self,
@@ -108,7 +109,7 @@ def _open_vector_from_table(
         )
 
     # Make columns case insensitive
-    columns: Set[str] = set(map(lambda col: col.lower(), df.columns))
+    columns: set[str] = set(map(lambda col: col.lower(), df.columns))
     columns.update(set(map(lambda col: col.upper(), df.columns)))
 
     if x_dim is None:

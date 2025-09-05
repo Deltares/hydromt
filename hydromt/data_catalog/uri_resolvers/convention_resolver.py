@@ -3,7 +3,7 @@
 from functools import reduce
 from itertools import chain, product
 from logging import Logger, getLogger
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any, Iterable, Optional
 
 import pandas as pd
 from fsspec.core import split_protocol
@@ -17,9 +17,8 @@ from hydromt._typing import (
     exec_nodata_strat,
 )
 from hydromt._utils.naming_convention import _expand_uri_placeholders
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 from hydromt.gis._gis_utils import _zoom_to_overview_level
-
-from .uri_resolver import URIResolver
 
 logger: Logger = getLogger(__name__)
 
@@ -34,7 +33,7 @@ class ConventionResolver(URIResolver):
 
     def _get_dates(
         self,
-        keys: List[str],
+        keys: list[str],
         time_range: TimeRange,
     ) -> pd.PeriodIndex:
         """Obtain the dates the user is searching for."""
@@ -43,15 +42,15 @@ class ConventionResolver(URIResolver):
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
 
-    def _resolve_wildcards(self, uris: Iterable[str]) -> Set[str]:
+    def _resolve_wildcards(self, uris: Iterable[str]) -> set[str]:
         """Expand on the wildcards in the uris based on the filesystem."""
 
-        def split_and_glob(uri: str) -> Tuple[Optional[str], List[str]]:
+        def split_and_glob(uri: str) -> tuple[Optional[str], list[str]]:
             protocol, _ = split_protocol(uri)
             return (protocol, self.filesystem.glob(uri))
 
         def maybe_unstrip_protocol(
-            pair: Tuple[Optional[str], Iterable[str]],
+            pair: tuple[Optional[str], Iterable[str]],
         ) -> Iterable[str]:
             if pair[0] is not None:
                 return map(
@@ -83,10 +82,10 @@ class ConventionResolver(URIResolver):
         time_range: Optional[TimeRange] = None,
         mask: Optional[Geom] = None,
         zoom: Optional[Zoom] = None,
-        variables: Optional[List[str]] = None,
+        variables: Optional[list[str]] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> List[str]:
+    ) -> list[str]:
         """Resolve the placeholders in the URI using naming conventions.
 
         Parameters
@@ -98,8 +97,8 @@ class ConventionResolver(URIResolver):
         mask : Optional[Geom], optional
             A geometry defining the area of interest, by default None
         zoom: Optional[Zoom], optional
-            zoom_level of the dataset, by default None
-        variables : Optional[List[str]], optional
+            zoom of the dataset, by default None
+        variables : Optional[list[str]], optional
             Names of variables to return, or all if None, by default None
         metadata: Optional[SourceMetadata], optional
             DataSource metadata.
@@ -108,7 +107,7 @@ class ConventionResolver(URIResolver):
 
         Returns
         -------
-        List[str]
+        list[str]
             a list of expanded uris
 
         Raises
@@ -134,18 +133,17 @@ class ConventionResolver(URIResolver):
         if not variables:
             variables = [""]  # fill any valid value
         if zoom:
-            try:
-                zls_dict: Optional[Dict[int, float]] = metadata.zls_dict
-            except AttributeError:
-                zls_dict: Optional[Dict[int, float]] = None
-
+            zls_dict: Optional[dict[int, float]] = None
+            if metadata is not None and hasattr(metadata, "zls_dict"):
+                zls_dict = metadata.zls_dict
+            crs = None if metadata is None else metadata.crs
             overview_level: int = (
-                _zoom_to_overview_level(zoom, mask, zls_dict, metadata.crs) or 0
+                _zoom_to_overview_level(zoom, mask, zls_dict, crs) or 0
             )
         else:
             overview_level = 0  # fill any valid value
 
-        fmts: Iterable[Dict[str, Any]] = map(
+        fmts: Iterable[dict[str, Any]] = map(
             lambda t: {
                 "year": t[0].year,
                 "month": t[0].month,
@@ -154,7 +152,7 @@ class ConventionResolver(URIResolver):
             },
             product(dates, variables),
         )
-        uris: List[str] = list(
+        uris: list[str] = list(
             self._resolve_wildcards(map(lambda fmt: uri_expanded.format(**fmt), fmts))
         )
         if not uris:

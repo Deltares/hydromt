@@ -28,6 +28,7 @@ class BaseDriver(AbstractBaseModel, ABC):
     options: Dict[str, Any] = Field(default_factory=dict)
 
     model_config: ConfigDict = ConfigDict(extra="forbid")
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = set()
 
     def __eq__(self, value: object) -> bool:
         """Compare equality.
