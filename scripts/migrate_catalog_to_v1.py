@@ -3,13 +3,13 @@
 from argparse import ArgumentParser, Namespace
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Optional, Set
+from typing import Any, Optional
 
 from yaml import Loader, SafeDumper, dump, load
 
 from hydromt.data_catalog import DataCatalog
 
-DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
+DRIVER_RENAME_MAPPING: dict[str, dict[str, str]] = {
     "RasterDataset": {
         "raster": "rasterio",
         "zarr": "raster_xarray",
@@ -65,15 +65,15 @@ def prepare_path_out(path_out: Path, overwrite: bool):
         path_out.parent.mkdir(parents=True, exist_ok=True)
 
 
-def load_catalog(catalog_path: Path) -> Dict:
+def load_catalog(catalog_path: Path) -> dict:
     """Load the catalog into dict."""
     with open(catalog_path) as f:
         return load(f, Loader)
 
 
-def migrate_meta(catalog_dict: Dict[str, Any], version: str) -> Dict[str, Any]:
+def migrate_meta(catalog_dict: dict[str, Any], version: str) -> dict[str, Any]:
     """Migrate metadata of catalog."""
-    if catalog_meta := catalog_dict.pop("meta", None):
+    if catalog_meta := catalog_dict.pop("meta", {}):
         if hydromt_version := catalog_meta.get("hydromt_version"):
             catalog_meta["hydromt_version"] = hydromt_version
         else:
@@ -81,12 +81,12 @@ def migrate_meta(catalog_dict: Dict[str, Any], version: str) -> Dict[str, Any]:
 
         catalog_meta["version"] = version
 
-        return catalog_meta
+    return catalog_meta
 
 
-def migrate_entries(catalog_dict: Dict[str, Any], version: str) -> Dict[str, Any]:
+def migrate_entries(catalog_dict: dict[str, Any], version: str) -> dict[str, Any]:
     """Migrate all entries of the data catalog."""
-    new_catalog_meta: Dict[str, Any] = migrate_meta(catalog_dict, version)
+    new_catalog_meta: dict[str, Any] = migrate_meta(catalog_dict, version)
     new_catalog_dict = {
         "meta": new_catalog_meta,
         **{item[0]: migrate_entry(*item) for item in catalog_dict.items()},
@@ -95,8 +95,8 @@ def migrate_entries(catalog_dict: Dict[str, Any], version: str) -> Dict[str, Any
 
 
 def migrate_entry(
-    entry_name: str, entry: Dict[str, Any], variant_ref: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    entry_name: str, entry: dict[str, Any], variant_ref: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """Migrate the v0.x entry to v1."""
     if variant_ref is None:
         variant_ref = {}
@@ -118,14 +118,14 @@ def migrate_entry(
         old_driver: str = entry.pop("driver")
         driver_name: str = DRIVER_RENAME_MAPPING[data_type][old_driver]
         entry["driver"] = {"name": driver_name}
-        driver_options: Dict[str, Any] = entry["driver"].get("options", {})
+        driver_options: dict[str, Any] = entry["driver"].get("options", {})
         entry["driver"]["options"] = driver_options
         if old_driver == "raster_tindex":
             entry["uri_resolver"] = {"name": "raster_tindex"}
             driver_options["mosaic"] = True
 
         # move kwargs and driver_kwargs to driver options
-        old_kwarg_names: Set[str] = {"kwargs", "driver_kwargs"}
+        old_kwarg_names: set[str] = {"kwargs", "driver_kwargs"}
         if any(old_kwarg_names.intersection(entry.keys())):
             for field in old_kwarg_names:
                 if value := entry.pop(field, None):
@@ -173,7 +173,7 @@ def migrate_entry(
         entry["metadata"] = metadata
 
     # move crs and nodata to metadata
-    new_meta: Set[str] = {"crs", "nodata"}
+    new_meta: set[str] = {"crs", "nodata"}
     if "metadata" not in entry:
         entry["metadata"] = {}
     for field in new_meta:
@@ -184,7 +184,7 @@ def migrate_entry(
         entry.pop("metadata")
 
     # Migrate postprocessing parameters to data_adapter
-    postprocessing_params: Set[str] = {"unit_add", "unit_mult", "rename"}
+    postprocessing_params: set[str] = {"unit_add", "unit_mult", "rename"}
     if any(postprocessing_params.intersection(entry.keys())):
         entry["data_adapter"] = {}
 
@@ -207,7 +207,7 @@ def migrate_entry(
     return entry
 
 
-def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
+def write_out(new_catalog_dict: dict[str, Any], path_out: Path):
     """Write the catalog out to the new structure."""
     # validate catalog, need a copy because catalog_dict is changed by DataCatalog.from_dict
     copy_catalog = deepcopy(new_catalog_dict)
@@ -232,8 +232,8 @@ def write_out(new_catalog_dict: Dict[str, Any], path_out: Path):
 def main(path_in: Path, path_out: Path, overwrite: bool, version: str):
     """Read in data catalog and write out."""
     prepare_path_out(path_out, overwrite)
-    old_catalog_dict: Dict[str, Any] = load_catalog(path_in)
-    new_catalog_dict: Dict[str, Any] = migrate_entries(old_catalog_dict, version)
+    old_catalog_dict: dict[str, Any] = load_catalog(path_in)
+    new_catalog_dict: dict[str, Any] = migrate_entries(old_catalog_dict, version)
     write_out(new_catalog_dict, path_out)
 
 

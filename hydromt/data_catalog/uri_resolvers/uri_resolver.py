@@ -29,7 +29,7 @@ class URIResolver(AbstractBaseModel, ABC):
         time_range: Optional[TimeRange] = None,
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
-        zoom_level: Optional[Zoom] = None,
+        zoom: Optional[Zoom] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> List[str]:
@@ -43,8 +43,8 @@ class URIResolver(AbstractBaseModel, ABC):
             left-inclusive start end time of the data, by default None
         mask : Optional[Geom], optional
             A geometry defining the area of interest, by default None
-        zoom_level : Optional[ZoomLevel], optional
-            zoom_level of the dataset, by default None
+        zoom : Optional[Zoom], optional
+            zoom of the dataset, by default None
         variables : Optional[List[str]], optional
             Names of variables to return, or all if None, by default None
         metadata: Optional[SourceMetadata], optional
