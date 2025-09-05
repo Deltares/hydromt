@@ -15,12 +15,10 @@ from pyproj import CRS
 
 from hydromt._io.readers import _read_yaml
 from hydromt._typing import StrPath
-from hydromt._typing.type_def import DeferedFileClose
 from hydromt._utils import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
 from hydromt.model.components import (
-    DatasetsComponent,
     ModelComponent,
     SpatialModelComponent,
 )
@@ -107,8 +105,6 @@ class Model(object, metaclass=ABCMeta):
 
         self.components: Dict[str, ModelComponent] = {}
         self._add_components(components)
-
-        self._defered_file_closes: List[DeferedFileClose] = []
 
         model_metadata = cast(Dict[str, str], PLUGINS.model_metadata[self.name])
         logger.info(
@@ -279,6 +275,8 @@ class Model(object, metaclass=ABCMeta):
         if write and not self._options_contain_write(steps):
             self.write()
 
+        self.close()
+
     def update(
         self,
         *,
@@ -369,9 +367,16 @@ class Model(object, metaclass=ABCMeta):
         if write and not self._options_contain_write(steps):
             self.write()
 
-        for comp in self.components.values():
-            if isinstance(comp, DatasetsComponent):
-                comp._cleanup(forceful_overwrite=forceful_overwrite)
+        self.close()
+
+    def close(self) -> None:
+        """Close all components by closing their open files."""
+        for c in self.components.values():
+            c.close()
+
+        # Finish all deferred file closes
+        for c in self.components.values():
+            c.finish_write()
 
     @hydromt_step
     def write(self, components: Optional[List[str]] = None) -> None:

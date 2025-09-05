@@ -5,6 +5,9 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, cast
 from weakref import ReferenceType, ref
 
+import xarray as xr
+
+from hydromt._typing.deferred_file_close import DeferredFileClose
 from hydromt.data_catalog import DataCatalog
 
 if TYPE_CHECKING:
@@ -19,6 +22,8 @@ class ModelComponent(ABC):
 
     def __init__(self, model: "Model"):
         self.__model_ref: ReferenceType["Model"] = ref(model)
+        self._open_datasets: list[xr.Dataset] = []
+        self._deferred_file_close_handles: list[DeferredFileClose] = []
 
     @abstractmethod
     def read(self):
@@ -26,7 +31,7 @@ class ModelComponent(ABC):
         ...
 
     @abstractmethod
-    def write(self):
+    def write(self) -> None:
         """Write the component to file(s)."""
         ...
 
@@ -73,3 +78,18 @@ class ModelComponent(ABC):
         if not isinstance(other, self.__class__):
             errors["__class__"] = f"other does not inherit from {self.__class__}."
         return len(errors) == 0, errors
+
+    def close(self) -> None:
+        """Clean up all open datasets. Method to be called before finish_write."""
+        for ds in self._open_datasets:
+            ds.close()
+        self._open_datasets.clear()
+
+    def finish_write(self):
+        """Finish the write functionality after cleanup was called for all components in the model.
+
+        All DeferredFileClose objects can overwrite any lazy loaded files now.
+        """
+        for close_handle in self._deferred_file_close_handles:
+            close_handle.close()
+        self._deferred_file_close_handles.clear()

@@ -12,7 +12,7 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import _read_ncs
+from hydromt._io.readers import read_ncs
 from hydromt._io.writers import write_nc
 from hydromt.gis.vector import GeoDataset
 from hydromt.model.components.base import ModelComponent
@@ -217,9 +217,10 @@ class VectorComponent(SpatialModelComponent):
         if filename is not None:
             # Disable lazy loading of data
             # to avoid issues with reading object dtype data
-            if "chunks" not in kwargs:
-                kwargs["chunks"] = None
-            ds = xr.merge(_read_ncs(filename, root=self.root.path, **kwargs).values())
+            kwargs.setdefault("chunks", None)
+            files = read_ncs(filename, root=self.root.path, **kwargs).values()
+            self._open_datasets.extend(files)
+            ds = xr.merge(files)
             # check if ds is empty (default filename has a value)
             if len(ds.sizes) == 0:
                 filename = None
@@ -246,8 +247,8 @@ class VectorComponent(SpatialModelComponent):
     def write(
         self,
         filename: Optional[str] = "vector/vector.nc",
-        *,
         geometry_filename: Optional[str] = "vector/vector.geojson",
+        *,
         ogr_compliant: bool = False,
         **kwargs,
     ) -> None:
@@ -337,13 +338,15 @@ class VectorComponent(SpatialModelComponent):
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing vector to {geojson_path}."
             )
-            write_nc(
+            close_handle = write_nc(
                 ds,
                 file_path=geojson_path,
                 engine="netcdf4",
                 force_overwrite=self.root.mode.is_override_mode(),
                 **kwargs,
             )
+            if close_handle is not None:
+                self._deferred_file_close_handles.append(close_handle)
         # write to geojson only
         elif filename is None:
             geojson_path = self.root.path / geometry_filename
@@ -366,11 +369,13 @@ class VectorComponent(SpatialModelComponent):
             gdf = ds.vector.geometry.to_frame("geometry")
             gdf.to_file(geojson_path)
 
-            write_nc(
+            close_handle = write_nc(
                 ds.drop_vars("geometry"),
                 file_path=nc_path,
                 **kwargs,
             )
+            if close_handle is not None:
+                self._deferred_file_close_handles.append(close_handle)
 
     # Other vector properties
     @property
