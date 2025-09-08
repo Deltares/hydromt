@@ -237,7 +237,7 @@ class GeoDataFrameSource(DataSource):
                 media_type = MediaType.GEOPACKAGE
             else:
                 raise RuntimeError(
-                    f"Unknown extension: {ext} cannot determine media type"
+                    f"Unknown extension: {ext}, cannot determine media type"
                 )
         except (IndexError, KeyError, CRSError, TypeError) as e:
             if handle_nodata == NoDataStrategy.IGNORE:
