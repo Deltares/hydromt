@@ -419,8 +419,8 @@ def check(
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log._setuplog(join(".", HYDROMT_LOG_PATH), log_level=log_level)
+    failed = False
     try:
-        all_exceptions: List[Exception] = []
         for cat_path in data:
             logger.info(f"Validating catalog at {cat_path}")
             try:
@@ -431,27 +431,43 @@ def check(
                 else:
                     DataCatalogV1Validator.from_yml(cat_path)
 
-                logger.info("Catalog is valid!")
+                logger.info(f"Catalog {cat_path} is valid!")
             except ValidationError as e:
-                all_exceptions.append(e)
-                logger.info("Catalog has errors")
+                failed = True
+                msg = f"Catalog {cat_path} has the following error(s): {e}"
+                logger.error(msg)
 
         if config:
             logger.info(f"Validating config at {config}")
-            try:
-                config_dict = _utils.parse_config(config)
-                if model:
-                    config_dict["modeltype"] = model
+            if format == Format.V0:
+                logger.error(
+                    "Because of the dynamic nature of workflow files, v0.x files cannot be "
+                    "checked by hydromt v1. Skipping..."
+                )
+            else:
+                try:
+                    config_dict = _utils.parse_config(config)
+                    if model:
+                        config_dict["modeltype"] = model
 
-                HydromtModelSetup(**config_dict)
-                logger.info("Model config valid!")
+                    if "steps" not in config_dict:
+                        raise ValueError(
+                            "No `steps` section. Perhaps it is a v0.x file?"
+                        )
 
-            except (ValidationError, ValueError) as e:
-                logger.info("Model has errors")
-                all_exceptions.append(e)
+                    HydromtModelSetup(**config_dict)
+                    logger.info(f"Workflow yaml {config} is valid!")
 
-        if len(all_exceptions) > 0:
-            raise ValueError(all_exceptions)
+                except (ValidationError, ValueError) as e:
+                    failed = True
+                    msg = f"Workflow yaml {config} has the following error(s): {e}"
+                    logger.error(msg)
+
+        if failed:
+            # We've already presentend the errors above
+            # now we simply raise without extra msg to fail the process
+            # so it has the correct exit code
+            raise ValueError
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
