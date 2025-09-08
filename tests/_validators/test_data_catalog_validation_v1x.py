@@ -21,58 +21,57 @@ def test_deltares_data_catalog_v1(latest_dd_version_uri):
 
 def test_geodataframe_v1_entry_validation():
     d = {
-        "hydro_basin_atlas_level12":{
-            "data_type": "GeoDataFrame",
-            "version": 10,
-            "uri": "hydrography/hydro_atlas/basin_atlas_v10.gpkg",
-            "driver":{
-
-                "name": "pyogrio",
-                "options":{
-                    "layer": "BasinATLAS_v10_lev12"
-                }},
-            "metadata":{
-                "category": "hydrography",
-                "notes": "renaming and units might require some revision",
-                "paper_doi": "10.1038/s41597-019-0300-6",
-                "paper_ref": "Linke et al. (2019)",
-                "url": "https://www.hydrosheds.org/hydroatlas",
-                "license": "CC BY 4.0",
-                "extent":{
-                    "bbox":{
-                        "West": -180.0,
-                        "South": -55.988,
-                        "East": 180.001,
-                        "North": 83.626,
-                    }}
-            }}}
+        "data_type": "GeoDataFrame",
+        "version": 10,
+        "uri": "hydrography/hydro_atlas/basin_atlas_v10.gpkg",
+        "driver": {"name": "pyogrio", "options": {"layer": "BasinATLAS_v10_lev12"}},
+        "metadata": {
+            "category": "hydrography",
+            "crs": 4326,
+            "notes": "renaming and units might require some revision",
+            "paper_doi": "10.1038/s41597-019-0300-6",
+            "paper_ref": "Linke et al. (2019)",
+            "source_url": "https://www.hydrosheds.org/hydroatlas",
+            "source_license": "CC BY 4.0",
+            "extent": {
+                "bbox": {
+                    "West": -180.0,
+                    "South": -55.988,
+                    "East": 180.001,
+                    "North": 83.626,
+                }
+            },
+        },
+    }
     entry = DataCatalogV1Item.from_dict(d, name="basin_atlas_level12_v10")
 
-    assert entry.crs == 4326
+    assert entry.metadata is not None
+    assert entry.driver is not None
+    assert entry.metadata.crs == 4326
     assert entry.data_type == "GeoDataFrame"
-    assert entry.driver == "vector"
-    assert entry.kwargs == {"layer": "BasinATLAS_v10_lev12"}
-    assert entry.meta is not None
-    assert entry.meta.category == "hydrography"
-    assert entry.meta.notes == "renaming and units might require some revision"
-    assert entry.meta.paper_doi == "10.1038/s41597-019-0300-6"
-    assert entry.meta.paper_ref == "Linke et al. (2019)"
-    assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == AnyUrl("https://www.hydrosheds.org/hydroatlas")
-    assert entry.meta.source_version == "10"
-    assert entry.path == Path("hydrography/hydro_atlas/basin_atlas_v10.gpkg")
+    assert entry.driver.name == "pyogrio"
+    assert entry.driver.options == {"layer": "BasinATLAS_v10_lev12"}
+
+    assert entry.metadata.category == "hydrography"
+    assert entry.metadata.notes == "renaming and units might require some revision"
+    assert entry.metadata.paper_doi == "10.1038/s41597-019-0300-6"
+    assert entry.metadata.paper_ref == "Linke et al. (2019)"
+    assert entry.metadata.source_license == "CC BY 4.0"
+    assert entry.metadata.source_url == AnyUrl("https://www.hydrosheds.org/hydroatlas")
+    assert entry.uri == "hydrography/hydro_atlas/basin_atlas_v10.gpkg"
 
 
 def test_valid_v1_catalog_variants():
     d = {
         "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "esa_worldcover": {
-            "crs": 4326,
             "data_type": "RasterDataset",
-            "driver": "raster",
-            "filesystem": "local",
-            "kwargs": {"chunks": {"x": 36000, "y": 36000}},
-            "meta": {
+            "driver": {
+                "name": "raster",
+                "options": {"chunks": {"x": 36000, "y": 36000}},
+            },
+            "metadata": {
+                "crs": 4326,
                 "category": "landuse",
                 "source_license": "CC BY 4.0",
                 "source_url": "https://doi.org/10.5281/zenodo.5571936",
@@ -81,20 +80,23 @@ def test_valid_v1_catalog_variants():
                 {
                     "provider": "local",
                     "version": 2021,
-                    "path": "landuse/esa_worldcover_2021/esa-worldcover.vrt",
+                    "uri": "landuse/esa_worldcover_2021/esa-worldcover.vrt",
                 },
                 {
                     "provider": "local",
                     "version": 2020,
-                    "path": "landuse/esa_worldcover/esa-worldcover.vrt",
+                    "uri": "landuse/esa_worldcover/esa-worldcover.vrt",
                 },
                 {
                     "provider": "aws",
                     "version": 2020,
-                    "path": "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt",
+                    "uri": "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt",
                     "rename": {"ESA_WorldCover_10m_2020_v100_Map_AWS": "landuse"},
-                    "filesystem": "s3",
-                    "storage_options": {"anon": True},
+                    "driver": {
+                        "name": "raster",
+                        "filesystem": "s3",
+                        "options": {"anon": True},
+                    },
                 },
             ],
         },
@@ -102,7 +104,9 @@ def test_valid_v1_catalog_variants():
     _ = DataCatalogV1Validator.from_dict(d)
 
 
-def test_no_hydromt_version_in_v1_catalog_logs_warning(caplog: pytest.LogCaptureFixture):
+def test_no_hydromt_version_in_v1_catalog_logs_warning(
+    caplog: pytest.LogCaptureFixture,
+):
     d = {
         "meta": {"roots": [""]},
     }
@@ -127,68 +131,81 @@ def test_catalog_v1_metadata_validation():
 
 def test_raster_dataset_v1_entry_validation():
     d = {
-        "crs": 4326,
         "data_type": "RasterDataset",
-        "driver": "raster",
-        "kwargs": {
-            "chunks": {
-                "x": 3600,
-                "y": 3600,
-            }
-        },
-        "meta": {
+        "metadata": {
             "category": "meteo",
             "paper_doi": "10.1038/sdata.2017.122",
             "paper_ref": "Karger et al. (2017)",
             "source_license": "CC BY 4.0",
             "source_url": "https://chelsa-climate.org/downloads/",
             "source_version": "1.2",
+            "crs": 4326,
         },
-        "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
+        "driver": {
+            "name": "raster",
+            "options": {
+                "chunks": {
+                    "x": 3600,
+                    "y": 3600,
+                }
+            },
+        },
+        "uri": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
     }
 
     entry = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
+    assert entry.metadata is not None
+    assert entry.driver is not None
+
     assert entry.name == "chelsa_v1.2"
-    assert entry.crs == 4326
+    assert entry.metadata.crs == 4326
     assert entry.data_type == "RasterDataset"
-    assert entry.driver == "raster"
-    assert entry.path == Path("meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif")
-    assert entry.kwargs == {"chunks": {"x": 3600, "y": 3600}}
-    assert entry.meta is not None
-    assert entry.meta.category == "meteo"
-    assert entry.meta.paper_doi == "10.1038/sdata.2017.122"
-    assert entry.meta.paper_ref == "Karger et al. (2017)"
-    assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == AnyUrl("https://chelsa-climate.org/downloads/")
-    assert entry.meta.source_version == "1.2"
+    assert entry.driver.name == "raster"
+    assert entry.uri == "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif"
+    assert entry.driver.options == {"chunks": {"x": 3600, "y": 3600}}
+    assert entry.metadata is not None
+    assert entry.metadata.category == "meteo"
+    assert entry.metadata.paper_doi == "10.1038/sdata.2017.122"
+    assert entry.metadata.paper_ref == "Karger et al. (2017)"
+    assert entry.metadata.source_license == "CC BY 4.0"
+    assert entry.metadata.source_url == AnyUrl("https://chelsa-climate.org/downloads/")
+    assert entry.metadata.source_version == "1.2"
 
 
 def test_dataset_v1_entry_with_typo_validation():
     d = {
-        "crs_num": 4326,
-        "datatype": "RasterDataset",
-        "diver": "raster",
-        "kw_args": {
-            "chunks": {
-                "x": 3600,
-                "y": 3600,
-            }
+        "meta_data": {
+            "crs_num": 4326,
         },
-        "filepath": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
+        "datatype": "RasterDataset",
+        "driver": {
+            "name": "raster",
+            "kw_options": {
+                "chunks": {
+                    "x": 3600,
+                    "y": 3600,
+                }
+            },
+        },
+        "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
     }
 
-    # 8 errors are:
-    #  - missing crs, data_type and driver (3)
-    #  - extra crs_num, datatype, diver, and filepath (5)
-    with pytest.raises(ValidationError, match="7 validation errors"):
+    # 4 errors are:
+    #  - missing data_type field
+    #  - unknown extra field meta_data (should be metadata)
+    #  - extra field datatype (should be data_type)
+    #  - extra field in crs_num (should be crs)
+    with pytest.raises(ValidationError, match="4 validation errors"):
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
 
 
-def test_data_type_v1_typo():
+def test_data_type_v1_typo_data_type():
     d = {
-        "crs": 4326,
+        "metadata": {
+            "crs": 4326,
+        },
         "data_type": "RaserDataset",
-        "driver": "raster",
+        "driver": {"name": "raster"},
         "uri": ".",
     }
     with pytest.raises(ValidationError, match="1 validation error"):
@@ -198,10 +215,10 @@ def test_data_type_v1_typo():
 def test_data_invalid_crs_v1():
     d = {
         "metadata": {
-        "crs": 123456789,
-            },
+            "crs": 123456789,
+        },
         "data_type": "RasterDataset",
         "uri": ".",
     }
-    with pytest.raises(ValidationError, match=" validation error for chelsea_v1.2"):
+    with pytest.raises(ValidationError, match="validation error for chelsa_v1.2"):
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")

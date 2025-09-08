@@ -45,7 +45,7 @@ class SourceVariant(BaseModel):
 
     provider: str | None = None
     version: str | Number | None = None
-    uri: Path
+    uri: Path | None = None
     rename: Dict[str, str] | None = None
     filesystem: Literal["local", "s3", "gcs"] | None = None
     storage_options: Dict[str, Any] | None = None

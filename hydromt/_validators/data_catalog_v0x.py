@@ -39,7 +39,7 @@ class SourceSpecDict(BaseModel):
 class SourceVariant(BaseModel):
     """A variant for a data source."""
 
-    provider: Optional[Literal["local", "aws", "gcs"]] = None
+    provider: str | None = None
     version: Optional[Union[str, Number]] = None
     path: Path
     rename: Optional[Dict[str, str]] = None

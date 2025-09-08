@@ -15,7 +15,7 @@ from hydromt._validators.data_catalog_v0x import (
 
 def test_deltares_data_catalog_v0(dd_v0_catalog):
     yml_dict = _yml_from_uri_or_path(dd_v0_catalog)
-    yml_dict['meta']['validate_hydromt_version'] = False
+    yml_dict["meta"]["validate_hydromt_version"] = False
     # would raise error if something goes wrong
     _ = DataCatalogV0Validator.from_dict(yml_dict)
 
@@ -93,7 +93,9 @@ def test_valid_v0_catalog_variants():
     _ = DataCatalogV0Validator.from_dict(d)
 
 
-def test_no_hydromt_version_in_v0_catalog_logs_warning(caplog: pytest.LogCaptureFixture):
+def test_no_hydromt_version_in_v0_catalog_logs_warning(
+    caplog: pytest.LogCaptureFixture,
+):
     d = {
         "meta": {"roots": [""]},
     }
