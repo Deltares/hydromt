@@ -30,15 +30,26 @@ class SourceSpecDict(BaseModel):
         return SourceSpecDict(**input_dict)
 
 
+class DataCatalogV1UriResolverItem(BaseModel):
+    name: str
+    options: Dict[str, Any] | None = None
+
+
+class DataCatalogV1DriverItem(BaseModel):
+    name: str
+    options: Dict[str, Any] | None = None
+
+
 class SourceVariant(BaseModel):
     """A variant for a data source."""
 
-    provider: Literal["local", "aws", "gcs"] | None = None
+    provider: str | None = None
     version: str | Number | None = None
     uri: Path
     rename: Dict[str, str] | None = None
     filesystem: Literal["local", "s3", "gcs"] | None = None
     storage_options: Dict[str, Any] | None = None
+    driver: DataCatalogV1DriverItem | None = None
 
 
 class Extent(BaseModel):
@@ -120,10 +131,6 @@ class DataCatalogV1ItemMetadata(BaseModel):
             return DataCatalogV1ItemMetadata(**input_dict, source_url=item_source_url)
 
 
-class DataCatalogV1DriverItem(BaseModel):
-    pass
-
-
 class DataCatalogV1DataAdapter(BaseModel):
     rename: Dict[str, str] | None = None
     unit_mult: Dict[str, int | float] | None = None
@@ -133,10 +140,13 @@ class DataCatalogV1DataAdapter(BaseModel):
 class DataCatalogV1Item(BaseModel):
     """A validated data source."""
 
+    # these are required but they can be defined in the variants instead
+    driver: DataCatalogV1DriverItem | None = None
+    uri: str | None = None
+
+    uri_resolver: DataCatalogV1UriResolverItem | None = None
     name: str
     data_type: Literal["RasterDataset", "GeoDataset", "GeoDataFrame", "DataFrame"]
-    driver: DataCatalogV1DriverItem
-    uri: str | None = None  # sometimes uri can be defined on all the variants
     provider: str | None = None
     metadata: DataCatalogV1ItemMetadata | None = None
     variants: List[SourceVariant] | None = None
@@ -148,6 +158,18 @@ class DataCatalogV1Item(BaseModel):
         str_strip_whitespace=True,
         extra="forbid",
     )
+
+    @model_validator(mode="after")
+    def driver_in_item_or_variants(cls, values):
+        if values.driver is not None or (
+            values.variants is not None
+            and all([variant.driver is not None for variant in values.variants])
+        ):
+            return values
+        else:
+            raise ValueError(
+                "Source must either have a driver, or all of it's variants must have one."
+            )
 
     @model_validator(mode="after")
     def uri_in_item_or_variants(cls, values):
