@@ -94,7 +94,7 @@ class DataSource(BaseModel, ABC):
         return copy_data
 
     @classmethod
-    def _infer_default_driver(cls):
+    def _infer_default_driver(cls, uri: str | None = None) -> str:
         return cls._fallback_driver_read
 
     @model_validator(mode="after")

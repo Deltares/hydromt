@@ -2,7 +2,7 @@
 
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import ClassVar, List, Optional, Set, Union
+from typing import ClassVar, List, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
@@ -27,7 +27,7 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     name = "pyogrio"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[Set[str]] = {".gpkg", ".shp", ".geojson", ".fgb"}
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".gpkg", ".shp", ".geojson", ".fgb"}
 
     def read(
         self,
@@ -83,7 +83,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         args:
         """
         no_ext, ext = splitext(path)
-        if ext not in self._supported_extensions:
+        if ext not in self.SUPPORTED_EXTENSIONS:
             logger.warning(
                 f"driver {self.name} has no support for extension {ext}"
                 "switching to .fgb."
