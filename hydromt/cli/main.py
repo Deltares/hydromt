@@ -17,9 +17,10 @@ from hydromt import __version__
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import log
+from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
+from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup
-from hydromt._validators.region import validate_region
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
@@ -124,6 +125,10 @@ data_opt = click.option(
     "--data",
     multiple=True,
     help="Path to local yaml data catalog file OR name of predefined data catalog.",
+)
+
+format_option = click.option(
+    "--format",
 )
 
 deltares_data_opt = click.option(
@@ -381,16 +386,16 @@ def update(
 @data_opt
 @quiet_opt
 @verbose_opt
-@region_opt
+@click.option("--format", type=click.Choice(list(Format)), default=Format.V1)
 @click.pass_context
 def check(
     _ctx: click.Context,
     model: Optional[str],
     config,
     data,
-    region: Optional[Dict[Any, Any]],
     quiet: int,
     verbose: int,
+    format: Format,
 ):
     """
     Verify that provided data catalog and config files are in the correct format.
@@ -398,6 +403,7 @@ def check(
     Additionally region bbox and geom can also be validated.
 
     Example usage:
+
     --------------
 
     Check data catalog file:
@@ -418,21 +424,17 @@ def check(
         for cat_path in data:
             logger.info(f"Validating catalog at {cat_path}")
             try:
-                DataCatalogV0Validator.from_yml(cat_path)
+                if format == Format.V0:
+                    DataCatalogV0Validator.from_yml(cat_path)
+                # if we add more versions don't forget to update this
+                # statement here
+                else:
+                    DataCatalogV1Validator.from_yml(cat_path)
+
                 logger.info("Catalog is valid!")
             except ValidationError as e:
                 all_exceptions.append(e)
                 logger.info("Catalog has errors")
-
-        if region:
-            logger.info(f"Validating region {region}")
-            try:
-                validate_region(region)
-                logger.info("Region is valid!")
-
-            except (ValueError, NotImplementedError) as e:
-                logger.info("region has errors")
-                all_exceptions.append(e)
 
         if config:
             logger.info(f"Validating config at {config}")
