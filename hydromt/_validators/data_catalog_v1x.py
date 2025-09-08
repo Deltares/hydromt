@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Literal
 
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-from pydantic import AnyUrl, BaseModel, ConfigDict, model_validator
+from pydantic import AnyUrl, BaseModel, ConfigDict, field_validator, model_validator
 from pydantic.fields import Field
 from pydantic_core import Url, ValidationError
 from pyproj import CRS
@@ -21,7 +21,7 @@ class SourceSpecDict(BaseModel):
     """A complete source variant specification."""
 
     source: str
-    provider: str | None= None
+    provider: str | None = None
     version: str | Number | None = None
 
     @staticmethod
@@ -35,7 +35,7 @@ class SourceVariant(BaseModel):
 
     provider: Literal["local", "aws", "gcs"] | None = None
     version: str | Number | None = None
-    path: Path
+    uri: Path
     rename: Dict[str, str] | None = None
     filesystem: Literal["local", "s3", "gcs"] | None = None
     storage_options: Dict[str, Any] | None = None
@@ -55,6 +55,7 @@ class DataCatalogV1MetaData(BaseModel):
     version: str | Number | None = None
     hydromt_version: str | None = None
     name: str | None = None
+    category: str | None = None
     model_config = ConfigDict(
         str_strip_whitespace=True,
         extra="allow",
@@ -86,6 +87,7 @@ class DataCatalogV1MetaData(BaseModel):
 class DataCatalogV1ItemMetadata(BaseModel):
     """The metadata for a data source."""
 
+    crs: str | int | None = None
     category: str | None = None
     paper_doi: str | None = None
     paper_ref: str | None = None
@@ -98,6 +100,14 @@ class DataCatalogV1ItemMetadata(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, coerce_numbers_to_str=True)
 
+    @field_validator("crs")
+    def _check_valid_crs(v):
+        try:
+            _ = CRS.from_user_input(v)
+        except CRSError as e:
+            raise ValueError(e)
+        return v
+
     @staticmethod
     def from_dict(input_dict):
         """Convert a dictionary into a validated source metadata item."""
@@ -109,8 +119,16 @@ class DataCatalogV1ItemMetadata(BaseModel):
                 Url(item_source_url)
             return DataCatalogV1ItemMetadata(**input_dict, source_url=item_source_url)
 
+
 class DataCatalogV1DriverItem(BaseModel):
     pass
+
+
+class DataCatalogV1DataAdapter(BaseModel):
+    rename: Dict[str, str] | None = None
+    unit_mult: Dict[str, int | float] | None = None
+    unit_add: Dict[str, int | float] | None = None
+
 
 class DataCatalogV1Item(BaseModel):
     """A validated data source."""
@@ -118,21 +136,13 @@ class DataCatalogV1Item(BaseModel):
     name: str
     data_type: Literal["RasterDataset", "GeoDataset", "GeoDataFrame", "DataFrame"]
     driver: DataCatalogV1DriverItem
-    uri: str 
-    crs: int | str | None = None
-    filesystem: str | None = None
+    uri: str | None = None  # sometimes uri can be defined on all the variants
     provider: str | None = None
-    driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
-    kwargs: Dict[str, Any] = Field(default_factory=dict)  # deprecated
-    storage_options: Dict[str, Any] = Field(default_factory=dict)
-    placeholders: Dict[str, Any] | None = None
-    rename: Dict[str, str] = Field(default_factory=dict)
-    nodata: Number | None = None
-    meta: DataCatalogV1ItemMetadata | None = None
-    unit_add: Dict[str, Number] | None = None
-    unit_mult: Dict[str, Number] | None = None
+    metadata: DataCatalogV1ItemMetadata | None = None
     variants: List[SourceVariant] | None = None
     version: str | Number | None = None
+    placehodler: dict[str, list[str]] | None = None
+    data_adapter: DataCatalogV1DataAdapter | None = None
 
     model_config = ConfigDict(
         str_strip_whitespace=True,
@@ -140,13 +150,16 @@ class DataCatalogV1Item(BaseModel):
     )
 
     @model_validator(mode="after")
-    def _check_valid_crs(self) -> "DataCatalogV1Item":
-        try:
-            if self.crs:
-                _ = CRS.from_user_input(self.crs)
-        except CRSError as e:
-            raise ValueError(e)
-        return self
+    def uri_in_item_or_variants(cls, values):
+        if values.uri is not None or (
+            values.variants is not None
+            and all([variant.uri is not None for variant in values.variants])
+        ):
+            return values
+        else:
+            raise ValueError(
+                "Source must either have a uri, or all of it's variants must have one."
+            )
 
     @staticmethod
     def from_dict(input_dict, name=None):
@@ -156,21 +169,20 @@ class DataCatalogV1Item(BaseModel):
             entry_name = dict_name
         else:
             entry_name = name
-        try: 
-            item_kwargs = input_dict.pop("kwargs", {})
-            item_storage_options = input_dict.pop("storage_options", {})
-            item_metadata = DataCatalogV1ItemMetadata.from_dict(input_dict.pop("meta", {}))
+        try:
+            item_metadata = DataCatalogV1ItemMetadata.from_dict(
+                input_dict.pop("metadata", {})
+            )
 
             return DataCatalogV1Item(
                 **input_dict,
                 name=entry_name,
-                kwargs=item_kwargs,
-                storage_options=item_storage_options,
-                meta=item_metadata,
+                metadata=item_metadata,
             )
         except ValidationError as e:
-                raise ValidationError.from_exception_data(entry_name or "nameless entry", e.errors(), 'python')
-
+            raise ValidationError.from_exception_data(
+                entry_name or "nameless entry", e.errors(), "python"
+            )
 
 
 class DataCatalogV1Validator(BaseModel):
