@@ -9,7 +9,7 @@ import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import read_ncs
+from hydromt._io.readers import open_ncs
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -181,7 +181,7 @@ class MeshComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
 
         filename = filename or str(self._filename)
-        files = read_ncs(filename, root=self.root.path, **kwargs).values()
+        files = open_ncs(filename, root=self.root.path, **kwargs).values()
         self._open_datasets.extend(files)
         if len(files) > 0:
             ds = xr.merge(files)

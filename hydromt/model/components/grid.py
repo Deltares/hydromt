@@ -10,7 +10,7 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import read_ncs
+from hydromt._io.readers import open_ncs
 from hydromt._io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -211,7 +211,7 @@ class GridComponent(SpatialModelComponent):
         self.root._assert_read_mode()
         self._initialize_grid(skip_read=True)
 
-        loaded_nc_files = read_ncs(
+        loaded_nc_files = open_ncs(
             filename or self._filename,
             self.root.path,
             **kwargs,

@@ -12,8 +12,8 @@ from .readers import (
     _open_vector_from_table,
     _read_toml,
     _read_yaml,
-    read_nc,
-    read_ncs,
+    open_nc,
+    open_ncs,
 )
 from .writers import (
     netcdf_writer,
@@ -35,8 +35,8 @@ __all__ = [
     "_open_timeseries_from_table",
     "_open_vector",
     "_open_vector_from_table",
-    "read_nc",
-    "read_ncs",
+    "open_nc",
+    "open_ncs",
     "_read_toml",
     "_read_yaml",
     "write_nc",

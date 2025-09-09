@@ -46,7 +46,7 @@ __all__ = [
     "_open_geodataset",
     "_open_vector_from_table",
     "_open_timeseries_from_table",
-    "read_nc",
+    "open_nc",
     "_read_yaml",
     "_read_toml",
 ]
@@ -868,7 +868,7 @@ def _parse_values(
     return cfdict
 
 
-def read_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
+def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     """Read a netcdf file.
 
     Parameters
@@ -895,7 +895,7 @@ def read_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     return ds
 
 
-def read_ncs(
+def open_ncs(
     filename_template: StrPath,
     root: Path,
     **kwargs,
@@ -926,7 +926,7 @@ def read_ncs(
     paths = glob(path_glob)
     for path in paths:
         name = ".".join(regex.match(path).groups())  # type: ignore
-        ds = read_nc(filepath=path, **kwargs)
+        ds = open_nc(filepath=path, **kwargs)
         ncs[name] = ds
     return ncs
 

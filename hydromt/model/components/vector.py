@@ -12,7 +12,7 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import read_ncs
+from hydromt._io.readers import open_ncs
 from hydromt._io.writers import write_nc
 from hydromt.gis.vector import GeoDataset
 from hydromt.model.components.base import ModelComponent
@@ -218,7 +218,7 @@ class VectorComponent(SpatialModelComponent):
             # Disable lazy loading of data
             # to avoid issues with reading object dtype data
             kwargs.setdefault("chunks", None)
-            files = read_ncs(filename, root=self.root.path, **kwargs).values()
+            files = open_ncs(filename, root=self.root.path, **kwargs).values()
             self._open_datasets.extend(files)
             ds = xr.merge(files)
             # check if ds is empty (default filename has a value)

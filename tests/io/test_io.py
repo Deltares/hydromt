@@ -20,7 +20,7 @@ from hydromt._io.readers import (
     _open_timeseries_from_table,
     _open_vector,
     _open_vector_from_table,
-    read_nc,
+    open_nc,
 )
 from hydromt._io.writers import write_xy
 from hydromt.gis.raster import GEO_MAP_COORD
@@ -253,7 +253,7 @@ def test_read_nc_geo_map_coord_sets_close(tmpdir):
     ds.to_netcdf(nc_path)
 
     # Call read_nc and ensure line 891 is hit (GEO_MAP_COORD in ds.data_vars)
-    ds2 = read_nc(str(nc_path))
+    ds2 = open_nc(str(nc_path))
     assert len(ds2.data_vars) == 0
     assert GEO_MAP_COORD in ds2.coords
     assert ds2._close is not None
