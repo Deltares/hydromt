@@ -16,6 +16,9 @@ class DeferredFileClose:
     def close(self) -> None:
         while self._close_attempts < _MAX_CLOSE_ATTEMPTS:
             try:
+                logger.debug(
+                    f"Moving temporary file '{self._temp_path}' to destination '{self._original_path}'."
+                )
                 shutil.move(self._temp_path, self._original_path)
                 return
             except PermissionError as e:
