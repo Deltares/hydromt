@@ -93,6 +93,6 @@ class AbstractBaseModel(BaseModel, ABC):
             yield from subclass._iter_all_possible_types()
 
     @classmethod
-    def find_all_possible_types(cls) -> set[type[Self]]:
-        """Return all possible sub types for this object as a set."""
-        return set(cls._iter_all_possible_types())
+    def find_all_possible_types(cls) -> Iterator[type[Self]]:
+        """Return all possible sub types for this object as an iterator."""
+        return cls._iter_all_possible_types()

@@ -90,7 +90,7 @@ class DataSource(BaseModel, ABC):
                 if data_type != cls.data_type:
                     raise ValueError(f"'data_type' must be '{cls.data_type}'.")
             if not copy_data.get("driver"):
-                copy_data["driver"] = cls._infer_default_driver(copy_data["uri"])
+                copy_data["driver"] = cls._infer_default_driver(copy_data.get("uri"))
         return copy_data
 
     @classmethod
