@@ -271,7 +271,4 @@ class GeoDataFrameSource(DataSource):
         if uri is None:
             return cls._fallback_driver_read
         _, extension = splitext(uri)
-        for driver in GeoDataFrameDriver.find_all_possible_types():
-            if extension in driver.SUPPORTED_EXTENSIONS:
-                return driver.name
-        return cls._fallback_driver_read
+        return next(driver.name for driver in GeoDataFrameDriver.find_all_possible_types() if extension in driver.SUPPORTED_EXTENSIONS, cls._fallback_driver_read)
