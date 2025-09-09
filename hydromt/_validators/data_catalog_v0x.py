@@ -11,6 +11,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     ValidationError,
+    model_serializer,
     model_validator,
 )
 from pydantic.fields import Field
@@ -23,11 +24,12 @@ from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, Number, TimeRange
 
 DEFAULT_DRIVER_MAPPING = {
-    "RasterDataset" : "raster", 
+    "RasterDataset": "raster",
     "GeoDataFrame": "vector",
     "DataFrame": "csv",
-    "GeoDataset": "vector"
+    "GeoDataset": "vector",
 }
+
 
 class SourceSpecDict(BaseModel):
     """A complete source variant specification."""
@@ -114,6 +116,15 @@ class DataCatalogV0ItemMetadata(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, coerce_numbers_to_str=True)
 
+    @model_serializer
+    def serialize(self):
+        if self.is_empty():
+            return None
+        else:
+            return self.model_dump(
+                exclude_defaults=True, exclude_none=True, exclude_unset=True
+            )
+
     @staticmethod
     def from_dict(input_dict):
         """Convert a dictionary into a validated source metadata item."""
@@ -124,6 +135,22 @@ class DataCatalogV0ItemMetadata(BaseModel):
             if item_source_url:
                 Url(item_source_url)
             return DataCatalogV0ItemMetadata(**input_dict, source_url=item_source_url)
+
+    def is_empty(self):
+        return not any(
+            attr is not None
+            for attr in [
+                self.category,
+                self.paper_doi,
+                self.paper_ref,
+                self.source_license,
+                self.source_url,
+                self.source_version,
+                self.notes,
+                self.temporal_extent,
+                self.spatial_extent,
+            ]
+        )
 
 
 class DataCatalogV0Item(BaseModel):
@@ -194,7 +221,7 @@ class DataCatalogV0Item(BaseModel):
             # but pydantic has better error handling so we'll let them
             # take care of it.
             if "driver" not in input_dict and "data_type" in input_dict:
-                input_dict['driver'] = DEFAULT_DRIVER_MAPPING[input_dict['data_type']]
+                input_dict["driver"] = DEFAULT_DRIVER_MAPPING[input_dict["data_type"]]
 
             return DataCatalogV0Item(
                 **input_dict,
@@ -230,7 +257,6 @@ class DataCatalogV0Validator(BaseModel):
                 catalog_meta = DataCatalogV0MetaData.from_dict(meta)
             else:
                 catalog_meta = None
-
 
             catalog_entries = {}
             for entry_name, entry_dict in input_dict.items():

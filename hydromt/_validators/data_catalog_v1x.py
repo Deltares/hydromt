@@ -6,7 +6,14 @@ from typing import Any, Dict, List, Literal
 
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
-from pydantic import AnyUrl, BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import (
+    AnyUrl,
+    BaseModel,
+    ConfigDict,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 from pydantic.fields import Field
 from pydantic_core import Url, ValidationError
 from pyproj import CRS
@@ -16,9 +23,44 @@ from hydromt import __version__ as HYDROMT_VERSION
 from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, Number, TimeRange
 from hydromt._validators.data_catalog_v0x import (
+    DataCatalogV0Item,
     DataCatalogV0ItemMetadata,
     DataCatalogV0MetaData,
+    DataCatalogV0Validator,
 )
+
+DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
+    "RasterDataset": {
+        "raster": "rasterio",
+        "zarr": "raster_xarray",
+        "netcdf": "raster_xarray",
+        "raster_tindex": "rasterio",
+    },
+    "GeoDataset": {
+        "vector": "geodataset_vector",
+        "zarr": "geodataset_xarray",
+        "netcdf": "geodataset_xarray",
+    },
+    "GeoDataFrame": {
+        "csv": "geodataframe_table",
+        "parquet": "geodataframe_table",
+        "xls": "geodataframe_table",
+        "xlsx": "geodataframe_table",
+        "xy": "geodataframe_table",
+        "vector": "pyogrio",
+    },
+    "DataFrame": {
+        "csv": "pandas",
+        "parquet": "pandas",
+        "xls": "pandas",
+        "xlsx": "pandas",
+        "fwf": "pandas",
+    },
+    "DataSet": {
+        "zarr": "dataset_xarray",
+        "netcdf": "dataset_xarray",
+    },
+}
 
 
 class SourceSpec(BaseModel):
@@ -31,7 +73,11 @@ class SourceSpec(BaseModel):
     @staticmethod
     def from_dict(input_dict):
         """Create a source variant specification from a dictionary."""
-        return SourceSpec(source = input_dict["source"], provider = input_dict.get("provider", None), version = input_dict.get("version", None))
+        return SourceSpec(
+            source=input_dict["source"],
+            provider=input_dict.get("provider", None),
+            version=input_dict.get("version", None),
+        )
 
 
 class DataCatalogV1UriResolverItem(BaseModel):
@@ -81,12 +127,12 @@ class DataCatalogV1MetaData(BaseModel):
     @staticmethod
     def from_v0(v0_metadata: DataCatalogV0MetaData, category: str | None = None):
         return DataCatalogV1MetaData(
-            roots = v0_metadata.roots,
-            version = v0_metadata.version,
-            hydromt_version= v0_metadata.hydromt_version,
-            name = v0_metadata.name , 
-            category = category, 
-            validate_hydromt_version = v0_metadata.validate_hydromt_version ,
+            roots=v0_metadata.roots,
+            version=v0_metadata.version,
+            hydromt_version=v0_metadata.hydromt_version,
+            name=v0_metadata.name,
+            category=category,
+            validate_hydromt_version=v0_metadata.validate_hydromt_version,
         )
 
     @model_validator(mode="after")
@@ -128,6 +174,7 @@ class DataCatalogV1ItemMetadata(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, coerce_numbers_to_str=True)
 
+    @staticmethod
     @field_validator("crs")
     def _check_valid_crs(v):
         try:
@@ -137,20 +184,26 @@ class DataCatalogV1ItemMetadata(BaseModel):
         return v
 
     @staticmethod
-    def from_v0(v0_metadata :DataCatalogV0ItemMetadata, crs: str | int | None = None):
-        return DataCatalogV1ItemMetadata(
-            crs = crs,
-            category = v0_metadata.category,
-            paper_doi=v0_metadata.paper_doi,
-            paper_ref=v0_metadata.paper_ref,
-            source_license=v0_metadata.source_license,
-            source_url=v0_metadata.source_url,
-            source_version=v0_metadata.source_version,
-            notes=v0_metadata.notes,
-            temporal_extent=v0_metadata.temporal_extent,
-            spatial_extent=v0_metadata.spatial_extent,
-        )
-
+    def from_v0(
+        v0_metadata: DataCatalogV0ItemMetadata | None, crs: str | int | None = None
+    ):
+        if (v0_metadata is None or v0_metadata.is_empty()) and not crs:
+            return None
+        elif v0_metadata:
+            return DataCatalogV1ItemMetadata(
+                crs=crs,
+                category=v0_metadata.category,
+                paper_doi=v0_metadata.paper_doi,
+                paper_ref=v0_metadata.paper_ref,
+                source_license=v0_metadata.source_license,
+                source_url=v0_metadata.source_url,
+                source_version=v0_metadata.source_version,
+                notes=v0_metadata.notes,
+                temporal_extent=v0_metadata.temporal_extent,
+                spatial_extent=v0_metadata.spatial_extent,
+            )
+        else:
+            return DataCatalogV1ItemMetadata(crs=crs)
 
     @staticmethod
     def from_dict(input_dict):
@@ -192,11 +245,56 @@ class DataCatalogV1Item(BaseModel):
         extra="forbid",
     )
 
+    @staticmethod
+    def from_v0(v0_item: DataCatalogV0Item) -> "DataCatalogV1Item":
+        uri = str(v0_item.path) if v0_item.path else None
+        possible_drivers = DRIVER_RENAME_MAPPING[v0_item.data_type]
+        driver_name = possible_drivers[v0_item.driver]
+        options = {}
+        if v0_item.driver_kwargs and len(v0_item.driver_kwargs) > 0:
+            options = v0_item.driver_kwargs
+
+        if v0_item.kwargs and len(v0_item.kwargs) > 0:
+            options = {**options, **v0_item.kwargs}
+
+        driver = DataCatalogV1DriverItem(
+            name=driver_name, options=options if len(options) > 0 else None
+        )
+
+        metadata = DataCatalogV1ItemMetadata.from_v0(
+            v0_metadata=v0_item.meta, crs=v0_item.crs
+        )
+
+        adapter_dict = {}
+
+        if v0_item.rename:
+            adapter_dict["rename"] = v0_item.rename
+
+        if v0_item.unit_add:
+            adapter_dict["unit_add"] = v0_item.unit_add
+
+        if v0_item.unit_mult:
+            adapter_dict["unit_mult"] = v0_item.unit_mult
+
+        if len(adapter_dict) > 0:
+            data_adapter = DataCatalogV1DataAdapter(**adapter_dict)
+        else:
+            data_adapter = None
+
+        return DataCatalogV1Item(
+            name=v0_item.name,
+            data_type=v0_item.data_type,
+            uri=uri,
+            data_adapter=data_adapter,
+            driver=driver,
+            metadata=metadata,
+        )
+
     @model_validator(mode="after")
     def driver_in_item_or_variants(cls, values):
         if values.driver is not None or (
             values.variants is not None
-            and all([variant.driver is not None for variant in values.variants])
+            and all(variant.driver is not None for variant in values.variants)
         ):
             return values
         else:
@@ -208,7 +306,7 @@ class DataCatalogV1Item(BaseModel):
     def uri_in_item_or_variants(cls, values):
         if values.uri is not None or (
             values.variants is not None
-            and all([variant.uri is not None for variant in values.variants])
+            and all(variant.uri is not None for variant in values.variants)
         ):
             return values
         else:
@@ -251,14 +349,49 @@ class DataCatalogV1Validator(BaseModel):
         extra="forbid",
     )
 
+    @model_serializer()
+    def serialize_model(self):
+        if self.meta:
+            out = {
+                "meta": self.meta.model_dump(),
+            }
+        else:
+            out = {}
+
+        serialized_sources = {
+            key: source.model_dump(
+                exclude_unset=True, exclude_none=True, exclude={"name"}
+            )
+            for (key, source) in self.sources.items()
+        }
+        return {**out, **serialized_sources}
+
+    @staticmethod
+    def from_v0(v0_catalog: DataCatalogV0Validator) -> "DataCatalogV1Validator":
+        if v0_catalog.meta:
+            v1_meta = DataCatalogV1MetaData.from_v0(v0_catalog.meta)
+        else:
+            v1_meta = None
+
+        converted_entries = {}
+
+        for entry_id, entry in v0_catalog.sources.items():
+            converted_entry = DataCatalogV1Item.from_v0(entry)
+            converted_entries[entry_id] = converted_entry
+
+        return DataCatalogV1Validator(meta=v1_meta, sources=converted_entries)
+
     @staticmethod
     def from_dict(input_dict):
         """Create a validated datacatalog from a dictionary."""
         if input_dict is None:
             return DataCatalogV1Validator()
         else:
-            meta = input_dict.pop("meta", None)
-            catalog_meta = DataCatalogV1MetaData.from_dict(meta)
+            if meta := input_dict.pop("meta", None):
+                catalog_meta = DataCatalogV1MetaData.from_dict(meta)
+            else:
+                catalog_meta = None
+
             catalog_entries = {}
             for entry_name, entry_dict in input_dict.items():
                 catalog_entries[entry_name] = DataCatalogV1Item.from_dict(

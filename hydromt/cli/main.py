@@ -14,6 +14,7 @@ import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__
+from hydromt._io import write_yaml
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import log
@@ -386,7 +387,8 @@ def update(
 @data_opt
 @quiet_opt
 @verbose_opt
-@click.option("--format", type=click.Choice(list(Format)), default=Format.V1)
+@click.option("--format", type=click.Choice(list(Format)), default=Format.v1)
+@click.option("--upgrade", is_flag=True)
 @click.pass_context
 def check(
     _ctx: click.Context,
@@ -396,6 +398,7 @@ def check(
     quiet: int,
     verbose: int,
     format: Format,
+    upgrade: bool,
 ):
     """
     Verify that provided data catalog and config files are in the correct format.
@@ -424,8 +427,21 @@ def check(
         for cat_path in data:
             logger.info(f"Validating catalog at {cat_path}")
             try:
-                if format == Format.V0:
-                    DataCatalogV0Validator.from_yml(cat_path)
+                if format == Format.v0:
+                    v0_catalog = DataCatalogV0Validator.from_yml(cat_path)
+                    if upgrade:
+                        v1_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
+
+                        p = Path(cat_path)
+                        write_yaml(
+                            p.with_stem(f"{p.stem}_v1"),
+                            v1_catalog.model_dump(
+                                exclude_unset=True,
+                                exclude_defaults=True,
+                                exclude_none=True,
+                            ),
+                        )
+
                 # if we add more versions don't forget to update this
                 # statement here
                 else:
@@ -439,7 +455,7 @@ def check(
 
         if config:
             logger.info(f"Validating config at {config}")
-            if format == Format.V0:
+            if format == Format.v0:
                 logger.error(
                     "Because of the dynamic nature of workflow files, v0.x files cannot be "
                     "checked by hydromt v1. Skipping..."

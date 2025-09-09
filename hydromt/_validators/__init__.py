@@ -42,8 +42,8 @@ __all__ = [
 
 
 class Format(Enum):
-    V0 = (0,)
-    V1 = (1,)
+    v0 = 0
+    v1 = 1
 
     # just a convenience function
     # with some nicer error messages
