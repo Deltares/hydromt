@@ -15,9 +15,13 @@ from pyproj.exceptions import CRSError
 from hydromt import __version__ as HYDROMT_VERSION
 from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, Number, TimeRange
+from hydromt._validators.data_catalog_v0x import (
+    DataCatalogV0ItemMetadata,
+    DataCatalogV0MetaData,
+)
 
 
-class SourceSpecDict(BaseModel):
+class SourceSpec(BaseModel):
     """A complete source variant specification."""
 
     source: str
@@ -27,7 +31,7 @@ class SourceSpecDict(BaseModel):
     @staticmethod
     def from_dict(input_dict):
         """Create a source variant specification from a dictionary."""
-        return SourceSpecDict(**input_dict)
+        return SourceSpec(source = input_dict["source"], provider = input_dict.get("provider", None), version = input_dict.get("version", None))
 
 
 class DataCatalogV1UriResolverItem(BaseModel):
@@ -67,10 +71,23 @@ class DataCatalogV1MetaData(BaseModel):
     hydromt_version: str | None = None
     name: str | None = None
     category: str | None = None
+    validate_hydromt_version: bool = True
+
     model_config = ConfigDict(
         str_strip_whitespace=True,
         extra="allow",
     )
+
+    @staticmethod
+    def from_v0(v0_metadata: DataCatalogV0MetaData, category: str | None = None):
+        return DataCatalogV1MetaData(
+            roots = v0_metadata.roots,
+            version = v0_metadata.version,
+            hydromt_version= v0_metadata.hydromt_version,
+            name = v0_metadata.name , 
+            category = category, 
+            validate_hydromt_version = v0_metadata.validate_hydromt_version ,
+        )
 
     @model_validator(mode="after")
     def _check_version_compatible(self) -> "DataCatalogV1MetaData":
@@ -118,6 +135,22 @@ class DataCatalogV1ItemMetadata(BaseModel):
         except CRSError as e:
             raise ValueError(e)
         return v
+
+    @staticmethod
+    def from_v0(v0_metadata :DataCatalogV0ItemMetadata, crs: str | int | None = None):
+        return DataCatalogV1ItemMetadata(
+            crs = crs,
+            category = v0_metadata.category,
+            paper_doi=v0_metadata.paper_doi,
+            paper_ref=v0_metadata.paper_ref,
+            source_license=v0_metadata.source_license,
+            source_url=v0_metadata.source_url,
+            source_version=v0_metadata.source_version,
+            notes=v0_metadata.notes,
+            temporal_extent=v0_metadata.temporal_extent,
+            spatial_extent=v0_metadata.spatial_extent,
+        )
+
 
     @staticmethod
     def from_dict(input_dict):

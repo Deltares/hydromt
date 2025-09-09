@@ -1,12 +1,6 @@
-meta:
-  version: v0.0.7
-  root: https://github.com/DirkEilander/hydromt-artifacts/releases/download/v0.0.7/data.tar.gz
-
-
 chelsa:
   crs: 4326
   data_type: RasterDataset
-  driver: raster
   meta:
     category: meteo
     paper_doi: 10.1038/sdata.2017.122

@@ -22,6 +22,12 @@ from hydromt import __version__ as HYDROMT_VERSION
 from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, Number, TimeRange
 
+DEFAULT_DRIVER_MAPPING = {
+    "RasterDataset" : "raster", 
+    "GeoDataFrame": "vector",
+    "DataFrame": "csv",
+    "GeoDataset": "vector"
+}
 
 class SourceSpecDict(BaseModel):
     """A complete source variant specification."""
@@ -181,7 +187,15 @@ class DataCatalogV0Item(BaseModel):
                 input_dict.pop("meta", {})
             )
             item_kwargs = input_dict.pop("kwargs", {})
+
             item_storage_options = input_dict.pop("storage_options", {})
+
+            # If data_type is not there, the validation will fail anyway
+            # but pydantic has better error handling so we'll let them
+            # take care of it.
+            if "driver" not in input_dict and "data_type" in input_dict:
+                input_dict['driver'] = DEFAULT_DRIVER_MAPPING[input_dict['data_type']]
+
             return DataCatalogV0Item(
                 **input_dict,
                 name=entry_name,
@@ -198,7 +212,7 @@ class DataCatalogV0Item(BaseModel):
 class DataCatalogV0Validator(BaseModel):
     """A validated complete data catalog."""
 
-    meta: Optional[DataCatalogV0MetaData] = None
+    meta: DataCatalogV0MetaData | None = None
     sources: Dict[str, DataCatalogV0Item] = Field(default_factory=dict)
 
     model_config = ConfigDict(
@@ -212,8 +226,12 @@ class DataCatalogV0Validator(BaseModel):
         if input_dict is None:
             return DataCatalogV0Validator()
         else:
-            meta = input_dict.pop("meta", None)
-            catalog_meta = DataCatalogV0MetaData.from_dict(meta)
+            if meta := input_dict.pop("meta", None):
+                catalog_meta = DataCatalogV0MetaData.from_dict(meta)
+            else:
+                catalog_meta = None
+
+
             catalog_entries = {}
             for entry_name, entry_dict in input_dict.items():
                 catalog_entries[entry_name] = DataCatalogV0Item.from_dict(
