@@ -199,14 +199,14 @@ class GridComponent(SpatialModelComponent):
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
 
-        key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`
+        key-word arguments are passed to :py:meth:`~hydromt.model.Model.open_nc`
 
         Parameters
         ----------
         filename : str, optional
             filename relative to model root, by default 'grid/grid.nc'
         **kwargs : dict
-            Additional keyword arguments to be passed to the `read_nc` method.
+            Additional keyword arguments to be passed to the `open_nc` method.
         """
         self.root._assert_read_mode()
         self._initialize_grid(skip_read=True)

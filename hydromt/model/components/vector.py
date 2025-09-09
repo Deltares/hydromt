@@ -192,7 +192,7 @@ class VectorComponent(SpatialModelComponent):
             * The geojson file contains both the attribute and the geometry data.
                 (filename is ignored)
 
-        Key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`
+        Key-word arguments are passed to :py:meth:`~hydromt.model.Model.open_nc`
 
         Parameters
         ----------
@@ -203,7 +203,7 @@ class VectorComponent(SpatialModelComponent):
             geojson filename relative to model root,
             by default 'vector/vector.geojson'
         kwargs:
-            Additional keyword arguments that are passed to the `read_nc`
+            Additional keyword arguments that are passed to the `open_nc`
             function.
         """
         self.root._assert_read_mode()

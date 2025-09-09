@@ -245,14 +245,14 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
 
 
-def test_read_nc_geo_map_coord_sets_close(tmpdir):
+def test_open_nc_geo_map_coord_sets_close(tmpdir):
     # Create a simple netcdf file with GEO_MAP_COORD as a data variable
     data = np.arange(10)
     ds = xr.Dataset({GEO_MAP_COORD: ("x", data)})
     nc_path = tmpdir.join("test_geo_map.nc")
     ds.to_netcdf(nc_path)
 
-    # Call read_nc and ensure line 891 is hit (GEO_MAP_COORD in ds.data_vars)
+    # Call open_nc and ensure line 891 is hit (GEO_MAP_COORD in ds.data_vars)
     ds2 = open_nc(str(nc_path))
     assert len(ds2.data_vars) == 0
     assert GEO_MAP_COORD in ds2.coords

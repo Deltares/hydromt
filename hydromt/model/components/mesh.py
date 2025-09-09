@@ -164,7 +164,7 @@ class MeshComponent(SpatialModelComponent):
     ) -> None:
         """Read model mesh data at <root>/<filename> and add to mesh property.
 
-        key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`
+        key-word arguments are passed to :py:meth:`~hydromt.model.Model.open_nc`
 
         Parameters
         ----------
@@ -175,7 +175,7 @@ class MeshComponent(SpatialModelComponent):
             spatial reference system of the mesh file. Only used if the CRS is not
             found when reading the mesh file.
         **kwargs : dict
-            Additional keyword arguments to be passed to the `read_nc` method.
+            Additional keyword arguments to be passed to the `open_nc` method.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)

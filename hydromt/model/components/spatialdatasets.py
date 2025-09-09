@@ -137,7 +137,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
         """Read model dataset files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`hydromt.io.readers.read_nc`
+        key-word arguments are passed to :py:func:`hydromt.io.readers.open_nc`
 
         Parameters
         ----------
@@ -147,7 +147,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.io.readers.read_nc` function.
+            `hydromt.io.readers.open_nc` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
