@@ -391,7 +391,7 @@ def test_v0_catalog_is_not_valid_v1_catalog(caplog):
                 "-d",
                 "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
                 "--format",
-                "V1",
+                "v1",
             ],
             catch_exceptions=False,
         )
@@ -408,7 +408,7 @@ def test_validate_v0_catalog():
             "-d",
             "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
             "--format",
-            "V0",
+            "v0",
         ],
         catch_exceptions=False,
     )
@@ -423,7 +423,7 @@ def test_cli_check_v0x_workflow_format_v0(caplog):
         Path(TEST_DATA_DIR) / "v0x_workflow.yml",
         "-vvv",
         "--format",
-        "V0",
+        "v0",
     ]
 
     # silence the ruff warning, we'll check the logs for error msgs
