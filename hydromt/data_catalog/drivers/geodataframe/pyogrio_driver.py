@@ -9,7 +9,7 @@ import pandas as pd
 from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
 
-from hydromt._typing import Bbox, Geom, SourceMetadata, StrPath
+from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
@@ -35,8 +35,6 @@ class PyogrioDriver(GeoDataFrameDriver):
         *,
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
-        predicate: Optional[str] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """

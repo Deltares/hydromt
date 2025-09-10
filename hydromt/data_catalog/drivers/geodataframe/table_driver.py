@@ -7,10 +7,8 @@ import geopandas as gpd
 import pandas as pd
 from pyproj import CRS
 
-from hydromt._typing import Geom
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.metadata import SourceMetadata
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -32,19 +30,12 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         self,
         uris: List[str],
         *,
-        mask: Optional[Geom] = None,
-        predicate: str = "intersects",
-        variables: Optional[List[str]] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
     ) -> gpd.GeoDataFrame:
         """Read tabular data using a combination of the pandas and geopandas libraries."""
         if not metadata:
             metadata = SourceMetadata()
-        _warn_on_unused_kwargs(
-            self.__class__.__name__,
-            {"mask": mask, "predicate": predicate, "variables": variables},
-        )
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
