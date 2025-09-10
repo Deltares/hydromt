@@ -32,6 +32,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         *,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        **kwargs,
     ) -> gpd.GeoDataFrame:
         """Read tabular data using a combination of the pandas and geopandas libraries."""
         if not metadata:

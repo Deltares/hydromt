@@ -36,6 +36,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
