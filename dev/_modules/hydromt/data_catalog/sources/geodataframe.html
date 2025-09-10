@@ -482,9 +482,8 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.adapters.geodataframe</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrameAdapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataFrameDriver</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.sources.data_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis._gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parse_geom_bbox_buffer</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">.data_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
 
 <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -708,7 +707,7 @@
                 <span class="n">media_type</span> <span class="o">=</span> <span class="n">MediaType</span><span class="o">.</span><span class="n">GEOPACKAGE</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unknown extension: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2"> cannot determine media type&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unknown extension: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2">, cannot determine media type&quot;</span>
                 <span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">,</span> <span class="n">CRSError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">handle_nodata</span> <span class="o">==</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">IGNORE</span><span class="p">:</span>
@@ -737,7 +736,21 @@
 
             <span class="n">stac_catalog</span><span class="o">.</span><span class="n">add_item</span><span class="p">(</span><span class="n">stac_item</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">stac_catalog</span></div>
-</div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_infer_default_driver</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">uri</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_fallback_driver_read</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">driver</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">for</span> <span class="n">driver</span> <span class="ow">in</span> <span class="n">GeoDataFrameDriver</span><span class="o">.</span><span class="n">find_all_possible_types</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">driver</span><span class="o">.</span><span class="n">SUPPORTED_EXTENSIONS</span>
+            <span class="p">),</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_fallback_driver_read</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 </pre></div>
 

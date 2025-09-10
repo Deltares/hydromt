@@ -1940,13 +1940,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;provider&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
                     <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;provider&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">})</span>
-                <span class="n">driver</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span>
-                    <span class="s2">&quot;driver&quot;</span><span class="p">,</span> <span class="n">GeoDataFrameSource</span><span class="o">.</span><span class="n">_fallback_driver_read</span>
-                <span class="p">)</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">basename</span><span class="p">(</span><span class="n">data_like</span><span class="p">)</span>
-                <span class="n">source</span> <span class="o">=</span> <span class="n">GeoDataFrameSource</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_like</span><span class="p">),</span> <span class="n">driver</span><span class="o">=</span><span class="n">driver</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-                <span class="p">)</span>
+                <span class="n">source</span> <span class="o">=</span> <span class="n">GeoDataFrameSource</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data_like</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_source</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_like</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
             <span class="n">data_like</span> <span class="o">=</span> <span class="n">GeoDataFrameAdapter</span><span class="o">.</span><span class="n">_slice_data</span><span class="p">(</span>

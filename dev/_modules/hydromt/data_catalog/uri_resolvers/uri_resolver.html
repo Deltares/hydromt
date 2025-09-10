@@ -491,7 +491,7 @@
         <span class="n">time_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Zoom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">zoom</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Zoom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SourceMetadata</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -505,8 +505,8 @@
 <span class="sd">            left-inclusive start end time of the data, by default None</span>
 <span class="sd">        mask : Optional[Geom], optional</span>
 <span class="sd">            A geometry defining the area of interest, by default None</span>
-<span class="sd">        zoom_level : Optional[ZoomLevel], optional</span>
-<span class="sd">            zoom_level of the dataset, by default None</span>
+<span class="sd">        zoom : Optional[Zoom], optional</span>
+<span class="sd">            zoom of the dataset, by default None</span>
 <span class="sd">        variables : Optional[List[str]], optional</span>
 <span class="sd">            Names of variables to return, or all if None, by default None</span>
 <span class="sd">        metadata: Optional[SourceMetadata], optional</span>
