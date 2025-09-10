@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, ClassVar, Dict, Generator, List
+from collections.abc import Iterator
+from typing import Any, Callable, ClassVar, Self
 
 from pydantic import (
     BaseModel,
@@ -52,8 +53,8 @@ class AbstractBaseModel(BaseModel, ABC):
             cls._load_plugins()
 
             # Find which subclass to instantiate.
-            possible_subclasses: List[AbstractBaseModel] = list(
-                filter(lambda dr: dr.name == name, cls._find_all_possible_types())
+            possible_subclasses: list[AbstractBaseModel] = list(
+                filter(lambda dr: dr.name == name, cls.find_all_possible_types())
             )
             if len(possible_subclasses) == 0:
                 raise ValueError(f"Unknown 'name': '{name}'")
@@ -70,9 +71,9 @@ class AbstractBaseModel(BaseModel, ABC):
     def _serialize(
         self,
         nxt: SerializerFunctionWrapHandler,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Add name to serialized result."""
-        serialized: Dict[str, Any] = nxt(self)
+        serialized: dict[str, Any] = nxt(self)
         serialized["name"] = self.name
         return serialized
 
@@ -83,16 +84,15 @@ class AbstractBaseModel(BaseModel, ABC):
         ...
 
     @classmethod
-    def _find_all_possible_types(cls) -> Generator[None, None, AbstractBaseModel]:
-        """Recursively generate all possible types for this object.
-
-        Logic relies on __bases__ and __subclass__() of the BaseDriver class,
-        which means that all drivers and plugins should be loaded in before.
-        """
-        # any concrete class is a possible type
+    def _iter_all_possible_types(cls) -> Iterator[type[Self]]:
+        """Recursively yield all possible sub types for this object."""
         if ABC not in cls.__bases__:
             yield cls
 
-        # continue looking for possible types in subclasses
         for subclass in cls.__subclasses__():
-            yield from subclass._find_all_possible_types()
+            yield from subclass._iter_all_possible_types()
+
+    @classmethod
+    def find_all_possible_types(cls) -> Iterator[type[Self]]:
+        """Return all possible sub types for this object as an iterator."""
+        return cls._iter_all_possible_types()

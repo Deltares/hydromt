@@ -24,9 +24,8 @@ from hydromt._typing import (
 )
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
+from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
-
-from .data_source import DataSource
 
 logger: Logger = getLogger(__name__)
 
@@ -237,7 +236,7 @@ class GeoDataFrameSource(DataSource):
                 media_type = MediaType.GEOPACKAGE
             else:
                 raise RuntimeError(
-                    f"Unknown extension: {ext} cannot determine media type"
+                    f"Unknown extension: {ext}, cannot determine media type"
                 )
         except (IndexError, KeyError, CRSError, TypeError) as e:
             if handle_nodata == NoDataStrategy.IGNORE:
@@ -266,3 +265,17 @@ class GeoDataFrameSource(DataSource):
 
             stac_catalog.add_item(stac_item)
             return stac_catalog
+
+    @classmethod
+    def _infer_default_driver(cls, uri: str | None = None) -> str:
+        if uri is None:
+            return cls._fallback_driver_read
+        _, extension = splitext(uri)
+        return next(
+            (
+                driver.name
+                for driver in GeoDataFrameDriver.find_all_possible_types()
+                if extension in driver.SUPPORTED_EXTENSIONS
+            ),
+            cls._fallback_driver_read,
+        )

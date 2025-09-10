@@ -153,3 +153,24 @@ class TestGeoDataFrameSource:
             -3.14
         )  # manually create an invalid adapter by deleting the crs
         assert adapter.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None
+
+        gdf_path = str(tmp_dir / "test.geojson")
+        geodf.to_file(gdf_path, driver="GeoJSON")
+        source = GeoDataFrameSource(name="test_data", uri=gdf_path)
+
+        with pytest.raises(
+            RuntimeError,
+            match="Unknown extension: .geojson, cannot determine media type",
+        ):
+            source.to_stac_catalog()
+
+    @pytest.mark.parametrize(
+        ("uri", "expected_driver"),
+        [
+            ("test_data.csv", "geodataframe_table"),
+            ("test_data.fgb", "pyogrio"),
+            ("test_data.fake_suffix", "pyogrio"),
+        ],
+    )
+    def test_infer_default_driver(self, uri, expected_driver):
+        assert GeoDataFrameSource._infer_default_driver(uri) == expected_driver
