@@ -1092,6 +1092,25 @@ def test_get_geodataframe_path(data_catalog):
     assert isinstance(gdf, gpd.GeoDataFrame)
 
 
+def test_get_geodataframe_geodataframe_table_driver(data_catalog):
+    uri = data_catalog.get_source("grdc").uri
+    p = Path(data_catalog.root) / uri
+    gdf = data_catalog.get_geodataframe(p, metadata={"crs": 4326})
+    assert isinstance(gdf, gpd.GeoDataFrame)
+    assert "grdc.csv" in data_catalog.sources
+    grdc_source = data_catalog.get_source("grdc.csv")
+    assert grdc_source.driver.name == "geodataframe_table"
+
+    # Should get the same results when supplying driver argument
+    data_catalog.sources.pop("grdc.csv")
+    gdf = data_catalog.get_geodataframe(
+        p, metadata={"crs": 4326}, driver="geodataframe_table"
+    )
+    assert "grdc.csv" in data_catalog.sources
+    grdc_source = data_catalog.get_source("grdc.csv")
+    assert grdc_source.driver.name == "geodataframe_table"
+
+
 def test_get_geodataframe_artifact_data(data_catalog):
     name = "osm_coastlines"
     gdf = data_catalog.get_geodataframe(name)

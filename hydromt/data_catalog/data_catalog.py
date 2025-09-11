@@ -1439,13 +1439,8 @@ class DataCatalog(object):
             else:
                 if "provider" not in kwargs:
                     kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop(
-                    "driver", GeoDataFrameSource._fallback_driver_read
-                )
                 name = basename(data_like)
-                source = GeoDataFrameSource(
-                    name=name, uri=str(data_like), driver=driver, **kwargs
-                )
+                source = GeoDataFrameSource(name=name, uri=str(data_like), **kwargs)
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             data_like = GeoDataFrameAdapter._slice_data(
