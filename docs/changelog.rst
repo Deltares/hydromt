@@ -15,6 +15,7 @@ New
 - Added option for delayed compute in writing netcdf files
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
+- Default driver is now inferred from file extension for RasterDataset and GeoDataFrame sources. (#1267)
 
 Fixed
 -----

@@ -4,7 +4,7 @@ from copy import deepcopy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import Callable, List, Optional
+from typing import Callable, ClassVar, List, Optional
 
 import xarray as xr
 
@@ -33,6 +33,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
     name = "raster_xarray"
     supports_writing = True
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = (".zarr", ".nc", ".netcdf")
 
     def read(
         self,
