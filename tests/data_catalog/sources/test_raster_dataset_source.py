@@ -50,3 +50,15 @@ class TestRasterDatasetSource:
         rioda_detected_bbox = _to_geographic_bbox(*writable_source.detect_bbox(rioda))
 
         assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
+
+    @pytest.mark.parametrize(
+        ("uri", "expected_driver"),
+        [
+            ("test_data.tif", "rasterio"),
+            ("test_data.nc", "raster_xarray"),
+            ("test_data.zarr", "raster_xarray"),
+            ("test_data.fake_suffix", "rasterio"),
+        ],
+    )
+    def test_infer_default_driver(self, uri, expected_driver):
+        assert RasterDatasetSource._infer_default_driver(uri) == expected_driver
