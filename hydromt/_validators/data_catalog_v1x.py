@@ -227,7 +227,7 @@ class DataCatalogV1Item(BaseModel):
 
     # these are required but they can be defined in the variants instead
     driver: DataCatalogV1DriverItem | None = None
-    uri: str | None = None
+    uri: Path | None = None
 
     uri_resolver: DataCatalogV1UriResolverItem | None = None
     name: str
@@ -246,7 +246,7 @@ class DataCatalogV1Item(BaseModel):
 
     @staticmethod
     def from_v0(v0_item: DataCatalogV0Item) -> "DataCatalogV1Item":
-        uri = str(v0_item.path) if v0_item.path else None
+        uri = v0_item.path if v0_item.path else None
         possible_drivers = DRIVER_RENAME_MAPPING[v0_item.data_type]
         driver_name = possible_drivers[v0_item.driver]
         options = {}

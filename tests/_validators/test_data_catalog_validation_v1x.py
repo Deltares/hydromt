@@ -60,7 +60,7 @@ def test_geodataframe_v1_entry_validation():
     assert entry.metadata.paper_ref == "Linke et al. (2019)"
     assert entry.metadata.source_license == "CC BY 4.0"
     assert entry.metadata.source_url == "https://www.hydrosheds.org/hydroatlas"
-    assert entry.uri == "hydrography/hydro_atlas/basin_atlas_v10.gpkg"
+    assert entry.uri == Path("hydrography/hydro_atlas/basin_atlas_v10.gpkg")
 
 
 def test_valid_v1_catalog_variants():
@@ -152,7 +152,7 @@ def test_raster_dataset_v1_entry_validation():
                 }
             },
         },
-        "uri": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
+        "uri": Path("meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif"),
     }
 
     entry = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
@@ -163,7 +163,7 @@ def test_raster_dataset_v1_entry_validation():
     assert entry.metadata.crs == 4326
     assert entry.data_type == "RasterDataset"
     assert entry.driver.name == "raster"
-    assert entry.uri == "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif"
+    assert entry.uri == Path("meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif")
     assert entry.driver.options == {"chunks": {"x": 3600, "y": 3600}}
     assert entry.metadata is not None
     assert entry.metadata.category == "meteo"
@@ -208,7 +208,7 @@ def test_data_type_v1_typo_data_type():
         },
         "data_type": "RaserDataset",
         "driver": {"name": "raster"},
-        "uri": ".",
+        "uri": Path("."),
     }
     with pytest.raises(ValidationError, match="1 validation error"):
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
@@ -220,7 +220,7 @@ def test_data_invalid_crs_v1():
             "crs": 123456789,
         },
         "data_type": "RasterDataset",
-        "uri": ".",
+        "uri": Path("."),
     }
     with pytest.raises(ValidationError, match="validation error for chelsa_v1.2"):
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
