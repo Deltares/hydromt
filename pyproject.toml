@@ -418,6 +418,3 @@ full-py311 = { features = [
 	"examples",
 ], solve-group = "py311" }
 min-py311 = { features = ["py311", "test"], solve-group = "py311" }
-
-[tool.pixi.dependencies]
-pytest-icdiff = ">=0.9,<0.10"
