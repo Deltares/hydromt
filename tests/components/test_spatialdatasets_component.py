@@ -116,7 +116,7 @@ def test_add_raster_data_from_raster_reclass(tmpdir, demda, lulcda):
 
 
 def test_spatialdataset_updates_netcdf(raster_ds, tmpdir: Path, caplog):
-    write_path = Path(tmpdir) / "spatial_datasets/forcing.nc"
+    write_path = Path(tmpdir, "spatial_datasets", "forcing.nc")
     makedirs(dirname(write_path), exist_ok=True)
     raster_ds.to_netcdf(write_path, engine="netcdf4")
 
