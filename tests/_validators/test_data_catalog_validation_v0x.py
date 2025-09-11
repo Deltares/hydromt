@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from pydantic import AnyUrl, ValidationError
+from pydantic import  ValidationError
 
 from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._validators.data_catalog_v0x import (
@@ -49,7 +49,7 @@ def test_geodataframe_v0_entry_validation():
     assert entry.meta.paper_doi == "10.1038/s41597-019-0300-6"
     assert entry.meta.paper_ref == "Linke et al. (2019)"
     assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == AnyUrl("https://www.hydrosheds.org/hydroatlas")
+    assert entry.meta.source_url == "https://www.hydrosheds.org/hydroatlas"
     assert entry.meta.source_version == "10"
     assert entry.path == Path("hydrography/hydro_atlas/basin_atlas_v10.gpkg")
 
@@ -152,7 +152,7 @@ def test_raster_dataset_v0_entry_validation():
     assert entry.meta.paper_doi == "10.1038/sdata.2017.122"
     assert entry.meta.paper_ref == "Karger et al. (2017)"
     assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == AnyUrl("https://chelsa-climate.org/downloads/")
+    assert entry.meta.source_url == "https://chelsa-climate.org/downloads/"
     assert entry.meta.source_version == "1.2"
 
 

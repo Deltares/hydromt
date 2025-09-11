@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Literal, Optional, Union
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 from pydantic import (
-    AnyUrl,
     BaseModel,
     ConfigDict,
     ValidationError,
@@ -108,7 +107,7 @@ class DataCatalogV0ItemMetadata(BaseModel):
     paper_doi: Optional[str] = None
     paper_ref: Optional[str] = None
     source_license: Optional[str] = None
-    source_url: Optional[AnyUrl] = None
+    source_url: Optional[str] = None
     source_version: Optional[str] = None
     notes: Optional[str] = None
     temporal_extent: Optional[dict] = None

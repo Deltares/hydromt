@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Literal
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
 from pydantic import (
-    AnyUrl,
     BaseModel,
     ConfigDict,
     field_validator,
@@ -166,7 +165,7 @@ class DataCatalogV1ItemMetadata(BaseModel):
     paper_doi: str | None = None
     paper_ref: str | None = None
     source_license: str | None = None
-    source_url: AnyUrl | None = None
+    source_url: str | None = None
     source_version: str | None = None
     notes: str | None = None
     temporal_extent: dict | None = None

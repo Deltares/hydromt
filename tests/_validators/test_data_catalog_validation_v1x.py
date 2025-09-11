@@ -2,10 +2,12 @@
 
 from pathlib import Path
 
+from tests.conftest import TEST_DATA_DIR
 import pytest
-from pydantic import AnyUrl, ValidationError
+from pydantic import  ValidationError
 
-from hydromt._io.readers import _yml_from_uri_or_path
+from hydromt._io.readers import _read_yaml, _yml_from_uri_or_path
+from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1Item,
     DataCatalogV1MetaData,
@@ -57,7 +59,7 @@ def test_geodataframe_v1_entry_validation():
     assert entry.metadata.paper_doi == "10.1038/s41597-019-0300-6"
     assert entry.metadata.paper_ref == "Linke et al. (2019)"
     assert entry.metadata.source_license == "CC BY 4.0"
-    assert entry.metadata.source_url == AnyUrl("https://www.hydrosheds.org/hydroatlas")
+    assert entry.metadata.source_url == "https://www.hydrosheds.org/hydroatlas"
     assert entry.uri == "hydrography/hydro_atlas/basin_atlas_v10.gpkg"
 
 
@@ -168,7 +170,7 @@ def test_raster_dataset_v1_entry_validation():
     assert entry.metadata.paper_doi == "10.1038/sdata.2017.122"
     assert entry.metadata.paper_ref == "Karger et al. (2017)"
     assert entry.metadata.source_license == "CC BY 4.0"
-    assert entry.metadata.source_url == AnyUrl("https://chelsa-climate.org/downloads/")
+    assert entry.metadata.source_url == "https://chelsa-climate.org/downloads/"
     assert entry.metadata.source_version == "1.2"
 
 
@@ -222,3 +224,14 @@ def test_data_invalid_crs_v1():
     }
     with pytest.raises(ValidationError, match="validation error for chelsa_v1.2"):
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
+
+def test_upgrade_v0_data_catalog():
+    v0_catalog_yml_dict = _read_yaml(Path(TEST_DATA_DIR)/"test_v0_data_catalog.yml")
+
+    expected_upgraded_data_catalog = DataCatalogV1Validator.from_yml(Path(TEST_DATA_DIR)/"test_v0_data_catalog_upgraded.yml")
+    v0_catalog = DataCatalogV0Validator.from_yml(Path(TEST_DATA_DIR)/"test_v0_data_catalog.yml")
+
+    upgraded_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
+
+    assert upgraded_catalog == expected_upgraded_data_catalog
+
