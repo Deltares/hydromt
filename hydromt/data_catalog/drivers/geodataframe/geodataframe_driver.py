@@ -6,7 +6,7 @@ from typing import ClassVar, List, Optional
 
 import geopandas as gpd
 
-from hydromt._typing import Geom, SourceMetadata, StrPath
+from hydromt._typing import SourceMetadata, StrPath
 from hydromt._typing.error import NoDataStrategy
 from hydromt.data_catalog.drivers import BaseDriver
 
@@ -23,11 +23,9 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         self,
         uris: List[str],
         *,
-        mask: Optional[Geom] = None,
-        predicate: str = "intersects",
-        variables: Optional[List[str]] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        **kwargs,
     ) -> gpd.GeoDataFrame:
         """Read in any compatible data source to a geopandas `GeoDataFrame`."""
         ...
