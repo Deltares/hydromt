@@ -2,17 +2,17 @@
 
 from pathlib import Path
 
-from tests.conftest import TEST_DATA_DIR
 import pytest
-from pydantic import  ValidationError
+from pydantic import ValidationError
 
-from hydromt._io.readers import _read_yaml, _yml_from_uri_or_path
+from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1Item,
     DataCatalogV1MetaData,
     DataCatalogV1Validator,
 )
+from tests.conftest import TEST_DATA_DIR
 
 
 def test_deltares_data_catalog_v1(latest_dd_version_uri):
@@ -225,13 +225,15 @@ def test_data_invalid_crs_v1():
     with pytest.raises(ValidationError, match="validation error for chelsa_v1.2"):
         _ = DataCatalogV1Item.from_dict(d, name="chelsa_v1.2")
 
-def test_upgrade_v0_data_catalog():
-    v0_catalog_yml_dict = _read_yaml(Path(TEST_DATA_DIR)/"test_v0_data_catalog.yml")
 
-    expected_upgraded_data_catalog = DataCatalogV1Validator.from_yml(Path(TEST_DATA_DIR)/"test_v0_data_catalog_upgraded.yml")
-    v0_catalog = DataCatalogV0Validator.from_yml(Path(TEST_DATA_DIR)/"test_v0_data_catalog.yml")
+def test_upgrade_v0_data_catalog():
+    expected_upgraded_data_catalog = DataCatalogV1Validator.from_yml(
+        Path(TEST_DATA_DIR) / "test_v0_data_catalog_upgraded.yml"
+    )
+    v0_catalog = DataCatalogV0Validator.from_yml(
+        Path(TEST_DATA_DIR) / "test_v0_data_catalog.yml"
+    )
 
     upgraded_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
 
     assert upgraded_catalog == expected_upgraded_data_catalog
-

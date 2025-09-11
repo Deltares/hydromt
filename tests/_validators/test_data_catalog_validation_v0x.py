@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from pydantic import  ValidationError
+from pydantic import ValidationError
 
 from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._validators.data_catalog_v0x import (
