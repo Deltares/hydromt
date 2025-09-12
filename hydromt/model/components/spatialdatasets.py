@@ -2,7 +2,6 @@
 
 from logging import Logger, getLogger
 from pathlib import Path
-from shutil import move
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import xarray as xr
@@ -10,9 +9,9 @@ from geopandas import GeoDataFrame
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt._io.readers import _read_ncs
+from hydromt._io.readers import open_ncs
 from hydromt._io.writers import write_nc
-from hydromt._typing.type_def import DeferedFileClose, XArrayDict
+from hydromt._typing.type_def import XArrayDict
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -58,7 +57,6 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         """
         self._data: Optional[XArrayDict] = None
         self._filename: str = filename
-        self._defered_file_closes: List[DeferedFileClose] = []
         super().__init__(
             model=model,
             region_component=region_component,
@@ -136,12 +134,10 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             self._data[name] = d
 
     @hydromt_step
-    def read(
-        self, filename: Optional[str] = None, single_var_as_array: bool = True, **kwargs
-    ) -> None:
-        r"""Read model dataset files at <root>/<filename>.
+    def read(self, filename: Optional[str] = None, **kwargs) -> None:
+        """Read model dataset files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`hydromt.io.readers.read_nc`
+        key-word arguments are passed to :py:func:`hydromt.io.readers.open_nc`
 
         Parameters
         ----------
@@ -151,20 +147,20 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.io.readers.read_nc` function.
+            `hydromt.io.readers.open_nc` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
         filename_template = filename or self._filename
-        ncs = _read_ncs(
-            filename_template,
-            root=self.root.path,
-            single_var_as_array=single_var_as_array,
-            **kwargs,
-        )
+        ncs = open_ncs(filename_template, root=self.root.path, **kwargs)
         for name, ds in ncs.items():
-            self.set(data=ds, name=name)
+            self._open_datasets.append(ds)
+            if len(ds.data_vars) == 1:
+                (da,) = ds.data_vars.values()
+            else:
+                da = ds
+            self.set(data=da, name=name)
 
     @hydromt_step
     def write(
@@ -181,9 +177,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
         files, using :py:meth:`~hydromt.raster.gdal_compliant`.
         The function will first try to directly write to file. In case of
-        PermissionError, it will first write a temporary file and add to the
-        self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
-        will be done by calling the self._cleanup function.
+        PermissionError, it will first write a temporary file and then move the file.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -225,7 +219,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
                 f"{self.model.name}.{self.name_in_model}: Writing spatial dataset to {file_path}."
             )
 
-            write_nc(
+            close_handle = write_nc(
                 ds,
                 file_path=file_path,
                 gdal_compliant=gdal_compliant,
@@ -234,50 +228,8 @@ class SpatialDatasetsComponent(SpatialModelComponent):
                 force_overwrite=self.root.mode.is_override_mode(),
                 **kwargs,
             )
-
-    def _cleanup(self, forceful_overwrite=False, max_close_attempts=2) -> List[str]:
-        """Try to close all deferred file handles.
-
-        Try to overwrite the destination file with the temporary one until either the
-        maximum number of tries is reached or until it succeeds. The forced cleanup
-        also attempts to close the original file handle, which could cause trouble
-        if the user will try to read from the same file handle after this function
-        is called.
-
-        Parameters
-        ----------
-        forceful_overwrite: bool
-            Attempt to force closing deferred file handles before writing to them.
-        max_close_attempts: int
-            Number of times to try and overwrite the original file, before giving up.
-
-        """
-        failed_closes = []
-        while len(self._defered_file_closes) > 0:
-            close_handle = self._defered_file_closes.pop()
-            if close_handle["close_attempts"] > max_close_attempts:
-                # already tried to close this to many times so give up
-                logger.error(
-                    f"Max write attempts to file {close_handle['org_fn']}"
-                    " exceeded. Skipping..."
-                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
-                )
-                continue
-
-            if forceful_overwrite:
-                close_handle["ds"].close()
-            try:
-                move(close_handle["tmp_fn"], close_handle["org_fn"])
-            except PermissionError:
-                logger.error(
-                    f"Could not write to destination file {close_handle['org_fn']} "
-                    "because the following error was raised: {e}"
-                )
-                close_handle["close_attempts"] += 1
-                self._defered_file_closes.append(close_handle)
-                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
-
-        return list(set(failed_closes))
+            if close_handle is not None:
+                self._deferred_file_close_handles.append(close_handle)
 
     @hydromt_step
     def add_raster_data_from_rasterdataset(

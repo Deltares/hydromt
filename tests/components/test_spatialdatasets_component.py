@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import pytest
@@ -112,3 +113,23 @@ def test_add_raster_data_from_raster_reclass(tmp_path: Path, demda, lulcda):
     )
 
     assert "roughness_manning" in model.maps.data
+
+
+def test_spatialdataset_updates_netcdf(raster_ds, tmp_path: Path, caplog):
+    write_path = tmp_path / "spatial_datasets" / "forcing.nc"
+    write_path.parent.mkdir()
+    raster_ds.to_netcdf(write_path, engine="netcdf4")
+
+    model = Model(root=tmp_path, mode="r+")
+    dataset_component = SpatialDatasetsComponent(model, region_component="fake")
+    model.add_component("forcing", dataset_component)
+
+    component_data = dataset_component.data["forcing"]
+    xr.testing.assert_equal(raster_ds, component_data)
+
+    dataset_component.write()
+    dataset_component.close()
+    dataset_component.finish_write()
+
+    # Check that there were no more permission errors during cleanup and files have been updated.
+    assert not any(log_record.levelno == logging.ERROR for log_record in caplog.records)

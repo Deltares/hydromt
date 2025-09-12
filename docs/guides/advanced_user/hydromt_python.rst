@@ -91,6 +91,14 @@ resample, transform, interpolate nodata or zonal statistics. There is also the
 point/line/polygon geometry). For example, reprojecting, transform, update geometry or
 convert to geopandas.GeoDataFrame to access further GIS methods.
 
+.. warning::
+    Remember to close any open datasets when you are finished working with them.
+    Leaving datasets open may cause xarray to lock the files, which can prevent
+    access by other processes until your Python session ends. For example, if you
+    open a NetCDF file used by a model and do not close it before calling
+    ``Model.update()``, HydroMT will raise a ``PermissionError`` when attempting
+    to write to the model.
+
 .. _flowpy_wrappers:
 
 FlowPy Wrappers:

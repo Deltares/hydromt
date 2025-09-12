@@ -46,7 +46,7 @@ __all__ = [
     "_open_geodataset",
     "_open_vector_from_table",
     "_open_timeseries_from_table",
-    "_read_nc",
+    "open_nc",
     "_read_yaml",
     "_read_toml",
 ]
@@ -868,30 +868,13 @@ def _parse_values(
     return cfdict
 
 
-def _read_nc(
-    filepath: Path | str,
-    *,
-    mask_and_scale: bool = False,
-    single_var_as_array: bool = True,
-    load: bool = False,
-    **kwargs,
-) -> xr.Dataset:
+def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     """Read a netcdf file.
 
     Parameters
     ----------
     filepath : Path | str
         Full path to the file.
-    mask_and_scale : bool, optional
-        If True, replace array values equal to _FillValue with NA and scale values
-        according to the formula original_values * scale_factor + add_offset, where
-        _FillValue, scale_factor and add_offset are taken from variable attributes
-        (if they exist), by default False
-    single_var_as_array : bool, optional
-        If True, return a DataArray if the dataset consists of a single variable.
-        If False, always return a Dataset, by default True
-    load : bool, optional
-        If True, the data is loaded into memory, by default False
     **kwargs : dict
         Additional keyword arguments that are passed to the `xr.open_dataset`
         function.
@@ -899,41 +882,25 @@ def _read_nc(
     Returns
     -------
     xr.Dataset
-        Read dataset
+        Read dataset. Don't forget to close it when you're done!
     """
-    if load:
-        ds: Union[xr.Dataset, xr.DataArray] = xr.open_dataset(
-            filepath, mask_and_scale=mask_and_scale, **kwargs
-        ).load()
-        ds.close()
-    else:
-        ds = xr.open_dataset(filepath, mask_and_scale=mask_and_scale, **kwargs)
+    ds = xr.open_dataset(filepath, **kwargs)
     # set geo coord if present as coordinate of dataset
     if GEO_MAP_COORD in ds.data_vars:
+        org_close = ds._close
         ds = ds.set_coords(GEO_MAP_COORD)
-    # single-variable Dataset to DataArray
-    if single_var_as_array and len(ds.data_vars) == 1:
-        (ds,) = ds.data_vars.values()
+        ds.set_close(org_close)
 
     # Return the dataset
     return ds
 
 
-def _read_ncs(
+def open_ncs(
     filename_template: StrPath,
     root: Path,
-    *,
-    mask_and_scale: bool = False,
-    single_var_as_array: bool = True,
-    load: bool = False,
     **kwargs,
-) -> Dict[str, Union[xr.Dataset, xr.DataArray]]:
+) -> Dict[str, xr.Dataset]:
     """Read netcdf files at <root>/<file> and return as dict of xarray.Dataset.
-
-    NOTE: Unless `single_var_as_array` is set to False a single-variable data source
-    will be returned as :py:class:`xarray.DataArray` rather than
-    :py:class:`xarray.Dataset`.
-    key-word arguments are passed to :py:func:`xarray.open_dataset`.
 
     Parameters
     ----------
@@ -941,16 +908,6 @@ def _read_ncs(
         Filename relative to model root, may contain wildcards
     root : Path
         The path to the model directory in which to write
-    mask_and_scale : bool, optional
-        If True, replace array values equal to _FillValue with NA and scale values
-        according to the formula original_values * scale_factor + add_offset, where
-        _FillValue, scale_factor and add_offset are taken from variable attributes
-        (if they exist).
-    single_var_as_array : bool, optional
-        If True, return a DataArray if the dataset consists of a single variable.
-        If False, always return a Dataset. By default True.
-    load : bool, optional
-        If True, the data is loaded into memory. By default False.
     **kwargs:
         Additional keyword arguments that are passed to the `xr.open_dataset`
         function.
@@ -958,26 +915,19 @@ def _read_ncs(
     Returns
     -------
     Dict[str, xr.Dataset]
-        dict of xarray.Dataset
+        dict of xarray.Dataset. Don't forget to close them when you're done!
     """
-    ncs = dict()
+    ncs = {}
     path_template = root / filename_template
 
     path_glob, _, regex = _expand_uri_placeholders(
-        str(path_template), placeholders=_placeholders
+        str(path_template), placeholders=list(_placeholders)
     )
     paths = glob(path_glob)
     for path in paths:
         name = ".".join(regex.match(path).groups())  # type: ignore
-        # Load data to allow overwriting in r+ mode
-        ds = _read_nc(
-            filepath=path,
-            mask_and_scale=mask_and_scale,
-            single_var_as_array=single_var_as_array,
-            load=load,
-            **kwargs,
-        )
-        ncs.update({name: ds})
+        ds = open_nc(filepath=path, **kwargs)
+        ncs[name] = ds
     return ncs
 
 

@@ -7,10 +7,10 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "justMyCode": false,
             "purpose": [
                 "debug-test"
-            ]
+            ],
+            "justMyCode": false
         }
     ]
 }
