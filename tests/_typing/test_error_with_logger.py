@@ -5,6 +5,8 @@ from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 _LOGGER_NAME = "test_logger"
 logger = logging.getLogger(_LOGGER_NAME)
 
+# This test is dependent on the caller and call stack.
+# Don't let pytest optimize the test.
 # pytest: disable_assert_rewriting
 
 
