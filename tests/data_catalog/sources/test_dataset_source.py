@@ -19,16 +19,16 @@ class TestDatasetSource:
         mock_ds_adapter: DatasetAdapter,
         mock_resolver: URIResolver,
         timeseries_ds: xr.Dataset,
-        tmp_dir: Path,
+        managed_tmp_path: Path,
     ):
-        tmp_dir.touch("test.nc")
+        managed_tmp_path.touch("test.nc")
         source = DatasetSource(
             root=".",
             name="example_source",
             driver=MockDatasetDriver(),
             data_adapter=mock_ds_adapter,
             uri_resolver=mock_resolver,
-            uri=str(tmp_dir / "test.nc"),
+            uri=str(managed_tmp_path / "test.nc"),
         )
         xr.testing.assert_equal(timeseries_ds, source.read_data())
 

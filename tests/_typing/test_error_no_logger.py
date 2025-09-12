@@ -1,5 +1,7 @@
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 
+# pytest: disable_assert_rewriting
+
 
 def test_logger_from_frame_in_nodata_strat(caplog):
     exec_nodata_strat("foo", NoDataStrategy.WARN)

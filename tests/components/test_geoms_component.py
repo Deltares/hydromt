@@ -1,5 +1,3 @@
-from os import makedirs
-from os.path import join
 from pathlib import Path
 from typing import cast
 
@@ -14,12 +12,12 @@ from hydromt.model.components.geoms import GeomsComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 
 
-def test_model_set_geoms(tmpdir):
+def test_model_set_geoms(tmp_path: Path):
     bbox_list = [4.221067, 51.949474, 4.471006, 52.073727]
     bbox = box(*bbox_list, ccw=True)
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
 
-    model = Model(root=str(tmpdir), mode="w")
+    model = Model(root=tmp_path, mode="w")
     geom_component = GeomsComponent(model, region_component="foo")
     model.add_component("geom", geom_component)
 
@@ -31,15 +29,15 @@ def test_model_set_geoms(tmpdir):
     assert np.allclose(geom_component._region_data.bounds.values, expected_bounds)
 
 
-def test_model_read_geoms(tmpdir):
+def test_model_read_geoms(tmp_path: Path):
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
     geom = gpd.GeoDataFrame(geometry=[bbox], crs=4326)
-    write_folder = join(tmpdir, "geoms")
-    makedirs(write_folder, exist_ok=True)
-    write_path = Path(write_folder) / "test_geom.geojson"
+    write_folder = tmp_path / "geoms"
+    write_folder.mkdir(parents=True, exist_ok=True)
+    write_path = write_folder / "test_geom.geojson"
     geom.to_file(write_path)
 
-    model = Model(root=tmpdir, mode="r")
+    model = Model(root=tmp_path, mode="r")
     model.add_component("geom", GeomsComponent(model, region_component="foo"))
 
     geom_component = cast(GeomsComponent, model.geom)
@@ -48,7 +46,7 @@ def test_model_read_geoms(tmpdir):
     assert geom.equals(component_data)
 
 
-def test_model_write_geoms_wgs84_with_model_crs(tmpdir, mocker: MockerFixture):
+def test_model_write_geoms_wgs84_with_model_crs(tmp_path: Path, mocker: MockerFixture):
     region_component = mocker.Mock(spec=SpatialModelComponent)
     region_component.region.crs = CRS.from_epsg(3857)
     bbox = box(*[4.221067, 51.949474, 4.471006, 52.073727], ccw=True)
@@ -61,7 +59,7 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir, mocker: MockerFixture):
     class FakeModel(Model):
         def __init__(self):
             super().__init__(
-                root=str(tmpdir),
+                root=tmp_path,
                 mode="w",
                 region_component="region",
                 components={
@@ -76,8 +74,7 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir, mocker: MockerFixture):
     geom_component.set(geom_4326, "test_geom")
 
     assert geom_component.data["test_geom"].equals(geom_3857)
-    write_folder = join(tmpdir, "geoms")
-    write_path = join(write_folder, "test_geom.geojson")
+    write_path = tmp_path / "geoms" / "test_geom.geojson"
     geom_component.write(to_wgs84=True)
 
     gdf = gpd.read_file(write_path)
@@ -85,8 +82,8 @@ def test_model_write_geoms_wgs84_with_model_crs(tmpdir, mocker: MockerFixture):
     assert gdf.equals(geom_4326)
 
 
-def test_model_write_geoms(tmpdir):
-    model = Model(root=str(tmpdir), mode="w")
+def test_model_write_geoms(tmp_path: Path):
+    model = Model(root=tmp_path, mode="w")
     geom_component = GeomsComponent(model, region_component="foo")
     model.add_component("geom", geom_component)
 
@@ -95,8 +92,7 @@ def test_model_write_geoms(tmpdir):
     geom.to_crs(3857, inplace=True)
     assert geom.crs.to_epsg() == 3857
 
-    write_folder = join(tmpdir, "geoms")
-    write_path = join(write_folder, "test_geom.geojson")
+    write_path = tmp_path / "geoms" / "test_geom.geojson"
     geom_component.set(geom, "test_geom")
     geom_component.write()
     region_geom = gpd.read_file(write_path)

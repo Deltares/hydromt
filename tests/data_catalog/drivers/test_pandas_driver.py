@@ -12,34 +12,34 @@ from hydromt.data_catalog.drivers.dataframe import PandasDriver
 
 class TestPandasDriver:
     @pytest.fixture(scope="class")
-    def uri_csv(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.csv")
+    def uri_csv(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.csv"
         df.to_csv(uri, index=False)
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_parquet(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.parquet")
+    def uri_parquet(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.parquet"
         df.to_parquet(uri, index=False)
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_xlsx(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.xlsx")
+    def uri_xlsx(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.xlsx"
         df.to_excel(uri, index=False)
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_xls(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.xls")
+    def uri_xls(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.xls"
         df.to_excel(uri, engine="openpyxl", index=False)
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_fwf(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.fwf")
+    def uri_fwf(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.fwf"
         df.to_string(uri, index=False)
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
     def driver(self):
@@ -105,9 +105,13 @@ class TestPandasDriver:
         "filename", ["temp.csv", "temp.parquet", temp_xls_param, temp_xlsx_param]
     )
     def test_write(
-        self, filename: str, df: pd.DataFrame, tmp_dir: Path, driver: PandasDriver
+        self,
+        filename: str,
+        df: pd.DataFrame,
+        managed_tmp_path: Path,
+        driver: PandasDriver,
     ):
-        df_path = tmp_dir / filename
+        df_path = managed_tmp_path / filename
         driver.write(df_path, df, index=False)
         reread = driver.read([str(df_path)])
         assert np.all(reread == df)
@@ -124,8 +128,10 @@ class TestPandasDriver:
     @pytest.mark.parametrize(
         "filename", ["temp_2.csv", temp_2_xls_param, temp_2_xlsx_param]
     )
-    def test_handles_index_col(self, filename: str, df: pd.DataFrame, tmp_dir: Path):
-        df_path = tmp_dir / filename
+    def test_handles_index_col(
+        self, filename: str, df: pd.DataFrame, managed_tmp_path: Path
+    ):
+        df_path = managed_tmp_path / filename
         driver = PandasDriver(options={"index_col": 0})
         driver.write(df_path, df)
 

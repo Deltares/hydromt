@@ -53,8 +53,8 @@ class TestRasterXarrayDriver:
         assert list(res.coords.keys()) == ["xc", "yc"]
         assert res["variable"].values[0, 0] == 42
 
-    def test_zarr_write(self, raster_ds: xr.Dataset, tmp_dir: Path):
-        zarr_path: Path = tmp_dir / "raster.zarr"
+    def test_zarr_write(self, raster_ds: xr.Dataset, managed_tmp_path: Path):
+        zarr_path: Path = managed_tmp_path / "raster.zarr"
         driver = DatasetXarrayDriver()
         driver.write(zarr_path, raster_ds)
         assert np.all(driver.read([str(zarr_path)]) == raster_ds)
