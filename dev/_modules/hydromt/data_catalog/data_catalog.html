@@ -650,7 +650,7 @@
             <span class="k">if</span> <span class="n">stac_child_catalog</span><span class="p">:</span>
                 <span class="n">stac_catalog</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">stac_child_catalog</span><span class="p">)</span>
 
-        <span class="n">stac_catalog</span><span class="o">.</span><span class="n">normalize_and_save</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">catalog_type</span><span class="o">=</span><span class="n">catalog_type</span><span class="p">)</span>
+        <span class="n">stac_catalog</span><span class="o">.</span><span class="n">normalize_and_save</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">),</span> <span class="n">catalog_type</span><span class="o">=</span><span class="n">catalog_type</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">stac_catalog</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">from_stac_catalog</span><span class="p">(</span>
