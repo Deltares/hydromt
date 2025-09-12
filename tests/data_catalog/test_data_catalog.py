@@ -5,7 +5,6 @@ import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from logging import WARNING
-from os import mkdir
 from os.path import abspath, basename, join
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
@@ -53,56 +52,53 @@ from tests.conftest import DATA_DIR, TEST_DATA_DIR
 _CATALOG_DIR = join(DATA_DIR, "catalogs")
 
 
-def test_errors_on_no_root_found(tmpdir):
+def test_errors_on_no_root_found(tmp_path: Path):
     d = {
         "meta": {
             "hydromt_version": ">=1.0a,<2",
-            "roots": list(
-                map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4", "⽀"])
-            ),
+            "roots": [tmp_path / p for p in ["a", "b", "c", "d", "4", "⽀"]],
         },
     }
     with pytest.raises(ValueError, match="None of the specified roots were found"):
         _ = DataCatalog().from_dict(d)
 
 
-def test_finds_later_roots(tmpdir):
-    mkdir(join(tmpdir, "asasdfasdf"))
+def test_finds_later_roots(tmp_path: Path):
+    Path(tmp_path, "asasdfasdf").mkdir()
     d = {
         "meta": {
             "hydromt_version": ">=1.0a,<2",
-            "roots": list(
-                map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4", "asasdfasdf"])
-            ),
+            "roots": [tmp_path / p for p in ["a", "b", "c", "d", "4", "asasdfasdf"]],
         },
     }
     cat = DataCatalog().from_dict(d)
-    assert cat.root == Path(join(tmpdir, "asasdfasdf"))
+    assert cat.root == Path(tmp_path, "asasdfasdf")
 
 
-def test_finds_roots_in_correct_order(tmpdir):
-    paths = list(map(lambda p: join(tmpdir, p), ["a", "b", "c", "d", "4"]))
+def test_finds_roots_in_correct_order(tmp_path: Path):
+    paths = [tmp_path / p for p in ["a", "b", "c", "d", "4"]]
     for p in paths:
-        mkdir(p)
+        p.mkdir()
 
     d = {
         "meta": {"hydromt_version": ">=1.0a,<2", "roots": paths},
     }
     cat = DataCatalog().from_dict(d)
-    assert cat.root == Path(join(tmpdir, "a"))
+    assert cat.root == Path(tmp_path, "a")
 
 
-def test_from_yml_no_root(tmpdir):
+def test_from_yml_no_root(tmp_path: Path):
     d = {
         "meta": {"hydromt_version": ">=1.0a,<2"},
     }
 
-    cat_file = join(tmpdir, "cat.yml")
+    cat_file = tmp_path / "cat.yml"
     with open(cat_file, "w") as f:
         dump(d, f)
 
     cat = DataCatalog().from_yml(cat_file)
-    assert cat.root == str(tmpdir)
+    assert cat.root is not None
+    assert Path(cat.root) == tmp_path
 
 
 def test_parser():
@@ -179,11 +175,11 @@ def test_parser():
         _parse_data_source_dict("test", {"path": "", "data_type": "error"})
 
 
-def test_data_catalog_io_round_trip(tmp_dir: Path, data_catalog: DataCatalog):
+def test_data_catalog_io_round_trip(managed_tmp_path: Path, data_catalog: DataCatalog):
     # read / write
-    uri_yml = str(tmp_dir / "test.yml")
+    uri_yml = managed_tmp_path / "test.yml"
     data_catalog.to_yml(uri_yml, root=str(data_catalog.root))
-    data_catalog_read = DataCatalog(data_libs=uri_yml)
+    data_catalog_read = DataCatalog(data_libs=str(uri_yml))
     assert data_catalog.to_dict() == data_catalog_read.to_dict()
 
 
@@ -390,8 +386,8 @@ def test_data_catalog_from_deltares_data():
     assert len(data_catalog._sources) > 0
 
 
-def test_data_catalog_hydromt_version(tmpdir):
-    yml_path = join(tmpdir, "test.yml")
+def test_data_catalog_hydromt_version(tmp_path: Path):
+    yml_path = tmp_path / "test.yml"
     data_catalog = DataCatalog()
     data_catalog.to_yml(yml_path, meta={"hydromt_version": "0.7.0"})
 
@@ -462,7 +458,7 @@ def export_test_slice_objects(
 
 
 @pytest.mark.integration
-def test_export_global_datasets(tmpdir, export_test_slice_objects):
+def test_export_global_datasets(tmp_path: Path, export_test_slice_objects):
     (
         data_catalog,
         bbox,
@@ -471,7 +467,7 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
         data_lib_path,
     ) = export_test_slice_objects
     data_catalog.export_data(
-        tmpdir,
+        tmp_path,
         bbox=bbox,
         time_range=time_range,
         source_names=source_names,
@@ -485,7 +481,7 @@ def test_export_global_datasets(tmpdir, export_test_slice_objects):
     assert yml_list[2].strip().startswith("root:")
 
 
-def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
+def test_export_global_datasets_overwrite(tmp_path: Path, export_test_slice_objects):
     (
         data_catalog,
         bbox,
@@ -494,7 +490,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
         _data_lib_path,
     ) = export_test_slice_objects
     data_catalog.export_data(
-        tmpdir,
+        tmp_path,
         bbox=bbox,
         time_range=time_range,
         source_names=source_names,
@@ -503,7 +499,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
     )
     # test append and overwrite source
     data_catalog.export_data(
-        tmpdir,
+        tmp_path,
         bbox=bbox,
         source_names=["corine"],
         append=True,
@@ -511,7 +507,7 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
         handle_nodata=NoDataStrategy.IGNORE,
     )
 
-    data_lib_path = join(tmpdir, "data_catalog.yml")
+    data_lib_path = tmp_path / "data_catalog.yml"
     # check if meta is written
     with open(data_lib_path, "r") as f:
         yml_list = f.readlines()
@@ -521,21 +517,21 @@ def test_export_global_datasets_overrwite(tmpdir, export_test_slice_objects):
 
 
 @pytest.mark.integration
-def test_export_dataframe(tmp_path, df, df_time):
+def test_export_dataframe(tmp_path: Path, df, df_time):
     # Write two csv files
-    csv_path = str(tmp_path / "test.csv")
-    parquet_path = str(tmp_path / "test.parquet")
+    csv_path = tmp_path / "test.csv"
+    parquet_path = tmp_path / "test.parquet"
     df.to_csv(csv_path)
     df.to_parquet(parquet_path)
-    csv_ts_path = str(tmp_path / "test_ts.csv")
-    parquet_ts_path = str(tmp_path / "test_ts.parquet")
+    csv_ts_path = tmp_path / "test_ts.csv"
+    parquet_ts_path = tmp_path / "test_ts.parquet"
     df_time.to_csv(csv_ts_path)
     df_time.to_parquet(parquet_ts_path)
 
     # Test to_file method (needs reading)
     data_dict = {
         "test_df": {
-            "uri": csv_path,
+            "uri": str(csv_path),
             "driver": {
                 "name": "pandas",
                 "options": {
@@ -545,7 +541,7 @@ def test_export_dataframe(tmp_path, df, df_time):
             "data_type": "DataFrame",
         },
         "test_df_ts": {
-            "uri": csv_ts_path,
+            "uri": str(csv_ts_path),
             "driver": {
                 "name": "pandas",
                 "options": {
@@ -556,12 +552,12 @@ def test_export_dataframe(tmp_path, df, df_time):
             "data_type": "DataFrame",
         },
         "test_df_parquet": {
-            "uri": parquet_path,
+            "uri": str(parquet_path),
             "driver": "pandas",
             "data_type": "DataFrame",
         },
         "test_df_ts_parquet": {
-            "uri": parquet_ts_path,
+            "uri": str(parquet_ts_path),
             "driver": "pandas",
             "data_type": "DataFrame",
         },
@@ -570,7 +566,7 @@ def test_export_dataframe(tmp_path, df, df_time):
     data_catalog = DataCatalog()
     data_catalog.from_dict(data_dict)
 
-    data_catalog_reread_path: Path = tmp_path / "newdir_filter"
+    data_catalog_reread_path = tmp_path / "newdir_filter"
     data_catalog.export_data(
         str(data_catalog_reread_path),
         time_range=("2010-02-01", "2010-02-14"),
@@ -582,7 +578,7 @@ def test_export_dataframe(tmp_path, df, df_time):
     )
     assert len(data_catalog_reread.list_sources()) == 2
 
-    data_catalog_reread_path_nofilter: Path = tmp_path / "newdir"
+    data_catalog_reread_path_nofilter = tmp_path / "newdir"
     data_catalog.export_data(str(data_catalog_reread_path_nofilter))
     data_catalog1 = DataCatalog(
         str(data_catalog_reread_path_nofilter / "data_catalog.yml")
@@ -719,12 +715,12 @@ class TestGetRasterDataset:
         assert source.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None
 
     @pytest.fixture
-    def zoom_dict(self, tmp_dir: Path, zoom_level_tif: str) -> Dict[str, Any]:
+    def zoom_dict(self, managed_tmp_path: Path, zoom_level_tif: str) -> Dict[str, Any]:
         return {
             "test_zoom": {
                 "data_type": "RasterDataset",
                 "driver": {"name": "rasterio"},
-                "uri": f"{str(tmp_dir)}/test_zl{{overview_level:d}}.tif",  # test with str format for zoom level
+                "uri": f"{str(managed_tmp_path)}/test_zl{{overview_level:d}}.tif",  # test with str format for zoom level
                 "metadata": {
                     "crs": 4326,
                     "zls_dict": {0: 0.1, 1: 0.3},
@@ -733,12 +729,12 @@ class TestGetRasterDataset:
         }
 
     @pytest.fixture
-    def zoom_level_tif(self, rioda_large: xr.DataArray, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test_zl1.tif")
+    def zoom_level_tif(self, rioda_large: xr.DataArray, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test_zl1.tif"
         # write tif with zoom level 1 in name
         # NOTE zl 0 not written to check correct functioning
         rioda_large.raster.to_raster(uri)  # , overviews=[0, 1])
-        return uri
+        return str(uri)
 
     @pytest.mark.integration
     @pytest.mark.usefixtures("zoom_level_tif")
@@ -778,10 +774,12 @@ class TestGetRasterDataset:
         assert np.allclose(da1.raster.res, res * 2)
 
     @pytest.fixture
-    def tif_no_overviews(self, tmp_dir: Path, rioda_large: xr.DataArray) -> str:
-        uri = str(tmp_dir / "test_tif_no_overviews.tif")
+    def tif_no_overviews(
+        self, managed_tmp_path: Path, rioda_large: xr.DataArray
+    ) -> str:
+        uri = managed_tmp_path / "test_tif_no_overviews.tif"
         rioda_large.raster.to_raster(uri, driver="GTiff")
-        return uri
+        return str(uri)
 
     @pytest.mark.integration
     def test_zoom_levels_no_overviews(
@@ -951,16 +949,16 @@ class TestGetRasterDataset:
 
 class TestGetGeoDataFrame:
     @pytest.fixture
-    def uri_geojson(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
-        uri_gdf = tmp_dir / "test.geojson"
+    def uri_geojson(self, managed_tmp_path: Path, geodf: gpd.GeoDataFrame) -> str:
+        uri_gdf = managed_tmp_path / "test.geojson"
         geodf.to_file(uri_gdf, driver="GeoJSON")
-        return uri_gdf
+        return str(uri_gdf)
 
     @pytest.fixture
-    def uri_shp(self, tmp_dir: Path, geodf: gpd.GeoDataFrame) -> str:
-        uri_shapefile = tmp_dir / "test.shp"  # shapefile what a horror
+    def uri_shp(self, managed_tmp_path: Path, geodf: gpd.GeoDataFrame) -> str:
+        uri_shapefile = managed_tmp_path / "test.shp"  # shapefile what a horror
         geodf.to_file(uri_shapefile)
-        return uri_shapefile
+        return str(uri_shapefile)
 
     @pytest.mark.integration
     def test_read_geojson_bbox(
@@ -1144,22 +1142,22 @@ def test_get_geodataframe_unknown_key(data_catalog):
 
 class TestGetGeoDataset:
     @pytest.fixture
-    def geojson_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri_gdf = str(tmp_dir / "test.geojson")
+    def geojson_dataset(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+        uri_gdf = managed_tmp_path / "test.geojson"
         geodf.to_file(uri_gdf, driver="GeoJSON")
-        return uri_gdf
+        return str(uri_gdf)
 
     @pytest.fixture
-    def csv_dataset(self, ts: pd.DataFrame, tmp_dir: Path) -> str:
-        uri_csv = str(tmp_dir / "test.csv")
+    def csv_dataset(self, ts: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri_csv = managed_tmp_path / "test.csv"
         ts.to_csv(uri_csv)
-        return uri_csv
+        return str(uri_csv)
 
     @pytest.fixture
-    def xy_dataset(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri_csv_locs = str(tmp_dir / "test_locs.xy")
+    def xy_dataset(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+        uri_csv_locs = managed_tmp_path / "test_locs.xy"
         write_xy(uri_csv_locs, geodf)
-        return uri_csv_locs
+        return str(uri_csv_locs)
 
     @pytest.fixture
     def nc_dataset(self, geoda: xr.Dataset, tmp_path: Path) -> str:
@@ -1388,28 +1386,28 @@ def test_get_dataset_variables(timeseries_df: pd.DataFrame, data_catalog: DataCa
 
 class TestGetDataFrame:
     @pytest.fixture
-    def uri_csv(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri: str = str(tmp_dir / "test.csv")
+    def uri_csv(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri: str = managed_tmp_path / "test.csv"
         df.to_csv(uri)
-        return uri
+        return str(uri)
 
     @pytest.fixture
-    def uri_parquet(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri: str = str(tmp_dir / "test.parquet")
+    def uri_parquet(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri: str = managed_tmp_path / "test.parquet"
         df.to_parquet(uri)
-        return uri
+        return str(uri)
 
     @pytest.fixture
-    def uri_fwf(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.txt")
+    def uri_fwf(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.txt"
         df.to_string(uri, index=False)
-        return uri
+        return str(uri)
 
     @pytest.fixture
-    def uri_xlsx(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.xlsx")
+    def uri_xlsx(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.xlsx"
         df.to_excel(uri, index=False)
-        return uri
+        return str(uri)
 
     def test_reads_csv(self, df: pd.DataFrame, uri_csv: str, data_catalog: DataCatalog):
         df1 = data_catalog.get_dataframe(
@@ -1443,9 +1441,9 @@ class TestGetDataFrame:
         pd.testing.assert_frame_equal(df1, df.set_index("id"))
 
     def test_dataframe_unit_attrs(
-        self, df: pd.DataFrame, tmp_dir: Path, data_catalog: DataCatalog
+        self, df: pd.DataFrame, managed_tmp_path: Path, data_catalog: DataCatalog
     ):
-        df_path = tmp_dir / "cities.csv"
+        df_path = managed_tmp_path / "cities.csv"
         df["test_na"] = -9999
         df.to_csv(df_path)
         cities = {
@@ -1469,10 +1467,10 @@ class TestGetDataFrame:
         assert np.all(cities_df["test_na"].isna())
 
     @pytest.fixture
-    def csv_uri_time(self, tmp_dir: Path, df_time: pd.DataFrame) -> str:
-        uri = str(tmp_dir / "test_ts.csv")
+    def csv_uri_time(self, managed_tmp_path: Path, df_time: pd.DataFrame) -> str:
+        uri = managed_tmp_path / "test_ts.csv"
         df_time.to_csv(uri)
-        return uri
+        return str(uri)
 
     def test_time(
         self, df_time: pd.DataFrame, csv_uri_time: str, data_catalog: DataCatalog
@@ -1544,10 +1542,10 @@ class TestGetDataFrame:
         assert np.all(dfts.columns == vars_slice)
 
 
-def test_get_dataframe(df, tmpdir, data_catalog):
+def test_get_dataframe(df, tmp_path: Path, data_catalog):
     n = len(data_catalog)
     name = "test.csv"
-    csv_path = str(tmpdir.join(name))
+    csv_path = tmp_path / name
     df.to_csv(csv_path)
     df = data_catalog.get_dataframe(csv_path)
     assert len(data_catalog) == n + 1
@@ -1560,12 +1558,12 @@ def test_get_dataframe_variables(df, data_catalog):
     assert df.columns == ["city"]
 
 
-def test_to_stac(df: pd.DataFrame, tmp_dir: Path):
-    uri_df = str(tmp_dir / "test.csv")
+def test_to_stac(df: pd.DataFrame, managed_tmp_path: Path):
+    uri_df = managed_tmp_path / "test.csv"
     name = "test_dataframe"
     df.to_csv(uri_df)
     dc = DataCatalog().from_dict(
-        {name: {"data_type": "DataFrame", "uri": uri_df, "driver": "pandas"}}
+        {name: {"data_type": "DataFrame", "uri": str(uri_df), "driver": "pandas"}}
     )
 
     source = cast(DataFrameSource, dc.get_source(name))
@@ -1579,9 +1577,9 @@ def test_to_stac(df: pd.DataFrame, tmp_dir: Path):
     assert source.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None
 
 
-def test_get_dataframe_custom_data(tmp_dir, df, data_catalog):
+def test_get_dataframe_custom_data(managed_tmp_path: Path, df, data_catalog):
     name = "test.csv"
-    path = Path(tmp_dir, name)
+    path = managed_tmp_path / name
     df.to_csv(path)
 
     gdf = data_catalog.get_dataframe(df)
@@ -1640,7 +1638,7 @@ def test_detect_extent_geodataset(data_catalog):
     assert detected_temporal_range == expected_temporal_range
 
 
-def test_to_stac_raster_dataset(tmpdir, data_catalog):
+def test_to_stac_raster_dataset(tmp_path: Path, data_catalog):
     data_catalog._sources = {}
     _ = data_catalog.get_rasterdataset("chirps_global")
 
@@ -1648,16 +1646,16 @@ def test_to_stac_raster_dataset(tmpdir, data_catalog):
         "chirps_global",
     ]
 
-    stac_catalog = data_catalog.to_stac_catalog(root=str(tmpdir), used_only=True)
+    stac_catalog = data_catalog.to_stac_catalog(root=tmp_path, used_only=True)
 
-    assert sorted(list(map(lambda x: x.id, stac_catalog.get_children()))) == sources
+    assert sorted(x.id for x in stac_catalog.get_children()) == sources
     # the two empty strings are for the root and self link which are destinct
     assert sorted(
         [
-            Path(join(tmpdir, x.get_href())) if x != str(tmpdir) else tmpdir
+            tmp_path / x.get_href() if x != str(tmp_path) else tmp_path
             for x in stac_catalog.get_links()
         ]
-    ) == sorted([Path(join(tmpdir, p, "catalog.json")) for p in ["", *sources, ""]])
+    ) == sorted(tmp_path / p / "catalog.json" for p in ["", *sources, ""])
 
 
 def test_from_stac():

@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import geopandas as gpd
@@ -54,7 +55,7 @@ def test_set_empty_ndarray_raises(mock_model):
 
 
 def test_write(
-    mock_model, tmpdir, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
+    mock_model, tmp_path: Path, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
 ):
     grid_component = GridComponent(model=mock_model)
     mock_model.components["grid"] = grid_component
@@ -65,20 +66,20 @@ def test_write(
         grid_component.write()
     assert "foo.grid: No grid data found, skip writing" in caplog.text
     # Test raise IOerror when model is in read only mode
-    mock_model.root = ModelRoot(tmpdir, mode="r")
+    mock_model.root = ModelRoot(tmp_path, mode="r")
     grid_component = GridComponent(model=mock_model)
     mocker.patch.object(GridComponent, "data", ["test"])
     with pytest.raises(IOError, match="Model opened in read-only mode"):
         grid_component.write()
 
 
-def test_read(tmpdir, mock_model, hydds, mocker: MockerFixture):
+def test_read(tmp_path: Path, mock_model, hydds, mocker: MockerFixture):
     # Test for raising IOError when model is in writing mode
     grid_component = GridComponent(model=mock_model)
-    mock_model.root = ModelRoot(path=tmpdir, mode="w")
+    mock_model.root = ModelRoot(path=tmp_path, mode="w")
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_component.read()
-    mock_model.root = ModelRoot(path=tmpdir, mode="r+")
+    mock_model.root = ModelRoot(path=tmp_path, mode="r+")
     grid_component = GridComponent(model=mock_model)
     mocker.patch(
         "hydromt.model.components.grid._read_ncs", return_value={"grid": hydds}
@@ -117,8 +118,8 @@ def test_properties(caplog: pytest.LogCaptureFixture, demda, mock_model):
     assert all(region.bounds == demda.raster.bounds)
 
 
-def test_initialize_grid(mock_model, tmpdir):
-    mock_model.root = ModelRoot(path=tmpdir, mode="r")
+def test_initialize_grid(mock_model, tmp_path: Path):
+    mock_model.root = ModelRoot(path=tmp_path, mode="r")
     grid_component = GridComponent(mock_model)
     grid_component.read = MagicMock()
     grid_component._initialize_grid()

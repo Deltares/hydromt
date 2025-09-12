@@ -1,4 +1,5 @@
 from logging import DEBUG
+from pathlib import Path
 
 import pytest
 import xarray as xr
@@ -9,20 +10,20 @@ from hydromt.model.model import Model
 from hydromt.model.root import ModelRoot
 
 
-def test_empty_data(tmpdir, mocker: MockerFixture):
+def test_empty_data(tmp_path: Path, mocker: MockerFixture):
     model = mocker.Mock(set=Model)
     model.root = mocker.Mock(set=ModelRoot)
-    model.root.path = tmpdir
+    model.root.path = tmp_path
     vector = VectorComponent(model)
     xr.testing.assert_identical(vector.data, xr.Dataset())
 
 
 def test_write_empty_data(
-    tmpdir, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
+    tmp_path: Path, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
 ):
     model = mocker.Mock(set=Model)
     model.root = mocker.Mock(set=ModelRoot)
-    model.root.path = tmpdir
+    model.root.path = tmp_path
     model.name = "foo"
     vector = VectorComponent(model)
     model.components = {}

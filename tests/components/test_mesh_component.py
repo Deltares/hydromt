@@ -112,8 +112,8 @@ def test_set_raises_errors(mocker: MockerFixture, mock_model):
         mesh_component.set(data=data)
 
 
-def test_model_mesh_sets_correctly(tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
+def test_model_mesh_sets_correctly(tmp_path: Path):
+    m = Model(root=tmp_path, mode="r+")
     m.add_component("mesh", MeshComponent(m))
     component = cast(MeshComponent, m.mesh)
     uds = xu.data.elevation_nl().to_dataset()
@@ -122,7 +122,7 @@ def test_model_mesh_sets_correctly(tmpdir: Path):
     assert component.data == uds
 
 
-def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmpdir):
+def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmp_path: Path):
     mesh_component = MeshComponent(mock_model)
     mesh_component.root.is_reading_mode.return_value = False
     mock_model.components["mesh"] = mesh_component
@@ -130,15 +130,15 @@ def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmpdir):
     caplog.set_level(logging.INFO)
     mesh_component.write()
     assert "foo.mesh: No mesh data found, skip writing." in caplog.text
-    mock_model.root = ModelRoot(path=tmpdir, mode="r")
+    mock_model.root = ModelRoot(path=tmp_path, mode="r")
     mesh_component._data = xu.data.elevation_nl().to_dataset()
     with pytest.raises(IOError, match="Model opened in read-only mode"):
         mesh_component.write()
-    mock_model.root = ModelRoot(path=tmpdir, mode="w")
+    mock_model.root = ModelRoot(path=tmp_path, mode="w")
     write_path = "mesh/fake_mesh.nc"
     mesh_component._data.grid.crs = 28992
     mesh_component.write(filename=write_path)
-    file_path = Path(tmpdir / write_path)
+    file_path = tmp_path / write_path
     assert file_path.parent.is_dir()
     assert f"foo.mesh: Writing mesh to {file_path}" in caplog.text
     assert file_path.is_file()
@@ -147,14 +147,14 @@ def test_write(mock_model, caplog: pytest.LogCaptureFixture, tmpdir):
     assert "28992" in ds.spatial_ref.crs_wkt
 
 
-def test_model_mesh_read_plus(tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="w")
+def test_model_mesh_read_plus(tmp_path: Path):
+    m = Model(root=tmp_path, mode="w")
     m.add_component("mesh", MeshComponent(m))
     data = xu.data.elevation_nl().to_dataset()
     data.grid.crs = 28992
     cast(MeshComponent, m.mesh).set(data=data, grid_name="elevation_mesh")
     m.write()
-    m2 = Model(root=str(tmpdir), mode="r+")
+    m2 = Model(root=tmp_path, mode="r+")
     m2.add_component("mesh", MeshComponent(m2))
     data = xu.data.elevation_nl().to_dataset()
     data.grid.crs = 28992
@@ -211,9 +211,9 @@ def test_get_mesh(mock_model):
 
 
 @pytest.mark.integration
-def test_read(mock_model, caplog: pytest.LogCaptureFixture, tmpdir, griduda):
+def test_read(mock_model, caplog: pytest.LogCaptureFixture, tmp_path: Path, griduda):
     mesh_component = MeshComponent(mock_model)
-    mesh_component.model.root = ModelRoot(tmpdir, mode="w")
+    mesh_component.model.root = ModelRoot(tmp_path, mode="w")
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         mesh_component.read()
     mesh_path = "test/test_mesh.nc"
@@ -221,7 +221,7 @@ def test_read(mock_model, caplog: pytest.LogCaptureFixture, tmpdir, griduda):
     os.makedirs(file_dir)
     data = griduda.ugrid.to_dataset()
     data.to_netcdf(join(mesh_component.model.root.path, mesh_path))
-    mock_model.root = ModelRoot(tmpdir, mode="r+")
+    mock_model.root = ModelRoot(tmp_path, mode="r+")
     with pytest.raises(
         ValueError, match="no crs is found in the file nor passed to the reader."
     ):
@@ -232,8 +232,8 @@ def test_read(mock_model, caplog: pytest.LogCaptureFixture, tmpdir, griduda):
     assert mesh_component._data.ugrid.crs["mesh2d"].to_epsg() == 4326
 
 
-def test_model_mesh_workflow(tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
+def test_model_mesh_workflow(tmp_path: Path):
+    m = Model(root=tmp_path, mode="r+")
     m.add_component("mesh", MeshComponent(m))
     component = cast(MeshComponent, m.mesh)
     region = {

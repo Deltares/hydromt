@@ -8,8 +8,8 @@ from hydromt.model import Model
 from hydromt.model.components.tables import TablesComponent
 
 
-def test_model_tables_key_error(df, tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
+def test_model_tables_key_error(df, tmp_path: Path):
+    m = Model(root=tmp_path, mode="r+")
     m.add_component("test_table", TablesComponent(m))
     component = cast(TablesComponent, m.test_table)
 
@@ -17,8 +17,8 @@ def test_model_tables_key_error(df, tmpdir: Path):
         component.data["1"]
 
 
-def test_model_tables_merges_correctly(df, tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
+def test_model_tables_merges_correctly(df, tmp_path: Path):
+    m = Model(root=tmp_path, mode="r+")
     m.add_component("test_table", TablesComponent(m))
     component = cast(TablesComponent, m.test_table)
 
@@ -32,8 +32,8 @@ def test_model_tables_merges_correctly(df, tmpdir: Path):
     assert computed.equals(expected)
 
 
-def test_model_tables_sets_correctly(df, tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
+def test_model_tables_sets_correctly(df, tmp_path: Path):
+    m = Model(root=tmp_path, mode="r+")
     m.add_component("test_table", TablesComponent(m))
     component = cast(TablesComponent, m.test_table)
 
@@ -47,15 +47,15 @@ def test_model_tables_sets_correctly(df, tmpdir: Path):
     assert list(component.data.keys()) == list(map(str, range(5)))
 
 
-def test_model_tables_reads_and_writes_correctly(df, tmpdir: Path):
-    model = Model(root=str(tmpdir), mode="r+")
+def test_model_tables_reads_and_writes_correctly(df, tmp_path: Path):
+    model = Model(root=tmp_path, mode="r+")
     model.add_component("test_table", TablesComponent(model))
     component = cast(TablesComponent, model.test_table)
 
     component.set(tables=df, name="table")
 
     model.write()
-    clean_model = Model(root=str(tmpdir), mode="r")
+    clean_model = Model(root=tmp_path, mode="r")
     clean_model.add_component("test_table", TablesComponent(model))
     clean_model.read()
 
