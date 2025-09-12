@@ -187,7 +187,7 @@ class DataCatalog(object):
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
 
-        stac_catalog.normalize_and_save(root, catalog_type=catalog_type)
+        stac_catalog.normalize_and_save(str(root), catalog_type=catalog_type)
         return stac_catalog
 
     def from_stac_catalog(

@@ -16,15 +16,15 @@ class TestDataFrameSource:
         mock_resolver: URIResolver,
         mock_df_adapter: DataFrameAdapter,
         df: pd.DataFrame,
-        tmp_dir: Path,
+        managed_tmp_path: Path,
     ):
-        tmp_dir.touch("test.xls")
+        managed_tmp_path.touch("test.xls")
         source = DataFrameSource(
             root=".",
             name="example_source",
             driver=MockDataFrameDriver(),
             uri_resolver=mock_resolver,
             data_adapter=mock_df_adapter,
-            uri=str(tmp_dir / "test.xls"),
+            uri=str(managed_tmp_path / "test.xls"),
         )
         pd.testing.assert_frame_equal(df, source.read_data())

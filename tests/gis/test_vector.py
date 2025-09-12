@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Tests for the vector submodule."""
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 import xarray as xr
@@ -41,7 +43,7 @@ def test_nodata(geoda):
     assert geoda.vector.nodata is None
 
 
-def test_ogr(tmpdir, gdf):
+def test_ogr(tmp_path: Path, gdf):
     # Create a geodataset and an ogr compliant version of it
     ds = GeoDataset.from_gdf(gdf)
     oc = ds.vector.ogr_compliant()
@@ -52,7 +54,7 @@ def test_ogr(tmpdir, gdf):
     assert len(oc.Roman) == 2
 
     # Write and load
-    path = str(tmpdir.join("dummy_ogr.nc"))
+    path = tmp_path / "dummy_ogr.nc"
     ds.vector.to_netcdf(path, ogr_compliant=True)
     ds1 = GeoDataset.from_netcdf(path)
     assert np.all(ds.vector.geometry == ds1.vector.geometry)
@@ -82,16 +84,16 @@ def test_vector(geoda, geodf):
     assert da1.vector.crs == gdf1.crs
 
 
-def test_single_geom_vector(geoda, tmp_dir):
+def test_single_geom_vector(geoda, managed_tmp_path: Path):
     geom = geoda.isel(index=0).vector.geometry
     assert geom is None
     # write to file
     with pytest.raises(ValueError, match="No geometry data found"):
-        geoda.isel(index=0).vector.to_netcdf(tmp_dir / "test.nc")
+        geoda.isel(index=0).vector.to_netcdf(managed_tmp_path / "test.nc")
 
     geom1 = geoda.isel(index=[0]).vector.geometry
     assert isinstance(geom1, GeoSeries)
-    netcdf_path = tmp_dir / "test.nc"
+    netcdf_path = managed_tmp_path / "test.nc"
     geoda.isel(index=[0]).vector.to_netcdf(netcdf_path)
     assert netcdf_path.is_file()
 

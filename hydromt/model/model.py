@@ -46,7 +46,7 @@ class Model(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        root: Optional[str] = None,
+        root: StrPath | None = None,
         *,
         components: Optional[Dict[str, Any]] = None,
         mode: str = "w",

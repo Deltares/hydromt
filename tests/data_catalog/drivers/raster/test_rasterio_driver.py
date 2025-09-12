@@ -121,7 +121,7 @@ class TestOpenMFRaster:
     ) -> Tuple[str, str, xr.Dataset]:
         ds = rioda.to_dataset()
         prefix = "_test_"
-        root = str(tmp_path)
+        root = tmp_path
         ds.raster.to_mapstack(root, prefix=prefix, mask=True, driver="GTiff")
         return root, prefix, ds
 

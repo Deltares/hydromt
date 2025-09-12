@@ -1,6 +1,4 @@
 import logging
-from os import makedirs
-from os.path import dirname
 from pathlib import Path
 
 import pytest
@@ -13,8 +11,8 @@ from hydromt.model.components.spatialdatasets import SpatialDatasetsComponent
 from tests.conftest import DC_PARAM_PATH
 
 
-def test_model_spatialdataset_key_error(tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
+def test_model_spatialdataset_key_error(tmp_path: Path):
+    m = Model(root=tmp_path, mode="r+")
     component = SpatialDatasetsComponent(m, region_component="fake")
     m.add_component("test_spatialdataset", component)
 
@@ -22,8 +20,8 @@ def test_model_spatialdataset_key_error(tmpdir: Path):
         component.data["1"]
 
 
-def test_model_spatialdataset_sets_correctly(raster_ds, tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r+")
+def test_model_spatialdataset_sets_correctly(raster_ds, tmp_path: Path):
+    m = Model(root=tmp_path, mode="r+")
     component = SpatialDatasetsComponent(m, region_component="fake")
     m.add_component("test_spatialdataset", component)
 
@@ -34,15 +32,15 @@ def test_model_spatialdataset_sets_correctly(raster_ds, tmpdir: Path):
     xr.testing.assert_equal(raster_ds["precipitation"], component.data["precipitation"])
 
 
-def test_model_spatialdataset_reads_and_writes_correctly(raster_ds, tmpdir: Path):
-    model = Model(root=str(tmpdir), mode="w+")
+def test_model_spatialdataset_reads_and_writes_correctly(raster_ds, tmp_path: Path):
+    model = Model(root=tmp_path, mode="w+")
     component = SpatialDatasetsComponent(model, region_component="fake")
     model.add_component("test_spatialdataset", component)
 
     component.set(data=raster_ds, name="data")
 
     model.write()
-    clean_model = Model(root=str(tmpdir), mode="r")
+    clean_model = Model(root=tmp_path, mode="r")
     clean_component = SpatialDatasetsComponent(clean_model, region_component="fake")
     clean_model.add_component("test_spatialdataset", clean_component)
     clean_model.read()
@@ -51,12 +49,12 @@ def test_model_spatialdataset_reads_and_writes_correctly(raster_ds, tmpdir: Path
     assert component.data["data"].equals(clean_component.data["data"])  # type: ignore
 
 
-def test_model_read_spatialdataset(raster_ds, tmpdir):
-    write_path = Path(tmpdir) / "spatial_datasets/forcing.nc"
-    makedirs(dirname(write_path), exist_ok=True)
+def test_model_read_spatialdataset(raster_ds, tmp_path: Path):
+    write_path = tmp_path / "spatial_datasets" / "forcing.nc"
+    write_path.parent.mkdir(parents=True, exist_ok=True)
     raster_ds.to_netcdf(write_path, engine="netcdf4")
 
-    model = Model(root=tmpdir, mode="r")
+    model = Model(root=tmp_path, mode="r")
     dataset_component = SpatialDatasetsComponent(model, region_component="fake")
     model.add_component("forcing", dataset_component)
 
@@ -64,10 +62,12 @@ def test_model_read_spatialdataset(raster_ds, tmpdir):
     xr.testing.assert_equal(raster_ds, component_data)
 
 
-def test_add_raster_data_from_rasterdataset(demda, tmpdir, mocker: MockerFixture):
+def test_add_raster_data_from_rasterdataset(
+    demda, tmp_path: Path, mocker: MockerFixture
+):
     demda.name = "dem"
     # Create a model with a GridComponent and a SpatialDatasetsComponent
-    model = Model(root=tmpdir)
+    model = Model(root=tmp_path)
     model.add_component("grid", GridComponent(model))
     # add data to the grid
     model.grid.set(data=demda, name="dem")
@@ -92,8 +92,8 @@ def test_add_raster_data_from_rasterdataset(demda, tmpdir, mocker: MockerFixture
     xr.testing.assert_equal(model.maps.data["elevation"], demda)
 
 
-def test_add_raster_data_from_raster_reclass(tmpdir, demda, lulcda):
-    model = Model(root=tmpdir, data_libs=[DC_PARAM_PATH], mode="w")
+def test_add_raster_data_from_raster_reclass(tmp_path: Path, demda, lulcda):
+    model = Model(root=tmp_path, data_libs=[DC_PARAM_PATH], mode="w")
 
     # add a grid and spatial component
     model.add_component("grid", GridComponent(model))
@@ -115,12 +115,12 @@ def test_add_raster_data_from_raster_reclass(tmpdir, demda, lulcda):
     assert "roughness_manning" in model.maps.data
 
 
-def test_spatialdataset_updates_netcdf(raster_ds, tmpdir: Path, caplog):
-    write_path = Path(tmpdir, "spatial_datasets", "forcing.nc")
-    makedirs(dirname(write_path), exist_ok=True)
+def test_spatialdataset_updates_netcdf(raster_ds, tmp_path: Path, caplog):
+    write_path = tmp_path / "spatial_datasets" / "forcing.nc"
+    write_path.parent.mkdir()
     raster_ds.to_netcdf(write_path, engine="netcdf4")
 
-    model = Model(root=str(tmpdir), mode="r+")
+    model = Model(root=tmp_path, mode="r+")
     dataset_component = SpatialDatasetsComponent(model, region_component="fake")
     model.add_component("forcing", dataset_component)
 

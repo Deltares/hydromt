@@ -13,28 +13,28 @@ from hydromt.data_catalog.drivers.geodataframe.table_driver import (
 
 class TestGeoDataFrameTableDriver:
     @pytest.fixture(scope="class")
-    def uri_csv(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.csv")
+    def uri_csv(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.csv"
         df.to_csv(uri)
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_parquet(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.parquet")
+    def uri_parquet(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.parquet"
         df.to_parquet(uri)
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_xls(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.xls")
+    def uri_xls(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.xls"
         df.to_excel(uri, engine="openpyxl")
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_xlsx(self, df: pd.DataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.xlsx")
+    def uri_xlsx(self, df: pd.DataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.xlsx"
         df.to_excel(uri, engine="openpyxl")
-        return uri
+        return str(uri)
 
     # lazy-fixtures not maintained:
     # https://github.com/TvoroG/pytest-lazy-fixture/issues/65#issuecomment-1914527162
@@ -71,9 +71,9 @@ class TestGeoDataFrameTableDriver:
             driver.read(uris=["weird_ext.zzz"])
 
     def test_header_case_insensitive(
-        self, tmp_dir: Path, df: pd.DataFrame, geodf: gpd.GeoDataFrame
+        self, managed_tmp_path: Path, df: pd.DataFrame, geodf: gpd.GeoDataFrame
     ):
-        uri = str(tmp_dir / "test.csv")
+        uri = str(managed_tmp_path / "test.csv")
         df = df.rename({"longitude": "LONGITUDE"})
         df.to_csv(uri)
         driver = GeoDataFrameTableDriver()
