@@ -57,7 +57,7 @@ def test_errors_on_unknown_modes(mode):
 def test_root_creates_logs_and_dir(tmp_path: Path):
     p = tmp_path / "one"
     log_path = p / "hydromt.log"
-    assert not log_path.is_file()
+    assert not log_path.exists()
     _ = ModelRoot(p)
     assert p.exists()
     assert log_path.is_file()
@@ -83,9 +83,10 @@ def test_new_root_copies_old_file(tmp_path: Path):
     r.set(second_path)
 
     assert second_path.exists()
-    assert (second_path / "hydromt.log").is_file()
+    second_log_path = second_path / "hydromt.log"
+    assert second_log_path.exists()
 
-    with open(second_path / "hydromt.log", "r") as file:
+    with open(second_log_path, "r") as file:
         second_log_str = file.read()
     assert "hey!" in second_log_str, second_log_str
 
