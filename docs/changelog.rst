@@ -19,9 +19,9 @@ New
 - Allow masking in `GridComponent.set`. (#1229)
 - `_io.readers.open_nc` and `_io.readers.open_ncs` always return an `xr.Dataset`. This Dataset is the one that needs to be closed before overwriting on disk.
 - All `ModelComponent.write` calls return an optional `DeferredFileClose` that can be called after the open ``xr.Dataset`` objects are closed.
-- `_io.writers.write_nc` writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well. 
+- `_io.writers.write_nc` writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well.
 - `hydromt check` accepts a `--format` flag to check either v1 or v0 data catalogs (#1265)
-- `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265) 
+- `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265)
 
 Fixed
 -----
