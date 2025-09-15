@@ -16,6 +16,10 @@ New
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
 
+Changed
+-------
+- `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed).
+
 Fixed
 -----
 - CLI update command was not working. (#1244)
@@ -23,6 +27,8 @@ Fixed
 - CF compliant dimensions in netcdf files
 - `buffer` argument in `DataCatalog.get_rasterdataset` now is an integer expressed in resolution multiplicity instead of in meters. (#1245)
 - Improved logging information for build and update functions. (#1237)
+- Better documentation of drivers and their options.
+- Passing options to ``geodataframe_table`` driver now works.
 
 Deprecated
 ----------
@@ -33,6 +39,7 @@ Removed
 - From the `GridComponent`, the functions `create_from_region`, `add_data_from_constant`, `add_data_from_rasterdataset`, `add_data_from_raster_reclass`, `add_data_from_geodataframe`. (#1229) Equivalent workflows are still available.
 - From the `MeshComponent`, the functions `create_2d_from_region`, `add_2d_data_from_rasterdataset`, `add_2d_data_from_raster_reclass`. (#1229) Equivalent workflows are still available.
 - `GridComponent`, `MeshComponent`, `GeomsComponent`, and `VectorComponent` no longer write the region on `write`. The function `SpatialModelComponent.write_region` is still available for plugin implementors.
+- `stats.eva_block_maxima` and `stats.eva_peaks_over_threshold`. Use `stats.eva` instead.
 
 v1.2.0 (2025-07-22)
 ===================

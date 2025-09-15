@@ -1,5 +1,6 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
 
+from copy import deepcopy
 from logging import Logger, getLogger
 from typing import ClassVar, List, Optional
 
@@ -21,7 +22,21 @@ Y_DIM_LABELS = ("y", "latitude", "lat")
 
 
 class GeoDataFrameTableDriver(GeoDataFrameDriver):
-    """Driver for reading in GeoDataFrames from tabular formats."""
+    """
+    Driver for GeoDataFrame from tabular formats: ``geodataframe_table``.
+
+    Supports reading point geometries from csv, excel (xls, xlsx), and parquet files
+    using a combination of the pandas and geopandas libraries.
+
+    Driver **options** include:
+    - x_dim: Optional[str], name of the column containing the x coordinate. Not needed
+      if one of the default names is used ('x', 'longitude', 'lon', 'long').
+    - y_dim: Optional[str], name of the column containing the y coordinate. Not needed
+      if one of the default names is used ('y', 'latitude', 'lat').
+    - Any other option supported by the underlying pandas read functions,
+      e.g. `pd.read_csv`, `pd.read_excel`, `pd.read_parquet`.
+
+    """
 
     name: ClassVar[str] = "geodataframe_table"
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
@@ -45,11 +60,15 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
 
         _uri: str = uris[0]
 
+        options = deepcopy(self.options)
+        x_dim = options.pop("x_dim", None)
+        y_dim = options.pop("y_dim", None)
         gdf = _open_vector_from_table(
             uri=_uri,
-            x_dim=self.options.get("x_dim"),
-            y_dim=self.options.get("y_dim"),
+            x_dim=x_dim,
+            y_dim=y_dim,
             crs=metadata.crs,
+            **options,
         )
         if gdf.index.size == 0:
             exec_nodata_strat(
@@ -59,6 +78,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         return gdf
 
 
+# TODO: this now duplicated from io.readers.open_vector_from_table.....
 def _open_vector_from_table(
     uri: str,
     x_dim: Optional[str] = None,

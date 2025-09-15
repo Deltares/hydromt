@@ -11,14 +11,31 @@ from hydromt._typing import CRS, SourceMetadata
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import Geom, Predicate, StrPath, TimeRange
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.data_catalog.drivers._preprocessing import PREPROCESSORS
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
 
 logger = getLogger(__name__)
 
 
 class GeoDatasetVectorDriver(GeoDatasetDriver):
-    """VectorGeodatasetDriver for vector data."""
+    """
+    Driver for GeoDataset using hydromt vector: ``geodataframe_vector``.
+
+    Supports reading geodataset from a combination of a geometry file and optionally an
+    external data file. The geometry file can be any file supported by
+    `geopandas.read_file`, such as shapefile, geojson, geopackage, or a tabular file
+    like csv or parquet for points (containing latitude and longitude columns). The
+    external data file can be a netcdf file or any tabular file like csv or parquet.
+    The geometry file and the external data file can be linked using a common column
+    (e.g. an ID column).
+
+    Driver **options** include:
+    - preprocess: Optional[str], name of preprocessor to apply on geodataset after
+      reading. Available preprocessors include: round_latlon, to_datetimeindex,
+      remove_duplicates, harmonise_dims. See their docstrings for details.
+    - Any other option supported by `hydromt.io.open_geodataset`.
+
+    """
 
     name: ClassVar[str] = "geodataset_vector"
 
