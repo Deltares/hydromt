@@ -406,7 +406,6 @@ def check(
     Additionally region bbox and geom can also be validated.
 
     Example usage:
-
     --------------
 
     Check data catalog file:
@@ -468,7 +467,7 @@ def check(
 
                     if "steps" not in config_dict:
                         raise ValueError(
-                            "No `steps` section. Perhaps it is a v0.x file?"
+                            f"No `steps` section in workflow yaml {config}. Perhaps it is a v0.x file?"
                         )
 
                     HydromtModelSetup(**config_dict)
@@ -483,7 +482,7 @@ def check(
             # We've already presentend the errors above
             # now we simply raise without extra msg to fail the process
             # so it has the correct exit code
-            raise ValueError
+            raise ValueError("hydromt check command failed. See error messages above for the details")
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
