@@ -353,5 +353,5 @@ class RasterDatasetSource(DataSource):
     def _infer_default_driver(
         cls,
         uri: str | None = None,
-    ):
+    ) -> str:
         return super()._infer_default_driver(uri, RasterDatasetDriver)

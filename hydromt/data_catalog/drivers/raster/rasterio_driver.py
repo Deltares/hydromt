@@ -35,13 +35,11 @@ class RasterioDriver(RasterDatasetDriver):
     """Driver using rasterio for RasterDataset."""
 
     name = "rasterio"
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = set(
-        [
-            "." + extension
-            for extension in rasterio.drivers.raster_driver_extensions()
-            if extension != "nc"
-        ]  # Exclude netcdf as a supported file type
-    )
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {
+        "." + extension
+        for extension in rasterio.drivers.raster_driver_extensions()
+        if extension != "nc"
+    }  # Exclude netcdf as a supported file type
 
     def read(
         self,

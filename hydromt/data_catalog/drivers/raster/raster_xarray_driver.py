@@ -33,7 +33,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
     name = "raster_xarray"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = (".zarr", ".nc", ".netcdf")
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".zarr", ".nc", ".netcdf"}
 
     def read(
         self,
@@ -125,7 +125,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         """
         no_ext, ext = splitext(path)
         # set filepath if incompat
-        if ext not in {_ZARR_EXT, ".nc", ".netcdf"}:
+        if ext not in self.SUPPORTED_EXTENSIONS:
             logger.warning(
                 f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
                 "switching to zarr"
