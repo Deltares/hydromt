@@ -445,4 +445,5 @@ def test_cli_check_v0x_workflow(caplog):
     with pytest.raises(ValueError):  # noqa : PT011
         _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
 
-    assert "No `steps` section. Perhaps it is a v0.x file?" in caplog.text
+    assert "No `steps` section" in caplog.text
+    assert "Perhaps it is a v0.x file?" in caplog.text
