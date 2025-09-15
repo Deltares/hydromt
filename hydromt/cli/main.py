@@ -482,7 +482,9 @@ def check(
             # We've already presentend the errors above
             # now we simply raise without extra msg to fail the process
             # so it has the correct exit code
-            raise ValueError("hydromt check command failed. See error messages above for the details")
+            raise ValueError(
+                "hydromt check command failed. See error messages above for the details"
+            )
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
