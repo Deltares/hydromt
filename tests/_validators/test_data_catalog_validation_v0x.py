@@ -170,10 +170,10 @@ def test_dataset_v0_entry_with_typo_validation():
         "filepath": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
     }
 
-    # 8 errors are:
-    #  - missing crs, data_type and driver (3)
-    #  - extra crs_num, datatype, diver, and filepath (5)
-    with pytest.raises(ValidationError, match="7 validation errors"):
+    # 6 errors are:
+    #  - missing data_type and driver (2)
+    #  - extra crs_num, datatype, diver, and filepath (4)
+    with pytest.raises(ValidationError, match="6 validation errors"):
         _ = DataCatalogV0Item.from_dict(d, name="chelsa_v1.2")
 
 

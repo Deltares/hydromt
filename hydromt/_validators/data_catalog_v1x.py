@@ -174,14 +174,15 @@ class DataCatalogV1ItemMetadata(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True, coerce_numbers_to_str=True)
 
-    @staticmethod
-    @field_validator("crs")
-    def _check_valid_crs(v):
+    @field_validator("crs", mode="after")
+    @classmethod
+    def _check_valid_crs(cls, value):
         try:
-            _ = CRS.from_user_input(v)
+            if value:
+                _ = CRS.from_user_input(value)
         except CRSError as e:
             raise ValueError(e)
-        return v
+        return value
 
     @staticmethod
     def from_v0(
