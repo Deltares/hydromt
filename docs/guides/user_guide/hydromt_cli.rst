@@ -48,7 +48,7 @@ Here is an example of how to use the command:
 
 .. code-block:: console
 
-    > hydromt build wflow /path/to/model_root -i /path/to/wflow_build_config.yml  -d deltares_data  -v
+    > hydromt build wflow_sbm /path/to/model_root -i /path/to/wflow_build_config.yml  -d deltares_data  -v
 
 You can find more information on the steps to build a model in the :ref:`Building a model <model_build>` section.
 In this section, you will also find how to :ref:`prepare a workflow file <model_workflow>`. To know more about the data catalog, you can refer to the
@@ -75,7 +75,7 @@ Here is an example of how to use the command:
 
 .. code-block:: console
 
-    > hydromt update wflow /path/to/model_to_update -o /path/to/updated_model -i /path/to/wflow_update_config.yml -d /path/to/data_catalog.yml -v
+    > hydromt update wflow_sbm /path/to/model_to_update -o /path/to/updated_model -i /path/to/wflow_update_config.yml -d /path/to/data_catalog.yml -v
 
 You can find more information on the steps to update a model in the :ref:`Updating a model <model_update>` section.
 In this section, you will also find how to :ref:`prepare a workflow file <model_workflow>`. To know more about the data catalog,
