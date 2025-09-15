@@ -10,12 +10,19 @@ The format is based on `Keep a Changelog`_, and this project adheres to
 Unreleased
 ==========
 
+ModelComponent API now contains functions for `ModelComponent.cleanup` and `ModelComponent.finish_write` that are called by the build and update functions. This stabilizes the write functionality and makes sure that netCDF files can be overwritten when the source and destination are the same. (#778)
+
 New
 ---
 - Added option for delayed compute in writing netcdf files
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
-- Default driver is now inferred from file extension for RasterDataset and GeoDataFrame sources. (#1267)
+- Default driver is now inferred from file extension for RasterDataset, GeoDataFrame, and GeoDataset sources. (#1267)
+- `_io.readers.open_nc` and `_io.readers.open_ncs` always return an `xr.Dataset`. This Dataset is the one that needs to be closed before overwriting on disk.
+- All `ModelComponent.write` calls return an optional `DeferredFileClose` that can be called after the open ``xr.Dataset`` objects are closed.
+- `_io.writers.write_nc` writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well.
+- `hydromt check` accepts a `--format` flag to check either v1 or v0 data catalogs (#1265)
+- `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265)
 
 Fixed
 -----
@@ -24,6 +31,8 @@ Fixed
 - CF compliant dimensions in netcdf files
 - `buffer` argument in `DataCatalog.get_rasterdataset` now is an integer expressed in resolution multiplicity instead of in meters. (#1245)
 - Improved logging information for build and update functions. (#1237)
+- Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
+- `hydromt check` has been updated to validate v1 data catalogs (#1265)
 
 Deprecated
 ----------

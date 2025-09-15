@@ -3,24 +3,24 @@
 from pathlib import Path
 
 import pytest
-from pydantic import AnyUrl, ValidationError
+from pydantic import ValidationError
 
 from hydromt._io.readers import _yml_from_uri_or_path
-from hydromt._validators.data_catalog import (
-    DataCatalogItem,
-    DataCatalogMetaData,
-    DataCatalogValidator,
+from hydromt._validators.data_catalog_v0x import (
+    DataCatalogV0Item,
+    DataCatalogV0MetaData,
+    DataCatalogV0Validator,
 )
 
 
-@pytest.mark.skip("validators need  to be updated to newest format")
-def test_deltares_data_catalog(latest_dd_version_uri):
-    yml_dict = _yml_from_uri_or_path(latest_dd_version_uri)
+def test_deltares_data_catalog_v0(dd_v0_catalog):
+    yml_dict = _yml_from_uri_or_path(dd_v0_catalog)
+    yml_dict["meta"]["validate_hydromt_version"] = False
     # would raise error if something goes wrong
-    _ = DataCatalogValidator.from_dict(yml_dict)
+    _ = DataCatalogV0Validator.from_dict(yml_dict)
 
 
-def test_geodataframe_entry_validation():
+def test_geodataframe_v0_entry_validation():
     d = {
         "crs": 4326,
         "data_type": "GeoDataFrame",
@@ -37,7 +37,7 @@ def test_geodataframe_entry_validation():
         },
         "path": "hydrography/hydro_atlas/basin_atlas_v10.gpkg",
     }
-    entry = DataCatalogItem.from_dict(d, name="basin_atlas_level12_v10")
+    entry = DataCatalogV0Item.from_dict(d, name="basin_atlas_level12_v10")
 
     assert entry.crs == 4326
     assert entry.data_type == "GeoDataFrame"
@@ -49,12 +49,12 @@ def test_geodataframe_entry_validation():
     assert entry.meta.paper_doi == "10.1038/s41597-019-0300-6"
     assert entry.meta.paper_ref == "Linke et al. (2019)"
     assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == AnyUrl("https://www.hydrosheds.org/hydroatlas")
+    assert entry.meta.source_url == "https://www.hydrosheds.org/hydroatlas"
     assert entry.meta.source_version == "10"
     assert entry.path == Path("hydrography/hydro_atlas/basin_atlas_v10.gpkg")
 
 
-def test_valid_catalog_variants():
+def test_valid_v0_catalog_variants():
     d = {
         "meta": {"hydromt_version": ">=1.0a,<2", "roots": [""]},
         "esa_worldcover": {
@@ -90,25 +90,27 @@ def test_valid_catalog_variants():
             ],
         },
     }
-    _ = DataCatalogValidator.from_dict(d)
+    _ = DataCatalogV0Validator.from_dict(d)
 
 
-def test_no_hydromt_version_logs_warning(caplog: pytest.LogCaptureFixture):
+def test_no_hydromt_version_in_v0_catalog_logs_warning(
+    caplog: pytest.LogCaptureFixture,
+):
     d = {
         "meta": {"roots": [""]},
     }
 
-    _ = DataCatalogValidator.from_dict(d)
+    _ = DataCatalogV0Validator.from_dict(d)
     assert "No hydromt version" in caplog.text
 
 
-def test_catalog_metadata_validation():
+def test_catalog_v0_metadata_validation():
     d = {
         "hydromt_version": ">=1.0a,<2",
         "roots": ["p:/wflow_global/hydromt", "/mnt/p/wflow_global/hydromt"],
         "version": "2023.3",
     }
-    catalog_metadata = DataCatalogMetaData.from_dict(d)
+    catalog_metadata = DataCatalogV0MetaData.from_dict(d)
     assert catalog_metadata.roots == [
         Path("p:/wflow_global/hydromt"),
         Path("/mnt/p/wflow_global/hydromt"),
@@ -116,7 +118,7 @@ def test_catalog_metadata_validation():
     assert catalog_metadata.version == "2023.3"
 
 
-def test_raster_dataset_entry_validation():
+def test_raster_dataset_v0_entry_validation():
     d = {
         "crs": 4326,
         "data_type": "RasterDataset",
@@ -138,7 +140,7 @@ def test_raster_dataset_entry_validation():
         "path": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
     }
 
-    entry = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+    entry = DataCatalogV0Item.from_dict(d, name="chelsa_v1.2")
     assert entry.name == "chelsa_v1.2"
     assert entry.crs == 4326
     assert entry.data_type == "RasterDataset"
@@ -150,11 +152,11 @@ def test_raster_dataset_entry_validation():
     assert entry.meta.paper_doi == "10.1038/sdata.2017.122"
     assert entry.meta.paper_ref == "Karger et al. (2017)"
     assert entry.meta.source_license == "CC BY 4.0"
-    assert entry.meta.source_url == AnyUrl("https://chelsa-climate.org/downloads/")
+    assert entry.meta.source_url == "https://chelsa-climate.org/downloads/"
     assert entry.meta.source_version == "1.2"
 
 
-def test_dataset_entry_with_typo_validation():
+def test_dataset_v0_entry_with_typo_validation():
     d = {
         "crs_num": 4326,
         "datatype": "RasterDataset",
@@ -168,14 +170,14 @@ def test_dataset_entry_with_typo_validation():
         "filepath": "meteo/chelsa_clim_v1.2/CHELSA_bio10_12.tif",
     }
 
-    # 8 errors are:
-    #  - missing crs, data_type and driver (3)
-    #  - extra crs_num, datatype, diver, and filepath (5)
-    with pytest.raises(ValidationError, match="7 validation errors"):
-        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+    # 6 errors are:
+    #  - missing data_type and driver (2)
+    #  - extra crs_num, datatype, diver, and filepath (4)
+    with pytest.raises(ValidationError, match="6 validation errors"):
+        _ = DataCatalogV0Item.from_dict(d, name="chelsa_v1.2")
 
 
-def test_data_type_typo():
+def test_data_type_v0_typo():
     d = {
         "crs": 4326,
         "data_type": "RaserDataset",
@@ -183,10 +185,10 @@ def test_data_type_typo():
         "path": ".",
     }
     with pytest.raises(ValidationError, match="1 validation error"):
-        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+        _ = DataCatalogV0Item.from_dict(d, name="chelsa_v1.2")
 
 
-def test_data_invalid_crs():
+def test_data_invalid_crs_v0():
     d = {
         "crs": 123456789,
         "data_type": "RasterDataset",
@@ -194,4 +196,4 @@ def test_data_invalid_crs():
         "path": ".",
     }
     with pytest.raises(ValidationError, match="1 validation error"):
-        _ = DataCatalogItem.from_dict(d, name="chelsa_v1.2")
+        _ = DataCatalogV0Item.from_dict(d, name="chelsa_v1.2")

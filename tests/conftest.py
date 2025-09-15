@@ -130,6 +130,12 @@ def data_catalog(_local_catalog_eps) -> DataCatalog:
     return DataCatalog("artifact_data=v1.0.0")
 
 
+@pytest.fixture
+def dd_v0_catalog():
+    cat_root = Path(DATA_DIR) / "catalogs" / "artifact_data"
+    return cat_root / "v0.0.9" / "data_catalog.yml"
+
+
 @pytest.fixture(scope="session")
 def latest_dd_version_uri():
     cat_root = Path(DATA_DIR) / "catalogs" / "deltares_data"
