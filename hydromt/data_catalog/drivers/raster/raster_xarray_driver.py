@@ -26,6 +26,7 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 logger: Logger = getLogger(__name__)
 
 _ZARR_EXT = ".zarr"
+_NETCDF_EXT = [".nc", ".netcdf"]
 
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
@@ -33,7 +34,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
     name = "raster_xarray"
     supports_writing = True
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".zarr", ".nc", ".netcdf"}
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
 
     def read(
         self,
@@ -91,7 +92,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             ds: xr.Dataset = xr.merge(datasets)
 
         # Normal netcdf file(s)
-        elif first_ext in [".nc", ".netcdf"]:
+        elif first_ext in _NETCDF_EXT:
             filtered_uris = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
