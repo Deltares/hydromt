@@ -151,6 +151,7 @@ loaded or performed.
 
 The command does not have any required arguments but several options that you can choose from:
 
+- ``-m, --model``: The name of the model to validate. The available models can be printed using the ``hydromt --models`` command.
 - ``-i, --config``: Relative or absolute path to the HydroMT configuration file to validate. Note that hydromt v1 cannot validate v0 config files, and vice versa.
 - ``-d, --data``: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog to validate.
 - ``--format`` specify which format of data catalog to validate. Accepted options are ``v0`` or ``v1``
