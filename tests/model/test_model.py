@@ -288,7 +288,7 @@ def test_model_build_update(tmp_path: Path, demda, obsda):
 def test_model_build_update_with_data(
     tmp_path: Path, demda, obsda, monkeypatch, caplog
 ):
-    caplog.set_level(logging.INFO)
+    caplog.set_level(logging.DEBUG)
     # users will not have a use for `set` in their yaml file because there is
     # nothing they will have access to then that they cat set it to
     # so we want to keep `SpatialDatasetsComponent.set` a non-hydromt-step
@@ -355,7 +355,6 @@ def test_model_build_update_with_data(
             {"forcing2.set": {"data": obsda * 0.2, "name": "precip"}},
         ]
     )
-    assert len(model._defered_file_closes) == 0
     # Check that variables from build AND update are present
     assert "elevtn" in model.maps.data
     assert "elevtn2" in model.maps.data
@@ -364,6 +363,15 @@ def test_model_build_update_with_data(
 
     assert any(
         log_record.message == "maps.set.name=elevtn2" for log_record in caplog.records
+    )
+    assert any(
+        log_record.message
+        == f"Could not write to file {Path(tmp_path, 'spatial_datasets', 'precip.nc').as_posix()}, deferring write"
+        for log_record in caplog.records
+    )
+    assert any(
+        log_record.message.startswith("Moving temporary file")
+        for log_record in caplog.records
     )
 
 
