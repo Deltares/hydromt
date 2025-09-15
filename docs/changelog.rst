@@ -15,8 +15,8 @@ New
 - Added option for delayed compute in writing netcdf files
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
-- `hydromt check` accetps a `--format` flag to check either v1 or v0 data catalogs (#1265)
-- `hydromt check` accetps a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 fotmat (#1265)
+- `hydromt check` accepts a `--format` flag to check either v1 or v0 data catalogs (#1265)
+- `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265)
 
 Fixed
 -----
@@ -25,7 +25,7 @@ Fixed
 - CF compliant dimensions in netcdf files
 - `buffer` argument in `DataCatalog.get_rasterdataset` now is an integer expressed in resolution multiplicity instead of in meters. (#1245)
 - Improved logging information for build and update functions. (#1237)
-- `hydromt check` has been updated to vlaidate v1 data catalogs (#1265)
+- `hydromt check` has been updated to validate v1 data catalogs (#1265)
 
 Deprecated
 ----------
