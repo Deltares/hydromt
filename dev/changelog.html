@@ -482,6 +482,8 @@
 <li><p><cite>_io.readers.open_nc</cite> and <cite>_io.readers.open_ncs</cite> always return an <cite>xr.Dataset</cite>. This Dataset is the one that needs to be closed before overwriting on disk.</p></li>
 <li><p>All <cite>ModelComponent.write</cite> calls return an optional <cite>DeferredFileClose</cite> that can be called after the open <code class="docutils literal notranslate"><span class="pre">xr.Dataset</span></code> objects are closed.</p></li>
 <li><p><cite>_io.writers.write_nc</cite> writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well.</p></li>
+<li><p><cite>hydromt check</cite> accepts a <cite>–format</cite> flag to check either v1 or v0 data catalogs (#1265)</p></li>
+<li><p><cite>hydromt check</cite> accepts a <cite>–upgrade</cite> flag to upgrade v0 datacatalogs to the new v1 format (#1265)</p></li>
 </ul>
 </section>
 <section id="fixed">
@@ -493,6 +495,7 @@
 <li><p><cite>buffer</cite> argument in <cite>DataCatalog.get_rasterdataset</cite> now is an integer expressed in resolution multiplicity instead of in meters. (#1245)</p></li>
 <li><p>Improved logging information for build and update functions. (#1237)</p></li>
 <li><p>Build and update functions call <cite>ModelComponent.cleanup</cite> and <cite>ModelComponent.finish_write</cite>. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)</p></li>
+<li><p><cite>hydromt check</cite> has been updated to validate v1 data catalogs (#1265)</p></li>
 </ul>
 </section>
 <section id="deprecated">
