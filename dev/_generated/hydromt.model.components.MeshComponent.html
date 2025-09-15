@@ -980,6 +980,12 @@ by default “mesh/mesh_region.geojson”.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#hydromt.model.components.MeshComponent.__init__" title="hydromt.model.components.MeshComponent.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model, *[, filename, ...])</p></td>
 <td><p>Initialize a MeshComponent.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
+<td><p>Clean up all open datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">finish_write</span></code>()</p></td>
+<td><p>Finish the write functionality after cleanup was called for all components in the model.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.MeshComponent.get_mesh.html#hydromt.model.components.MeshComponent.get_mesh" title="hydromt.model.components.MeshComponent.get_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_mesh</span></code></a>(grid_name[, include_data])</p></td>
 <td><p>Return a specific grid topology from mesh based on grid_name.</p></td>
 </tr>

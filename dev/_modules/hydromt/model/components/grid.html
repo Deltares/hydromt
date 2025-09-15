@@ -468,9 +468,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_ncs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_ncs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_nc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferedFileClose</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">SpatialModelComponent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.steps</span><span class="w"> </span><span class="kn">import</span> <span class="n">hydromt_step</span>
@@ -616,7 +615,7 @@
         <span class="n">rename_dims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">force_sn</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DeferedFileClose</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write model grid data to netcdf file at &lt;root&gt;/&lt;fn&gt;.</span>
 
 <span class="sd">        key-word arguments are passed to :py:meth:`~hydromt.model.Model.write_nc`</span>
@@ -652,8 +651,7 @@
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: Writing grid data to </span><span class="si">{</span><span class="n">full_path</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 
-        <span class="c1"># write_nc requires dict - use dummy &#39;grid&#39; key</span>
-        <span class="k">return</span> <span class="n">write_nc</span><span class="p">(</span>
+        <span class="n">close_handle</span> <span class="o">=</span> <span class="n">write_nc</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
             <span class="n">file_path</span><span class="o">=</span><span class="n">full_path</span><span class="p">,</span>
             <span class="n">gdal_compliant</span><span class="o">=</span><span class="n">gdal_compliant</span><span class="p">,</span>
@@ -661,50 +659,37 @@
             <span class="n">force_overwrite</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">is_override_mode</span><span class="p">(),</span>
             <span class="n">force_sn</span><span class="o">=</span><span class="n">force_sn</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">close_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_file_close_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">close_handle</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GridComponent.read">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.GridComponent.read.html#hydromt.model.components.GridComponent.read">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">*</span><span class="p">,</span>
-        <span class="n">mask_and_scale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read model grid data at &lt;root&gt;/&lt;fn&gt; and add to grid property.</span>
 
-<span class="sd">        key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`</span>
+<span class="sd">        key-word arguments are passed to :py:meth:`~hydromt.model.Model.open_nc`</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        filename : str, optional</span>
 <span class="sd">            filename relative to model root, by default &#39;grid/grid.nc&#39;</span>
-<span class="sd">        mask_and_scale : bool, optional</span>
-<span class="sd">            If True, replace array values equal to _FillValue with NA and scale values</span>
-<span class="sd">            according to the formula original_values * scale_factor + add_offset, where</span>
-<span class="sd">            _FillValue, scale_factor and add_offset are taken from variable attributes</span>
-<span class="sd">        (if they exist).</span>
 <span class="sd">        **kwargs : dict</span>
-<span class="sd">            Additional keyword arguments to be passed to the `read_nc` method.</span>
+<span class="sd">            Additional keyword arguments to be passed to the `open_nc` method.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_read_mode</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_grid</span><span class="p">(</span><span class="n">skip_read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="c1"># Load grid data in r+ mode to allow overwriting netcdf files</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">is_reading_mode</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">is_writing_mode</span><span class="p">():</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;load&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">loaded_nc_files</span> <span class="o">=</span> <span class="n">_read_ncs</span><span class="p">(</span>
+        <span class="n">loaded_nc_files</span> <span class="o">=</span> <span class="n">open_ncs</span><span class="p">(</span>
             <span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
-            <span class="n">single_var_as_array</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">mask_and_scale</span><span class="o">=</span><span class="n">mask_and_scale</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">loaded_nc_files</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span></div>
 
 
     <span class="nd">@property</span>

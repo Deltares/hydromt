@@ -612,6 +612,15 @@ resample, transform, interpolate nodata or zonal statistics. There is also the
 <a class="reference internal" href="../../api/gis.html#geodataset-api"><span class="std std-ref">GeoDataset API</span></a> to work with geodataset data (N-dim
 point/line/polygon geometry). For example, reprojecting, transform, update geometry or
 convert to geopandas.GeoDataFrame to access further GIS methods.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Remember to close any open datasets when you are finished working with them.
+Leaving datasets open may cause xarray to lock the files, which can prevent
+access by other processes until your Python session ends. For example, if you
+open a NetCDF file used by a model and do not close it before calling
+<code class="docutils literal notranslate"><span class="pre">Model.update()</span></code>, HydroMT will raise a <code class="docutils literal notranslate"><span class="pre">PermissionError</span></code> when attempting
+to write to the model.</p>
+</div>
 </section>
 <section id="flowpy-wrappers">
 <span id="id3"></span><h2>FlowPy Wrappers:<a class="headerlink" href="#flowpy-wrappers" title="Link to this heading">#</a></h2>

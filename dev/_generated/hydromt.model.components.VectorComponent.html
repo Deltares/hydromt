@@ -970,6 +970,12 @@ If None, the region will be set to the bounds of the geometry of this vector com
 <tr class="row-odd"><td><p><a class="reference internal" href="#hydromt.model.components.VectorComponent.__init__" title="hydromt.model.components.VectorComponent.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model, *[, region_component, ...])</p></td>
 <td><p>Initialize a vector component.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
+<td><p>Clean up all open datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">finish_write</span></code>()</p></td>
+<td><p>Finish the write functionality after cleanup was called for all components in the model.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.VectorComponent.read.html#hydromt.model.components.VectorComponent.read" title="hydromt.model.components.VectorComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>(*[, filename, geometry_filename])</p></td>
 <td><p>Read model vector from combined netcdf and geojson file.</p></td>
 </tr>

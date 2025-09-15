@@ -473,12 +473,10 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_yaml</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrPath</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferedFileClose</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_rgetattr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.steps_validator</span><span class="w"> </span><span class="kn">import</span> <span class="n">_validate_steps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">DatasetsComponent</span><span class="p">,</span>
     <span class="n">ModelComponent</span><span class="p">,</span>
     <span class="n">SpatialModelComponent</span><span class="p">,</span>
 <span class="p">)</span>
@@ -569,8 +567,6 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_components</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_defered_file_closes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DeferedFileClose</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="n">model_metadata</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">PLUGINS</span><span class="o">.</span><span class="n">model_metadata</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -748,7 +744,9 @@
         <span class="c1"># If there are any write options included in the steps,</span>
         <span class="c1"># we don&#39;t need to write the whole model.</span>
         <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options_contain_write</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Model.update">
@@ -843,10 +841,17 @@
         <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options_contain_write</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">DatasetsComponent</span><span class="p">):</span>
-                <span class="n">comp</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">(</span><span class="n">forceful_overwrite</span><span class="o">=</span><span class="n">forceful_overwrite</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close all components by closing their open files.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Finish all deferred file closes</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">finish_write</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Model.write">
 <a class="viewcode-back" href="../../../_generated/hydromt.model.Model.write.html#hydromt.model.Model.write">[docs]</a>

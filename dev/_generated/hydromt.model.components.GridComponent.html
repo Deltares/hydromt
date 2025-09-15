@@ -983,10 +983,16 @@ By default “grid/grid_region.geojson”. If None, the region is not written to
 <tr class="row-odd"><td><p><a class="reference internal" href="#hydromt.model.components.GridComponent.__init__" title="hydromt.model.components.GridComponent.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model, *[, filename, ...])</p></td>
 <td><p>Initialize a GridComponent.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
+<td><p>Clean up all open datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">finish_write</span></code>()</p></td>
+<td><p>Finish the write functionality after cleanup was called for all components in the model.</p></td>
+</tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_mask_layer</span></code>(mask, *args)</p></td>
 <td><p>Get the proper mask layer based on itself or a layer in a Dataset.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.GridComponent.read.html#hydromt.model.components.GridComponent.read" title="hydromt.model.components.GridComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([filename, mask_and_scale])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.GridComponent.read.html#hydromt.model.components.GridComponent.read" title="hydromt.model.components.GridComponent.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([filename])</p></td>
 <td><p>Read model grid data at &lt;root&gt;/&lt;fn&gt; and add to grid property.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.GridComponent.set.html#hydromt.model.components.GridComponent.set" title="hydromt.model.components.GridComponent.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(data[, name, mask, force_sn])</p></td>

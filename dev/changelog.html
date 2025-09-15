@@ -472,12 +472,16 @@
 <a class="reference external" href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <section id="unreleased">
 <h2>Unreleased<a class="headerlink" href="#unreleased" title="Link to this heading">#</a></h2>
+<p>ModelComponent API now contains functions for <cite>ModelComponent.cleanup</cite> and <cite>ModelComponent.finish_write</cite> that are called by the build and update functions. This stabilizes the write functionality and makes sure that netCDF files can be overwritten when the source and destination are the same. (#778)</p>
 <section id="new">
 <h3>New<a class="headerlink" href="#new" title="Link to this heading">#</a></h3>
 <ul class="simple">
 <li><p>Added option for delayed compute in writing netcdf files</p></li>
 <li><p>Set compression in <cite>write_nc</cite></p></li>
 <li><p>Allow masking in <cite>GridComponent.set</cite>. (#1229)</p></li>
+<li><p><cite>_io.readers.open_nc</cite> and <cite>_io.readers.open_ncs</cite> always return an <cite>xr.Dataset</cite>. This Dataset is the one that needs to be closed before overwriting on disk.</p></li>
+<li><p>All <cite>ModelComponent.write</cite> calls return an optional <cite>DeferredFileClose</cite> that can be called after the open <code class="docutils literal notranslate"><span class="pre">xr.Dataset</span></code> objects are closed.</p></li>
+<li><p><cite>_io.writers.write_nc</cite> writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well.</p></li>
 </ul>
 </section>
 <section id="fixed">
@@ -488,6 +492,7 @@
 <li><p>CF compliant dimensions in netcdf files</p></li>
 <li><p><cite>buffer</cite> argument in <cite>DataCatalog.get_rasterdataset</cite> now is an integer expressed in resolution multiplicity instead of in meters. (#1245)</p></li>
 <li><p>Improved logging information for build and update functions. (#1237)</p></li>
+<li><p>Build and update functions call <cite>ModelComponent.cleanup</cite> and <cite>ModelComponent.finish_write</cite>. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)</p></li>
 </ul>
 </section>
 <section id="deprecated">

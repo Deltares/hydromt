@@ -470,7 +470,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_ncs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_ncs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_nc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.vector</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDataset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
@@ -660,7 +660,7 @@
 <span class="sd">            * The geojson file contains both the attribute and the geometry data.</span>
 <span class="sd">                (filename is ignored)</span>
 
-<span class="sd">        Key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`</span>
+<span class="sd">        Key-word arguments are passed to :py:meth:`~hydromt.model.Model.open_nc`</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -671,7 +671,7 @@
 <span class="sd">            geojson filename relative to model root,</span>
 <span class="sd">            by default &#39;vector/vector.geojson&#39;</span>
 <span class="sd">        kwargs:</span>
-<span class="sd">            Additional keyword arguments that are passed to the `read_nc`</span>
+<span class="sd">            Additional keyword arguments that are passed to the `open_nc`</span>
 <span class="sd">            function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_read_mode</span><span class="p">()</span>
@@ -685,9 +685,10 @@
         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Disable lazy loading of data</span>
             <span class="c1"># to avoid issues with reading object dtype data</span>
-            <span class="k">if</span> <span class="s2">&quot;chunks&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;chunks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">_read_ncs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;chunks&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="n">open_ncs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
             <span class="c1"># check if ds is empty (default filename has a value)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">sizes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">filename</span> <span class="o">=</span> <span class="kc">None</span>
@@ -717,8 +718,8 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;vector/vector.nc&quot;</span><span class="p">,</span>
-        <span class="o">*</span><span class="p">,</span>
         <span class="n">geometry_filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;vector/vector.geojson&quot;</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
         <span class="n">ogr_compliant</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -808,13 +809,15 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: Writing vector to </span><span class="si">{</span><span class="n">geojson_path</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
-            <span class="n">write_nc</span><span class="p">(</span>
+            <span class="n">close_handle</span> <span class="o">=</span> <span class="n">write_nc</span><span class="p">(</span>
                 <span class="n">ds</span><span class="p">,</span>
                 <span class="n">file_path</span><span class="o">=</span><span class="n">geojson_path</span><span class="p">,</span>
                 <span class="n">engine</span><span class="o">=</span><span class="s2">&quot;netcdf4&quot;</span><span class="p">,</span>
                 <span class="n">force_overwrite</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">is_override_mode</span><span class="p">(),</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">close_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_file_close_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">close_handle</span><span class="p">)</span>
         <span class="c1"># write to geojson only</span>
         <span class="k">elif</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">geojson_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">geometry_filename</span>
@@ -837,11 +840,13 @@
             <span class="n">gdf</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
             <span class="n">gdf</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">geojson_path</span><span class="p">)</span>
 
-            <span class="n">write_nc</span><span class="p">(</span>
+            <span class="n">close_handle</span> <span class="o">=</span> <span class="n">write_nc</span><span class="p">(</span>
                 <span class="n">ds</span><span class="o">.</span><span class="n">drop_vars</span><span class="p">(</span><span class="s2">&quot;geometry&quot;</span><span class="p">),</span>
                 <span class="n">file_path</span><span class="o">=</span><span class="n">nc_path</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="p">)</span></div>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">close_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_file_close_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">close_handle</span><span class="p">)</span></div>
 
 
     <span class="c1"># Other vector properties</span>

@@ -1010,28 +1010,31 @@ If there are no <cite>SpatialModelComponent</cite> it will raise a warning that 
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.Model.build.html#hydromt.model.Model.build" title="hydromt.model.Model.build"><code class="xref py py-obj docutils literal notranslate"><span class="pre">build</span></code></a>(*[, write])</p></td>
 <td><p>Single method to build a model from scratch based on settings in <cite>steps</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_dict</span></code>(model_dict)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
+<td><p>Close all components by closing their open files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_dict</span></code>(model_dict)</p></td>
 <td><p>Construct a model with the components and other init arguments in the yaml file located at <cite>path</cite>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_yml</span></code>(path)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_yml</span></code>(path)</p></td>
 <td><p>Construct a model with the components and other init arguments in the yaml file located at <cite>path</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.Model.get_component.html#hydromt.model.Model.get_component" title="hydromt.model.Model.get_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_component</span></code></a>(name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.Model.get_component.html#hydromt.model.Model.get_component" title="hydromt.model.Model.get_component"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_component</span></code></a>(name)</p></td>
 <td><p>Get a component from the model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.Model.read.html#hydromt.model.Model.read" title="hydromt.model.Model.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([components])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.Model.read.html#hydromt.model.Model.read" title="hydromt.model.Model.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([components])</p></td>
 <td><p>Read provided components from disk.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.Model.test_equal.html#hydromt.model.Model.test_equal" title="hydromt.model.Model.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_equal</span></code></a>(other)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.Model.test_equal.html#hydromt.model.Model.test_equal" title="hydromt.model.Model.test_equal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_equal</span></code></a>(other)</p></td>
 <td><p>Test if two models are equal, based on their components.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.Model.update.html#hydromt.model.Model.update" title="hydromt.model.Model.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(*[, model_out, write, steps, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.Model.update.html#hydromt.model.Model.update" title="hydromt.model.Model.update"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code></a>(*[, model_out, write, steps, ...])</p></td>
 <td><p>Single method to update a model based the settings in <cite>steps</cite>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.Model.write.html#hydromt.model.Model.write" title="hydromt.model.Model.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>([components])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.Model.write.html#hydromt.model.Model.write" title="hydromt.model.Model.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>([components])</p></td>
 <td><p>Write provided components to disk with defaults.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.Model.write_data_catalog.html#hydromt.model.Model.write_data_catalog" title="hydromt.model.Model.write_data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_data_catalog</span></code></a>([root, data_lib_path, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.Model.write_data_catalog.html#hydromt.model.Model.write_data_catalog" title="hydromt.model.Model.write_data_catalog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_data_catalog</span></code></a>([root, data_lib_path, ...])</p></td>
 <td><p>Write the data catalog to data_lib_path.</p></td>
 </tr>
 </tbody>

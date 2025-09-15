@@ -969,6 +969,12 @@ component, and can be either relative or absolute.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#hydromt.model.components.TablesComponent.__init__" title="hydromt.model.components.TablesComponent.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model[, filename])</p></td>
 <td><p>Initialize a TablesComponent.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
+<td><p>Clean up all open datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">finish_write</span></code>()</p></td>
+<td><p>Finish the write functionality after cleanup was called for all components in the model.</p></td>
+</tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tables_merged</span></code>()</p></td>
 <td><p>Return all tables of a model merged into one dataframe.</p></td>
 </tr>

@@ -978,8 +978,14 @@ default configuration template. By default None.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#hydromt.model.components.ConfigComponent.__init__" title="hydromt.model.components.ConfigComponent.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(model, *[, filename, ...])</p></td>
 <td><p>Initialize a ConfigComponent.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="hydromt.model.components.ConfigComponent.create.html#hydromt.model.components.ConfigComponent.create" title="hydromt.model.components.ConfigComponent.create"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code></a>([template])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
+<td><p>Clean up all open datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.ConfigComponent.create.html#hydromt.model.components.ConfigComponent.create" title="hydromt.model.components.ConfigComponent.create"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code></a>([template])</p></td>
 <td><p>Create a new config file based on a template file.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">finish_write</span></code>()</p></td>
+<td><p>Finish the write functionality after cleanup was called for all components in the model.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="hydromt.model.components.ConfigComponent.get_value.html#hydromt.model.components.ConfigComponent.get_value" title="hydromt.model.components.ConfigComponent.get_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_value</span></code></a>(key[, fallback, abs_path])</p></td>
 <td><p>Get a config value at key(s).</p></td>

@@ -459,24 +459,15 @@
 <span></span><span class="sd">&quot;&quot;&quot;Xarrays component.&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">shutil</span><span class="w"> </span><span class="kn">import</span> <span class="n">move</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">TYPE_CHECKING</span><span class="p">,</span>
-    <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">List</span><span class="p">,</span>
-    <span class="n">Optional</span><span class="p">,</span>
-    <span class="n">Tuple</span><span class="p">,</span>
-    <span class="n">Union</span><span class="p">,</span>
-    <span class="n">cast</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_ncs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_ncs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.writers</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_nc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">DeferedFileClose</span><span class="p">,</span> <span class="n">XArrayDict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">XArrayDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelComponent</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.steps</span><span class="w"> </span><span class="kn">import</span> <span class="n">hydromt_step</span>
 
@@ -514,7 +505,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">XArrayDict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">filename</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_defered_file_closes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DeferedFileClose</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span></div>
 
 
@@ -533,7 +523,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_read</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize geoms.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">is_reading_mode</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">skip_read</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
@@ -585,15 +575,10 @@
 <div class="viewcode-block" id="DatasetsComponent.read">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.DatasetsComponent.read.html#hydromt.model.components.DatasetsComponent.read">[docs]</a>
     <span class="nd">@hydromt_step</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">single_var_as_array</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read model dataset files at &lt;root&gt;/&lt;filename&gt;.</span>
 
-<span class="sd">        key-word arguments are passed to :py:func:`hydromt.io.readers.read_nc`</span>
+<span class="sd">        key-word arguments are passed to :py:func:`hydromt.io.readers.open_nc`</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -603,20 +588,20 @@
 <span class="sd">            if None, the path that was provided at init will be used.</span>
 <span class="sd">        **kwargs:</span>
 <span class="sd">            Additional keyword arguments that are passed to the</span>
-<span class="sd">            `hydromt.io.readers.read_nc` function.</span>
+<span class="sd">            `hydromt.io.readers.open_nc` function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_assert_read_mode</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">skip_read</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="p">{</span><span class="s2">&quot;engine&quot;</span><span class="p">:</span> <span class="s2">&quot;netcdf4&quot;</span><span class="p">},</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
         <span class="n">filename_template</span> <span class="o">=</span> <span class="n">filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span>
-        <span class="n">ncs</span> <span class="o">=</span> <span class="n">_read_ncs</span><span class="p">(</span>
-            <span class="n">filename_template</span><span class="p">,</span>
-            <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
-            <span class="n">single_var_as_array</span><span class="o">=</span><span class="n">single_var_as_array</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">ncs</span> <span class="o">=</span> <span class="n">open_ncs</span><span class="p">(</span><span class="n">filename_template</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">ncs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">ds</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_open_datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">da</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">da</span> <span class="o">=</span> <span class="n">ds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">da</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DatasetsComponent.write">
@@ -635,10 +620,8 @@
 
 <span class="sd">        Possibility to update the xarray objects attributes to get GDAL compliant NetCDF</span>
 <span class="sd">        files, using :py:meth:`~hydromt.raster.gdal_compliant`.</span>
-<span class="sd">        The function will first try to directly write to file. In case of</span>
-<span class="sd">        PermissionError, it will first write a temporary file and add to the</span>
-<span class="sd">        self._defered_file_closes attribute. Renaming and closing of netcdf filehandles</span>
-<span class="sd">        will be done by calling the self._cleanup function.</span>
+<span class="sd">        The function will first try to directly write to file.</span>
+<span class="sd">        In case of PermissionError, it will first write a temporary file then move the file over.</span>
 
 <span class="sd">        key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`</span>
 
@@ -681,7 +664,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name_in_model</span><span class="si">}</span><span class="s2">: Writing datasets to </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
-            <span class="n">write_nc</span><span class="p">(</span>
+            <span class="n">close_handle</span> <span class="o">=</span> <span class="n">write_nc</span><span class="p">(</span>
                 <span class="n">ds</span><span class="p">,</span>
                 <span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span>
                 <span class="n">gdal_compliant</span><span class="o">=</span><span class="n">gdal_compliant</span><span class="p">,</span>
@@ -689,54 +672,10 @@
                 <span class="n">force_sn</span><span class="o">=</span><span class="n">force_sn</span><span class="p">,</span>
                 <span class="n">force_overwrite</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">is_override_mode</span><span class="p">(),</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-            <span class="p">)</span></div>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">close_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_file_close_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">close_handle</span><span class="p">)</span></div>
 
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_cleanup</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">forceful_overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_close_attempts</span><span class="o">=</span><span class="mi">2</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Try to close all deferred file handles.</span>
-
-<span class="sd">        Try to overwrite the destination file with the temporary one until either the</span>
-<span class="sd">        maximum number of tries is reached or until it succeeds. The forced cleanup</span>
-<span class="sd">        also attempts to close the original file handle, which could cause trouble</span>
-<span class="sd">        if the user will try to read from the same file handle after this function</span>
-<span class="sd">        is called.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        forceful_overwrite: bool</span>
-<span class="sd">            Attempt to force closing deferred file handles before writing to them.</span>
-<span class="sd">        max_close_attempts: int</span>
-<span class="sd">            Number of times to try and overwrite the original file, before giving up.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">failed_closes</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_defered_file_closes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">close_handle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defered_file_closes</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">close_handle</span><span class="p">[</span><span class="s2">&quot;close_attempts&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">max_close_attempts</span><span class="p">:</span>
-                <span class="c1"># already tried to close this to many times so give up</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Max write attempts to file </span><span class="si">{</span><span class="n">close_handle</span><span class="p">[</span><span class="s1">&#39;org_fn&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="s2">&quot; exceeded. Skipping...&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;Instead data was written to tmpfile: </span><span class="si">{</span><span class="n">close_handle</span><span class="p">[</span><span class="s1">&#39;tmp_fn&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-                <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="n">forceful_overwrite</span><span class="p">:</span>
-                <span class="n">close_handle</span><span class="p">[</span><span class="s2">&quot;ds&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">move</span><span class="p">(</span><span class="n">close_handle</span><span class="p">[</span><span class="s2">&quot;tmp_fn&quot;</span><span class="p">],</span> <span class="n">close_handle</span><span class="p">[</span><span class="s2">&quot;org_fn&quot;</span><span class="p">])</span>
-            <span class="k">except</span> <span class="ne">PermissionError</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Could not write to destination file </span><span class="si">{</span><span class="n">close_handle</span><span class="p">[</span><span class="s1">&#39;org_fn&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
-                    <span class="s2">&quot;because the following error was raised: </span><span class="si">{e}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-                <span class="n">close_handle</span><span class="p">[</span><span class="s2">&quot;close_attempts&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_defered_file_closes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">close_handle</span><span class="p">)</span>
-                <span class="n">failed_closes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">close_handle</span><span class="p">[</span><span class="s2">&quot;org_fn&quot;</span><span class="p">],</span> <span class="n">close_handle</span><span class="p">[</span><span class="s2">&quot;tmp_fn&quot;</span><span class="p">]))</span>
-
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">failed_closes</span><span class="p">))</span>
 
 <div class="viewcode-block" id="DatasetsComponent.test_equal">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.components.DatasetsComponent.test_equal.html#hydromt.model.components.DatasetsComponent.test_equal">[docs]</a>
