@@ -236,7 +236,7 @@ class DataCatalogV1Item(BaseModel):
     metadata: DataCatalogV1ItemMetadata | None = None
     variants: List[SourceVariant] | None = None
     version: str | Number | None = None
-    placehodler: dict[str, list[str]] | None = None
+    placeholder: dict[str, list[str]] | None = None
     data_adapter: DataCatalogV1DataAdapter | None = None
 
     model_config = ConfigDict(
