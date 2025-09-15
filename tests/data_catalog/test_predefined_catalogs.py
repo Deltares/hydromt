@@ -16,8 +16,8 @@ def cat_root() -> Path:
 
 
 @pytest.fixture
-def tmp_catalog_files(tmpdir):
-    _base_url = Path(tmpdir) / "test_catalog"
+def tmp_catalog_files(tmp_path: Path) -> Path:
+    _base_url = tmp_path / "test_catalog"
     for version in ["v0.1.0", "v0.2.0", "v1.0.0"]:
         catalog_path = _base_url / version / "data_catalog.yml"
         catalog_path.parent.mkdir(parents=True, exist_ok=True)
@@ -39,8 +39,8 @@ def tmp_catalog_class(tmp_catalog_files) -> type[PredefinedCatalog]:
     return TestCatalog
 
 
-def test_predefined_catalog(tmp_catalog_class, tmpdir):
-    catalog = tmp_catalog_class(format_version="v0", cache_dir=Path(tmpdir) / "cache")
+def test_predefined_catalog(tmp_catalog_class, tmp_path: Path):
+    catalog = tmp_catalog_class(format_version="v0", cache_dir=tmp_path / "cache")
     assert catalog.name == "test_catalog"
     assert catalog._format_version == "v0"
     assert catalog._pooch is None
@@ -67,7 +67,7 @@ def test_predefined_catalog(tmp_catalog_class, tmpdir):
         catalog.get_catalog_file("v0.0.0")
 
 
-def test_create_registry_file(tmpdir, tmp_catalog_files):
+def test_create_registry_file(tmp_path: Path, tmp_catalog_files: Path):
     # test create registry file
     root = tmp_catalog_files
     create_registry_file(root)
@@ -76,7 +76,7 @@ def test_create_registry_file(tmpdir, tmp_catalog_files):
 
     # no catalog files
     with pytest.raises(FileNotFoundError):
-        create_registry_file(Path(tmpdir, "not_existing"))
+        create_registry_file(tmp_path / "not_existing")
 
     # create a dummy catalog file with version folder
     cat_path = root / "data_catalog.yml"
@@ -91,7 +91,7 @@ def test_get_versions_artifacts():
     assert "v0.0.8" in versions
 
 
-def test_catalog_versions(cat_root: Path, tmpdir):
+def test_catalog_versions(cat_root: Path, tmp_path: Path):
     # assert all subdirs are catalogs and have a versions.yml file
     catalogs = filter(
         lambda dir: "__pycache__" not in str(dir),
@@ -100,7 +100,7 @@ def test_catalog_versions(cat_root: Path, tmpdir):
     for cat_dir in catalogs:
         registry_file = cat_dir / "registry.txt"
         assert registry_file.exists()
-        tmp_registry_file = Path(tmpdir) / f"{cat_dir.name}_registry.txt"
+        tmp_registry_file = tmp_path / f"{cat_dir.name}_registry.txt"
         create_registry_file(cat_dir, tmp_registry_file)
         # check if both registry files (incl hashes) are the same
         with open(registry_file, "r") as f:

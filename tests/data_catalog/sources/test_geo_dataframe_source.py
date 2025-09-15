@@ -28,10 +28,10 @@ class TestGeoDataFrameSource:
         return datacatalog
 
     @pytest.fixture(scope="class")
-    def example_geojson(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / f"{uuid4().hex}.geojson")
+    def example_geojson(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / f"{uuid4().hex}.geojson"
         geodf.to_file(uri, driver="GeoJSON")
-        return uri
+        return str(uri)
 
     def test_raises_on_invalid_fields(
         self,
@@ -122,8 +122,10 @@ class TestGeoDataFrameSource:
         gdf = source.read_data()
         assert gdf.attrs["NAME_0"]["long_name"] == "Country names"
 
-    def test_to_stac_geodataframe(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
-        gdf_path = str(tmp_dir / "test.geojson")
+    def test_to_stac_geodataframe(
+        self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path
+    ):
+        gdf_path = managed_tmp_path / "test.geojson"
         geodf.to_file(gdf_path, driver="GeoJSON")
         data_catalog = DataCatalog()  # read artifacts
         _ = data_catalog.sources  # load artifact data as fallback
@@ -154,9 +156,9 @@ class TestGeoDataFrameSource:
         )  # manually create an invalid adapter by deleting the crs
         assert adapter.to_stac_catalog(handle_nodata=NoDataStrategy.IGNORE) is None
 
-        gdf_path = str(tmp_dir / "test.geojson")
+        gdf_path = managed_tmp_path / "test.geojson"
         geodf.to_file(gdf_path, driver="GeoJSON")
-        source = GeoDataFrameSource(name="test_data", uri=gdf_path)
+        source = GeoDataFrameSource(name="test_data", uri=str(gdf_path))
 
         with pytest.raises(
             RuntimeError,

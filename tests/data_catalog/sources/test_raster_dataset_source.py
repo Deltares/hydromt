@@ -20,7 +20,7 @@ class TestRasterDatasetSource:
         mock_raster_ds_driver: RasterDatasetDriver,
         mock_raster_ds_adapter: RasterDatasetAdapter,
         mock_resolver: URIResolver,
-        tmp_dir: Path,
+        managed_tmp_path: Path,
     ):
         source = RasterDatasetSource(
             root=".",
@@ -28,7 +28,7 @@ class TestRasterDatasetSource:
             driver=mock_raster_ds_driver,
             data_adapter=mock_raster_ds_adapter,
             uri_resolver=mock_resolver,
-            uri=str(tmp_dir / "rasterds.zarr"),
+            uri=str(managed_tmp_path / "rasterds.zarr"),
         )
         assert raster_ds == source.read_data()
 

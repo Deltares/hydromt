@@ -34,14 +34,14 @@ def test_region_from_file(tmp_path: Path, world: gpd.GeoDataFrame):
     gpd.testing.assert_geodataframe_equal(world, region)
 
 
-def test_geom_from_cat(tmpdir, world):
-    uri_gdf = str(tmpdir.join("world.geojson"))
+def test_geom_from_cat(tmp_path: Path, world):
+    uri_gdf = tmp_path / "world.geojson"
     world.to_file(uri_gdf, driver="GeoJSON")
     cat = DataCatalog()
     cat.from_dict(
         {
             "world": {
-                "uri": uri_gdf,
+                "uri": str(uri_gdf),
                 "data_type": "GeoDataFrame",
                 "driver": "pyogrio",
             },
@@ -168,11 +168,11 @@ def test_raise_wrong_region_value_for_interbasin():
         )
 
 
-def test_region_from_model(tmpdir, world, mocker: MockerFixture):
+def test_region_from_model(tmp_path: Path, world, mocker: MockerFixture):
     model = mocker.Mock(spec=Model, region=world)
     plugins = mocker.patch("hydromt.model.processes.region.PLUGINS")
     plugins.model_plugins = {"Model": mocker.Mock(return_value=model)}
-    region = {Model.__name__: tmpdir}
+    region = {Model.__name__: str(tmp_path)}
     read_model = parse_region_other_model(region=region)
     assert read_model is model
     assert read_model.region is world

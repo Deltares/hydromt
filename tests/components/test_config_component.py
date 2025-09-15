@@ -1,4 +1,4 @@
-from os.path import abspath, isabs, isfile, join
+from os.path import abspath, isabs
 from pathlib import Path
 
 import pytest
@@ -36,8 +36,8 @@ def test_config_dict():
     }
 
 
-def test_rejects_non_yaml_format(tmpdir):
-    config_file = tmpdir.join("config.toml")
+def test_rejects_non_yaml_format(tmp_path: Path):
+    config_file = tmp_path / "config.toml"
     # hydromt just checks the extension, so an empty file is ok
     open(config_file, "w").close()
 
@@ -45,15 +45,15 @@ def test_rejects_non_yaml_format(tmpdir):
         _ = _config_read(config_file, abs_path=True)
 
 
-def test_config_create_always_reads(tmpdir):
+def test_config_create_always_reads(tmp_path: Path):
     filename = "myconfig.yaml"
-    config_path = join(tmpdir, filename)
+    config_path = tmp_path / filename
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
-    model = Model(root=tmpdir, mode="w")
+    model = Model(root=tmp_path, mode="w")
     config_component = ConfigComponent(
-        model, filename=filename, default_template_filename=config_path
+        model, filename=filename, default_template_filename=str(config_path)
     )
     model.add_component("config", config_component)
     config_component.create()
@@ -61,85 +61,85 @@ def test_config_create_always_reads(tmpdir):
     assert config_component._data == config_data
 
 
-def test_config_does_not_read_at_lazy_init(tmpdir):
+def test_config_does_not_read_at_lazy_init(tmp_path: Path):
     filename = "myconfig.yaml"
-    config_path = join(tmpdir, filename)
+    config_path = tmp_path / filename
     config_data = {"a": 1, "b": 3.14, "c": None, "d": {"e": {"f": True}}}
     write_yaml(config_path, config_data)
     # notice the write mode
-    model = Model(root=tmpdir, mode="w")
+    model = Model(root=tmp_path, mode="w")
     config_component = ConfigComponent(
-        model, filename=filename, default_template_filename=config_path
+        model, filename=filename, default_template_filename=str(config_path)
     )
     model.add_component("config", config_component)
     assert config_component.data == {}
 
 
-def test_raises_on_no_config_template_found(tmpdir):
-    model = Model(root=tmpdir, mode="w")
+def test_raises_on_no_config_template_found(tmp_path: Path):
+    model = Model(root=tmp_path, mode="w")
     config_component = ConfigComponent(model)
     model.add_component("config", config_component)
     with pytest.raises(FileNotFoundError, match="No template file was provided"):
         config_component.create()
 
 
-@pytest.mark.parametrize("extention", ["yaml", "yml"])
-def test_loads_from_config_template_yaml(tmpdir, extention, test_config_dict):
+@pytest.mark.parametrize("extension", ["yaml", "yml"])
+def test_loads_from_config_template_yaml(tmp_path: Path, extension, test_config_dict):
     template_name = "default_config_template"
-    template_path = tmpdir / f"{template_name}.{extention}"
+    template_path = tmp_path / f"{template_name}.{extension}"
     with open(template_path, "w") as fp:
         yaml_dump(test_config_dict, fp)
 
-    model = Model(root=tmpdir, mode="w")
-    config_component = ConfigComponent(model, default_template_filename=template_path)
+    model = Model(root=tmp_path, mode="w")
+    config_component = ConfigComponent(
+        model, default_template_filename=str(template_path)
+    )
     model.add_component("config", config_component)
     config_component.read()
 
     assert config_component._data == test_config_dict
 
 
-def test_loads_from_config_template_toml(tmpdir, test_config_dict):
-    template_path = join(tmpdir, "default_config_template.toml")
+def test_loads_from_config_template_toml(tmp_path: Path, test_config_dict):
+    template_path = tmp_path / "default_config_template.toml"
     with open(template_path, "wb") as fp:
         toml_dump(test_config_dict, fp)
 
-    model = Model(root=tmpdir, mode="w")
-    config_component = ConfigComponent(model, default_template_filename=template_path)
+    model = Model(root=tmp_path, mode="w")
+    config_component = ConfigComponent(
+        model, default_template_filename=str(template_path)
+    )
     config_component.read()
 
     assert config_component._data == test_config_dict
 
 
-def test_make_config_abs(tmpdir, test_config_dict):
-    p = join(tmpdir, "config.yml")
+def test_make_config_abs(tmp_path: Path, test_config_dict):
+    p = tmp_path / "config.yml"
     # create file so it will get parsed correctly
     open(p, "w").close()
     test_config_dict["section2"]["path"] = p
     test_config_dict["section2"]["path2"] = abspath(p)
-    parsed_config = _make_config_paths_abs(test_config_dict, tmpdir)
+    parsed_config = _make_config_paths_abs(test_config_dict, tmp_path)
     assert all(
-        [isabs(p) for p in parsed_config["section2"].values() if isinstance(p, Path)]
+        isabs(p) for p in parsed_config["section2"].values() if isinstance(p, Path)
     ), parsed_config["section2"]
 
 
-def test_make_rel_abs(tmpdir, test_config_dict):
-    p = join(tmpdir, "config.yml")
+def test_make_rel_abs(tmp_path: Path, test_config_dict):
+    p = tmp_path / "config.yml"
     # create file so it will get parsed correctly
     open(p, "w").close()
     test_config_dict["section2"]["path"] = p
     test_config_dict["section2"]["path2"] = abspath(p)
-    parsed_config = _make_config_paths_relative(test_config_dict, tmpdir)
+    parsed_config = _make_config_paths_relative(test_config_dict, tmp_path)
     assert all(
-        [
-            not isabs(p)
-            for p in parsed_config["section2"].values()
-            if isinstance(p, Path)
-        ]
+        not isabs(p) for p in parsed_config["section2"].values() if isinstance(p, Path)
     ), parsed_config["section2"]
 
 
-def test_set_config(tmpdir):
-    model = Model(root=tmpdir)
+def test_set_config(tmp_path: Path):
+    model = Model(root=tmp_path)
     config_component = ConfigComponent(model)
     model.add_component("config", config_component)
     config_component.set("global.name", "test")
@@ -148,24 +148,24 @@ def test_set_config(tmpdir):
     assert config_component.get_value("global.name") == "test"
 
 
-def test_write_config(tmpdir):
-    model = Model(root=tmpdir)
+def test_write_config(tmp_path: Path):
+    model = Model(root=tmp_path)
     config_component = ConfigComponent(model)
     model.add_component("config", config_component)
     config_component.set("global.name", "test")
-    write_path = join(tmpdir, "config.yaml")
-    assert not isfile(write_path)
+    write_path = tmp_path / "config.yaml"
+    assert not write_path.exists()
     config_component.write()
-    assert isfile(write_path)
+    assert write_path.exists()
     read_contents = _read_yaml(write_path)
     assert read_contents == {"global": {"name": "test"}}
 
 
-def test_get_config_abs_path(tmpdir):
-    model = Model(root=tmpdir)
+def test_get_config_abs_path(tmp_path: Path):
+    model = Model(root=tmp_path)
     config_component = ConfigComponent(model)
     model.add_component("config", config_component)
-    abs_path = str(tmpdir.join("test.file"))
+    abs_path = tmp_path / "test.file"
     config_component.set("global.file", "test.file")
     assert str(config_component.get_value("global.file")) == "test.file"
-    assert str(config_component.get_value("global.file", abs_path=True)) == abs_path
+    assert config_component.get_value("global.file", abs_path=True) == abs_path

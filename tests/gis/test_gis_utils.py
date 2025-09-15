@@ -135,16 +135,20 @@ def test_spread():
 
 class TestBBoxFromFileAndFilters:
     @pytest.fixture(scope="class")
-    def vector_data_with_crs(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> Path:
+    def vector_data_with_crs(
+        self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path
+    ) -> Path:
         example_data = geodf.set_crs(crs=CRS.from_user_input(4326))
         example_data.to_crs(crs=CRS.from_user_input(3857), inplace=True)
-        path = tmp_dir / "test.fgb"
+        path = managed_tmp_path / "test.fgb"
         example_data.to_file(path, engine="pyogrio")
         return path
 
     @pytest.fixture(scope="class")
-    def vector_data_without_crs(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> Path:
-        path = tmp_dir / "test.geojson"
+    def vector_data_without_crs(
+        self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path
+    ) -> Path:
+        path = managed_tmp_path / "test.geojson"
         geodf.to_file(path, engine="pyogrio")
         return path
 

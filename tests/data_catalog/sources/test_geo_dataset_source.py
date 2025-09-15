@@ -21,7 +21,7 @@ class TestGeoDatasetSource:
         mock_geo_ds_driver: GeoDatasetDriver,
         mock_geo_ds_adapter: GeoDatasetAdapter,
         mock_resolver: URIResolver,
-        tmp_dir: Path,
+        managed_tmp_path: Path,
     ):
         geoda = geoda.to_dataset()
         source = GeoDatasetSource(
@@ -30,7 +30,7 @@ class TestGeoDatasetSource:
             driver=mock_geo_ds_driver,
             data_adapter=mock_geo_ds_adapter,
             uri_resolver=mock_resolver,
-            uri=str(tmp_dir / "geoda.zarr"),
+            uri=str(managed_tmp_path / "geoda.zarr"),
         )
         read_data = source.read_data()
         assert read_data.equals(geoda)
@@ -50,20 +50,22 @@ class TestGeoDatasetSource:
         )
 
     @pytest.mark.integration
-    def test_writes_to_netcdf(self, tmp_dir: Path, writable_source: GeoDatasetSource):
+    def test_writes_to_netcdf(
+        self, managed_tmp_path: Path, writable_source: GeoDatasetSource
+    ):
         local_driver = GeoDatasetXarrayDriver()
-        local_path: Path = tmp_dir / "geods_source_writes_netcdf.nc"
+        local_path = managed_tmp_path / "geods_source_writes_netcdf.nc"
         writable_source.to_file(file_path=local_path, driver_override=local_driver)
         assert local_driver.filesystem.exists(local_path)
 
     @pytest.mark.integration
     def test_writes_to_netcdf_variables(
         self,
-        tmp_dir: Path,
+        managed_tmp_path: Path,
         writable_source: GeoDatasetSource,
     ):
         local_driver = GeoDatasetXarrayDriver()
-        local_path = tmp_dir / "geods_source_writes_netcdf_variables.nc"
+        local_path = managed_tmp_path / "geods_source_writes_netcdf_variables.nc"
         writable_source.to_file(
             file_path=local_path,
             driver_override=local_driver,
@@ -72,9 +74,11 @@ class TestGeoDatasetSource:
         assert local_driver.filesystem.exists(local_path)
 
     @pytest.mark.integration
-    def test_writes_to_zarr(self, tmp_dir: Path, writable_source: GeoDatasetSource):
+    def test_writes_to_zarr(
+        self, managed_tmp_path: Path, writable_source: GeoDatasetSource
+    ):
         local_driver = GeoDatasetXarrayDriver()
-        local_path = tmp_dir / "geods_source_writes_netcdf.zarr"
+        local_path = managed_tmp_path / "geods_source_writes_netcdf.zarr"
         writable_source.to_file(
             file_path=local_path,
             driver_override=local_driver,
