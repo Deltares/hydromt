@@ -28,6 +28,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
     name: ClassVar[str] = "geodataset_xarray"
     supports_writing = True
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".zarr", ".nc", ".netcdf"}
 
     def read(
         self,

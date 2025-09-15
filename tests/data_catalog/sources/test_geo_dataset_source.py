@@ -92,3 +92,14 @@ class TestGeoDatasetSource:
         geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
         geoda_detected_time_range = writable_source.detect_time_range(geoda)
         assert geoda_expected_time_range == geoda_detected_time_range
+
+    @pytest.mark.parametrize(
+        ("uri", "expected_driver"),
+        [
+            ("test_data.csv", "geodataset_vector"),
+            ("test_data.zarr", "geodataset_xarray"),
+            ("test_data.fake_suffix", "geodataset_vector"),
+        ],
+    )
+    def test_infer_default_driver(self, uri, expected_driver):
+        assert GeoDatasetSource._infer_default_driver(uri) == expected_driver
