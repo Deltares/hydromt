@@ -47,11 +47,11 @@ class Format(Enum):
 
     # just a convenience function
     # with some nicer error messages
-    @staticmethod
-    def from_str(s: str) -> "Format":
+    @classmethod
+    def from_str(cls, s: str) -> "Format":
         try:
-            return Format[s.upper().strip()]
+            return cls[s.strip().lower()]
         except KeyError as e:
-            raise TypeError(
-                f"{e} is not a known valid Format, options are {list(Format.__members__.keys())}"
+            raise ValueError(
+                f"{e} is not a known valid Format, options are {list(cls.__members__.keys())}"
             )
