@@ -14,7 +14,7 @@ from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
 
 class TestRasterTindexResolver:
     @pytest.fixture
-    def raster_tindex(self, tmpdir):
+    def raster_tindex(self, tmp_path: Path):
         raster_tindex_dict = {
             "type": "FeatureCollection",
             "features": [
@@ -62,7 +62,7 @@ class TestRasterTindexResolver:
         }
         gdf = gpd.GeoDataFrame.from_features(raster_tindex_dict)
         gdf.set_crs(crs=4326, inplace=True)
-        fp = join(tmpdir, "raster_tindex.gpkg")
+        fp = tmp_path / "raster_tindex.gpkg"
         gdf.to_file(fp)
         return fp
 

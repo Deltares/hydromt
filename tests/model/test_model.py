@@ -117,25 +117,25 @@ def test_from_dict_multiple_spatials():
     assert model._region_component_name == "grid2"
 
 
-def test_write_data_catalog_no_used(tmpdir):
-    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
-    data_lib_path = join(model.root.path, "hydromt_data.yml")
+def test_write_data_catalog_no_used(tmp_path: Path):
+    model = Model(root=tmp_path / "model", data_libs=["artifact_data"])
+    data_lib_path = model.root.path / "hydromt_data.yml"
     model.write_data_catalog()
-    assert not isfile(data_lib_path)
+    assert not data_lib_path.is_file()
 
 
-def test_write_data_catalog_single_source(tmpdir):
-    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
-    data_lib_path = join(model.root.path, "hydromt_data.yml")
+def test_write_data_catalog_single_source(tmp_path: Path):
+    model = Model(root=tmp_path / "model", data_libs=["artifact_data"])
+    data_lib_path = model.root.path / "hydromt_data.yml"
     sources = list(model.data_catalog.sources.keys())
     model.data_catalog.get_source(sources[0])._mark_as_used()
     model.write_data_catalog()
     assert list(DataCatalog(data_lib_path).sources.keys()) == sources[:1]
 
 
-def test_write_data_catalog_append(tmpdir):
-    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
-    data_lib_path = join(model.root.path, "hydromt_data.yml")
+def test_write_data_catalog_append(tmp_path: Path):
+    model = Model(root=tmp_path / "model", data_libs=["artifact_data"])
+    data_lib_path = model.root.path / "hydromt_data.yml"
     sources = list(model.data_catalog.sources.keys())
     model1 = Model(root=str(model.root.path), data_libs=["artifact_data"], mode="r+")
     model1.data_catalog.get_source(sources[1])._mark_as_used()
@@ -146,20 +146,21 @@ def test_write_data_catalog_append(tmpdir):
     assert list(DataCatalog(data_lib_path).sources.keys()) == sources[:2]
 
 
-def test_write_data_catalog_csv(tmpdir):
-    model = Model(root=join(tmpdir, "model"), data_libs=["artifact_data"])
+def test_write_data_catalog_csv(tmp_path: Path):
+    model = Model(root=tmp_path / "model", data_libs=["artifact_data"])
     sources = list(model.data_catalog.sources.keys())
     model.write_data_catalog(used_only=False, save_csv=True)
-    assert isfile(join(model.root.path, "hydromt_data.csv"))
-    data_catalog_df = pd.read_csv(join(model.root.path, "hydromt_data.csv"))
+    data_path = model.root.path / "hydromt_data.csv"
+    assert data_path.is_file()
+    data_catalog_df = pd.read_csv(data_path)
     assert len(data_catalog_df) == len(sources)
     assert data_catalog_df.iloc[0, 0] == sources[0]
     assert data_catalog_df.iloc[-1, 0] == sources[-1]
 
 
-def test_model_mode_errors_reading_in_write_only(grid_model, tmpdir):
+def test_model_mode_errors_reading_in_write_only(grid_model, tmp_path: Path):
     # write model
-    grid_model.root.set(str(tmpdir), mode="w")
+    grid_model.root.set(tmp_path, mode="w")
     grid_model.write()
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_model.read()
@@ -173,9 +174,9 @@ def test_model_mode_errors_writing_in_read_only(grid_model):
 
 
 @pytest.mark.integration
-def test_grid_model_append(demda, df, tmpdir):
+def test_grid_model_append(demda, df, tmp_path: Path):
     demda.name = "dem"
-    model = Model(mode="w", root=str(tmpdir))
+    model = Model(mode="w", root=tmp_path)
 
     config_component = ConfigComponent(model)
     config_component.set("test.data", "dem")
@@ -201,7 +202,7 @@ def test_grid_model_append(demda, df, tmpdir):
 
     # append to model and check if previous data is still there
     demda.name = "dem"
-    model2 = Model(mode="w", root=str(tmpdir))
+    model2 = Model(mode="w", root=tmp_path)
 
     config_component = ConfigComponent(model2)
     config_component.set("test.data", "dem")
@@ -244,10 +245,10 @@ def test_grid_model_append(demda, df, tmpdir):
 
 
 @pytest.mark.integration
-def test_model_build_update(tmpdir, demda, obsda):
+def test_model_build_update(tmp_path: Path, demda, obsda):
     bbox = [12.00, 45.00, 12.25, 45.25]
     model = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         mode="w",
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
@@ -271,20 +272,22 @@ def test_model_build_update(tmpdir, demda, obsda):
 
     # read and update model
     model = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         mode="r",
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
     )
     geoms_component = GeomsComponent(model)
     model.add_component("geoms", geoms_component)
-    model_out = str(tmpdir.join("update"))
+    model_out = tmp_path / "update"
     model.update(model_out=model_out, steps=[])  # write only
-    assert isdir(join(model_out, "grid")), listdir(model_out)
+    assert Path(model_out, "grid").exists(), listdir(model_out)
 
 
 @pytest.mark.integration
-def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch, caplog):
+def test_model_build_update_with_data(
+    tmp_path: Path, demda, obsda, monkeypatch, caplog
+):
     caplog.set_level(logging.INFO)
     # users will not have a use for `set` in their yaml file because there is
     # nothing they will have access to then that they cat set it to
@@ -297,7 +300,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch, caplog)
     # Build model with some data
     bbox = [12.00, 45.00, 12.25, 45.25]
     model = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         components={
             "grid": {"type": "GridComponent"},
             "maps": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
@@ -331,7 +334,7 @@ def test_model_build_update_with_data(tmpdir, demda, obsda, monkeypatch, caplog)
     )
     # Now update the model
     model = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         components={
             "grid": {"type": "GridComponent"},
             "maps": {"type": "SpatialDatasetsComponent", "region_component": "grid"},
@@ -376,14 +379,14 @@ def test_setup_region_geom(grid_model, bbox):
     )
 
 
-def test_setup_region_geom_catalog(grid_model, bbox, tmpdir):
+def test_setup_region_geom_catalog(grid_model, bbox, tmp_path: Path):
     # geom via data catalog
-    region_path = str(tmpdir.join("region.gpkg"))
+    region_path = tmp_path / "region.gpkg"
     bbox.to_file(region_path, driver="GPKG")
     grid_model.data_catalog.from_dict(
         {
             "region": {
-                "uri": region_path,
+                "uri": str(region_path),
                 "data_type": "GeoDataFrame",
                 "driver": "pyogrio",
             }
@@ -399,12 +402,12 @@ def test_setup_region_geom_catalog(grid_model, bbox, tmpdir):
     )
 
 
-def test_setup_region_grid(grid_model, demda, tmpdir):
+def test_setup_region_grid(grid_model, demda, tmp_path: Path):
     # grid
-    grid_path = str(tmpdir.join("grid.tif"))
+    grid_path = tmp_path / "grid.tif"
     demda.raster.to_raster(grid_path)
     ds = create_grid_from_region(
-        region={"grid": grid_path}, data_catalog=grid_model.data_catalog
+        region={"grid": str(grid_path)}, data_catalog=grid_model.data_catalog
     )
     grid_model.grid.set(data=ds)
 
@@ -465,9 +468,9 @@ def test_maps_setup():
 
 
 @pytest.mark.integration
-def test_gridmodel(demda, tmpdir):
+def test_gridmodel(demda, tmp_path: Path):
     grid_model = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
@@ -499,7 +502,7 @@ def test_gridmodel(demda, tmpdir):
     grid_model.write()
     # read model
     model1 = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
@@ -511,10 +514,10 @@ def test_gridmodel(demda, tmpdir):
     assert equal, errors
 
     # try update
-    grid_model.root.set(str(join(tmpdir, "update")), mode="w")
+    update_root = tmp_path / "update"
+    grid_model.root.set(update_root, mode="w")
     grid_model.write()
 
-    update_root = str(join(tmpdir, "update"))
     model1 = Model(
         root=update_root,
         data_libs=["artifact_data", DC_PARAM_PATH],
@@ -878,16 +881,16 @@ def test_grid_model_geodataframe_fraction(grid_model):
     assert "water_frac" in grid_model.grid.data
 
 
-def test_vectormodel(vector_model, tmpdir, mocker: MockerFixture, geodf):
+def test_vectormodel(vector_model, tmp_path: Path, mocker: MockerFixture, geodf):
     # write model
-    vector_model.root.set(str(tmpdir), mode="w")
+    vector_model.root.set(tmp_path, mode="w")
     vector_model.write()
     # read model
     region_component = mocker.Mock(spec_set=SpatialModelComponent)
     region_component.test_equal.return_value = (True, {})
     region_component.region = geodf
     model1 = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         mode="r",
         region_component="area",
         components={
@@ -901,7 +904,7 @@ def test_vectormodel(vector_model, tmpdir, mocker: MockerFixture, geodf):
     assert equal, errors
 
 
-def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
+def test_vectormodel_vector(vector_model_no_defaults, tmp_path: Path, geoda):
     # test set vector
     testds = vector_model_no_defaults.vector.data.copy()
     vector_component = cast(VectorComponent, vector_model_no_defaults.vector)
@@ -939,7 +942,7 @@ def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
 
     # test write vector
     vector_component.set(gdf)
-    vector_model_no_defaults.root.set(str(tmpdir), mode="w")
+    vector_model_no_defaults.root.set(tmp_path, mode="w")
     # netcdf+geojson --> tested in test_vectormodel
     # netcdf only
     vector_component.write(filename="vector/vector_full.nc", geometry_filename=None)
@@ -962,7 +965,7 @@ def test_vectormodel_vector(vector_model_no_defaults, tmpdir, geoda):
     )
 
     # test read vector
-    vector_model1 = Model(root=str(tmpdir), mode="r")
+    vector_model1 = Model(root=tmp_path, mode="r")
     vector_model1.add_component("vector", VectorComponent(vector_model1))
     # netcdf only
     vector_model1.vector.read(filename="vector/vector_full.nc", geometry_filename=None)
@@ -1030,10 +1033,10 @@ def test_setup_mesh_from_bbox(mesh_model):
     assert np.all(np.round(mesh_model.mesh.data.ugrid.total_bounds, 3) == bbox)
 
 
-def test_setup_mesh_from_geom(tmpdir):
+def test_setup_mesh_from_geom(tmp_path: Path):
     bbox = [12.00, 45.00, 12.25, 45.25]
     dummy_mesh_model = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
@@ -1159,9 +1162,9 @@ def test_initialize_model_with_grid_component():
     assert isinstance(m.grid, GridComponent)
 
 
-def test_write_multiple_components(mocker: MockerFixture, tmpdir: Path):
+def test_write_multiple_components(mocker: MockerFixture, tmp_path: Path):
     m = Model(
-        root=str(tmpdir),
+        root=tmp_path,
     )
     foo = mocker.Mock(spec_set=ModelComponent)
     bar = mocker.Mock(spec_set=ModelComponent)
@@ -1202,11 +1205,11 @@ def test_read_calls_components(mocker: MockerFixture):
     foo.read.assert_called_once()
 
 
-def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
+def test_build_two_components_writes_one(mocker: MockerFixture, tmp_path: Path):
     foo = mocker.Mock(spec_set=ModelComponent)
     foo.write.__ishydromtstep__ = True
     bar = mocker.Mock(spec_set=ModelComponent)
-    m = Model(root=str(tmpdir))
+    m = Model(root=tmp_path)
     m.add_component("foo", foo)
     m.add_component("bar", bar)
     assert m.foo is foo
@@ -1218,9 +1221,9 @@ def test_build_two_components_writes_one(mocker: MockerFixture, tmpdir: Path):
     foo.write.assert_called_once()  # foo was written, because it was specified in steps
 
 
-def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path):
+def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmp_path: Path):
     foo = mocker.Mock(spec_set=ModelComponent)
-    m = Model(root=str(tmpdir))
+    m = Model(root=tmp_path)
     m.add_component("foo", foo)
 
     m.build(steps=[], write=False)
@@ -1228,8 +1231,8 @@ def test_build_write_disabled_does_not_write(mocker: MockerFixture, tmpdir: Path
     foo.write.assert_not_called()
 
 
-def test_build_non_existing_step(tmpdir: Path):
-    m = Model(root=str(tmpdir))
+def test_build_non_existing_step(tmp_path: Path):
+    m = Model(root=tmp_path)
 
     with pytest.raises(KeyError):
         m.build(steps=[{"foo": {}}])
@@ -1246,12 +1249,12 @@ def test_add_component_duplicate_throws(mocker: MockerFixture):
 
 
 def test_update_empty_model_with_region_none_throws(
-    tmpdir: Path, mocker: MockerFixture
+    tmp_path: Path, mocker: MockerFixture
 ):
     (foo,) = _patch_plugin_components(mocker, SpatialModelComponent)
     foo.region = None
     m = Model(
-        root=str(tmpdir), components={"foo": {"type": SpatialModelComponent.__name__}}
+        root=tmp_path, components={"foo": {"type": SpatialModelComponent.__name__}}
     )
     with pytest.raises(
         ValueError, match="Model region not found, setup model using `build` first."
@@ -1259,8 +1262,8 @@ def test_update_empty_model_with_region_none_throws(
         m.update()
 
 
-def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
-    m = Model(root=str(tmpdir), mode="r")
+def test_update_in_read_mode_without_out_folder_throws(tmp_path: Path):
+    m = Model(root=tmp_path, mode="r")
     with pytest.raises(
         ValueError,
         match='"model_out" directory required when updating in "read-only" mode.',
@@ -1269,17 +1272,17 @@ def test_update_in_read_mode_without_out_folder_throws(tmpdir: Path):
 
 
 def test_update_in_read_mode_with_out_folder_sets_to_write_mode(
-    tmpdir: Path, mocker: MockerFixture
+    tmp_path: Path, mocker: MockerFixture
 ):
     (region,) = _patch_plugin_components(mocker, SpatialModelComponent)
     m = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         mode="r",
         components={"region": {"type": SpatialModelComponent.__name__}},
     )
     assert region.region is m.region
 
-    m.update(model_out=str(tmpdir / "out"))
+    m.update(model_out=tmp_path / "out")
 
     assert m.root.is_writing_mode()
     assert not m.root.is_override_mode()

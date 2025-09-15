@@ -14,28 +14,28 @@ from hydromt.data_catalog.drivers import PyogrioDriver
 
 class TestPyogrioDriver:
     @pytest.fixture(scope="class")
-    def uri_gjson(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.geojson")
+    def uri_gjson(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.geojson"
         geodf.to_file(uri, driver="GeoJSON")
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_shp(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.shp")
+    def uri_shp(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.shp"
         geodf.to_file(uri, "ESRI Shapefile")
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_gpkg(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.gpkg")
+    def uri_gpkg(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.gpkg"
         geodf.to_file(uri, driver="GPKG")
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
-    def uri_fgb(self, geodf: gpd.GeoDataFrame, tmp_dir: Path) -> str:
-        uri = str(tmp_dir / "test.fgb")
+    def uri_fgb(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path) -> str:
+        uri = managed_tmp_path / "test.fgb"
         geodf.to_file(uri, driver="FlatGeobuf")
-        return uri
+        return str(uri)
 
     @pytest.fixture(scope="class")
     def driver(self):
@@ -98,20 +98,20 @@ class TestPyogrioDriver:
         gdf = driver.read(uris, variables=variables)
         assert set(gdf.columns) == set(variables + ["geometry"])
 
-    def test_write(self, geodf: gpd.GeoDataFrame, tmp_dir: Path):
-        df_path = tmp_dir / "temp.gpkg"
+    def test_write(self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path):
+        df_path = managed_tmp_path / "temp.gpkg"
         driver = PyogrioDriver()
         driver.write(df_path, geodf)
         assert np.all(driver.read([str(df_path)]) == geodf)
 
     def test_write_unknown_uri(
-        self, geodf: gpd.GeoDataFrame, tmp_dir: Path, mocker: MockerFixture
+        self, geodf: gpd.GeoDataFrame, managed_tmp_path: Path, mocker: MockerFixture
     ):
-        df_path = tmp_dir / "temp.fakeformat"
+        df_path = managed_tmp_path / "temp.fakeformat"
         mock_xr_open: mocker.MagicMock = mocker.patch(
             "hydromt.data_catalog.drivers.geodataframe.pyogrio_driver.write_dataframe",
             spec=write_dataframe,
         )
         driver = PyogrioDriver()
         driver.write(df_path, geodf)
-        assert mock_xr_open.call_args[0][1] == str(tmp_dir / "temp.fgb")
+        assert mock_xr_open.call_args[0][1] == str(managed_tmp_path / "temp.fgb")
