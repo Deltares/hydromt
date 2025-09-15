@@ -9,6 +9,7 @@ from packaging.version import Version
 from pydantic import (
     BaseModel,
     ConfigDict,
+    field_serializer,
     field_validator,
     model_serializer,
     model_validator,
@@ -244,11 +245,15 @@ class DataCatalogV1Item(BaseModel):
         extra="forbid",
     )
 
+    @field_serializer("uri")
+    def serialize_uri(self, value):
+        return value.as_posix()
+
     @staticmethod
     def from_v0(v0_item: DataCatalogV0Item) -> "DataCatalogV1Item":
         uri = v0_item.path if v0_item.path else None
         possible_drivers = DRIVER_RENAME_MAPPING[v0_item.data_type]
-        driver_name = possible_drivers[v0_item.driver]
+        driver_name = possible_drivers.get(v0_item.driver, None)
         options = {}
         if v0_item.driver_kwargs and len(v0_item.driver_kwargs) > 0:
             options = v0_item.driver_kwargs
@@ -256,9 +261,12 @@ class DataCatalogV1Item(BaseModel):
         if v0_item.kwargs and len(v0_item.kwargs) > 0:
             options = {**options, **v0_item.kwargs}
 
-        driver = DataCatalogV1DriverItem(
-            name=driver_name, options=options if len(options) > 0 else None
-        )
+        if driver_name:
+            driver = DataCatalogV1DriverItem(
+                name=driver_name, options=options if len(options) > 0 else None
+            )
+        else:
+            driver = None
 
         metadata = DataCatalogV1ItemMetadata.from_v0(
             v0_metadata=v0_item.meta, crs=v0_item.crs
@@ -288,18 +296,6 @@ class DataCatalogV1Item(BaseModel):
             driver=driver,
             metadata=metadata,
         )
-
-    @model_validator(mode="after")
-    def driver_in_item_or_variants(cls, values):
-        if values.driver is not None or (
-            values.variants is not None
-            and all(variant.driver is not None for variant in values.variants)
-        ):
-            return values
-        else:
-            raise ValueError(
-                "Source must either have a driver, or all of it's variants must have one."
-            )
 
     @model_validator(mode="after")
     def uri_in_item_or_variants(cls, values):

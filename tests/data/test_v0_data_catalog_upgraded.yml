@@ -1,7 +1,5 @@
 chelsa:
   data_type: RasterDataset
-  driver:
-    name: rasterio
   metadata:
     category: meteo
     crs: 4326
@@ -29,8 +27,6 @@ chirps_global:
   uri: chirps_global.nc
 corine:
   data_type: RasterDataset
-  driver:
-    name: rasterio
   metadata:
     category: landuse & landcover
     source_license: https://land.copernicus.eu/pan-european/corine-land-cover/clc2018?tab=metadata

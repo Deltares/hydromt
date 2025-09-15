@@ -25,7 +25,6 @@ chirps_global:
     time: 86400
 corine:
   data_type: RasterDataset
-  driver: raster
   meta:
     category: landuse & landcover
     source_author: European Environment Agency

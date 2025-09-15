@@ -157,19 +157,22 @@ class DataCatalogV0Item(BaseModel):
 
     name: str
     data_type: Literal["RasterDataset", "GeoDataset", "GeoDataFrame", "DataFrame"]
-    driver: Literal[
-        "csv",
-        "fwf",
-        "netcdf",
-        "parquet",
-        "raster",
-        "raster_tindex",
-        "vector",
-        "vector_table",
-        "xls",
-        "xlsx",
-        "zarr",
-    ]
+    driver: (
+        Literal[
+            "csv",
+            "fwf",
+            "netcdf",
+            "parquet",
+            "raster",
+            "raster_tindex",
+            "vector",
+            "vector_table",
+            "xls",
+            "xlsx",
+            "zarr",
+        ]
+        | None
+    ) = None
     path: Optional[Path] = None
     crs: Optional[Union[int, str]] = None
     filesystem: Optional[str] = None
@@ -215,12 +218,6 @@ class DataCatalogV0Item(BaseModel):
             item_kwargs = input_dict.pop("kwargs", {})
 
             item_storage_options = input_dict.pop("storage_options", {})
-
-            # If data_type is not there, the validation will fail anyway
-            # but pydantic has better error handling so we'll let them
-            # take care of it.
-            if "driver" not in input_dict and "data_type" in input_dict:
-                input_dict["driver"] = DEFAULT_DRIVER_MAPPING[input_dict["data_type"]]
 
             return DataCatalogV0Item(
                 **input_dict,
