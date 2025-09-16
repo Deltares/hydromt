@@ -1,6 +1,5 @@
 """Implementations for all of the necessary IO reading for HydroMT."""
 
-import logging
 from ast import literal_eval
 from glob import glob
 from io import IOBase
@@ -24,7 +23,7 @@ from shapely.geometry.base import GEOMETRY_TYPES
 from tomli import load as load_toml
 from yaml import safe_load as load_yaml
 
-from hydromt._typing.type_def import StrPath
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
@@ -35,7 +34,7 @@ from hydromt.gis.raster_merge import merge
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 __all__ = [
     "_open_mfcsv",
@@ -173,7 +172,7 @@ def _open_mfcsv(
 
 
 def _open_raster(
-    uri: Union[StrPath, IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
+    uri: Union[str, Path, IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
     *,
     mask_nodata: bool = False,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
@@ -236,7 +235,7 @@ def _open_raster(
 
 
 def _open_mfraster(
-    uris: Union[str, List[StrPath]],
+    uris: str | list[str | Path],
     *,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
     concat: bool = False,
@@ -594,7 +593,7 @@ def _open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs)
 
 
 def _open_vector(
-    path: StrPath,
+    path: str | Path,
     *,
     driver: Optional[OPEN_VECTOR_DRIVER] = None,
     crs: Optional[CRS] = None,
@@ -765,7 +764,7 @@ def _open_vector_from_table(
 
 
 def _read_workflow_yaml(
-    path: StrPath,
+    path: str | Path,
 ) -> Tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
     d = _read_yaml(path)
     modeltype = d.pop("modeltype", None)
@@ -896,7 +895,7 @@ def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
 
 
 def open_ncs(
-    filename_template: StrPath,
+    filename_template: str | Path,
     root: Path,
     **kwargs,
 ) -> Dict[str, xr.Dataset]:
@@ -931,7 +930,7 @@ def open_ncs(
     return ncs
 
 
-def _read_yaml(path: StrPath) -> Dict[str, Any]:
+def _read_yaml(path: str | Path) -> Dict[str, Any]:
     """Read yaml file and return as dict."""
     with open(path, "rb") as stream:
         yml = load_yaml(stream)
@@ -943,7 +942,7 @@ def _parse_yaml(text: str) -> Dict[str, Any]:
     return load_yaml(text)
 
 
-def _read_toml(path: StrPath) -> Dict[str, Any]:
+def _read_toml(path: str | Path) -> Dict[str, Any]:
     """Read toml file and return as dict."""
     with open(path, "rb") as f:
         data = load_toml(f)
@@ -951,7 +950,7 @@ def _read_toml(path: StrPath) -> Dict[str, Any]:
     return data
 
 
-def _yml_from_uri_or_path(uri_or_path: StrPath) -> Dict[str, Any]:
+def _yml_from_uri_or_path(uri_or_path: str | Path) -> Dict[str, Any]:
     if _is_valid_url(str(uri_or_path)):
         with fetch(str(uri_or_path), stream=True) as r:
             r.raise_for_status()

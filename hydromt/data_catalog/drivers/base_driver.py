@@ -1,7 +1,6 @@
 """Base class for different drivers."""
 
 from abc import ABC
-from logging import Logger, getLogger
 from typing import Any, ClassVar, Dict
 
 from fsspec.implementations.local import LocalFileSystem
@@ -12,9 +11,10 @@ from pydantic import (
 
 from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import FS
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.plugins import PLUGINS
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class BaseDriver(AbstractBaseModel, ABC):

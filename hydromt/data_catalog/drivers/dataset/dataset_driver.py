@@ -1,7 +1,6 @@
 """Driver for Datasets."""
 
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
 from typing import List, Optional
 
 import xarray as xr
@@ -13,9 +12,10 @@ from hydromt._typing import (
     Variables,
 )
 from hydromt._typing.error import NoDataStrategy
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.drivers.base_driver import BaseDriver
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class DatasetDriver(BaseDriver, ABC):

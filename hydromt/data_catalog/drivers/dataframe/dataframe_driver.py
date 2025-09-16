@@ -1,7 +1,6 @@
 """Generic driver for reading and writing DataFrames."""
 
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
 from typing import ClassVar, List, Optional
 
 import pandas as pd
@@ -13,9 +12,10 @@ from hydromt._typing import (
     TimeRange,
     Variables,
 )
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.drivers import BaseDriver
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class DataFrameDriver(BaseDriver, ABC):

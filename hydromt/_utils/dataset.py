@@ -1,10 +1,11 @@
 import typing
-from logging import getLogger
 from typing import Dict, Optional, cast
 
 import numpy as np
 import pandas as pd
 import xarray as xr
+
+from hydromt._utils.log import get_hydromt_logger
 
 if typing.TYPE_CHECKING:
     from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices
@@ -13,7 +14,7 @@ from hydromt._typing.metadata import SourceMetadata
 from hydromt._typing.type_def import TimeRange, Variables
 from hydromt._utils.nodata import _has_no_data
 
-logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 __all__ = [
     "_set_metadata",

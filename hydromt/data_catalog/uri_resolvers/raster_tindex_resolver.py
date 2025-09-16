@@ -1,6 +1,5 @@
 """URIResolver for raster tindex files."""
 
-from logging import Logger, getLogger
 from os.path import abspath, dirname, join
 from pathlib import Path
 from typing import List, Optional, Union
@@ -14,9 +13,10 @@ from hydromt._typing import (
     Zoom,
     exec_nodata_strat,
 )
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class RasterTindexResolver(URIResolver):

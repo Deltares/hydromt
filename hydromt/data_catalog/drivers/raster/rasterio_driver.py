@@ -1,7 +1,6 @@
 """Driver using rasterio for RasterDataset."""
 
 import copy
-from logging import Logger, getLogger
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -22,13 +21,14 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.caching import _cache_vrt_tiles
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.temp_env import temp_env
 from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.gis._gis_utils import _zoom_to_overview_level
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class RasterioDriver(RasterDatasetDriver):

@@ -1,16 +1,16 @@
 """Driver for GeoDataFrames."""
 
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
 from typing import ClassVar, List, Optional
 
 import geopandas as gpd
 
 from hydromt._typing import SourceMetadata, StrPath
 from hydromt._typing.error import NoDataStrategy
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.drivers import BaseDriver
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class GeoDataFrameDriver(BaseDriver, ABC):

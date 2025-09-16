@@ -1,6 +1,5 @@
 """Data adapter for DataFrames."""
 
-from logging import Logger, getLogger
 from typing import Optional
 
 import numpy as np
@@ -13,9 +12,10 @@ from hydromt._typing import (
     Variables,
     exec_nodata_strat,
 )
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class DataFrameAdapter(DataAdapterBase):

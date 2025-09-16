@@ -22,18 +22,18 @@ In addition the passed data catalog yaml is checked if it is a valid data catalo
 
 import argparse
 import json
-import logging
 from os.path import exists
 
 from pydantic_core import ValidationError
 
 from hydromt import DataCatalog
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 def test_dataset(args, datacatalog):

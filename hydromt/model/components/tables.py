@@ -1,12 +1,12 @@
 """Tables component."""
 
 import glob
-from logging import Logger, getLogger
 from os.path import basename, join
 from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import pandas as pd
 
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 __all__ = ["TablesComponent"]
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class TablesComponent(ModelComponent):

@@ -2,7 +2,6 @@
 
 from copy import deepcopy
 from functools import partial
-from logging import Logger, getLogger
 from os.path import splitext
 from typing import Callable, List, Optional
 
@@ -17,13 +16,14 @@ from hydromt._typing import (
     Zoom,
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers._preprocessing import PREPROCESSORS
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
 )
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 _ZARR_EXT = ".zarr"
 

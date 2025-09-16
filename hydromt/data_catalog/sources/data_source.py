@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from abc import ABC
 from copy import deepcopy
-from logging import Logger, getLogger
 from os.path import abspath, join
 from pathlib import Path, PurePath
 from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union
@@ -20,12 +19,13 @@ from pydantic import (
 )
 
 from hydromt._typing import DataType, NoDataException, NoDataStrategy, SourceMetadata
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 T = TypeVar("T")
 

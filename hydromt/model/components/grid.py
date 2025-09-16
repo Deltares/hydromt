@@ -1,6 +1,5 @@
 """Grid Component."""
 
-from logging import Logger, getLogger
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -12,6 +11,7 @@ from shapely.geometry import box
 
 from hydromt._io.readers import open_ncs
 from hydromt._io.writers import write_nc
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 __all__ = ["GridComponent"]
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class GridComponent(SpatialModelComponent):
