@@ -16,9 +16,9 @@ import xarray as xr
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt._io.readers import _read_ncs
-from hydromt._io.writers import write_nc
 from hydromt._typing.type_def import DeferedFileClose, XArrayDict
+from hydromt.io.readers import read_ncs
+from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 
@@ -125,7 +125,7 @@ class DatasetsComponent(ModelComponent):
     ) -> None:
         """Read model dataset files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`hydromt.io.readers.read_nc`
+        key-word arguments are passed to :py:func:`hydromt.io.readers.read_ncs`
 
         Parameters
         ----------
@@ -135,13 +135,13 @@ class DatasetsComponent(ModelComponent):
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.io.readers.read_nc` function.
+            `hydromt.io.readers.read_ncs` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
         filename_template = filename or self._filename
-        ncs = _read_ncs(
+        ncs = read_ncs(
             filename_template,
             root=self.root.path,
             single_var_as_array=single_var_as_array,

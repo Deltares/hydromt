@@ -18,7 +18,10 @@ New
 
 Changed
 -------
+- `hydromt.io` and its functions are now public (underscore removed).
+- Reading the hydromt workflow yaml is now done with `hydromt.io.read_workflow_yaml`.
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed).
+
 
 Fixed
 -----

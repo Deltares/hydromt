@@ -11,7 +11,6 @@ import rasterio.errors
 import xarray as xr
 from pyproj import CRS
 
-from hydromt._io.readers import _open_mfraster
 from hydromt._typing import (
     Geom,
     SourceMetadata,
@@ -25,8 +24,11 @@ from hydromt._utils.caching import _cache_vrt_tiles
 from hydromt._utils.temp_env import temp_env
 from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
-from hydromt.data_catalog.drivers import RasterDatasetDriver
+from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
+    RasterDatasetDriver,
+)
 from hydromt.gis._gis_utils import _zoom_to_overview_level
+from hydromt.io.readers import open_mfraster
 
 logger: Logger = getLogger(__name__)
 
@@ -131,11 +133,11 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> Union[xr.DataArray, xr.Dataset]:
             try:
-                return _open_mfraster(uris, mosaic=mosaic, **options)
+                return open_mfraster(uris, mosaic=mosaic, **options)
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     options.pop("overview_level")
-                    return _open_mfraster(uris, mosaic=mosaic, **options)
+                    return open_mfraster(uris, mosaic=mosaic, **options)
                 else:
                     raise
 

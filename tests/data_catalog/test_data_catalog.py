@@ -24,7 +24,6 @@ from shapely import box
 from yaml import dump
 
 from hydromt._compat import HAS_GCSFS, HAS_GDAL, HAS_OPENPYXL, HAS_S3FS
-from hydromt._io.writers import write_xy
 from hydromt._typing import Bbox, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy
 from hydromt.config import Settings
@@ -47,6 +46,7 @@ from hydromt.data_catalog.sources import (
 )
 from hydromt.data_catalog.sources.dataframe import DataFrameSource
 from hydromt.gis._gis_utils import _to_geographic_bbox
+from hydromt.io.writers import write_xy
 from tests.conftest import DATA_DIR, TEST_DATA_DIR
 
 _CATALOG_DIR = join(DATA_DIR, "catalogs")

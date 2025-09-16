@@ -10,9 +10,9 @@ from geopandas import GeoDataFrame
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt._io.readers import _read_ncs
-from hydromt._io.writers import write_nc
 from hydromt._typing.type_def import DeferedFileClose, XArrayDict
+from hydromt.io.readers import read_ncs
+from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -157,7 +157,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
         filename_template = filename or self._filename
-        ncs = _read_ncs(
+        ncs = read_ncs(
             filename_template,
             root=self.root.path,
             single_var_as_array=single_var_as_array,

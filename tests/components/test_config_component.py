@@ -5,9 +5,9 @@ import pytest
 from tomli_w import dump as toml_dump
 from yaml import dump as yaml_dump
 
-from hydromt._io.readers import _config_read, _read_yaml
-from hydromt._io.writers import write_yaml
 from hydromt._utils.path import _make_config_paths_abs, _make_config_paths_relative
+from hydromt.io.readers import _config_read, read_yaml
+from hydromt.io.writers import write_yaml
 from hydromt.model import Model
 from hydromt.model.components.config import ConfigComponent
 
@@ -157,7 +157,7 @@ def test_write_config(tmp_path: Path):
     assert not write_path.exists()
     config_component.write()
     assert write_path.exists()
-    read_contents = _read_yaml(write_path)
+    read_contents = read_yaml(write_path)
     assert read_contents == {"global": {"name": "test"}}
 
 

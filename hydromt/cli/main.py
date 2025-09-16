@@ -22,6 +22,7 @@ from hydromt._validators.model_config import HydromtModelSetup
 from hydromt._validators.region import validate_region
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
+from hydromt.io import read_workflow_yaml, read_yaml
 from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
@@ -235,17 +236,8 @@ def build(
     log._setuplog(join(model_root, HYDROMT_LOG_PATH), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
-    opt = _utils.parse_config(config)
-    if "steps" not in opt:
-        error_msg = (
-            f"It seems your workflow file at {config} does not "
-            "contain a `steps` section. Perhaps you're using a v0.x format? "
-        )
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
+    modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
 
-    kwargs = opt.pop("global", {})
-    modeltype = opt.pop("modeltype", model)
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -264,7 +256,7 @@ def build(
         )
         mod.data_catalog.cache = cache
         # build model
-        mod.build(steps=opt["steps"])
+        mod.build(steps=steps)
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
@@ -331,18 +323,8 @@ def update(
     logger.info(f"Output dir: {model_out}")
     # parse settings
     logger.info("User settings:")
-    opt = _utils.parse_config(config)
+    modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
 
-    if "steps" not in opt:
-        error_msg = (
-            f"It seems your workflow file at {config} does not "
-            "contain a `steps` section. Perhaps you're using a v0.x format? "
-        )
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
-
-    kwargs = opt.pop("global", {})
-    modeltype = opt.pop("modeltype", model)
     if modeltype not in PLUGINS.model_plugins:
         raise ValueError("Unknown model")
     # parse data catalog options from global section in config and cli options
@@ -359,7 +341,7 @@ def update(
             **kwargs,
         )
         mod.data_catalog.cache = cache
-        mod.update(model_out=model_out, steps=opt["steps"], forceful_overwrite=fo)
+        mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
@@ -437,10 +419,8 @@ def check(
         if config:
             logger.info(f"Validating config at {config}")
             try:
-                config_dict = _utils.parse_config(config)
-                if model:
-                    config_dict["modeltype"] = model
-
+                modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
+                config_dict = {"modeltype": modeltype, "global": kwargs, "steps": steps}
                 HydromtModelSetup(**config_dict)
                 logger.info("Model config valid!")
 
@@ -544,7 +524,7 @@ def export(
     append = False
 
     if config:
-        config_dict = _utils.parse_config(config)["export_data"]
+        config_dict = read_yaml(config)["export_data"]
         if "data_libs" in config_dict.keys():
             data_libs = data_libs + config_dict.pop("data_libs")
         time_range = config_dict.pop("time_range", None)

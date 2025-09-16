@@ -13,8 +13,8 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import LineString, Point, Polygon, box
 
-from hydromt._io import _open_raster
 from hydromt.gis import _gis_utils, raster
+from hydromt.io import open_raster
 from hydromt.model.processes.grid import (
     create_grid_from_region,
     create_rotated_grid_from_geom,
@@ -548,7 +548,7 @@ def test_rotated(transform, shape, tmp_path: Path):
     # test I/O
     path = tmp_path / "rotated.tif"
     da.raster.to_raster(path)
-    assert da.raster.identical_grid(_open_raster(path))
+    assert da.raster.identical_grid(open_raster(path))
     # test rasterize
     gdf = da.raster.vector_grid()
     gdf["value"] = np.arange(gdf.index.size).astype(np.float32)

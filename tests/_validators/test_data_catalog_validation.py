@@ -5,12 +5,12 @@ from pathlib import Path
 import pytest
 from pydantic import AnyUrl, ValidationError
 
-from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._validators.data_catalog import (
     DataCatalogItem,
     DataCatalogMetaData,
     DataCatalogValidator,
 )
+from hydromt.io.readers import _yml_from_uri_or_path
 
 
 @pytest.mark.skip("validators need  to be updated to newest format")
