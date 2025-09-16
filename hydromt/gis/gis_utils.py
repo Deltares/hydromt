@@ -17,7 +17,7 @@ from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom, Zoom
-from hydromt.gis._raster_utils import _cellres
+from hydromt.gis.raster_utils import _cellres
 
 __all__ = [
     "_axes_attrs",
@@ -25,8 +25,8 @@ __all__ = [
     "_parse_geom_bbox_buffer",
     "_zoom_to_overview_level",
     "_to_geographic_bbox",
-    "utm_crs",
     "parse_crs",
+    "utm_crs",
 ]
 
 logger = logging.getLogger(__name__)

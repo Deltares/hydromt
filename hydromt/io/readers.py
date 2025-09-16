@@ -28,9 +28,9 @@ from hydromt._typing.type_def import StrPath
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
-from hydromt.gis import _gis_utils, _vector_utils, raster, vector
+from hydromt.gis import gis_utils, raster, vector, vector_utils
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.gis.raster_merge import merge
+from hydromt.gis.raster_utils import merge
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
@@ -657,7 +657,7 @@ def open_vector(
                 bbox_shapely = box(*bbox)
             else:
                 bbox_shapely = None
-            bbox_reader = _gis_utils._bbox_from_file_and_filters(
+            bbox_reader = gis_utils._bbox_from_file_and_filters(
                 str(path), bbox_shapely, geom, crs
             )
             gdf = read_dataframe(str(path), bbox=bbox_reader, **kwargs)
@@ -686,7 +686,7 @@ def open_vector(
         gdf = gdf.to_crs(dst_crs)
     # filter points
     if gdf.index.size > 0 and (geom is not None or bbox is not None):
-        idx = _vector_utils._filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
+        idx = vector_utils._filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
         gdf = gdf.iloc[idx, :]
     return gdf
 

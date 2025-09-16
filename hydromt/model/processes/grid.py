@@ -13,7 +13,7 @@ from shapely.geometry import Polygon
 
 from hydromt._typing.type_def import Number
 from hydromt.data_catalog import DataCatalog
-from hydromt.gis import parse_crs, raster
+from hydromt.gis import parse_crs, raster_utils
 from hydromt.model.processes.region import (
     parse_region_basin,
     parse_region_bbox,
@@ -215,7 +215,7 @@ def _create_non_rotated_grid(
         A grid that is not rotated.
     """
     coords = {"x": xcoords, "y": ycoords}
-    return raster.full(
+    return raster_utils.full(
         coords=coords,
         nodata=1,
         dtype=np.uint8,
@@ -254,7 +254,7 @@ def create_rotated_grid_from_geom(
     transform = (
         Affine.translation(x0, y0) * Affine.rotation(rot) * Affine.scale(res, res)
     )
-    return raster.full_from_transform(
+    return raster_utils.full_from_transform(
         transform,
         shape=(nmax, mmax),
         nodata=1,
@@ -297,7 +297,7 @@ def grid_from_constant(
     da: xr.DataArray
         Grid with constant value.
     """
-    da = raster.full(
+    da = raster_utils.full(
         coords=grid_like.raster.coords,
         nodata=constant,
         dtype=dtype,

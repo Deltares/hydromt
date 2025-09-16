@@ -8,8 +8,8 @@ import numpy as np
 import pyflwdir
 import xarray as xr
 
-from hydromt.gis._raster_utils import _affine_to_coords
-from hydromt.gis._vector_utils import _nearest
+from hydromt.gis.raster_utils import _affine_to_coords
+from hydromt.gis.vector_utils import _nearest
 
 logger = logging.getLogger(__name__)
 

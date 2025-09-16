@@ -27,8 +27,8 @@ from hydromt._utils import (
     _slice_temporal_dimension,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.gis._raster_utils import _meridian_offset
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.gis.raster_utils import _meridian_offset
 
 logger = getLogger(__name__)
 

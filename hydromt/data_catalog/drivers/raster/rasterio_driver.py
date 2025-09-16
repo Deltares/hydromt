@@ -27,7 +27,7 @@ from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
 )
-from hydromt.gis._gis_utils import _zoom_to_overview_level
+from hydromt.gis.gis_utils import _zoom_to_overview_level
 from hydromt.io.readers import open_mfraster
 
 logger: Logger = getLogger(__name__)

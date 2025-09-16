@@ -18,7 +18,7 @@ from hydromt._typing import (
 )
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
-from hydromt.gis._gis_utils import _zoom_to_overview_level
+from hydromt.gis.gis_utils import _zoom_to_overview_level
 
 logger: Logger = getLogger(__name__)
 

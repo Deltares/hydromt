@@ -64,7 +64,7 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
     create_source,
 )
-from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
+from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
 
