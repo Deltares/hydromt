@@ -2,7 +2,6 @@
 
 from functools import reduce
 from itertools import chain, product
-from logging import Logger, getLogger
 from typing import Any, Iterable, Optional
 
 import pandas as pd
@@ -16,11 +15,12 @@ from hydromt._typing import (
     Zoom,
     exec_nodata_strat,
 )
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 from hydromt.gis._gis_utils import _zoom_to_overview_level
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class ConventionResolver(URIResolver):

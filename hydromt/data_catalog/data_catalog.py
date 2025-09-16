@@ -5,7 +5,6 @@ from __future__ import annotations
 import copy
 import inspect
 import itertools
-import logging
 import os
 from datetime import datetime
 from os.path import abspath, basename, dirname, exists, isfile, join, splitext
@@ -36,12 +35,13 @@ from pystac import CatalogType, MediaType
 
 from hydromt import __version__
 from hydromt._io.readers import _yml_from_uri_or_path
-from hydromt._typing import Bbox, SourceSpecDict, StrPath, TimeRange
+from hydromt._typing import Bbox, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._utils import (
     _deep_merge,
     _partition_dictionaries,
     _single_var_as_array,
+    get_hydromt_logger,
 )
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
@@ -68,7 +68,7 @@ from hydromt.data_catalog.sources import (
 from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
 from hydromt.plugins import PLUGINS
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 __all__ = ["DataCatalog"]
 
@@ -124,7 +124,7 @@ class DataCatalog(object):
 
         self._sources: Dict[str, DataSource] = {}
         self._catalogs: Dict[str, PredefinedCatalog] = {}
-        self.root: Optional[StrPath] = None
+        self.root: str | Path | None = None
         self._fallback_lib = fallback_lib
 
         # caching
@@ -662,7 +662,7 @@ class DataCatalog(object):
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         catalog_name: Optional[str] = None,
         catalog_version: Optional[str] = None,
         mark_used: bool = False,
@@ -783,7 +783,7 @@ class DataCatalog(object):
         data_dict: Dict[str, Any],
         catalog_name: str = "",
         catalog_version: Optional[str] = None,
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         category: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
@@ -924,7 +924,7 @@ class DataCatalog(object):
     def to_dict(
         self,
         source_names: Optional[List[str]] = None,
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         meta: Optional[Dict[str, Any]] = None,
         used_only: bool = False,
     ) -> Dict[str, Any]:

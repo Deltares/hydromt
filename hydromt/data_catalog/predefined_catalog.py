@@ -1,6 +1,5 @@
 """Implementation of the predefined data catalogs entry points."""
 
-import logging
 import shutil
 import sys
 from pathlib import Path
@@ -9,10 +8,12 @@ from typing import Callable, ClassVar, Optional
 import packaging.version
 import pooch
 
-from hydromt._utils import _copy_to_local, _is_valid_url
+from hydromt._utils.caching import _copy_to_local
+from hydromt._utils.log import get_hydromt_logger
+from hydromt._utils.uris import _is_valid_url
 from hydromt.config import SETTINGS
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 # get repos folder
 _hydromt_root = Path(__file__).parent.parent.parent

@@ -1,6 +1,6 @@
 """The module of HydroMT handeling file and path interactions."""
 
-from .readers import (
+from hydromt._io.readers import (
     _config_read,
     _open_geodataset,
     _open_mfcsv,
@@ -15,7 +15,7 @@ from .readers import (
     open_nc,
     open_ncs,
 )
-from .writers import (
+from hydromt._io.writers import (
     netcdf_writer,
     write_nc,
     write_toml,

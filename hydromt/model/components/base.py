@@ -1,6 +1,5 @@
 """Provides the base class for model components."""
 
-import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, cast
 from weakref import ReferenceType, ref
@@ -8,13 +7,14 @@ from weakref import ReferenceType, ref
 import xarray as xr
 
 from hydromt._typing.deferred_file_close import DeferredFileClose
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog import DataCatalog
 
 if TYPE_CHECKING:
     from hydromt.model import Model
     from hydromt.model.root import ModelRoot
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class ModelComponent(ABC):

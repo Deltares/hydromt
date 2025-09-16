@@ -1,8 +1,9 @@
-import logging
 import shutil
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from hydromt._utils.log import get_hydromt_logger
+
+logger = get_hydromt_logger(__name__)
 
 _MAX_CLOSE_ATTEMPTS = 2
 

@@ -3,7 +3,6 @@
 import hashlib
 import os
 import uuid
-from logging import Logger, getLogger
 from os.path import isdir, join
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, cast
@@ -15,24 +14,24 @@ from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
 from hydromt._typing.deferred_file_close import DeferredFileClose
-from hydromt._typing.type_def import StrPath
+from hydromt._utils.log import get_hydromt_logger
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
-def write_yaml(path: StrPath, data: Dict[str, Any]):
+def write_yaml(path: str | Path, data: Dict[str, Any]):
     """Write a dictionary to a yaml formatted file."""
     with open(path, "w") as f:
         dump_yaml(data, f)
 
 
-def write_toml(path: StrPath, data: Dict[str, Any]):
+def write_toml(path: str | Path, data: Dict[str, Any]):
     """Write a dictionary to a toml formatted file."""
     with open(path, "wb") as f:
         dump_toml(data, f)
 
 
-def write_xy(path: StrPath, gdf, fmt="%.4f"):
+def write_xy(path: str | Path, gdf, fmt="%.4f"):
     """Write geopandas.GeoDataFrame with Point geometries to point xy files.
 
     Parameters

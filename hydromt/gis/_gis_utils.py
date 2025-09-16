@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any, Dict, List, Optional, Union
 
 import geopandas as gpd
@@ -17,6 +16,7 @@ from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom, Zoom
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.gis._raster_utils import _cellres
 
 __all__ = [
@@ -29,7 +29,7 @@ __all__ = [
     "utm_crs",
 ]
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 # REPROJ

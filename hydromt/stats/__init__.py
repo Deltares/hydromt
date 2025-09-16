@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """HydroMT statistics."""
 
-from .design_events import get_peak_hydrographs, hydrograph_1d
-from .extremes import (
+from hydromt.stats.design_events import get_peak_hydrographs, hydrograph_1d
+from hydromt.stats.extremes import (
     eva,
     eva_block_maxima,
     eva_peaks_over_threshold,
@@ -10,7 +10,7 @@ from .extremes import (
     get_peaks,
     get_return_value,
 )
-from .skills import (
+from hydromt.stats.skills import (
     bias,
     kge,
     kge_2012,

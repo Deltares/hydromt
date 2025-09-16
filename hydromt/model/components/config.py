@@ -1,12 +1,12 @@
 """A component to write configuration files for model simulations/kernels."""
 
-from logging import Logger, getLogger
 from os.path import isfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
 from hydromt._io.readers import _read_toml, _read_yaml
 from hydromt._io.writers import write_toml, write_yaml
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.path import _make_config_paths_relative
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
@@ -14,7 +14,7 @@ from hydromt.model.steps import hydromt_step
 if TYPE_CHECKING:
     from hydromt.model import Model
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class ConfigComponent(ModelComponent):

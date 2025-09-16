@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """command line interface for hydromt models."""
 
-import logging
 from ast import literal_eval
 from datetime import datetime
 from json import loads as json_decode
-from os.path import join
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -26,7 +24,7 @@ from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.plugins import PLUGINS
 
-logger = logging.getLogger(__name__)
+logger = log.get_hydromt_logger(__name__)
 
 HYDROMT_LOG_PATH = "hydromt.log"
 
@@ -238,7 +236,9 @@ def build(
     -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(model_root, HYDROMT_LOG_PATH), log_level=log_level, append=False)
+    log._setuplog(
+        path=Path(model_root) / HYDROMT_LOG_PATH, log_level=log_level, append=False
+    )
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
     opt = _utils.parse_config(config)
@@ -276,7 +276,9 @@ def build(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log.remove_hydromt_file_handlers(
+            path_or_filename=HYDROMT_LOG_PATH
+        )  # Release locks on logs
 
 
 ## UPDATE
@@ -332,7 +334,7 @@ def update(
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(model_out, HYDROMT_LOG_PATH), log_level=log_level)
+    log._setuplog(path=Path(model_out) / HYDROMT_LOG_PATH, log_level=log_level)
     logger.info(f"Updating {model} model at {model_root} ({mode}).")
     logger.info(f"Output dir: {model_out}")
     # parse settings
@@ -370,7 +372,9 @@ def update(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log.remove_hydromt_file_handlers(
+            path_or_filename=HYDROMT_LOG_PATH
+        )  # Release locks on logs
 
 
 @main.command(
@@ -420,7 +424,7 @@ def check(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(".", HYDROMT_LOG_PATH), log_level=log_level)
+    log._setuplog(path=Path(".") / HYDROMT_LOG_PATH, log_level=log_level)
     failed = False
     try:
         for cat_path in data:
@@ -490,7 +494,9 @@ def check(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log.remove_hydromt_file_handlers(
+            path_or_filename=HYDROMT_LOG_PATH
+        )  # Release locks on logs
 
 
 ## Export
@@ -554,7 +560,7 @@ def export(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(join(export_dest_path, HYDROMT_LOG_PATH), log_level=log_level)
+    log._setuplog(path=Path(export_dest_path) / HYDROMT_LOG_PATH, log_level=log_level)
     logger.info(f"Output dir: {export_dest_path}")
 
     if error_on_empty:
@@ -627,7 +633,9 @@ def export(
         logger.exception(e)  # catch and log errors
         raise
     finally:
-        log._wait_and_remove_file_handlers(logger)  # Release locks on logs
+        log.remove_hydromt_file_handlers(
+            path_or_filename=HYDROMT_LOG_PATH
+        )  # Release locks on logs
 
 
 if __name__ == "__main__":

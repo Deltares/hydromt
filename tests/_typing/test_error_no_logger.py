@@ -1,4 +1,5 @@
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
+from hydromt._utils.log import _setuplog
 
 # This test is dependent on the caller and call stack.
 # Don't let pytest optimize the test.
@@ -6,8 +7,9 @@ from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 
 
 def test_logger_from_frame_in_nodata_strat(caplog):
+    _setuplog()
     exec_nodata_strat("foo", NoDataStrategy.WARN)
-    assert caplog.records[0].levelname == "WARNING"
-    assert caplog.records[0].message == "foo"
+    assert caplog.records[-1].levelname == "WARNING"
+    assert caplog.records[-1].message == "foo"
     # Test that the name of the logger is this current frame's module, not the error.py logger.
-    assert caplog.records[0].name == __name__
+    assert caplog.records[-1].name == f"hydromt.{__name__}"

@@ -2,8 +2,9 @@
 """Tests for the hydromt.model module of HydroMT."""
 
 import logging
-from os import listdir, makedirs
-from os.path import isdir, isfile, join
+import shutil
+from os import makedirs
+from os.path import isfile, join
 from pathlib import Path
 from typing import List, cast
 from unittest.mock import Mock
@@ -247,11 +248,14 @@ def test_grid_model_append(demda, df, tmp_path: Path):
 @pytest.mark.integration
 def test_model_build_update(tmp_path: Path, demda, obsda):
     bbox = [12.00, 45.00, 12.25, 45.25]
+    root_orig = tmp_path / "model"
+    log_file = Path("hydromt.log")
     model = Model(
-        root=tmp_path,
+        root=root_orig,
         mode="w",
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
+        log_file=log_file,
     )
     geoms_component = GeomsComponent(model)
     model.add_component("geoms", geoms_component)
@@ -266,28 +270,42 @@ def test_model_build_update(tmp_path: Path, demda, obsda):
     )
     model.grid.set(data=ds)
     model.write()
+    model.close()
 
-    assert isfile(join(model.root.path, "hydromt.log"))
-    assert isdir(join(model.root.path, "grid")), listdir(model.root.path)
+    assert (root_orig / log_file).exists()
+    assert (root_orig / "grid").exists(), root_orig.iterdir()
 
     # read and update model
-    model = Model(
-        root=tmp_path,
+    model_update = Model(
+        root=root_orig,
         mode="r",
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
+        log_file=log_file,
     )
-    geoms_component = GeomsComponent(model)
-    model.add_component("geoms", geoms_component)
-    model_out = tmp_path / "update"
-    model.update(model_out=model_out, steps=[])  # write only
-    assert Path(model_out, "grid").exists(), listdir(model_out)
+    geoms_component = GeomsComponent(model_update)
+    model_update.add_component("geoms", geoms_component)
+
+    root_update = tmp_path / "model_update"
+    model_update.update(model_out=root_update, steps=[])  # write only
+
+    assert (root_update / log_file).exists()
+    assert (root_update / "grid").exists(), root_update.iterdir()
+
+    # delete models to validate all files were closed correctly
+    shutil.rmtree(root_orig)
+    shutil.rmtree(root_update)
 
 
 @pytest.mark.integration
 def test_model_build_update_with_data(
     tmp_path: Path, demda, obsda, monkeypatch, caplog
 ):
+    def assert_all_datasets_exist(data_dict, base_filename: str, root: Path):
+        for name in data_dict:
+            path = (root / base_filename).with_name(f"{name}.nc")
+            assert path.exists(), f"Expected file not found: {path}"
+
     caplog.set_level(logging.DEBUG)
     # users will not have a use for `set` in their yaml file because there is
     # nothing they will have access to then that they cat set it to
@@ -332,6 +350,15 @@ def test_model_build_update_with_data(
             },
         ],
     )
+    # Check that variables are present + files were created
+    assert "elevtn" in model.maps.data
+    assert "precip" in model.forcing.data
+    assert (model.root.path / model.grid._filename).exists()
+    assert_all_datasets_exist(model.maps.data, model.maps._filename, model.root.path)
+    assert_all_datasets_exist(
+        model.forcing.data, model.forcing._filename, model.root.path
+    )
+
     # Now update the model
     model = Model(
         root=tmp_path,
@@ -355,23 +382,19 @@ def test_model_build_update_with_data(
             {"forcing2.set": {"data": obsda * 0.2, "name": "precip"}},
         ]
     )
-    # Check that variables from build AND update are present
-    assert "elevtn" in model.maps.data
-    assert "elevtn2" in model.maps.data
-    assert "precip" in model.forcing.data
-    assert "temp" in model.forcing.data
 
-    assert any(
-        log_record.message == "maps.set.name=elevtn2" for log_record in caplog.records
+    # Check that old and new variables are present + files were created
+    assert {"elevtn", "elevtn2"} <= set(model.maps.data)
+    assert {"precip", "temp"} <= set(model.forcing.data)
+    assert "precip" in model.forcing2.data
+    assert "maps.set.name=elevtn2" in caplog.messages
+    assert (model.root.path / model.grid._filename).exists()
+    assert_all_datasets_exist(model.maps.data, model.maps._filename, model.root.path)
+    assert_all_datasets_exist(
+        model.forcing.data, model.forcing._filename, model.root.path
     )
-    assert any(
-        log_record.message
-        == f"Could not write to file {Path(tmp_path, 'spatial_datasets', 'precip.nc').as_posix()}, deferring write"
-        for log_record in caplog.records
-    )
-    assert any(
-        log_record.message.startswith("Moving temporary file")
-        for log_record in caplog.records
+    assert_all_datasets_exist(
+        model.forcing2.data, model.forcing2._filename, model.root.path
     )
 
 

@@ -1,7 +1,6 @@
 """Driver for handling IO of GeoDatasets."""
 
 from abc import ABC, abstractmethod
-from logging import getLogger
 from typing import List, Optional
 
 import xarray as xr
@@ -9,9 +8,10 @@ import xarray as xr
 from hydromt._typing import Geom, SourceMetadata, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Predicate
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.drivers import BaseDriver
 
-logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class GeoDatasetDriver(BaseDriver, ABC):

@@ -1,6 +1,5 @@
 """Caching mechanisms used in HydroMT."""
 
-import logging
 import os
 import xml.etree.ElementTree as ET
 from ast import literal_eval
@@ -15,7 +14,7 @@ from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
 
 from hydromt._compat import HAS_GDAL
-from hydromt._typing.type_def import StrPath
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.uris import _strip_scheme, _strip_vsi
 from hydromt.config import SETTINGS
 
@@ -24,7 +23,7 @@ if HAS_GDAL:
 
     gdal.UseExceptions()
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 __all__ = ["_copy_to_local", "_cache_vrt_tiles"]
 
@@ -91,7 +90,7 @@ def _cache_vrt_tiles(
     vrt_uri: str,
     fs: Optional[AbstractFileSystem] = None,
     geom: Optional[gpd.GeoSeries] = None,
-    cache_dir: StrPath = SETTINGS.cache_root,
+    cache_dir: str | Path = SETTINGS.cache_root,
 ) -> Path:
     """Cache vrt tiles that intersect with geom.
 

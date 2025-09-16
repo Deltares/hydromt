@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any, Hashable, List, Mapping, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -15,10 +14,11 @@ from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
 from xarray.core.types import DataVars
 
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.gis import raster
 from hydromt.gis._vector_utils import _filter_gdf
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 GDAL_VERSION = gdal_version()
 
 

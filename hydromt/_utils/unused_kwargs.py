@@ -1,9 +1,10 @@
 """Utilities for logging unused kwargs."""
 
-from logging import Logger, getLogger
 from typing import Any, Dict
 
-logger: Logger = getLogger(__name__)
+from hydromt._utils.log import get_hydromt_logger
+
+logger = get_hydromt_logger(__name__)
 
 __all__ = ["_warn_on_unused_kwargs"]
 

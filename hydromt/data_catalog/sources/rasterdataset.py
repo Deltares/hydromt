@@ -1,6 +1,5 @@
 """DataSource class for the RasterDataset type."""
 
-from logging import Logger, getLogger
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
 
@@ -24,12 +23,13 @@ from hydromt._typing import (
     TotalBounds,
     Zoom,
 )
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class RasterDatasetSource(DataSource):

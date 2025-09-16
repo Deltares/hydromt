@@ -1,8 +1,7 @@
 import re
+from pathlib import Path
 from typing import Optional, Tuple
 from urllib.parse import urlparse
-
-from hydromt._typing import StrPath
 
 __all__ = ["_strip_scheme", "_is_valid_url"]
 
@@ -27,7 +26,7 @@ def _strip_vsi(uri: str) -> Tuple[Optional[str], str]:
     return (prefix, uri.lstrip(prefix))
 
 
-def _is_valid_url(uri: StrPath) -> bool:
+def _is_valid_url(uri: str | Path) -> bool:
     """Check if uri is valid."""
     try:
         result = urlparse(str(uri))

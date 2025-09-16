@@ -1,6 +1,6 @@
 """Tests for the cli submodule."""
 
-from logging import NOTSET, WARNING, Logger, getLogger
+from logging import NOTSET, WARNING, Logger
 from os.path import join
 from pathlib import Path
 from typing import Generator
@@ -10,6 +10,7 @@ from click.testing import CliRunner
 
 from hydromt import __version__
 from hydromt._typing import NoDataException
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.cli.main import main as hydromt_cli
 from hydromt.model.components.grid import GridComponent
 from tests.conftest import TEST_DATA_DIR
@@ -60,7 +61,7 @@ def test_cli_update_help():
 @pytest.fixture
 def _reset_log_level() -> Generator[None, None, None]:
     yield
-    main_logger: Logger = getLogger("hydromt")
+    main_logger: Logger = get_hydromt_logger()
     main_logger.setLevel(NOTSET)  # Most verbose so all messages get passed
 
 

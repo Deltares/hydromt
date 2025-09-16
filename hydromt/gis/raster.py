@@ -10,7 +10,6 @@
 from __future__ import annotations
 
 import itertools
-import logging
 import math
 import os
 from itertools import product
@@ -37,10 +36,11 @@ from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.gis import _gis_utils, _raster_utils
 from hydromt.gis._gdal_drivers import GDAL_EXT_CODE_MAP
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 XDIMS = ("x", "longitude", "lon", "long")
 YDIMS = ("y", "latitude", "lat")
 GEO_MAP_COORD = "spatial_ref"

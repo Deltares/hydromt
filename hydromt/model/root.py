@@ -1,17 +1,20 @@
 """the new model root class."""
 
-from logging import FileHandler, Logger, getLogger
-from os import makedirs, remove
-from os.path import dirname, exists, isdir, join
+import logging
+from os.path import isdir
 from pathlib import Path
 from shutil import SameFileError, copyfile
 from typing import Optional
 
 from hydromt._typing import ModeLike, ModelMode
-from hydromt._typing.type_def import StrPath
-from hydromt._utils.log import _add_filehandler
+from hydromt._utils.log import (
+    _add_filehandler,
+    _setuplog,
+    get_hydromt_logger,
+    remove_hydromt_file_handlers,
+)
 
-logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 __all__ = ["ModelRoot"]
 
@@ -21,39 +24,82 @@ class ModelRoot:
 
     def __init__(
         self,
-        path: StrPath,
+        path: Path,
         mode: ModeLike = "w",
+        log_file: Path | None = None,
+        log_level: int = logging.INFO,
     ):
-        self.set(path, mode)
+        self._log_file: Path | None = log_file
+        self._log_level: int = log_level
+        self.mode = mode
+
+        self.path = Path(path).resolve()
+        self.path.mkdir(parents=True, exist_ok=True)
+
+        _setuplog(
+            path=self.path / log_file if log_file is not None else None,
+            log_level=self._log_level,
+            append=self.mode == ModelMode.APPEND,
+        )
+
+        self.set(path, mode, log_file)
 
     def set(
         self,
-        path: StrPath,
+        path: Path,
         mode: Optional[ModeLike] = None,
+        log_file: Optional[Path] = None,
+        log_level: Optional[int] = None,
     ) -> Path:
         """Set the path of the root, and create the necessary loggers."""
-        if hasattr(self, "path"):
-            old_path = self.path
-        else:
-            old_path = None
+        logger.info(f"Setting root to {path}")
 
-        logger.info(f"setting root to {path}")
-
+        current_root = self.path
         self.path = Path(path)
+        self.path.mkdir(parents=True, exist_ok=True)
 
         if mode:
-            self._mode = ModelMode.from_str_or_mode(mode)
+            self.mode = mode
 
         if self.is_reading_mode():
             self._check_root_exists()
 
-        if self.mode is not None:
-            is_override = self.mode.is_override_mode()
-        else:
-            is_override = False
+        # Decide new log file location
+        _fn = log_file or self._log_file or None
+        new_log_file = self.path / _fn if _fn is not None else None
 
-        self._update_logger_filehandler(old_path, is_override)
+        # Remove old log file handlers
+        if self._log_file is not None:
+            old_log_file = current_root / self._log_file
+            remove_hydromt_file_handlers(path_or_filename=old_log_file)
+
+            # Copy old log file, will get cleared below if in overwrite mode
+            if new_log_file is not None:
+                new_log_file.parent.mkdir(parents=True, exist_ok=True)
+                if old_log_file.exists():
+                    try:
+                        copyfile(old_log_file, new_log_file)
+                    except SameFileError:
+                        pass
+
+        # Add new log file handler
+        if new_log_file is not None:
+            self._log_level = log_level or self._log_level
+            # Clear logs if in overwrite mode
+            if self.mode == ModelMode.FORCED_WRITE:
+                new_log_file.unlink(missing_ok=True)
+            _add_filehandler(path=new_log_file, log_level=self._log_level)
+            self._log_file = new_log_file.relative_to(self.path)
+        else:
+            self._log_file = None
+
         return self.path
+
+    def close(self) -> None:
+        """Close the model root, removing any open log file handlers."""
+        if self._log_file is not None:
+            remove_hydromt_file_handlers(path_or_filename=self.path / self._log_file)
+            self._log_file = None
 
     def _assert_write_mode(self) -> None:
         if not self.mode.is_writing_mode():
@@ -85,44 +131,6 @@ class ModelRoot:
     def is_override_mode(self) -> bool:
         """Test whether we are in override mode or not."""
         return self._mode.is_override_mode()
-
-    def _update_logger_filehandler(
-        self, old_path: Optional[Path] = None, overwrite: bool = False
-    ):
-        """Update the file handler to save logs in self.path/hydromt.log. If a log file at old_path exists copy it to self.path and append."""
-        new_path = join(self.path, "hydromt.log")
-        if old_path == new_path:
-            return
-
-        makedirs(self.path, exist_ok=True)
-
-        main_logger: Logger = getLogger("hydromt")
-
-        log_level = 20  # default, but overwritten by the level of active loggers
-        for handler in main_logger.handlers:
-            log_level = handler.level
-            if isinstance(handler, FileHandler):
-                if dirname(handler.baseFilename) != self.path:
-                    # first remove so no new logs come in
-                    main_logger.removeHandler(handler)
-                    # wait for all messages to be processed
-                    handler.flush()
-                    # close the handler
-                    handler.close()
-                break
-
-        if overwrite and exists(new_path):
-            remove(new_path)
-
-        if old_path is not None and exists(old_path):
-            old_log_path = join(old_path, "hydromt.log")
-            if exists(old_log_path):
-                try:
-                    copyfile(old_log_path, new_path)
-                except SameFileError:
-                    pass
-
-        _add_filehandler(main_logger, new_path, log_level)
 
     def __repr__(self):
         return f"ModelRoot(path={self.path}, mode={self._mode})"

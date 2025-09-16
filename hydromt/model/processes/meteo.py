@@ -1,6 +1,5 @@
 """Implementaion of forcing workflows."""
 
-import logging
 import re
 from typing import Dict, Literal, Optional, Union
 
@@ -9,11 +8,12 @@ import pandas as pd
 import xarray as xr
 
 from hydromt._compat import HAS_PYET
+from hydromt._utils.log import get_hydromt_logger
 
 if HAS_PYET:
     import pyet
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 __all__ = [
     "precip",

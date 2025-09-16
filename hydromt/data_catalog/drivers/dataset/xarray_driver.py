@@ -2,7 +2,6 @@
 
 from copy import copy
 from functools import partial
-from logging import Logger, getLogger
 from os.path import splitext
 from typing import Callable, ClassVar, List, Optional
 
@@ -14,11 +13,12 @@ from hydromt._typing import (
     TimeRange,
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
+from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers._preprocessing import PREPROCESSORS
 from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 
-logger: Logger = getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 
 class DatasetXarrayDriver(DatasetDriver):

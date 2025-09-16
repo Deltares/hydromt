@@ -5,13 +5,14 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Optional
 
 import numpy as np
 import xarray as xr
 from pyflwdir import gis_utils as gis
 from rasterio.transform import Affine
+
+from hydromt._utils.log import get_hydromt_logger
 
 __all__ = [
     "_affine_to_coords",
@@ -23,7 +24,7 @@ __all__ = [
     "_spread2d",
 ]
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 
 _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
 
