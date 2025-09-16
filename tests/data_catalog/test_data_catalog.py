@@ -45,7 +45,7 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
 )
 from hydromt.data_catalog.sources.dataframe import DataFrameSource
-from hydromt.gis._gis_utils import _to_geographic_bbox
+from hydromt.gis.gis_utils import _to_geographic_bbox
 from hydromt.io.writers import write_xy
 from tests.conftest import DATA_DIR, TEST_DATA_DIR
 

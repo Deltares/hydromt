@@ -14,7 +14,7 @@ from hydromt._compat import HAS_GDAL
 from hydromt._typing import SourceMetadata
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.raster.rasterio_driver import RasterioDriver
-from hydromt.gis.raster import full_from_transform
+from hydromt.gis.raster_utils import full_from_transform
 from hydromt.io import open_mfraster, open_raster
 from tests.conftest import TEST_DATA_DIR
 

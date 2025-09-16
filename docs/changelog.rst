@@ -20,6 +20,8 @@ Changed
 -------
 - `hydromt.io` and its functions are now public (underscore removed).
 - Reading the hydromt workflow yaml is now done with `hydromt.io.read_workflow_yaml`.
+- Important GIS methods are now public in `hydromt.gis.gis_utils`, `hydromt.gis.raster_utils` and `hydromt.gis.vector_utils`.
+- HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils` and its functions are now public (underscore removed).
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed).
 
 

@@ -4,7 +4,7 @@ import xarray as xr
 from hydromt.data_catalog.drivers.preprocessing import (
     round_latlon,
 )
-from hydromt.gis.raster import full_from_transform
+from hydromt.gis.raster_utils import full_from_transform
 
 
 def test_round_latlon():

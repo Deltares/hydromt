@@ -13,7 +13,7 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import LineString, Point, Polygon, box
 
-from hydromt.gis import parse_crs, raster
+from hydromt.gis import parse_crs, raster, raster_utils
 from hydromt.io import open_raster
 from hydromt.model.processes.grid import (
     create_grid_from_region,
@@ -50,7 +50,7 @@ testdata = [(get_transform(*d[:3]), d[-2]) for d in tests[:4]]
 @pytest.mark.parametrize(("origin", "rotation", "res", "shape", "bounds"), tests)
 def test_raster_properties(origin, rotation, res, shape, bounds):
     transform = get_transform(origin, rotation, res)
-    da = raster.full_from_transform(transform, shape, name="test", crs=4326)
+    da = raster_utils.full_from_transform(transform, shape, name="test", crs=4326)
     assert np.allclose(rotation, da.raster.rotation)
     assert np.allclose(res, da.raster.res)
     assert np.allclose(origin, da.raster.origin)
@@ -66,7 +66,7 @@ def test_raster_properties(origin, rotation, res, shape, bounds):
 @pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_attrs(transform, shape):
     # checks on raster spatial attributes
-    da = raster.full_from_transform(transform, shape, name="test")
+    da = raster_utils.full_from_transform(transform, shape, name="test")
     da.drop_vars(raster.GEO_MAP_COORD)  # reset attrs
     assert isinstance(da.raster.attrs, dict)
     assert raster.GEO_MAP_COORD in da.coords
@@ -82,7 +82,7 @@ def test_attrs(transform, shape):
 
 
 def test_crs():
-    da = raster.full_from_transform(*testdata[0], name="test")
+    da = raster_utils.full_from_transform(*testdata[0], name="test")
     # check crs
     da[raster.GEO_MAP_COORD].attrs = dict()
     da.attrs.update(crs=4326)
@@ -103,7 +103,7 @@ def test_crs():
 
 
 def test_gdal(tmp_path: Path):
-    da = raster.full_from_transform(*testdata[0], name="test")
+    da = raster_utils.full_from_transform(*testdata[0], name="test")
     # Add crs
     da.attrs.update(crs=4326)
     da.raster.set_crs()
@@ -172,12 +172,12 @@ def test_check_dimensions(rioda):
 
 def test_from_numpy_full_like():
     # test full with rotated grid
-    da_rot = raster.full_from_transform(*testdata[-1], nodata=-1, name="test")
-    da_rot1 = raster.full(da_rot.raster.coords, nodata=-1, name="test")
+    da_rot = raster_utils.full_from_transform(*testdata[-1], nodata=-1, name="test")
+    da_rot1 = raster_utils.full(da_rot.raster.coords, nodata=-1, name="test")
     assert da_rot1.raster.identical_grid(da_rot1)
     # test with normal grid
-    da = raster.full_from_transform(*testdata[0], nodata=-1, name="test")
-    da0 = raster.full_like(da)
+    da = raster_utils.full_from_transform(*testdata[0], nodata=-1, name="test")
+    da0 = raster_utils.full_like(da)
     da1 = raster.RasterDataArray.from_numpy(
         da.values[None, :],
         da.raster.transform,
@@ -194,7 +194,7 @@ def test_from_numpy_full_like():
     with pytest.raises(ValueError, match="Only 2D and 3D"):
         raster.RasterDataArray.from_numpy(da.values[None, None, :], da.raster.transform)
     with pytest.raises(ValueError, match="Only 2D and 3D"):
-        raster.full_from_transform(da.raster.transform, (1, 1, 5, 5))
+        raster_utils.full_from_transform(da.raster.transform, (1, 1, 5, 5))
     ds1 = raster.RasterDataset.from_numpy(
         data_vars={"var0": da.values, "var1": (da.values, da.raster.nodata)},
         transform=da.raster.transform,
@@ -208,12 +208,12 @@ def test_from_numpy_full_like():
             transform=da.raster.transform,
         )
     with pytest.raises(ValueError, match="should be xarray.DataArray"):
-        raster.full_like(da.to_dataset())
+        raster_utils.full_like(da.to_dataset())
 
 
 @pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_idx(transform, shape):
-    da = raster.full_from_transform(transform, shape, name="test")
+    da = raster_utils.full_from_transform(transform, shape, name="test")
     size = np.multiply(*da.raster.shape)
     xs, ys = da.raster.xcoords.values.ravel(), da.raster.ycoords.values.ravel()
     assert np.allclose(([xs[0]], [ys[0]]), da.raster.idx_to_xy(0))
@@ -273,7 +273,7 @@ def test_rasterize_geometry(rioda):
 
 
 def test_vectorize():
-    da = raster.full_from_transform(*testdata[0], nodata=1, name="test")
+    da = raster_utils.full_from_transform(*testdata[0], nodata=1, name="test")
     da.raster.set_crs(4326)
     # all nodata
     gdf = da.raster.vectorize()
@@ -293,7 +293,9 @@ def test_vectorize():
 @pytest.mark.parametrize(("transform", "shape"), testdata)
 def test_clip(transform, shape):
     # create rasterdataarray with crs
-    da = raster.full_from_transform(transform, shape, nodata=1, name="test", crs=4326)
+    da = raster_utils.full_from_transform(
+        transform, shape, nodata=1, name="test", crs=4326
+    )
     da.raster.set_nodata(0)
     # attributes do not persist with xarray slicing
     da1 = da[:2, :2]
@@ -371,11 +373,11 @@ def test_reproject():
     # create data
     kwargs = dict(name="test", crs=4326)
     transform, shape = testdata[1][0], (9, 5, 5)
-    da0 = raster.full_from_transform(transform, shape, **kwargs)
+    da0 = raster_utils.full_from_transform(transform, shape, **kwargs)
     da0.data = np.random.random(da0.shape)
     ds0 = da0.to_dataset()
-    ds1 = raster.full_from_transform(*testdata[1], **kwargs).to_dataset()
-    da2 = raster.full_from_transform(*testdata[3], **kwargs).to_dataset()
+    ds1 = raster_utils.full_from_transform(*testdata[1], **kwargs).to_dataset()
+    da2 = raster_utils.full_from_transform(*testdata[3], **kwargs).to_dataset()
     assert np.all(ds1.raster.bounds == ds1.raster.transform_bounds(ds1.raster.crs))
     # test out of bounds -> return empty grid
     ds2_empty = ds0.raster.reproject_like(da2)
@@ -443,7 +445,7 @@ def test_area_grid(rioda):
 
 def test_interpolate_na():
     # nodata is nan
-    da0 = raster.full_from_transform(*testdata[0], nodata=np.nan)
+    da0 = raster_utils.full_from_transform(*testdata[0], nodata=np.nan)
     da0.values.flat[np.array([0, 3, -6])] = np.array([1, 1, 2])
     # default nearest interpolation
     da1 = da0.raster.interpolate_na()
@@ -491,7 +493,7 @@ def test_vector_grid(rioda):
 
 def test_sample():
     transform, shape = [0.2, 0.0, 3.0, 0.0, 0.25, -11.0], (8, 10)
-    da = raster.full_from_transform(transform, shape, name="test", crs=4326)
+    da = raster_utils.full_from_transform(transform, shape, name="test", crs=4326)
     da.data = np.arange(da.raster.size).reshape(da.raster.shape).astype(da.dtype)
     gdf0 = gpd.GeoDataFrame(geometry=gpd.points_from_xy(da.x.values[:8], da.y.values))
 
@@ -510,7 +512,7 @@ def test_sample():
 
 def test_zonal_stats():
     transform, shape = [0.2, 0.0, 3.0, 0.0, -0.25, -11.0], (8, 10)
-    da = raster.full_from_transform(transform, shape, name="test", crs=4326)
+    da = raster_utils.full_from_transform(transform, shape, name="test", crs=4326)
     da.data = np.arange(da.raster.size).reshape(da.raster.shape).astype(da.dtype)
     ds = xr.merge([da, da.expand_dims("time").to_dataset().rename({"test": "test1"})])
     w, s, e, n = da.raster.bounds
@@ -542,7 +544,7 @@ def test_zonal_stats():
 
 @pytest.mark.parametrize(("transform", "shape"), testdata[-2:])
 def test_rotated(transform, shape, tmp_path: Path):
-    da = raster.full_from_transform(transform, shape, nodata=-1, name="test")
+    da = raster_utils.full_from_transform(transform, shape, nodata=-1, name="test")
     da.raster.set_crs(4326)
     da[:] = 1
     # test I/O

@@ -15,14 +15,6 @@ High level methods
 
 .. autosummary::
    :toctree: ../_generated
-
-   raster.full
-   raster.full_like
-   raster.full_from_transform
-   raster_merge.merge
-
-.. autosummary::
-   :toctree: ../_generated
    :template: autosummary/accessor_method.rst
 
    DataArray.raster.from_numpy
@@ -151,6 +143,19 @@ Writing methods
 
    DataArray.raster.to_raster
    Dataset.raster.to_mapstack
+
+Raster utilities
+----------------
+
+.. autosummary::
+   :toctree: ../_generated
+
+   raster_utils.cellres
+   raster_utils.full
+   raster_utils.full_like
+   raster_utils.full_from_transform
+   raster_utils.merge
+   raster_utils.spread2d
 
 .. _geodataset_api:
 
@@ -291,5 +296,8 @@ Other useful GIS related methods.
 .. autosummary::
    :toctree: ../_generated
 
-   gis.parse_crs
-   gis.utm_crs
+   gis.gis_utils.parse_crs
+   gis.gis_utils.utm_crs
+   gis.gis_utils.zoom_to_overview_level
+   gis.vector_utils.nearest_merge
+   gis.vector_utils.nearest

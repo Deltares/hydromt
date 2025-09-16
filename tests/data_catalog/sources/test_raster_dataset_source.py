@@ -10,7 +10,7 @@ from hydromt.data_catalog.adapters import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
-from hydromt.gis._gis_utils import _to_geographic_bbox
+from hydromt.gis.gis_utils import _to_geographic_bbox
 
 
 class TestRasterDatasetSource:
