@@ -805,7 +805,14 @@
 
         <span class="n">stac_catalog</span><span class="o">.</span><span class="n">add_item</span><span class="p">(</span><span class="n">stac_item</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">stac_catalog</span></div>
-</div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_infer_default_driver</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_infer_default_driver</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="n">GeoDatasetDriver</span><span class="p">)</span></div>
 
 </pre></div>
 

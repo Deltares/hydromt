@@ -480,6 +480,9 @@
 
 <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
+<span class="n">_ZARR_EXT</span> <span class="o">=</span> <span class="s2">&quot;.zarr&quot;</span>
+<span class="n">_NETCDF_EXT</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;.nc&quot;</span><span class="p">,</span> <span class="s2">&quot;.netcdf&quot;</span><span class="p">]</span>
+
 
 <div class="viewcode-block" id="GeoDatasetXarrayDriver">
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.html#hydromt.data_catalog.drivers.GeoDatasetXarrayDriver">[docs]</a>
@@ -488,6 +491,7 @@
 
     <span class="n">name</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;geodataset_xarray&quot;</span>
     <span class="n">supports_writing</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">SUPPORTED_EXTENSIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">_ZARR_EXT</span><span class="p">,</span> <span class="o">*</span><span class="n">_NETCDF_EXT</span><span class="p">}</span>
 
 <div class="viewcode-block" id="GeoDatasetXarrayDriver.read">
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.read.html#hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.read">[docs]</a>
@@ -525,7 +529,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown preprocessor: &#39;</span><span class="si">{</span><span class="n">preprocessor_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
 
         <span class="n">first_ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">first_ext</span> <span class="o">==</span> <span class="s2">&quot;.zarr&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">first_ext</span> <span class="o">==</span> <span class="n">_ZARR_EXT</span><span class="p">:</span>
             <span class="n">opn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">open_zarr</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
             <span class="n">datasets</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">_uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">:</span>
@@ -538,7 +542,7 @@
                     <span class="p">)</span>
 
             <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">first_ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.nc&quot;</span><span class="p">,</span> <span class="s2">&quot;.netcdf&quot;</span><span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">first_ext</span> <span class="ow">in</span> <span class="n">_NETCDF_EXT</span><span class="p">:</span>
             <span class="n">filtered_uris</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">_uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">:</span>
                 <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">_uri</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -572,9 +576,9 @@
 <span class="sd">        args:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.zarr&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="n">_ZARR_EXT</span><span class="p">:</span>
             <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">to_zarr</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.nc&quot;</span><span class="p">,</span> <span class="s2">&quot;.netcdf&quot;</span><span class="p">]:</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">_NETCDF_EXT</span><span class="p">:</span>
             <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown extension for GeoDatasetXarrayDriver: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>

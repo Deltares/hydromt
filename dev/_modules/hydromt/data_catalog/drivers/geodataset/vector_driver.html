@@ -481,6 +481,17 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;VectorGeodatasetDriver for vector data.&quot;&quot;&quot;</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;geodataset_vector&quot;</span>
+    <span class="n">SUPPORTED_EXTENSIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.parquet&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.xlsx&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.xls&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.xy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.gpkg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.shp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.geojson&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.fgb&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
 
 <div class="viewcode-block" id="GeoDatasetVectorDriver.read">
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.read.html#hydromt.data_catalog.drivers.GeoDatasetVectorDriver.read">[docs]</a>
