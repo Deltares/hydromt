@@ -4,7 +4,7 @@
 from xarray import DataArray, Dataset  # noqa: F401
 
 from hydromt.gis import flw
-from hydromt.gis._gis_utils import utm_crs
+from hydromt.gis._gis_utils import parse_crs, utm_crs
 from hydromt.gis.raster import (
     RasterDataArray,
     RasterDataset,
@@ -23,5 +23,6 @@ __all__ = [
     "full_from_transform",
     "full_like",
     "utm_crs",
+    "parse_crs",
     "flw",
 ]

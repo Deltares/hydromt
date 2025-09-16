@@ -283,3 +283,13 @@ visit the `pyflwdir docs. <https://deltares.github.io/pyflwdir/latest/>`_
    flw.outlet_map
    flw.clip_basins
    flw.dem_adjust
+
+Other GIS methods
+=================
+Other useful GIS related methods.
+
+.. autosummary::
+   :toctree: ../_generated
+
+   gis.parse_crs
+   gis.utm_crs

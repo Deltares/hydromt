@@ -13,7 +13,7 @@ import xarray as xr
 from affine import Affine
 from shapely.geometry import LineString, Point, Polygon, box
 
-from hydromt.gis import _gis_utils, raster
+from hydromt.gis import parse_crs, raster
 from hydromt.io import open_raster
 from hydromt.model.processes.grid import (
     create_grid_from_region,
@@ -267,7 +267,7 @@ def test_rasterize_geometry(rioda):
     assert da2.name == "area"
     assert da2.raster.nodata == -1.0
     rioda_grid = rioda.raster.vector_grid()
-    crs_utm = _gis_utils._parse_crs("utm", rioda_grid.total_bounds)
+    crs_utm = parse_crs("utm", rioda_grid.total_bounds)
     rioda_grid = rioda_grid.to_crs(crs_utm)
     assert da2.values.max() == rioda_grid.area.max()
 
@@ -568,7 +568,7 @@ def test_rotated(transform, shape, tmp_path: Path):
     # zonal stat
     assert np.all(idxs == da2.raster.zonal_stats(gdf_pnts, ["mean"])["value_mean"])
     # test reproject to non-rotated utm grid
-    dst_crs = _gis_utils._parse_crs("utm", da.raster.bounds)
+    dst_crs = parse_crs("utm", da.raster.bounds)
     da2_reproj = da2.raster.reproject(dst_crs=dst_crs)
     assert np.all(da2.raster.box.intersects(da2_reproj.raster.box.to_crs(4326)))
 

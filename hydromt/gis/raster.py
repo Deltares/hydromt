@@ -37,7 +37,7 @@ from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
-from hydromt.gis import _gis_utils, _raster_utils
+from hydromt import gis
 from hydromt.gis._gdal_drivers import GDAL_EXT_CODE_MAP
 
 logger = logging.getLogger(__name__)
@@ -197,7 +197,7 @@ def full_from_transform(
         raise ValueError("Only 2D and 3D data arrays supported.")
     if not isinstance(transform, Affine):
         transform = Affine(*transform)
-    coords = _raster_utils._affine_to_coords(
+    coords = gis._raster_utils._affine_to_coords(
         transform, shape[-2:], x_dim="x", y_dim="y"
     )
     dims = ("y", "x")
@@ -451,7 +451,7 @@ class XRasterBase(XGeoBase):
         if self.crs is None:
             raise ValueError("CRS is missing. Use set_crs function to resolve.")
         _da = self._obj
-        x_dim, y_dim, x_attrs, y_attrs = _gis_utils._axes_attrs(self.crs)
+        x_dim, y_dim, x_attrs, y_attrs = gis._gis_utils._axes_attrs(self.crs)
         if rename_dims and (x_dim != self.x_dim or y_dim != self.y_dim):
             _da = _da.rename({self.x_dim: x_dim, self.y_dim: y_dim})
             _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
@@ -766,7 +766,7 @@ class XRasterBase(XGeoBase):
             transform = obj_out.raster.transform
         else:
             transform = self.transform
-        x_dim, y_dim, x_attrs, y_attrs = _gis_utils._axes_attrs(crs)
+        x_dim, y_dim, x_attrs, y_attrs = gis._gis_utils._axes_attrs(crs)
         if rename_dims:
             obj_out = obj_out.rename({self.x_dim: x_dim, self.y_dim: y_dim})
         else:
@@ -1465,9 +1465,7 @@ class XRasterBase(XGeoBase):
 
         # find the best UTM CRS for area computation
         if gdf_intersect.crs.is_geographic:
-            crs_utm = _gis_utils._parse_crs(
-                "utm", gdf_intersect.to_crs(4326).total_bounds
-            )
+            crs_utm = gis.parse_crs("utm", gdf_intersect.to_crs(4326).total_bounds)
         else:
             crs_utm = gdf_intersect.crs
 
@@ -1596,7 +1594,7 @@ class XRasterBase(XGeoBase):
                 xs, ys = transform * (np.array([i, i]), np.array([0, nrow]))
                 geoms.append(LineString(zip(xs, ys, strict=False)))
         elif geom_type.lower().startswith("point"):
-            x, y = _raster_utils._affine_to_meshgrid(transform, (nrow, ncol))
+            x, y = gis._raster_utils._affine_to_meshgrid(transform, (nrow, ncol))
             geoms = gpd.points_from_xy(x.ravel(), y.ravel())
         else:
             raise ValueError(f"geom_type {geom_type} not recognized")
@@ -1615,7 +1613,9 @@ class XRasterBase(XGeoBase):
                 "area_grid has not yet been implemented for rotated grids."
             )
         if self.crs.is_geographic:
-            data = _raster_utils._reggrid_area(self.ycoords.values, self.xcoords.values)
+            data = gis._raster_utils._reggrid_area(
+                self.ycoords.values, self.xcoords.values
+            )
         elif self.crs.is_projected:
             ucf = rasterio.crs.CRS.from_user_input(self.crs).linear_units_factor[1]
             data = np.full(self.shape, abs(self.res[0] * self.res[0]) * ucf**2)
@@ -1694,7 +1694,7 @@ class XRasterBase(XGeoBase):
             return dst_crs
         elif dst_crs == "utm":
             # make sure bounds are in EPSG:4326
-            dst_crs = _gis_utils.utm_crs(self.transform_bounds(4326))
+            dst_crs = gis.utm_crs(self.transform_bounds(4326))
         elif dst_crs is not None:
             dst_crs = CRS.from_user_input(dst_crs)
         else:
@@ -1761,7 +1761,7 @@ class XRasterBase(XGeoBase):
             crs_from=dst_crs, crs_to=self.crs, always_xy=True
         )
         # Create destination coordinate pairs in source CRS.
-        dst_xx, dst_yy = _raster_utils._affine_to_meshgrid(
+        dst_xx, dst_yy = gis._raster_utils._affine_to_meshgrid(
             dst_transform, (dst_height, dst_width)
         )
         dst_yy, dst_xx = dst_yy.ravel(), dst_xx.ravel()
@@ -1789,7 +1789,7 @@ class XRasterBase(XGeoBase):
         index = xr.DataArray(
             data=indices.reshape((dst_height, dst_width)),
             dims=(self.y_dim, self.x_dim),
-            coords=_raster_utils._affine_to_coords(
+            coords=gis._raster_utils._affine_to_coords(
                 transform=dst_transform,
                 shape=(dst_height, dst_width),
                 x_dim=self.x_dim,
@@ -1846,7 +1846,7 @@ class RasterDataArray(XRasterBase):
         da = xr.DataArray(
             data,
             dims=dims,
-            coords=_raster_utils._affine_to_coords(transform, (nrow, ncol)),
+            coords=gis._raster_utils._affine_to_coords(transform, (nrow, ncol)),
         )
         da.raster.set_spatial_dims(x_dim="x", y_dim="y")
         da.raster.set_nodata(nodata=nodata)  # set  _FillValue attr
@@ -1952,7 +1952,7 @@ class RasterDataArray(XRasterBase):
             for d in self._obj.dims
             if d not in [self.x_dim, self.y_dim]
         }
-        coords = _raster_utils._affine_to_coords(
+        coords = gis._raster_utils._affine_to_coords(
             dst_transform, (dst_height, dst_width), y_dim=self.y_dim, x_dim=self.x_dim
         )
         dst_coords.update(coords)
@@ -2087,7 +2087,7 @@ class RasterDataArray(XRasterBase):
                 for d in self._obj.dims
                 if d not in [self.x_dim, self.y_dim]
             }
-            coords = _raster_utils._affine_to_coords(
+            coords = gis._raster_utils._affine_to_coords(
                 dst_transform,
                 (dst_height, dst_width),
                 x_dim=self.x_dim,

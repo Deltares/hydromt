@@ -20,6 +20,7 @@ __all__ = [
     "stream_map",
     "basin_map",
     "outlet_map",
+    "gauge_map",
     "clip_basins",
     "upscale_flwdir",
     "dem_adjust",

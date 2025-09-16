@@ -22,11 +22,11 @@ from hydromt.gis._raster_utils import _cellres
 __all__ = [
     "_axes_attrs",
     "_bbox_from_file_and_filters",
-    "_parse_crs",
     "_parse_geom_bbox_buffer",
     "_zoom_to_overview_level",
     "_to_geographic_bbox",
     "utm_crs",
+    "parse_crs",
 ]
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ def utm_crs(bbox):
     return CRS.from_epsg(epsg)
 
 
-def _parse_crs(crs: Any, bbox: Optional[List[float]] = None) -> CRS:
+def parse_crs(crs: Any, bbox: Optional[List[float]] = None) -> CRS:
     """Parse crs string to pyproj.CRS.
 
     Parameters
