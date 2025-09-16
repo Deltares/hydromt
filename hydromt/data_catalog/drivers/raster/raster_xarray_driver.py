@@ -37,13 +37,14 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     `xr.open_mfdataset`.
 
     Driver **options** include:
-    - preprocess: Optional[str], name of preprocessor to apply before merging datasets.
+
+    * preprocess: Optional[str], name of preprocessor to apply before merging datasets.
       Available preprocessors include: round_latlon, to_datetimeindex,
       remove_duplicates, harmonise_dims. See their docstrings for details.
-    - ext_override: Optional[str], if set, will override the file extension check
+    * ext_override: Optional[str], if set, will override the file extension check
       and try to read all files as the given extension. Useful when reading zarr
       files without the .zarr extension.
-    - Any other option supported by `xr.open_zarr` or `xr.open_mfdataset`.
+    * Any other option supported by `xr.open_zarr` or `xr.open_mfdataset`.
 
     """
 

@@ -30,10 +30,11 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
     (e.g. an ID column).
 
     Driver **options** include:
-    - preprocess: Optional[str], name of preprocessor to apply on geodataset after
+
+    * preprocess: Optional[str], name of preprocessor to apply on geodataset after
       reading. Available preprocessors include: round_latlon, to_datetimeindex,
       remove_duplicates, harmonise_dims. See their docstrings for details.
-    - Any other option supported by `hydromt.io.open_geodataset`.
+    * Any other option supported by `hydromt.io.open_geodataset`.
 
     """
 
