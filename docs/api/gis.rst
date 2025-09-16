@@ -296,8 +296,8 @@ Other useful GIS related methods.
 .. autosummary::
    :toctree: ../_generated
 
-   gis.gis_utils.parse_crs
-   gis.gis_utils.utm_crs
-   gis.gis_utils.zoom_to_overview_level
-   gis.vector_utils.nearest_merge
-   gis.vector_utils.nearest
+   gis_utils.parse_crs
+   gis_utils.utm_crs
+   gis_utils.zoom_to_overview_level
+   vector_utils.nearest_merge
+   vector_utils.nearest
