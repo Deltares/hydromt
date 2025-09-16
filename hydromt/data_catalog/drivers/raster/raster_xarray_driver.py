@@ -3,7 +3,7 @@
 from copy import deepcopy
 from functools import partial
 from os.path import splitext
-from typing import Callable, List, Optional
+from typing import Callable, ClassVar, List, Optional
 
 import xarray as xr
 
@@ -26,6 +26,7 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 logger = get_hydromt_logger(__name__)
 
 _ZARR_EXT = ".zarr"
+_NETCDF_EXT = [".nc", ".netcdf"]
 
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
@@ -33,6 +34,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
     name = "raster_xarray"
     supports_writing = True
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
 
     def read(
         self,
@@ -90,7 +92,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             ds: xr.Dataset = xr.merge(datasets)
 
         # Normal netcdf file(s)
-        elif first_ext in [".nc", ".netcdf"]:
+        elif first_ext in _NETCDF_EXT:
             filtered_uris = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -124,7 +126,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         """
         no_ext, ext = splitext(path)
         # set filepath if incompat
-        if ext not in {_ZARR_EXT, ".nc", ".netcdf"}:
+        if ext not in self.SUPPORTED_EXTENSIONS:
             logger.warning(
                 f"Unknown extension for RasterDatasetXarrayDriver: {ext},"
                 "switching to zarr"

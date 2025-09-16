@@ -1,7 +1,7 @@
 """Driver for GeoDataFrames."""
 
 from abc import ABC, abstractmethod
-from typing import ClassVar, List, Optional
+from typing import List, Optional
 
 import geopandas as gpd
 
@@ -15,8 +15,6 @@ logger = get_hydromt_logger(__name__)
 
 class GeoDataFrameDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDataFrames."""
-
-    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = set()
 
     @abstractmethod
     def read(

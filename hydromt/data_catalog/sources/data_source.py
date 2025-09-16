@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from abc import ABC
 from copy import deepcopy
-from os.path import abspath, join
+from os.path import abspath, join, splitext
 from pathlib import Path, PurePath
 from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union
 
@@ -94,8 +94,21 @@ class DataSource(BaseModel, ABC):
         return copy_data
 
     @classmethod
-    def _infer_default_driver(cls, uri: str | None = None) -> str:
-        return cls._fallback_driver_read
+    def _infer_default_driver(
+        cls, uri: str | None = None, driver: type[BaseDriver] | None = None
+    ) -> str:
+        if uri is None:
+            return cls._fallback_driver_read
+        _, extension = splitext(uri)
+        driver = driver if driver else BaseDriver
+        return next(
+            (
+                driver.name
+                for driver in driver.find_all_possible_types()
+                if extension in driver.SUPPORTED_EXTENSIONS
+            ),
+            cls._fallback_driver_read,
+        )
 
     @model_validator(mode="after")
     def _validate_fs_equal_if_not_set(self) -> DataSource:
