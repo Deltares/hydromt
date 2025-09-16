@@ -1,10 +1,11 @@
-from logging import FileHandler, Logger, getLogger
+from logging import FileHandler, Logger
 from os.path import abspath
 from pathlib import Path
 
 import pytest
 
 from hydromt._typing import ModelMode
+from hydromt._utils.log import get_hydromt_logger
 from hydromt.model.root import ModelRoot
 
 # we need to compensate for where the repo is located when
@@ -55,25 +56,34 @@ def test_errors_on_unknown_modes(mode):
 
 
 def test_root_creates_logs_and_dir(tmp_path: Path):
-    p = tmp_path / "one"
-    log_path = p / "hydromt.log"
-    assert not log_path.exists()
-    _ = ModelRoot(p)
-    assert p.exists()
-    assert log_path.is_file()
+    root1 = tmp_path / "one"
+    filename = Path("hydromt.log")
+    log_path1 = root1 / filename
+    assert not log_path1.exists()
+
+    _ = ModelRoot(path=root1)
+    assert root1.exists()
+    assert not log_path1.exists()
+
+    root2 = tmp_path / "two"
+    log_path2 = root2 / filename
+    _ = ModelRoot(path=root2, log_file=filename)
+    assert root2.exists()
+    assert log_path2.exists()
 
 
 def test_new_root_copies_old_file(tmp_path: Path):
-    logger: Logger = getLogger("hydromt.fake_module")
+    logger: Logger = get_hydromt_logger("fake_module")
     first_path = tmp_path / "one"
     assert not first_path.exists()
-
-    r = ModelRoot(first_path, "w")
+    filename = Path("hydromt.log")
+    log_path = first_path / filename
+    r = ModelRoot(first_path, "w", log_file=filename)
     logger.warning("hey! this is a secret you should really remember")
 
     assert first_path.exists()
 
-    with open(first_path / "hydromt.log", "r") as file:
+    with open(log_path, "r") as file:
         first_log_str = file.read()
     assert "hey!" in first_log_str, first_log_str
 
@@ -83,7 +93,7 @@ def test_new_root_copies_old_file(tmp_path: Path):
     r.set(second_path)
 
     assert second_path.exists()
-    second_log_path = second_path / "hydromt.log"
+    second_log_path = second_path / filename
     assert second_log_path.exists()
 
     with open(second_log_path, "r") as file:
@@ -92,48 +102,58 @@ def test_new_root_copies_old_file(tmp_path: Path):
 
 
 def test_new_root_closes_old_log(tmp_path: Path):
-    main_logger = getLogger("hydromt")
-
+    main_logger = get_hydromt_logger()
+    filename = Path("hydromt.log")
     first_path = tmp_path / "one"
     second_path = tmp_path / "two"
 
-    r = ModelRoot(first_path, "w")
-    assert any(
-        h
-        for h in main_logger.handlers
-        if isinstance(h, FileHandler) and h.baseFilename.startswith(str(first_path))
-    ), main_logger.handlers
+    root = ModelRoot(first_path, "w", log_file=filename)
 
-    r.set(second_path)
-    assert not any(
-        h
-        for h in main_logger.handlers
-        if isinstance(h, FileHandler) and h.baseFilename.startswith(str(first_path))
-    ), main_logger.handlers
+    # assert there exists 1 file handler with the correct path
+    file_handlers = [h for h in main_logger.handlers if isinstance(h, FileHandler)]
+    open_logfiles = [
+        h for h in file_handlers if h.baseFilename.startswith(str(first_path))
+    ]
+    assert len(open_logfiles) == 1, (
+        f"Expected 1 file handler for first root, but got {len(open_logfiles)}"
+    )
 
-    assert any(
-        h
-        for h in main_logger.handlers
-        if isinstance(h, FileHandler) and h.baseFilename.startswith(str(second_path))
-    ), main_logger.handlers
+    # set to new root, which should close the old log file, remove the handler, and create a new one
+    root.set(second_path)
+
+    # assert there exists 1 file handler with the correct path, and 0 with the old path
+    file_handlers = [h for h in main_logger.handlers if isinstance(h, FileHandler)]
+    open_logfiles_first = [
+        h for h in file_handlers if h.baseFilename.startswith(str(first_path))
+    ]
+    open_logfiles_second = [
+        h for h in file_handlers if h.baseFilename.startswith(str(second_path))
+    ]
+    assert len(open_logfiles_first) == 0, (
+        f"Expected 0 file handlers for old root, but got {len(open_logfiles_first)}"
+    )
+    assert len(open_logfiles_second) == 1, (
+        f"Expected 1 file handler for new root, but got {len(open_logfiles_second)}"
+    )
 
 
 def test_root_overwrite_deletes_old_log(tmp_path: Path):
-    logger: Logger = getLogger("hydromt.fake_module")
+    logger: Logger = get_hydromt_logger("fake_module")
     path = tmp_path / "one"
+    filename = Path("hydromt.log")
+    log_path = path / filename
+
     assert not path.exists()
-    root = ModelRoot(path, "w")
+
+    root = ModelRoot(path, "w", log_file=filename)
     logger.warning("hey!, this is a secret you should really remember")
-    log_path = path / "hydromt.log"
 
     with open(log_path, "r") as file:
         first_log_str = file.read()
-
     assert "hey!" in first_log_str, first_log_str
+
     root.set(path, "w+")
     logger.warning("what were we talking about again?")
     with open(log_path, "r") as file:
         second_log_str = file.read()
     assert "hey!" not in second_log_str, second_log_str
-    assert path.exists()
-    assert log_path.is_file()

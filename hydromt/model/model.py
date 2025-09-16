@@ -16,6 +16,9 @@ from pyproj import CRS
 from hydromt._io.readers import _read_yaml
 from hydromt._typing import StrPath
 from hydromt._utils import _rgetattr
+from hydromt._utils.log import (
+    get_hydromt_logger,
+)
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
 from hydromt.model.components import (
@@ -32,7 +35,7 @@ __all__ = ["Model"]
 # see also hydromt.model group in pyproject.toml
 __hydromt_eps__ = ["Model"]
 
-logger = logging.getLogger(__name__)
+logger = get_hydromt_logger(__name__)
 T = TypeVar("T", bound=ModelComponent)
 
 
@@ -52,6 +55,8 @@ class Model(object, metaclass=ABCMeta):
         mode: str = "w",
         data_libs: Optional[Union[List, str]] = None,
         region_component: Optional[str] = None,
+        log_file: Optional[Path] = None,
+        log_level: int = logging.INFO,
         **catalog_keys,
     ):
         """Initialize a model.
@@ -85,8 +90,11 @@ class Model(object, metaclass=ABCMeta):
             If None, the model will can automatically determine the region component if there is only one `SpatialModelComponent`.
             Otherwise it will raise an error.
             If there are no `SpatialModelComponent` it will raise a warning that `region` functionality will not work.
-        logger:
-            The logger to be used.
+        log_file : Path | None, optional
+            If provided, will also write logs to the file `<root> / <log_file>`,
+            in addition to writing to the console, by default None.
+        log_level : int, optional
+            Log level [0-50], by default 20 (info)
         **catalog_keys:
             Additional keyword arguments to be passed down to the DataCatalog.
         """
@@ -100,7 +108,9 @@ class Model(object, metaclass=ABCMeta):
         """DataCatalog for data access"""
 
         # file system
-        self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
+        self.root: ModelRoot = ModelRoot(
+            root or ".", mode=mode, log_file=log_file, log_level=log_level
+        )
         """Model root"""
 
         self.components: Dict[str, ModelComponent] = {}
@@ -377,6 +387,8 @@ class Model(object, metaclass=ABCMeta):
         # Finish all deferred file closes
         for c in self.components.values():
             c.finish_write()
+
+        self.root.close()
 
     @hydromt_step
     def write(self, components: Optional[List[str]] = None) -> None:
