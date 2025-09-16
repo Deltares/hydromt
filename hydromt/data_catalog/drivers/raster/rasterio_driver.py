@@ -27,7 +27,7 @@ from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
 )
-from hydromt.gis.gis_utils import _zoom_to_overview_level
+from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.io.readers import open_mfraster
 
 logger: Logger = getLogger(__name__)
@@ -117,7 +117,7 @@ class RasterioDriver(RasterDatasetDriver):
             except AttributeError:  # pydantic extra=allow on SourceMetadata
                 zls_dict, crs = self._get_zoom_levels_and_crs(uris[0])
 
-            overview_level: Optional[int] = _zoom_to_overview_level(
+            overview_level: Optional[int] = zoom_to_overview_level(
                 zoom, mask, zls_dict, crs
             )
             if overview_level:

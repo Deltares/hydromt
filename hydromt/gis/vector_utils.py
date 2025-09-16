@@ -16,8 +16,8 @@ from shapely.geometry.base import BaseGeometry
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "_nearest",
     "_filter_gdf",
+    "nearest",
     "nearest_merge",
 ]
 
@@ -57,7 +57,7 @@ def nearest_merge(
         Merged GeoDataFrames
     """
     # Get nearest index right
-    idx_nn, dst = _nearest(gdf1, gdf2)
+    idx_nn, dst = nearest(gdf1, gdf2)
     if not inplace:
         gdf1 = gdf1.copy()
     valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
@@ -84,7 +84,7 @@ def nearest_merge(
         return gdf1[:, left_only_cols].join(gdf2, join="left")
 
 
-def _nearest(
+def nearest(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Return the index of and distance [m] to the nearest geometry.

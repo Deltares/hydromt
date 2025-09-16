@@ -18,7 +18,7 @@ from hydromt._typing import (
 )
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
-from hydromt.gis.gis_utils import _zoom_to_overview_level
+from hydromt.gis.gis_utils import zoom_to_overview_level
 
 logger: Logger = getLogger(__name__)
 
@@ -137,9 +137,7 @@ class ConventionResolver(URIResolver):
             if metadata is not None and hasattr(metadata, "zls_dict"):
                 zls_dict = metadata.zls_dict
             crs = None if metadata is None else metadata.crs
-            overview_level: int = (
-                _zoom_to_overview_level(zoom, mask, zls_dict, crs) or 0
-            )
+            overview_level: int = zoom_to_overview_level(zoom, mask, zls_dict, crs) or 0
         else:
             overview_level = 0  # fill any valid value
 

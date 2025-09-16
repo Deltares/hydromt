@@ -20,9 +20,9 @@ __all__ = [
     "_affine_to_coords",
     "_affine_to_meshgrid",
     "_cellarea",
-    "_cellres",
     "_meridian_offset",
     "_reggrid_area",
+    "cellres",
     "full",
     "full_from_transform",
     "full_like",
@@ -149,7 +149,7 @@ def full_from_transform(
 ):
     """Return a full DataArray based on a geospatial transform and shape.
 
-    See :py:meth:`~hydromt.raster.full` for all options.
+    See :py:meth:`~hydromt.raster_utils.full` for all options.
 
     Parameters
     ----------
@@ -339,7 +339,7 @@ def _cellarea(lat, xres=1.0, yres=1.0):
     return _R**2 * dx * (np.sin(l2) - np.sin(l1))
 
 
-def _cellres(lat, xres=1.0, yres=1.0):
+def cellres(lat, xres=1.0, yres=1.0):
     """Return the cell (x, y) resolution [m].
 
     Based on cell center latitude and its resolution measured in degrees.

@@ -9,7 +9,7 @@ import pyflwdir
 import xarray as xr
 
 from hydromt.gis.raster_utils import _affine_to_coords
-from hydromt.gis.vector_utils import _nearest
+from hydromt.gis.vector_utils import nearest
 
 logger = logging.getLogger(__name__)
 
@@ -412,7 +412,7 @@ def reproject_hydrography_like(
                 crs=crs,
             )
             gdf0["distnc"] = flwdir.distnc.flat[inflow_idxs]
-            gdf0["idx2"], gdf0["dst2"] = _nearest(gdf0, gdf_stream)
+            gdf0["idx2"], gdf0["dst2"] = nearest(gdf0, gdf_stream)
             gdf0 = gdf0.sort_values("distnc", ascending=False).drop_duplicates("idx2")
             gdf0["uparea"] = gdf_stream.loc[gdf0["idx2"].values, "uparea"].values
             # set stream uparea to selected inflow cells and calculate total uparea
