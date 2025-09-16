@@ -20,7 +20,7 @@ class TestRasterDatasetSource:
         mock_raster_ds_driver: RasterDatasetDriver,
         mock_raster_ds_adapter: RasterDatasetAdapter,
         mock_resolver: URIResolver,
-        tmp_dir: Path,
+        managed_tmp_path: Path,
     ):
         source = RasterDatasetSource(
             root=".",
@@ -28,7 +28,7 @@ class TestRasterDatasetSource:
             driver=mock_raster_ds_driver,
             data_adapter=mock_raster_ds_adapter,
             uri_resolver=mock_resolver,
-            uri=str(tmp_dir / "rasterds.zarr"),
+            uri=str(managed_tmp_path / "rasterds.zarr"),
         )
         assert raster_ds == source.read_data()
 
@@ -50,3 +50,15 @@ class TestRasterDatasetSource:
         rioda_detected_bbox = _to_geographic_bbox(*writable_source.detect_bbox(rioda))
 
         assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
+
+    @pytest.mark.parametrize(
+        ("uri", "expected_driver"),
+        [
+            ("test_data.tif", "rasterio"),
+            ("test_data.nc", "raster_xarray"),
+            ("test_data.zarr", "raster_xarray"),
+            ("test_data.fake_suffix", "rasterio"),
+        ],
+    )
+    def test_infer_default_driver(self, uri, expected_driver):
+        assert RasterDatasetSource._infer_default_driver(uri) == expected_driver

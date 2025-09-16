@@ -50,9 +50,8 @@ class TestGeoDatasetVectorDriver:
             driver.write("fake_path.zarr", MagicMock())  # type: ignore
 
     @pytest.fixture
-    def example_vector_geods(self, geodf, tmp_dir: Path) -> Path:
-        base = Path(tmp_dir)
-        gdf_path = base / "test.geojson"
+    def example_vector_geods(self, geodf, managed_tmp_path: Path) -> Path:
+        gdf_path = managed_tmp_path / "test.geojson"
         geodf.to_file(gdf_path, driver="GeoJSON")
         return gdf_path
 

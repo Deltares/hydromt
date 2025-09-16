@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the io submodule."""
 
-import os
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import geopandas as gpd
@@ -20,18 +20,20 @@ from hydromt._io.readers import (
     _open_timeseries_from_table,
     _open_vector,
     _open_vector_from_table,
+    open_nc,
 )
 from hydromt._io.writers import write_xy
+from hydromt.gis.raster import GEO_MAP_COORD
 
 
-def test_open_vector(tmpdir, df, geodf, world):
-    csv_path = str(tmpdir.join("test.csv"))
-    parquet_path = str(tmpdir.join("test.parquet"))
-    xy_path = str(tmpdir.join("test.xy"))
-    xls_path = str(tmpdir.join("test.xlsx"))
-    geojson_path = str(tmpdir.join("test.geojson"))
-    shp_path = str(tmpdir.join("test.shp"))
-    gpkg_path = str(tmpdir.join("test.gpkg"))
+def test_open_vector(tmp_path: Path, df, geodf, world):
+    csv_path = tmp_path / "test.csv"
+    parquet_path = tmp_path / "test.parquet"
+    xy_path = tmp_path / "test.xy"
+    xls_path = tmp_path / "test.xlsx"
+    geojson_path = tmp_path / "test.geojson"
+    shp_path = tmp_path / "test.shp"
+    gpkg_path = tmp_path / "test.gpkg"
     df.to_csv(csv_path)
     df.to_parquet(parquet_path)
     if _compat.HAS_OPENPYXL:
@@ -107,11 +109,11 @@ def test_open_vector_s3(geodf: gpd.GeoDataFrame):
     assert np.all(geodf == df)
 
 
-def test_open_geodataset(tmpdir, geodf):
-    point_data_path = str(tmpdir.join("points.geojson"))
+def test_open_geodataset(tmp_path: Path, geodf):
+    point_data_path = tmp_path / "points.geojson"
     geodf.to_file(point_data_path, driver="GeoJSON")
     # create equivalent polygon file
-    polygon_data_path = str(tmpdir.join("polygons.geojson"))
+    polygon_data_path = tmp_path / "polygons.geojson"
     geodf_poly = geodf.copy()
     crs = geodf.crs
     geodf_poly["geometry"] = geodf_poly.to_crs(3857).buffer(0.1).to_crs(crs)
@@ -123,7 +125,7 @@ def test_open_geodataset(tmpdir, geodf):
         data=np.zeros((2, geodf.index.size)),
     )
     name = "waterlevel"
-    timeseries_path = str(tmpdir.join(f"{name}.csv"))
+    timeseries_path = tmp_path / f"{name}.csv"
     ts.to_csv(timeseries_path)
     # returns dataset with coordinates, but no variable
     ds = _open_geodataset(point_data_path)
@@ -145,29 +147,29 @@ def test_open_geodataset(tmpdir, geodf):
         _open_geodataset(point_data_path, data_path="missing_file.csv")
 
 
-def test_timeseries_io(tmpdir, ts):
-    ts_path = str(tmpdir.join("test1.csv"))
+def test_timeseries_io(tmp_path: Path, ts):
+    ts_path = tmp_path / "test1.csv"
     # dattime in columns
     ts.to_csv(ts_path)
     da = _open_timeseries_from_table(ts_path)
     assert isinstance(da, xr.DataArray)
     assert da.time.dtype.type.__name__ == "datetime64"
     # transposed df > datetime in row index
-    ts_transposed_path = str(tmpdir.join("test2.csv"))
+    ts_transposed_path = tmp_path / "test2.csv"
     ts = ts.T
     ts.to_csv(ts_transposed_path)
     da2 = _open_timeseries_from_table(ts_transposed_path)
     assert da.time.dtype.type.__name__ == "datetime64"
     assert np.all(da == da2)
     # no time index
-    ts_no_index_path = str(tmpdir.join("test3.csv"))
+    ts_no_index_path = tmp_path / "test3.csv"
     pd.DataFrame(ts.values).to_csv(ts_no_index_path)
     with pytest.raises(ValueError, match="No time index found"):
         _open_timeseries_from_table(ts_no_index_path)
     # parse str index to numeric index
     cols = [f"a_{i}" for i in ts.columns]
     ts.columns = cols
-    ts_num_index_path = str(tmpdir.join("test4.csv"))
+    ts_num_index_path = tmp_path / "test4.csv"
     ts.to_csv(ts_num_index_path)
     da4 = _open_timeseries_from_table(ts_num_index_path)
     assert np.all(da == da4)
@@ -175,18 +177,17 @@ def test_timeseries_io(tmpdir, ts):
     # no numeric index
     cols[0] = "a"
     ts.columns = cols
-    ts_no_num_index_path = str(tmpdir.join("test5.csv"))
+    ts_no_num_index_path = tmp_path / "test5.csv"
     ts.to_csv(ts_no_num_index_path)
     with pytest.raises(ValueError, match="No numeric index"):
         _open_timeseries_from_table(ts_no_num_index_path)
 
 
-def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
+def test_open_mfcsv_by_id(tmp_path: Path, dfs_segmented_by_points):
     df_paths = {
-        i: str(tmpdir.join("data", f"{i}.csv"))
-        for i in range(len(dfs_segmented_by_points))
+        i: tmp_path / "data" / f"{i}.csv" for i in range(len(dfs_segmented_by_points))
     }
-    os.mkdir(tmpdir.join("data"))
+    Path(tmp_path, "data").mkdir()
     for i in range(len(df_paths)):
         dfs_segmented_by_points[i].to_csv(df_paths[i])
 
@@ -224,11 +225,11 @@ def test_open_mfcsv_by_id(tmpdir, dfs_segmented_by_points):
         )
 
 
-def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
-    os.mkdir(tmpdir.join("data"))
+def test_open_mfcsv_by_var(tmp_path: Path, dfs_segmented_by_vars):
+    Path(tmp_path, "data").mkdir()
     paths = {}
     for var, df in dfs_segmented_by_vars.items():
-        csv_path = tmpdir.join("data", f"{var}.csv")
+        csv_path = tmp_path / "data" / f"{var}.csv"
         df.to_csv(csv_path)
         paths[var] = csv_path
 
@@ -241,3 +242,17 @@ def test_open_mfcsv_by_var(tmpdir, dfs_segmented_by_vars):
         test2 = ds.sel(id=i)["test2"]
         assert np.all(np.equal(test1, np.arange(len(ids)) * int(i))), test1
         assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
+
+
+def test_open_nc_geo_map_coord_sets_close(tmpdir):
+    # Create a simple netcdf file with GEO_MAP_COORD as a data variable
+    data = np.arange(10)
+    ds = xr.Dataset({GEO_MAP_COORD: ("x", data)})
+    nc_path = tmpdir.join("test_geo_map.nc")
+    ds.to_netcdf(nc_path)
+
+    # Call open_nc and ensure line 891 is hit (GEO_MAP_COORD in ds.data_vars)
+    ds2 = open_nc(str(nc_path))
+    assert len(ds2.data_vars) == 0
+    assert GEO_MAP_COORD in ds2.coords
+    assert ds2._close is not None

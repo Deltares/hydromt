@@ -1,16 +1,14 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
 
 from logging import Logger, getLogger
-from typing import ClassVar, List, Optional, Set
+from typing import ClassVar, List, Optional
 
 import geopandas as gpd
 import pandas as pd
 from pyproj import CRS
 
-from hydromt._typing import Geom
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.metadata import SourceMetadata
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -26,24 +24,19 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
     """Driver for reading in GeoDataFrames from tabular formats."""
 
     name: ClassVar[str] = "geodataframe_table"
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
 
     def read(
         self,
         uris: List[str],
         *,
-        mask: Optional[Geom] = None,
-        predicate: str = "intersects",
-        variables: Optional[List[str]] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        **kwargs,
     ) -> gpd.GeoDataFrame:
         """Read tabular data using a combination of the pandas and geopandas libraries."""
         if not metadata:
             metadata = SourceMetadata()
-        _warn_on_unused_kwargs(
-            self.__class__.__name__,
-            {"mask": mask, "predicate": predicate, "variables": variables},
-        )
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
@@ -108,7 +101,7 @@ def _open_vector_from_table(
         )
 
     # Make columns case insensitive
-    columns: Set[str] = set(map(lambda col: col.lower(), df.columns))
+    columns: set[str] = set(map(lambda col: col.lower(), df.columns))
     columns.update(set(map(lambda col: col.upper(), df.columns)))
 
     if x_dim is None:

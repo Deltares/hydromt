@@ -3,7 +3,7 @@ from os import sep
 from os.path import abspath, dirname, join
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any, ClassVar, Dict, Generator, List, Optional, Union, cast
+from typing import Any, ClassVar, Dict, Generator, Iterator, List, Optional, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -95,8 +95,8 @@ def _local_catalog_eps(monkeypatch, PLUGINS):
 
 
 @pytest.fixture
-def example_zarr_file(tmp_dir: Path) -> Path:
-    tmp_path: Path = tmp_dir / "0s.zarr"
+def example_zarr_file(managed_tmp_path: Path) -> Path:
+    tmp_path = managed_tmp_path / "0s.zarr"
     store = zarr.DirectoryStore(tmp_path)
     root: zarr.Group = zarr.group(store=store, overwrite=True)
     zarray_var: zarr.Array = root.zeros(
@@ -130,6 +130,12 @@ def data_catalog(_local_catalog_eps) -> DataCatalog:
     return DataCatalog("artifact_data=v1.0.0")
 
 
+@pytest.fixture
+def dd_v0_catalog():
+    cat_root = Path(DATA_DIR) / "catalogs" / "artifact_data"
+    return cat_root / "v0.0.9" / "data_catalog.yml"
+
+
 @pytest.fixture(scope="session")
 def latest_dd_version_uri():
     cat_root = Path(DATA_DIR) / "catalogs" / "deltares_data"
@@ -139,7 +145,7 @@ def latest_dd_version_uri():
 
 
 @pytest.fixture(scope="class")
-def tmp_dir() -> Generator[Path, None, None]:
+def managed_tmp_path() -> Iterator[Path]:
     with TemporaryDirectory() as tempdirname:
         tempdirpath = Path(tempdirname)
         yield tempdirpath
@@ -155,8 +161,8 @@ def root() -> str:
 
 
 @pytest.fixture
-def test_model(tmpdir) -> Model:
-    return Model(root=tmpdir)
+def test_model(tmp_path: Path) -> Model:
+    return Model(root=tmp_path)
 
 
 @pytest.fixture
@@ -455,9 +461,9 @@ def bbox():
 
 
 @pytest.fixture
-def grid_model(demda, world, obsda, tmpdir):
+def grid_model(demda, world, obsda, tmp_path: Path):
     mod = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
@@ -487,9 +493,9 @@ def grid_model(demda, world, obsda, tmpdir):
 
 
 @pytest.fixture
-def mesh_model(tmpdir):
+def mesh_model(tmp_path: Path):
     mesh_model = Model(
-        root=str(tmpdir),
+        root=tmp_path,
         data_libs=["artifact_data", DC_PARAM_PATH],
         components={"mesh": {"type": "MeshComponent"}},
         region_component="mesh",
@@ -618,11 +624,11 @@ def artifact_data():
 
 
 @pytest.fixture
-def mock_model(tmpdir, mocker: MockerFixture):
+def mock_model(tmp_path: Path, mocker: MockerFixture):
     model = mocker.create_autospec(Model)
     model.components = {}
-    model.root = mocker.create_autospec(ModelRoot(tmpdir), instance=True)
-    model.root.path.return_value = tmpdir
+    model.root = mocker.create_autospec(ModelRoot(tmp_path), instance=True)
+    model.root.path.return_value = tmp_path
     model.data_catalog = mocker.create_autospec(DataCatalog)
     return model
 

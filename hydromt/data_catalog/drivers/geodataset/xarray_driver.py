@@ -22,12 +22,16 @@ from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDataset
 
 logger: Logger = getLogger(__name__)
 
+_ZARR_EXT = ".zarr"
+_NETCDF_EXT = [".nc", ".netcdf"]
+
 
 class GeoDatasetXarrayDriver(GeoDatasetDriver):
     """GeoDatasetXarrayDriver."""
 
     name: ClassVar[str] = "geodataset_xarray"
     supports_writing = True
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
 
     def read(
         self,
@@ -63,7 +67,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
         first_ext = splitext(uris[0])[-1]
-        if first_ext == ".zarr":
+        if first_ext == _ZARR_EXT:
             opn: Callable = partial(xr.open_zarr, **options)
             datasets = []
             for _uri in uris:
@@ -76,7 +80,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                     )
 
             ds: xr.Dataset = xr.merge(datasets)
-        elif first_ext in [".nc", ".netcdf"]:
+        elif first_ext in _NETCDF_EXT:
             filtered_uris = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -107,9 +111,9 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         args:
         """
         ext = splitext(path)[-1]
-        if ext == ".zarr":
+        if ext == _ZARR_EXT:
             ds.vector.to_zarr(path, **kwargs)
-        elif ext in [".nc", ".netcdf"]:
+        elif ext in _NETCDF_EXT:
             ds.vector.to_netcdf(path, **kwargs)
         else:
             raise ValueError(f"Unknown extension for GeoDatasetXarrayDriver: {ext} ")

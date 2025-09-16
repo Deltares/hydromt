@@ -1,7 +1,7 @@
 """Tests for the cli submodule."""
 
 from logging import NOTSET, WARNING, Logger, getLogger
-from os.path import isfile, join
+from os.path import join
 from pathlib import Path
 from typing import Generator
 
@@ -64,13 +64,13 @@ def _reset_log_level() -> Generator[None, None, None]:
     main_logger.setLevel(NOTSET)  # Most verbose so all messages get passed
 
 
-def test_cli_build_missing_arg_workflow(tmpdir):
+def test_cli_build_missing_arg_workflow(tmp_path: Path):
     cmd = [
         "build",
         "model",
-        str(tmpdir),
+        str(tmp_path),
         "-i",
-        Path(TEST_DATA_DIR) / "missing_data_workflow.yml",
+        str(join(TEST_DATA_DIR, "missing_data_workflow.yml")),
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
@@ -82,13 +82,13 @@ def test_cli_build_missing_arg_workflow(tmpdir):
     )
 
 
-def test_cli_build_v0x_workflow(tmpdir):
+def test_cli_build_v0x_workflow(tmp_path: Path):
     cmd = [
         "build",
         "model",
-        str(tmpdir),
+        str(tmp_path),
         "-i",
-        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        str(join(TEST_DATA_DIR, "v0x_workflow.yml")),
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
@@ -100,13 +100,13 @@ def test_cli_build_v0x_workflow(tmpdir):
     )
 
 
-def test_cli_update_missing_arg(tmpdir):
+def test_cli_update_missing_arg(tmp_path: Path):
     cmd = [
         "update",
         "model",
-        str(tmpdir),
+        str(tmp_path),
         "-i",
-        Path(TEST_DATA_DIR) / "missing_data_workflow.yml",
+        str(join(TEST_DATA_DIR, "missing_data_workflow.yml")),
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
@@ -119,13 +119,13 @@ def test_cli_update_missing_arg(tmpdir):
     )
 
 
-def test_cli_update_v0x_workflow(tmpdir):
+def test_cli_update_v0x_workflow(tmp_path: Path):
     cmd = [
         "update",
         "model",
-        str(tmpdir),
+        str(tmp_path),
         "-i",
-        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        str(join(TEST_DATA_DIR, "v0x_workflow.yml")),
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
@@ -138,12 +138,12 @@ def test_cli_update_v0x_workflow(tmpdir):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_update_model(tmpdir):
-    root = str(tmpdir.join("model_region"))
+def test_cli_build_update_model(tmp_path: Path):
+    root = tmp_path / "model_region"
     cmd = [
         "build",
         "model",
-        root,
+        str(root),
         "-i",
         BUILD_CONFIG_PATH,
         "-d",
@@ -153,22 +153,22 @@ def test_cli_build_update_model(tmpdir):
     r = CliRunner().invoke(hydromt_cli, cmd)
 
     assert r.exit_code == 0
-    assert isfile(join(root, "run_config.toml"))
+    assert Path(root, "run_config.toml").exists()
     # Open and check content
-    with open(join(root, "run_config.toml")) as f:
+    with open(root / "run_config.toml") as f:
         content = f.read()
     assert "starttime = 2010-01-01" in content
     assert '[model]\ntype = "model"' in content
     assert "endtime " not in content
 
     # We need to build before we can update
-    root_out = str(tmpdir.join("model_region_update"))
+    root_out = tmp_path / "model_region_update"
     cmd = [
         "update",
         "model",
-        root,
+        str(root),
         "-o",
-        root_out,
+        str(root_out),
         "-i",
         UPDATE_CONFIG_PATH,
         "-vv",
@@ -176,9 +176,9 @@ def test_cli_build_update_model(tmpdir):
     r = CliRunner().invoke(hydromt_cli, cmd)
 
     assert r.exit_code == 0
-    assert isfile(join(root_out, "run_config.toml"))
+    assert Path(root_out, "run_config.toml").exists()
     # Open and check content
-    with open(join(root_out, "run_config.toml")) as f:
+    with open(root_out / "run_config.toml") as f:
         content = f.read()
     assert "starttime = 2020-01-01" in content
     assert '[model]\ntype = "model"' in content
@@ -186,14 +186,13 @@ def test_cli_build_update_model(tmpdir):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_no_config(tmpdir):
-    root = str(tmpdir.join("model_region"))
+def test_cli_build_no_config(tmp_path: Path):
     result = CliRunner().invoke(
         hydromt_cli,
         [
             "build",
             "model",
-            root,
+            str(tmp_path / "model_region"),
             "-d",
             "artifact_data",
             "-vv",
@@ -204,12 +203,11 @@ def test_cli_build_no_config(tmpdir):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_unknown_option(tmpdir):
-    root = str(tmpdir.join("model_region"))
+def test_cli_build_unknown_option(tmp_path: Path):
     cmd = [
         "build",
         "model",
-        root,
+        str(tmp_path / "model_region"),
         "--opt",
         "setup_grid.res=0.05",
         "-vv",
@@ -222,14 +220,14 @@ def test_cli_build_unknown_option(tmpdir):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_unknown_model(tmpdir):
+def test_cli_build_unknown_model(tmp_path: Path):
     with pytest.raises(ValueError, match="Unknown model"):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
                 "build",
                 "test_model",
-                str(tmpdir),
+                str(tmp_path),
                 "-i",
                 BUILD_CONFIG_PATH,
             ],
@@ -238,14 +236,14 @@ def test_cli_build_unknown_model(tmpdir):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_update_unknown_model(tmpdir):
+def test_cli_update_unknown_model(tmp_path: Path):
     with pytest.raises(ValueError, match="Unknown model"):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
                 "update",
                 "test_model",
-                str(tmpdir),
+                str(tmp_path),
                 "-i",
                 UPDATE_CONFIG_PATH,
             ],
@@ -254,12 +252,12 @@ def test_cli_update_unknown_model(tmpdir):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_export_cli_deltares_data(tmpdir):
+def test_export_cli_deltares_data(tmp_path: Path):
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "export",
-            str(tmpdir),
+            str(tmp_path),
             "-s",
             "hydro_lakes",
             "--bbox",
@@ -272,13 +270,13 @@ def test_export_cli_deltares_data(tmpdir):
     assert r.exit_code == 0, r.output
 
 
-def test_export_cli_no_data_ignore(tmpdir):
+def test_export_cli_no_data_ignore(tmp_path: Path):
     with pytest.raises(NoDataException):
         _ = CliRunner().invoke(
             hydromt_cli,
             [
                 "export",
-                str(tmpdir),
+                str(tmp_path),
                 "-s",
                 "hydro_lakes",
                 "--bbox",
@@ -289,7 +287,7 @@ def test_export_cli_no_data_ignore(tmpdir):
         )
 
 
-def test_export_skips_overwrite(tmpdir, caplog: pytest.LogCaptureFixture):
+def test_export_skips_overwrite(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     with caplog.at_level(WARNING):
         # export twice
         for _i in range(2):
@@ -297,7 +295,7 @@ def test_export_skips_overwrite(tmpdir, caplog: pytest.LogCaptureFixture):
                 hydromt_cli,
                 [
                     "export",
-                    str(tmpdir),
+                    str(tmp_path),
                     "-s",
                     "hydro_lakes",
                 ],
@@ -306,12 +304,14 @@ def test_export_skips_overwrite(tmpdir, caplog: pytest.LogCaptureFixture):
     assert "already exists and not in forced overwrite mode" in caplog.text
 
 
-def test_export_does_not_warn_on_fo(tmpdir, caplog):
+def test_export_does_not_warn_on_forced_overwrite(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+):
     _ = CliRunner().invoke(
         hydromt_cli,
         [
             "export",
-            str(tmpdir),
+            str(tmp_path),
             "-s",
             "hydro_lakes",
         ],
@@ -322,7 +322,7 @@ def test_export_does_not_warn_on_fo(tmpdir, caplog):
         hydromt_cli,
         [
             "export",
-            str(tmpdir),
+            str(tmp_path),
             "-s",
             "hydro_lakes",
             "--fo",
@@ -333,16 +333,16 @@ def test_export_does_not_warn_on_fo(tmpdir, caplog):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_export_cli_catalog(tmpdir):
+def test_export_cli_catalog(tmp_path: Path):
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "export",
-            str(tmpdir),
+            str(tmp_path),
             "-s",
             "hydro_lakes",
             "-d",
-            join(TEST_DATA_DIR, "test_sources1.yml"),
+            str(join(TEST_DATA_DIR, "test_sources1.yml")),
         ],
         catch_exceptions=False,
     )
@@ -350,12 +350,12 @@ def test_export_cli_catalog(tmpdir):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_export_multiple_sources(tmpdir):
+def test_export_multiple_sources(tmp_path: Path):
     r = CliRunner().invoke(
         hydromt_cli,
         [
             "export",
-            str(tmpdir),
+            str(tmp_path),
             "-s",
             "hydro_lakes",
             "-s",
@@ -371,10 +371,79 @@ def test_export_multiple_sources(tmpdir):
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_export_cli_config_file(tmpdir):
+def test_export_cli_config_file(tmp_path: Path):
     r = CliRunner().invoke(
         hydromt_cli,
-        ["export", str(tmpdir), "-i", "tests/data/export_config.yml"],
+        ["export", str(tmp_path), "-i", "tests/data/export_config.yml"],
         catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_v0_catalog_is_not_valid_v1_catalog(caplog):
+    # silence the ruff warning, we'll check the logs for error msgs
+    with pytest.raises(ValueError):  # noqa : PT011
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "check",
+                "-d",
+                "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
+                "--format",
+                "v1",
+            ],
+            catch_exceptions=False,
+        )
+
+    assert "has the following error(s): " in caplog.text
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_validate_v0_catalog():
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "-d",
+            "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
+            "--format",
+            "v0",
+        ],
+        catch_exceptions=False,
+    )
+    assert r.exit_code == 0, r.output
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_check_v0x_workflow_format_v0(caplog):
+    cmd = [
+        "check",
+        "-i",
+        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        "-vvv",
+        "--format",
+        "v0",
+    ]
+
+    # silence the ruff warning, we'll check the logs for error msgs
+    r = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+    assert r.exit_code == 0
+
+    assert "v0.x files cannot be checked" in caplog.text
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_check_v0x_workflow(caplog):
+    cmd = [
+        "check",
+        "-i",
+        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        "-vv",
+    ]
+    # silence the ruff warning, we'll check the logs for error msgs
+    with pytest.raises(ValueError):  # noqa : PT011
+        _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+
+    assert "No `steps` section" in caplog.text
+    assert "Perhaps it is a v0.x file?" in caplog.text

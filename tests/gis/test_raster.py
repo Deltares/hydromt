@@ -102,7 +102,7 @@ def test_crs():
     assert da.raster.crs.to_epsg() == 9518  # return horizontal crs
 
 
-def test_gdal(tmpdir):
+def test_gdal(tmp_path: Path):
     da = raster.full_from_transform(*testdata[0], name="test")
     # Add crs
     da.attrs.update(crs=4326)
@@ -113,7 +113,7 @@ def test_gdal(tmpdir):
     assert da1.raster.dims == ("latitude", "longitude")
     assert da1.raster.res[1] > 0
     # Write to netcdf and reopen with gdal
-    netcdf_path = str(tmpdir.join("gdal_test.nc"))
+    netcdf_path = tmp_path / "gdal_test.nc"
     da1.to_netcdf(netcdf_path)
     with rasterio.open(netcdf_path) as src:
         src.read()
@@ -121,7 +121,7 @@ def test_gdal(tmpdir):
     # # test with web mercator dataset
     da2 = da.raster.reproject(dst_crs=3857)
     ds2 = da2.to_dataset().raster.gdal_compliant(rename_dims=True, force_sn=True)
-    netcdf_path = str(tmpdir.join("gdal_test_epsg3857.nc"))
+    netcdf_path = tmp_path / "gdal_test_epsg3857.nc"
     ds2.to_netcdf(netcdf_path)
     with rasterio.open(netcdf_path) as src:
         src.read()
@@ -541,12 +541,12 @@ def test_zonal_stats():
 
 
 @pytest.mark.parametrize(("transform", "shape"), testdata[-2:])
-def test_rotated(transform, shape, tmpdir):
+def test_rotated(transform, shape, tmp_path: Path):
     da = raster.full_from_transform(transform, shape, nodata=-1, name="test")
     da.raster.set_crs(4326)
     da[:] = 1
     # test I/O
-    path = str(tmpdir.join("rotated.tif"))
+    path = tmp_path / "rotated.tif"
     da.raster.to_raster(path)
     assert da.raster.identical_grid(_open_raster(path))
     # test rasterize
@@ -602,28 +602,32 @@ def test_create_rotated_grid_from_geom_rotated():
     assert da.raster.shape == expected_shape
 
 
-def test_to_raster(rioda: xr.DataArray, tmp_dir: Path):
-    uri_tif = str(tmp_dir / "test_to_raster.tif")
+def test_to_raster(rioda: xr.DataArray, managed_tmp_path: Path):
+    uri_tif = managed_tmp_path / "test_to_raster.tif"
     rioda.raster.to_raster(uri_tif)
-    assert Path(uri_tif).is_file()
+    assert uri_tif.is_file()
 
 
-def test_to_raster_raises_on_invalid_kwargs(rioda: xr.DataArray, tmp_dir: Path):
+def test_to_raster_raises_on_invalid_kwargs(
+    rioda: xr.DataArray, managed_tmp_path: Path
+):
     with pytest.raises(ValueError, match="will be set based on the DataArray"):
-        rioda.raster.to_raster(str(tmp_dir / "test2.tif"), count=3)
+        rioda.raster.to_raster(managed_tmp_path / "test2.tif", count=3)
 
 
-def test_to_mapstack_raises_on_invalid_driver(rioda: xr.DataArray, tmp_dir: Path):
+def test_to_mapstack_raises_on_invalid_driver(
+    rioda: xr.DataArray, managed_tmp_path: Path
+):
     with pytest.raises(ValueError, match="Extension unknown for driver"):
-        rioda.to_dataset().raster.to_mapstack(root=str(tmp_dir), driver="unknown")
+        rioda.to_dataset().raster.to_mapstack(root=managed_tmp_path, driver="unknown")
 
 
-def test_to_mapstack(rioda: xr.DataArray, tmp_dir: Path):
+def test_to_mapstack(rioda: xr.DataArray, managed_tmp_path: Path):
     ds = rioda.to_dataset()
     prefix = "_test_"
-    ds.raster.to_mapstack(str(tmp_dir), prefix=prefix, mask=True, driver="GTiff")
+    ds.raster.to_mapstack(managed_tmp_path, prefix=prefix, mask=True, driver="GTiff")
     for name in ds.raster.vars:
-        assert (tmp_dir / f"{prefix}{name}.tif").is_file()
+        assert Path(managed_tmp_path, f"{prefix}{name}.tif").is_file()
 
 
 def test_grid_utm_parsing():

@@ -2,14 +2,14 @@
 
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import ClassVar, List, Optional, Set, Union
+from typing import ClassVar, List, Optional, Union
 
 import geopandas as gpd
 import pandas as pd
 from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
 
-from hydromt._typing import Bbox, Geom, SourceMetadata, StrPath
+from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
@@ -19,11 +19,15 @@ logger: Logger = getLogger(__name__)
 
 
 class PyogrioDriver(GeoDataFrameDriver):
-    """Driver to read GeoDataFrames using the `pyogrio` package."""
+    """
+    Driver to read GeoDataFrames using the `pyogrio` package.
+
+    Options in this driver are passed to `pyogrio.read_dataframe`.
+    """
 
     name = "pyogrio"
     supports_writing = True
-    _supported_extensions: ClassVar[Set[str]] = {".gpkg", ".shp", ".geojson", ".fgb"}
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".gpkg", ".shp", ".geojson", ".fgb"}
 
     def read(
         self,
@@ -31,17 +35,17 @@ class PyogrioDriver(GeoDataFrameDriver):
         *,
         mask: Optional[Geom] = None,
         variables: Optional[List[str]] = None,
-        predicate: Optional[str] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        **kwargs,
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
 
         Warning
         -------
-        The 'predicate' keyword argument is unused in this method and is only present
-        in the method's signature for compatibility with other functions.
+        The 'predicate' and 'metadata' keyword arguments are unused in this method and
+        are only present in the method's signature for compatibility with other
+        functions.
         """
         if len(uris) > 1:
             raise ValueError(
@@ -62,14 +66,6 @@ class PyogrioDriver(GeoDataFrameDriver):
         if not isinstance(gdf, gpd.GeoDataFrame):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
 
-        crs = None
-        if metadata is not None:
-            crs = metadata.crs
-        if crs is not None:
-            if gdf.crs is not None:
-                logger.warning(f"Overwriting crs of GeoDataFrame to {crs}")
-            gdf.set_crs(crs)
-
         if gdf.index.size == 0:
             exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
         return gdf
@@ -86,7 +82,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         args:
         """
         no_ext, ext = splitext(path)
-        if ext not in self._supported_extensions:
+        if ext not in self.SUPPORTED_EXTENSIONS:
             logger.warning(
                 f"driver {self.name} has no support for extension {ext}"
                 "switching to .fgb."

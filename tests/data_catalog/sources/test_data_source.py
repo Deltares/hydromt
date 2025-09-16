@@ -1,11 +1,13 @@
+from pathlib import Path
 from typing import Any, Dict, List
 
+import pandas as pd
 import pytest
 
 from hydromt._typing import NoDataException
-from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
-from hydromt.data_catalog.drivers import GeoDataFrameDriver
-from hydromt.data_catalog.sources import DataSource, GeoDataFrameSource
+from hydromt.data_catalog.adapters import DataFrameAdapter, GeoDataFrameAdapter
+from hydromt.data_catalog.drivers import DataFrameDriver, GeoDataFrameDriver
+from hydromt.data_catalog.sources import DataFrameSource, DataSource, GeoDataFrameSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
 
 
@@ -96,3 +98,22 @@ class TestDataSource:
         )
         with pytest.raises(NoDataException):
             source.read_data()
+
+    def test_infer_default_driver(
+        self,
+        MockDataFrameDriver: type[DataFrameDriver],
+        mock_resolver: URIResolver,
+        mock_df_adapter: DataFrameAdapter,
+        df: pd.DataFrame,
+        managed_tmp_path: Path,
+    ):
+        managed_tmp_path.touch("test.xls")
+        source = DataFrameSource(
+            root=".",
+            name="example_source",
+            driver=MockDataFrameDriver(),
+            uri_resolver=mock_resolver,
+            data_adapter=mock_df_adapter,
+            uri=str(managed_tmp_path / "test.xls"),
+        )
+        assert source._infer_default_driver() == DataFrameSource._fallback_driver_read
