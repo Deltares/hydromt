@@ -151,5 +151,5 @@ Preprocessing
 
    preprocessing.harmonise_dims
    preprocessing.remove_duplicates
-   preprocessing.round_lat_lon
+   preprocessing.round_latlon
    preprocessing.to_datetimeindex

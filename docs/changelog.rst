@@ -25,11 +25,11 @@ New
 
 Changed
 -------
-- `hydromt.io` and its functions are now public (underscore removed).
-- Reading the hydromt workflow yaml is now done with `hydromt.io.read_workflow_yaml`.
-- Important GIS methods are now public in `hydromt.gis.gis_utils`, `hydromt.gis.raster_utils` and `hydromt.gis.vector_utils`.
-- HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils` and its functions are now public (underscore removed).
-- `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed).
+- `hydromt.io` and its functions are now public (underscore removed). (#1271)
+- Reading the hydromt workflow yaml is now done with `hydromt.io.read_workflow_yaml`. (#1271)
+- Important GIS methods are now public in `hydromt.gis.gis_utils`, `hydromt.gis.raster_utils` and `hydromt.gis.vector_utils`. (#1271)
+- HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils`. (#1271)
+- `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
 
 
 Fixed
@@ -39,8 +39,8 @@ Fixed
 - CF compliant dimensions in netcdf files
 - `buffer` argument in `DataCatalog.get_rasterdataset` now is an integer expressed in resolution multiplicity instead of in meters. (#1245)
 - Improved logging information for build and update functions. (#1237)
-- Better documentation of drivers and their options.
-- Passing options to ``geodataframe_table`` driver now works.
+- Better documentation of drivers and their options. (#1271)
+- Passing options to ``geodataframe_table`` driver now works. (#1271)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 
