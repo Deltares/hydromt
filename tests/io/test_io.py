@@ -14,9 +14,11 @@ from upath import UPath
 
 import hydromt
 from hydromt import _compat
+from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.io.readers import (
     open_geodataset,
     open_mfcsv,
+    open_nc,
     open_timeseries_from_table,
     open_vector,
     open_vector_from_table,
@@ -240,3 +242,17 @@ def test_open_mfcsv_by_var(tmp_path: Path, dfs_segmented_by_vars):
         test2 = ds.sel(id=i)["test2"]
         assert np.all(np.equal(test1, np.arange(len(ids)) * int(i))), test1
         assert np.all(np.equal(test2, np.arange(len(ids)) ** int(i))), test2
+
+
+def test_open_nc_geo_map_coord_sets_close(tmpdir):
+    # Create a simple netcdf file with GEO_MAP_COORD as a data variable
+    data = np.arange(10)
+    ds = xr.Dataset({GEO_MAP_COORD: ("x", data)})
+    nc_path = tmpdir.join("test_geo_map.nc")
+    ds.to_netcdf(nc_path)
+
+    # Call open_nc and ensure line 891 is hit (GEO_MAP_COORD in ds.data_vars)
+    ds2 = open_nc(str(nc_path))
+    assert len(ds2.data_vars) == 0
+    assert GEO_MAP_COORD in ds2.coords
+    assert ds2._close is not None

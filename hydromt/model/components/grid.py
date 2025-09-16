@@ -10,8 +10,7 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._typing.type_def import DeferedFileClose
-from hydromt.io.readers import read_ncs
+from hydromt.io.readers import open_ncs
 from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -148,7 +147,7 @@ class GridComponent(SpatialModelComponent):
         rename_dims: bool = False,
         force_sn: bool = False,
         **kwargs,
-    ) -> Optional[DeferedFileClose]:
+    ) -> None:
         """Write model grid data to netcdf file at <root>/<fn>.
 
         key-word arguments are passed to :py:meth:`~hydromt.model.Model.write_nc`
@@ -184,8 +183,7 @@ class GridComponent(SpatialModelComponent):
             f"{self.model.name}.{self.name_in_model}: Writing grid data to {full_path}."
         )
 
-        # write_nc requires dict - use dummy 'grid' key
-        return write_nc(
+        close_handle = write_nc(
             self.data,
             file_path=full_path,
             gdal_compliant=gdal_compliant,
@@ -194,46 +192,33 @@ class GridComponent(SpatialModelComponent):
             force_sn=force_sn,
             **kwargs,
         )
+        if close_handle is not None:
+            self._deferred_file_close_handles.append(close_handle)
 
     @hydromt_step
-    def read(
-        self,
-        filename: Optional[str] = None,
-        *,
-        mask_and_scale: bool = False,
-        **kwargs,
-    ) -> None:
+    def read(self, filename: Optional[str] = None, **kwargs) -> None:
         """Read model grid data at <root>/<fn> and add to grid property.
 
-        key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`
+        key-word arguments are passed to :py:meth:`~hydromt.model.Model.open_nc`
 
         Parameters
         ----------
         filename : str, optional
             filename relative to model root, by default 'grid/grid.nc'
-        mask_and_scale : bool, optional
-            If True, replace array values equal to _FillValue with NA and scale values
-            according to the formula original_values * scale_factor + add_offset, where
-            _FillValue, scale_factor and add_offset are taken from variable attributes
-        (if they exist).
         **kwargs : dict
-            Additional keyword arguments to be passed to the `read_nc` method.
+            Additional keyword arguments to be passed to the `open_nc` method.
         """
         self.root._assert_read_mode()
         self._initialize_grid(skip_read=True)
 
-        # Load grid data in r+ mode to allow overwriting netcdf files
-        if self.root.is_reading_mode() and self.root.is_writing_mode():
-            kwargs["load"] = True
-        loaded_nc_files = read_ncs(
+        loaded_nc_files = open_ncs(
             filename or self._filename,
             self.root.path,
-            single_var_as_array=False,
-            mask_and_scale=mask_and_scale,
             **kwargs,
         )
         for ds in loaded_nc_files.values():
             self.set(ds)
+            self._open_datasets.append(ds)
 
     @property
     def res(self) -> Optional[Tuple[float, float]]:

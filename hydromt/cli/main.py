@@ -7,7 +7,7 @@ from datetime import datetime
 from json import loads as json_decode
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import click
 import numpy as np
@@ -17,12 +17,13 @@ from hydromt import __version__
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import log
-from hydromt._validators.data_catalog import DataCatalogValidator
+from hydromt._validators import Format
+from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
+from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup
-from hydromt._validators.region import validate_region
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
-from hydromt.io import read_workflow_yaml, read_yaml
+from hydromt.io import read_workflow_yaml, read_yaml, write_yaml
 from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
@@ -125,6 +126,10 @@ data_opt = click.option(
     "--data",
     multiple=True,
     help="Path to local yaml data catalog file OR name of predefined data catalog.",
+)
+
+format_option = click.option(
+    "--format",
 )
 
 deltares_data_opt = click.option(
@@ -363,16 +368,18 @@ def update(
 @data_opt
 @quiet_opt
 @verbose_opt
-@region_opt
+@click.option("--format", type=click.Choice(list(Format)), default=Format.v1)
+@click.option("--upgrade", is_flag=True)
 @click.pass_context
 def check(
     _ctx: click.Context,
-    model: Optional[str],
+    model: str | None,
     config,
     data,
-    region: Optional[Dict[Any, Any]],
     quiet: int,
     verbose: int,
+    format: Format,
+    upgrade: bool,
 ):
     """
     Verify that provided data catalog and config files are in the correct format.
@@ -395,41 +402,69 @@ def check(
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log._setuplog(join(".", HYDROMT_LOG_PATH), log_level=log_level)
+    failed = False
     try:
-        all_exceptions: List[Exception] = []
         for cat_path in data:
             logger.info(f"Validating catalog at {cat_path}")
             try:
-                DataCatalogValidator.from_yml(cat_path)
-                logger.info("Catalog is valid!")
+                if format == Format.v0:
+                    v0_catalog = DataCatalogV0Validator.from_yml(cat_path)
+                    if upgrade:
+                        v1_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
+
+                        p = Path(cat_path)
+                        write_yaml(
+                            p.with_stem(f"{p.stem}_v1"),
+                            v1_catalog.model_dump(
+                                exclude_unset=True,
+                                exclude_defaults=True,
+                                exclude_none=True,
+                            ),
+                        )
+
+                # if we add more versions don't forget to update this
+                # statement here
+                else:
+                    DataCatalogV1Validator.from_yml(cat_path)
+
+                logger.info(f"Catalog {cat_path} is valid!")
             except ValidationError as e:
-                all_exceptions.append(e)
-                logger.info("Catalog has errors")
-
-        if region:
-            logger.info(f"Validating region {region}")
-            try:
-                validate_region(region)
-                logger.info("Region is valid!")
-
-            except (ValueError, NotImplementedError) as e:
-                logger.info("region has errors")
-                all_exceptions.append(e)
+                failed = True
+                msg = f"Catalog {cat_path} has the following error(s): {e}"
+                logger.error(msg)
 
         if config:
             logger.info(f"Validating config at {config}")
-            try:
-                modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
-                config_dict = {"modeltype": modeltype, "global": kwargs, "steps": steps}
-                HydromtModelSetup(**config_dict)
-                logger.info("Model config valid!")
+            if format == Format.v0:
+                logger.error(
+                    "Because of the dynamic nature of workflow files, v0.x files cannot be "
+                    "checked by hydromt v1. Skipping..."
+                )
+            else:
+                try:
+                    modeltype, kwargs, steps = read_workflow_yaml(
+                        config, modeltype=model
+                    )
+                    config_dict = {
+                        "modeltype": modeltype,
+                        "global": kwargs,
+                        "steps": steps,
+                    }
+                    HydromtModelSetup(**config_dict)
+                    logger.info("Model config valid!")
 
-            except (ValidationError, ValueError) as e:
-                logger.info("Model has errors")
-                all_exceptions.append(e)
+                except (ValidationError, ValueError) as e:
+                    failed = True
+                    msg = f"Workflow yaml {config} has the following error(s): {e}"
+                    logger.error(msg)
 
-        if len(all_exceptions) > 0:
-            raise ValueError(all_exceptions)
+        if failed:
+            # We've already presented the errors above
+            # now we simply raise without extra msg to fail the process
+            # so it has the correct exit code
+            raise ValueError(
+                "hydromt check command failed. See error messages above for the details"
+            )
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
@@ -471,12 +506,12 @@ def check(
 def export(
     _ctx: click.Context,
     export_dest_path: Path,
-    source: Optional[str],
-    time_range: Optional[str],
-    bbox: Optional[Tuple[float, float, float, float]],
-    config: Optional[Path],
-    region: Optional[Dict[Any, Any]],
-    data: Optional[List[StrPath]],
+    source: str | None,
+    time_range: str | None,
+    bbox: tuple[float, float, float, float] | None,
+    config: Path | None,
+    region: dict[Any, Any] | None,
+    data: list[StrPath] | None,
     dd: bool,
     fo: bool,
     error_on_empty: bool,
@@ -507,11 +542,11 @@ def export(
     else:
         handle_nodata = NoDataStrategy.IGNORE
 
-    data_libs: List[StrPath] = list(data) if data else []
+    data_libs: list[StrPath] = list(data) if data else []
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs.insert(0, "deltares_data")
 
-    sources: List[str] = []
+    sources: list[str] = []
     if source:
         if isinstance(source, str):
             sources = [source]

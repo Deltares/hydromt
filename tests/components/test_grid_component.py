@@ -81,7 +81,7 @@ def test_read(tmp_path: Path, mock_model, hydds, mocker: MockerFixture):
         grid_component.read()
     mock_model.root = ModelRoot(path=tmp_path, mode="r+")
     grid_component = GridComponent(model=mock_model)
-    mocker.patch("hydromt.model.components.grid.read_ncs", return_value={"grid": hydds})
+    mocker.patch("hydromt.model.components.grid.open_ncs", return_value={"grid": hydds})
     grid_component.read()
     assert grid_component.data == hydds
 

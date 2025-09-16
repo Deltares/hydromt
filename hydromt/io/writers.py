@@ -1,18 +1,19 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
 
+import hashlib
+import uuid
 from logging import Logger, getLogger
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from typing import Any, Dict, Optional, cast
+from typing import Any, cast
 
 import geopandas as gpd
 import numpy as np
 import xarray as xr
-from dask.diagnostics import ProgressBar
 from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
-from hydromt._typing.type_def import DeferedFileClose, StrPath
+from hydromt._typing.deferred_file_close import DeferredFileClose
+from hydromt._typing.type_def import StrPath
 
 logger: Logger = getLogger(__name__)
 
@@ -25,13 +26,13 @@ __all__ = [
 ]
 
 
-def write_yaml(path: StrPath, data: Dict[str, Any]):
+def write_yaml(path: StrPath, data: dict[str, Any]):
     """Write a dictionary to a yaml formatted file."""
     with open(path, "w") as f:
         dump_yaml(data, f)
 
 
-def write_toml(path: StrPath, data: Dict[str, Any]):
+def write_toml(path: StrPath, data: dict[str, Any]):
     """Write a dictionary to a toml formatted file."""
     with open(path, "wb") as f:
         dump_toml(data, f)
@@ -56,38 +57,6 @@ def write_xy(path: StrPath, gdf, fmt="%.4f"):
         np.savetxt(f, xy, fmt=fmt)
 
 
-def _compute_nc(
-    ds: xr.Dataset,
-    file_path: Path,
-    compute: bool = True,
-    **kwargs,
-):
-    """Write and compute the dataset.
-
-    Either compute directly or with a progressbar.
-
-    Parameters
-    ----------
-    ds : xr.Dataset
-        The dataset to be written.
-    file_path : Path
-        The full path to the outgoing file.
-    compute : bool, optional
-        Whether to compute the output directly, by default True
-    """
-    obj = ds.to_netcdf(
-        file_path,
-        compute=compute,
-        **kwargs,
-    )
-    if compute:
-        return
-
-    with ProgressBar():
-        obj.compute()
-    obj = None
-
-
 def write_nc(
     ds: xr.DataArray | xr.Dataset,
     file_path: Path,
@@ -98,15 +67,13 @@ def write_nc(
     force_sn: bool = False,
     force_overwrite: bool = False,
     **kwargs,
-) -> Optional[DeferedFileClose]:
+) -> DeferredFileClose | None:
     """Write xarray.Dataset and/or xarray.DataArray to netcdf file.
 
     Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
     files, using :py:meth:`~hydromt.raster.gdal_compliant`.
     The function will first try to directly write to file. In case of
-    PermissionError, it will first write a temporary file and add to the
-    self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
-    will be done by calling the self._cleanup function.
+    PermissionError, it will first write a temporary file and move the file over.
 
     key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -173,20 +140,16 @@ def write_nc(
 
     # Try to write the file
     try:
-        _compute_nc(ds, file_path=file_path, **kwargs)
+        ds.to_netcdf(file_path, **kwargs)
     except PermissionError:
         logger.debug(f"Could not write to file {file_path.as_posix()}, deferring write")
-        temp_data_dir = TemporaryDirectory()
 
-        temp_file_path = Path(temp_data_dir.name, file_path.name)
-        _compute_nc(ds, file_path=temp_file_path, **kwargs)
+        unique_str = f"{file_path}_{uuid.uuid4()}"
+        hash_str = hashlib.sha256(unique_str.encode()).hexdigest()[:8]
+        temp_filepath = file_path.with_stem(f"{file_path.stem}_{hash_str}")
+        ds.to_netcdf(temp_filepath, **kwargs)
 
-        return DeferedFileClose(
-            ds=ds,
-            original_path=str(file_path),
-            temp_path=str(temp_file_path),
-            close_attempts=1,
-        )
+        return DeferredFileClose(original_path=file_path, temp_path=temp_filepath)
 
     return None
 

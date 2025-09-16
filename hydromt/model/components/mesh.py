@@ -10,7 +10,7 @@ from pyproj import CRS
 from shapely.geometry import box
 
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io.readers import read_ncs
+from hydromt.io.readers import open_ncs
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
@@ -164,7 +164,7 @@ class MeshComponent(SpatialModelComponent):
     ) -> None:
         """Read model mesh data at <root>/<filename> and add to mesh property.
 
-        key-word arguments are passed to :py:meth:`~hydromt.model.Model.read_nc`
+        key-word arguments are passed to :py:meth:`~hydromt.model.Model.open_nc`
 
         Parameters
         ----------
@@ -175,18 +175,14 @@ class MeshComponent(SpatialModelComponent):
             spatial reference system of the mesh file. Only used if the CRS is not
             found when reading the mesh file.
         **kwargs : dict
-            Additional keyword arguments to be passed to the `read_nc` method.
+            Additional keyword arguments to be passed to the `open_nc` method.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
 
         filename = filename or str(self._filename)
-        files = read_ncs(
-            filename,
-            root=self.root.path,
-            single_var_as_array=False,
-            **kwargs,
-        ).values()
+        files = open_ncs(filename, root=self.root.path, **kwargs).values()
+        self._open_datasets.extend(files)
         if len(files) > 0:
             ds = xr.merge(files)
             if ds.rio.crs is not None:  # parse crs

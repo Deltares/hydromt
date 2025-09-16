@@ -144,19 +144,18 @@ Finally you can check the :ref: `hydromt export API <export_api>` for all the av
 
 Check command
 -------------
-The **hydromt check** command is used to validate the configuration file, the data catalog, and the region.
+The **hydromt check** command is used to validate the configuration file, and the data catalog.
 It can be useful to validate files before running other command lines to avoid errors. Please note that it
 will only check the syntax of the files provided. The actual data or calculations referenced will not be checked,
 loaded or performed.
 
 The command does not have any required arguments but several options that you can choose from:
 
-- `-m, \-\-model`: The name of the model to validate. The available models can be printed using the `hydromt \-\-models` command.
-- `-i, \-\-config`: Relative or absolute path to the HydroMT configuration file to validate.
-- `-d, \-\-data`: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog to validate.
-
-If you only wish to validate a region or a data catalog files, they can be run separately.
-Because configuration files are dependant on the model to build/update, to check a configuration file, you need to specify the model.
+- ``-m, --model``: The name of the model to validate. The available models can be printed using the ``hydromt --models`` command.
+- ``-i, --config``: Relative or absolute path to the HydroMT configuration file to validate. Note that hydromt v1 cannot validate v0 config files, and vice versa.
+- ``-d, --data``: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog to validate.
+- ``--format`` specify which format of data catalog to validate. Accepted options are ``v0`` or ``v1``
+- ``--upgrade`` when validating ``v0`` data catalogs you can supply the ``--upgrade`` flag, and hydromt will convert the data catalog to the ``v1`` format and write it to a file with the same name but with the suffix ``_v1`` added to the file stem.
 
 Here are some examples of how to use the command:
 
@@ -164,13 +163,12 @@ Here are some examples of how to use the command:
 
     > hydromt check -m wflow -i /path/to/wflow_config.yml -d /path/to/data_catalog.yml -v
 
-    > hydromt check -d /path/to/data_catalog.yml -v
+    > hydromt check -d /path/to/data_catalog.yml --format v0 --upgrade -v
 
     > hydromt check -m wflow -i /path/to/wflow_config.yml -v
 
 The validation is so far limited:
 
-- region: full validation is only supported for the `bbox` and `geom` types. For other type, it will only check if the type is supported but will not validate the region itself.
 - data catalog: only the format and options are validated but it does not try to load any of the data.
 - configuration file: it will check if the methods exists and if the correct arguments are called. No validation is done on the content and type of the arguments themselves.
 

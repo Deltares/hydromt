@@ -1,23 +1,14 @@
 """Xarrays component."""
 
 from logging import Logger, getLogger
-from shutil import move
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Union, cast
 
 import xarray as xr
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt._typing.type_def import DeferedFileClose, XArrayDict
-from hydromt.io.readers import read_ncs
+from hydromt._typing.type_def import XArrayDict
+from hydromt.io.readers import open_ncs
 from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
@@ -50,9 +41,8 @@ class DatasetsComponent(ModelComponent):
             by default "datasets/{name}.nc" ie one file per dataset in the data
             dictionary.
         """
-        self._data: Optional[XArrayDict] = None
+        self._data: XArrayDict | None = None
         self._filename: str = filename
-        self._defered_file_closes: List[DeferedFileClose] = []
         super().__init__(model=model)
 
     @property
@@ -70,14 +60,14 @@ class DatasetsComponent(ModelComponent):
     def _initialize(self, skip_read=False) -> None:
         """Initialize geoms."""
         if self._data is None:
-            self._data = dict()
+            self._data = {}
             if self.root.is_reading_mode() and not skip_read:
                 self.read()
 
     def set(
         self,
         data: Union[Dataset, DataArray],
-        name: Optional[str] = None,
+        name: str | None = None,
         split_dataset: bool = False,
     ):
         """Add data to the xarray component.
@@ -95,7 +85,7 @@ class DatasetsComponent(ModelComponent):
         assert self._data is not None
         if split_dataset:
             if isinstance(data, Dataset):
-                ds: Dict[str, Union[Dataset, DataArray]] = {
+                ds: dict[str, Union[Dataset, DataArray]] = {
                     str(name): data[name] for name in data.data_vars
                 }
             else:
@@ -117,15 +107,10 @@ class DatasetsComponent(ModelComponent):
             self._data[name] = d
 
     @hydromt_step
-    def read(
-        self,
-        filename: Optional[str] = None,
-        single_var_as_array: bool = True,
-        **kwargs,
-    ) -> None:
+    def read(self, filename: str | None = None, **kwargs) -> None:
         """Read model dataset files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`hydromt.io.readers.read_ncs`
+        key-word arguments are passed to :py:func:`hydromt.io.readers.open_ncs`
 
         Parameters
         ----------
@@ -135,25 +120,25 @@ class DatasetsComponent(ModelComponent):
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.io.readers.read_ncs` function.
+            `hydromt.io.readers.open_ncs` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
         kwargs = {**{"engine": "netcdf4"}, **kwargs}
         filename_template = filename or self._filename
-        ncs = read_ncs(
-            filename_template,
-            root=self.root.path,
-            single_var_as_array=single_var_as_array,
-            **kwargs,
-        )
+        ncs = open_ncs(filename_template, root=self.root.path, **kwargs)
         for name, ds in ncs.items():
-            self.set(data=ds, name=name)
+            self._open_datasets.append(ds)
+            if len(ds.data_vars) == 1:
+                (da,) = ds.data_vars.values()
+            else:
+                da = ds
+            self.set(data=da, name=name)
 
     @hydromt_step
     def write(
         self,
-        filename: Optional[str] = None,
+        filename: str | None = None,
         *,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
@@ -164,10 +149,8 @@ class DatasetsComponent(ModelComponent):
 
         Possibility to update the xarray objects attributes to get GDAL compliant NetCDF
         files, using :py:meth:`~hydromt.raster.gdal_compliant`.
-        The function will first try to directly write to file. In case of
-        PermissionError, it will first write a temporary file and add to the
-        self._defered_file_closes attribute. Renaming and closing of netcdf filehandles
-        will be done by calling the self._cleanup function.
+        The function will first try to directly write to file.
+        In case of PermissionError, it will first write a temporary file then move the file over.
 
         key-word arguments are passed to :py:meth:`xarray.Dataset.to_netcdf`
 
@@ -210,7 +193,7 @@ class DatasetsComponent(ModelComponent):
             logger.info(
                 f"{self.model.name}.{self.name_in_model}: Writing datasets to {file_path}."
             )
-            write_nc(
+            close_handle = write_nc(
                 ds,
                 file_path=file_path,
                 gdal_compliant=gdal_compliant,
@@ -219,54 +202,10 @@ class DatasetsComponent(ModelComponent):
                 force_overwrite=self.root.mode.is_override_mode(),
                 **kwargs,
             )
+            if close_handle is not None:
+                self._deferred_file_close_handles.append(close_handle)
 
-    def _cleanup(
-        self, forceful_overwrite=False, max_close_attempts=2
-    ) -> List[Tuple[str, str]]:
-        """Try to close all deferred file handles.
-
-        Try to overwrite the destination file with the temporary one until either the
-        maximum number of tries is reached or until it succeeds. The forced cleanup
-        also attempts to close the original file handle, which could cause trouble
-        if the user will try to read from the same file handle after this function
-        is called.
-
-        Parameters
-        ----------
-        forceful_overwrite: bool
-            Attempt to force closing deferred file handles before writing to them.
-        max_close_attempts: int
-            Number of times to try and overwrite the original file, before giving up.
-
-        """
-        failed_closes = []
-        while len(self._defered_file_closes) > 0:
-            close_handle = self._defered_file_closes.pop()
-            if close_handle["close_attempts"] > max_close_attempts:
-                # already tried to close this to many times so give up
-                logger.error(
-                    f"Max write attempts to file {close_handle['org_fn']}"
-                    " exceeded. Skipping..."
-                    f"Instead data was written to tmpfile: {close_handle['tmp_fn']}"
-                )
-                continue
-
-            if forceful_overwrite:
-                close_handle["ds"].close()
-            try:
-                move(close_handle["tmp_fn"], close_handle["org_fn"])
-            except PermissionError:
-                logger.error(
-                    f"Could not write to destination file {close_handle['org_fn']} "
-                    "because the following error was raised: {e}"
-                )
-                close_handle["close_attempts"] += 1
-                self._defered_file_closes.append(close_handle)
-                failed_closes.append((close_handle["org_fn"], close_handle["tmp_fn"]))
-
-        return list(set(failed_closes))
-
-    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
         """
         Test if two DatasetsComponents are equal.
 

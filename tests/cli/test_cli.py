@@ -378,3 +378,72 @@ def test_export_cli_config_file(tmp_path: Path):
         catch_exceptions=False,
     )
     assert r.exit_code == 0, r.output
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_v0_catalog_is_not_valid_v1_catalog(caplog):
+    # silence the ruff warning, we'll check the logs for error msgs
+    with pytest.raises(ValueError):  # noqa : PT011
+        _ = CliRunner().invoke(
+            hydromt_cli,
+            [
+                "check",
+                "-d",
+                "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
+                "--format",
+                "v1",
+            ],
+            catch_exceptions=False,
+        )
+
+    assert "has the following error(s): " in caplog.text
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_validate_v0_catalog():
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "-d",
+            "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
+            "--format",
+            "v0",
+        ],
+        catch_exceptions=False,
+    )
+    assert r.exit_code == 0, r.output
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_check_v0x_workflow_format_v0(caplog):
+    cmd = [
+        "check",
+        "-i",
+        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        "-vvv",
+        "--format",
+        "v0",
+    ]
+
+    # silence the ruff warning, we'll check the logs for error msgs
+    r = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+    assert r.exit_code == 0
+
+    assert "v0.x files cannot be checked" in caplog.text
+
+
+@pytest.mark.usefixtures("_reset_log_level")
+def test_cli_check_v0x_workflow(caplog):
+    cmd = [
+        "check",
+        "-i",
+        Path(TEST_DATA_DIR) / "v0x_workflow.yml",
+        "-vv",
+    ]
+    # silence the ruff warning, we'll check the logs for error msgs
+    with pytest.raises(RuntimeError):  # noqa : PT011
+        _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+
+    assert "does not contain a `steps` section" in caplog.text
+    assert "using a v0.x format?" in caplog.text
