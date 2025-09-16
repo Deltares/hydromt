@@ -348,3 +348,10 @@ class RasterDatasetSource(DataSource):
 
             stac_catalog.add_item(stac_item)
             return stac_catalog
+
+    @classmethod
+    def _infer_default_driver(
+        cls,
+        uri: str | None = None,
+    ) -> str:
+        return super()._infer_default_driver(uri, RasterDatasetDriver)

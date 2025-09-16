@@ -54,7 +54,7 @@ __all__ = [
 OPEN_VECTOR_PREDICATE = Literal[
     "intersects", "within", "contains", "overlaps", "crosses", "touches"
 ]
-OPEN_VECTOR_DRIVER = Literal["csv", "xls", "xy", "vector", "parquet"]
+OPEN_VECTOR_DRIVER = Literal["csv", "xls", "xy", "pyogrio", "parquet", "xlsx"]
 
 
 def _open_mfcsv(
@@ -506,7 +506,7 @@ def _open_geodataset(
     # For filetype [], only point geometry is supported
     filetype = str(loc_path).split(".")[-1].lower()
     if filetype in ["csv", "parquet", "xls", "xlsx", "xy"]:
-        kwargs.update(assert_gtype="Point")
+        kwargs.update(assert_gtype="Point", driver=filetype)
     # read geometry file
     polygon: Optional[Polygon] = box(*bbox) if bbox else None
     gdf = _open_vector(loc_path, crs=crs, bbox=polygon, geom=geom, **kwargs)
@@ -615,7 +615,7 @@ def _open_vector(
     ----------
     path: str or Path-like,
         path to geometry file
-    driver: {'csv', 'xls', 'xy', 'vector', 'parquet'}, optional
+    driver: {'csv', 'xls', 'xy', 'pyogrio', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
         files, :py:meth:`hydromt.io.open_vector_from_table`
         for csv, parquet, xls(x) and xy files. By default None, and inferred from
