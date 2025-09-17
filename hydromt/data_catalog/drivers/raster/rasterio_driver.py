@@ -3,7 +3,7 @@
 import copy
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import rasterio
@@ -56,6 +56,11 @@ class RasterioDriver(RasterDatasetDriver):
     """
 
     name = "rasterio"
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {
+        "." + extension
+        for extension in rasterio.drivers.raster_driver_extensions()
+        if extension != "nc"
+    }  # Exclude netcdf as a supported file type
 
     def read(
         self,

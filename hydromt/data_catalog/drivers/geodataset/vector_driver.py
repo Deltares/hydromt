@@ -39,6 +39,17 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
     """
 
     name: ClassVar[str] = "geodataset_vector"
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {
+        ".csv",
+        ".parquet",
+        ".xlsx",
+        ".xls",
+        ".xy",
+        ".gpkg",
+        ".shp",
+        ".geojson",
+        ".fgb",
+    }
 
     def read(
         self,

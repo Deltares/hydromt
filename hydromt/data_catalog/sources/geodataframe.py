@@ -268,14 +268,4 @@ class GeoDataFrameSource(DataSource):
 
     @classmethod
     def _infer_default_driver(cls, uri: str | None = None) -> str:
-        if uri is None:
-            return cls._fallback_driver_read
-        _, extension = splitext(uri)
-        return next(
-            (
-                driver.name
-                for driver in GeoDataFrameDriver.find_all_possible_types()
-                if extension in driver.SUPPORTED_EXTENSIONS
-            ),
-            cls._fallback_driver_read,
-        )
+        return super()._infer_default_driver(uri, GeoDataFrameDriver)
