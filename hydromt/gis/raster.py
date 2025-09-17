@@ -13,7 +13,6 @@ import itertools
 import logging
 import math
 import os
-from itertools import product
 from os.path import join
 from typing import Any, Optional, Tuple, Union
 
@@ -37,7 +36,7 @@ from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon, box
 
-from hydromt.gis import _gis_utils, _raster_utils
+from hydromt.gis import gis_utils, raster_utils
 from hydromt.gis._gdal_drivers import GDAL_EXT_CODE_MAP
 
 logger = logging.getLogger(__name__)
@@ -48,187 +47,7 @@ GEO_MAP_COORD = "spatial_ref"
 __all__ = [
     "RasterDataArray",
     "RasterDataset",
-    "full",
-    "full_like",
-    "full_from_transform",
 ]
-
-
-def full_like(
-    other: xr.DataArray, *, nodata: float = None, lazy: bool = False
-) -> xr.DataArray:
-    """Return a full object with the same grid and geospatial attributes as ``other``.
-
-    Arguments
-    ---------
-    other: DataArray
-        DataArray from which coordinates and attributes are taken
-    nodata: float, int, optional
-        Fill value for new DataArray, defaults to other.nodata or if not set np.nan
-    lazy: bool, optional
-        If True return DataArray with a dask rather than numpy array.
-
-    Returns
-    -------
-    da: DataArray
-        Filled DataArray
-    """
-    if not isinstance(other, xr.DataArray):
-        raise ValueError("other should be xarray.DataArray.")
-    if nodata is None:
-        nodata = other.raster.nodata if other.raster.nodata is not None else np.nan
-    da = full(
-        coords={d: c for d, c in other.coords.items() if d in other.dims},
-        nodata=nodata,
-        dtype=other.dtype,
-        name=other.name,
-        attrs=other.attrs,
-        crs=other.raster.crs,
-        lazy=lazy,
-        shape=other.shape,
-        dims=other.dims,
-    )
-    da.raster.set_attrs(**other.raster.attrs)
-    da.raster._transform = other.raster.transform
-    return da
-
-
-def full(
-    coords,
-    *,
-    nodata=np.nan,
-    dtype=np.float32,
-    name=None,
-    attrs=None,
-    crs=None,
-    lazy=False,
-    shape=None,
-    dims=None,
-) -> xr.DataArray:
-    """Return a full DataArray based on a geospatial coords dictionary.
-
-    Arguments
-    ---------
-    coords: sequence or dict of array_like, optional
-        Coordinates (tick labels) to use for indexing along each dimension (max 3).
-        The coordinate sequence should be (dim0, y, x) of which the first is optional.
-    nodata: float, int, optional
-        Fill value for new DataArray, defaults to other.nodata or if not set np.nan
-    dtype: numpy.dtype, optional
-        Data type
-    name: str, optional
-        DataArray name
-    attrs : dict, optional
-        additional attributes
-    crs: int, dict, or str, optional
-        Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-    lazy: bool, optional
-        If True return DataArray with a dask rather than numpy array.
-    shape: tuple, optional
-        Length along (dim0, y, x) dimensions, of which the first is optional.
-    dims: tuple, optional
-        Name(s) of the data dimension(s).
-
-    Returns
-    -------
-    da: DataArray
-        Filled DataArray
-    """
-    attrs = attrs or {}
-    f = dask.array.empty if lazy else np.full
-    if dims is None:
-        dims = tuple([d for d in coords])
-    if shape is None:
-        cs = next(iter(coords.values()))  # get first coordinate
-        if cs.ndim == 1:
-            shape = tuple([coords[dim].size for dim in dims])
-        else:  # rotated
-            shape = cs.shape
-            if hasattr(cs, "dims"):
-                dims = cs.dims
-    data = f(shape, nodata, dtype=dtype)
-    da = xr.DataArray(data, coords, dims, name, attrs)
-    da.raster.set_nodata(nodata)
-    da.raster.set_crs(crs)
-    return da
-
-
-def full_from_transform(
-    transform,
-    shape,
-    *,
-    nodata=np.nan,
-    dtype=np.float32,
-    name=None,
-    attrs=None,
-    crs=None,
-    lazy=False,
-):
-    """Return a full DataArray based on a geospatial transform and shape.
-
-    See :py:meth:`~hydromt.raster.full` for all options.
-
-    Parameters
-    ----------
-    transform : affine transform
-        Two dimensional affine transform for 2D linear mapping.
-    shape : tuple of int
-        Length along (dim0, y, x) dimensions, of which the first is optional.
-    nodata : optional
-        The nodata value to assign to the DataArray. Defaults to np.nan.
-    dtype : optional
-        The data type to use for the DataArray. Defaults to np.float32.
-    name : optional
-        The name of the DataArray. Defaults to None.
-    attrs : optional
-        Additional attributes to assign to the DataArray. Empty by default.
-    crs : optional
-        The coordinate reference system (CRS) of the DataArray. Defaults to None.
-    lazy : bool, optional
-        Whether to create a lazy DataArray. Defaults to False.
-
-    Returns
-    -------
-    da : DataArray
-        Filled DataArray
-    """
-    attrs = attrs or {}
-    if len(shape) not in [2, 3]:
-        raise ValueError("Only 2D and 3D data arrays supported.")
-    if not isinstance(transform, Affine):
-        transform = Affine(*transform)
-    coords = _raster_utils._affine_to_coords(
-        transform, shape[-2:], x_dim="x", y_dim="y"
-    )
-    dims = ("y", "x")
-    if len(shape) == 3:
-        coords = {"dim0": ("dim0", np.arange(shape[0], dtype=int)), **coords}
-        dims = ("dim0", "y", "x")
-    da = full(
-        coords=coords,
-        nodata=nodata,
-        dtype=dtype,
-        name=name,
-        attrs=attrs,
-        crs=crs,
-        lazy=lazy,
-        shape=shape,
-        dims=dims,
-    )
-    da.raster._transform = transform
-    return da
-
-
-def _tile_window_xyz(shape, px):
-    """Yield (left, upper, width, height)."""
-    nr, nc = shape
-    lu = product(range(0, nc, px), range(0, nr, px))
-
-    ## create the window
-    for l, u in lu:
-        h = min(px, nr - u)
-        w = min(px, nc - l)
-        yield (l, u, w, h)
 
 
 class XGeoBase(object):
@@ -451,7 +270,7 @@ class XRasterBase(XGeoBase):
         if self.crs is None:
             raise ValueError("CRS is missing. Use set_crs function to resolve.")
         _da = self._obj
-        x_dim, y_dim, x_attrs, y_attrs = _gis_utils._axes_attrs(self.crs)
+        x_dim, y_dim, x_attrs, y_attrs = gis_utils._axes_attrs(self.crs)
         if rename_dims and (x_dim != self.x_dim or y_dim != self.y_dim):
             _da = _da.rename({self.x_dim: x_dim, self.y_dim: y_dim})
             _da.raster.set_spatial_dims(x_dim=x_dim, y_dim=y_dim)
@@ -766,7 +585,7 @@ class XRasterBase(XGeoBase):
             transform = obj_out.raster.transform
         else:
             transform = self.transform
-        x_dim, y_dim, x_attrs, y_attrs = _gis_utils._axes_attrs(crs)
+        x_dim, y_dim, x_attrs, y_attrs = gis_utils._axes_attrs(crs)
         if rename_dims:
             obj_out = obj_out.rename({self.x_dim: x_dim, self.y_dim: y_dim})
         else:
@@ -1070,7 +889,7 @@ class XRasterBase(XGeoBase):
                 ds1 = ds.raster.clip_bbox(geom.bounds, buffer=2).raster.mask_nodata()
                 if np.any(np.asarray(ds1.raster.shape) < 2):
                     continue
-                mask = full(ds1.raster.coords, nodata=0, dtype=np.uint8)
+                mask = raster_utils.full(ds1.raster.coords, nodata=0, dtype=np.uint8)
                 features.rasterize(
                     [(geom, 1)],
                     out_shape=mask.raster.shape,
@@ -1465,7 +1284,7 @@ class XRasterBase(XGeoBase):
 
         # find the best UTM CRS for area computation
         if gdf_intersect.crs.is_geographic:
-            crs_utm = _gis_utils._parse_crs(
+            crs_utm = gis_utils.parse_crs(
                 "utm", gdf_intersect.to_crs(4326).total_bounds
             )
         else:
@@ -1596,7 +1415,7 @@ class XRasterBase(XGeoBase):
                 xs, ys = transform * (np.array([i, i]), np.array([0, nrow]))
                 geoms.append(LineString(zip(xs, ys, strict=False)))
         elif geom_type.lower().startswith("point"):
-            x, y = _raster_utils._affine_to_meshgrid(transform, (nrow, ncol))
+            x, y = raster_utils._affine_to_meshgrid(transform, (nrow, ncol))
             geoms = gpd.points_from_xy(x.ravel(), y.ravel())
         else:
             raise ValueError(f"geom_type {geom_type} not recognized")
@@ -1615,7 +1434,7 @@ class XRasterBase(XGeoBase):
                 "area_grid has not yet been implemented for rotated grids."
             )
         if self.crs.is_geographic:
-            data = _raster_utils._reggrid_area(self.ycoords.values, self.xcoords.values)
+            data = raster_utils._reggrid_area(self.ycoords.values, self.xcoords.values)
         elif self.crs.is_projected:
             ucf = rasterio.crs.CRS.from_user_input(self.crs).linear_units_factor[1]
             data = np.full(self.shape, abs(self.res[0] * self.res[0]) * ucf**2)
@@ -1694,7 +1513,7 @@ class XRasterBase(XGeoBase):
             return dst_crs
         elif dst_crs == "utm":
             # make sure bounds are in EPSG:4326
-            dst_crs = _gis_utils.utm_crs(self.transform_bounds(4326))
+            dst_crs = gis_utils.utm_crs(self.transform_bounds(4326))
         elif dst_crs is not None:
             dst_crs = CRS.from_user_input(dst_crs)
         else:
@@ -1761,7 +1580,7 @@ class XRasterBase(XGeoBase):
             crs_from=dst_crs, crs_to=self.crs, always_xy=True
         )
         # Create destination coordinate pairs in source CRS.
-        dst_xx, dst_yy = _raster_utils._affine_to_meshgrid(
+        dst_xx, dst_yy = raster_utils._affine_to_meshgrid(
             dst_transform, (dst_height, dst_width)
         )
         dst_yy, dst_xx = dst_yy.ravel(), dst_xx.ravel()
@@ -1789,7 +1608,7 @@ class XRasterBase(XGeoBase):
         index = xr.DataArray(
             data=indices.reshape((dst_height, dst_width)),
             dims=(self.y_dim, self.x_dim),
-            coords=_raster_utils._affine_to_coords(
+            coords=raster_utils._affine_to_coords(
                 transform=dst_transform,
                 shape=(dst_height, dst_width),
                 x_dim=self.x_dim,
@@ -1846,7 +1665,7 @@ class RasterDataArray(XRasterBase):
         da = xr.DataArray(
             data,
             dims=dims,
-            coords=_raster_utils._affine_to_coords(transform, (nrow, ncol)),
+            coords=raster_utils._affine_to_coords(transform, (nrow, ncol)),
         )
         da.raster.set_spatial_dims(x_dim="x", y_dim="y")
         da.raster.set_nodata(nodata=nodata)  # set  _FillValue attr
@@ -1952,11 +1771,11 @@ class RasterDataArray(XRasterBase):
             for d in self._obj.dims
             if d not in [self.x_dim, self.y_dim]
         }
-        coords = _raster_utils._affine_to_coords(
+        coords = raster_utils._affine_to_coords(
             dst_transform, (dst_height, dst_width), y_dim=self.y_dim, x_dim=self.x_dim
         )
         dst_coords.update(coords)
-        da_reproject = full(
+        da_reproject = raster_utils.full(
             dst_coords,
             nodata=dst_nodata,
             dtype=self._obj.dtype,
@@ -1988,7 +1807,7 @@ class RasterDataArray(XRasterBase):
         dst_coords = {d: self._obj.coords[d] for d in self._obj.dims}
         ys, xs = index.raster.ycoords, index.raster.xcoords
         dst_coords.update({self.y_dim: ys, self.x_dim: xs})
-        da_reproject = full(
+        da_reproject = raster_utils.full(
             dst_coords,
             nodata=dst_nodata,
             dtype=self._obj.dtype,
@@ -2087,14 +1906,14 @@ class RasterDataArray(XRasterBase):
                 for d in self._obj.dims
                 if d not in [self.x_dim, self.y_dim]
             }
-            coords = _raster_utils._affine_to_coords(
+            coords = raster_utils._affine_to_coords(
                 dst_transform,
                 (dst_height, dst_width),
                 x_dim=self.x_dim,
                 y_dim=self.y_dim,
             )
             dst_coords.update(coords)
-            da_temp = full(
+            da_temp = raster_utils.full(
                 dst_coords,
                 nodata=dst_nodata,
                 dtype=self._obj.dtype,
@@ -2143,7 +1962,9 @@ class RasterDataArray(XRasterBase):
                 # out of bounds -> return empty array
                 if isinstance(other, xr.Dataset):
                     other = other[list(other.data_vars.keys())[0]]
-                da = full_like(other.astype(da_clip.dtype), nodata=self.nodata)
+                da = raster_utils.full_like(
+                    other.astype(da_clip.dtype), nodata=self.nodata
+                )
                 da.name = self._obj.name
             else:
                 da = da_clip.raster.reproject(
@@ -2208,7 +2029,7 @@ class RasterDataArray(XRasterBase):
             dst_coords = {d: self._obj.coords[d] for d in self._obj.dims}
             ys, xs = index.raster.ycoords, index.raster.xcoords
             dst_coords.update({self.y_dim: ys, self.x_dim: xs})
-            da_temp = full(
+            da_temp = raster_utils.full(
                 dst_coords,
                 nodata=dst_nodata,
                 dtype=self._obj.dtype,
@@ -2676,7 +2497,7 @@ class RasterDataset(XRasterBase):
                     other = other[list(other.data_vars.keys())[0]]
                 ds = xr.Dataset(attrs=self._obj.attrs)
                 for var in self._obj.data_vars:
-                    ds[var] = full_like(other, nodata=np.nan)
+                    ds[var] = raster_utils.full_like(other, nodata=np.nan)
             else:
                 ds = ds_clip.raster.reproject(
                     dst_crs=other.raster.crs,

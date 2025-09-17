@@ -17,16 +17,16 @@ from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom, Zoom
-from hydromt.gis._raster_utils import _cellres
+from hydromt.gis.raster_utils import cellres
 
 __all__ = [
     "_axes_attrs",
     "_bbox_from_file_and_filters",
-    "_parse_crs",
     "_parse_geom_bbox_buffer",
-    "_zoom_to_overview_level",
     "_to_geographic_bbox",
+    "parse_crs",
     "utm_crs",
+    "zoom_to_overview_level",
 ]
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ def utm_crs(bbox):
     return CRS.from_epsg(epsg)
 
 
-def _parse_crs(crs: Any, bbox: Optional[List[float]] = None) -> CRS:
+def parse_crs(crs: Any, bbox: Optional[List[float]] = None) -> CRS:
     """Parse crs string to pyproj.CRS.
 
     Parameters
@@ -233,7 +233,7 @@ def _bbox_from_file_and_filters(
     return tuple(bbox.to_crs(source_crs).total_bounds)
 
 
-def _zoom_to_overview_level(
+def zoom_to_overview_level(
     zoom: Zoom,
     mask: Optional[Geom] = None,
     zls_dict: Optional[Dict[int, float]] = None,
@@ -252,6 +252,12 @@ def _zoom_to_overview_level(
     source_crs: pyproj.CRS, optional
         Source crs to determine res if zoom_level tuple is provided
         with different unit than source_crs
+
+    Returns
+    -------
+    overview_level: int or None
+        Overview level of the data to be used. If no overview levels are defined,
+        None is returned.
     """
     # check zoom level
     if zls_dict is None or len(zls_dict) == 0:
@@ -295,7 +301,7 @@ def _zoom_to_overview_level(
                 lat = 0
                 if mask is not None:
                     lat = mask.to_crs(4326).centroid.y.item()
-                conversions["degree"] = _cellres(lat=lat)[1]
+                conversions["degree"] = cellres(lat=lat)[1]
             fsrc = conversions.get(src_res_unit, 1)
             fdst = conversions.get(dst_crs_unit, 1)
             dst_res = src_res * fsrc / fdst

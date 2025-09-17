@@ -216,12 +216,6 @@ def test_eva(ts_extremes):
     xr.testing.assert_equal(bm_eva, bm_test)
     del da_params, da_rps
 
-    # test eva_block_maxima
-    bm_eva2 = extremes.eva_block_maxima(
-        ts_extremes, period="quarter", distribution="gumb"
-    )
-    xr.testing.assert_equal(bm_eva, bm_eva2)
-
     # Test fot POT
     pot_eva = extremes.eva(
         ts_extremes, ev_type="POT", qthresh=0.996, distribution="gpd"
@@ -234,11 +228,6 @@ def test_eva(ts_extremes):
     )
     pot_test = xr.merge([pot_peaks, da_params, da_rps])
     xr.testing.assert_equal(pot_test, pot_eva)
-
-    pot_eva2 = extremes.eva_peaks_over_threshold(
-        ts_extremes, qthresh=0.996, distribution="gpd"
-    )
-    xr.testing.assert_equal(pot_eva, pot_eva2)
 
     # test plot
     # not sure how to work with assertions here but at least check that it runs

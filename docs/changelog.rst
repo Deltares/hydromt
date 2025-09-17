@@ -24,6 +24,15 @@ New
 - `hydromt check` accepts a `--format` flag to check either v1 or v0 data catalogs (#1265)
 - `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265)
 
+Changed
+-------
+- `hydromt.io` and its functions are now public (underscore removed). (#1271)
+- Reading the hydromt workflow yaml is now done with `hydromt.io.read_workflow_yaml`. (#1271)
+- Important GIS methods are now public in `hydromt.gis.gis_utils`, `hydromt.gis.raster_utils` and `hydromt.gis.vector_utils`. (#1271)
+- HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils`. (#1271)
+- `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
+
+
 Fixed
 -----
 - CLI update command was not working. (#1244)
@@ -31,6 +40,8 @@ Fixed
 - CF compliant dimensions in netcdf files
 - `buffer` argument in `DataCatalog.get_rasterdataset` now is an integer expressed in resolution multiplicity instead of in meters. (#1245)
 - Improved logging information for build and update functions. (#1237)
+- Better documentation of drivers and their options. (#1271)
+- Passing options to ``geodataframe_table`` driver now works. (#1271)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 
@@ -43,6 +54,7 @@ Removed
 - From the `GridComponent`, the functions `create_from_region`, `add_data_from_constant`, `add_data_from_rasterdataset`, `add_data_from_raster_reclass`, `add_data_from_geodataframe`. (#1229) Equivalent workflows are still available.
 - From the `MeshComponent`, the functions `create_2d_from_region`, `add_2d_data_from_rasterdataset`, `add_2d_data_from_raster_reclass`. (#1229) Equivalent workflows are still available.
 - `GridComponent`, `MeshComponent`, `GeomsComponent`, and `VectorComponent` no longer write the region on `write`. The function `SpatialModelComponent.write_region` is still available for plugin implementors.
+- `stats.eva_block_maxima` and `stats.eva_peaks_over_threshold`. Use `stats.eva` instead.
 
 v1.2.0 (2025-07-22)
 ===================

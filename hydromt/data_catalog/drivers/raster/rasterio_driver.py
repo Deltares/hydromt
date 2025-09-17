@@ -11,7 +11,6 @@ import rasterio.errors
 import xarray as xr
 from pyproj import CRS
 
-from hydromt._io.readers import _open_mfraster
 from hydromt._typing import (
     Geom,
     SourceMetadata,
@@ -25,14 +24,36 @@ from hydromt._utils.caching import _cache_vrt_tiles
 from hydromt._utils.temp_env import temp_env
 from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
-from hydromt.data_catalog.drivers import RasterDatasetDriver
-from hydromt.gis._gis_utils import _zoom_to_overview_level
+from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
+    RasterDatasetDriver,
+)
+from hydromt.gis.gis_utils import zoom_to_overview_level
+from hydromt.io.readers import open_mfraster
 
 logger: Logger = getLogger(__name__)
 
 
 class RasterioDriver(RasterDatasetDriver):
-    """Driver using rasterio for RasterDataset."""
+    """
+    Driver for RasterDataset using the rasterio library: ``rasterio``.
+
+    Supports reading and writing raster files using rasterio.
+
+    Driver **options** include:
+
+    * mosaic: bool, if True and multiple uris are given, will mosaic the datasets
+      together using `rasterio.merge.merge`. Default is False.
+    * mosaic_kwargs: dict, additional keyword arguments to pass to
+      `rasterio.merge.merge`.
+    * cache: bool, if True and reading from VRT files, will cache the tiles
+      locally to speed up reading. Default is False.
+    * cache_root: str, root directory for caching. Default is taken from
+      `hydromt.config.SETTINGS.cache_root`.
+    * cache_dir: str, subdirectory for caching. Default is the stem of the first
+      uri without extension.
+    * Any other option supported by `hydromt.io.readers.open_mfraster`.
+
+    """
 
     name = "rasterio"
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {
@@ -103,7 +124,7 @@ class RasterioDriver(RasterDatasetDriver):
             except AttributeError:  # pydantic extra=allow on SourceMetadata
                 zls_dict, crs = self._get_zoom_levels_and_crs(uris[0])
 
-            overview_level: Optional[int] = _zoom_to_overview_level(
+            overview_level: Optional[int] = zoom_to_overview_level(
                 zoom, mask, zls_dict, crs
             )
             if overview_level:
@@ -115,15 +136,15 @@ class RasterioDriver(RasterDatasetDriver):
 
         # If the metadata resolver has already resolved the overview level,
         # trying to open zoom levels here will result in an error.
-        # Better would be to seperate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023
+        # Better would be to separate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023
         # Then we can implement looking for a overview level in the driver.
         def _open() -> Union[xr.DataArray, xr.Dataset]:
             try:
-                return _open_mfraster(uris, mosaic=mosaic, **options)
+                return open_mfraster(uris, mosaic=mosaic, **options)
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     options.pop("overview_level")
-                    return _open_mfraster(uris, mosaic=mosaic, **options)
+                    return open_mfraster(uris, mosaic=mosaic, **options)
                 else:
                     raise
 
@@ -139,7 +160,7 @@ class RasterioDriver(RasterDatasetDriver):
         else:
             ds = _open()
 
-        # Mosiac's can mess up the chunking, which can error during writing
+        # Mosaic's can mess up the chunking, which can error during writing
         # Or maybe setting
         chunks = options.get("chunks")
         if chunks is not None:

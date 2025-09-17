@@ -8,7 +8,7 @@ import geopandas as gpd
 from geopandas import GeoDataFrame
 from pyproj import CRS
 
-from hydromt._io.writers import write_region
+from hydromt.io.writers import write_region
 from hydromt.model.components.base import ModelComponent
 
 if TYPE_CHECKING:

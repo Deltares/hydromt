@@ -3,14 +3,11 @@
 
 import json
 from os.path import isfile
-from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 import click
 
-from hydromt._io import _config_read
-
-__all__ = ["parse_json", "parse_config"]
+__all__ = ["parse_json"]
 
 
 ### CLI callback methods ###
@@ -31,12 +28,3 @@ def parse_json(_ctx: click.Context, _param, value: str) -> Dict[str, Any]:
         except json.JSONDecodeError:
             raise ValueError(f'Could not decode JSON "{value}"')
     return kwargs
-
-
-### general parsing methods ##
-def parse_config(path: Union[Path, str]) -> Dict[str, Any]:
-    """Parse config from `path`."""
-    if not isfile(path):
-        raise IOError(f"Config not found at {path}")
-
-    return _config_read(path, abs_path=True, skip_abspath_sections=["setup_config"])

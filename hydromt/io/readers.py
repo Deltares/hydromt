@@ -28,9 +28,9 @@ from hydromt._typing.type_def import StrPath
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
-from hydromt.gis import _gis_utils, _vector_utils, raster, vector
+from hydromt.gis import gis_utils, raster, vector, vector_utils
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.gis.raster_merge import merge
+from hydromt.gis.raster_utils import merge
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
@@ -38,17 +38,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    "_open_mfcsv",
-    "_open_raster",
-    "_open_mfraster",
-    "_open_raster_from_tindex",
-    "_open_vector",
-    "_open_geodataset",
-    "_open_vector_from_table",
-    "_open_timeseries_from_table",
+    "open_mfcsv",
+    "open_raster",
+    "open_mfraster",
+    "open_ncs",
     "open_nc",
-    "_read_yaml",
-    "_read_toml",
+    "open_raster_from_tindex",
+    "open_vector",
+    "open_geodataset",
+    "open_vector_from_table",
+    "open_timeseries_from_table",
+    "read_toml",
+    "read_yaml",
+    "read_workflow_yaml",
 ]
 
 OPEN_VECTOR_PREDICATE = Literal[
@@ -57,7 +59,7 @@ OPEN_VECTOR_PREDICATE = Literal[
 OPEN_VECTOR_DRIVER = Literal["csv", "xls", "xy", "pyogrio", "parquet", "xlsx"]
 
 
-def _open_mfcsv(
+def open_mfcsv(
     paths: Dict[Union[str, int], Union[str, Path]],
     concat_dim: str,
     *,
@@ -172,7 +174,7 @@ def _open_mfcsv(
     return ds
 
 
-def _open_raster(
+def open_raster(
     uri: Union[StrPath, IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
     *,
     mask_nodata: bool = False,
@@ -235,7 +237,7 @@ def _open_raster(
     return da
 
 
-def _open_mfraster(
+def open_mfraster(
     uris: Union[str, List[StrPath]],
     *,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
@@ -309,7 +311,7 @@ def _open_mfraster(
     index_lst, file_attrs = [], []
     for i, uri in enumerate(uris):
         # read file
-        da = _open_raster(uri, chunks=chunks, **kwargs)
+        da = open_raster(uri, chunks=chunks, **kwargs)
 
         # get name, attrs and index (if concat)
         if hasattr(uri, "path"):  # file-like
@@ -376,7 +378,7 @@ def _open_mfraster(
     return ds
 
 
-def _open_raster_from_tindex(
+def open_raster_from_tindex(
     tindex_path,
     *,
     bbox=None,
@@ -436,7 +438,7 @@ def _open_raster_from_tindex(
     if "dst_bounds" not in mosaic_kwargs:
         mosaic_kwargs.update(mask=geom)  # limit output domain to bbox/geom
 
-    ds_out = _open_mfraster(
+    ds_out = open_mfraster(
         paths, mosaic=len(paths) > 1, mosaic_kwargs=mosaic_kwargs, **kwargs
     )
     # clip to extent
@@ -446,7 +448,7 @@ def _open_raster_from_tindex(
     return ds_out  # dataset to be consitent with open_mfraster
 
 
-def _open_geodataset(
+def open_geodataset(
     loc_path,
     *,
     data_path=None,
@@ -509,7 +511,7 @@ def _open_geodataset(
         kwargs.update(assert_gtype="Point", driver=filetype)
     # read geometry file
     polygon: Optional[Polygon] = box(*bbox) if bbox else None
-    gdf = _open_vector(loc_path, crs=crs, bbox=polygon, geom=geom, **kwargs)
+    gdf = open_vector(loc_path, crs=crs, bbox=polygon, geom=geom, **kwargs)
     if index_dim is None:
         index_dim = gdf.index.name if gdf.index.name is not None else "index"
     # read timeseries file
@@ -517,7 +519,7 @@ def _open_geodataset(
         loc_path_base = dirname(loc_path)
         full_data_path = join(loc_path_base, data_path)
         if isfile(full_data_path):
-            da_ts = _open_timeseries_from_table(
+            da_ts = open_timeseries_from_table(
                 full_data_path, name=var_name, index_dim=index_dim
             )
             ds = vector.GeoDataset.from_gdf(gdf, da_ts)
@@ -528,7 +530,7 @@ def _open_geodataset(
     return ds.chunk(chunks)
 
 
-def _open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
+def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
     """Open timeseries csv or parquet file and parse to xarray.DataArray.
 
     Accepts files with time index on one dimension and numeric location index on the
@@ -593,7 +595,7 @@ def _open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs)
     return xr.DataArray(df, dims=("time", index_dim), name=name)
 
 
-def _open_vector(
+def open_vector(
     path: StrPath,
     *,
     driver: Optional[OPEN_VECTOR_DRIVER] = None,
@@ -647,7 +649,7 @@ def _open_vector(
     """
     driver = driver if driver is not None else str(path).split(".")[-1].lower()
     if driver in ["csv", "parquet", "xls", "xlsx", "xy"]:
-        gdf = _open_vector_from_table(path, driver=driver, **kwargs)
+        gdf = open_vector_from_table(path, driver=driver, **kwargs)
     # drivers with multiple relevant files cannot be opened directly, we should pass the uri only
 
     else:
@@ -656,7 +658,7 @@ def _open_vector(
                 bbox_shapely = box(*bbox)
             else:
                 bbox_shapely = None
-            bbox_reader = _gis_utils._bbox_from_file_and_filters(
+            bbox_reader = gis_utils._bbox_from_file_and_filters(
                 str(path), bbox_shapely, geom, crs
             )
             gdf = read_dataframe(str(path), bbox=bbox_reader, **kwargs)
@@ -685,12 +687,12 @@ def _open_vector(
         gdf = gdf.to_crs(dst_crs)
     # filter points
     if gdf.index.size > 0 and (geom is not None or bbox is not None):
-        idx = _vector_utils._filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
+        idx = vector_utils._filter_gdf(gdf, geom=geom, bbox=bbox, predicate=predicate)
         gdf = gdf.iloc[idx, :]
     return gdf
 
 
-def _open_vector_from_table(
+def open_vector_from_table(
     path,
     *,
     driver=None,
@@ -742,9 +744,10 @@ def _open_vector_from_table(
         kwargs.update(index_col=False, header=None, sep=r"\s+")
         df = pd.read_csv(path, **kwargs).rename(columns={0: x_dim, 1: y_dim})
     else:
-        raise IOError(f"Driver {driver} unknown.")
+        raise IOError(f"Driver or extension {driver} unknown for vector table.")
     # infer points from table
     df.columns = [c.lower() for c in df.columns]
+
     if x_dim is None:
         for dim in raster.XDIMS:
             if dim in df.columns:
@@ -764,14 +767,64 @@ def _open_vector_from_table(
     return gdf
 
 
-def _read_workflow_yaml(
+def read_workflow_yaml(
     path: StrPath,
+    modeltype: Optional[str] = None,
+    defaults: Optional[Dict[str, Any]] = None,
+    abs_path: bool = True,
+    skip_abspath_sections: Optional[List[str]] = None,
 ) -> Tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
-    d = _read_yaml(path)
-    modeltype = d.pop("modeltype", None)
+    """Read HydroMT workflow yaml file.
+
+    Parameters
+    ----------
+    path : StrPath
+        Path to workflow yaml file.
+    modeltype : str, optional
+        Model type (eg wflow, sfincs). If given, this overrules the modeltype
+        specified in the workflow file, by default None
+    defaults : dict, optional
+        Nested dictionary with default options, by default dict()
+    abs_path : bool, optional
+        If True, parse string values to an absolute path if the a file or folder
+        with that name (string value) relative to the config file exist,
+        by default True
+    skip_abspath_sections: list, optional
+        These sections are not evaluated for absolute paths if abs_path=True,
+        by default ['setup_config']
+
+    Returns
+    -------
+    modeltype : str | None
+        Model type (eg wflow, sfincs)
+    model_init : dict
+        Model initialization options to be used when instantiating a `hydromt.Model`
+    steps : list of HydromtModelStep
+        List of model steps to be executed. Can be passed to `hydromt.Model.build` and
+        `hydromt.Model.update`.
+    """
+    if not isfile(path):
+        raise IOError(f"HydroMT workflow file not found at {path}")
+
+    d = _config_read(
+        path,
+        defaults=defaults,
+        abs_path=abs_path,
+        skip_abspath_sections=skip_abspath_sections,
+    )
+
+    modeltype = modeltype if modeltype is not None else d.pop("modeltype", None)
     model_init = d.pop("global", {})
 
     # steps are required
+    if "steps" not in d:
+        error_msg = (
+            f"It seems your workflow file at {path} does not "
+            "contain a `steps` section. Perhaps you're using a v0.x format? "
+        )
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+
     steps = d.pop("steps")
 
     return modeltype, model_init, steps
@@ -797,7 +850,7 @@ def _config_read(
         by default False
     skip_abspath_sections: list, optional
         These sections are not evaluated for absolute paths if abs_path=True,
-        by default ['update_config']
+        by default ['setup_config']
 
     Returns
     -------
@@ -809,7 +862,7 @@ def _config_read(
     # read
     ext = splitext(config_path)[-1].strip()
     if ext in [".yaml", ".yml"]:
-        cfdict = _read_yaml(config_path)
+        cfdict = read_yaml(config_path)
     else:
         raise ValueError(f"Unknown extension: {ext} Hydromt only supports yaml")
 
@@ -931,7 +984,7 @@ def open_ncs(
     return ncs
 
 
-def _read_yaml(path: StrPath) -> Dict[str, Any]:
+def read_yaml(path: StrPath) -> Dict[str, Any]:
     """Read yaml file and return as dict."""
     with open(path, "rb") as stream:
         yml = load_yaml(stream)
@@ -943,7 +996,7 @@ def _parse_yaml(text: str) -> Dict[str, Any]:
     return load_yaml(text)
 
 
-def _read_toml(path: StrPath) -> Dict[str, Any]:
+def read_toml(path: StrPath) -> Dict[str, Any]:
     """Read toml file and return as dict."""
     with open(path, "rb") as f:
         data = load_toml(f)
@@ -958,5 +1011,5 @@ def _yml_from_uri_or_path(uri_or_path: StrPath) -> Dict[str, Any]:
             yml = _parse_yaml(r.text)
 
     else:
-        yml = _read_yaml(uri_or_path)
+        yml = read_yaml(uri_or_path)
     return yml

@@ -15,14 +15,28 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.data_catalog.drivers._preprocessing import PREPROCESSORS
 from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
+from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
 
 logger: Logger = getLogger(__name__)
 
 
 class DatasetXarrayDriver(DatasetDriver):
-    """DatasetXarrayDriver."""
+    """
+    Driver for Dataset using xarray: ``dataset_xarray``.
+
+    Supports reading and writing zarr and netcdf files using xarray.
+    zarr files will be read using `xr.open_zarr` and netcdf files using
+    `xr.open_mfdataset`.
+
+    Driver **options** include:
+
+    * preprocess: Optional[str], name of preprocessor to apply before merging datasets.
+      Available preprocessors include: round_latlon, to_datetimeindex,
+      remove_duplicates, harmonise_dims. See their docstrings for details.
+    * Any other option supported by `xr.open_zarr` or `xr.open_mfdataset`.
+
+    """
 
     name: ClassVar[str] = "dataset_xarray"
     supports_writing = True

@@ -7,14 +7,13 @@ from datetime import datetime
 from json import loads as json_decode
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import click
 import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__
-from hydromt._io import write_yaml
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import log
@@ -24,6 +23,7 @@ from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
+from hydromt.io import read_workflow_yaml, read_yaml, write_yaml
 from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
@@ -241,17 +241,8 @@ def build(
     log._setuplog(join(model_root, HYDROMT_LOG_PATH), log_level=log_level, append=False)
     logger.info(f"Building instance of {model} model at {model_root}.")
     logger.info("User settings:")
-    opt = _utils.parse_config(config)
-    if "steps" not in opt:
-        error_msg = (
-            f"It seems your workflow file at {config} does not "
-            "contain a `steps` section. Perhaps you're using a v0.x format? "
-        )
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
+    modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
 
-    kwargs = opt.pop("global", {})
-    modeltype = opt.pop("modeltype", model)
     # parse data catalog options from global section in config and cli options
     data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
     data_libs += list(data)  # add data catalogs from cli
@@ -270,7 +261,7 @@ def build(
         )
         mod.data_catalog.cache = cache
         # build model
-        mod.build(steps=opt["steps"])
+        mod.build(steps=steps)
 
     except Exception as e:
         logger.exception(e)  # catch and log errors
@@ -337,18 +328,8 @@ def update(
     logger.info(f"Output dir: {model_out}")
     # parse settings
     logger.info("User settings:")
-    opt = _utils.parse_config(config)
+    modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
 
-    if "steps" not in opt:
-        error_msg = (
-            f"It seems your workflow file at {config} does not "
-            "contain a `steps` section. Perhaps you're using a v0.x format? "
-        )
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
-
-    kwargs = opt.pop("global", {})
-    modeltype = opt.pop("modeltype", model)
     if modeltype not in PLUGINS.model_plugins:
         raise ValueError("Unknown model")
     # parse data catalog options from global section in config and cli options
@@ -365,7 +346,7 @@ def update(
             **kwargs,
         )
         mod.data_catalog.cache = cache
-        mod.update(model_out=model_out, steps=opt["steps"], forceful_overwrite=fo)
+        mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
     except Exception as e:
         logger.exception(e)  # catch and log errors
         raise
@@ -392,7 +373,7 @@ def update(
 @click.pass_context
 def check(
     _ctx: click.Context,
-    model: Optional[str],
+    model: str | None,
     config,
     data,
     quiet: int,
@@ -461,17 +442,16 @@ def check(
                 )
             else:
                 try:
-                    config_dict = _utils.parse_config(config)
-                    if model:
-                        config_dict["modeltype"] = model
-
-                    if "steps" not in config_dict:
-                        raise ValueError(
-                            f"No `steps` section in workflow yaml {config}. Perhaps it is a v0.x file?"
-                        )
-
+                    modeltype, kwargs, steps = read_workflow_yaml(
+                        config, modeltype=model
+                    )
+                    config_dict = {
+                        "modeltype": modeltype,
+                        "global": kwargs,
+                        "steps": steps,
+                    }
                     HydromtModelSetup(**config_dict)
-                    logger.info(f"Workflow yaml {config} is valid!")
+                    logger.info("Model config valid!")
 
                 except (ValidationError, ValueError) as e:
                     failed = True
@@ -479,7 +459,7 @@ def check(
                     logger.error(msg)
 
         if failed:
-            # We've already presentend the errors above
+            # We've already presented the errors above
             # now we simply raise without extra msg to fail the process
             # so it has the correct exit code
             raise ValueError(
@@ -526,12 +506,12 @@ def check(
 def export(
     _ctx: click.Context,
     export_dest_path: Path,
-    source: Optional[str],
-    time_range: Optional[str],
-    bbox: Optional[Tuple[float, float, float, float]],
-    config: Optional[Path],
-    region: Optional[Dict[Any, Any]],
-    data: Optional[List[StrPath]],
+    source: str | None,
+    time_range: str | None,
+    bbox: tuple[float, float, float, float] | None,
+    config: Path | None,
+    region: dict[Any, Any] | None,
+    data: list[StrPath] | None,
     dd: bool,
     fo: bool,
     error_on_empty: bool,
@@ -562,11 +542,11 @@ def export(
     else:
         handle_nodata = NoDataStrategy.IGNORE
 
-    data_libs: List[StrPath] = list(data) if data else []
+    data_libs: list[StrPath] = list(data) if data else []
     if dd and "deltares_data" not in data_libs:  # deltares_data from cli
         data_libs.insert(0, "deltares_data")
 
-    sources: List[str] = []
+    sources: list[str] = []
     if source:
         if isinstance(source, str):
             sources = [source]
@@ -579,7 +559,7 @@ def export(
     append = False
 
     if config:
-        config_dict = _utils.parse_config(config)["export_data"]
+        config_dict = read_yaml(config)["export_data"]
         if "data_libs" in config_dict.keys():
             data_libs = data_libs + config_dict.pop("data_libs")
         time_range = config_dict.pop("time_range", None)
