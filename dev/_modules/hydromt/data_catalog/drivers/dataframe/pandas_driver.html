@@ -477,7 +477,15 @@
 <div class="viewcode-block" id="PandasDriver">
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.PandasDriver.html#hydromt.data_catalog.drivers.PandasDriver">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PandasDriver</span><span class="p">(</span><span class="n">DataFrameDriver</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Driver for DataFrames using the pandas library.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Driver for DataFrames using the pandas library: ``pandas``.</span>
+
+<span class="sd">    Supports reading and writing csv, excel (xls, xlsx), parquet, fixed width formatted</span>
+<span class="sd">    files (fwf) using pandas.</span>
+
+<span class="sd">    Driver **options** include any option supported by the pandas read functions,</span>
+<span class="sd">    e.g. `pd.read_csv`, `pd.read_excel`, `pd.read_parquet`, `pd.read_fwf`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;pandas&quot;</span>
     <span class="n">supports_writing</span> <span class="o">=</span> <span class="kc">True</span>

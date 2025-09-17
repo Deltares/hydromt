@@ -469,8 +469,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;eva_block_maxima&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;eva_peaks_over_threshold&quot;</span><span class="p">,</span>
     <span class="s2">&quot;eva&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_peaks&quot;</span><span class="p">,</span>
     <span class="s2">&quot;get_return_value&quot;</span><span class="p">,</span>
@@ -554,123 +552,6 @@
     <span class="c1"># combine data</span>
     <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">da_peaks</span><span class="p">,</span> <span class="n">da_params</span><span class="p">,</span> <span class="n">da_rps</span><span class="p">])</span></div>
 
-
-
-<span class="c1"># In theory could be removed because redundant with eva</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">eva_block_maxima</span><span class="p">(</span>
-    <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_DEFAULT_PERIOD_STR</span><span class="p">,</span>
-    <span class="n">min_dist</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">min_sample_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">distribution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rps</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">]</span> <span class="o">=</span> <span class="n">_RPS</span><span class="p">,</span>
-    <span class="n">criterium</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;AIC&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return EVA based on block maxima.</span>
-
-<span class="sd">    Extreme valua analysis based on block maxima. The method selects the peaks,</span>
-<span class="sd">    fits a distribution and calculates return values for provided return periods.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    da : xr.DataArray</span>
-<span class="sd">        Timeseries data, must have a regular spaced &#39;time&#39; dimension.</span>
-<span class="sd">    period : str, optional</span>
-<span class="sd">        Period string, by default &quot;365.25D&quot;. See pandas.Timedelta for options.</span>
-<span class="sd">    min_dist : int, optional</span>
-<span class="sd">        Minimum distance between peaks measured in time steps, by default 0</span>
-<span class="sd">    min_sample_size : int, optional</span>
-<span class="sd">        Minimum number of finite values in a valid block, by default 0. Peaks of</span>
-<span class="sd">        invalid blocks are set to NaN.</span>
-<span class="sd">    distribution : str, optional</span>
-<span class="sd">        Short name of distribution. If None (default) the optimal block maxima</span>
-<span class="sd">        distribution (&quot;gumb&quot; or &quot;gev&quot;) is selected based on `criterium`.</span>
-<span class="sd">    rps : np.ndarray, optional</span>
-<span class="sd">        Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]</span>
-<span class="sd">    criterium: {&#39;AIC&#39;, &#39;AICc&#39;, &#39;BIC&#39;}</span>
-<span class="sd">        Selection criterium, by default &quot;AIC&quot;</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    xr.Dataset</span>
-<span class="sd">        Dataset with peaks timeseries, distribution name and parameters</span>
-<span class="sd">        and return values.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">da_bm</span> <span class="o">=</span> <span class="n">get_peaks</span><span class="p">(</span>
-        <span class="n">da</span><span class="p">,</span>
-        <span class="n">ev_type</span><span class="o">=</span><span class="s2">&quot;BM&quot;</span><span class="p">,</span>
-        <span class="n">min_dist</span><span class="o">=</span><span class="n">min_dist</span><span class="p">,</span>
-        <span class="n">min_sample_size</span><span class="o">=</span><span class="n">min_sample_size</span><span class="p">,</span>
-        <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="c1"># fit distribution using lmom</span>
-    <span class="n">da_params</span> <span class="o">=</span> <span class="n">fit_extremes</span><span class="p">(</span>
-        <span class="n">da_bm</span><span class="p">,</span> <span class="n">ev_type</span><span class="o">=</span><span class="s2">&quot;BM&quot;</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span> <span class="n">criterium</span><span class="o">=</span><span class="n">criterium</span>
-    <span class="p">)</span>
-    <span class="c1"># get return values</span>
-    <span class="n">da_rps</span> <span class="o">=</span> <span class="n">get_return_value</span><span class="p">(</span><span class="n">da_params</span><span class="p">,</span> <span class="n">rps</span><span class="o">=</span><span class="n">rps</span><span class="p">)</span>
-    <span class="c1"># combine data</span>
-    <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">da_bm</span><span class="p">,</span> <span class="n">da_params</span><span class="p">,</span> <span class="n">da_rps</span><span class="p">])</span>
-
-
-<span class="c1"># In theory could be removed because redundant with eva</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">eva_peaks_over_threshold</span><span class="p">(</span>
-    <span class="n">da</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
-    <span class="n">qthresh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">,</span>
-    <span class="n">min_dist</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">min_sample_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="n">period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_DEFAULT_PERIOD_STR</span><span class="p">,</span>
-    <span class="n">distribution</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">rps</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">int_</span><span class="p">]</span> <span class="o">=</span> <span class="n">_RPS</span><span class="p">,</span>
-    <span class="n">criterium</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;AIC&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return EVA based on peaks over threshold.</span>
-
-<span class="sd">    Extreme valua analysis based on peaks over threshold. The method selects the</span>
-<span class="sd">    peaks, fits a distribution and calculates return values for provided return</span>
-<span class="sd">    periods.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    da : xr.DataArray</span>
-<span class="sd">        Timeseries data, must have a regular spaced &#39;time&#39; dimension.</span>
-<span class="sd">    qthresh : float, optional</span>
-<span class="sd">        Quantile threshold used with peaks over threshold method, by default 0.9</span>
-<span class="sd">    min_dist : int, optional</span>
-<span class="sd">        Minimum distance between peaks measured in time steps, by default 0</span>
-<span class="sd">    min_sample_size : int, optional</span>
-<span class="sd">        Minumimum number of finite values in a valid block, by default 0. Peaks of</span>
-<span class="sd">    period : str, optional</span>
-<span class="sd">        Period string, by default &quot;365.25D&quot;. See pandas.Timedelta for options.</span>
-<span class="sd">    distribution : str, optional</span>
-<span class="sd">        Short name of distribution. If None (default) the optimal block maxima</span>
-<span class="sd">        distribution (&quot;exp&quot; or &quot;gpd&quot;) is selected based on `criterium`.</span>
-<span class="sd">    rps : np.ndarray, optional</span>
-<span class="sd">        Array of return periods, by default [1.5, 2, 5, 10, 20, 50, 100, 200, 500]</span>
-<span class="sd">    criterium: {&#39;AIC&#39;, &#39;AICc&#39;, &#39;BIC&#39;}</span>
-<span class="sd">        distrition selection criterium, by default &quot;AIC&quot;</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    xr.Dataset</span>
-<span class="sd">        Dataset with peaks timeseries, distribution name and parameters</span>
-<span class="sd">        and return values.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">da_bm</span> <span class="o">=</span> <span class="n">get_peaks</span><span class="p">(</span>
-        <span class="n">da</span><span class="p">,</span>
-        <span class="n">ev_type</span><span class="o">=</span><span class="s2">&quot;POT&quot;</span><span class="p">,</span>
-        <span class="n">min_dist</span><span class="o">=</span><span class="n">min_dist</span><span class="p">,</span>
-        <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-        <span class="n">qthresh</span><span class="o">=</span><span class="n">qthresh</span><span class="p">,</span>
-        <span class="n">min_sample_size</span><span class="o">=</span><span class="n">min_sample_size</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="c1"># fit distribution using lmom</span>
-    <span class="n">da_params</span> <span class="o">=</span> <span class="n">fit_extremes</span><span class="p">(</span>
-        <span class="n">da_bm</span><span class="p">,</span> <span class="n">ev_type</span><span class="o">=</span><span class="s2">&quot;POT&quot;</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">,</span> <span class="n">criterium</span><span class="o">=</span><span class="n">criterium</span>
-    <span class="p">)</span>
-    <span class="c1"># get return values</span>
-    <span class="n">da_rps</span> <span class="o">=</span> <span class="n">get_return_value</span><span class="p">(</span><span class="n">da_params</span><span class="p">,</span> <span class="n">rps</span><span class="o">=</span><span class="n">rps</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">([</span><span class="n">da_bm</span><span class="p">,</span> <span class="n">da_params</span><span class="p">,</span> <span class="n">da_rps</span><span class="p">])</span>
 
 
 <div class="viewcode-block" id="get_peaks">

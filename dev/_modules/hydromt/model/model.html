@@ -471,11 +471,11 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_yaml</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrPath</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_rgetattr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.steps_validator</span><span class="w"> </span><span class="kn">import</span> <span class="n">_validate_steps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_yaml</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ModelComponent</span><span class="p">,</span>
     <span class="n">SpatialModelComponent</span><span class="p">,</span>
@@ -656,7 +656,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_yml</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct a model with the components and other init arguments in the yaml file located at `path`.&quot;&quot;&quot;</span>
-        <span class="n">file_contents</span> <span class="o">=</span> <span class="n">_read_yaml</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">file_contents</span> <span class="o">=</span> <span class="n">read_yaml</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Model</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">file_contents</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -686,24 +686,27 @@
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Single method to build a model from scratch based on settings in `steps`.</span>
 
 <span class="sd">        Methods will be run one by one based on the /order of appearance in `steps`</span>
-<span class="sd">        (configuration file). For a list of available functions see :ref:`The model API&lt;model_api&gt;`</span>
-<span class="sd">        and :ref:`The plugin documentation&lt;plugin_create&gt;`</span>
+<span class="sd">        (configuration file). For a list of available functions see</span>
+<span class="sd">        :ref:`The model API&lt;model_api&gt;` and</span>
+<span class="sd">        :ref:`The plugin documentation&lt;plugin_create&gt;`.</span>
 
 <span class="sd">        By default the full model will be written at the end, except if a write step</span>
 <span class="sd">        is called for somewhere in steps, then this is skipped.</span>
 
-<span class="sd">        Note that the \* in the signature signifies that all of the arguments to this function</span>
-<span class="sd">        MUST be provided as keyword arguments.</span>
+<span class="sd">        Note that the \* in the signature signifies that all of the arguments to this</span>
+<span class="sd">        function MUST be provided as keyword arguments.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        write: bool, optional</span>
 <span class="sd">            Write complete model after executing all methods in opt, by default True.</span>
 <span class="sd">        steps: Optional[List[Dict[str, Dict[str, Any]]]]</span>
-<span class="sd">            Model build configuration. The configuration can be parsed from a</span>
-<span class="sd">            configuration file using :py:meth:`~hydromt.io.readers.configread`.</span>
+<span class="sd">            Model build steps. The steps can be parsed from a hydromt workflow/</span>
+<span class="sd">            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.</span>
 <span class="sd">            This is a list of nested dictionary where the first-level keys are the names</span>
-<span class="sd">            of the method for a ``Model`` method (e.g. `write`) OR the name of a component followed by the name of the method to run separated by a dot for ``ModelComponent`` method (e.g. `grid.write`).</span>
+<span class="sd">            of the method for a ``Model`` method (e.g. `write`) OR the name of a</span>
+<span class="sd">            component followed by the name of the method to run separated by a dot for</span>
+<span class="sd">            ``ModelComponent`` method (e.g. `grid.write`).</span>
 <span class="sd">            Any subsequent pairs will be passed to the method as arguments.</span>
 
 <span class="sd">            .. code-block:: text</span>
@@ -778,8 +781,8 @@
 <span class="sd">        write: bool, optional</span>
 <span class="sd">            Write the updated model schematization to disk. By default True.</span>
 <span class="sd">        steps: Optional[List[Dict[str, Dict[str, Any]]]]</span>
-<span class="sd">            Model build configuration. The configuration can be parsed from a</span>
-<span class="sd">            configuration file using :py:meth:`~hydromt.io.readers.configread`.</span>
+<span class="sd">            Model build steps. The steps can be parsed from a hydromt workflow/</span>
+<span class="sd">            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.</span>
 <span class="sd">            This is a list of nested dictionary where the first-level keys are the names</span>
 <span class="sd">            of a component followed by the name of the method to run separated by a dot.</span>
 <span class="sd">            any subsequent pairs will be passed to the method as arguments.</span>

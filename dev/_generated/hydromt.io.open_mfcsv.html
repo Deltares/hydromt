@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>hydromt.gis.raster.full_like &#8212; HydroMT  documentation</title>
+    <title>hydromt.io.open_mfcsv &#8212; HydroMT  documentation</title>
   
   
   
@@ -45,7 +45,7 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/hydromt.gis.raster.full_like';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_generated/hydromt.io.open_mfcsv';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
@@ -56,8 +56,8 @@
     <link rel="icon" href="../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="hydromt.gis.raster.full_from_transform" href="hydromt.gis.raster.full_from_transform.html" />
-    <link rel="prev" title="hydromt.gis.raster.full" href="hydromt.gis.raster.full.html" />
+    <link rel="next" title="hydromt.io.open_mfraster" href="hydromt.io.open_mfraster.html" />
+    <link rel="prev" title="hydromt.io.open_geodataset" href="hydromt.io.open_geodataset.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.2.0.dev0" />
@@ -433,6 +433,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.predefined_catalogs.html">hydromt.data_catalog.DataCatalog.predefined_catalogs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.to_dict.html">hydromt.data_catalog.DataCatalog.to_dict</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.to_yml.html">hydromt.data_catalog.DataCatalog.to_yml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.to_stac_catalog.html">hydromt.data_catalog.DataCatalog.to_stac_catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.export_data.html">hydromt.data_catalog.DataCatalog.export_data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source_bbox.html">hydromt.data_catalog.DataCatalog.get_source_bbox</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source_time_range.html">hydromt.data_catalog.DataCatalog.get_source_time_range</a></li>
@@ -441,6 +442,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_yml.html">hydromt.data_catalog.DataCatalog.from_yml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_stac_catalog.html">hydromt.data_catalog.DataCatalog.from_stac_catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataset.html">hydromt.data_catalog.DataCatalog.get_geodataset</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
@@ -515,13 +517,13 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.DatasetXarrayDriver.html">hydromt.data_catalog.drivers.DatasetXarrayDriver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.DatasetXarrayDriver.read.html">hydromt.data_catalog.drivers.DatasetXarrayDriver.read</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.DatasetXarrayDriver.write.html">hydromt.data_catalog.drivers.DatasetXarrayDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.harmonise_dims.html">hydromt.data_catalog.drivers.preprocessing.harmonise_dims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.remove_duplicates.html">hydromt.data_catalog.drivers.preprocessing.remove_duplicates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.round_latlon.html">hydromt.data_catalog.drivers.preprocessing.round_latlon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.to_datetimeindex.html">hydromt.data_catalog.drivers.preprocessing.to_datetimeindex</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api/gis.html">GIS methods</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster.full.html">hydromt.gis.raster.full</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">hydromt.gis.raster.full_like</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster.full_from_transform.html">hydromt.gis.raster.full_from_transform</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_merge.merge.html">hydromt.gis.raster_merge.merge</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/gis.html">GIS methods</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.from_numpy.html">hydromt.gis.DataArray.raster.from_numpy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.Dataset.raster.from_numpy.html">hydromt.gis.Dataset.raster.from_numpy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.attrs.html">hydromt.gis.DataArray.raster.attrs</a></li>
@@ -580,6 +582,12 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.zonal_stats.html">hydromt.gis.DataArray.raster.zonal_stats</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.to_raster.html">hydromt.gis.DataArray.raster.to_raster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.Dataset.raster.to_mapstack.html">hydromt.gis.Dataset.raster.to_mapstack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.cellres.html">hydromt.gis.raster_utils.cellres</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.full.html">hydromt.gis.raster_utils.full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.full_like.html">hydromt.gis.raster_utils.full_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.full_from_transform.html">hydromt.gis.raster_utils.full_from_transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.merge.html">hydromt.gis.raster_utils.merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.spread2d.html">hydromt.gis.raster_utils.spread2d</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.vector.from_gdf.html">hydromt.gis.DataArray.vector.from_gdf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.vector.to_gdf.html">hydromt.gis.DataArray.vector.to_gdf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.vector.from_netcdf.html">hydromt.gis.DataArray.vector.from_netcdf</a></li>
@@ -646,6 +654,32 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.flw.outlet_map.html">hydromt.gis.flw.outlet_map</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.flw.clip_basins.html">hydromt.gis.flw.clip_basins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.flw.dem_adjust.html">hydromt.gis.flw.dem_adjust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.gis_utils.parse_crs.html">hydromt.gis.gis_utils.parse_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.gis_utils.utm_crs.html">hydromt.gis.gis_utils.utm_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.gis_utils.zoom_to_overview_level.html">hydromt.gis.gis_utils.zoom_to_overview_level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.vector_utils.nearest_merge.html">hydromt.gis.vector_utils.nearest_merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.vector_utils.nearest.html">hydromt.gis.vector_utils.nearest</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api/io.html">Reading and writing files</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_geodataset.html">hydromt.io.open_geodataset</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">hydromt.io.open_mfcsv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_mfraster.html">hydromt.io.open_mfraster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_nc.html">hydromt.io.open_nc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_ncs.html">hydromt.io.open_ncs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_raster.html">hydromt.io.open_raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_raster_from_tindex.html">hydromt.io.open_raster_from_tindex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_timeseries_from_table.html">hydromt.io.open_timeseries_from_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_vector.html">hydromt.io.open_vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_vector_from_table.html">hydromt.io.open_vector_from_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.read_toml.html">hydromt.io.read_toml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.read_workflow_yaml.html">hydromt.io.read_workflow_yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.read_yaml.html">hydromt.io.read_yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_nc.html">hydromt.io.write_nc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_region.html">hydromt.io.write_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_toml.html">hydromt.io.write_toml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_xy.html">hydromt.io.write_xy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_yaml.html">hydromt.io.write_yaml</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/model.html">Model</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -908,9 +942,9 @@
     <li class="breadcrumb-item"><a href="../api/api.html" class="nav-link">API reference</a></li>
     
     
-    <li class="breadcrumb-item"><a href="../api/gis.html" class="nav-link">GIS methods</a></li>
+    <li class="breadcrumb-item"><a href="../api/io.html" class="nav-link">Reading and writing files</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">hydromt.gis.raster.full_like</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">hydromt.io.open_mfcsv</span></li>
   </ul>
 </nav>
 </div>
@@ -927,25 +961,38 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="hydromt-gis-raster-full-like">
-<h1>hydromt.gis.raster.full_like<a class="headerlink" href="#hydromt-gis-raster-full-like" title="Link to this heading">#</a></h1>
+  <section id="hydromt-io-open-mfcsv">
+<h1>hydromt.io.open_mfcsv<a class="headerlink" href="#hydromt-io-open-mfcsv" title="Link to this heading">#</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="hydromt.gis.raster.full_like">
-<span class="sig-prename descclassname"><span class="pre">hydromt.gis.raster.</span></span><span class="sig-name descname"><span class="pre">full_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2025.9.1)"><span class="pre">DataArray</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lazy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="(in xarray v2025.9.1)"><span class="pre">DataArray</span></a></span></span><a class="reference internal" href="../_modules/hydromt/gis/raster.html#full_like"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.gis.raster.full_like" title="Link to this definition">#</a></dt>
-<dd><p>Return a full object with the same grid and geospatial attributes as <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
+<dt class="sig sig-object py" id="hydromt.io.open_mfcsv">
+<span class="sig-prename descclassname"><span class="pre">hydromt.io.</span></span><span class="sig-name descname"><span class="pre">open_mfcsv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">concat_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">driver_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.13)"><span class="pre">Dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.13)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segmented_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'id'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'var'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'id'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.9.1)"><span class="pre">Dataset</span></a></span></span><a class="reference internal" href="../_modules/hydromt/io/readers.html#open_mfcsv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.io.open_mfcsv" title="Link to this definition">#</a></dt>
+<dd><p>Open multiple csv files as single Dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>other</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code>) – DataArray from which coordinates and attributes are taken</p></li>
-<li><p><strong>nodata</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – Fill value for new DataArray, defaults to other.nodata or if not set np.nan</p></li>
-<li><p><strong>lazy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – If True return DataArray with a dask rather than numpy array.</p></li>
+<li><p><strong>paths</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict[str</span> <span class="pre">|</span> <span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">Path],</span></code>) – Dictionary containing a id -&gt; filename mapping. Here the ids,
+should correspond to the values of the <cite>concat_dim</cite> dimension and
+the corresponding setting of <cite>segmented_by</cite>. I.e. if files are
+segmented by id, these should contain ids. If the files are
+segmented by var, the keys of this dictionaires should be the
+names of the variables.</p></li>
+<li><p><strong>concat_dim</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span></code>) – name of the dimension that will be created by concatinating
+all of the supplied csv files.</p></li>
+<li><p><strong>driver_kwargs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict[str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Any],</span></code>) – Any additional arguments to be passed to pandas’ <cite>read_csv</cite> function.</p></li>
+<li><p><strong>variable_axis</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Literal[0</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">1]</span> <span class="pre">=</span> <span class="pre">1,</span></code>) – The axis along which your variables or ids are. so if the csvs have the
+columns as variable names, you would leave this as 1. If the variables
+are along the index, set this to 0. If you are unsure leave it as default.</p></li>
+<li><p><strong>segmented_by</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – How the csv files are segmented. Options are “id” or “var”.  “id” should refer
+to the values of <cite>concat_dim</cite>. Segmented by id means csv files contain all
+variables for one id. Segmented by var or contain all ids for a
+single variable.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>da</strong> – Filled DataArray</p>
+<dd class="field-even"><p><strong>data</strong> – The newly created Dataset.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code></p>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -963,20 +1010,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="hydromt.gis.raster.full.html"
+       href="hydromt.io.open_geodataset.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">hydromt.gis.raster.full</p>
+        <p class="prev-next-title">hydromt.io.open_geodataset</p>
       </div>
     </a>
     <a class="right-next"
-       href="hydromt.gis.raster.full_from_transform.html"
+       href="hydromt.io.open_mfraster.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">hydromt.gis.raster.full_from_transform</p>
+        <p class="prev-next-title">hydromt.io.open_mfraster</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -999,7 +1046,7 @@
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydromt.gis.raster.full_like"><code class="docutils literal notranslate"><span class="pre">full_like()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydromt.io.open_mfcsv"><code class="docutils literal notranslate"><span class="pre">open_mfcsv()</span></code></a></li>
 </ul>
   </nav></div>
 
@@ -1007,7 +1054,7 @@
 
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/Deltares/hydromt/edit/main/docs/_generated/hydromt.gis.raster.full_like.rst">
+    <a href="https://github.com/Deltares/hydromt/edit/main/docs/_generated/hydromt.io.open_mfcsv.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -1023,7 +1070,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/_generated/hydromt.gis.raster.full_like.rst.txt"
+      <li><a href="../_sources/_generated/hydromt.io.open_mfcsv.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

@@ -469,7 +469,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">_open_mfraster</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Geom</span><span class="p">,</span>
     <span class="n">SourceMetadata</span><span class="p">,</span>
@@ -483,8 +482,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.temp_env</span><span class="w"> </span><span class="kn">import</span> <span class="n">temp_env</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.uris</span><span class="w"> </span><span class="kn">import</span> <span class="n">_strip_scheme</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SETTINGS</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterDatasetDriver</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis._gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_zoom_to_overview_level</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.raster.raster_dataset_driver</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RasterDatasetDriver</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">zoom_to_overview_level</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_mfraster</span>
 
 <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -492,7 +494,26 @@
 <div class="viewcode-block" id="RasterioDriver">
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">RasterioDriver</span><span class="p">(</span><span class="n">RasterDatasetDriver</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Driver using rasterio for RasterDataset.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Driver for RasterDataset using the rasterio library: ``rasterio``.</span>
+
+<span class="sd">    Supports reading and writing raster files using rasterio.</span>
+
+<span class="sd">    Driver **options** include:</span>
+
+<span class="sd">    * mosaic: bool, if True and multiple uris are given, will mosaic the datasets</span>
+<span class="sd">      together using `rasterio.merge.merge`. Default is False.</span>
+<span class="sd">    * mosaic_kwargs: dict, additional keyword arguments to pass to</span>
+<span class="sd">      `rasterio.merge.merge`.</span>
+<span class="sd">    * cache: bool, if True and reading from VRT files, will cache the tiles</span>
+<span class="sd">      locally to speed up reading. Default is False.</span>
+<span class="sd">    * cache_root: str, root directory for caching. Default is taken from</span>
+<span class="sd">      `hydromt.config.SETTINGS.cache_root`.</span>
+<span class="sd">    * cache_dir: str, subdirectory for caching. Default is the stem of the first</span>
+<span class="sd">      uri without extension.</span>
+<span class="sd">    * Any other option supported by `hydromt.io.readers.open_mfraster`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;rasterio&quot;</span>
     <span class="n">SUPPORTED_EXTENSIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
@@ -565,7 +586,7 @@
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>  <span class="c1"># pydantic extra=allow on SourceMetadata</span>
                 <span class="n">zls_dict</span><span class="p">,</span> <span class="n">crs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_zoom_levels_and_crs</span><span class="p">(</span><span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-            <span class="n">overview_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">_zoom_to_overview_level</span><span class="p">(</span>
+            <span class="n">overview_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_to_overview_level</span><span class="p">(</span>
                 <span class="n">zoom</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">zls_dict</span><span class="p">,</span> <span class="n">crs</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">overview_level</span><span class="p">:</span>
@@ -577,15 +598,15 @@
 
         <span class="c1"># If the metadata resolver has already resolved the overview level,</span>
         <span class="c1"># trying to open zoom levels here will result in an error.</span>
-        <span class="c1"># Better would be to seperate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023</span>
+        <span class="c1"># Better would be to separate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023</span>
         <span class="c1"># Then we can implement looking for a overview level in the driver.</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">_open</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">_open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">RasterioIOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;Cannot open overview level&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                     <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;overview_level&quot;</span><span class="p">)</span>
-                    <span class="k">return</span> <span class="n">_open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span>
 
@@ -601,7 +622,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">_open</span><span class="p">()</span>
 
-        <span class="c1"># Mosiac&#39;s can mess up the chunking, which can error during writing</span>
+        <span class="c1"># Mosaic&#39;s can mess up the chunking, which can error during writing</span>
         <span class="c1"># Or maybe setting</span>
         <span class="n">chunks</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;chunks&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

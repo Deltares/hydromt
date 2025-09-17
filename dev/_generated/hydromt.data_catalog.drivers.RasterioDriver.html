@@ -433,6 +433,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.predefined_catalogs.html">hydromt.data_catalog.DataCatalog.predefined_catalogs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.to_dict.html">hydromt.data_catalog.DataCatalog.to_dict</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.to_yml.html">hydromt.data_catalog.DataCatalog.to_yml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.to_stac_catalog.html">hydromt.data_catalog.DataCatalog.to_stac_catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.export_data.html">hydromt.data_catalog.DataCatalog.export_data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source_bbox.html">hydromt.data_catalog.DataCatalog.get_source_bbox</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source_time_range.html">hydromt.data_catalog.DataCatalog.get_source_time_range</a></li>
@@ -441,6 +442,7 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_predefined_catalogs.html">hydromt.data_catalog.DataCatalog.from_predefined_catalogs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_yml.html">hydromt.data_catalog.DataCatalog.from_yml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_dict.html">hydromt.data_catalog.DataCatalog.from_dict</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.from_stac_catalog.html">hydromt.data_catalog.DataCatalog.from_stac_catalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_rasterdataset.html">hydromt.data_catalog.DataCatalog.get_rasterdataset</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataset.html">hydromt.data_catalog.DataCatalog.get_geodataset</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_geodataframe.html">hydromt.data_catalog.DataCatalog.get_geodataframe</a></li>
@@ -515,13 +517,13 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.DatasetXarrayDriver.html">hydromt.data_catalog.drivers.DatasetXarrayDriver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.DatasetXarrayDriver.read.html">hydromt.data_catalog.drivers.DatasetXarrayDriver.read</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.DatasetXarrayDriver.write.html">hydromt.data_catalog.drivers.DatasetXarrayDriver.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.harmonise_dims.html">hydromt.data_catalog.drivers.preprocessing.harmonise_dims</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.remove_duplicates.html">hydromt.data_catalog.drivers.preprocessing.remove_duplicates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.round_latlon.html">hydromt.data_catalog.drivers.preprocessing.round_latlon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.to_datetimeindex.html">hydromt.data_catalog.drivers.preprocessing.to_datetimeindex</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/gis.html">GIS methods</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster.full.html">hydromt.gis.raster.full</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster.full_like.html">hydromt.gis.raster.full_like</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster.full_from_transform.html">hydromt.gis.raster.full_from_transform</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_merge.merge.html">hydromt.gis.raster_merge.merge</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.from_numpy.html">hydromt.gis.DataArray.raster.from_numpy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.Dataset.raster.from_numpy.html">hydromt.gis.Dataset.raster.from_numpy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.attrs.html">hydromt.gis.DataArray.raster.attrs</a></li>
@@ -580,6 +582,12 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.zonal_stats.html">hydromt.gis.DataArray.raster.zonal_stats</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.to_raster.html">hydromt.gis.DataArray.raster.to_raster</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.Dataset.raster.to_mapstack.html">hydromt.gis.Dataset.raster.to_mapstack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.cellres.html">hydromt.gis.raster_utils.cellres</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.full.html">hydromt.gis.raster_utils.full</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.full_like.html">hydromt.gis.raster_utils.full_like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.full_from_transform.html">hydromt.gis.raster_utils.full_from_transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.merge.html">hydromt.gis.raster_utils.merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.raster_utils.spread2d.html">hydromt.gis.raster_utils.spread2d</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.vector.from_gdf.html">hydromt.gis.DataArray.vector.from_gdf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.vector.to_gdf.html">hydromt.gis.DataArray.vector.to_gdf</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.vector.from_netcdf.html">hydromt.gis.DataArray.vector.from_netcdf</a></li>
@@ -646,6 +654,32 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.flw.outlet_map.html">hydromt.gis.flw.outlet_map</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.flw.clip_basins.html">hydromt.gis.flw.clip_basins</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.flw.dem_adjust.html">hydromt.gis.flw.dem_adjust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.gis_utils.parse_crs.html">hydromt.gis.gis_utils.parse_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.gis_utils.utm_crs.html">hydromt.gis.gis_utils.utm_crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.gis_utils.zoom_to_overview_level.html">hydromt.gis.gis_utils.zoom_to_overview_level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.vector_utils.nearest_merge.html">hydromt.gis.vector_utils.nearest_merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.gis.vector_utils.nearest.html">hydromt.gis.vector_utils.nearest</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/io.html">Reading and writing files</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_geodataset.html">hydromt.io.open_geodataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_mfcsv.html">hydromt.io.open_mfcsv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_mfraster.html">hydromt.io.open_mfraster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_nc.html">hydromt.io.open_nc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_ncs.html">hydromt.io.open_ncs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_raster.html">hydromt.io.open_raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_raster_from_tindex.html">hydromt.io.open_raster_from_tindex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_timeseries_from_table.html">hydromt.io.open_timeseries_from_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_vector.html">hydromt.io.open_vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.open_vector_from_table.html">hydromt.io.open_vector_from_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.read_toml.html">hydromt.io.read_toml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.read_workflow_yaml.html">hydromt.io.read_workflow_yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.read_yaml.html">hydromt.io.read_yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_nc.html">hydromt.io.write_nc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_region.html">hydromt.io.write_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_toml.html">hydromt.io.write_toml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_xy.html">hydromt.io.write_xy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.io.write_yaml.html">hydromt.io.write_yaml</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/model.html">Model</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -932,7 +966,22 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="hydromt.data_catalog.drivers.RasterioDriver">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hydromt.data_catalog.drivers.</span></span><span class="sig-name descname"><span class="pre">RasterioDriver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filesystem:</span> <span class="pre">~fsspec.spec.Annotated[~fsspec.spec.AbstractFileSystem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~pydantic.functional_validators.PlainValidator(func=~hydromt._typing.fsspec_types.validate_filesystem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_schema_input_type=~typing.Any)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~pydantic.functional_serializers.PlainSerializer(func=~hydromt._typing.fsspec_types.serialize_filesystem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_type=PydanticUndefined</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when_used=always)]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hydromt/data_catalog/drivers/raster/rasterio_driver.html#RasterioDriver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hydromt.data_catalog.drivers.RasterioDriver" title="Link to this definition">#</a></dt>
-<dd><p>Driver using rasterio for RasterDataset.</p>
+<dd><p>Driver for RasterDataset using the rasterio library: <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>.</p>
+<p>Supports reading and writing raster files using rasterio.</p>
+<p>Driver <strong>options</strong> include:</p>
+<ul class="simple">
+<li><p>mosaic: bool, if True and multiple uris are given, will mosaic the datasets
+together using <cite>rasterio.merge.merge</cite>. Default is False.</p></li>
+<li><p>mosaic_kwargs: dict, additional keyword arguments to pass to
+<cite>rasterio.merge.merge</cite>.</p></li>
+<li><p>cache: bool, if True and reading from VRT files, will cache the tiles
+locally to speed up reading. Default is False.</p></li>
+<li><p>cache_root: str, root directory for caching. Default is taken from
+<cite>hydromt.config.SETTINGS.cache_root</cite>.</p></li>
+<li><p>cache_dir: str, subdirectory for caching. Default is the stem of the first
+uri without extension.</p></li>
+<li><p>Any other option supported by <cite>hydromt.io.readers.open_mfraster</cite>.</p></li>
+</ul>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>

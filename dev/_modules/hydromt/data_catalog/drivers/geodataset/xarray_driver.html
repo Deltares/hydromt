@@ -475,8 +475,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">Predicate</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.unused_kwargs</span><span class="w"> </span><span class="kn">import</span> <span class="n">_warn_on_unused_kwargs</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers._preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PREPROCESSORS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.geodataset.geodataset_driver</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDatasetDriver</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PREPROCESSORS</span>
 
 <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -487,7 +487,21 @@
 <div class="viewcode-block" id="GeoDatasetXarrayDriver">
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.html#hydromt.data_catalog.drivers.GeoDatasetXarrayDriver">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">GeoDatasetXarrayDriver</span><span class="p">(</span><span class="n">GeoDatasetDriver</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;GeoDatasetXarrayDriver.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Driver for GeoDataset using the xarray library: ``geodataset_xarray``.</span>
+
+<span class="sd">    Supports reading and writing zarr and netcdf files using xarray.</span>
+<span class="sd">    zarr files will be read using `xr.open_zarr` and netcdf files using</span>
+<span class="sd">    `xr.open_mfdataset`.</span>
+
+<span class="sd">    Driver **options** include:</span>
+
+<span class="sd">    * preprocess: Optional[str], name of preprocessor to apply before merging datasets.</span>
+<span class="sd">      Available preprocessors include: round_latlon, to_datetimeindex,</span>
+<span class="sd">      remove_duplicates, harmonise_dims. See their docstrings for details.</span>
+<span class="sd">    * Any other option supported by `xr.open_zarr` or `xr.open_mfdataset`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;geodataset_xarray&quot;</span>
     <span class="n">supports_writing</span> <span class="o">=</span> <span class="kc">True</span>
