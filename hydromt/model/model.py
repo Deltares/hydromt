@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT."""
 
-import logging
 import os
 import typing
 from abc import ABCMeta
@@ -55,8 +54,6 @@ class Model(object, metaclass=ABCMeta):
         mode: str = "w",
         data_libs: Optional[Union[List, str]] = None,
         region_component: Optional[str] = None,
-        log_file: Optional[Path] = None,
-        log_level: int = logging.INFO,
         **catalog_keys,
     ):
         """Initialize a model.
@@ -90,11 +87,6 @@ class Model(object, metaclass=ABCMeta):
             If None, the model will can automatically determine the region component if there is only one `SpatialModelComponent`.
             Otherwise it will raise an error.
             If there are no `SpatialModelComponent` it will raise a warning that `region` functionality will not work.
-        log_file : Path | None, optional
-            If provided, will also write logs to the file `<root> / <log_file>`,
-            in addition to writing to the console, by default None.
-        log_level : int, optional
-            Log level [0-50], by default 20 (info)
         **catalog_keys:
             Additional keyword arguments to be passed down to the DataCatalog.
         """
@@ -108,9 +100,8 @@ class Model(object, metaclass=ABCMeta):
         """DataCatalog for data access"""
 
         # file system
-        self.root: ModelRoot = ModelRoot(
-            root or ".", mode=mode, log_file=log_file, log_level=log_level
-        )
+        path = Path(root) if root is not None else Path(".")
+        self.root: ModelRoot = ModelRoot(path, mode=mode)
         """Model root"""
 
         self.components: Dict[str, ModelComponent] = {}
@@ -215,6 +206,55 @@ class Model(object, metaclass=ABCMeta):
     def crs(self) -> Optional[CRS]:
         """Returns coordinate reference system embedded in region."""
         return self.region.crs if self.region is not None else None
+
+    def __enter__(self) -> "Model":
+        """Enter the model runtime context.
+
+        This allows the model to be used as a context manager in a ``with`` block.
+        The method returns the model instance itself, enabling setup and write
+        operations to be performed within the block.
+
+        Example
+        -------
+        >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
+        ...     model.setup_x()
+        ...     model.setup_y()
+        ...     model.write()
+        # Exiting the with block will call __exit__, ensuring resources are cleaned up.
+
+        Returns
+        -------
+        Model
+            The model instance.
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """Exit the model runtime context.
+
+        Ensures that resources associated with the model are properly released
+        when leaving a ``with`` block, even if an exception occurred during its
+        execution. This method delegates cleanup to :meth:`close`.
+
+        Example
+        -------
+        >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
+        ...     model.setup_x()
+        ...     model.setup_y()
+        ...     model.write()
+        # Exiting the with block will call __exit__, ensuring resources are cleaned up.
+
+        Parameters
+        ----------
+        exc_type : type or None
+            The type of the exception raised in the ``with`` block, or ``None``
+            if no exception occurred.
+        exc_value : BaseException or None
+            The exception instance raised in the ``with`` block, or ``None``.
+        traceback : types.TracebackType or None
+            The traceback object associated with the exception, or ``None``.
+        """
+        self.close()
 
     def build(
         self,
@@ -346,7 +386,7 @@ class Model(object, metaclass=ABCMeta):
                 )
             self.read()
             mode = "w+" if forceful_overwrite else "w"
-            self.root.set(model_out, mode=mode)
+            self.root.set(Path(model_out), mode=mode)
 
         # check if model has a region
         if self._region_component_name is not None and self.region is None:

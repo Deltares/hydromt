@@ -2,17 +2,18 @@
 
 import logging
 import sys
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Optional
 
 from hydromt import __version__
 
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 
 __all__ = [
-    "_setuplog",
+    "initialize_logging",
+    "add_filehandler",
+    "remove_filehandler",
     "get_hydromt_logger",
-    "remove_hydromt_file_handlers",
 ]
 
 
@@ -24,107 +25,112 @@ def get_hydromt_logger(name: str | None = None) -> logging.Logger:
         return logging.getLogger(f"hydromt.{name}")
 
 
-ROOT_LOGGER = get_hydromt_logger()
+_ROOT_LOGGER = get_hydromt_logger()
 
 
-def remove_hydromt_file_handlers(
-    path_or_filename: str | Path | None = None,
-    include_children: bool = True,
-) -> None:
-    """Remove only file handlers that match a given path or filename.
+def initialize_logging(log_level: int = logging.INFO) -> None:
+    """Initialize the hydromt root logger with a console handler, formatter and a log level.
 
-    Parameters
-    ----------
-    path_or_name : str | Path | None, optional
-        Either a full path to the log file, the filename (e.g., "hydromt.log"), or None to remove all hydromt file handlers, by default None.
-    include_children : bool, optional
-        Whether to also remove handlers from child loggers (hydromt.*), by default True.
+    Example
+    -------
+    ```python
+    from hydromt._utils.log import initialize_logging, get_hydromt_logger
+
+    # Initialize with log level (INFO)
+    initialize_logging(log_level=logging.INFO)
+
+    # Change log level to ERROR
+    logger = get_hydromt_logger()
+    logger.setLevel(logging.ERROR)
     """
-    if path_or_filename is None:
-        match_str = None
-    elif isinstance(path_or_filename, str):
-        match_str = path_or_filename
-    else:
-        match_str = str(path_or_filename)
-
-    def _remove_matching(logger: logging.Logger):
-        for handler in list(logger.handlers):
-            if isinstance(handler, logging.FileHandler):
-                handler_path = Path(handler.baseFilename).resolve()
-                if match_str is not None and match_str in {
-                    str(handler_path),
-                    handler_path.name,
-                }:
-                    logger.removeHandler(handler)
-                    handler.flush()
-                    handler.close()
-
-    # main hydromt logger
-    _remove_matching(ROOT_LOGGER)
-
-    if include_children:
-        for name, lg in logging.Logger.manager.loggerDict.items():
-            if isinstance(lg, logging.Logger) and name.startswith("hydromt."):
-                _remove_matching(lg)
-
-
-def _setuplog(
-    path: Optional[Path] = None,
-    log_level: int = logging.INFO,
-    fmt: str = FMT,
-    append: bool = True,
-    logger: logging.Logger = ROOT_LOGGER,
-):
-    """Set up the logging for hydromt with a console handler and optionally a file handler.
-
-    Parameters
-    ----------
-    path : Path, optional
-        Path to model root, where the log file "hydromt.log" will be created.
-        If None is provided, no file handler is added. By default None.
-    log_level : int, optional
-        Log level [0-50], by default 20 (info)
-    fmt : str, optional
-        log message formatter
-    append : bool, optional
-        Whether to append (True) or overwrite (False) to a logfile at path,
-        by default True
-    """
-    if path is not None:
-        remove_hydromt_file_handlers(path_or_filename=path)
+    logger = get_hydromt_logger()
     logging.captureWarnings(True)
     logger.setLevel(log_level)
-
-    # Remove all stream handlers
     logger.handlers = [
         h for h in logger.handlers if not isinstance(h, logging.StreamHandler)
     ]
     console = logging.StreamHandler(sys.stdout)
     console.setLevel(log_level)
-    console.setFormatter(logging.Formatter(fmt))
+    console.setFormatter(logging.Formatter(FMT))
     logger.addHandler(console)
 
-    if path is not None:
-        if not append:
-            path.unlink(missing_ok=True)
-        _add_filehandler(path=path, log_level=log_level, fmt=fmt, logger=logger)
     logger.info(f"HydroMT version: {__version__}")
 
 
-def _add_filehandler(
+def add_filehandler(
     path: Path,
-    log_level: int = logging.INFO,
-    fmt: str = FMT,
-    logger: logging.Logger = ROOT_LOGGER,
-):
+    log_level: int | None = None,
+    fmt: str | None = FMT,
+    logger: logging.Logger = _ROOT_LOGGER,
+) -> logging.FileHandler:
     """Add file handler to logger."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    ch = logging.FileHandler(path)
-    ch.setFormatter(logging.Formatter(fmt))
-    ch.setLevel(log_level)
-    logger.addHandler(ch)
+
+    fh = logging.FileHandler(path)
+
+    if fmt is not None:
+        fh.setFormatter(logging.Formatter(fmt))
+    elif logger.handlers:
+        # inherit formatter from first existing handler
+        fh.setFormatter(logger.handlers[0].formatter)
+
+    if log_level is not None:
+        fh.setLevel(log_level)
+
+    logger.addHandler(fh)
 
     if path.exists():
         logger.debug(f"Appending log messages to file {path}.")
     else:
         logger.debug(f"Writing log messages to new file {path}.")
+
+    return fh
+
+
+def remove_filehandler(path: Path, logger: logging.Logger = _ROOT_LOGGER) -> None:
+    """Remove file handler from logger."""
+    for h in logger.handlers:
+        if not isinstance(h, logging.FileHandler):
+            continue
+        if Path(h.baseFilename) == path.resolve():
+            logger.removeHandler(h)
+            h.close()
+            logger.debug(f"Removed log file handler {path}.")
+
+
+@contextmanager
+def to_file(
+    path: Path,
+    log_level: int | None = None,
+    fmt: str | None = None,
+    logger: logging.Logger = _ROOT_LOGGER,
+):
+    """Context manager that attaches a file handler for the duration of the block."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fh = logging.FileHandler(path)
+    if fmt is not None:
+        fh.setFormatter(logging.Formatter(fmt))
+    if log_level is not None:
+        fh.setLevel(log_level)
+
+    logger.addHandler(fh)
+    try:
+        yield
+    finally:
+        logger.removeHandler(fh)
+        fh.close()
+
+
+def shutdown_logging():
+    """Shut down the logging system by removing all handlers and closing them."""
+    for h in _ROOT_LOGGER.handlers:
+        _ROOT_LOGGER.removeHandler(h)
+        h.close()
+
+    for child in _ROOT_LOGGER.manager.loggerDict.values():
+        if isinstance(child, logging.Logger):
+            for h in child.handlers:
+                child.removeHandler(h)
+                h.close()
+
+    logging.shutdown()

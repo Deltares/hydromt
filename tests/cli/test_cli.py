@@ -383,20 +383,20 @@ def test_export_cli_config_file(tmp_path: Path):
 
 @pytest.mark.usefixtures("_reset_log_level")
 def test_v0_catalog_is_not_valid_v1_catalog(caplog):
-    # silence the ruff warning, we'll check the logs for error msgs
-    with pytest.raises(ValueError):  # noqa : PT011
-        _ = CliRunner().invoke(
-            hydromt_cli,
-            [
-                "check",
-                "-d",
-                "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
-                "--format",
-                "v1",
-            ],
-            catch_exceptions=False,
-        )
+    r = CliRunner().invoke(
+        hydromt_cli,
+        [
+            "check",
+            "-d",
+            "data/catalogs/artifact_data/v0.0.9/data_catalog.yml",
+            "--format",
+            "v1",
+        ],
+        catch_exceptions=False,
+    )
 
+    assert r.exit_code == 1
+    assert "No hydromt version was specified for the data catalog" in caplog.text
     assert "has the following error(s): " in caplog.text
 
 
@@ -427,11 +427,10 @@ def test_cli_check_v0x_workflow_format_v0(caplog):
         "v0",
     ]
 
-    # silence the ruff warning, we'll check the logs for error msgs
     r = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
-    assert r.exit_code == 0
 
-    assert "v0.x files cannot be checked" in caplog.text
+    assert r.exit_code == 1
+    assert "v0.x workflow files cannot be validated by hydromt v1." in caplog.text
 
 
 @pytest.mark.usefixtures("_reset_log_level")
@@ -442,9 +441,9 @@ def test_cli_check_v0x_workflow(caplog):
         Path(TEST_DATA_DIR) / "v0x_workflow.yml",
         "-vv",
     ]
-    # silence the ruff warning, we'll check the logs for error msgs
-    with pytest.raises(ValueError):  # noqa : PT011
-        _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
 
-    assert "No `steps` section" in caplog.text
+    r = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
+
+    assert r.exit_code == 1
+    assert "No `steps` section in workflow yaml" in caplog.text
     assert "Perhaps it is a v0.x file?" in caplog.text

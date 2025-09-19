@@ -177,122 +177,116 @@ def test_model_mode_errors_writing_in_read_only(grid_model):
 @pytest.mark.integration
 def test_grid_model_append(demda, df, tmp_path: Path):
     demda.name = "dem"
-    model = Model(mode="w", root=tmp_path)
+    with Model(mode="w", root=tmp_path) as model:
+        config_component = ConfigComponent(model)
+        config_component.set("test.data", "dem")
+        model.add_component("config", config_component)
 
-    config_component = ConfigComponent(model)
-    config_component.set("test.data", "dem")
-    model.add_component("config", config_component)
+        grid_component = GridComponent(model)
+        grid_component.set(demda, name="dem")
+        model.add_component("grid", grid_component)
 
-    grid_component = GridComponent(model)
-    grid_component.set(demda, name="dem")
-    model.add_component("grid", grid_component)
+        maps_component = SpatialDatasetsComponent(model, region_component="grid")
+        maps_component.set(demda, name="maps")
+        model.add_component("maps", maps_component)
 
-    maps_component = SpatialDatasetsComponent(model, region_component="grid")
-    maps_component.set(demda, name="maps")
-    model.add_component("maps", maps_component)
+        forcing_component = SpatialDatasetsComponent(model, region_component="grid")
+        forcing_component.set(demda, name="forcing")
+        model.add_component("forcing", forcing_component)
 
-    forcing_component = SpatialDatasetsComponent(model, region_component="grid")
-    forcing_component.set(demda, name="forcing")
-    model.add_component("forcing", forcing_component)
+        tables_component = TablesComponent(model)
+        tables_component.set(df, name="df")
+        model.add_component("tables", tables_component)
 
-    tables_component = TablesComponent(model)
-    tables_component.set(df, name="df")
-    model.add_component("tables", tables_component)
+        model.write()
 
-    model.write()
+    with Model(mode="w", root=tmp_path) as model2:
+        # append to model and check if previous data is still there
+        demda.name = "dem"
 
-    # append to model and check if previous data is still there
-    demda.name = "dem"
-    model2 = Model(mode="w", root=tmp_path)
+        config_component = ConfigComponent(model2)
+        config_component.set("test.data", "dem")
+        model2.add_component("config", config_component)
 
-    config_component = ConfigComponent(model2)
-    config_component.set("test.data", "dem")
-    model2.add_component("config", config_component)
+        grid_component = GridComponent(model2)
+        grid_component.set(demda, name="dem")
+        model2.add_component("grid", grid_component)
 
-    grid_component = GridComponent(model2)
-    grid_component.set(demda, name="dem")
-    model2.add_component("grid", grid_component)
+        maps_component = SpatialDatasetsComponent(model2, region_component="grid")
+        maps_component.set(demda, name="maps")
+        model2.add_component("maps", maps_component)
 
-    maps_component = SpatialDatasetsComponent(model2, region_component="grid")
-    maps_component.set(demda, name="maps")
-    model2.add_component("maps", maps_component)
+        forcing_component = SpatialDatasetsComponent(model2, region_component="grid")
+        forcing_component.set(demda, name="forcing")
+        model2.add_component("forcing", forcing_component)
 
-    forcing_component = SpatialDatasetsComponent(model2, region_component="grid")
-    forcing_component.set(demda, name="forcing")
-    model2.add_component("forcing", forcing_component)
+        tables_component = TablesComponent(model2)
+        tables_component.set(df, name="df")
+        model2.add_component("tables", tables_component)
 
-    tables_component = TablesComponent(model2)
-    tables_component.set(df, name="df")
-    model2.add_component("tables", tables_component)
+        model2.config.set("test1.data", "dem")
+        assert model2.config.get_value("test.data") == "dem"
 
-    model2.config.set("test1.data", "dem")
-    assert model2.config.get_value("test.data") == "dem"
+        model2.grid.set(demda, name="dem1")
+        assert "dem" in model2.grid.data
 
-    model2.grid.set(demda, name="dem1")
-    assert "dem" in model2.grid.data
+        model2.maps.set(demda, name="dem1")
+        assert "maps" in model2.maps.data
 
-    model2.maps.set(demda, name="dem1")
-    assert "maps" in model2.maps.data
+        model2.forcing.set(demda, name="dem1")
+        assert "forcing" in model2.forcing.data
 
-    model2.forcing.set(demda, name="dem1")
-    assert "forcing" in model2.forcing.data
+        model2.forcing.set(df, name="df1", split_dataset=False)
+        assert "df1" in model2.forcing.data
+        assert isinstance(model2.forcing.data["df1"], xr.Dataset)
 
-    model2.forcing.set(df, name="df1", split_dataset=False)
-    assert "df1" in model2.forcing.data
-    assert isinstance(model2.forcing.data["df1"], xr.Dataset)
-
-    model2.tables.set(df, name="df1")
-    assert "df" in model2.tables.data
+        model2.tables.set(df, name="df1")
+        assert "df" in model2.tables.data
 
 
 @pytest.mark.integration
 def test_model_build_update(tmp_path: Path, demda, obsda):
     bbox = [12.00, 45.00, 12.25, 45.25]
     root_orig = tmp_path / "model"
-    log_file = Path("hydromt.log")
-    model = Model(
+
+    with Model(
         root=root_orig,
         mode="w",
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
-        log_file=log_file,
-    )
-    geoms_component = GeomsComponent(model)
-    model.add_component("geoms", geoms_component)
+    ) as model:
+        geoms_component = GeomsComponent(model)
+        model.add_component("geoms", geoms_component)
 
-    ds = create_grid_from_region(
-        region={"bbox": bbox}, data_catalog=model.data_catalog, res=0.01
-    )
-    model.grid.set(data=ds)
+        ds = create_grid_from_region(
+            region={"bbox": bbox}, data_catalog=model.data_catalog, res=0.01
+        )
+        model.grid.set(data=ds)
 
-    ds = grid_from_constant(
-        grid_like=model.grid.data, constant=0.01, name="c1", nodata=-99.0
-    )
-    model.grid.set(data=ds)
-    model.write()
-    model.close()
+        ds = grid_from_constant(
+            grid_like=model.grid.data, constant=0.01, name="c1", nodata=-99.0
+        )
+        model.grid.set(data=ds)
+        model.write()
 
-    assert (root_orig / log_file).exists()
     assert (root_orig / "grid").exists(), root_orig.iterdir()
 
     # read and update model
-    model_update = Model(
+    with Model(
         root=root_orig,
         mode="r",
         components={"grid": {"type": "GridComponent"}},
         region_component="grid",
-        log_file=log_file,
-    )
-    geoms_component = GeomsComponent(model_update)
-    model_update.add_component("geoms", geoms_component)
+    ) as model_update:
+        geoms_component = GeomsComponent(model_update)
+        model_update.add_component("geoms", geoms_component)
 
-    root_update = tmp_path / "model_update"
-    model_update.update(model_out=root_update, steps=[])  # write only
+        root_update = tmp_path / "model_update"
+        model_update.update(model_out=root_update, steps=[])  # write only
 
-    assert (root_update / log_file).exists()
     assert (root_update / "grid").exists(), root_update.iterdir()
 
-    # delete models to validate all files were closed correctly
+    # delete to validate all files were closed correctly
     shutil.rmtree(root_orig)
     shutil.rmtree(root_update)
 

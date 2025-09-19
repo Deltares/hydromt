@@ -1,4 +1,3 @@
-from logging import FileHandler, Logger
 from os.path import abspath
 from pathlib import Path
 
@@ -55,105 +54,127 @@ def test_errors_on_unknown_modes(mode):
         _ = ModelMode.from_str_or_mode(mode)
 
 
-def test_root_creates_logs_and_dir(tmp_path: Path):
-    root1 = tmp_path / "one"
-    filename = Path("hydromt.log")
-    log_path1 = root1 / filename
-    assert not log_path1.exists()
+def test_root_init_creates_logfile(tmp_path: Path):
+    root = tmp_path / "create_me"
+    log_path = root / "hydromt.log"
+    assert not log_path.exists()
 
-    _ = ModelRoot(path=root1)
-    assert root1.exists()
-    assert not log_path1.exists()
-
-    root2 = tmp_path / "two"
-    log_path2 = root2 / filename
-    _ = ModelRoot(path=root2, log_file=filename)
-    assert root2.exists()
-    assert log_path2.exists()
+    _ = ModelRoot(path=root)
+    assert root.exists()
+    assert log_path.exists()
 
 
-def test_new_root_copies_old_file(tmp_path: Path):
-    logger: Logger = get_hydromt_logger("fake_module")
-    first_path = tmp_path / "one"
-    assert not first_path.exists()
-    filename = Path("hydromt.log")
-    log_path = first_path / filename
-    r = ModelRoot(first_path, "w", log_file=filename)
-    logger.warning("hey! this is a secret you should really remember")
+@pytest.mark.parametrize(
+    (
+        "mode",
+        "should_clear",
+    ),
+    [
+        ("w", True),
+        ("w+", True),
+        ("r", False),
+        ("r+", False),
+        (ModelMode.WRITE, True),
+        (ModelMode.FORCED_WRITE, True),
+        (ModelMode.READ, False),
+        (ModelMode.APPEND, False),
+    ],
+)
+def test_root_init_should_clear_logfile(tmp_path: Path, mode, should_clear):
+    logger = get_hydromt_logger("fake_module")
+    path = tmp_path / "create_me"
+    log_path = path / "hydromt.log"
+    path.mkdir(parents=True, exist_ok=True)
+    log_path.write_text("existing log messages")
 
-    assert first_path.exists()
-
-    with open(log_path, "r") as file:
-        first_log_str = file.read()
-    assert "hey!" in first_log_str, first_log_str
-
-    second_path = tmp_path / "two"
-    assert not second_path.exists()
-
-    r.set(second_path)
-
-    assert second_path.exists()
-    second_log_path = second_path / filename
-    assert second_log_path.exists()
-
-    with open(second_log_path, "r") as file:
-        second_log_str = file.read()
-    assert "hey!" in second_log_str, second_log_str
-
-
-def test_new_root_closes_old_log(tmp_path: Path):
-    main_logger = get_hydromt_logger()
-    filename = Path("hydromt.log")
-    first_path = tmp_path / "one"
-    second_path = tmp_path / "two"
-
-    root = ModelRoot(first_path, "w", log_file=filename)
-
-    # assert there exists 1 file handler with the correct path
-    file_handlers = [h for h in main_logger.handlers if isinstance(h, FileHandler)]
-    open_logfiles = [
-        h for h in file_handlers if h.baseFilename.startswith(str(first_path))
-    ]
-    assert len(open_logfiles) == 1, (
-        f"Expected 1 file handler for first root, but got {len(open_logfiles)}"
-    )
-
-    # set to new root, which should close the old log file, remove the handler, and create a new one
-    root.set(second_path)
-
-    # assert there exists 1 file handler with the correct path, and 0 with the old path
-    file_handlers = [h for h in main_logger.handlers if isinstance(h, FileHandler)]
-    open_logfiles_first = [
-        h for h in file_handlers if h.baseFilename.startswith(str(first_path))
-    ]
-    open_logfiles_second = [
-        h for h in file_handlers if h.baseFilename.startswith(str(second_path))
-    ]
-    assert len(open_logfiles_first) == 0, (
-        f"Expected 0 file handlers for old root, but got {len(open_logfiles_first)}"
-    )
-    assert len(open_logfiles_second) == 1, (
-        f"Expected 1 file handler for new root, but got {len(open_logfiles_second)}"
-    )
-
-
-def test_root_overwrite_deletes_old_log(tmp_path: Path):
-    logger: Logger = get_hydromt_logger("fake_module")
-    path = tmp_path / "one"
-    filename = Path("hydromt.log")
-    log_path = path / filename
-
-    assert not path.exists()
-
-    root = ModelRoot(path, "w", log_file=filename)
-    logger.warning("hey!, this is a secret you should really remember")
+    _ = ModelRoot(path=path, mode=mode)
+    logger.warning("message from test_root_init_logging_modes")
 
     with open(log_path, "r") as file:
-        first_log_str = file.read()
-    assert "hey!" in first_log_str, first_log_str
+        log_str = file.read()
 
-    root.set(path, "w+")
-    logger.warning("what were we talking about again?")
-    with open(log_path, "r") as file:
-        second_log_str = file.read()
-    assert "hey!" not in second_log_str, second_log_str
+    assert "message from test_root_init_logging_modes" in log_str, log_str
+    assert ("existing log messages" in log_str) is not should_clear, log_str
+
+
+@pytest.mark.parametrize(
+    (
+        "mode",
+        "should_clear",
+    ),
+    [
+        ("w", True),
+        ("w+", True),
+        ("r", False),
+        ("r+", False),
+        (ModelMode.WRITE, True),
+        (ModelMode.FORCED_WRITE, True),
+        (ModelMode.READ, False),
+        (ModelMode.APPEND, False),
+    ],
+)
+def test_root_set_with_reading_modes_copies_old_logfile(
+    tmp_path: Path, mode, should_clear
+):
+    logger = get_hydromt_logger("fake_module")
+    path = tmp_path / "create_me"
+    log_path = path / "hydromt.log"
+    path.mkdir(parents=True, exist_ok=True)
+    log_path.write_text("existing log messages")
+
+    root = ModelRoot(path=path, mode=mode)
+    new_path = tmp_path / "another"
+    new_path.mkdir(parents=True, exist_ok=True)
+
+    root.set(new_path, mode=mode)
+    logger.warning("message from new path")
+
+    with open(new_path / "hydromt.log", "r") as file:
+        log_str = file.read()
+
+    assert ("existing log messages" in log_str) is not should_clear, log_str
+    assert "message from new path" in log_str, log_str
+
+
+def test_root_close_removes_filehandler_and_closes_logfile(tmp_path: Path):
+    root = tmp_path / "create_me"
+    log_path = root / "hydromt.log"
+    assert not log_path.exists()
+
+    model_root = ModelRoot(path=root)
+    assert model_root._filehandler is not None
+    assert root.exists()
+    assert log_path.exists()
+
+    model_root.close()
+    log_path.unlink()  # try to delete to verify filehandler is removed
+    assert model_root._filehandler is None
+
+
+def test_root_add_and_remove_filehandler(tmp_path: Path):
+    path = tmp_path / "create_me"
+    log_path = path / "hydromt.log"
+
+    root = ModelRoot(path=path, mode="w")
+    assert root._filehandler is not None
+    assert log_path.exists()
+
+    root._remove_filehandler()
+    assert root._filehandler is None
+    log_path.unlink()  # try to delete to verify filehandler is removed
+
+
+def test_root_add_filehandler_maximum_one_handler(tmp_path: Path):
+    path = tmp_path / "create_me"
+    log_path = path / "hydromt.log"
+
+    root = ModelRoot(path=path, mode="w")
+    assert root._filehandler is not None
+    assert log_path.exists()
+
+    # adding a new filehandler should remove the old one first
+    old_handler = root._filehandler
+    root._add_filehandler(path=log_path.with_name("another.log"))
+    assert root._filehandler is not None
+    assert root._filehandler is not old_handler
+    log_path.unlink()  # try to delete to verify filehandler is removed

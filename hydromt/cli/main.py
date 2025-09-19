@@ -26,8 +26,6 @@ from hydromt.plugins import PLUGINS
 
 logger = log.get_hydromt_logger(__name__)
 
-HYDROMT_LOG_PATH = "hydromt.log"
-
 
 def print_available_models(ctx, param, value):
     """Print the available models and exit.
@@ -236,49 +234,44 @@ def build(
     -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(
-        path=Path(model_root) / HYDROMT_LOG_PATH, log_level=log_level, append=False
-    )
-    logger.info(f"Building instance of {model} model at {model_root}.")
-    logger.info("User settings:")
-    opt = _utils.parse_config(config)
-    if "steps" not in opt:
-        error_msg = (
-            f"It seems your workflow file at {config} does not "
-            "contain a `steps` section. Perhaps you're using a v0.x format? "
-        )
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
+    log.initialize_logging(log_level=log_level)
+    log_path = Path(model_root) / "hydromt_build.log"
+    with log.to_file(log_path, log_level=log_level):
+        opt = _utils.parse_config(config)
+        if "steps" not in opt:
+            error_msg = (
+                f"It seems your workflow file at {config} does not "
+                "contain a `steps` section. Perhaps you're using a v0.x format? "
+            )
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
-    kwargs = opt.pop("global", {})
-    modeltype = opt.pop("modeltype", model)
-    # parse data catalog options from global section in config and cli options
-    data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
-    data_libs += list(data)  # add data catalogs from cli
-    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
-        data_libs = ["deltares_data"] + data_libs  # prepend!
-    try:
-        # initialize model and create folder structure
-        mode = "w+" if fo else "w"
-        if modeltype not in PLUGINS.model_plugins:
-            raise ValueError("Unknown model")
-        mod = PLUGINS.model_plugins[modeltype](
-            root=model_root,
-            mode=mode,
-            data_libs=data_libs,
-            **kwargs,
-        )
-        mod.data_catalog.cache = cache
-        # build model
-        mod.build(steps=opt["steps"])
+        kwargs = opt.pop("global", {})
+        modeltype = opt.pop("modeltype", model)
+        # parse data catalog options from global section in config and cli options
+        data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
+        data_libs += list(data)  # add data catalogs from cli
+        if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+            data_libs = ["deltares_data"] + data_libs  # prepend!
 
-    except Exception as e:
-        logger.exception(e)  # catch and log errors
-        raise
-    finally:
-        log.remove_hydromt_file_handlers(
-            path_or_filename=HYDROMT_LOG_PATH
-        )  # Release locks on logs
+        try:
+            # initialize model and create folder structure
+            mode = "w+" if fo else "w"
+            if modeltype not in PLUGINS.model_plugins:
+                raise ValueError("Unknown model")
+            mod = PLUGINS.model_plugins[modeltype](
+                root=model_root,
+                mode=mode,
+                data_libs=data_libs,
+                **kwargs,
+            )
+            mod.data_catalog.cache = cache
+            # build model
+            mod.build(steps=opt["steps"])
+
+        except Exception as e:
+            logger.exception(e)  # catch and log errors
+            raise
 
 
 ## UPDATE
@@ -334,52 +327,116 @@ def update(
     # logger
     mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(path=Path(model_out) / HYDROMT_LOG_PATH, log_level=log_level)
-    logger.info(f"Updating {model} model at {model_root} ({mode}).")
-    logger.info(f"Output dir: {model_out}")
-    # parse settings
-    logger.info("User settings:")
-    opt = _utils.parse_config(config)
+    log.initialize_logging(log_level=log_level)
+    log_path = Path(model_out) / "hydromt_update.log"
+    with log.to_file(log_path, log_level=log_level):
+        opt = _utils.parse_config(config)
 
-    if "steps" not in opt:
-        error_msg = (
-            f"It seems your workflow file at {config} does not "
-            "contain a `steps` section. Perhaps you're using a v0.x format? "
+        if "steps" not in opt:
+            error_msg = (
+                f"It seems your workflow file at {config} does not "
+                "contain a `steps` section. Perhaps you're using a v0.x format? "
+            )
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
+
+        kwargs = opt.pop("global", {})
+        modeltype = opt.pop("modeltype", model)
+        if modeltype not in PLUGINS.model_plugins:
+            raise ValueError("Unknown model")
+        # parse data catalog options from global section in config and cli options
+        data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
+        data_libs += list(data)  # add data catalogs from cli
+        if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+            data_libs = ["deltares_data"] + data_libs  # prepend!
+
+        try:
+            # initialize model and create folder structure
+            mod = PLUGINS.model_plugins[modeltype](
+                root=model_root,
+                mode=mode,
+                data_libs=data_libs,
+                **kwargs,
+            )
+            mod.data_catalog.cache = cache
+            mod.update(model_out=model_out, steps=opt["steps"], forceful_overwrite=fo)
+        except Exception as e:
+            logger.exception(e)  # catch and log errors
+            raise
+
+
+def _validate_catalog(cat_path: Path, fmt: Format, upgrade: bool) -> bool:
+    """Validate a catalog file. Returns True if valid, False otherwise."""
+    logger.info(f"Validating catalog at {cat_path}")
+
+    if fmt == Format.v0:
+        try:
+            v0_catalog = DataCatalogV0Validator.from_yml(cat_path)
+        except ValidationError as e:
+            logger.error(f"Catalog {cat_path} has the following error(s): {e}")
+            return False
+
+        if upgrade:
+            v1_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
+            out_path = cat_path.with_stem(f"{cat_path.stem}_v1")
+            write_yaml(
+                out_path,
+                v1_catalog.model_dump(
+                    exclude_unset=True,
+                    exclude_defaults=True,
+                    exclude_none=True,
+                ),
+            )
+            logger.info(f"Upgraded catalog written to {out_path}")
+    elif fmt == Format.v1:
+        try:
+            DataCatalogV1Validator.from_yml(cat_path)
+        except ValidationError as e:
+            logger.error(f"Catalog {cat_path} has the following error(s): {e}")
+            return False
+    else:
+        logger.error(f"Unknown format {fmt} for catalog {cat_path}")
+        return False
+
+    logger.info(f"Catalog {cat_path} is valid!")
+    return True
+
+
+def _validate_config(config: Path, model: Optional[str], fmt: Format) -> bool:
+    """Validate a config file. Returns True if valid, False otherwise."""
+    logger.info(f"Validating config at {config}")
+    if fmt == Format.v0:
+        logger.error(
+            f"v0.x workflow files cannot be validated by hydromt v1. Skipping {config}...",
         )
-        logger.error(error_msg)
-        raise RuntimeError(error_msg)
+        return False
 
-    kwargs = opt.pop("global", {})
-    modeltype = opt.pop("modeltype", model)
-    if modeltype not in PLUGINS.model_plugins:
-        raise ValueError("Unknown model")
-    # parse data catalog options from global section in config and cli options
-    data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
-    data_libs += list(data)  # add data catalogs from cli
-    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
-        data_libs = ["deltares_data"] + data_libs  # prepend!
     try:
-        # initialize model and create folder structure
-        mod = PLUGINS.model_plugins[modeltype](
-            root=model_root,
-            mode=mode,
-            data_libs=data_libs,
-            **kwargs,
-        )
-        mod.data_catalog.cache = cache
-        mod.update(model_out=model_out, steps=opt["steps"], forceful_overwrite=fo)
+        config_dict = _utils.parse_config(config)
     except Exception as e:
-        logger.exception(e)  # catch and log errors
-        raise
-    finally:
-        log.remove_hydromt_file_handlers(
-            path_or_filename=HYDROMT_LOG_PATH
-        )  # Release locks on logs
+        logger.error(f"Failed to parse config {config}: {e}")
+        return False
+
+    if "steps" not in config_dict:
+        logger.error(
+            f"No `steps` section in workflow yaml {config}. Perhaps it is a v0.x file?"
+        )
+        return False
+
+    if model:
+        config_dict["modeltype"] = model
+
+    try:
+        HydromtModelSetup(**config_dict)
+    except (ValidationError, ValueError) as e:
+        logger.error(f"Workflow yaml {config} has the following error(s): {e}")
+        return False
+
+    logger.info(f"Workflow yaml {config} is valid!")
+    return True
 
 
-@main.command(
-    short_help="Validate config / data catalog / region",
-)
+@main.command(short_help="Validate config / data catalog / region")
 @click.option(
     "-m",
     "--model",
@@ -408,95 +465,22 @@ def check(
     Verify that provided data catalog and config files are in the correct format.
 
     Additionally region bbox and geom can also be validated.
-
-    Example usage:
-    --------------
-
-    Check data catalog file:
-    hydromt check -d /path/to/data_catalog.yml -v
-
-    Check data catalog and grid_model config file:
-    hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -v
-
-    With region:
-    hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{'bbox': [-1,-1,1,1]}' -v
-
-    """  # noqa: E501
-    # logger
+    """
+    # Configure logging
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(path=Path(".") / HYDROMT_LOG_PATH, log_level=log_level)
-    failed = False
-    try:
+    log_path = Path.cwd() / "hydromt_check.log"
+    log.initialize_logging(log_level=log_level)
+    with log.to_file(log_path, log_level=log_level):
+        results = []
         for cat_path in data:
-            logger.info(f"Validating catalog at {cat_path}")
-            try:
-                if format == Format.v0:
-                    v0_catalog = DataCatalogV0Validator.from_yml(cat_path)
-                    if upgrade:
-                        v1_catalog = DataCatalogV1Validator.from_v0(v0_catalog)
-
-                        p = Path(cat_path)
-                        write_yaml(
-                            p.with_stem(f"{p.stem}_v1"),
-                            v1_catalog.model_dump(
-                                exclude_unset=True,
-                                exclude_defaults=True,
-                                exclude_none=True,
-                            ),
-                        )
-
-                # if we add more versions don't forget to update this
-                # statement here
-                else:
-                    DataCatalogV1Validator.from_yml(cat_path)
-
-                logger.info(f"Catalog {cat_path} is valid!")
-            except ValidationError as e:
-                failed = True
-                msg = f"Catalog {cat_path} has the following error(s): {e}"
-                logger.error(msg)
-
+            results.append(_validate_catalog(Path(cat_path), format, upgrade))
         if config:
-            logger.info(f"Validating config at {config}")
-            if format == Format.v0:
-                logger.error(
-                    "Because of the dynamic nature of workflow files, v0.x files cannot be "
-                    "checked by hydromt v1. Skipping..."
-                )
-            else:
-                try:
-                    config_dict = _utils.parse_config(config)
-                    if model:
-                        config_dict["modeltype"] = model
+            results.append(_validate_config(Path(config), model, format))
 
-                    if "steps" not in config_dict:
-                        raise ValueError(
-                            f"No `steps` section in workflow yaml {config}. Perhaps it is a v0.x file?"
-                        )
-
-                    HydromtModelSetup(**config_dict)
-                    logger.info(f"Workflow yaml {config} is valid!")
-
-                except (ValidationError, ValueError) as e:
-                    failed = True
-                    msg = f"Workflow yaml {config} has the following error(s): {e}"
-                    logger.error(msg)
-
-        if failed:
-            # We've already presentend the errors above
-            # now we simply raise without extra msg to fail the process
-            # so it has the correct exit code
-            raise ValueError(
-                "hydromt check command failed. See error messages above for the details"
-            )
-
-    except Exception as e:
-        logger.exception(e)  # catch and log errors
-        raise
-    finally:
-        log.remove_hydromt_file_handlers(
-            path_or_filename=HYDROMT_LOG_PATH
-        )  # Release locks on logs
+    if not all(results):
+        raise click.ClickException(
+            f"hydromt check command failed. See error messages above or in {log_path} for details."
+        )
 
 
 ## Export
@@ -560,82 +544,78 @@ def export(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log._setuplog(path=Path(export_dest_path) / HYDROMT_LOG_PATH, log_level=log_level)
-    logger.info(f"Output dir: {export_dest_path}")
-
-    if error_on_empty:
-        handle_nodata = NoDataStrategy.RAISE
-    else:
-        handle_nodata = NoDataStrategy.IGNORE
-
-    data_libs: List[StrPath] = list(data) if data else []
-    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
-        data_libs.insert(0, "deltares_data")
-
-    sources: List[str] = []
-    if source:
-        if isinstance(source, str):
-            sources = [source]
+    log.initialize_logging(log_level=log_level)
+    log_path = Path(export_dest_path) / "hydromt_export.log"
+    with log.to_file(log_path, log_level=log_level):
+        if error_on_empty:
+            handle_nodata = NoDataStrategy.RAISE
         else:
-            sources = list(source)
+            handle_nodata = NoDataStrategy.IGNORE
 
-    # these need to be defined even if config does not exist
-    unit_conversion = True
-    meta = {}
-    append = False
+        data_libs: List[StrPath] = list(data) if data else []
+        if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+            data_libs.insert(0, "deltares_data")
 
-    if config:
-        config_dict = _utils.parse_config(config)["export_data"]
-        if "data_libs" in config_dict.keys():
-            data_libs = data_libs + config_dict.pop("data_libs")
-        time_range = config_dict.pop("time_range", None)
-        region = region or config_dict.pop("region", None)
-        if isinstance(region, str):
-            region = json_decode(region)
+        sources: List[str] = []
+        if source:
+            if isinstance(source, str):
+                sources = [source]
+            else:
+                sources = list(source)
 
-        sources = sources + config_dict["sources"]
+        # these need to be defined even if config does not exist
+        unit_conversion = True
+        meta = {}
+        append = False
 
-        unit_conversion = config_dict.pop("unit_conversion", True)
-        meta = config_dict.pop("meta", {})
-        append = config_dict.pop("append", False)
+        if config:
+            config_dict = _utils.parse_config(config)["export_data"]
+            if "data_libs" in config_dict.keys():
+                data_libs = data_libs + config_dict.pop("data_libs")
+            time_range = config_dict.pop("time_range", None)
+            region = region or config_dict.pop("region", None)
+            if isinstance(region, str):
+                region = json_decode(region)
 
-    data_catalog = DataCatalog(data_libs=data_libs)
-    _ = data_catalog.sources  # initialise lazy loading
+            sources = sources + config_dict["sources"]
 
-    if time_range:
-        if isinstance(time_range, str):
-            tup = literal_eval(time_range)
+            unit_conversion = config_dict.pop("unit_conversion", True)
+            meta = config_dict.pop("meta", {})
+            append = config_dict.pop("append", False)
+
+        data_catalog = DataCatalog(data_libs=data_libs)
+        _ = data_catalog.sources  # initialise lazy loading
+
+        if time_range:
+            if isinstance(time_range, str):
+                tup = literal_eval(time_range)
+            else:
+                tup = time_range
+            time_start = datetime.strptime(tup[0], "%Y-%m-%d")
+            time_end = datetime.strptime(tup[1], "%Y-%m-%d")
+            time_tup = (time_start, time_end)
         else:
-            tup = time_range
-        time_start = datetime.strptime(tup[0], "%Y-%m-%d")
-        time_end = datetime.strptime(tup[1], "%Y-%m-%d")
-        time_tup = (time_start, time_end)
-    else:
-        time_tup = None
+            time_tup = None
 
-    if isinstance(bbox, str):
-        bbox = literal_eval(bbox)
+        if isinstance(bbox, str):
+            bbox = literal_eval(bbox)
 
-    try:
-        data_catalog.export_data(
-            export_dest_path,
-            source_names=sources,
-            bbox=bbox,
-            time_range=time_tup,
-            unit_conversion=unit_conversion,
-            metadata=meta,
-            append=append,
-            handle_nodata=handle_nodata,
-            force_overwrite=fo,
-        )
+        try:
+            data_catalog.export_data(
+                export_dest_path,
+                source_names=sources,
+                bbox=bbox,
+                time_range=time_tup,
+                unit_conversion=unit_conversion,
+                metadata=meta,
+                append=append,
+                handle_nodata=handle_nodata,
+                force_overwrite=fo,
+            )
 
-    except Exception as e:
-        logger.exception(e)  # catch and log errors
-        raise
-    finally:
-        log.remove_hydromt_file_handlers(
-            path_or_filename=HYDROMT_LOG_PATH
-        )  # Release locks on logs
+        except Exception as e:
+            logger.exception(e)  # catch and log errors
+            raise
 
 
 if __name__ == "__main__":
