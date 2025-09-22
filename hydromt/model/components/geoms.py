@@ -1,5 +1,6 @@
 """Geoms component."""
 
+import logging
 from glob import glob
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
@@ -16,9 +17,6 @@ from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
-
-
-import logging
 
 logger = logging.getLogger(__name__)
 

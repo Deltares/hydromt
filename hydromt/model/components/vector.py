@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """HydroMT VectorComponent class definition."""
 
+import logging
 from os.path import basename, dirname, isfile, join
 from typing import TYPE_CHECKING, Optional, Union, cast
 
@@ -22,8 +23,6 @@ if TYPE_CHECKING:
     from hydromt.model.model import Model
 
 __all__ = ["VectorComponent"]
-
-import logging
 
 logger = logging.getLogger(__name__)
 

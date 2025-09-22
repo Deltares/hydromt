@@ -1,5 +1,6 @@
 """Model Region class."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, cast
 
@@ -12,9 +13,6 @@ from hydromt.model.components.base import ModelComponent
 
 if TYPE_CHECKING:
     from hydromt.model import Model
-
-
-import logging
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
 """Tables component."""
 
 import glob
+import logging
 from os.path import basename, join
 from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
@@ -13,8 +14,6 @@ if TYPE_CHECKING:
     from hydromt.model.model import Model
 
 __all__ = ["TablesComponent"]
-
-import logging
 
 logger = logging.getLogger(__name__)
 

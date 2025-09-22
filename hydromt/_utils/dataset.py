@@ -1,18 +1,17 @@
-import typing
-from typing import Dict, Optional, cast
+import logging
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 
-if typing.TYPE_CHECKING:
-    from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices
-
-import logging
-
 from hydromt._typing.metadata import SourceMetadata
 from hydromt._typing.type_def import TimeRange, Variables
 from hydromt._utils.nodata import _has_no_data
+
+if TYPE_CHECKING:
+    from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices
+
 
 logger = logging.getLogger(__name__)
 

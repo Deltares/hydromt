@@ -1,5 +1,6 @@
 """Mesh Component."""
 
+import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -19,8 +20,6 @@ if TYPE_CHECKING:
 
 __all__ = ["MeshComponent"]
 
-
-import logging
 
 logger = logging.getLogger(__name__)
 

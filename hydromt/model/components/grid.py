@@ -1,5 +1,6 @@
 """Grid Component."""
 
+import logging
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -19,8 +20,6 @@ if TYPE_CHECKING:
     from hydromt.model.model import Model
 
 __all__ = ["GridComponent"]
-
-import logging
 
 logger = logging.getLogger(__name__)
 

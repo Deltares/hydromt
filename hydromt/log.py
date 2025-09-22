@@ -9,6 +9,7 @@ from hydromt import __version__
 
 __all__ = [
     "initialize_logging",
+    "set_log_level",
     "add_filehandler",
     "remove_filehandler",
 ]
@@ -44,6 +45,25 @@ def initialize_logging(
         console.setFormatter(formatter or logging.Formatter(FMT))
         logger.addHandler(console)
     logger.info(f"HydroMT version: {__version__}")
+
+
+def set_log_level(log_level: int) -> None:
+    """Set the log level of the hydromt root logger.
+
+    This also affects all child loggers (e.g., ``hydromt.core``),
+    unless they have their own log level explicitly set.
+
+    Example
+    -------
+    ```python
+    from hydromt.log import set_log_level
+
+    # Set log level to ERROR
+    set_log_level(logging.ERROR)
+    ```
+    """
+    logger = logging.getLogger("hydromt")
+    logger.setLevel(log_level)
 
 
 def add_filehandler(

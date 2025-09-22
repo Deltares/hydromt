@@ -1,5 +1,6 @@
 """A component to write configuration files for model simulations/kernels."""
 
+import logging
 from os.path import isfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
@@ -12,8 +13,6 @@ from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model import Model
-
-import logging
 
 logger = logging.getLogger(__name__)
 

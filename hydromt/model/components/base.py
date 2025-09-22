@@ -1,5 +1,6 @@
 """Provides the base class for model components."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Dict, cast
 from weakref import ReferenceType, ref
@@ -12,8 +13,6 @@ from hydromt.data_catalog import DataCatalog
 if TYPE_CHECKING:
     from hydromt.model import Model
     from hydromt.model.root import ModelRoot
-
-import logging
 
 logger = logging.getLogger(__name__)
 

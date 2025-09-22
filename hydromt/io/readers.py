@@ -1,5 +1,6 @@
 """Implementations for all of the necessary IO reading for HydroMT."""
 
+import logging
 from ast import literal_eval
 from glob import glob
 from io import IOBase
@@ -31,7 +32,6 @@ from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
 
-import logging
 
 logger = logging.getLogger(__name__)
 

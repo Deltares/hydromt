@@ -1,5 +1,6 @@
 """Spatial Xarrays component."""
 
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
 
@@ -17,8 +18,6 @@ from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
-
-import logging
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """General and basic API for models in HydroMT."""
 
+import logging
 import os
 import shutil
 import typing
@@ -33,7 +34,6 @@ __all__ = ["Model"]
 # see also hydromt.model group in pyproject.toml
 __hydromt_eps__ = ["Model"]
 
-import logging
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=ModelComponent)
@@ -101,7 +101,7 @@ class Model(object, metaclass=ABCMeta):
         """DataCatalog for data access"""
 
         # file system
-        path = Path(root) if root is not None else Path(".")
+        path = Path(root) if root is not None else Path.cwd()
         self.root: ModelRoot = ModelRoot(path, mode=mode)
         """Model root"""
 
@@ -380,13 +380,12 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        steps = steps or []
-        _validate_steps(self, steps)
-
         # read current model
         with log.to_file(
             self.root.path / "hydromt.log", append=self.root.is_reading_mode()
         ):
+            steps = steps or []
+            _validate_steps(self, steps)
             if not self.root.is_writing_mode():
                 if model_out is None:
                     raise ValueError(

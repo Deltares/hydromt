@@ -234,7 +234,8 @@ def build(
     -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.initialize_logging(log_level=log_level)
+    log.set_log_level(log_level=log_level)
+    # Model.build will manage the filehandlers and logging
 
     modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
     # parse data catalog options from global section in config and cli options
@@ -313,33 +314,33 @@ def update(
     hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     # logger
-    mode = "r+" if model_root == model_out else "r"
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.initialize_logging(log_level=log_level)
-    log_path = Path(model_out) / "hydromt_update.log"
-    with log.to_file(log_path, log_level=log_level):
-        modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
+    log.set_log_level(log_level=log_level)
+    # Model.update will manage the filehandlers and logging
 
-        if modeltype not in PLUGINS.model_plugins:
-            raise ValueError("Unknown model")
-        # parse data catalog options from global section in config and cli options
-        data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
-        data_libs += list(data)  # add data catalogs from cli
-        if dd and "deltares_data" not in data_libs:  # deltares_data from cli
-            data_libs = ["deltares_data"] + data_libs  # prepend!
-        try:
-            # initialize model and create folder structure
-            mod = PLUGINS.model_plugins[modeltype](
-                root=model_root,
-                mode=mode,
-                data_libs=data_libs,
-                **kwargs,
-            )
-            mod.data_catalog.cache = cache
-            mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
-        except Exception as e:
-            logger.exception(e)  # catch and log errors
-            raise
+    mode = "r+" if model_root == model_out else "r"
+    modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
+
+    if modeltype not in PLUGINS.model_plugins:
+        raise ValueError("Unknown model")
+    # parse data catalog options from global section in config and cli options
+    data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
+    data_libs += list(data)  # add data catalogs from cli
+    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+        data_libs = ["deltares_data"] + data_libs  # prepend!
+    try:
+        # initialize model and create folder structure
+        mod = PLUGINS.model_plugins[modeltype](
+            root=model_root,
+            mode=mode,
+            data_libs=data_libs,
+            **kwargs,
+        )
+        mod.data_catalog.cache = cache
+        mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
+    except Exception as e:
+        logger.exception(e)  # catch and log errors
+        raise
 
 
 def _validate_catalog(cat_path: Path, fmt: Format, upgrade: bool) -> bool:
@@ -434,8 +435,8 @@ def check(
     # Configure logging
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log_path = Path.cwd() / "hydromt_check.log"
-    log.initialize_logging(log_level=log_level)
-    with log.to_file(log_path, log_level=log_level):
+    log.set_log_level(log_level=log_level)
+    with log.to_file(log_path):
         results = []
         for cat_path in data:
             results.append(_validate_catalog(Path(cat_path), format, upgrade))
@@ -509,9 +510,9 @@ def export(
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
-    log.initialize_logging(log_level=log_level)
+    log.set_log_level(log_level=log_level)
     log_path = Path(export_dest_path) / "hydromt_export.log"
-    with log.to_file(log_path, log_level=log_level):
+    with log.to_file(log_path):
         if error_on_empty:
             handle_nodata = NoDataStrategy.RAISE
         else:

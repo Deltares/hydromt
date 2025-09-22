@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, List, Optional, Union
 
 import geopandas as gpd
@@ -28,7 +29,6 @@ __all__ = [
     "zoom_to_overview_level",
 ]
 
-import logging
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 """Implementaion of forcing workflows."""
 
+import logging
 import re
 from typing import Dict, Literal, Optional, Union
 
@@ -12,7 +13,6 @@ from hydromt._compat import HAS_PYET
 if HAS_PYET:
     import pyet
 
-import logging
 
 logger = logging.getLogger(__name__)
 
