@@ -15,8 +15,8 @@ __all__ = [
 ]
 
 _ROOT_LOGGER = logging.getLogger("hydromt")
-FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
-_DEFAULT_FORMATTER = logging.Formatter(FMT)
+_LOG_FORMAT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
+_DEFAULT_FORMATTER = logging.Formatter(_LOG_FORMAT)
 
 
 def initialize_logging(
@@ -36,18 +36,17 @@ def initialize_logging(
     logger = logging.getLogger("hydromt")
     logger.setLevel(logging.ERROR)
     """
-    logger = logging.getLogger("hydromt")
     logging.captureWarnings(True)
-    logger.setLevel(log_level)
-    if not logger.hasHandlers():
+    _ROOT_LOGGER.setLevel(log_level)
+    if not _ROOT_LOGGER.hasHandlers():
         console = logging.StreamHandler(sys.stdout)
         console.setLevel(log_level)
-        console.setFormatter(formatter or logging.Formatter(FMT))
-        logger.addHandler(console)
-    logger.info(f"HydroMT version: {__version__}")
+        console.setFormatter(formatter)
+        _ROOT_LOGGER.addHandler(console)
+    _ROOT_LOGGER.info(f"HydroMT version: {__version__}")
 
 
-def set_log_level(log_level: int) -> None:
+def set_log_level(log_level: int, logger: logging.Logger = _ROOT_LOGGER) -> None:
     """Set the log level of the hydromt root logger.
 
     This also affects all child loggers (e.g., ``hydromt.core``),
@@ -62,34 +61,27 @@ def set_log_level(log_level: int) -> None:
     set_log_level(logging.ERROR)
     ```
     """
-    logger = logging.getLogger("hydromt")
     logger.setLevel(log_level)
 
 
 def add_filehandler(
     path: Path,
     log_level: int | None = None,
-    fmt: logging.Formatter = _DEFAULT_FORMATTER,
+    formatter: logging.Formatter = _DEFAULT_FORMATTER,
     logger: logging.Logger = _ROOT_LOGGER,
 ) -> logging.FileHandler:
     """Add file handler to logger."""
     path.parent.mkdir(parents=True, exist_ok=True)
-
-    fh = logging.FileHandler(path)
-
-    fh.setFormatter(fmt)
-
+    filehandler = logging.FileHandler(path)
+    filehandler.setFormatter(formatter)
     if log_level is not None:
-        fh.setLevel(log_level)
-
-    logger.addHandler(fh)
-
+        filehandler.setLevel(log_level)
+    logger.addHandler(filehandler)
     if path.exists():
         logger.debug(f"Appending log messages to file {path}.")
     else:
         logger.debug(f"Writing log messages to new file {path}.")
-
-    return fh
+    return filehandler
 
 
 def remove_filehandler(path: Path, logger: logging.Logger = _ROOT_LOGGER) -> None:
@@ -107,7 +99,7 @@ def remove_filehandler(path: Path, logger: logging.Logger = _ROOT_LOGGER) -> Non
 def to_file(
     path: Path,
     log_level: int | None = None,
-    fmt: str | None = None,
+    formatter: logging.Formatter = _DEFAULT_FORMATTER,
     logger: logging.Logger = _ROOT_LOGGER,
     append: bool = True,
 ):
@@ -115,20 +107,17 @@ def to_file(
     path.parent.mkdir(parents=True, exist_ok=True)
     if not append and path.exists():
         path.unlink()
-
-    fh = logging.FileHandler(path)
-    if fmt is not None:
-        fh.setFormatter(logging.Formatter(fmt))
+    filehandler = logging.FileHandler(path)
+    if formatter is not None:
+        filehandler.setFormatter(formatter)
     if log_level is not None:
-        fh.setLevel(log_level)
-
-    logger.addHandler(fh)
-
+        filehandler.setLevel(log_level)
+    logger.addHandler(filehandler)
     try:
         yield
     finally:
-        logger.removeHandler(fh)
-        fh.close()
+        logger.removeHandler(filehandler)
+        filehandler.close()
 
 
 def shutdown_logging():

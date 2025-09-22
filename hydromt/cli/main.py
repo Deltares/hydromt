@@ -432,6 +432,17 @@ def check(
     Verify that provided data catalog and config files are in the correct format.
 
     Additionally region bbox and geom can also be validated.
+
+    Example usage
+    -------------
+    Check data catalog file:
+    >>> hydromt check -d /path/to/data_catalog.yml -v
+
+    Check data catalog and grid_model config file:
+    >>> hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -v
+
+    With region:
+    >>> hydromt check -m grid_model -d /path/to/data_catalog.yml -i /path/to/model_config.yml -r '{"bbox": [-1,-1,1,1]}' -v
     """
     # Configure logging
     log_level = max(10, 30 - 10 * (verbose - quiet))
