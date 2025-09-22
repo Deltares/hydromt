@@ -12,9 +12,10 @@ import click
 import numpy as np
 from pydantic import ValidationError
 
-from hydromt import __version__, log
+from hydromt import __version__
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
+from hydromt._utils import log
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator

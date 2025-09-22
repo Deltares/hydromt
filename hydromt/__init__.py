@@ -8,17 +8,15 @@ __version__ = "1.2.0.dev0"
 # We have to make sure that netcdf4 is imported before
 # numpy is imported for the first time, e.g. also via
 # importing xarray
-import warnings  # noqa: F401
 
-import netCDF4  # noqa: F401
 
 # submodules
 from hydromt import data_catalog, gis, io, model, stats
-from hydromt.data_catalog import DataCatalog
-from hydromt.gis import raster, vector
 
 # high-level methods
-from hydromt.log import initialize_logging
+from hydromt._utils.log import initialize_logging
+from hydromt.data_catalog import DataCatalog
+from hydromt.gis import raster, vector
 from hydromt.model import Model, hydromt_step
 from hydromt.plugins import PLUGINS
 
