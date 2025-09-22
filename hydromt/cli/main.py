@@ -523,7 +523,7 @@ def export(
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log.set_log_level(log_level=log_level)
-    log_path = Path(export_dest_path) / "hydromt_export.log"
+    log_path = Path(export_dest_path, "hydromt_export.log")
     with log.to_file(log_path):
         if error_on_empty:
             handle_nodata = NoDataStrategy.RAISE

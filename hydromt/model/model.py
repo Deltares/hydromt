@@ -378,9 +378,10 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        # read current model
+        # read current model & optionally clear log file
         with log.to_file(
-            self.root.path / "hydromt.log", append=self.root.is_reading_mode()
+            self.root.path / "hydromt.log",
+            append=self.root.is_reading_mode(),
         ):
             steps = steps or []
             _validate_steps(self, steps)
@@ -401,9 +402,8 @@ class Model(object, metaclass=ABCMeta):
                 mode = "w+" if forceful_overwrite else "w"
                 self.root.set(model_out, mode=mode)
 
-        with log.to_file(
-            self.root.path / "hydromt.log", append=self.root.is_reading_mode()
-        ):
+        # No need to clear the log file here since we did that already if needed above
+        with log.to_file(self.root.path / "hydromt.log", append=True):
             # check if model has a region
             if self._region_component_name is not None and self.region is None:
                 raise ValueError(
