@@ -42,6 +42,8 @@ dask_config.set(scheduler="single-threaded")
 # https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
 pd.options.mode.copy_on_write = True
 
+xr.set_options(use_new_combine_kwarg_defaults=True)
+
 CURRENT_DIR = Path(__file__).parent
 DATA_DIR = join(dirname(abspath(__file__)), "..", "data")
 TEST_DATA_DIR = join(dirname(abspath(__file__)), "data")
