@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 import pandas as pd
 
-from hydromt.log import get_hydromt_logger
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 
@@ -15,7 +14,9 @@ if TYPE_CHECKING:
 
 __all__ = ["TablesComponent"]
 
-logger = get_hydromt_logger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TablesComponent(ModelComponent):

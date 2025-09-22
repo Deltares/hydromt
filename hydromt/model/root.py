@@ -1,14 +1,12 @@
 """the new model root class."""
 
+import logging
 from pathlib import Path
 from typing import Optional
 
 from hydromt._typing import ModeLike, ModelMode
-from hydromt.log import (
-    get_hydromt_logger,
-)
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["ModelRoot"]
 

@@ -1,5 +1,6 @@
 """DatasetDriver for zarr data."""
 
+import logging
 from copy import copy
 from functools import partial
 from os.path import splitext
@@ -16,9 +17,8 @@ from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DatasetXarrayDriver(DatasetDriver):

@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import inspect
 import itertools
+import logging
 import os
 from datetime import datetime
 from os.path import abspath, basename, dirname, exists, isfile, join, splitext
@@ -40,7 +41,6 @@ from hydromt._utils import (
     _deep_merge,
     _partition_dictionaries,
     _single_var_as_array,
-    get_hydromt_logger,
 )
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.adapters import (
@@ -68,7 +68,7 @@ from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["DataCatalog"]
 

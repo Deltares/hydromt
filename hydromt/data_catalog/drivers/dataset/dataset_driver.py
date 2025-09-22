@@ -1,5 +1,6 @@
 """Driver for Datasets."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
@@ -13,9 +14,8 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataStrategy
 from hydromt.data_catalog.drivers.base_driver import BaseDriver
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DatasetDriver(BaseDriver, ABC):

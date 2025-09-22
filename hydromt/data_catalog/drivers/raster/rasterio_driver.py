@@ -1,6 +1,7 @@
 """Driver using rasterio for RasterDataset."""
 
 import copy
+import logging
 from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
 
@@ -28,9 +29,8 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 )
 from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.io.readers import open_mfraster
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class RasterioDriver(RasterDatasetDriver):

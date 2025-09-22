@@ -19,7 +19,6 @@ from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt._utils.uris import _is_valid_url, _strip_scheme
 from hydromt.log import (
     add_filehandler,
-    get_hydromt_logger,
     initialize_logging,
     remove_filehandler,
 )
@@ -31,7 +30,6 @@ __all__ = [
     "_rename_vars",
     "_set_metadata",
     "initialize_logging",
-    "get_hydromt_logger",
     "add_filehandler",
     "remove_filehandler",
     "_shift_dataset_time",

@@ -1,5 +1,6 @@
 """Caching mechanisms used in HydroMT."""
 
+import logging
 import os
 import xml.etree.ElementTree as ET
 from ast import literal_eval
@@ -16,14 +17,14 @@ from pyproj import CRS
 from hydromt._compat import HAS_GDAL
 from hydromt._utils.uris import _strip_scheme, _strip_vsi
 from hydromt.config import SETTINGS
-from hydromt.log import get_hydromt_logger
 
 if HAS_GDAL:
     from osgeo import gdal
 
     gdal.UseExceptions()
 
-logger = get_hydromt_logger(__name__)
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["_copy_to_local", "_cache_vrt_tiles"]
 

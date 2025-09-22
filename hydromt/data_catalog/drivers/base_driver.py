@@ -1,5 +1,6 @@
 """Base class for different drivers."""
 
+import logging
 from abc import ABC
 from typing import Any, ClassVar, Dict
 
@@ -11,10 +12,9 @@ from pydantic import (
 
 from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import FS
-from hydromt.log import get_hydromt_logger
 from hydromt.plugins import PLUGINS
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BaseDriver(AbstractBaseModel, ABC):

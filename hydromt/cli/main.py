@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """command line interface for hydromt models."""
 
+import logging
 from ast import literal_eval
 from datetime import datetime
 from json import loads as json_decode
@@ -23,7 +24,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.io import read_workflow_yaml, read_yaml, write_yaml
 from hydromt.plugins import PLUGINS
 
-logger = log.get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def print_available_models(ctx, param, value):

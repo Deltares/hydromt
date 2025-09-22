@@ -1,6 +1,7 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
 
 import hashlib
+import logging
 import uuid
 from pathlib import Path
 from typing import Any, cast
@@ -12,9 +13,8 @@ from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
 from hydromt._typing.deferred_file_close import DeferredFileClose
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "write_nc",

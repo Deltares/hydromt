@@ -1,5 +1,6 @@
 """URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
+import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
@@ -8,10 +9,9 @@ from pydantic import ConfigDict, Field
 
 from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import FS, Geom, NoDataStrategy, SourceMetadata, TimeRange, Zoom
-from hydromt.log import get_hydromt_logger
 from hydromt.plugins import PLUGINS
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class URIResolver(AbstractBaseModel, ABC):

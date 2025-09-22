@@ -1,5 +1,6 @@
 """Hydrological flow direction methods powered by pyFlwDir."""
 
+import logging
 from typing import Literal, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -9,9 +10,8 @@ import xarray as xr
 
 from hydromt.gis.raster_utils import _affine_to_coords
 from hydromt.gis.vector_utils import nearest
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "flwdir_from_da",

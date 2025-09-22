@@ -27,12 +27,13 @@ from hydromt._utils.naming_convention import _expand_uri_placeholders, _placehol
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
-from hydromt.log import get_hydromt_logger
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
 
-logger = get_hydromt_logger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "open_mfcsv",

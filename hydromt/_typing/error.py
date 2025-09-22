@@ -1,9 +1,8 @@
 """All of the types for handeling errors within HydroMT."""
 
 import inspect
+import logging
 from enum import Enum
-
-from hydromt.log import get_hydromt_logger
 
 
 class DeprecatedError(Exception):
@@ -50,7 +49,7 @@ def exec_nodata_strat(msg: str, strategy: NoDataStrategy) -> None:
     caller_frame = frame.f_back if frame else None
     module = inspect.getmodule(caller_frame) if caller_frame else None
     logger_name = getattr(module, "__name__", __name__)
-    logger = getattr(module, "logger", get_hydromt_logger(logger_name))
+    logger = getattr(module, "logger", logging.getLogger(logger_name))
 
     if strategy == NoDataStrategy.RAISE:
         raise NoDataException(msg)

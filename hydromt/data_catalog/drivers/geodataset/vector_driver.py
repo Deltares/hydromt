@@ -1,5 +1,6 @@
 """GeoDatasetVectorDriver class for reading vector data from table like files such as csv or parquet."""
 
+import logging
 from copy import copy
 from typing import Callable, ClassVar, List, Optional
 
@@ -12,9 +13,8 @@ from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
 from hydromt.io import open_geodataset
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeoDatasetVectorDriver(GeoDatasetDriver):

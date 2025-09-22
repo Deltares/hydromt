@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Optional
 
 import numpy as np
@@ -23,9 +24,8 @@ from hydromt._utils import (
     _single_var_as_array,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["DatasetAdapter"]
 

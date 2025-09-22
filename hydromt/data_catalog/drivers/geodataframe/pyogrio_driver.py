@@ -1,5 +1,6 @@
 """Driver to read geodataframes using Pyogrio."""
 
+import logging
 from os.path import splitext
 from typing import ClassVar, List, Optional, Union
 
@@ -13,9 +14,8 @@ from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class PyogrioDriver(GeoDataFrameDriver):

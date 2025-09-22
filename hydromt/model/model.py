@@ -19,9 +19,6 @@ from hydromt._utils import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
 from hydromt.io.readers import read_yaml
-from hydromt.log import (
-    get_hydromt_logger,
-)
 from hydromt.model.components import (
     ModelComponent,
     SpatialModelComponent,
@@ -36,7 +33,9 @@ __all__ = ["Model"]
 # see also hydromt.model group in pyproject.toml
 __hydromt_eps__ = ["Model"]
 
-logger = get_hydromt_logger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=ModelComponent)
 
 

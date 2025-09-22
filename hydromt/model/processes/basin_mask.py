@@ -4,6 +4,8 @@
 Based on pre-cooked basin index files, basin maps or flow direction maps.
 """
 
+import logging
+
 import geopandas as gpd
 import numpy as np
 import xarray as xr
@@ -11,9 +13,8 @@ from shapely.geometry import box
 
 from hydromt.data_catalog.sources.geodataframe import GeoDataFrameSource
 from hydromt.gis.flw import basin_map, flwdir_from_da, outlet_map, stream_map
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["get_basin_geometry"]
 

@@ -16,14 +16,15 @@ from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.gis import parse_crs
-from hydromt.log import get_hydromt_logger
 from hydromt.model.processes.basin_mask import get_basin_geometry
 from hydromt.plugins import PLUGINS
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-logger = get_hydromt_logger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "parse_region_basin",

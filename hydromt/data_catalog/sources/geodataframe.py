@@ -1,5 +1,6 @@
 """DataSource class for the GeoDataFrame type."""
 
+import logging
 from datetime import datetime
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional
@@ -25,9 +26,8 @@ from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeoDataFrameSource(DataSource):

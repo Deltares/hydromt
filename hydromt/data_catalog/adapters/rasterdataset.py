@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, List, Optional, Union, cast
 
 import numpy as np
@@ -28,9 +29,8 @@ from hydromt._utils import (
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.gis.raster_utils import _meridian_offset
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["RasterDatasetAdapter"]
 

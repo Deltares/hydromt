@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Hashable, List, Mapping, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -16,9 +17,8 @@ from xarray.core.types import DataVars
 
 from hydromt.gis import raster
 from hydromt.gis.vector_utils import _filter_gdf
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 GDAL_VERSION = gdal_version()
 
 

@@ -1,5 +1,6 @@
 """DataSource class for the DataFrame type."""
 
+import logging
 from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import pandas as pd
@@ -15,9 +16,8 @@ from hydromt._typing import (
 from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataSource
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DataFrameSource(DataSource):

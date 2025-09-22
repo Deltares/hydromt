@@ -8,13 +8,14 @@ import xarray as xr
 
 from hydromt._typing.deferred_file_close import DeferredFileClose
 from hydromt.data_catalog import DataCatalog
-from hydromt.log import get_hydromt_logger
 
 if TYPE_CHECKING:
     from hydromt.model import Model
     from hydromt.model.root import ModelRoot
 
-logger = get_hydromt_logger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ModelComponent(ABC):

@@ -9,14 +9,15 @@ from xarray import DataArray, Dataset
 from hydromt._typing.type_def import XArrayDict
 from hydromt.io.readers import open_ncs
 from hydromt.io.writers import write_nc
-from hydromt.log import get_hydromt_logger
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-logger = get_hydromt_logger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class DatasetsComponent(ModelComponent):

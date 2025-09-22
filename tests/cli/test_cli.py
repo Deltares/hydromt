@@ -1,6 +1,6 @@
 """Tests for the cli submodule."""
 
-from logging import NOTSET, WARNING, Logger
+import logging
 from os.path import join
 from pathlib import Path
 from typing import Generator
@@ -11,7 +11,6 @@ from click.testing import CliRunner
 from hydromt import __version__
 from hydromt._typing import NoDataException
 from hydromt.cli.main import main as hydromt_cli
-from hydromt.log import get_hydromt_logger
 from hydromt.model.components.grid import GridComponent
 from tests.conftest import TEST_DATA_DIR
 
@@ -61,11 +60,13 @@ def test_cli_update_help():
 @pytest.fixture
 def _reset_log_level() -> Generator[None, None, None]:
     yield
-    main_logger: Logger = get_hydromt_logger()
-    main_logger.setLevel(NOTSET)  # Most verbose so all messages get passed
+    main_logger = logging.getLogger("hydromt")
+    main_logger.setLevel(logging.NOTSET)  # Most verbose so all messages get passed
 
 
-def test_cli_build_missing_arg_workflow(tmp_path: Path):
+def test_cli_build_missing_arg_workflow(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+):
     cmd = [
         "build",
         "model",
@@ -74,16 +75,17 @@ def test_cli_build_missing_arg_workflow(tmp_path: Path):
         str(join(TEST_DATA_DIR, "missing_data_workflow.yml")),
         "-vv",
     ]
-    r = CliRunner().invoke(hydromt_cli, cmd)
+    with caplog.at_level(logging.NOTSET):
+        r = CliRunner().invoke(hydromt_cli, cmd)
 
     assert r.exit_code == 1
     assert (
         "Validation of step 1 (config.update) failed because of the following error:"
-        in r.output
+        in caplog.text
     )
 
 
-def test_cli_build_v0x_workflow(tmp_path: Path):
+def test_cli_build_v0x_workflow(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     cmd = [
         "build",
         "model",
@@ -92,16 +94,17 @@ def test_cli_build_v0x_workflow(tmp_path: Path):
         str(join(TEST_DATA_DIR, "v0x_workflow.yml")),
         "-vv",
     ]
-    r = CliRunner().invoke(hydromt_cli, cmd)
+    with caplog.at_level(logging.NOTSET):
+        r = CliRunner().invoke(hydromt_cli, cmd)
 
     assert r.exit_code == 1
     assert (
         "does not contain a `steps` section. Perhaps you're using a v0.x format?"
-        in r.output
+        in caplog.text
     )
 
 
-def test_cli_update_missing_arg(tmp_path: Path):
+def test_cli_update_missing_arg(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     cmd = [
         "update",
         "model",
@@ -110,17 +113,17 @@ def test_cli_update_missing_arg(tmp_path: Path):
         str(join(TEST_DATA_DIR, "missing_data_workflow.yml")),
         "-vv",
     ]
-    r = CliRunner().invoke(hydromt_cli, cmd)
+    with caplog.at_level(logging.NOTSET):
+        r = CliRunner().invoke(hydromt_cli, cmd)
 
     assert r.exit_code == 1
-    print(r)
     assert (
         "Validation of step 1 (config.update) failed because of the following error:"
-        in r.output
+        in caplog.text
     )
 
 
-def test_cli_update_v0x_workflow(tmp_path: Path):
+def test_cli_update_v0x_workflow(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     cmd = [
         "update",
         "model",
@@ -129,17 +132,18 @@ def test_cli_update_v0x_workflow(tmp_path: Path):
         str(join(TEST_DATA_DIR, "v0x_workflow.yml")),
         "-vv",
     ]
-    r = CliRunner().invoke(hydromt_cli, cmd)
+    with caplog.at_level(logging.NOTSET):
+        r = CliRunner().invoke(hydromt_cli, cmd)
 
     assert r.exit_code == 1
     assert (
         "does not contain a `steps` section. Perhaps you're using a v0.x format?"
-        in r.output
+        in caplog.text
     )
 
 
 @pytest.mark.usefixtures("_reset_log_level")
-def test_cli_build_update_model(tmp_path: Path):
+def test_cli_build_update_model(tmp_path: Path, caplog: pytest.LogCaptureFixture):
     root = tmp_path / "model_region"
     cmd = [
         "build",
@@ -175,7 +179,6 @@ def test_cli_build_update_model(tmp_path: Path):
         "-vv",
     ]
     r = CliRunner().invoke(hydromt_cli, cmd)
-
     assert r.exit_code == 0
     assert Path(root_out, "run_config.toml").exists()
     # Open and check content
@@ -289,7 +292,7 @@ def test_export_cli_no_data_ignore(tmp_path: Path):
 
 
 def test_export_skips_overwrite(tmp_path: Path, caplog: pytest.LogCaptureFixture):
-    with caplog.at_level(WARNING):
+    with caplog.at_level(logging.WARNING):
         # export twice
         for _i in range(2):
             _ = CliRunner().invoke(

@@ -8,12 +8,13 @@ import pandas as pd
 import xarray as xr
 
 from hydromt._compat import HAS_PYET
-from hydromt.log import get_hydromt_logger
 
 if HAS_PYET:
     import pyet
 
-logger = get_hydromt_logger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "precip",

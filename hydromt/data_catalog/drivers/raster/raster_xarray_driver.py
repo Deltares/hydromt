@@ -1,5 +1,6 @@
 """RasterDatasetDriver for zarr data."""
 
+import logging
 from copy import deepcopy
 from functools import partial
 from os.path import splitext
@@ -21,9 +22,8 @@ from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
 )
-from hydromt.log import get_hydromt_logger
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 _ZARR_EXT = ".zarr"
 _NETCDF_EXT = [".nc", ".netcdf"]

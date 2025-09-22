@@ -1,5 +1,6 @@
 """Implementation for mesh based workflows."""
 
+import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -13,14 +14,13 @@ from shapely.geometry import box
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import parse_crs
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.log import get_hydromt_logger
 from hydromt.model.processes.region import (
     parse_region_bbox,
     parse_region_geom,
     parse_region_mesh,
 )
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "create_mesh2d_from_region",

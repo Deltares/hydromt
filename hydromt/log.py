@@ -11,19 +11,9 @@ __all__ = [
     "initialize_logging",
     "add_filehandler",
     "remove_filehandler",
-    "get_hydromt_logger",
 ]
 
-
-def get_hydromt_logger(name: str | None = None) -> logging.Logger:
-    """Get a logger with the given name, or the root hydromt logger if name is None."""
-    if name is None:
-        return logging.getLogger("hydromt")
-    else:
-        return logging.getLogger(f"hydromt.{name}")
-
-
-_ROOT_LOGGER = get_hydromt_logger()
+_ROOT_LOGGER = logging.getLogger("hydromt")
 FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
 _DEFAULT_FORMATTER = logging.Formatter(FMT)
 
@@ -36,26 +26,23 @@ def initialize_logging(
     Example
     -------
     ```python
-    from hydromt._utils.log import initialize_logging, get_hydromt_logger
+    from hydromt._utils.log import initialize_logging
 
     # Initialize with log level (INFO)
     initialize_logging(log_level=logging.INFO)
 
     # Change log level to ERROR
-    logger = get_hydromt_logger()
+    logger = logging.getLogger("hydromt")
     logger.setLevel(logging.ERROR)
     """
-    logger = get_hydromt_logger()
+    logger = logging.getLogger("hydromt")
     logging.captureWarnings(True)
     logger.setLevel(log_level)
-    logger.handlers = [
-        h for h in logger.handlers if not isinstance(h, logging.StreamHandler)
-    ]
-    console = logging.StreamHandler(sys.stdout)
-    console.setLevel(log_level)
-    console.setFormatter(formatter or logging.Formatter(FMT))
-    logger.addHandler(console)
-
+    if not logger.hasHandlers():
+        console = logging.StreamHandler(sys.stdout)
+        console.setLevel(log_level)
+        console.setFormatter(formatter or logging.Formatter(FMT))
+        logger.addHandler(console)
     logger.info(f"HydroMT version: {__version__}")
 
 

@@ -17,7 +17,6 @@ from shapely.geometry.base import BaseGeometry
 
 from hydromt._typing import Bbox, Geom, GpdShapeGeom, Zoom
 from hydromt.gis.raster_utils import cellres
-from hydromt.log import get_hydromt_logger
 
 __all__ = [
     "_axes_attrs",
@@ -29,7 +28,9 @@ __all__ = [
     "zoom_to_overview_level",
 ]
 
-logger = get_hydromt_logger(__name__)
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 # REPROJ

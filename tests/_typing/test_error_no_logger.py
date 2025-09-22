@@ -10,4 +10,4 @@ def test_logger_from_frame_in_nodata_strat(caplog):
     assert caplog.records[-1].levelname == "WARNING"
     assert caplog.records[-1].message == "foo"
     # Test that the name of the logger is this current frame's module, not the error.py logger.
-    assert caplog.records[-1].name == f"hydromt.{__name__}"
+    assert caplog.records[-1].name == __name__

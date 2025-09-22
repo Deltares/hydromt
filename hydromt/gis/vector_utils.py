@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Optional, Tuple
 
 import geopandas as gpd
@@ -12,9 +13,7 @@ import numpy as np
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
-from hydromt.log import get_hydromt_logger
-
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "_filter_gdf",

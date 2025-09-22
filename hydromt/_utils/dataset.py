@@ -5,16 +5,16 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from hydromt.log import get_hydromt_logger
-
 if typing.TYPE_CHECKING:
     from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices
+
+import logging
 
 from hydromt._typing.metadata import SourceMetadata
 from hydromt._typing.type_def import TimeRange, Variables
 from hydromt._utils.nodata import _has_no_data
 
-logger = get_hydromt_logger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "_set_metadata",
