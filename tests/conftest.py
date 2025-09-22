@@ -17,7 +17,7 @@ from dask import config as dask_config
 from pytest_mock import MockerFixture
 from shapely.geometry import box
 
-from hydromt import Model, raster, vector
+from hydromt import Model, vector
 from hydromt._typing import SourceMetadata
 from hydromt.config import SETTINGS, Settings
 from hydromt.data_catalog import DataCatalog
@@ -26,7 +26,7 @@ from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver, RasterDatasetDriver
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.data_catalog.uri_resolvers import URIResolver
-from hydromt.gis._raster_utils import _affine_to_coords
+from hydromt.gis.raster_utils import _affine_to_coords, full_from_transform
 from hydromt.model.components.config import ConfigComponent
 from hydromt.model.components.geoms import GeomsComponent
 from hydromt.model.components.spatial import SpatialModelComponent
@@ -167,7 +167,7 @@ def test_model(tmp_path: Path) -> Model:
 
 @pytest.fixture
 def rioda():
-    return raster.full_from_transform(
+    return full_from_transform(
         transform=[0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
         shape=(4, 6),
         nodata=-1,
@@ -178,7 +178,7 @@ def rioda():
 
 @pytest.fixture
 def rioda_large():
-    da = raster.full_from_transform(
+    da = full_from_transform(
         transform=[0.004166666666666666, 0.0, 0.0, 0.0, -0.004166666666666667, 0.0],
         shape=(1024, 1000),
         nodata=-9999,

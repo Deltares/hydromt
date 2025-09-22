@@ -2,7 +2,7 @@
 
 from typing import Any, Dict
 
-from hydromt._utils.log import get_hydromt_logger
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

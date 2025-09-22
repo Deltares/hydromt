@@ -12,10 +12,10 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
 )
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataSource
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

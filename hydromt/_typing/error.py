@@ -3,7 +3,7 @@
 import inspect
 from enum import Enum
 
-from hydromt._utils.log import get_hydromt_logger
+from hydromt.log import get_hydromt_logger
 
 
 class DeprecatedError(Exception):

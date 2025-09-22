@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from hydromt._utils.log import get_hydromt_logger
+from hydromt.log import get_hydromt_logger
 
 if typing.TYPE_CHECKING:
     from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices

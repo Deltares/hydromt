@@ -19,11 +19,11 @@ from pydantic import (
 )
 
 from hydromt._typing import DataType, NoDataException, NoDataStrategy, SourceMetadata
-from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

@@ -5,12 +5,12 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Item,
     DataCatalogV0MetaData,
     DataCatalogV0Validator,
 )
+from hydromt.io.readers import _yml_from_uri_or_path
 
 
 def test_deltares_data_catalog_v0(dd_v0_catalog):

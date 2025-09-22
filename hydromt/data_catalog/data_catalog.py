@@ -34,7 +34,6 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt import __version__
-from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, SourceSpecDict, TimeRange
 from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._utils import (
@@ -65,7 +64,8 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
     create_source,
 )
-from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
+from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
+from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
 
 logger = get_hydromt_logger(__name__)

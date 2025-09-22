@@ -1,15 +1,15 @@
 """Xarrays component."""
 
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Union, cast
 
 import xarray as xr
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt._io.readers import open_ncs
-from hydromt._io.writers import write_nc
 from hydromt._typing.type_def import XArrayDict
-from hydromt._utils.log import get_hydromt_logger
+from hydromt.io.readers import open_ncs
+from hydromt.io.writers import write_nc
+from hydromt.log import get_hydromt_logger
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 
@@ -41,7 +41,7 @@ class DatasetsComponent(ModelComponent):
             by default "datasets/{name}.nc" ie one file per dataset in the data
             dictionary.
         """
-        self._data: Optional[XArrayDict] = None
+        self._data: XArrayDict | None = None
         self._filename: str = filename
         super().__init__(model=model)
 
@@ -67,7 +67,7 @@ class DatasetsComponent(ModelComponent):
     def set(
         self,
         data: Union[Dataset, DataArray],
-        name: Optional[str] = None,
+        name: str | None = None,
         split_dataset: bool = False,
     ):
         """Add data to the xarray component.
@@ -85,7 +85,7 @@ class DatasetsComponent(ModelComponent):
         assert self._data is not None
         if split_dataset:
             if isinstance(data, Dataset):
-                ds: Dict[str, Union[Dataset, DataArray]] = {
+                ds: dict[str, Union[Dataset, DataArray]] = {
                     str(name): data[name] for name in data.data_vars
                 }
             else:
@@ -107,10 +107,10 @@ class DatasetsComponent(ModelComponent):
             self._data[name] = d
 
     @hydromt_step
-    def read(self, filename: Optional[str] = None, **kwargs) -> None:
+    def read(self, filename: str | None = None, **kwargs) -> None:
         """Read model dataset files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`hydromt.io.readers.open_nc`
+        key-word arguments are passed to :py:func:`hydromt.io.readers.open_ncs`
 
         Parameters
         ----------
@@ -120,7 +120,7 @@ class DatasetsComponent(ModelComponent):
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.io.readers.open_nc` function.
+            `hydromt.io.readers.open_ncs` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
@@ -138,7 +138,7 @@ class DatasetsComponent(ModelComponent):
     @hydromt_step
     def write(
         self,
-        filename: Optional[str] = None,
+        filename: str | None = None,
         *,
         gdal_compliant: bool = False,
         rename_dims: bool = False,
@@ -205,7 +205,7 @@ class DatasetsComponent(ModelComponent):
             if close_handle is not None:
                 self._deferred_file_close_handles.append(close_handle)
 
-    def test_equal(self, other: ModelComponent) -> Tuple[bool, Dict[str, str]]:
+    def test_equal(self, other: ModelComponent) -> tuple[bool, dict[str, str]]:
         """
         Test if two DatasetsComponents are equal.
 

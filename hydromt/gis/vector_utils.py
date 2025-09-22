@@ -12,18 +12,18 @@ import numpy as np
 from shapely.geometry import box
 from shapely.geometry.base import BaseGeometry
 
-from hydromt._utils.log import get_hydromt_logger
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 
 __all__ = [
-    "_nearest",
-    "_nearest_merge",
     "_filter_gdf",
+    "nearest",
+    "nearest_merge",
 ]
 
 
-def _nearest_merge(
+def nearest_merge(
     gdf1: gpd.GeoDataFrame,
     gdf2: gpd.GeoDataFrame,
     *,
@@ -51,8 +51,6 @@ def _nearest_merge(
         i.e. NaN values for existing columns or missing columns.
     inplace : bool,
         If True, apply the merge to gdf1, otherwise return a new object.
-    logger:
-        The logger to use.
 
     Returns
     -------
@@ -60,24 +58,34 @@ def _nearest_merge(
         Merged GeoDataFrames
     """
     # Get nearest index right
-    idx_nn, dst = _nearest(gdf1, gdf2)
+    idx_nn, dst = nearest(gdf1, gdf2)
     if not inplace:
         gdf1 = gdf1.copy()
     valid = dst < max_dist if max_dist is not None else np.ones_like(idx_nn, dtype=bool)
+    # gdf2 column selection
+    columns = gdf2.columns if columns is None else columns
+    for c in columns:
+        if c not in gdf2.columns:
+            logger.warning(f"Column {c} not in gdf2, skipping.")
+            columns.remove(c)
+
     gdf1["distance_right"] = dst
     gdf1["index_right"] = -1
     gdf1.loc[valid, "index_right"] = idx_nn[valid]
 
     if not overwrite:
-        new_cols = [c for c in gdf2.columns if c not in gdf1.columns]
+        new_cols = [c for c in columns if c not in gdf1.columns]
         gdf1.loc[:, new_cols] = np.nan
         return gdf1.combine_first(gdf2)
     else:
+        # Keep only columns selection in gdf2 before join
+        gdf2 = gdf2[columns]
+        # Keep only left only columns in gdf1 before join
         left_only_cols = [c for c in gdf1.columns if c not in gdf2.columns]
         return gdf1[:, left_only_cols].join(gdf2, join="left")
 
 
-def _nearest(
+def nearest(
     gdf1: gpd.GeoDataFrame, gdf2: gpd.GeoDataFrame
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Return the index of and distance [m] to the nearest geometry.

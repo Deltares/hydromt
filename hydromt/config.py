@@ -1,11 +1,21 @@
 """Runtime Settings for HydroMT."""
 
 from pathlib import Path
+from typing import Annotated, Any
 
-from pydantic import Field
+from pydantic import Field, ValidationInfo, ValidatorFunctionWrapHandler, WrapValidator
 from pydantic_settings import BaseSettings
 
-from hydromt._typing import Pathdantic
+
+def _validate_path(
+    path: Any, handler: ValidatorFunctionWrapHandler, info: ValidationInfo
+):
+    if isinstance(path, str):
+        path = Path(path)
+    return handler(path, info)
+
+
+Pathdantic = Annotated[Path, WrapValidator(_validate_path)]
 
 
 class Settings(BaseSettings):

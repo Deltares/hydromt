@@ -13,7 +13,7 @@ import warnings  # noqa: F401
 import netCDF4  # noqa: F401
 
 # submodules
-from hydromt import _io, data_catalog, gis, model, stats
+from hydromt import data_catalog, gis, io, model, stats
 
 # high-level methods
 from hydromt.data_catalog import DataCatalog
@@ -28,7 +28,7 @@ __all__ = [
     # submodules
     "data_catalog",
     "gis",
-    "_io",
+    "io",
     "model",
     "stats",
     # raster and vector accessor

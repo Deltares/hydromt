@@ -27,11 +27,11 @@ from os.path import exists
 from pydantic_core import ValidationError
 
 from hydromt import DataCatalog
-from hydromt._utils.log import get_hydromt_logger
 from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

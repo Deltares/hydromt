@@ -7,8 +7,6 @@ from pathlib import Path
 
 from hydromt import __version__
 
-FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
-
 __all__ = [
     "initialize_logging",
     "add_filehandler",
@@ -26,9 +24,13 @@ def get_hydromt_logger(name: str | None = None) -> logging.Logger:
 
 
 _ROOT_LOGGER = get_hydromt_logger()
+FMT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s"
+_DEFAULT_FORMATTER = logging.Formatter(FMT)
 
 
-def initialize_logging(log_level: int = logging.INFO) -> None:
+def initialize_logging(
+    log_level: int = logging.INFO, formatter: logging.Formatter = _DEFAULT_FORMATTER
+) -> None:
     """Initialize the hydromt root logger with a console handler, formatter and a log level.
 
     Example
@@ -51,7 +53,7 @@ def initialize_logging(log_level: int = logging.INFO) -> None:
     ]
     console = logging.StreamHandler(sys.stdout)
     console.setLevel(log_level)
-    console.setFormatter(logging.Formatter(FMT))
+    console.setFormatter(formatter or logging.Formatter(FMT))
     logger.addHandler(console)
 
     logger.info(f"HydroMT version: {__version__}")
@@ -60,7 +62,7 @@ def initialize_logging(log_level: int = logging.INFO) -> None:
 def add_filehandler(
     path: Path,
     log_level: int | None = None,
-    fmt: str | None = FMT,
+    fmt: logging.Formatter = _DEFAULT_FORMATTER,
     logger: logging.Logger = _ROOT_LOGGER,
 ) -> logging.FileHandler:
     """Add file handler to logger."""
@@ -68,11 +70,7 @@ def add_filehandler(
 
     fh = logging.FileHandler(path)
 
-    if fmt is not None:
-        fh.setFormatter(logging.Formatter(fmt))
-    elif logger.handlers:
-        # inherit formatter from first existing handler
-        fh.setFormatter(logger.handlers[0].formatter)
+    fh.setFormatter(fmt)
 
     if log_level is not None:
         fh.setLevel(log_level)
@@ -104,9 +102,13 @@ def to_file(
     log_level: int | None = None,
     fmt: str | None = None,
     logger: logging.Logger = _ROOT_LOGGER,
+    append: bool = True,
 ):
     """Context manager that attaches a file handler for the duration of the block."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    if not append and path.exists():
+        path.unlink()
+
     fh = logging.FileHandler(path)
     if fmt is not None:
         fh.setFormatter(logging.Formatter(fmt))
@@ -114,6 +116,7 @@ def to_file(
         fh.setLevel(log_level)
 
     logger.addHandler(fh)
+
     try:
         yield
     finally:

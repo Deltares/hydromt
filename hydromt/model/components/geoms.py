@@ -9,8 +9,8 @@ from geopandas import GeoDataFrame, GeoSeries
 from geopandas.testing import assert_geodataframe_equal
 from shapely.geometry import box
 
-from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.naming_convention import _expand_uri_placeholders
+from hydromt.log import get_hydromt_logger
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step

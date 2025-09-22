@@ -14,9 +14,9 @@ from rasterio import gdal_version
 from shapely.geometry.base import BaseGeometry
 from xarray.core.types import DataVars
 
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.gis import raster
-from hydromt.gis._vector_utils import _filter_gdf
+from hydromt.gis.vector_utils import _filter_gdf
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 GDAL_VERSION = gdal_version()

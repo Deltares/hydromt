@@ -11,10 +11,10 @@ from geopandas.testing import assert_geodataframe_equal
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import open_ncs
-from hydromt._io.writers import write_nc
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.gis.vector import GeoDataset
+from hydromt.io.readers import open_ncs
+from hydromt.io.writers import write_nc
+from hydromt.log import get_hydromt_logger
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step

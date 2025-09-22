@@ -1,11 +1,5 @@
 """Drivers responsible for reading and writing data."""
 
-from hydromt.data_catalog.drivers._preprocessing import (
-    _harmonise_dims,
-    _remove_duplicates,
-    _round_latlon,
-    _to_datetimeindex,
-)
 from hydromt.data_catalog.drivers.base_driver import BaseDriver
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver, PandasDriver
 from hydromt.data_catalog.drivers.dataset import DatasetDriver, DatasetXarrayDriver
@@ -18,6 +12,12 @@ from hydromt.data_catalog.drivers.geodataset import (
     GeoDatasetDriver,
     GeoDatasetVectorDriver,
     GeoDatasetXarrayDriver,
+)
+from hydromt.data_catalog.drivers.preprocessing import (
+    harmonise_dims,
+    remove_duplicates,
+    round_latlon,
+    to_datetimeindex,
 )
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
@@ -42,10 +42,10 @@ __all__ = [
     "RasterDatasetDriver",
     "RasterDatasetXarrayDriver",
     "RasterioDriver",
-    "_harmonise_dims",
-    "_remove_duplicates",
-    "_round_latlon",
-    "_to_datetimeindex",
+    "harmonise_dims",
+    "remove_duplicates",
+    "round_latlon",
+    "to_datetimeindex",
 ]
 
 # define hydromt driver entry points

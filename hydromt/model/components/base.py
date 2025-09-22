@@ -7,8 +7,8 @@ from weakref import ReferenceType, ref
 import xarray as xr
 
 from hydromt._typing.deferred_file_close import DeferredFileClose
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog import DataCatalog
+from hydromt.log import get_hydromt_logger
 
 if TYPE_CHECKING:
     from hydromt.model import Model

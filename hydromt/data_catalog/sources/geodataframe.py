@@ -21,11 +21,11 @@ from hydromt._typing import (
     StrPath,
     TotalBounds,
 )
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
+from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

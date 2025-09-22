@@ -25,10 +25,10 @@ from hydromt._utils import (
     _single_var_as_array,
     _slice_temporal_dimension,
 )
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.gis._raster_utils import _meridian_offset
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.gis.raster_utils import _meridian_offset
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

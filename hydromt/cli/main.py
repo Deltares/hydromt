@@ -5,23 +5,22 @@ from ast import literal_eval
 from datetime import datetime
 from json import loads as json_decode
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import click
 import numpy as np
 from pydantic import ValidationError
 
-from hydromt import __version__
-from hydromt._io import write_yaml
+from hydromt import __version__, log
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
-from hydromt._utils import log
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
+from hydromt.io import read_workflow_yaml, read_yaml, write_yaml
 from hydromt.plugins import PLUGINS
 
 logger = log.get_hydromt_logger(__name__)
@@ -235,43 +234,31 @@ def build(
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log.initialize_logging(log_level=log_level)
-    log_path = Path(model_root) / "hydromt_build.log"
-    with log.to_file(log_path, log_level=log_level):
-        opt = _utils.parse_config(config)
-        if "steps" not in opt:
-            error_msg = (
-                f"It seems your workflow file at {config} does not "
-                "contain a `steps` section. Perhaps you're using a v0.x format? "
-            )
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
 
-        kwargs = opt.pop("global", {})
-        modeltype = opt.pop("modeltype", model)
-        # parse data catalog options from global section in config and cli options
-        data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
-        data_libs += list(data)  # add data catalogs from cli
-        if dd and "deltares_data" not in data_libs:  # deltares_data from cli
-            data_libs = ["deltares_data"] + data_libs  # prepend!
+    modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
+    # parse data catalog options from global section in config and cli options
+    data_libs = np.atleast_1d(kwargs.pop("data_libs", [])).tolist()  # from global
+    data_libs += list(data)  # add data catalogs from cli
+    if dd and "deltares_data" not in data_libs:  # deltares_data from cli
+        data_libs = ["deltares_data"] + data_libs  # prepend!
+    try:
+        # initialize model and create folder structure
+        mode = "w+" if fo else "w"
+        if modeltype not in PLUGINS.model_plugins:
+            raise ValueError("Unknown model")
+        mod = PLUGINS.model_plugins[modeltype](
+            root=model_root,
+            mode=mode,
+            data_libs=data_libs,
+            **kwargs,
+        )
+        mod.data_catalog.cache = cache
+        # build model
+        mod.build(steps=steps)
 
-        try:
-            # initialize model and create folder structure
-            mode = "w+" if fo else "w"
-            if modeltype not in PLUGINS.model_plugins:
-                raise ValueError("Unknown model")
-            mod = PLUGINS.model_plugins[modeltype](
-                root=model_root,
-                mode=mode,
-                data_libs=data_libs,
-                **kwargs,
-            )
-            mod.data_catalog.cache = cache
-            # build model
-            mod.build(steps=opt["steps"])
-
-        except Exception as e:
-            logger.exception(e)  # catch and log errors
-            raise
+    except Exception as e:
+        logger.exception(e)  # catch and log errors
+        raise
 
 
 ## UPDATE
@@ -330,18 +317,8 @@ def update(
     log.initialize_logging(log_level=log_level)
     log_path = Path(model_out) / "hydromt_update.log"
     with log.to_file(log_path, log_level=log_level):
-        opt = _utils.parse_config(config)
+        modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
 
-        if "steps" not in opt:
-            error_msg = (
-                f"It seems your workflow file at {config} does not "
-                "contain a `steps` section. Perhaps you're using a v0.x format? "
-            )
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
-
-        kwargs = opt.pop("global", {})
-        modeltype = opt.pop("modeltype", model)
         if modeltype not in PLUGINS.model_plugins:
             raise ValueError("Unknown model")
         # parse data catalog options from global section in config and cli options
@@ -349,7 +326,6 @@ def update(
         data_libs += list(data)  # add data catalogs from cli
         if dd and "deltares_data" not in data_libs:  # deltares_data from cli
             data_libs = ["deltares_data"] + data_libs  # prepend!
-
         try:
             # initialize model and create folder structure
             mod = PLUGINS.model_plugins[modeltype](
@@ -359,7 +335,7 @@ def update(
                 **kwargs,
             )
             mod.data_catalog.cache = cache
-            mod.update(model_out=model_out, steps=opt["steps"], forceful_overwrite=fo)
+            mod.update(model_out=model_out, steps=steps, forceful_overwrite=fo)
         except Exception as e:
             logger.exception(e)  # catch and log errors
             raise
@@ -412,23 +388,9 @@ def _validate_config(config: Path, model: Optional[str], fmt: Format) -> bool:
         return False
 
     try:
-        config_dict = _utils.parse_config(config)
-    except Exception as e:
-        logger.error(f"Failed to parse config {config}: {e}")
-        return False
-
-    if "steps" not in config_dict:
-        logger.error(
-            f"No `steps` section in workflow yaml {config}. Perhaps it is a v0.x file?"
-        )
-        return False
-
-    if model:
-        config_dict["modeltype"] = model
-
-    try:
-        HydromtModelSetup(**config_dict)
-    except (ValidationError, ValueError) as e:
+        modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
+        HydromtModelSetup(modeltype=modeltype, globals=kwargs, steps=steps)
+    except (ValidationError, ValueError, RuntimeError) as e:
         logger.error(f"Workflow yaml {config} has the following error(s): {e}")
         return False
 
@@ -436,7 +398,9 @@ def _validate_config(config: Path, model: Optional[str], fmt: Format) -> bool:
     return True
 
 
-@main.command(short_help="Validate config / data catalog / region")
+@main.command(
+    short_help="Validate config / data catalog / region",
+)
 @click.option(
     "-m",
     "--model",
@@ -453,7 +417,7 @@ def _validate_config(config: Path, model: Optional[str], fmt: Format) -> bool:
 @click.pass_context
 def check(
     _ctx: click.Context,
-    model: Optional[str],
+    model: str | None,
     config,
     data,
     quiet: int,
@@ -516,12 +480,12 @@ def check(
 def export(
     _ctx: click.Context,
     export_dest_path: Path,
-    source: Optional[str],
-    time_range: Optional[str],
-    bbox: Optional[Tuple[float, float, float, float]],
-    config: Optional[Path],
-    region: Optional[Dict[Any, Any]],
-    data: Optional[List[StrPath]],
+    source: str | None,
+    time_range: str | None,
+    bbox: tuple[float, float, float, float] | None,
+    config: Path | None,
+    region: dict[Any, Any] | None,
+    data: list[StrPath] | None,
     dd: bool,
     fo: bool,
     error_on_empty: bool,
@@ -552,11 +516,11 @@ def export(
         else:
             handle_nodata = NoDataStrategy.IGNORE
 
-        data_libs: List[StrPath] = list(data) if data else []
+        data_libs: list[StrPath] = list(data) if data else []
         if dd and "deltares_data" not in data_libs:  # deltares_data from cli
             data_libs.insert(0, "deltares_data")
 
-        sources: List[str] = []
+        sources: list[str] = []
         if source:
             if isinstance(source, str):
                 sources = [source]
@@ -569,7 +533,7 @@ def export(
         append = False
 
         if config:
-            config_dict = _utils.parse_config(config)["export_data"]
+            config_dict = read_yaml(config)["export_data"]
             if "data_libs" in config_dict.keys():
                 data_libs = data_libs + config_dict.pop("data_libs")
             time_range = config_dict.pop("time_range", None)

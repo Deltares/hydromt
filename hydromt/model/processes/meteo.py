@@ -8,7 +8,7 @@ import pandas as pd
 import xarray as xr
 
 from hydromt._compat import HAS_PYET
-from hydromt._utils.log import get_hydromt_logger
+from hydromt.log import get_hydromt_logger
 
 if HAS_PYET:
     import pyet

@@ -10,8 +10,8 @@ from click.testing import CliRunner
 
 from hydromt import __version__
 from hydromt._typing import NoDataException
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.cli.main import main as hydromt_cli
+from hydromt.log import get_hydromt_logger
 from hydromt.model.components.grid import GridComponent
 from tests.conftest import TEST_DATA_DIR
 
@@ -445,5 +445,5 @@ def test_cli_check_v0x_workflow(caplog):
     r = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
 
     assert r.exit_code == 1
-    assert "No `steps` section in workflow yaml" in caplog.text
-    assert "Perhaps it is a v0.x file?" in caplog.text
+    error_msg = f"It seems your workflow file at {Path(TEST_DATA_DIR) / 'v0x_workflow.yml'} does not contain a `steps` section. Perhaps you're using a v0.x format?"
+    assert error_msg.lower() in caplog.text.lower()

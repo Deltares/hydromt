@@ -9,9 +9,9 @@ import packaging.version
 import pooch
 
 from hydromt._utils.caching import _copy_to_local
-from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.uris import _is_valid_url
 from hydromt.config import SETTINGS
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "vector_split",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "index": 0 }, "geometry": { "type": "Point", "coordinates": [ -58.66, -34.58 ] } },
+{ "type": "Feature", "properties": { "index": 1 }, "geometry": { "type": "Point", "coordinates": [ -47.91, -15.78 ] } },
+{ "type": "Feature", "properties": { "index": 2 }, "geometry": { "type": "Point", "coordinates": [ -70.66, -33.45 ] } },
+{ "type": "Feature", "properties": { "index": 3 }, "geometry": { "type": "Point", "coordinates": [ -74.08, 4.6 ] } },
+{ "type": "Feature", "properties": { "index": 4 }, "geometry": { "type": "Point", "coordinates": [ -66.86, 10.48 ] } }
+]
+}

@@ -4,10 +4,10 @@ from os.path import isfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
-from hydromt._io.readers import _read_toml, _read_yaml
-from hydromt._io.writers import write_toml, write_yaml
-from hydromt._utils.log import get_hydromt_logger
 from hydromt._utils.path import _make_config_paths_relative
+from hydromt.io.readers import read_toml, read_yaml
+from hydromt.io.writers import write_toml, write_yaml
+from hydromt.log import get_hydromt_logger
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
 
@@ -135,9 +135,9 @@ class ConfigComponent(ModelComponent):
         # Always overwrite config when reading
         match read_path.suffix.lower():
             case ".yaml" | ".yml":
-                self._data = _read_yaml(read_path)
+                self._data = read_yaml(read_path)
             case ".toml":
-                self._data = _read_toml(read_path)
+                self._data = read_toml(read_path)
             case _:
                 raise ValueError(f"Unknown file extension: {read_path.suffix}")
 
@@ -277,9 +277,9 @@ class ConfigComponent(ModelComponent):
         logger.info(f"Creating model config from {prefix} template: {template}")
         match template.suffix.lower():
             case ".yaml" | ".yml":
-                self._data = _read_yaml(template)
+                self._data = read_yaml(template)
             case ".toml":
-                self._data = _read_toml(template)
+                self._data = read_toml(template)
             case _:
                 raise ValueError(f"Unknown file extension: {template.suffix}")
 

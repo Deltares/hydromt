@@ -22,8 +22,8 @@ from hydromt._utils import (
     _shift_dataset_time,
     _single_var_as_array,
 )
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

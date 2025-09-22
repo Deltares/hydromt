@@ -1,17 +1,17 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
 
+from copy import deepcopy
 from typing import ClassVar, List, Optional
 
 import geopandas as gpd
-import pandas as pd
-from pyproj import CRS
 
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.metadata import SourceMetadata
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
+from hydromt.io.readers import open_vector_from_table
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 
@@ -21,7 +21,22 @@ Y_DIM_LABELS = ("y", "latitude", "lat")
 
 
 class GeoDataFrameTableDriver(GeoDataFrameDriver):
-    """Driver for reading in GeoDataFrames from tabular formats."""
+    """
+    Driver for GeoDataFrame from tabular formats: ``geodataframe_table``.
+
+    Supports reading point geometries from csv, excel (xls, xlsx), and parquet files
+    using a combination of the pandas and geopandas libraries.
+
+    Driver **options** include:
+
+    * x_dim: Optional[str], name of the column containing the x coordinate. Not needed
+      if one of the default names is used ('x', 'longitude', 'lon', 'long').
+    * y_dim: Optional[str], name of the column containing the y coordinate. Not needed
+      if one of the default names is used ('y', 'latitude', 'lat').
+    * Any other option supported by the underlying pandas read functions,
+      e.g. `pd.read_csv`, `pd.read_excel`, `pd.read_parquet`.
+
+    """
 
     name: ClassVar[str] = "geodataframe_table"
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
@@ -45,11 +60,15 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
 
         _uri: str = uris[0]
 
-        gdf = _open_vector_from_table(
-            uri=_uri,
-            x_dim=self.options.get("x_dim"),
-            y_dim=self.options.get("y_dim"),
+        options = deepcopy(self.options)
+        x_dim = options.pop("x_dim", None)
+        y_dim = options.pop("y_dim", None)
+        gdf = open_vector_from_table(
+            path=_uri,
+            x_dim=x_dim,
+            y_dim=y_dim,
             crs=metadata.crs,
+            **options,
         )
         if gdf.index.size == 0:
             exec_nodata_strat(
@@ -57,67 +76,3 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
                 strategy=handle_nodata,
             )
         return gdf
-
-
-def _open_vector_from_table(
-    uri: str,
-    x_dim: Optional[str] = None,
-    y_dim: Optional[str] = None,
-    crs: Optional[CRS] = None,
-    **kwargs,
-) -> gpd.GeoDataFrame:
-    r"""Read point geometry files from csv, parquet, xy or excel table files.
-
-    Parameters
-    ----------
-    x_dim, y_dim: str
-        Name of x, y column. By default the x-column header should be one of
-        ['x', 'longitude', 'lon', 'long'], and y-column header one of
-        ['y', 'latitude', 'lat']. For xy files, which don't have a header,
-        the first column is interpreted as x and the second as y column.
-    crs: int, dict, or str, optional
-        Coordinate reference system, accepts EPSG codes (int or str), proj (str or dict)
-        or wkt (str)
-    **kwargs
-        Additional keyword arguments that are passed to the underlying drivers.
-
-    Returns
-    -------
-    gdf: geopandas.GeoDataFrame
-        Parsed and filtered point geometries
-    """
-    ext: str = uri.split(".")[-1].lower()
-    if "index_col" not in kwargs and ext != "parquet":
-        kwargs.update(index_col=0)
-    if ext == "csv":
-        df = pd.read_csv(uri, **kwargs)
-    elif ext == "parquet":
-        df = pd.read_parquet(uri, **kwargs)
-    elif ext in ["xls", "xlsx"]:
-        df = pd.read_excel(uri, engine="openpyxl", **kwargs)
-    else:
-        raise ValueError(
-            f"Extension '{ext}' not compatible with geodataframe table driver"
-        )
-
-    # Make columns case insensitive
-    columns: set[str] = set(map(lambda col: col.lower(), df.columns))
-    columns.update(set(map(lambda col: col.upper(), df.columns)))
-
-    if x_dim is None:
-        for dim in X_DIM_LABELS:
-            if dim in columns:
-                x_dim = dim
-                break
-    if x_dim is None or x_dim not in columns:
-        raise ValueError(f'x dimension "{x_dim}" not found in columns: {columns}.')
-    if y_dim is None:
-        for dim in Y_DIM_LABELS:
-            if dim in df.columns:
-                y_dim = dim
-                break
-    if y_dim is None or y_dim not in columns:
-        raise ValueError(f'y dimension "{y_dim}" not found in columns: {columns}.')
-    points = gpd.points_from_xy(df[x_dim], df[y_dim])
-    gdf = gpd.GeoDataFrame(df.drop(columns=[x_dim, y_dim]), geometry=points, crs=crs)
-    return gdf

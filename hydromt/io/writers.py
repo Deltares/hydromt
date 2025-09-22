@@ -1,11 +1,9 @@
 """Implementations for all of the necessary IO writing for HydroMT."""
 
 import hashlib
-import os
 import uuid
-from os.path import isdir, join
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, cast
 
 import geopandas as gpd
 import numpy as np
@@ -14,18 +12,26 @@ from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
 from hydromt._typing.deferred_file_close import DeferredFileClose
-from hydromt._utils.log import get_hydromt_logger
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 
+__all__ = [
+    "write_nc",
+    "write_region",
+    "write_toml",
+    "write_xy",
+    "write_yaml",
+]
 
-def write_yaml(path: str | Path, data: Dict[str, Any]):
+
+def write_yaml(path: str | Path, data: dict[str, Any]):
     """Write a dictionary to a yaml formatted file."""
     with open(path, "w") as f:
         dump_yaml(data, f)
 
 
-def write_toml(path: str | Path, data: Dict[str, Any]):
+def write_toml(path: str | Path, data: dict[str, Any]):
     """Write a dictionary to a toml formatted file."""
     with open(path, "wb") as f:
         dump_toml(data, f)
@@ -48,75 +54,6 @@ def write_xy(path: str | Path, gdf, fmt="%.4f"):
     xy = np.stack((gdf.geometry.x.values, gdf.geometry.y.values)).T
     with open(path, "w") as f:
         np.savetxt(f, xy, fmt=fmt)
-
-
-def netcdf_writer(
-    obj: Union[xr.Dataset, xr.DataArray],
-    data_root: Union[str, Path],
-    data_name: str,
-    variables: Optional[List[str]] = None,
-    encoder: str = "zlib",
-) -> str:
-    """Utiliy function for writing a xarray dataset/data array to a netcdf file.
-
-    Parameters
-    ----------
-    obj : xr.Dataset | xr.DataArray
-        Dataset.
-    data_root : str | Path
-        root to write the data to.
-    data_name : str
-        filename to write to.
-    variables : Optional[List[str]]
-        list of dataset variables to write, by default None
-
-    Returns
-    -------
-    write_path: str
-        Absolute path to output file
-    """
-    dvars = [obj.name] if isinstance(obj, xr.DataArray) else obj.data_vars
-    if variables is None:
-        encoding = {k: {encoder: True} for k in dvars}
-        write_path = join(data_root, f"{data_name}.nc")
-        obj.to_netcdf(write_path, encoding=encoding)
-    else:  # save per variable
-        if not isdir(join(data_root, data_name)):
-            os.makedirs(join(data_root, data_name))
-        for var in dvars:
-            write_path = join(data_root, data_name, f"{var}.nc")
-            obj[var].to_netcdf(write_path, encoding={var: {encoder: True}})
-        write_path = join(data_root, data_name, "{variable}.nc")
-    return write_path
-
-
-def zarr_writer(
-    obj: Union[xr.Dataset, xr.DataArray],
-    data_root: Union[str, Path],
-    data_name: str,
-    **kwargs,
-) -> str:
-    """Utiliy function for writing a xarray dataset/data array to a netcdf file.
-
-    Parameters
-    ----------
-    obj : xr.Dataset | xr.DataArray
-        Dataset.
-    data_root : str | Path
-        root to write the data to.
-    data_name : str
-        filename to write to.
-
-    Returns
-    -------
-    write_path: str
-        Absolute path to output file
-    """
-    write_path = join(data_root, f"{data_name}.zarr")
-    if isinstance(obj, xr.DataArray):
-        obj = obj.to_dataset()
-    obj.to_zarr(write_path, **kwargs)
-    return write_path
 
 
 def write_nc(

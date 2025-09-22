@@ -10,10 +10,10 @@ import xugrid as xu
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog import DataCatalog
-from hydromt.gis import _gis_utils
+from hydromt.gis import parse_crs
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.log import get_hydromt_logger
 from hydromt.model.processes.region import (
     parse_region_bbox,
     parse_region_geom,
@@ -107,7 +107,7 @@ def create_mesh2d_from_region(
         clip_to_geom = kind == "geom"
 
         if crs is not None:
-            crs = _gis_utils._parse_crs(crs, bbox=geom.total_bounds)
+            crs = parse_crs(crs, bbox=geom.total_bounds)
             geom = geom.to_crs(crs)
 
         return create_mesh2d_from_geom(
@@ -177,7 +177,7 @@ def create_mesh2d_from_mesh(
         bbox = None
         if grid_crs is not None and grid_crs.to_epsg() == 4326:
             bbox = mesh2d.ugrid.grid.bounds
-        crs = _gis_utils._parse_crs(crs, bbox=bbox)
+        crs = parse_crs(crs, bbox=bbox)
     else:
         crs = CRS.from_user_input(4326)
     if grid_crs is not None:  # parse crs

@@ -18,10 +18,10 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
 )
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

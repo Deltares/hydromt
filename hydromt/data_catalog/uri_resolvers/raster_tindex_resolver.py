@@ -13,8 +13,8 @@ from hydromt._typing import (
     Zoom,
     exec_nodata_strat,
 )
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

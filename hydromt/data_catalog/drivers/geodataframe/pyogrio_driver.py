@@ -10,17 +10,20 @@ from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 
 
 class PyogrioDriver(GeoDataFrameDriver):
     """
-    Driver to read GeoDataFrames using the `pyogrio` package.
+    Driver for GeoDataFrame using the pyogrio library: ``pyogrio``.
+
+    Supports reading and writing files supported by the OGR library,
+    including geopackage, shapefile, geojson and flatgeobuf.
 
     Options in this driver are passed to `pyogrio.read_dataframe`.
     """

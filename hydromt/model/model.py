@@ -2,6 +2,7 @@
 """General and basic API for models in HydroMT."""
 
 import os
+import shutil
 import typing
 from abc import ABCMeta
 from inspect import _empty, signature
@@ -12,14 +13,15 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 import geopandas as gdp
 from pyproj import CRS
 
-from hydromt._io.readers import _read_yaml
+from hydromt import log
 from hydromt._typing import StrPath
 from hydromt._utils import _rgetattr
-from hydromt._utils.log import (
-    get_hydromt_logger,
-)
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
+from hydromt.io.readers import read_yaml
+from hydromt.log import (
+    get_hydromt_logger,
+)
 from hydromt.model.components import (
     ModelComponent,
     SpatialModelComponent,
@@ -188,7 +190,7 @@ class Model(object, metaclass=ABCMeta):
     @staticmethod
     def from_yml(path: Path) -> "Model":
         """Construct a model with the components and other init arguments in the yaml file located at `path`."""
-        file_contents = _read_yaml(path)
+        file_contents = read_yaml(path)
         return Model.from_dict(file_contents)
 
     @property
@@ -265,24 +267,27 @@ class Model(object, metaclass=ABCMeta):
         r"""Single method to build a model from scratch based on settings in `steps`.
 
         Methods will be run one by one based on the /order of appearance in `steps`
-        (configuration file). For a list of available functions see :ref:`The model API<model_api>`
-        and :ref:`The plugin documentation<plugin_create>`
+        (configuration file). For a list of available functions see
+        :ref:`The model API<model_api>` and
+        :ref:`The plugin documentation<plugin_create>`.
 
         By default the full model will be written at the end, except if a write step
         is called for somewhere in steps, then this is skipped.
 
-        Note that the \* in the signature signifies that all of the arguments to this function
-        MUST be provided as keyword arguments.
+        Note that the \* in the signature signifies that all of the arguments to this
+        function MUST be provided as keyword arguments.
 
         Parameters
         ----------
         write: bool, optional
             Write complete model after executing all methods in opt, by default True.
         steps: Optional[List[Dict[str, Dict[str, Any]]]]
-            Model build configuration. The configuration can be parsed from a
-            configuration file using :py:meth:`~hydromt.io.readers.configread`.
+            Model build steps. The steps can be parsed from a hydromt workflow/
+            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.
             This is a list of nested dictionary where the first-level keys are the names
-            of the method for a ``Model`` method (e.g. `write`) OR the name of a component followed by the name of the method to run separated by a dot for ``ModelComponent`` method (e.g. `grid.write`).
+            of the method for a ``Model`` method (e.g. `write`) OR the name of a
+            component followed by the name of the method to run separated by a dot for
+            ``ModelComponent`` method (e.g. `grid.write`).
             Any subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
@@ -297,35 +302,36 @@ class Model(object, metaclass=ABCMeta):
                 ]
 
         """
-        steps = steps or []
-        _validate_steps(self, steps)
+        with log.to_file(Path(self.root.path) / "hydromt.log"):
+            steps = steps or []
+            _validate_steps(self, steps)
 
-        for step_dict in steps:
-            step, kwargs = next(iter(step_dict.items()))
-            logger.info(f"build: {step}")
-            # Call the methods.
-            method = _rgetattr(self, step)
-            params = {
-                param: arg.default
-                for param, arg in signature(method).parameters.items()
-                if arg.default != _empty
-            }
-            merged: dict[str, Any] = {}
-            if params:
-                merged.update(**params)
-            if kwargs:
-                merged.update(**kwargs)
-            for k, v in merged.items():
-                logger.info(f"{step}.{k}={v}")
+            for step_dict in steps:
+                step, kwargs = next(iter(step_dict.items()))
+                logger.info(f"build: {step}")
+                # Call the methods.
+                method = _rgetattr(self, step)
+                params = {
+                    param: arg.default
+                    for param, arg in signature(method).parameters.items()
+                    if arg.default != _empty
+                }
+                merged: dict[str, Any] = {}
+                if params:
+                    merged.update(**params)
+                if kwargs:
+                    merged.update(**kwargs)
+                for k, v in merged.items():
+                    logger.info(f"{step}.{k}={v}")
 
-            method(**merged)
+                method(**merged)
 
-        # If there are any write options included in the steps,
-        # we don't need to write the whole model.
-        if write and not self._options_contain_write(steps):
-            self.write()
+            # If there are any write options included in the steps,
+            # we don't need to write the whole model.
+            if write and not self._options_contain_write(steps):
+                self.write()
 
-        self.close()
+            self.close()
 
     def update(
         self,
@@ -354,8 +360,8 @@ class Model(object, metaclass=ABCMeta):
         write: bool, optional
             Write the updated model schematization to disk. By default True.
         steps: Optional[List[Dict[str, Dict[str, Any]]]]
-            Model build configuration. The configuration can be parsed from a
-            configuration file using :py:meth:`~hydromt.io.readers.configread`.
+            Model build steps. The steps can be parsed from a hydromt workflow/
+            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.
             This is a list of nested dictionary where the first-level keys are the names
             of a component followed by the name of the method to run separated by a dot.
             any subsequent pairs will be passed to the method as arguments.
@@ -379,45 +385,61 @@ class Model(object, metaclass=ABCMeta):
         _validate_steps(self, steps)
 
         # read current model
-        if not self.root.is_writing_mode():
-            if model_out is None:
+        with log.to_file(
+            self.root.path / "hydromt.log", append=self.root.is_reading_mode()
+        ):
+            if not self.root.is_writing_mode():
+                if model_out is None:
+                    raise ValueError(
+                        '"model_out" directory required when updating in "read-only" mode.'
+                    )
+                # Copy log file
+                model_out = Path(model_out)
+                if model_out != self.root.path:
+                    model_out.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(
+                        self.root.path / "hydromt.log", model_out / "hydromt.log"
+                    )
+
+                self.read()
+                mode = "w+" if forceful_overwrite else "w"
+                self.root.set(model_out, mode=mode)
+
+        with log.to_file(
+            self.root.path / "hydromt.log", append=self.root.is_reading_mode()
+        ):
+            # check if model has a region
+            if self._region_component_name is not None and self.region is None:
                 raise ValueError(
-                    '"model_out" directory required when updating in "read-only" mode.'
+                    "Model region not found, setup model using `build` first."
                 )
-            self.read()
-            mode = "w+" if forceful_overwrite else "w"
-            self.root.set(Path(model_out), mode=mode)
 
-        # check if model has a region
-        if self._region_component_name is not None and self.region is None:
-            raise ValueError("Model region not found, setup model using `build` first.")
+            # loop over methods from config file
+            for step_dict in steps:
+                step, kwargs = next(iter(step_dict.items()))
+                logger.info(f"update: {step}")
+                # Call the methods.
+                method = _rgetattr(self, step)
+                params = {
+                    param: arg.default
+                    for param, arg in signature(method).parameters.items()
+                    if arg.default != _empty
+                }
+                merged = {}
+                if params:
+                    merged.update(**params)
+                if kwargs:
+                    merged.update(**kwargs)
+                for k, v in merged.items():
+                    logger.info(f"{step}.{k}={v}")
+                method(**merged)
 
-        # loop over methods from config file
-        for step_dict in steps:
-            step, kwargs = next(iter(step_dict.items()))
-            logger.info(f"update: {step}")
-            # Call the methods.
-            method = _rgetattr(self, step)
-            params = {
-                param: arg.default
-                for param, arg in signature(method).parameters.items()
-                if arg.default != _empty
-            }
-            merged = {}
-            if params:
-                merged.update(**params)
-            if kwargs:
-                merged.update(**kwargs)
-            for k, v in merged.items():
-                logger.info(f"{step}.{k}={v}")
-            method(**merged)
+            # If there are any write options included in the steps,
+            # we don't need to write the whole model.
+            if write and not self._options_contain_write(steps):
+                self.write()
 
-        # If there are any write options included in the steps,
-        # we don't need to write the whole model.
-        if write and not self._options_contain_write(steps):
-            self.write()
-
-        self.close()
+            self.close()
 
     def close(self) -> None:
         """Close all components by closing their open files."""
@@ -427,8 +449,6 @@ class Model(object, metaclass=ABCMeta):
         # Finish all deferred file closes
         for c in self.components.values():
             c.finish_write()
-
-        self.root.close()
 
     @hydromt_step
     def write(self, components: Optional[List[str]] = None) -> None:

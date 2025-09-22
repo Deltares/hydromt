@@ -12,8 +12,8 @@ from hydromt._typing import (
     TimeRange,
     Variables,
 )
-from hydromt._utils.log import get_hydromt_logger
 from hydromt.data_catalog.drivers import BaseDriver
+from hydromt.log import get_hydromt_logger
 
 logger = get_hydromt_logger(__name__)
 

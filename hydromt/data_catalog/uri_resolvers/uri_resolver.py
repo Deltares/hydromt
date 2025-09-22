@@ -8,7 +8,7 @@ from pydantic import ConfigDict, Field
 
 from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import FS, Geom, NoDataStrategy, SourceMetadata, TimeRange, Zoom
-from hydromt._utils.log import get_hydromt_logger
+from hydromt.log import get_hydromt_logger
 from hydromt.plugins import PLUGINS
 
 logger = get_hydromt_logger(__name__)

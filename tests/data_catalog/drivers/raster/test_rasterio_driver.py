@@ -11,11 +11,11 @@ import rasterio
 import xarray as xr
 
 from hydromt._compat import HAS_GDAL
-from hydromt._io import _open_mfraster, _open_raster
 from hydromt._typing import SourceMetadata
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.raster.rasterio_driver import RasterioDriver
-from hydromt.gis.raster import full_from_transform
+from hydromt.gis.raster_utils import full_from_transform
+from hydromt.io import open_mfraster, open_raster
 from tests.conftest import TEST_DATA_DIR
 
 
@@ -62,7 +62,7 @@ class TestRasterioDriver:
         )
         assert ds["test_sets_nodata"].raster.nodata == 42
 
-    @patch("hydromt.data_catalog.drivers.raster.rasterio_driver._open_mfraster")
+    @patch("hydromt.data_catalog.drivers.raster.rasterio_driver.open_mfraster")
     def test_sets_mosaic_kwargs(self, fake_open_mfraster: MagicMock):
         uris = ["test", "test2"]
         mosaic_kwargs = {"mykwarg": 0}
@@ -80,24 +80,24 @@ class TestOpenMFRaster:
         return uri_tif
 
     def test_open_raster(self, raster_file: str, rioda: xr.DataArray):
-        assert np.all(_open_raster(raster_file).values == rioda.values)
+        assert np.all(open_raster(raster_file).values == rioda.values)
         with rasterio.open(raster_file, "r") as src:
             assert src.tags()["name"] == "test"
             assert src.crs.to_epsg() == 3857
 
     def test_open_raster_mask_nodata(self, raster_file: str):
-        da_masked = _open_raster(raster_file, mask_nodata=True)
+        da_masked = open_raster(raster_file, mask_nodata=True)
         assert np.any(np.isnan(da_masked.values))
 
     @pytest.fixture
     def raster_file_masked_windowed(self, tmp_path: Path, raster_file: str) -> str:
         uri_tif = str(tmp_path / "test_masked.tif")
-        da_masked = _open_raster(raster_file, mask_nodata=True)
+        da_masked = open_raster(raster_file, mask_nodata=True)
         da_masked.raster.to_raster(uri_tif, nodata=-9999, windowed=True)
         return uri_tif
 
     def test_open_raster_windowed_nodata(self, raster_file_masked_windowed: str):
-        da_windowed = _open_raster(raster_file_masked_windowed)
+        da_windowed = open_raster(raster_file_masked_windowed)
         assert not np.any(np.isnan(da_windowed.values))
 
     @pytest.fixture
@@ -105,14 +105,14 @@ class TestOpenMFRaster:
         self, tmp_path: Path, raster_file_masked_windowed: str
     ) -> str:
         uri_tif = str(tmp_path / "t_dim.tif")
-        da_masked = _open_raster(raster_file_masked_windowed)
+        da_masked = open_raster(raster_file_masked_windowed)
         da_masked.fillna(da_masked.attrs["_FillValue"]).expand_dims("t").round(
             0
         ).astype(np.int32).raster.to_raster(uri_tif, dtype=np.int32)
         return uri_tif
 
     def test_open_raster_t_dim(self, raster_file_t_dim: str):
-        da_windowed = _open_raster(raster_file_t_dim)
+        da_windowed = open_raster(raster_file_t_dim)
         assert da_windowed.dtype == np.int32
 
     @pytest.fixture
@@ -127,7 +127,7 @@ class TestOpenMFRaster:
 
     def test_open_mfraster_mapstack(self, raster_mapstack: Tuple[str, str, xr.Dataset]):
         root, prefix, ds = raster_mapstack
-        ds_in = _open_mfraster(join(root, f"{prefix}*.tif"), mask_nodata=True)
+        ds_in = open_mfraster(join(root, f"{prefix}*.tif"), mask_nodata=True)
         dvars = ds_in.raster.vars
         assert np.all([n in dvars for n in ds.raster.vars])
         assert np.all([np.isnan(ds_in[n].raster.nodata) for n in dvars])
@@ -144,7 +144,7 @@ class TestOpenMFRaster:
 
     def test_open_mfraster(self, raster_mapstack_plus_one: Tuple[str, str, xr.Dataset]):
         root, _, _ = raster_mapstack_plus_one
-        ds_in = _open_mfraster(str(Path(root) / "test_*.tif"), concat=True)
+        ds_in = open_mfraster(str(Path(root) / "test_*.tif"), concat=True)
         assert ds_in[ds_in.raster.vars[0]].ndim == 3
 
     def test_open_mfraster_paths(
@@ -153,7 +153,7 @@ class TestOpenMFRaster:
         root, prefix, ds = raster_mapstack_plus_one
         # with reading with pathlib
         paths = [Path(p) for p in glob.glob(join(root, f"{prefix}*.tif"))]
-        dvars2 = _open_mfraster(paths, mask_nodata=True).raster.vars
+        dvars2 = open_mfraster(paths, mask_nodata=True).raster.vars
         assert np.all([f"{prefix}{n}" in dvars2 for n in ds.raster.vars])
         # test writing to subdir
         new_name: str = "test_open_mfraster_paths"
@@ -162,7 +162,7 @@ class TestOpenMFRaster:
 
     def test_open_mfraster_not_found(self, tmp_path: Path):
         with pytest.raises(OSError, match="no files to open"):
-            _open_mfraster(str(tmp_path / "test*.tiffff"))
+            open_mfraster(str(tmp_path / "test*.tiffff"))
 
     def test_open_mfraster_mergeerror(self, tmp_path: Path):
         da0: xr.DataArray = full_from_transform(
@@ -176,4 +176,4 @@ class TestOpenMFRaster:
         with pytest.raises(
             xr.MergeError, match="Geotransform and/or shape do not match"
         ):
-            _open_mfraster(str(tmp_path / "test*.tif"))
+            open_mfraster(str(tmp_path / "test*.tif"))
