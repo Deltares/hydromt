@@ -14,6 +14,7 @@ from hydromt.data_catalog.data_catalog import DataCatalog
 from hydromt.data_catalog.drivers.preprocessing import round_latlon
 from hydromt.data_catalog.drivers.raster.raster_xarray_driver import (
     RasterDatasetXarrayDriver,
+    RasterXarrayOptions,
 )
 
 
@@ -48,6 +49,7 @@ def test_driver_options():
     dc = DataCatalog().from_dict(data_dict=data_dict)
     read_options = dc.get_source("era5").driver.options
 
+    assert isinstance(read_options, RasterXarrayOptions)
     for option in options:
         assert getattr(read_options, option) == options[option]
 
