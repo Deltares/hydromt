@@ -1,6 +1,6 @@
 """Drivers responsible for reading and writing data."""
 
-from .base_driver import BaseDriver
+from .base_driver import BaseDriver, DriverOptions
 from .dataframe import DataFrameDriver, PandasDriver
 from .dataset import DatasetDriver, DatasetXarrayDriver
 from .geodataframe import GeoDataFrameDriver, GeoDataFrameTableDriver, PyogrioDriver
@@ -15,6 +15,7 @@ from .raster import RasterDatasetDriver, RasterDatasetXarrayDriver, RasterioDriv
 
 __all__ = [
     "BaseDriver",
+    "DriverOptions",
     "DatasetDriver",
     "DatasetXarrayDriver",
     "DataFrameDriver",

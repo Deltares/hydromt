@@ -1,12 +1,12 @@
 """RasterDatasetDriver for zarr data."""
 
-from copy import deepcopy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
 from typing import Callable, ClassVar, List, Optional
 
 import xarray as xr
+from pydantic import Field
 
 from hydromt._typing import (
     Geom,
@@ -18,6 +18,7 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
+from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
@@ -27,6 +28,34 @@ logger: Logger = getLogger(__name__)
 
 _ZARR_EXT = ".zarr"
 _NETCDF_EXT = [".nc", ".netcdf"]
+
+
+class RasterXarrayOptions(DriverOptions):
+    """Options for RasterXarrayDriver."""
+
+    preprocess: Optional[str] = Field(
+        default=None,
+        description="Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details.",
+    )
+    ext_override: Optional[str] = Field(
+        default=None,
+        description="Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension.",
+    )
+
+    def get_preprocessor(self) -> Optional[Callable]:
+        """Get the preprocessor function."""
+        if self.preprocess:
+            preprocessor = PREPROCESSORS.get(self.preprocess)
+            if not preprocessor:
+                raise ValueError(f"unknown preprocessor: '{self.preprocess}'")
+            return preprocessor
+        return None
+
+    def get_ext_override(self, uris: List[str]) -> Optional[str]:
+        """Get the extension override."""
+        if not self.ext_override:
+            return splitext(uris[0])[-1]
+        return self.ext_override
 
 
 class RasterDatasetXarrayDriver(RasterDatasetDriver):
@@ -52,6 +81,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     name = "raster_xarray"
     supports_writing = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
+    options: RasterXarrayOptions = Field(default_factory=RasterXarrayOptions)
 
     def read(
         self,
@@ -64,6 +94,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         chunks: Optional[dict] = None,
         metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        **kwargs,
     ) -> xr.Dataset:
         """
         Read zarr data to an xarray DataSet.
@@ -76,30 +107,25 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 "zoom": zoom,
             },
         )
-        options = deepcopy(self.options)
 
         # Sort out the preprocessor
-        preprocessor: Optional[Callable] = None
-        preprocessor_name: Optional[str] = options.pop("preprocess", None)
-        if preprocessor_name:
-            preprocessor = PREPROCESSORS.get(preprocessor_name)
-            if not preprocessor:
-                raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
+        preprocessor: Optional[Callable] = self.options.get_preprocessor()
 
         # Check for the override flag
-        ext_override: Optional[str] = options.pop("ext_override", None)
-        if ext_override is not None:
-            first_ext: str = ext_override
-        else:
-            first_ext: str = splitext(uris[0])[-1]
+        first_ext = self.options.get_ext_override(uris)
 
         # When is zarr, open like a zarr archive
         if first_ext == _ZARR_EXT:
-            opn: Callable = partial(xr.open_zarr, **options)
+            opn: Callable = partial(
+                xr.open_zarr,
+                **self.options.to_backend_kwargs(
+                    exclude={"preprocess", "ext_override"}
+                ),
+            )
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
-                if ext != first_ext and not ext_override:
+                if ext != first_ext and not self.options.ext_override:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
                 else:
                     datasets.append(
@@ -117,9 +143,13 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                     logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
                 else:
                     filtered_uris.append(_uri)
-
             ds: xr.Dataset = xr.open_mfdataset(
-                filtered_uris, decode_coords="all", preprocess=preprocessor, **options
+                filtered_uris,
+                decode_coords="all",
+                preprocess=preprocessor,
+                **self.options.to_backend_kwargs(
+                    exclude={"preprocess", "ext_override"}
+                ),
             )
         else:
             raise ValueError(

@@ -2,7 +2,7 @@
 
 from abc import ABC
 from logging import Logger, getLogger
-from typing import Any, ClassVar, Dict
+from typing import ClassVar
 
 from fsspec.implementations.local import LocalFileSystem
 from pydantic import (
@@ -17,6 +17,22 @@ from hydromt.plugins import PLUGINS
 logger: Logger = getLogger(__name__)
 
 
+class DriverOptions(AbstractBaseModel, ABC):
+    """Options for the driver."""
+
+    # allow arbitrary kwargs, usually passed to some `open_dataset` function()
+    model_config = ConfigDict(extra="allow")
+
+    def to_backend_kwargs(self, exclude: set[str] | None = None) -> dict:
+        """Return dict of kwargs excluding reserved/internal keys."""
+        exclude = exclude or set()
+        return {
+            k: v
+            for k, v in self.model_dump(exclude_unset=True).items()
+            if k not in exclude
+        }
+
+
 class BaseDriver(AbstractBaseModel, ABC):
     """Base class for different drivers.
 
@@ -25,7 +41,7 @@ class BaseDriver(AbstractBaseModel, ABC):
 
     supports_writing: ClassVar[bool] = False
     filesystem: FS = Field(default_factory=LocalFileSystem)
-    options: Dict[str, Any] = Field(default_factory=dict)
+    options: DriverOptions = Field(default_factory=DriverOptions)
 
     model_config: ConfigDict = ConfigDict(extra="forbid")
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = set()
