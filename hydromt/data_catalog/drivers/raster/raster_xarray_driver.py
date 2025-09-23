@@ -118,9 +118,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         if first_ext == _ZARR_EXT:
             opn: Callable = partial(
                 xr.open_zarr,
-                **self.options.to_backend_kwargs(
-                    exclude={"preprocess", "ext_override"}
-                ),
+                **self.options.to_dict(exclude={"preprocess", "ext_override"}),
             )
             datasets = []
             for _uri in uris:
@@ -147,9 +145,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,
-                **self.options.to_backend_kwargs(
-                    exclude={"preprocess", "ext_override"}
-                ),
+                **self.options.to_dict(exclude={"preprocess", "ext_override"}),
             )
         else:
             raise ValueError(

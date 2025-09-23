@@ -23,14 +23,9 @@ class DriverOptions(AbstractBaseModel, ABC):
     # allow arbitrary kwargs, usually passed to some `open_dataset` function()
     model_config = ConfigDict(extra="allow")
 
-    def to_backend_kwargs(self, exclude: set[str] | None = None) -> dict:
+    def to_dict(self, exclude: set[str] | None = None) -> dict:
         """Return dict of kwargs excluding reserved/internal keys."""
-        exclude = exclude or set()
-        return {
-            k: v
-            for k, v in self.model_dump(exclude_unset=True).items()
-            if k not in exclude
-        }
+        return self.model_dump(exclude=exclude, exclude_unset=True)
 
 
 class BaseDriver(AbstractBaseModel, ABC):
