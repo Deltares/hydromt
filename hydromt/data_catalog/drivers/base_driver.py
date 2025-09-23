@@ -48,7 +48,6 @@ class DriverOptions(BaseModel):
         """Return dict of kwargs excluding reserved/internal keys, and including the extra kwargs."""
         return self.model_dump(exclude=exclude, exclude_unset=True)
 
-    # TODO better name?
     def get_kwargs(self) -> dict:
         """Return attributes set that are not explicitly declared fields."""
         return self.model_dump(
