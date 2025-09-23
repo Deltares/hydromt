@@ -5,10 +5,7 @@ from logging import Logger, getLogger
 from typing import ClassVar
 
 from fsspec.implementations.local import LocalFileSystem
-from pydantic import (
-    ConfigDict,
-    Field,
-)
+from pydantic import BaseModel, ConfigDict, Field
 
 from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import FS
@@ -17,7 +14,7 @@ from hydromt.plugins import PLUGINS
 logger: Logger = getLogger(__name__)
 
 
-class DriverOptions(AbstractBaseModel, ABC):
+class DriverOptions(BaseModel):
     """Options for the driver."""
 
     # allow arbitrary kwargs, usually passed to some `open_dataset` function()
