@@ -7,13 +7,13 @@ from typing import ClassVar, List, Optional
 import pandas as pd
 
 from hydromt._typing import (
-    NoDataStrategy,
     SourceMetadata,
     StrPath,
     TimeRange,
     Variables,
 )
 from hydromt.data_catalog.drivers import BaseDriver
+from hydromt.error import NoDataStrategy
 
 logger: Logger = getLogger(__name__)
 

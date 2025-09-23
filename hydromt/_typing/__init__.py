@@ -2,11 +2,6 @@
 
 from .crs import CRS
 from .deferred_file_close import DeferredFileClose
-from .error import (
-    NoDataException,
-    NoDataStrategy,
-    exec_nodata_strat,
-)
 from .fsspec_types import FS
 from .metadata import SourceMetadata
 from .model_mode import ModelMode
@@ -56,7 +51,6 @@ __all__ = [
     "ModelMode",
     "NoDataStrategy",
     "NoDataException",
-    "exec_nodata_strat",
     "Variables",
     "Geom",
     "GpdShapeGeom",
