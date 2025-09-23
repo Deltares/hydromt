@@ -14,6 +14,11 @@ Base
 
    BaseDriver
 
+.. autosummary::
+   :toctree: ../_generated
+
+   DriverOptions
+
 RasterDataset
 -------------
 
@@ -34,6 +39,11 @@ RasterDatasetXarrayDriver
    RasterDatasetXarrayDriver.read
    RasterDatasetXarrayDriver.write
 
+.. autosummary::
+   :toctree: ../_generated
+
+   RasterXarrayOptions
+
 RasterioDriver
 ^^^^^^^^^^^^^^
 
@@ -43,6 +53,11 @@ RasterioDriver
    RasterioDriver
    RasterioDriver.read
    RasterioDriver.write
+
+.. autosummary::
+   :toctree: ../_generated
+
+   RasterioOptions
 
 GeoDataFrame
 ------------

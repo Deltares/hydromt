@@ -1,17 +1,31 @@
 """Drivers responsible for reading and writing data."""
 
-from .base_driver import BaseDriver, DriverOptions
-from .dataframe import DataFrameDriver, PandasDriver
-from .dataset import DatasetDriver, DatasetXarrayDriver
-from .geodataframe import GeoDataFrameDriver, GeoDataFrameTableDriver, PyogrioDriver
-from .geodataset import GeoDatasetDriver, GeoDatasetVectorDriver, GeoDatasetXarrayDriver
-from .preprocessing import (
+from hydromt.data_catalog.drivers.base_driver import BaseDriver, DriverOptions
+from hydromt.data_catalog.drivers.dataframe import DataFrameDriver, PandasDriver
+from hydromt.data_catalog.drivers.dataset import DatasetDriver, DatasetXarrayDriver
+from hydromt.data_catalog.drivers.geodataframe import (
+    GeoDataFrameDriver,
+    GeoDataFrameTableDriver,
+    PyogrioDriver,
+)
+from hydromt.data_catalog.drivers.geodataset import (
+    GeoDatasetDriver,
+    GeoDatasetVectorDriver,
+    GeoDatasetXarrayDriver,
+)
+from hydromt.data_catalog.drivers.preprocessing import (
     harmonise_dims,
     remove_duplicates,
     round_latlon,
     to_datetimeindex,
 )
-from .raster import RasterDatasetDriver, RasterDatasetXarrayDriver, RasterioDriver
+from hydromt.data_catalog.drivers.raster import (
+    RasterDatasetDriver,
+    RasterDatasetXarrayDriver,
+    RasterioDriver,
+    RasterioOptions,
+    RasterXarrayOptions,
+)
 
 __all__ = [
     "BaseDriver",
@@ -28,7 +42,9 @@ __all__ = [
     "PyogrioDriver",
     "RasterDatasetDriver",
     "RasterDatasetXarrayDriver",
+    "RasterXarrayOptions",
     "RasterioDriver",
+    "RasterioOptions",
     "harmonise_dims",
     "remove_duplicates",
     "round_latlon",

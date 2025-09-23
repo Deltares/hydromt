@@ -39,26 +39,20 @@ class RasterioOptions(DriverOptions):
 
     _kwargs_for_open: ClassVar[set[str]] = {"mosaic_kwargs"}
 
-    mosaic: bool = Field(
-        default=False,
-        description="If True and multiple uris are given, will mosaic the datasets together using `rasterio.merge.merge`. Default is False.",
-    )
-    mosaic_kwargs: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional keyword arguments to pass to `rasterio.merge.merge`.",
-    )
-    cache: bool = Field(
-        default=False,
-        description="If True and reading from VRT files, will cache the tiles locally to speed up reading. Default is False.",
-    )
-    cache_root: str = Field(
-        default=str(SETTINGS.cache_root),
-        description="Root directory for caching. Default is taken from `hydromt.config.SETTINGS.cache_root`.",
-    )
-    cache_dir: Optional[str] = Field(
-        default=None,
-        description="Subdirectory for caching. Default is the stem of the first uri without extension.",
-    )
+    mosaic: bool = False
+    """If True and multiple uris are given, will mosaic the datasets together using `rasterio.merge.merge`. Default is False."""
+
+    mosaic_kwargs: dict[str, Any] = {}
+    """Additional keyword arguments to pass to `rasterio.merge.merge`."""
+
+    cache: bool = False
+    """If True and reading from VRT files, will cache the tiles locally to speed up reading. Default is False."""
+
+    cache_root: str = str(SETTINGS.cache_root)
+    """Root directory for caching. Default is taken from `hydromt.config.SETTINGS.cache_root`."""
+
+    cache_dir: Optional[str] = None
+    """Subdirectory for caching. Default is the stem of the first uri without extension."""
 
     def get_cache_path(self, uris: List[str]) -> Path:
         """Get the cache path based on the options and uris."""

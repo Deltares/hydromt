@@ -33,14 +33,11 @@ _NETCDF_EXT = [".nc", ".netcdf"]
 class RasterXarrayOptions(DriverOptions):
     """Options for RasterXarrayDriver."""
 
-    preprocess: Optional[str] = Field(
-        default=None,
-        description="Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details.",
-    )
-    ext_override: Optional[str] = Field(
-        default=None,
-        description="Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension.",
-    )
+    preprocess: Optional[str] = None
+    """Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
+
+    ext_override: Optional[str] = None
+    """Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension."""
 
     def get_preprocessor(self) -> Optional[Callable]:
         """Get the preprocessor function."""
