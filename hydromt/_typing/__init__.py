@@ -49,8 +49,6 @@ __all__ = [
     "TotalBounds",
     "XArrayDict",
     "ModelMode",
-    "NoDataStrategy",
-    "NoDataException",
     "Variables",
     "Geom",
     "GpdShapeGeom",
