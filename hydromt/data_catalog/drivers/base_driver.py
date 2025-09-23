@@ -2,7 +2,7 @@
 
 from abc import ABC
 from logging import Logger, getLogger
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from fsspec.implementations.local import LocalFileSystem
 from pydantic import BaseModel, ConfigDict, Field
@@ -20,9 +20,14 @@ class DriverOptions(BaseModel):
     # allow arbitrary kwargs, usually passed to some `open_dataset` function()
     model_config = ConfigDict(extra="allow")
 
-    def to_dict(self, exclude: set[str] | None = None) -> dict:
-        """Return dict of kwargs excluding reserved/internal keys."""
-        return self.model_dump(exclude=exclude, exclude_unset=True)
+    def to_dict(
+        self, exclude: set[str] | None = None, extra: dict[str, Any] | None = None
+    ) -> dict:
+        """Return dict of kwargs excluding reserved/internal keys, and including the extra kwargs."""
+        true_options = self.model_dump(exclude=exclude, exclude_unset=True)
+        if extra:
+            true_options.update(extra)
+        return true_options
 
 
 class BaseDriver(AbstractBaseModel, ABC):

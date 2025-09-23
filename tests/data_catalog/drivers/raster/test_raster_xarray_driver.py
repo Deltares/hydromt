@@ -10,10 +10,46 @@ import xarray as xr
 from pytest_mock import MockerFixture
 from xarray import open_mfdataset
 
+from hydromt.data_catalog.data_catalog import DataCatalog
 from hydromt.data_catalog.drivers.preprocessing import round_latlon
 from hydromt.data_catalog.drivers.raster.raster_xarray_driver import (
     RasterDatasetXarrayDriver,
 )
+
+
+def test_driver_options():
+    """Test that new driver options are correctly parsed from a dictionary.
+
+    I used the contents of tests/data/test_sources1.yaml here to create the dict.
+    """
+    options = {
+        "chunks": {
+            "time": 100,
+            "longitude": 120,
+            "latitude": 125,
+        },
+        "concat_dim": "time",
+        "decode_times": True,
+        "combine": "by_coords",
+        "parallel": True,
+    }
+
+    data_dict = {
+        "era5": {
+            "data_type": "RasterDataset",
+            "uri": (Path.home() / ".hydromt/artifact_data/latest/era5.nc").as_posix(),
+            "driver": {
+                "name": "raster_xarray",
+                "options": options,
+            },
+        },
+    }
+
+    dc = DataCatalog().from_dict(data_dict=data_dict)
+    read_options = dc.get_source("era5").driver.options
+
+    for option in options:
+        assert getattr(read_options, option) == options[option]
 
 
 class TestRasterXarrayDriver:
