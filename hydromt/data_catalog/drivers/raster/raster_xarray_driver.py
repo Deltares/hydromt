@@ -44,12 +44,12 @@ class RasterXarrayOptions(DriverOptions):
 
     def get_preprocessor(self) -> Optional[Callable]:
         """Get the preprocessor function."""
-        if self.preprocess:
-            preprocessor = PREPROCESSORS.get(self.preprocess)
-            if not preprocessor:
-                raise ValueError(f"unknown preprocessor: '{self.preprocess}'")
-            return preprocessor
-        return None
+        if self.preprocess is None:
+            return None
+        preprocessor = PREPROCESSORS.get(self.preprocess)
+        if not preprocessor:
+            raise ValueError(f"unknown preprocessor: '{self.preprocess}'")
+        return preprocessor
 
     def get_ext_override(self, uris: List[str]) -> Optional[str]:
         """Get the extension override."""
@@ -118,7 +118,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         if first_ext == _ZARR_EXT:
             opn: Callable = partial(
                 xr.open_zarr,
-                **self.options.to_dict(exclude={"preprocess", "ext_override"}),
+                **self.options.get_kwargs(),
             )
             datasets = []
             for _uri in uris:
@@ -145,7 +145,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,
-                **self.options.to_dict(exclude={"preprocess", "ext_override"}),
+                **self.options.get_kwargs(),
             )
         else:
             raise ValueError(
