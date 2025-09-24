@@ -20,7 +20,10 @@ logger: Logger = getLogger(__name__)
 
 class PyogrioDriver(GeoDataFrameDriver):
     """
-    Driver to read GeoDataFrames using the `pyogrio` package.
+    Driver for GeoDataFrame using the pyogrio library: ``pyogrio``.
+
+    Supports reading and writing files supported by the OGR library,
+    including geopackage, shapefile, geojson and flatgeobuf.
 
     Options in this driver are passed to `pyogrio.read_dataframe`.
     """

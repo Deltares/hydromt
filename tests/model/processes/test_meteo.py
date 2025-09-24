@@ -5,7 +5,7 @@ import pytest
 import xarray as xr
 
 from hydromt._compat import HAS_PYET
-from hydromt.gis.raster import full_from_transform
+from hydromt.gis.raster_utils import full_from_transform
 from hydromt.model.processes.meteo import (
     PET_METHODS,
     pet,

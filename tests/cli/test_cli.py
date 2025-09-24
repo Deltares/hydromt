@@ -442,8 +442,8 @@ def test_cli_check_v0x_workflow(caplog):
         "-vv",
     ]
     # silence the ruff warning, we'll check the logs for error msgs
-    with pytest.raises(ValueError):  # noqa : PT011
+    with pytest.raises(RuntimeError):  # noqa : PT011
         _ = CliRunner().invoke(hydromt_cli, cmd, catch_exceptions=False)
 
-    assert "No `steps` section" in caplog.text
-    assert "Perhaps it is a v0.x file?" in caplog.text
+    assert "does not contain a `steps` section" in caplog.text
+    assert "using a v0.x format?" in caplog.text

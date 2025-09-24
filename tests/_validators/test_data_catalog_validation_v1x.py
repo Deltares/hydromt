@@ -5,13 +5,13 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
 from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1Item,
     DataCatalogV1MetaData,
     DataCatalogV1Validator,
 )
+from hydromt.io.readers import _yml_from_uri_or_path
 from tests.conftest import TEST_DATA_DIR
 
 

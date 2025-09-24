@@ -10,8 +10,8 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt._io.readers import open_ncs
-from hydromt._io.writers import write_nc
+from hydromt.io.readers import open_ncs
+from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step

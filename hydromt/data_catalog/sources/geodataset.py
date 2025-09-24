@@ -27,7 +27,7 @@ from hydromt._typing.type_def import GeomBuffer, Predicate
 from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.gis._gis_utils import _parse_geom_bbox_buffer
+from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)
 

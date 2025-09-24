@@ -11,8 +11,6 @@ from numpy.typing import NDArray
 from scipy import stats
 
 __all__ = [
-    "eva_block_maxima",
-    "eva_peaks_over_threshold",
     "eva",
     "get_peaks",
     "get_return_value",
@@ -93,123 +91,6 @@ def eva(
     da_rps = get_return_value(da_params, rps=rps)
     # combine data
     return xr.merge([da_peaks, da_params, da_rps])
-
-
-# In theory could be removed because redundant with eva
-def eva_block_maxima(
-    da: xr.DataArray,
-    period: str = _DEFAULT_PERIOD_STR,
-    min_dist: int = 0,
-    min_sample_size: int = 0,
-    distribution: Optional[str] = None,
-    rps: NDArray[np.int_] = _RPS,
-    criterium: str = "AIC",
-) -> xr.Dataset:
-    """Return EVA based on block maxima.
-
-    Extreme valua analysis based on block maxima. The method selects the peaks,
-    fits a distribution and calculates return values for provided return periods.
-
-    Parameters
-    ----------
-    da : xr.DataArray
-        Timeseries data, must have a regular spaced 'time' dimension.
-    period : str, optional
-        Period string, by default "365.25D". See pandas.Timedelta for options.
-    min_dist : int, optional
-        Minimum distance between peaks measured in time steps, by default 0
-    min_sample_size : int, optional
-        Minimum number of finite values in a valid block, by default 0. Peaks of
-        invalid blocks are set to NaN.
-    distribution : str, optional
-        Short name of distribution. If None (default) the optimal block maxima
-        distribution ("gumb" or "gev") is selected based on `criterium`.
-    rps : np.ndarray, optional
-        Array of return periods, by default [2, 5, 10, 25, 50, 100, 250, 500]
-    criterium: {'AIC', 'AICc', 'BIC'}
-        Selection criterium, by default "AIC"
-
-    Returns
-    -------
-    xr.Dataset
-        Dataset with peaks timeseries, distribution name and parameters
-        and return values.
-    """
-    da_bm = get_peaks(
-        da,
-        ev_type="BM",
-        min_dist=min_dist,
-        min_sample_size=min_sample_size,
-        period=period,
-    )
-    # fit distribution using lmom
-    da_params = fit_extremes(
-        da_bm, ev_type="BM", distribution=distribution, criterium=criterium
-    )
-    # get return values
-    da_rps = get_return_value(da_params, rps=rps)
-    # combine data
-    return xr.merge([da_bm, da_params, da_rps])
-
-
-# In theory could be removed because redundant with eva
-def eva_peaks_over_threshold(
-    da: xr.DataArray,
-    qthresh: float = 0.9,
-    min_dist: int = 0,
-    min_sample_size: int = 0,
-    period: str = _DEFAULT_PERIOD_STR,
-    distribution: Optional[str] = None,
-    rps: NDArray[np.int_] = _RPS,
-    criterium: str = "AIC",
-) -> xr.Dataset:
-    """Return EVA based on peaks over threshold.
-
-    Extreme valua analysis based on peaks over threshold. The method selects the
-    peaks, fits a distribution and calculates return values for provided return
-    periods.
-
-    Parameters
-    ----------
-    da : xr.DataArray
-        Timeseries data, must have a regular spaced 'time' dimension.
-    qthresh : float, optional
-        Quantile threshold used with peaks over threshold method, by default 0.9
-    min_dist : int, optional
-        Minimum distance between peaks measured in time steps, by default 0
-    min_sample_size : int, optional
-        Minumimum number of finite values in a valid block, by default 0. Peaks of
-    period : str, optional
-        Period string, by default "365.25D". See pandas.Timedelta for options.
-    distribution : str, optional
-        Short name of distribution. If None (default) the optimal block maxima
-        distribution ("exp" or "gpd") is selected based on `criterium`.
-    rps : np.ndarray, optional
-        Array of return periods, by default [1.5, 2, 5, 10, 20, 50, 100, 200, 500]
-    criterium: {'AIC', 'AICc', 'BIC'}
-        distrition selection criterium, by default "AIC"
-
-    Returns
-    -------
-    xr.Dataset
-        Dataset with peaks timeseries, distribution name and parameters
-        and return values.
-    """
-    da_bm = get_peaks(
-        da,
-        ev_type="POT",
-        min_dist=min_dist,
-        period=period,
-        qthresh=qthresh,
-        min_sample_size=min_sample_size,
-    )
-    # fit distribution using lmom
-    da_params = fit_extremes(
-        da_bm, ev_type="POT", distribution=distribution, criterium=criterium
-    )
-    # get return values
-    da_rps = get_return_value(da_params, rps=rps)
-    return xr.merge([da_bm, da_params, da_rps])
 
 
 def get_peaks(

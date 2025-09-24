@@ -13,11 +13,11 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 import geopandas as gdp
 from pyproj import CRS
 
-from hydromt._io.readers import _read_yaml
 from hydromt._typing import StrPath
 from hydromt._utils import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
 from hydromt.data_catalog import DataCatalog
+from hydromt.io.readers import read_yaml
 from hydromt.model.components import (
     ModelComponent,
     SpatialModelComponent,
@@ -187,7 +187,7 @@ class Model(object, metaclass=ABCMeta):
     @staticmethod
     def from_yml(path: Path) -> "Model":
         """Construct a model with the components and other init arguments in the yaml file located at `path`."""
-        file_contents = _read_yaml(path)
+        file_contents = read_yaml(path)
         return Model.from_dict(file_contents)
 
     @property
@@ -215,24 +215,27 @@ class Model(object, metaclass=ABCMeta):
         r"""Single method to build a model from scratch based on settings in `steps`.
 
         Methods will be run one by one based on the /order of appearance in `steps`
-        (configuration file). For a list of available functions see :ref:`The model API<model_api>`
-        and :ref:`The plugin documentation<plugin_create>`
+        (configuration file). For a list of available functions see
+        :ref:`The model API<model_api>` and
+        :ref:`The plugin documentation<plugin_create>`.
 
         By default the full model will be written at the end, except if a write step
         is called for somewhere in steps, then this is skipped.
 
-        Note that the \* in the signature signifies that all of the arguments to this function
-        MUST be provided as keyword arguments.
+        Note that the \* in the signature signifies that all of the arguments to this
+        function MUST be provided as keyword arguments.
 
         Parameters
         ----------
         write: bool, optional
             Write complete model after executing all methods in opt, by default True.
         steps: Optional[List[Dict[str, Dict[str, Any]]]]
-            Model build configuration. The configuration can be parsed from a
-            configuration file using :py:meth:`~hydromt.io.readers.configread`.
+            Model build steps. The steps can be parsed from a hydromt workflow/
+            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.
             This is a list of nested dictionary where the first-level keys are the names
-            of the method for a ``Model`` method (e.g. `write`) OR the name of a component followed by the name of the method to run separated by a dot for ``ModelComponent`` method (e.g. `grid.write`).
+            of the method for a ``Model`` method (e.g. `write`) OR the name of a
+            component followed by the name of the method to run separated by a dot for
+            ``ModelComponent`` method (e.g. `grid.write`).
             Any subsequent pairs will be passed to the method as arguments.
 
             .. code-block:: text
@@ -304,8 +307,8 @@ class Model(object, metaclass=ABCMeta):
         write: bool, optional
             Write the updated model schematization to disk. By default True.
         steps: Optional[List[Dict[str, Dict[str, Any]]]]
-            Model build configuration. The configuration can be parsed from a
-            configuration file using :py:meth:`~hydromt.io.readers.configread`.
+            Model build steps. The steps can be parsed from a hydromt workflow/
+            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.
             This is a list of nested dictionary where the first-level keys are the names
             of a component followed by the name of the method to run separated by a dot.
             any subsequent pairs will be passed to the method as arguments.

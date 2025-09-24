@@ -15,7 +15,7 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataException, exec_nodata_strat
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
-from hydromt.gis._vector_utils import _filter_gdf
+from hydromt.gis.vector_utils import _filter_gdf
 
 logger: Logger = getLogger(__name__)
 

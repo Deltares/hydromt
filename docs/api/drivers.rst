@@ -143,3 +143,13 @@ DatasetXarrayDriver
    DatasetXarrayDriver
    DatasetXarrayDriver.read
    DatasetXarrayDriver.write
+
+Preprocessing
+-------------
+.. autosummary::
+   :toctree: ../_generated
+
+   preprocessing.harmonise_dims
+   preprocessing.remove_duplicates
+   preprocessing.round_latlon
+   preprocessing.to_datetimeindex

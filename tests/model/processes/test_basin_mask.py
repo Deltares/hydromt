@@ -7,7 +7,7 @@ import geopandas as gpd
 import numpy as np
 import pytest
 
-from hydromt.gis import raster
+from hydromt.gis import raster_utils
 from hydromt.model.processes.basin_mask import (
     _check_size,
     get_basin_geometry,
@@ -215,7 +215,7 @@ def test_interbasin_requires_bbox_or_geom(basin_files):
 
 
 def test_check_size(caplog):
-    test_raster = raster.full_from_transform(
+    test_raster = raster_utils.full_from_transform(
         transform=[0.5, 0.0, 3.0, 0.0, -0.5, -9.0],
         shape=(13000, 13000),
         nodata=-1,

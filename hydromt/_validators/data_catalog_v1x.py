@@ -20,7 +20,6 @@ from pyproj import CRS
 from pyproj.exceptions import CRSError
 
 from hydromt import __version__ as HYDROMT_VERSION
-from hydromt._io.readers import _yml_from_uri_or_path
 from hydromt._typing import Bbox, Number, TimeRange
 from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Item,
@@ -28,6 +27,7 @@ from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0MetaData,
     DataCatalogV0Validator,
 )
+from hydromt.io.readers import _yml_from_uri_or_path
 
 DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
     "RasterDataset": {

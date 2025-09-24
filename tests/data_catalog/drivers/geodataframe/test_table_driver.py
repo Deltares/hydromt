@@ -67,7 +67,7 @@ class TestGeoDataFrameTableDriver:
 
     def test_unknown_extension(self):
         driver = GeoDataFrameTableDriver()
-        with pytest.raises(ValueError, match="not compatible"):
+        with pytest.raises(IOError, match="extension zzz unknown"):
             driver.read(uris=["weird_ext.zzz"])
 
     def test_header_case_insensitive(
