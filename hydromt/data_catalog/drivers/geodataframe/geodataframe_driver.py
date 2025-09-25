@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import Any
 
 import geopandas as gpd
 
@@ -19,11 +19,14 @@ class GeoDataFrameDriver(BaseDriver, ABC):
     @abstractmethod
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
+        kwargs_for_open: dict[str, Any] | None = None,
+        metadata: SourceMetadata | None = None,
+        mask: Any = None,
+        predicate: str = "intersects",
+        variables: str | list[str] | None = None,
     ) -> gpd.GeoDataFrame:
         """Read in any compatible data source to a geopandas `GeoDataFrame`."""
         ...

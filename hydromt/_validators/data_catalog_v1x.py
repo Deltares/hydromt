@@ -27,6 +27,7 @@ from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0MetaData,
     DataCatalogV0Validator,
 )
+from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.io.readers import _yml_from_uri_or_path
 
 DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
@@ -87,7 +88,7 @@ class DataCatalogV1UriResolverItem(BaseModel):
 
 class DataCatalogV1DriverItem(BaseModel):
     name: str
-    options: Dict[str, Any] | None = None
+    options: DriverOptions | None = None
 
 
 class SourceVariant(BaseModel):

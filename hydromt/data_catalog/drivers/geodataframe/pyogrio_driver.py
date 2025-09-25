@@ -2,7 +2,7 @@
 
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import ClassVar, List, Optional, Union
+from typing import Any, ClassVar
 
 import geopandas as gpd
 import pandas as pd
@@ -11,6 +11,7 @@ from pyproj import CRS
 
 from hydromt._typing import Bbox, Geom, StrPath
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
+from hydromt._typing.metadata import SourceMetadata
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -28,18 +29,20 @@ class PyogrioDriver(GeoDataFrameDriver):
     Options in this driver are passed to `pyogrio.read_dataframe`.
     """
 
-    name = "pyogrio"
-    supports_writing = True
+    name: ClassVar[str] = "pyogrio"
+    supports_writing: ClassVar[bool] = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".gpkg", ".shp", ".geojson", ".fgb"}
 
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        mask: Optional[Geom] = None,
-        variables: Optional[List[str]] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
+        kwargs_for_open: dict[str, Any] | None = None,
+        mask: Any = None,
+        variables: str | list[str] | None = None,
+        metadata: SourceMetadata | None = None,
+        predicate: str = "intersects",
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
@@ -50,6 +53,8 @@ class PyogrioDriver(GeoDataFrameDriver):
         are only present in the method's signature for compatibility with other
         functions.
         """
+        kwargs_for_open = kwargs_for_open or {}
+        kwargs = self.options.get_kwargs() | kwargs_for_open
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
@@ -60,11 +65,11 @@ class PyogrioDriver(GeoDataFrameDriver):
         else:
             _uri = uris[0]
             if mask is not None:
-                bbox = _bbox_from_file_and_mask(_uri, mask=mask)
+                bbox = _bbox_from_file_and_mask(_uri, mask=mask, **kwargs)
             else:
                 bbox = None
-            gdf: Union[pd.DataFrame, gpd.GeoDataFrame] = read_dataframe(
-                _uri, bbox=bbox, columns=variables, **self.options
+            gdf: pd.DataFrame | gpd.GeoDataFrame = read_dataframe(
+                _uri, bbox=bbox, columns=variables, **kwargs
             )
         if not isinstance(gdf, gpd.GeoDataFrame):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
@@ -100,7 +105,8 @@ class PyogrioDriver(GeoDataFrameDriver):
 def _bbox_from_file_and_mask(
     uri: str,
     mask: Geom,
-) -> Optional[Bbox]:
+    **kwargs,
+) -> Bbox | None:
     """Create a bbox from the file metadata and mask given.
 
     Pyogrio's mask or bbox arguments require a mask or bbox in the same CRS as the data.
@@ -115,7 +121,7 @@ def _bbox_from_file_and_mask(
         mask to filter the data while reading.
     """
     source_crs = None
-    if source_crs_str := read_info(uri).get("crs"):
+    if source_crs_str := read_info(uri, **kwargs).get("crs"):
         source_crs = CRS.from_user_input(source_crs_str)
 
     if not source_crs:

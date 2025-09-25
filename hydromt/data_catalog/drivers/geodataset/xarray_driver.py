@@ -1,10 +1,9 @@
 """GeoDatasetDriver for zarr data."""
 
-from copy import copy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import Callable, ClassVar, List, Optional
+from typing import Any, Callable, ClassVar
 
 import xarray as xr
 
@@ -18,7 +17,6 @@ from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import Predicate
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
-from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
 
 logger: Logger = getLogger(__name__)
 
@@ -49,14 +47,15 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        mask: Optional[Geom] = None,
-        metadata: Optional[SourceMetadata] = None,
-        predicate: Predicate = "intersects",
-        time_range: Optional[TimeRange] = None,
-        variables: Optional[List[str]] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        kwargs_for_open: dict[str, Any] | None = None,
+        mask: Geom | None = None,
+        metadata: SourceMetadata | None = None,
+        predicate: Predicate = "intersects",
+        time_range: TimeRange | None = None,
+        variables: str | list[str] | None = None,
     ) -> xr.Dataset:
         """
         Read zarr data to an xarray DataSet.
@@ -72,17 +71,13 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 "predicate": predicate,
             },
         )
-        options = copy(self.options)
-        preprocessor: Optional[Callable] = None
-        preprocessor_name: Optional[str] = options.pop("preprocess", None)
-        if preprocessor_name:
-            preprocessor = PREPROCESSORS.get(preprocessor_name)
-            if not preprocessor:
-                raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
 
+        preprocessor = self.options.get_preprocessor()
         first_ext = splitext(uris[0])[-1]
+        kwargs_for_open = kwargs_for_open or {}
+        kwargs = self.options.get_kwargs() | kwargs_for_open
         if first_ext == _ZARR_EXT:
-            opn: Callable = partial(xr.open_zarr, **options)
+            opn: Callable = partial(xr.open_zarr, **kwargs)
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -104,7 +99,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                     filtered_uris.append(_uri)
 
             ds: xr.Dataset = xr.open_mfdataset(
-                filtered_uris, decode_coords="all", preprocess=preprocessor, **options
+                filtered_uris, decode_coords="all", preprocess=preprocessor, **kwargs
             )
         else:
             raise ValueError(

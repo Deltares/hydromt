@@ -2,34 +2,51 @@
 
 from abc import ABC, abstractmethod
 from logging import getLogger
-from typing import List, Optional
+from typing import Any, Callable
 
 import xarray as xr
+from pydantic import Field
 
 from hydromt._typing import Geom, SourceMetadata, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Predicate
-from hydromt.data_catalog.drivers.base_driver import BaseDriver
+from hydromt.data_catalog.drivers.base_driver import BaseDriver, DriverOptions
+from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 
 logger = getLogger(__name__)
+
+
+class GeoDatasetOptions(DriverOptions):
+    """Options for GeoDatasetVectorDriver."""
+
+    preprocess: str | None = None
+    """Name of preprocessor to apply on geodataset after reading. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
+
+    def get_preprocessor(self) -> Callable | None:
+        """Get the preprocessor function."""
+        if self.preprocess is None:
+            return None
+        return get_preprocessor(self.preprocess)
 
 
 class GeoDatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDatasets."""
 
+    options: GeoDatasetOptions = Field(default_factory=GeoDatasetOptions)
+
     @abstractmethod
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        mask: Optional[Geom] = None,
-        predicate: Predicate = "intersects",
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> Optional[xr.Dataset]:
+        kwargs_for_open: dict[str, Any] | None = None,
+        mask: Geom | None = None,
+        predicate: Predicate = "intersects",
+        variables: list[str] | None = None,
+        time_range: TimeRange | None = None,
+        metadata: SourceMetadata | None = None,
+    ) -> xr.Dataset | None:
         """
         Read in any compatible data source to an xarray Dataset.
 

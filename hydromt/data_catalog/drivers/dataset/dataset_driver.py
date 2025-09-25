@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
-from typing import List, Optional
+from typing import Any
 
 import xarray as xr
 
@@ -24,12 +24,13 @@ class DatasetDriver(BaseDriver, ABC):
     @abstractmethod
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        variables: Optional[Variables] = None,
-        time_range: Optional[TimeRange] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        kwargs_for_open: dict[str, Any] | None = None,
+        variables: Variables | None = None,
+        time_range: TimeRange | None = None,
+        metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """
         Read in any compatible data source to an xarray Dataset.

@@ -2,7 +2,7 @@
 
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import Any, ClassVar
 
 import numpy as np
 import rasterio
@@ -37,7 +37,7 @@ logger: Logger = getLogger(__name__)
 class RasterioOptions(DriverOptions):
     """Options for RasterioDriver."""
 
-    _kwargs_for_open: ClassVar[set[str]] = {"mosaic_kwargs"}
+    KWARGS_FOR_OPEN: ClassVar[set[str]] = {"mosaic_kwargs"}
 
     mosaic: bool = False
     """If True and multiple uris are given, will mosaic the datasets together using `rasterio.merge.merge`. Default is False."""
@@ -51,10 +51,10 @@ class RasterioOptions(DriverOptions):
     cache_root: str = str(SETTINGS.cache_root)
     """Root directory for caching. Default is taken from `hydromt.config.SETTINGS.cache_root`."""
 
-    cache_dir: Optional[str] = None
+    cache_dir: str | None = None
     """Subdirectory for caching. Default is the stem of the first uri without extension."""
 
-    def get_cache_path(self, uris: List[str]) -> Path:
+    def get_cache_path(self, uris: list[str]) -> Path:
         """Get the cache path based on the options and uris."""
         if self.cache_dir is not None:
             cache_dir = Path(self.cache_root) / self.cache_dir
@@ -96,16 +96,16 @@ class RasterioDriver(RasterDatasetDriver):
 
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        mask: Optional[Geom] = None,
-        time_range: Optional[TimeRange] = None,
-        variables: Optional[Variables] = None,
-        zoom: Optional[Zoom] = None,
-        chunks: Optional[dict] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs_open_mfraster,
+        kwargs_for_open: dict[str, Any] | None = None,
+        mask: Geom | None = None,
+        variables: Variables | None = None,
+        time_range: TimeRange | None = None,
+        zoom: Zoom | None = None,
+        chunks: dict[str, Any] | None = None,
+        metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """Read data using rasterio."""
         if metadata is None:
@@ -125,35 +125,36 @@ class RasterioDriver(RasterDatasetDriver):
         if mask is not None:
             self.options.mosaic_kwargs.update({"mask": mask})
 
+        kwargs_for_open = kwargs_for_open or {}
         if np.issubdtype(type(metadata.nodata), np.number):
-            kwargs_open_mfraster.update({"nodata": metadata.nodata})
+            kwargs_for_open.update({"nodata": metadata.nodata})
 
         # Fix overview level
         if zoom:
             try:
                 zls_dict: dict[int, float] = metadata.zls_dict
-                crs: Optional[CRS] = metadata.crs
+                crs: CRS | None = metadata.crs
             except AttributeError:  # pydantic extra=allow on SourceMetadata
                 zls_dict, crs = self._get_zoom_levels_and_crs(uris[0])
 
-            overview_level: Optional[int] = zoom_to_overview_level(
+            overview_level: int | None = zoom_to_overview_level(
                 zoom, mask, zls_dict, crs
             )
             if overview_level:
                 # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
-                kwargs_open_mfraster.update(overview_level=overview_level - 1)
+                kwargs_for_open.update(overview_level=overview_level - 1)
 
         if chunks is not None:
-            kwargs_open_mfraster.update({"chunks": chunks})
+            kwargs_for_open.update({"chunks": chunks})
 
-        kwargs = self.options.get_kwargs() | kwargs_open_mfraster
+        kwargs = self.options.get_kwargs() | kwargs_for_open
         mosaic: bool = self.options.mosaic and len(uris) > 1
 
         # If the metadata resolver has already resolved the overview level,
         # trying to open zoom levels here will result in an error.
         # Better would be to separate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023
         # Then we can implement looking for a overview level in the driver.
-        def _open() -> Union[xr.DataArray, xr.Dataset]:
+        def _open() -> xr.DataArray | xr.Dataset:
             try:
                 return open_mfraster(
                     uris,
@@ -206,7 +207,7 @@ class RasterioDriver(RasterDatasetDriver):
         raise NotImplementedError()
 
     @staticmethod
-    def _get_zoom_levels_and_crs(uri: str) -> Tuple[Dict[int, float], int]:
+    def _get_zoom_levels_and_crs(uri: str) -> tuple[dict[int, float], int]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         zoom_levels = {}
         crs = None

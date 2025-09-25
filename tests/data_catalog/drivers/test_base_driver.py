@@ -32,23 +32,23 @@ class TestDriverOptions:
     class CustomOptions(DriverOptions):
         """Custom options for testing."""
 
-        _kwargs_for_open: ClassVar[set[str]] = {"custom_kwarg1"}
+        KWARGS_FOR_OPEN: ClassVar[set[str]] = {"custom_kwarg1"}
 
         custom_kwarg1: str = Field(
             default="value1",
-            description="since this is in _kwargs_for_open, it should be returned by get_kwargs().",
+            description="since this is in KWARGS_FOR_OPEN, it should be returned by get_kwargs().",
         )
         custom_kwarg2: int = Field(
             default=123,
-            description="since this is not in _kwargs_for_open, it should not be returned by get_kwargs().",
+            description="since this is not in KWARGS_FOR_OPEN, it should not be returned by get_kwargs().",
         )
 
-    def test_get_kwargs_for_open(self):
+    def test_getKWARGS_FOR_OPEN(self):
         dct = {
             "chunks": {"x": 100, "y": 100},  # not a declared field, so always included
             "decode_times": True,  # not a declared field, so always included
-            "custom_kwarg1": "value1",  # in _kwargs_for_open, so included
-            "custom_kwarg2": 123,  # not in _kwargs_for_open, so not included
+            "custom_kwarg1": "value1",  # in KWARGS_FOR_OPEN, so included
+            "custom_kwarg2": 123,  # not in KWARGS_FOR_OPEN, so not included
         }
         options = self.CustomOptions(**dct)
         kwargs = options.get_kwargs()

@@ -1,7 +1,7 @@
 """Driver for DataFrames using the pandas library."""
 
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 import pandas as pd
 
@@ -12,6 +12,7 @@ from hydromt._typing import (
     Variables,
     exec_nodata_strat,
 )
+from hydromt._typing.metadata import SourceMetadata
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
 
@@ -32,11 +33,13 @@ class PandasDriver(DataFrameDriver):
 
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        variables: Optional[Variables] = None,
-        time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        kwargs_for_open: dict[str, Any] | None = None,
+        variables: Variables | None = None,
+        time_range: TimeRange | None = None,
+        metadata: SourceMetadata | None = None,
     ) -> pd.DataFrame:
         """Read in any compatible data source to a pandas `DataFrame`."""
         _warn_on_unused_kwargs(
@@ -53,6 +56,9 @@ class PandasDriver(DataFrameDriver):
         else:
             uri = uris[0]
             extension: str = uri.split(".")[-1]
+            kwargs_for_open = kwargs_for_open or {}
+            kwargs = self.options.get_kwargs() | kwargs_for_open
+
             if extension == "csv":
                 variables = self._unify_variables_and_pandas_kwargs(
                     uri, pd.read_csv, variables
@@ -60,10 +66,10 @@ class PandasDriver(DataFrameDriver):
                 df = pd.read_csv(
                     uri,
                     usecols=variables,
-                    **self.options,
+                    **kwargs,
                 )
             elif extension == "parquet":
-                df = pd.read_parquet(uri, columns=variables, **self.options)
+                df = pd.read_parquet(uri, columns=variables, **kwargs)
             elif extension in ["xls", "xlsx"]:
                 variables = self._unify_variables_and_pandas_kwargs(
                     uri, pd.read_excel, variables
@@ -72,13 +78,13 @@ class PandasDriver(DataFrameDriver):
                     uri,
                     usecols=variables,
                     engine="openpyxl",
-                    **self.options,
+                    **kwargs,
                 )
             elif extension in ["fwf", "txt"]:
                 _warn_on_unused_kwargs(
                     self.__class__.__name__, {"variables": variables}
                 )
-                df = pd.read_fwf(uri, **self.options)
+                df = pd.read_fwf(uri, **kwargs)
             else:
                 raise IOError(f"DataFrame: extension {extension} unknown.")
         if df.index.size == 0:
@@ -130,10 +136,12 @@ class PandasDriver(DataFrameDriver):
         """Prevent clashes between arguments and hydromt query parameters."""
         # include index_col in variables
         if variables:
-            if not isinstance(self.options.get("index_col", "str"), str):
+            if hasattr(self.options, "index_col") and not isinstance(
+                self.options.index_col, str
+            ):
                 # if index_col is an index, get name of col
-                new_options: Dict[str, Any] = self.options.copy()
-                new_options.pop("index_col")
+                new_options: dict[str, Any] = self.options.get_kwargs()
+                new_options.pop("index_col", None)
                 df: pd.DataFrame = read_method(uri, **{"nrows": 1, **new_options})
                 return variables + [df.columns[0]]
 
