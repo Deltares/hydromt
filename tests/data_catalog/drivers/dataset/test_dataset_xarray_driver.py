@@ -36,9 +36,7 @@ class TestRasterXarrayDriver:
         assert call_args[1].get("preprocess") == round_latlon
         assert res.sizes == {}  # empty dataframe
 
-        assert (
-            driver.options.get("preprocess") == "round_latlon"
-        )  # test does not consume property
+        assert driver.options.preprocess == "round_latlon"
 
     def test_write(self, raster_ds: xr.Dataset, tmp_path: Path):
         netcdf_path = tmp_path / f"{uuid4().hex}.nc"

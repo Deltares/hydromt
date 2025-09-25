@@ -12,8 +12,10 @@ import xarray as xr
 
 from hydromt._compat import HAS_GDAL
 from hydromt._typing import SourceMetadata
-from hydromt.config import SETTINGS
-from hydromt.data_catalog.drivers.raster.rasterio_driver import RasterioDriver
+from hydromt.data_catalog.drivers.raster.rasterio_driver import (
+    RasterioDriver,
+    RasterioOptions,
+)
 from hydromt.gis.raster_utils import full_from_transform
 from hydromt.io import open_mfraster, open_raster
 from tests.conftest import TEST_DATA_DIR
@@ -32,9 +34,12 @@ class TestRasterioDriver:
     @pytest.mark.usefixtures("test_settings")
     def test_caches_tifs_from_vrt(self, vrt_tiled_raster_ds: str):
         cache_dir: str = "tests_caches_tifs_from_vrt"
-        driver = RasterioDriver(options={"cache": True, "cache_dir": cache_dir})
-        driver.read(uris=[join(vrt_tiled_raster_ds, "tiled_zl0.vrt")])
-        assert len(list((Path(SETTINGS.cache_root) / cache_dir).glob("**/*.tif"))) == 16
+        options = RasterioOptions(cache=True, cache_dir=cache_dir)
+        driver = RasterioDriver(options=options)
+        uris = [join(vrt_tiled_raster_ds, "tiled_zl0.vrt")]
+        driver.read(uris=uris)
+        cache_path = options.get_cache_path(uris)
+        assert len(list(cache_path.glob("**/*.tif"))) == 16
 
     @pytest.fixture
     def small_tif(self, tmp_path: Path, rioda: xr.DataArray) -> str:
@@ -66,7 +71,9 @@ class TestRasterioDriver:
     def test_sets_mosaic_kwargs(self, fake_open_mfraster: MagicMock):
         uris = ["test", "test2"]
         mosaic_kwargs = {"mykwarg": 0}
-        RasterioDriver(options={"mosaic_kwargs": mosaic_kwargs}).read(uris=uris)
+        options_dict = {"mosaic_kwargs": mosaic_kwargs}
+        options = RasterioOptions(**options_dict)
+        RasterioDriver(options=options).read(uris=uris)
         fake_open_mfraster.assert_called_once_with(
             uris, mosaic=False, mosaic_kwargs=mosaic_kwargs
         )

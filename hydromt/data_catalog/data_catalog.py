@@ -1343,7 +1343,8 @@ class DataCatalog(object):
 
         # This isnt briliant but works the best at this stage
         if isinstance(source.driver, RasterioDriver):
-            source.driver.options.update({"cache": self.cache})
+            source.driver.options.cache = self.cache
+            source.driver.options.cache_root = self._cache_dir.as_posix()
 
         return source.read_data(
             bbox=bbox,

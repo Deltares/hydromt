@@ -1,6 +1,6 @@
 """Common routines for preprocessing."""
 
-from typing import Callable, Dict
+from typing import Callable
 
 import numpy as np
 import xarray as xr
@@ -69,9 +69,29 @@ def harmonise_dims(ds: xr.Dataset) -> xr.Dataset:
     return ds
 
 
-PREPROCESSORS: Dict[str, Callable] = {
+PREPROCESSORS: dict[str, Callable] = {
     "round_latlon": round_latlon,
     "to_datetimeindex": to_datetimeindex,
     "remove_duplicates": remove_duplicates,
     "harmonise_dims": harmonise_dims,
 }
+
+
+def get_preprocessor(name: str) -> Callable:
+    """Get a preprocessor function by name.
+
+    Parameters
+    ----------
+    name: str
+        Name of the preprocessor function.
+
+    Returns
+    -------
+    preprocessor: Callable
+        Preprocessor function.
+    """
+    if name not in PREPROCESSORS:
+        raise ValueError(
+            f"Preprocessor '{name}' not found. Available: {list(PREPROCESSORS.keys())}"
+        )
+    return PREPROCESSORS[name]

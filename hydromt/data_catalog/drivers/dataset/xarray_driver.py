@@ -1,12 +1,12 @@
 """DatasetDriver for zarr data."""
 
-from copy import copy
 from functools import partial
 from logging import Logger, getLogger
 from os.path import splitext
-from typing import Callable, ClassVar, List, Optional
+from typing import Any, Callable, ClassVar
 
 import xarray as xr
+from pydantic import Field
 
 from hydromt._typing import (
     SourceMetadata,
@@ -15,10 +15,33 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
+from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
-from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
+from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 
 logger: Logger = getLogger(__name__)
+
+
+class DatasetXarrayOptions(DriverOptions):
+    """Options for DatasetXarrayDriver."""
+
+    preprocess: str | None = None
+    """Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
+
+    ext_override: str | None = None
+    """Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension."""
+
+    def get_preprocessor(self) -> Callable | None:
+        """Get the preprocessor function."""
+        if self.preprocess is None:
+            return None
+        return get_preprocessor(self.preprocess)
+
+    def get_ext_override(self, uris: list[str]) -> str:
+        """Get the extension override."""
+        if not self.ext_override:
+            return splitext(uris[0])[-1]
+        return self.ext_override
 
 
 class DatasetXarrayDriver(DatasetDriver):
@@ -31,7 +54,7 @@ class DatasetXarrayDriver(DatasetDriver):
 
     Driver **options** include:
 
-    * preprocess: Optional[str], name of preprocessor to apply before merging datasets.
+    * preprocess: [str | None], name of preprocessor to apply before merging datasets.
       Available preprocessors include: round_latlon, to_datetimeindex,
       remove_duplicates, harmonise_dims. See their docstrings for details.
     * Any other option supported by `xr.open_zarr` or `xr.open_mfdataset`.
@@ -39,16 +62,20 @@ class DatasetXarrayDriver(DatasetDriver):
     """
 
     name: ClassVar[str] = "dataset_xarray"
-    supports_writing = True
+    supports_writing: ClassVar[bool] = True
+    SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".zarr", ".nc", ".netcdf"}
+
+    options: DatasetXarrayOptions = Field(default_factory=DatasetXarrayOptions)
 
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        metadata: Optional[SourceMetadata] = None,
-        time_range: Optional[TimeRange] = None,
-        variables: Optional[List[str]] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        kwargs_for_open: dict[str, Any] | None = None,
+        metadata: SourceMetadata | None = None,
+        time_range: TimeRange | None = None,
+        variables: str | list[str] | None = None,
     ) -> xr.Dataset:
         """
         Read zarr data to an xarray DataSet.
@@ -63,17 +90,12 @@ class DatasetXarrayDriver(DatasetDriver):
                 "metadata": metadata,
             },
         )
-        options = copy(self.options)
-        preprocessor: Optional[Callable] = None
-        preprocessor_name: Optional[str] = options.pop("preprocess", None)
-        if preprocessor_name:
-            preprocessor = PREPROCESSORS.get(preprocessor_name)
-            if not preprocessor:
-                raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
-
-        first_ext = splitext(uris[0])[-1]
+        preprocessor: Callable | None = self.options.get_preprocessor()
+        first_ext = self.options.get_ext_override(uris)
+        kwargs_for_open = kwargs_for_open or {}
+        kwargs = self.options.get_kwargs() | kwargs_for_open
         if first_ext == ".zarr":
-            opn: Callable = partial(xr.open_zarr, **options)
+            opn: Callable = partial(xr.open_zarr, **kwargs)
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -95,7 +117,7 @@ class DatasetXarrayDriver(DatasetDriver):
                     filtered_uris.append(_uri)
 
             ds: xr.Dataset = xr.open_mfdataset(
-                filtered_uris, decode_coords="all", preprocess=preprocessor, **options
+                filtered_uris, decode_coords="all", preprocess=preprocessor, **kwargs
             )
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext} ")

@@ -1,14 +1,14 @@
 """Driver using rasterio for RasterDataset."""
 
-import copy
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, ClassVar, Dict, List, Optional, Tuple, Union
+from typing import Any, ClassVar
 
 import numpy as np
 import rasterio
 import rasterio.errors
 import xarray as xr
+from pydantic import Field
 from pyproj import CRS
 
 from hydromt._typing import (
@@ -24,6 +24,7 @@ from hydromt._utils.caching import _cache_vrt_tiles
 from hydromt._utils.temp_env import temp_env
 from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
+from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
 )
@@ -31,6 +32,36 @@ from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.io.readers import open_mfraster
 
 logger: Logger = getLogger(__name__)
+
+
+class RasterioOptions(DriverOptions):
+    """Options for RasterioDriver."""
+
+    KWARGS_FOR_OPEN: ClassVar[set[str]] = {"mosaic_kwargs"}
+
+    mosaic: bool = False
+    """If True and multiple uris are given, will mosaic the datasets together using `rasterio.merge.merge`. Default is False."""
+
+    mosaic_kwargs: dict[str, Any] = {}
+    """Additional keyword arguments to pass to `rasterio.merge.merge`."""
+
+    cache: bool = False
+    """If True and reading from VRT files, will cache the tiles locally to speed up reading. Default is False."""
+
+    cache_root: str = str(SETTINGS.cache_root)
+    """Root directory for caching. Default is taken from `hydromt.config.SETTINGS.cache_root`."""
+
+    cache_dir: str | None = None
+    """Subdirectory for caching. Default is the stem of the first uri without extension."""
+
+    def get_cache_path(self, uris: list[str]) -> Path:
+        """Get the cache path based on the options and uris."""
+        if self.cache_dir is not None:
+            cache_dir = Path(self.cache_root) / self.cache_dir
+        else:
+            # default to first uri without extension
+            cache_dir = Path(self.cache_root) / Path(_strip_scheme(uris[0])[1]).stem
+        return cache_dir
 
 
 class RasterioDriver(RasterDatasetDriver):
@@ -61,43 +92,28 @@ class RasterioDriver(RasterDatasetDriver):
         for extension in rasterio.drivers.raster_driver_extensions()
         if extension != "nc"
     }  # Exclude netcdf as a supported file type
+    options: RasterioOptions = Field(default_factory=RasterioOptions)
 
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        mask: Optional[Geom] = None,
-        time_range: Optional[TimeRange] = None,
-        variables: Optional[Variables] = None,
-        zoom: Optional[Zoom] = None,
-        chunks: Optional[dict] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        kwargs_for_open: dict[str, Any] | None = None,
+        mask: Geom | None = None,
+        variables: Variables | None = None,
+        time_range: TimeRange | None = None,
+        zoom: Zoom | None = None,
+        chunks: dict[str, Any] | None = None,
+        metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """Read data using rasterio."""
         if metadata is None:
             metadata = SourceMetadata()
-        # build up kwargs for open_raster
-        options = copy.deepcopy(self.options)
-        mosaic_kwargs: Dict[str, Any] = self.options.get("mosaic_kwargs", {})
-        mosaic: bool = options.pop("mosaic", False) and len(uris) > 1
-
-        # get source-specific options
-        cache_root: str = str(
-            options.pop("cache_root", SETTINGS.cache_root),
-        )
-
-        # Check for caching, default to false
-        cache_flag = options.pop("cache", False)
 
         # Caching portion, only when the flag is True and the file format is vrt
-        if all([uri.endswith(".vrt") for uri in uris]) and cache_flag:
-            cache_dir = Path(cache_root) / options.pop(
-                "cache_dir",
-                Path(
-                    _strip_scheme(uris[0])[1]
-                ).stem,  # default to first uri without extension
-            )
+        if all([uri.endswith(".vrt") for uri in uris]) and self.options.cache:
+            cache_dir: Path = self.options.get_cache_path(uris)
             uris_cached = []
             for uri in uris:
                 cached_uri: str = _cache_vrt_tiles(
@@ -107,44 +123,52 @@ class RasterioDriver(RasterDatasetDriver):
             uris = uris_cached
 
         if mask is not None:
-            mosaic_kwargs.update({"mask": mask})
+            self.options.mosaic_kwargs.update({"mask": mask})
 
-        # get mosaic kwargs
-        if mosaic_kwargs:
-            options.update({"mosaic_kwargs": mosaic_kwargs})
-
+        kwargs_for_open = kwargs_for_open or {}
         if np.issubdtype(type(metadata.nodata), np.number):
-            options.update(nodata=metadata.nodata)
+            kwargs_for_open.update({"nodata": metadata.nodata})
 
         # Fix overview level
         if zoom:
             try:
-                zls_dict: Dict[int, float] = metadata.zls_dict
-                crs: Optional[CRS] = metadata.crs
+                zls_dict: dict[int, float] = metadata.zls_dict
+                crs: CRS | None = metadata.crs
             except AttributeError:  # pydantic extra=allow on SourceMetadata
                 zls_dict, crs = self._get_zoom_levels_and_crs(uris[0])
 
-            overview_level: Optional[int] = zoom_to_overview_level(
+            overview_level: int | None = zoom_to_overview_level(
                 zoom, mask, zls_dict, crs
             )
             if overview_level:
                 # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
-                options.update(overview_level=overview_level - 1)
+                kwargs_for_open.update(overview_level=overview_level - 1)
 
         if chunks is not None:
-            options.update({"chunks": chunks})
+            kwargs_for_open.update({"chunks": chunks})
+
+        kwargs = self.options.get_kwargs() | kwargs_for_open
+        mosaic: bool = self.options.mosaic and len(uris) > 1
 
         # If the metadata resolver has already resolved the overview level,
         # trying to open zoom levels here will result in an error.
         # Better would be to separate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023
         # Then we can implement looking for a overview level in the driver.
-        def _open() -> Union[xr.DataArray, xr.Dataset]:
+        def _open() -> xr.DataArray | xr.Dataset:
             try:
-                return open_mfraster(uris, mosaic=mosaic, **options)
+                return open_mfraster(
+                    uris,
+                    mosaic=mosaic,
+                    **kwargs,
+                )
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
-                    options.pop("overview_level")
-                    return open_mfraster(uris, mosaic=mosaic, **options)
+                    kwargs.pop("overview_level", None)
+                    return open_mfraster(
+                        uris,
+                        mosaic=mosaic,
+                        **kwargs,
+                    )
                 else:
                     raise
 
@@ -162,7 +186,7 @@ class RasterioDriver(RasterDatasetDriver):
 
         # Mosaic's can mess up the chunking, which can error during writing
         # Or maybe setting
-        chunks = options.get("chunks")
+        chunks = kwargs.get("chunks", None)
         if chunks is not None:
             ds = ds.chunk(chunks=chunks)
 
@@ -183,7 +207,7 @@ class RasterioDriver(RasterDatasetDriver):
         raise NotImplementedError()
 
     @staticmethod
-    def _get_zoom_levels_and_crs(uri: str) -> Tuple[Dict[int, float], int]:
+    def _get_zoom_levels_and_crs(uri: str) -> tuple[dict[int, float], int]:
         """Get zoom levels and crs from adapter or detect from tif file if missing."""
         zoom_levels = {}
         crs = None
