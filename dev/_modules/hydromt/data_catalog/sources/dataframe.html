@@ -467,13 +467,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pystac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Catalog</span> <span class="k">as</span> <span class="n">StacCatalog</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">NoDataStrategy</span><span class="p">,</span>
     <span class="n">StrPath</span><span class="p">,</span>
     <span class="n">TimeRange</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.adapters</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrameAdapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrameDriver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.sources</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span>
 
 <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 

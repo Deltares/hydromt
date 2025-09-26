@@ -476,7 +476,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Bbox</span><span class="p">,</span>
     <span class="n">Geom</span><span class="p">,</span>
-    <span class="n">NoDataStrategy</span><span class="p">,</span>
     <span class="n">StrPath</span><span class="p">,</span>
     <span class="n">TimeRange</span><span class="p">,</span>
     <span class="n">TotalBounds</span><span class="p">,</span>
@@ -485,6 +484,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.adapters.geodataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDatasetAdapter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.geodataset.geodataset_driver</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeoDatasetDriver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.sources.data_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_parse_geom_bbox_buffer</span>
 
 <span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
