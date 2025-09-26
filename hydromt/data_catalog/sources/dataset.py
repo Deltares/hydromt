@@ -15,13 +15,13 @@ from pystac import Item as StacItem
 from pystac import MediaType
 
 from hydromt._typing import (
-    NoDataStrategy,
     StrPath,
     TimeRange,
 )
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
+from hydromt.error import NoDataStrategy
 
 logger: Logger = getLogger(__name__)
 

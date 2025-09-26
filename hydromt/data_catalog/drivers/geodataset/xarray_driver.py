@@ -14,11 +14,11 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
 )
-from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import Predicate
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
 from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 
 logger: Logger = getLogger(__name__)
 

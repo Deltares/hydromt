@@ -36,7 +36,6 @@ from pystac import CatalogType, MediaType
 
 from hydromt import __version__
 from hydromt._typing import Bbox, SourceSpecDict, StrPath, TimeRange
-from hydromt._typing.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt._utils import (
     _deep_merge,
     _partition_dictionaries,
@@ -64,6 +63,7 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
     create_source,
 )
+from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS

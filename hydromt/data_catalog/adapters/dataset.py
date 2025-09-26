@@ -10,12 +10,9 @@ import xarray as xr
 
 from hydromt._typing import (
     Data,
-    NoDataException,
-    NoDataStrategy,
     SourceMetadata,
     TimeRange,
     Variables,
-    exec_nodata_strat,
 )
 from hydromt._utils import (
     _has_no_data,
@@ -24,6 +21,7 @@ from hydromt._utils import (
     _single_var_as_array,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
+from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 
 logger = getLogger(__name__)
 

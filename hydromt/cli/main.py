@@ -14,7 +14,6 @@ import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__
-from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import log
 from hydromt._validators import Format
@@ -23,6 +22,7 @@ from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
+from hydromt.error import NoDataStrategy
 from hydromt.io import read_workflow_yaml, read_yaml, write_yaml
 from hydromt.plugins import PLUGINS
 

@@ -6,11 +6,11 @@ from typing import ClassVar, List, Optional
 
 import geopandas as gpd
 
-from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.metadata import SourceMetadata
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.io.readers import open_vector_from_table
 
 logger: Logger = getLogger(__name__)

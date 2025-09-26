@@ -14,8 +14,8 @@ from hydromt._typing import (
     Variables,
     Zoom,
 )
-from hydromt._typing.error import NoDataStrategy
 from hydromt.data_catalog.drivers.base_driver import BaseDriver
+from hydromt.error import NoDataStrategy
 
 logger = getLogger(__name__)
 
