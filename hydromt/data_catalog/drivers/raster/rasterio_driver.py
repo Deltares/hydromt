@@ -19,7 +19,7 @@ from hydromt._typing import (
     Variables,
     Zoom,
 )
-from hydromt._utils.caching import _cache_vrt_tiles
+from hydromt._utils.caching import cache_vrt_tiles
 from hydromt._utils.temp_env import temp_env
 from hydromt._utils.uris import _strip_scheme
 from hydromt.config import SETTINGS
@@ -100,7 +100,7 @@ class RasterioDriver(RasterDatasetDriver):
             )
             uris_cached = []
             for uri in uris:
-                cached_uri: str = _cache_vrt_tiles(
+                cached_uri: str = cache_vrt_tiles(
                     uri, geom=mask, fs=self.filesystem, cache_dir=cache_dir
                 )
                 uris_cached.append(cached_uri)
