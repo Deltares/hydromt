@@ -43,7 +43,7 @@ class TestDriverOptions:
             description="since this is not in KWARGS_FOR_OPEN, it should not be returned by get_kwargs().",
         )
 
-    def test_getKWARGS_FOR_OPEN(self):
+    def test_get_kwargs(self):
         dct = {
             "chunks": {"x": 100, "y": 100},  # not a declared field, so always included
             "decode_times": True,  # not a declared field, so always included

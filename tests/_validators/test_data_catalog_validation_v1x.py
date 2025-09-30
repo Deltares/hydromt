@@ -97,7 +97,7 @@ def test_valid_v1_catalog_variants():
                     "driver": {
                         "name": "raster",
                         "filesystem": "s3",
-                        "options": {"anon": True},
+                        "options": {"anon": "true"},
                     },
                 },
             ],

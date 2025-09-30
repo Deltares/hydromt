@@ -1838,10 +1838,6 @@ def _parse_data_source_dict(
 
     source["metadata"] = meta
 
-    # if source.get("driver"):
-    #     if source.get("filesystem"):
-    #         source["filesystem"] = validate_filesystem(source["filesystem"])
-
     return create_source(source)
 
 

@@ -85,7 +85,7 @@ def test_valid_v0_catalog_variants():
                     "path": "s3://esa-worldcover/v100/2020/ESA_WorldCover_10m_2020_v100_Map_AWS.vrt",
                     "rename": {"ESA_WorldCover_10m_2020_v100_Map_AWS": "landuse"},
                     "filesystem": "s3",
-                    "storage_options": {"anon": True},
+                    "storage_options": {"anon": "true"},
                 },
             ],
         },

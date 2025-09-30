@@ -869,7 +869,7 @@ class TestGetRasterDataset:
             data,
             driver={
                 "name": "rasterio",
-                "filesystem": {"protocol": "s3", "anon": True},
+                "filesystem": {"protocol": "s3", "anon": "true"},
             },
         )
 
