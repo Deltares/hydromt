@@ -10,7 +10,11 @@ from pydantic import Field
 from hydromt._typing import Geom, SourceMetadata, StrPath, TimeRange
 from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Predicate
-from hydromt.data_catalog.drivers.base_driver import BaseDriver, DriverOptions
+from hydromt.data_catalog.drivers.base_driver import (
+    DRIVER_OPTIONS_DESCRIPTION,
+    BaseDriver,
+    DriverOptions,
+)
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 
 logger = getLogger(__name__)
@@ -32,7 +36,9 @@ class GeoDatasetOptions(DriverOptions):
 class GeoDatasetDriver(BaseDriver, ABC):
     """Abstract Driver to read GeoDatasets."""
 
-    options: GeoDatasetOptions = Field(default_factory=GeoDatasetOptions)
+    options: GeoDatasetOptions = Field(
+        default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    )
 
     @abstractmethod
     def read(

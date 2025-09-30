@@ -56,7 +56,7 @@ class TestGeoDatasetSource:
         local_driver = GeoDatasetXarrayDriver()
         local_path = managed_tmp_path / "geods_source_writes_netcdf.nc"
         writable_source.to_file(file_path=local_path, driver_override=local_driver)
-        assert local_driver.filesystem.exists(local_path)
+        assert local_driver.filesystem.get_fs().exists(local_path)
 
     @pytest.mark.integration
     def test_writes_to_netcdf_variables(
@@ -71,7 +71,7 @@ class TestGeoDatasetSource:
             driver_override=local_driver,
             variables="test1",
         )
-        assert local_driver.filesystem.exists(local_path)
+        assert local_driver.filesystem.get_fs().exists(local_path)
 
     @pytest.mark.integration
     def test_writes_to_zarr(
@@ -83,7 +83,7 @@ class TestGeoDatasetSource:
             file_path=local_path,
             driver_override=local_driver,
         )
-        assert local_driver.filesystem.exists(local_path)
+        assert local_driver.filesystem.get_fs().exists(local_path)
 
     def test_detect_bbox(self, writable_source: GeoDatasetSource, geoda: xr.DataArray):
         geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)

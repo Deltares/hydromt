@@ -47,14 +47,14 @@ class ConventionResolver(URIResolver):
 
         def split_and_glob(uri: str) -> tuple[Optional[str], list[str]]:
             protocol, _ = split_protocol(uri)
-            return (protocol, self.filesystem.glob(uri))
+            return (protocol, self.filesystem.get_fs().glob(uri))
 
         def maybe_unstrip_protocol(
             pair: tuple[Optional[str], Iterable[str]],
         ) -> Iterable[str]:
             if pair[0] is not None:
                 return map(
-                    lambda uri: self.filesystem.unstrip_protocol(uri)
+                    lambda uri: self.filesystem.get_fs().unstrip_protocol(uri)
                     if not uri.startswith(pair[0])
                     else uri,
                     pair[1],

@@ -6,6 +6,7 @@ from os.path import splitext
 from typing import Any, Callable, ClassVar
 
 import xarray as xr
+from pydantic import Field
 
 from hydromt._typing import (
     Geom,
@@ -16,7 +17,13 @@ from hydromt._typing import (
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.type_def import Predicate
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.data_catalog.drivers.base_driver import (
+    DRIVER_OPTIONS_DESCRIPTION,
+)
+from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
+    GeoDatasetDriver,
+    GeoDatasetOptions,
+)
 
 logger: Logger = getLogger(__name__)
 
@@ -44,6 +51,9 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
     name: ClassVar[str] = "geodataset_xarray"
     supports_writing = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
+    options: GeoDatasetOptions = Field(
+        default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    )
 
     def read(
         self,

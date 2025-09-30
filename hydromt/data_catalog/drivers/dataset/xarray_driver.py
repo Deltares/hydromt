@@ -15,7 +15,10 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.data_catalog.drivers.base_driver import DriverOptions
+from hydromt.data_catalog.drivers.base_driver import (
+    DRIVER_OPTIONS_DESCRIPTION,
+    DriverOptions,
+)
 from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 
@@ -25,11 +28,14 @@ logger: Logger = getLogger(__name__)
 class DatasetXarrayOptions(DriverOptions):
     """Options for DatasetXarrayDriver."""
 
-    preprocess: str | None = None
-    """Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
-
-    ext_override: str | None = None
-    """Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension."""
+    preprocess: str | None = Field(
+        default=None,
+        description="Name of preprocessor to apply before merging datasets. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details.",
+    )
+    ext_override: str | None = Field(
+        default=None,
+        description="Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension.",
+    )
 
     def get_preprocessor(self) -> Callable | None:
         """Get the preprocessor function."""
@@ -65,7 +71,9 @@ class DatasetXarrayDriver(DatasetDriver):
     supports_writing: ClassVar[bool] = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".zarr", ".nc", ".netcdf"}
 
-    options: DatasetXarrayOptions = Field(default_factory=DatasetXarrayOptions)
+    options: DatasetXarrayOptions = Field(
+        default_factory=DatasetXarrayOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    )
 
     def read(
         self,

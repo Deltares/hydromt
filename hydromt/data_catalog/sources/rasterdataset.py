@@ -6,7 +6,6 @@ from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
 
 import pandas as pd
 import xarray as xr
-from fsspec import filesystem
 from pydantic import Field
 from pyproj import CRS
 from pyproj.exceptions import CRSError
@@ -24,6 +23,7 @@ from hydromt._typing import (
     TotalBounds,
     Zoom,
 )
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
@@ -132,7 +132,7 @@ class RasterDatasetSource(DataSource):
         else:
             # use local filesystem
             driver: RasterDatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         ds: Optional[xr.Dataset] = self.read_data(

@@ -110,6 +110,14 @@ class DataSource(BaseModel, ABC):
             cls._fallback_driver_read,
         )
 
+    @model_validator(mode="wrap")
+    @classmethod
+    def _wrap_driver_validation(cls, data, handler):
+        driver = data.get("driver")
+        if isinstance(driver, BaseDriver):
+            data["driver"] = driver.model_dump()
+        return handler(data)
+
     @model_validator(mode="after")
     def _validate_fs_equal_if_not_set(self) -> DataSource:
         """
@@ -145,6 +153,7 @@ class DataSource(BaseModel, ABC):
         """Serialize data_type."""
         res: Dict[str, Any] = nxt(self)
         res["data_type"] = self.data_type
+
         return res
 
     def _get_uri_basename(self, handle_nodata: NoDataStrategy, **query_kwargs) -> str:

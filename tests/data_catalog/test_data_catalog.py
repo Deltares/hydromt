@@ -291,11 +291,11 @@ def test_catalog_entry_merged_correct_version_provider(merged_aws_worldcover):
     # make sure we can read merged catalogs
     assert len(merged_catalog) == 3
     source_aws = merged_catalog.get_source("esa_worldcover")  # last variant is default
-    assert source_aws.driver.filesystem.protocol[0] == "s3"
+    assert source_aws.driver.filesystem.protocol == "s3"
     assert merged_catalog.get_source("esa_worldcover", provider="aws") == source_aws
     source_loc = merged_catalog.get_source("esa_worldcover", provider="local")
     assert source_loc != source_aws
-    assert source_loc.driver.filesystem.protocol[0] == "file"
+    assert source_loc.driver.filesystem.protocol == "file"
     assert source_loc.version == "2021"  # get newest version
     # test get_source with version only
     assert merged_catalog.get_source("esa_worldcover", version="2021") == source_loc
@@ -320,7 +320,7 @@ def test_catalog_entry_merging(aws_worldcover, legacy_aws_worldcover):
     aws_and_legacy_catalog = DataCatalog(data_libs=[legacy_yml_path, aws_yml_path])
     assert len(aws_and_legacy_catalog) == 2
     source_aws = aws_and_legacy_catalog.get_source("esa_worldcover")
-    assert source_aws.driver.filesystem.protocol[0] == "s3"
+    assert source_aws.driver.filesystem.protocol == "s3"
     source_aws2 = aws_and_legacy_catalog.get_source("esa_worldcover", provider="aws")
     assert source_aws2 == source_aws
     source_loc = aws_and_legacy_catalog.get_source(
@@ -869,7 +869,7 @@ class TestGetRasterDataset:
             data,
             driver={
                 "name": "rasterio",
-                "filesystem": {"protocol": "s3", "anon": "true"},
+                "filesystem": {"protocol": "s3", "anon": True},
             },
         )
 

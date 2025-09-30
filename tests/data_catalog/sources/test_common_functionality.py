@@ -215,7 +215,7 @@ class TestValidators:
         )
         driver2 = driver_cls(filesystem="memory")
         new_source = source.to_file("test", driver_override=driver2)
-        assert new_source.driver.filesystem.protocol == "memory"
+        assert new_source.driver.filesystem.get_fs().protocol == "memory"
         # make sure we are not changing the state
         assert id(new_source) != id(source)
         assert id(driver2) == id(new_source.driver)
@@ -274,7 +274,8 @@ class TestValidators:
             driver=driver_cls(),
         ).to_file(new_path)
         assert new_source.root is None
-        assert new_source.driver.filesystem.protocol == ("file", "local")
+        assert new_source.driver.filesystem.protocol == "file"
+        assert new_source.driver.filesystem.get_fs().protocol == ("file", "local")
 
     @pytest.mark.parametrize(
         ("source_cls", "_driver_cls"),

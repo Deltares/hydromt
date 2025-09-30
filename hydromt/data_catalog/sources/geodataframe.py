@@ -6,7 +6,6 @@ from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import geopandas as gpd
-from fsspec import filesystem
 from pydantic import Field
 from pyproj import CRS
 from pyproj.exceptions import CRSError
@@ -22,6 +21,7 @@ from hydromt._typing import (
     StrPath,
     TotalBounds,
 )
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources.data_source import DataSource
@@ -119,7 +119,7 @@ class GeoDataFrameSource(DataSource):
         else:
             # use local filesystem
             driver: GeoDataFrameDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         gdf: Optional[gpd.GeoDataFrame] = self.read_data(

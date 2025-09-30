@@ -18,7 +18,10 @@ from hydromt._typing import (
 )
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.data_catalog.drivers.base_driver import DriverOptions
+from hydromt.data_catalog.drivers.base_driver import (
+    DRIVER_OPTIONS_DESCRIPTION,
+    DriverOptions,
+)
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
@@ -60,22 +63,14 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
     zarr files will be read using `xr.open_zarr` and netcdf files using
     `xr.open_mfdataset`.
 
-    Driver **options** include:
-
-    * preprocess: [str | None], name of preprocessor to apply before merging datasets.
-      Available preprocessors include: round_latlon, to_datetimeindex,
-      remove_duplicates, harmonise_dims. See their docstrings for details.
-    * ext_override: [str | None], if set, will override the file extension check
-      and try to read all files as the given extension. Useful when reading zarr
-      files without the .zarr extension.
-    * Any other option supported by `xr.open_zarr` or `xr.open_mfdataset`.
-
     """
 
     name = "raster_xarray"
     supports_writing = True
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {_ZARR_EXT, *_NETCDF_EXT}
-    options: RasterXarrayOptions = Field(default_factory=RasterXarrayOptions)
+    options: RasterXarrayOptions = Field(
+        default_factory=RasterXarrayOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    )
 
     def read(
         self,

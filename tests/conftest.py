@@ -13,6 +13,7 @@ import pytest
 import xarray as xr
 import xugrid as xu
 import zarr
+import zarr.storage
 from dask import config as dask_config
 from pytest_mock import MockerFixture
 from shapely.geometry import box
@@ -41,6 +42,8 @@ dask_config.set(scheduler="single-threaded")
 # https://pandas.pydata.org/pandas-docs/stable/user_guide/copy_on_write.html#copy-on-write-chained-assignment
 # https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
 pd.options.mode.copy_on_write = True
+
+xr.set_options(use_new_combine_kwarg_defaults=True)
 
 CURRENT_DIR = Path(__file__).parent
 DATA_DIR = join(dirname(abspath(__file__)), "..", "data")
@@ -78,9 +81,14 @@ def data_dir() -> Path:
 def test_settings(tmp_path: Path) -> Generator[Settings, None, None]:
     """Temporary sets settings for testing."""
     cache_dir: Path = tmp_path / "test_caching"
+    current = SETTINGS.cache_root
     SETTINGS.cache_root = cache_dir
+    Settings.cache_root = cache_dir
+    Settings.model_fields["cache_root"].default = cache_dir
     yield SETTINGS
-    SETTINGS.cache_root = Settings.model_fields["cache_root"].default
+    SETTINGS.cache_root = current
+    Settings.cache_root = current
+    Settings.model_fields["cache_root"].default = current
 
 
 @pytest.fixture(autouse=True)
@@ -97,30 +105,55 @@ def _local_catalog_eps(monkeypatch, PLUGINS):
 @pytest.fixture
 def example_zarr_file(managed_tmp_path: Path) -> Path:
     tmp_path = managed_tmp_path / "0s.zarr"
-    store = zarr.DirectoryStore(tmp_path)
-    root: zarr.Group = zarr.group(store=store, overwrite=True)
+    store = zarr.storage.LocalStore(tmp_path)
+
+    # Force v3
+    root: zarr.Group = zarr.group(store=store, overwrite=True, zarr_format=3)
+
+    # Main variable
     zarray_var: zarr.Array = root.zeros(
-        "variable", shape=(10, 10), chunks=(5, 5), dtype="int8"
+        name="variable",
+        shape=(10, 10),
+        chunks=(5, 5),
+        dtype="int8",
+        dimension_names=["x", "y"],
     )
     zarray_var[0, 0] = 42  # trigger write
     zarray_var.attrs.update(
         {
-            "_ARRAY_DIMENSIONS": ["x", "y"],
+            "_ARRAY_DIMENSIONS": ["x", "y"],  # still useful for legacy tools
             "coordinates": "xc yc",
             "long_name": "Test Array",
             "type_preferred": "int8",
         }
     )
-    # create symmetrical coords
-    xy = np.linspace(0, 9, 10, dtype=np.dtypes.Int8DType)
+
+    # Create symmetrical coords
+    xy = np.linspace(0, 9, 10, dtype=np.int8)
     xcoords, ycoords = np.meshgrid(xy, xy)
 
-    zarray_x: zarr.Array = root.array("xc", xcoords, chunks=(5, 5), dtype="int8")
+    # Coordinate arrays with values
+    zarray_x: zarr.Array = root.create_array(
+        name="xc",
+        shape=xcoords.shape,
+        chunks=(5, 5),
+        dtype="int8",
+        dimension_names=["x", "y"],
+    )
     zarray_x.attrs["_ARRAY_DIMENSIONS"] = ["x", "y"]
-    zarray_y: zarr.Array = root.array("yc", ycoords, chunks=(5, 5), dtype="int8")
+
+    zarray_y: zarr.Array = root.create_array(
+        name="yc",
+        shape=ycoords.shape,
+        chunks=(5, 5),
+        dtype="int8",
+        dimension_names=["x", "y"],
+    )
     zarray_y.attrs["_ARRAY_DIMENSIONS"] = ["x", "y"]
-    zarr.consolidate_metadata(store)
+
+    zarr.consolidate_metadata(store, zarr_format=3)
     store.close()
+
     return tmp_path
 
 

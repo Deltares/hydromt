@@ -8,7 +8,7 @@ import numpy as np
 import rasterio
 import rasterio.errors
 import xarray as xr
-from pydantic import Field
+from pydantic import Field, field_serializer, model_validator
 from pyproj import CRS
 
 from hydromt._typing import (
@@ -39,20 +39,30 @@ class RasterioOptions(DriverOptions):
 
     KWARGS_FOR_OPEN: ClassVar[set[str]] = {"mosaic_kwargs"}
 
-    mosaic: bool = False
-    """If True and multiple uris are given, will mosaic the datasets together using `rasterio.merge.merge`. Default is False."""
+    mosaic: bool = Field(
+        default=False,
+        description="If True and multiple uris are given, will mosaic the datasets together using `rasterio.merge.merge`. Default is False.",
+    )
 
-    mosaic_kwargs: dict[str, Any] = {}
-    """Additional keyword arguments to pass to `rasterio.merge.merge`."""
+    mosaic_kwargs: dict[str, Any] = Field(
+        default={},
+        description="Additional keyword arguments to pass to `rasterio.merge.merge`.",
+    )
 
-    cache: bool = False
-    """If True and reading from VRT files, will cache the tiles locally to speed up reading. Default is False."""
+    cache: bool = Field(
+        default=False,
+        description="If True and reading from VRT files, will cache the tiles locally to speed up reading. Default is False.",
+    )
 
-    cache_root: str = str(SETTINGS.cache_root)
-    """Root directory for caching. Default is taken from `hydromt.config.SETTINGS.cache_root`."""
+    cache_root: str = Field(
+        default=str(SETTINGS.cache_root),
+        description="Root directory for caching. Default is taken from `hydromt.config.SETTINGS.cache_root`.",
+    )
 
-    cache_dir: str | None = None
-    """Subdirectory for caching. Default is the stem of the first uri without extension."""
+    cache_dir: str | None = Field(
+        default=None,
+        description="Subdirectory for caching. Default is the stem of the first uri without extension.",
+    )
 
     def get_cache_path(self, uris: list[str]) -> Path:
         """Get the cache path based on the options and uris."""
@@ -62,6 +72,22 @@ class RasterioOptions(DriverOptions):
             # default to first uri without extension
             cache_dir = Path(self.cache_root) / Path(_strip_scheme(uris[0])[1]).stem
         return cache_dir
+
+    @model_validator(mode="after")
+    def _convert_path_to_str(self):
+        """Convert Path to str for pydantic compatibility."""
+        if isinstance(self.cache_root, Path):
+            self.cache_root = self.cache_root.as_posix()
+        if isinstance(self.cache_dir, Path):
+            self.cache_dir = self.cache_dir.as_posix()
+        return self
+
+    @field_serializer("cache_root", "cache_dir")
+    def serialize_paths(self, value: Path) -> str | None:
+        """Serialize Path to str for pydantic compatibility."""
+        if value is None:
+            return None
+        return Path(value).as_posix()
 
 
 class RasterioDriver(RasterDatasetDriver):
@@ -117,7 +143,7 @@ class RasterioDriver(RasterDatasetDriver):
             uris_cached = []
             for uri in uris:
                 cached_uri: str = _cache_vrt_tiles(
-                    uri, geom=mask, fs=self.filesystem, cache_dir=cache_dir
+                    uri, geom=mask, fs=self.filesystem.get_fs(), cache_dir=cache_dir
                 )
                 uris_cached.append(cached_uri)
             uris = uris_cached
@@ -174,7 +200,7 @@ class RasterioDriver(RasterDatasetDriver):
 
         # rasterio uses specific environment variable for s3 access.
         try:
-            anon: str = self.filesystem.anon
+            anon: str = self.filesystem.get_fs().anon
         except AttributeError:
             anon: str = ""
 

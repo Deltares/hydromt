@@ -8,7 +8,10 @@ from pydantic import Field
 
 from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._typing.metadata import SourceMetadata
-from hydromt.data_catalog.drivers.base_driver import DriverOptions
+from hydromt.data_catalog.drivers.base_driver import (
+    DRIVER_OPTIONS_DESCRIPTION,
+    DriverOptions,
+)
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -49,7 +52,9 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
     name: ClassVar[str] = "geodataframe_table"
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
 
-    options: GeoDataFrameTableOptions = Field(default_factory=GeoDataFrameTableOptions)
+    options: GeoDataFrameTableOptions = Field(
+        default_factory=GeoDataFrameTableOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    )
 
     def read(
         self,

@@ -5,15 +5,22 @@ from logging import Logger, getLogger
 from pathlib import Path
 from typing import Any, ClassVar
 
-from fsspec.implementations.local import LocalFileSystem
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from hydromt._abstract_base import AbstractBaseModel
-from hydromt._typing import FS
 from hydromt._typing.error import NoDataStrategy
+from hydromt._typing.fsspec_types import (
+    FSSpecFileSystem,
+)
 from hydromt.plugins import PLUGINS
 
 logger: Logger = getLogger(__name__)
+
+DRIVER_OPTIONS_DESCRIPTION = """
+Driver options that can be used to configure the behavior of the driver.
+DriverOptions allows for setting arbitrary kwargs. Any options not explicitly declared
+in the DriverOptions class are passed as kwargs to the underlying `open` functions.
+"""
 
 
 class DriverOptions(BaseModel):
@@ -67,20 +74,17 @@ class BaseDriver(AbstractBaseModel, ABC):
     """"Whether the driver supports writing data."""
 
     model_config: ClassVar[ConfigDict] = ConfigDict(extra="forbid")
-    """"Forbid extra fields in the driver configuration."""
+    """"Forbid extra fields in the driver configuration and allow arbitrary types."""
 
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = set()
     """"Set of supported file extensions for this driver."""
 
-    filesystem: FS = Field(
-        default_factory=LocalFileSystem,
+    filesystem: FSSpecFileSystem = Field(
+        default_factory=FSSpecFileSystem,
         description="Filesystem to use for accessing the data.",
     )
     options: DriverOptions = Field(
-        default_factory=DriverOptions,
-        description="Driver options that can be used to configure the behavior of the driver. "
-        "DriverOptions allows for setting arbitrary kwargs. Any options not explicitly declared "
-        "in the DriverOptions class are passed as kwargs to the underlying `open` functions.",
+        default_factory=DriverOptions, description=DRIVER_OPTIONS_DESCRIPTION
     )
 
     def __eq__(self, value: object) -> bool:
@@ -106,10 +110,36 @@ class BaseDriver(AbstractBaseModel, ABC):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         kwargs_for_open: dict[str, Any] | None = None,
     ):
-        """Read data using the driver."""
+        """Read data using the driver.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle no data situations. Default is NoDataStrategy.RAISE.
+        kwargs_for_open : dict[str, Any] | None, optional
+            Additional keyword arguments to pass to the underlying open function. Default is None.
+        """
         ...
 
     @abstractmethod
     def write(self, path: str | Path, *args, **kwargs):
-        """Write data using the driver."""
+        """Write data using the driver.
+
+        Parameters
+        ----------
+        path : str | Path
+            Path to write data to.
+        *args
+            Positional arguments for the write function.
+        **kwargs
+            Keyword arguments for the write function.
+        """
         ...
+
+    @field_validator("filesystem", mode="before")
+    @classmethod
+    def _create_filesystem(cls, v: Any) -> FSSpecFileSystem:
+        """Allow filesystem to be provided as string, dict, or FSSpecFileSystem."""
+        return FSSpecFileSystem.create(v)

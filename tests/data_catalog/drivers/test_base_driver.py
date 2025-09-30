@@ -15,13 +15,13 @@ class TestBaseDriver:
         )
 
         assert driver.__class__.__qualname__ == "PyogrioDriver"
-        assert driver.filesystem.__class__.__qualname__ == "MemoryFileSystem"
+        assert driver.filesystem.get_fs().__class__.__qualname__ == "MemoryFileSystem"
 
     def test_init_dict_minimal_args(self):
         driver: BaseDriver = BaseDriver.model_validate({"name": "pyogrio"})
 
         assert driver.__class__.__qualname__ == "PyogrioDriver"
-        assert driver.filesystem.__class__.__qualname__ == "LocalFileSystem"
+        assert driver.filesystem.get_fs().__class__.__qualname__ == "LocalFileSystem"
 
     def test_serializes_name(self):
         driver = BaseDriver.model_validate({"name": "pyogrio"})

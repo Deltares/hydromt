@@ -6,7 +6,6 @@ from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
 
 import pandas as pd
 import xarray as xr
-from fsspec import filesystem
 from pydantic import Field
 from pyproj import CRS
 from pyproj.exceptions import CRSError
@@ -23,6 +22,7 @@ from hydromt._typing import (
     TimeRange,
     TotalBounds,
 )
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt._typing.type_def import GeomBuffer, Predicate
 from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
@@ -124,7 +124,7 @@ class GeoDatasetSource(DataSource):
         else:
             # use local filesystem
             driver: GeoDatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         if bbox is not None or (mask is not None and buffer > 0):

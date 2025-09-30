@@ -6,7 +6,6 @@ from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
 import pandas as pd
 import xarray as xr
-from fsspec import filesystem
 from pydantic import Field
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
@@ -19,6 +18,7 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
 )
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
@@ -121,7 +121,7 @@ class DatasetSource(DataSource):
         else:
             # use local filesystem
             driver: DatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         ds: Optional[xr.Dataset] = self.read_data(
