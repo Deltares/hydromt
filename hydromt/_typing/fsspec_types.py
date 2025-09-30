@@ -6,7 +6,6 @@ from pydantic import (
     Field,
     PrivateAttr,
     model_serializer,
-    model_validator,
 )
 
 
@@ -42,14 +41,6 @@ class FSSpecFileSystem(BaseModel):
             fs_dict.pop("args")  # args is optional
         return fs_dict
 
-    @model_validator(mode="before")
-    @classmethod
-    def _validate(cls, value: Any) -> Any:
-        """Validate input before model initialization."""
-        if value is None:
-            return FSSpecFileSystem()
-        return FSSpecFileSystem.create(value)
-
     @staticmethod
     def create(input: Any) -> "FSSpecFileSystem":
         """Create an fsspec filesystem from various inputs."""
@@ -63,13 +54,15 @@ class FSSpecFileSystem(BaseModel):
             if "protocol" not in input:
                 raise ValueError(f"Filesystem dict {input} requires 'protocol'.")
             protocol = input.pop("protocol")
-            return FSSpecFileSystem(protocol=protocol, **input)
+            return FSSpecFileSystem(protocol=protocol, storage_options=input)
         elif isinstance(input, AbstractFileSystem):
             protocol = (
                 input.protocol[0]
                 if isinstance(input.protocol, tuple)
                 else input.protocol
             )
-            return FSSpecFileSystem(protocol=protocol, **input.storage_options)
+            return FSSpecFileSystem(
+                protocol=protocol, storage_options=input.storage_options
+            )
         else:
             raise ValueError(f"Unknown filesystem: {input}")
