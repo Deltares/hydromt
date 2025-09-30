@@ -1,14 +1,14 @@
 """HydroMT: Automated and reproducible model building and analysis."""
 
 # version number without 'v' at start
-__version__ = "1.3.0"
+__version__ = "1.3.0-rc1"
 
 # This is only here to suppress the bug described in
 # https://github.com/pydata/xarray/issues/7259
 # We have to make sure that netcdf4 is imported before
 # numpy is imported for the first time, e.g. also via
 # importing xarray
-import warnings
+import warnings  # noqa: F401
 
 import netCDF4  # noqa: F401
 
