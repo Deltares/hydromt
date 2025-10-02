@@ -7,13 +7,12 @@ import numpy as np
 import pandas as pd
 
 from hydromt._typing import (
-    NoDataStrategy,
     SourceMetadata,
     TimeRange,
     Variables,
-    exec_nodata_strat,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 
 logger: Logger = getLogger(__name__)
 

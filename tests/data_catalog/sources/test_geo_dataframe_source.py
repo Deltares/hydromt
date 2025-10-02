@@ -12,12 +12,12 @@ from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 
-from hydromt._typing import NoDataException, NoDataStrategy
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver, PyogrioDriver
 from hydromt.data_catalog.sources.geodataframe import GeoDataFrameSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
+from hydromt.error import NoDataException, NoDataStrategy
 
 
 class TestGeoDataFrameSource:

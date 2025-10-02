@@ -14,7 +14,6 @@ import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__
-from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt._utils import log
 from hydromt._validators import Format
@@ -23,6 +22,7 @@ from hydromt._validators.data_catalog_v1x import DataCatalogV1Validator
 from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
+from hydromt.error import NoDataStrategy
 from hydromt.io import read_workflow_yaml, read_yaml, write_yaml
 from hydromt.plugins import PLUGINS
 
@@ -230,7 +230,7 @@ def build(
     --------------
 
     To build a wflow model:
-    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml
+    hydromt build wflow_sbm /path/to/model_root -i /path/to/wflow_config.yml
     -d deltares_data -d /path/to/data_catalog.yml -v
 
     To build a sfincs model:
@@ -318,7 +318,7 @@ def update(
 
     Update Wflow model components outlined in an .yml configuration file and
     write the model to a directory:
-    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
+    hydromt update wflow_sbm /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     # logger
     mode = "r+" if model_root == model_out else "r"
