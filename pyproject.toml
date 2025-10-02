@@ -43,7 +43,7 @@ dependencies = [
 	"xarray",                 # ndim data arrays
 	"xmltodict",              # xml parser also used to read VRT
 	"xugrid>=0.9.0",          # xarray wrapper for mesh processing
-	"zarr>=2,<4",             # zarr
+	"zarr>=3,<4",             # zarr
 ]
 
 requires-python = ">=3.11"
@@ -175,6 +175,13 @@ filterwarnings = [
 	"ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
 	'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
 	"ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                 # Pillow 13
+
+	# numpy itself silences these
+	# https://github.com/numpy/numpy/blob/46268caa719db95ab2198bcd619f0e3120d7c52e/numpy/__init__.py#L704-L707
+	"ignore:numpy.ndarray size changed:RuntimeWarning",
+
+	# zarr v3 experimental warning
+	"ignore:Consolidated metadata is currently not part in the Zarr format 3 specification:UserWarning",
 ]
 
 [tool.mypy]
