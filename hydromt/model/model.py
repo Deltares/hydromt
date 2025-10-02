@@ -14,7 +14,6 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 import geopandas as gdp
 from pyproj import CRS
 
-from hydromt._typing import StrPath
 from hydromt._utils import _rgetattr, _validate_steps, log
 from hydromt.data_catalog import DataCatalog
 from hydromt.io.readers import read_yaml
@@ -47,7 +46,7 @@ class Model(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        root: StrPath | None = None,
+        root: str | Path | None = None,
         *,
         components: Optional[Dict[str, Any]] = None,
         mode: str = "w",
@@ -59,8 +58,8 @@ class Model(object, metaclass=ABCMeta):
 
         Parameters
         ----------
-        root : str, optional
-            Model root, by default None
+        root : str, Path, optional
+            Model root, by default the current working directory: ``Path.cwd()``
         components: Dict[str, Any], optional
             Dictionary of components to add to the model, by default None
             Every entry in this dictionary contains the name of the component as key,
@@ -333,7 +332,7 @@ class Model(object, metaclass=ABCMeta):
     def update(
         self,
         *,
-        model_out: Optional[StrPath] = None,
+        model_out: str | Path | None = None,
         write: Optional[bool] = True,
         steps: Optional[List[Dict[str, Dict[str, Any]]]] = None,
         forceful_overwrite: bool = False,
@@ -482,8 +481,8 @@ class Model(object, metaclass=ABCMeta):
     @hydromt_step
     def write_data_catalog(
         self,
-        root: Optional[StrPath] = None,
-        data_lib_path: StrPath = "hydromt_data.yml",
+        root: str | Path | None = None,
+        data_lib_path: str | Path = "hydromt_data.yml",
         used_only: bool = True,
         append: bool = True,
         save_csv: bool = False,

@@ -1,7 +1,6 @@
 """Implementations related to logging."""
 
 import logging
-import sys
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -18,33 +17,19 @@ _LOG_FORMAT = "%(asctime)s - %(name)s - %(module)s - %(levelname)s - %(message)s
 _DEFAULT_FORMATTER = logging.Formatter(_LOG_FORMAT)
 
 
-def initialize_logging(
-    log_level: int = logging.INFO, formatter: logging.Formatter = _DEFAULT_FORMATTER
-) -> None:
+def initialize_logging() -> None:
     """Initialize the hydromt root logger with a formatter, a log level and an optional console handler.
 
     This function should be called once, at the start of the program.
     For HydroMT, this is achieved by calling it in the `hydromt.__init__.py` file, so it is
     automatically called when importing the hydromt package.
     If the root logger has a handler before hydromt is imported, no new handler will be added.
-
-    If you want to override the default behavior, you can call this function
-    with your own parameters, or set up your own logging configuration before importing hydromt.
-
-    Parameters
-    ----------
-    log_level : int, optional
-        Log level, by default logging.INFO
-    formatter : logging.Formatter, optional
-        Log formatter, by default _DEFAULT_FORMATTER
     """
     logging.captureWarnings(True)
-    _ROOT_LOGGER.setLevel(log_level)
-    if not _ROOT_LOGGER.hasHandlers():
-        console = logging.StreamHandler(sys.stdout)
-        console.setLevel(log_level)
-        console.setFormatter(formatter)
-        _ROOT_LOGGER.addHandler(console)
+    logging.basicConfig(
+        format=_LOG_FORMAT,
+        level=logging.INFO,
+    )
     _ROOT_LOGGER.info(f"HydroMT version: {__version__}")
 
 
