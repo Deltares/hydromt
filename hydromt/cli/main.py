@@ -227,7 +227,7 @@ def build(
     --------------
 
     To build a wflow model:
-    hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml
+    hydromt build wflow_sbm /path/to/model_root -i /path/to/wflow_config.yml
     -d deltares_data -d /path/to/data_catalog.yml -v
 
     To build a sfincs model:
@@ -312,7 +312,7 @@ def update(
 
     Update Wflow model components outlined in an .yml configuration file and
     write the model to a directory:
-    hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
+    hydromt update wflow_sbm /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v
     """  # noqa: E501
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
