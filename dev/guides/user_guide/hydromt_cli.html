@@ -561,7 +561,7 @@ region, the data catalog, and other options. The most important ones are:</p>
 <li><p><cite>-d, --data</cite>: Relative or absolute path to the local yaml data catalog file or name of a predefined data catalog. The data catalog is a yaml file that contains the paths to the data that will be used to build the model.</p></li>
 </ul>
 <p>Here is an example of how to use the command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt build wflow /path/to/model_root -i /path/to/wflow_build_config.yml  -d deltares_data  -v</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt build wflow_sbm /path/to/model_root -i /path/to/wflow_build_config.yml  -d deltares_data  -v</span>
 </pre></div>
 </div>
 <p>You can find more information on the steps to build a model in the <a class="reference internal" href="model_build.html#model-build"><span class="std std-ref">Building a model</span></a> section.
@@ -585,7 +585,7 @@ the data catalog, and other options. The most important ones are:</p>
 <li><p><cite>-o, --model-out</cite>: Relative or absolute path to the output folder of the updated model. If not provided, the current model will be overwritten.</p></li>
 </ul>
 <p>Here is an example of how to use the command:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt update wflow /path/to/model_to_update -o /path/to/updated_model -i /path/to/wflow_update_config.yml -d /path/to/data_catalog.yml -v</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt; hydromt update wflow_sbm /path/to/model_to_update -o /path/to/updated_model -i /path/to/wflow_update_config.yml -d /path/to/data_catalog.yml -v</span>
 </pre></div>
 </div>
 <p>You can find more information on the steps to update a model in the <a class="reference internal" href="model_update.html#model-update"><span class="std std-ref">Updating a model</span></a> section.

@@ -1023,7 +1023,7 @@
 <section id="example-usage">
 <h3>Example usage:<a class="headerlink" href="#example-usage" title="Link to this heading">#</a></h3>
 <p>To build a wflow model:
-hydromt build wflow /path/to/model_root -i /path/to/wflow_config.yml
+hydromt build wflow_sbm /path/to/model_root -i /path/to/wflow_config.yml
 -d deltares_data -d /path/to/data_catalog.yml -v</p>
 <p>To build a sfincs model:
 hydromt build sfincs /path/to/model_root  -i /path/to/sfincs_config.yml
@@ -1098,7 +1098,7 @@ are overwritten.</p>
 <h3>Example usage:<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
 <p>Update Wflow model components outlined in an .yml configuration file and
 write the model to a directory:
-hydromt update wflow /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v</p>
+hydromt update wflow_sbm /path/to/model_root  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d /path/to/data_catalog.yml -v</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>hydromt<span class="w"> </span>update<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>MODEL<span class="w"> </span>MODEL_ROOT
 </pre></div>
 </div>

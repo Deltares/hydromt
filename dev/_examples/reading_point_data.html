@@ -549,7 +549,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-GeoDatasetSource(name=&#39;gtsmv3_eu_era5&#39;, uri=&#39;gtsmv3_eu_era5.nc&#39;, data_adapter=GeoDatasetAdapter(unit_add={}, unit_mult={}, rename={}), driver=GeoDatasetXarrayDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0e7103c350&gt;, options={}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0e7103c350&gt;, options={}), root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39;, version=&#39;3.0&#39;, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+GeoDatasetSource(name=&#39;gtsmv3_eu_era5&#39;, uri=&#39;gtsmv3_eu_era5.nc&#39;, data_adapter=GeoDatasetAdapter(unit_add={}, unit_mult={}, rename={}), driver=GeoDatasetXarrayDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f4e3d1e4e90&gt;, options={}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f4e3d1e4e90&gt;, options={}), root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39;, version=&#39;3.0&#39;, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -602,9 +602,7 @@ object: GeoDatasetXarrayDriver does not use kwarg predicate with value intersect
 </symbol>
 </defs>
 </svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
+<style>/* CSS stylesheet for displaying xarray objects in notebooks */
 
 :root {
   --xr-font-color0: var(
@@ -683,6 +681,7 @@ body.vscode-dark {
   display: block !important;
   min-width: 300px;
   max-width: 700px;
+  line-height: 1.6;
 }
 
 .xr-text-repr-fallback {
@@ -705,11 +704,18 @@ body.vscode-dark {
 }
 
 .xr-obj-type,
-.xr-array-name {
+.xr-obj-name,
+.xr-group-name {
   margin-left: 2px;
   margin-right: 10px;
 }
 
+.xr-group-name::before {
+  content: "📁";
+  padding-right: 0.3em;
+}
+
+.xr-group-name,
 .xr-obj-type {
   color: var(--xr-font-color2);
 }
@@ -718,6 +724,8 @@ body.vscode-dark {
   padding-left: 0 !important;
   display: grid;
   grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .xr-section-item {
@@ -728,6 +736,7 @@ body.vscode-dark {
   display: inline-block;
   opacity: 0;
   height: 0;
+  margin: 0;
 }
 
 .xr-section-item input + label {
@@ -786,7 +795,6 @@ body.vscode-dark {
 .xr-section-summary,
 .xr-section-inline-details {
   padding-top: 4px;
-  padding-bottom: 4px;
 }
 
 .xr-section-inline-details {
@@ -796,11 +804,38 @@ body.vscode-dark {
 .xr-section-details {
   display: none;
   grid-column: 1 / -1;
+  margin-top: 4px;
   margin-bottom: 5px;
 }
 
 .xr-section-summary-in:checked ~ .xr-section-details {
   display: contents;
+}
+
+.xr-group-box {
+  display: inline-grid;
+  grid-template-columns: 0px 20px auto;
+  width: 100%;
+}
+
+.xr-group-box-vline {
+  grid-column-start: 1;
+  border-right: 0.2em solid;
+  border-color: var(--xr-border-color);
+  width: 0px;
+}
+
+.xr-group-box-hline {
+  grid-column-start: 2;
+  grid-row-start: 1;
+  height: 1em;
+  width: 20px;
+  border-bottom: 0.2em solid;
+  border-color: var(--xr-border-color);
+}
+
+.xr-group-box-contents {
+  grid-column-start: 3;
 }
 
 .xr-array-wrap {
@@ -1046,7 +1081,7 @@ Attributes:
     paper_doi:  10.24381/cds.8c59054f
     paper_ref:  Copernicus Climate Change Service 2019
     url:        https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/c...
-    license:    https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-...</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-c29362c7-23b4-4c02-a2a5-3678b582d50c' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-c29362c7-23b4-4c02-a2a5-3678b582d50c' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 19</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-52deb585-4d1a-4b96-81ee-9ff909c34a80' class='xr-section-summary-in' type='checkbox'  checked><label for='section-52deb585-4d1a-4b96-81ee-9ff909c34a80' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19,), meta=np.ndarray&gt;</div><input id='attrs-62739d53-90c2-41ff-bdb0-ddd844b4abff' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-62739d53-90c2-41ff-bdb0-ddd844b4abff' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-81be5dc8-713d-4068-83ed-98155265e80f' class='xr-var-data-in' type='checkbox'><label for='data-81be5dc8-713d-4068-83ed-98155265e80f' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
+    license:    https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-...</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-b717c5a5-b193-4d45-8d8e-70a682e91211' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-b717c5a5-b193-4d45-8d8e-70a682e91211' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 19</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-4ef765ba-40e8-404c-9558-09d349918818' class='xr-section-summary-in' type='checkbox'  checked><label for='section-4ef765ba-40e8-404c-9558-09d349918818' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19,), meta=np.ndarray&gt;</div><input id='attrs-328855e3-ba55-4cad-9e03-8a3ac54cfb7d' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-328855e3-ba55-4cad-9e03-8a3ac54cfb7d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-472b04d4-e854-4425-b792-748453898ef6' class='xr-var-data-in' type='checkbox'><label for='data-472b04d4-e854-4425-b792-748453898ef6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1101,10 +1136,10 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-01 ... 2010-02-14T23:50:00</div><input id='attrs-7891274e-bf2b-43a9-8fd9-b2809d20468d' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-7891274e-bf2b-43a9-8fd9-b2809d20468d' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-14a5f4ba-c0bb-4336-8908-0fe140fcfd09' class='xr-var-data-in' type='checkbox'><label for='data-14a5f4ba-c0bb-4336-8908-0fe140fcfd09' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>T</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>short_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-01T00:00:00.000000000&#x27;, &#x27;2010-02-01T00:10:00.000000000&#x27;,
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-01 ... 2010-02-14T23:50:00</div><input id='attrs-9fb7c33e-d434-4685-96a0-46184861dd92' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-9fb7c33e-d434-4685-96a0-46184861dd92' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-71e1c4dd-5a22-4cfb-98e3-424eb14011ff' class='xr-var-data-in' type='checkbox'><label for='data-71e1c4dd-5a22-4cfb-98e3-424eb14011ff' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>T</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>short_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-01T00:00:00.000000000&#x27;, &#x27;2010-02-01T00:10:00.000000000&#x27;,
        &#x27;2010-02-01T00:20:00.000000000&#x27;, ..., &#x27;2010-02-14T23:30:00.000000000&#x27;,
        &#x27;2010-02-14T23:40:00.000000000&#x27;, &#x27;2010-02-14T23:50:00.000000000&#x27;],
-      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19,), meta=np.ndarray&gt;</div><input id='attrs-657f1ecc-0645-4b1e-8879-171f526d2da7' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-657f1ecc-0645-4b1e-8879-171f526d2da7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-9944576d-1b56-4210-a8e4-ec140ed4308d' class='xr-var-data-in' type='checkbox'><label for='data-9944576d-1b56-4210-a8e4-ec140ed4308d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>short_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
+      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(19,), meta=np.ndarray&gt;</div><input id='attrs-f30285c1-b8dc-4760-9b6f-df8dfdc9cc99' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f30285c1-b8dc-4760-9b6f-df8dfdc9cc99' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-7aa075e9-675e-40cb-ae5f-124d4d69d22e' class='xr-var-data-in' type='checkbox'><label for='data-7aa075e9-675e-40cb-ae5f-124d4d69d22e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>short_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1159,9 +1194,9 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-2c29903a-84fc-43bc-b575-945319e970dc' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-2c29903a-84fc-43bc-b575-945319e970dc' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b37eec36-713c-4cab-a9e0-4a3e6e6b2114' class='xr-var-data-in' type='checkbox'><label for='data-b37eec36-713c-4cab-a9e0-4a3e6e6b2114' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>x_dim :</span></dt><dd>lon</dd><dt><span>y_dim :</span></dt><dd>lat</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_name :</span></dt><dd>lon</dd><dt><span>y_name :</span></dt><dd>lat</dd><dt><span>geom_format :</span></dt><dd>xy</dd><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>13670 2798 2799 ... 2791 2790 2789</div><input id='attrs-150421f2-2a8e-48f7-91b3-fb26be12d73c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-150421f2-2a8e-48f7-91b3-fb26be12d73c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-95d31db7-d2be-4126-a969-f0c8a981609d' class='xr-var-data-in' type='checkbox'><label for='data-95d31db7-d2be-4126-a969-f0c8a981609d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([13670,  2798,  2799, 13775, 13723,  2797, 13822,  2796, 23305, 22721,
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-2451643c-2142-458d-a272-8e52e2cabb73' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-2451643c-2142-458d-a272-8e52e2cabb73' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-92962fd1-3357-4d62-8221-70e105fbed51' class='xr-var-data-in' type='checkbox'><label for='data-92962fd1-3357-4d62-8221-70e105fbed51' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>x_dim :</span></dt><dd>lon</dd><dt><span>y_dim :</span></dt><dd>lat</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_name :</span></dt><dd>lon</dd><dt><span>y_name :</span></dt><dd>lat</dd><dt><span>geom_format :</span></dt><dd>xy</dd><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>13670 2798 2799 ... 2791 2790 2789</div><input id='attrs-4afd0a35-2e0f-4767-a911-abe1dc9242cb' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-4afd0a35-2e0f-4767-a911-abe1dc9242cb' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0c1dbbee-f424-45b5-80aa-4c3d13070639' class='xr-var-data-in' type='checkbox'><label for='data-0c1dbbee-f424-45b5-80aa-4c3d13070639' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([13670,  2798,  2799, 13775, 13723,  2797, 13822,  2796, 23305, 22721,
         2795,  2794,  2793, 13774, 13722,  2792,  2791,  2790,  2789],
-      dtype=int32)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-842a4582-0d20-4279-9b4b-7ea1408d322e' class='xr-section-summary-in' type='checkbox'  checked><label for='section-842a4582-0d20-4279-9b4b-7ea1408d322e' class='xr-section-summary' >Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>waterlevel</span></div><div class='xr-var-dims'>(time, stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2016, 19), meta=np.ndarray&gt;</div><input id='attrs-a8e36e1c-4c05-4680-8f5d-7c9c6277ceae' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-a8e36e1c-4c05-4680-8f5d-7c9c6277ceae' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-4d1d8fdb-857d-443f-85ab-8403d66a5417' class='xr-var-data-in' type='checkbox'><label for='data-4d1d8fdb-857d-443f-85ab-8403d66a5417' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>sea_surface_height_above_mean_sea_level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>CDI_grid_type :</span></dt><dd>unstructured</dd><dt><span>short_name :</span></dt><dd>waterlevel</dd><dt><span>description :</span></dt><dd>Total water level resulting from the combination of barotropic tides and surges and mean sea-level</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>source_version :</span></dt><dd>GTSM v3.0</dd></dl></div><div class='xr-var-data'><table>
+      dtype=int32)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-9947391c-6241-4cb6-9917-d9a0464db4a1' class='xr-section-summary-in' type='checkbox'  checked><label for='section-9947391c-6241-4cb6-9917-d9a0464db4a1' class='xr-section-summary' >Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>waterlevel</span></div><div class='xr-var-dims'>(time, stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2016, 19), meta=np.ndarray&gt;</div><input id='attrs-0f5b4108-d88f-4ba4-9b6c-287f6c18eca2' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-0f5b4108-d88f-4ba4-9b6c-287f6c18eca2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b0635bad-a798-4984-9e94-e78001ce1974' class='xr-var-data-in' type='checkbox'><label for='data-b0635bad-a798-4984-9e94-e78001ce1974' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>sea_surface_height_above_mean_sea_level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>CDI_grid_type :</span></dt><dd>unstructured</dd><dt><span>short_name :</span></dt><dd>waterlevel</dd><dt><span>description :</span></dt><dd>Total water level resulting from the combination of barotropic tides and surges and mean sea-level</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>source_version :</span></dt><dd>GTSM v3.0</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1216,20 +1251,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-965a02de-a0ef-4159-a1e7-595dd018139e' class='xr-section-summary-in' type='checkbox'  ><label for='section-965a02de-a0ef-4159-a1e7-595dd018139e' class='xr-section-summary' >Indexes: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-8cb02d45-5479-4dab-8553-7c40406bec93' class='xr-index-data-in' type='checkbox'/><label for='index-8cb02d45-5479-4dab-8553-7c40406bec93' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;2010-02-01 00:00:00&#x27;, &#x27;2010-02-01 00:10:00&#x27;,
-               &#x27;2010-02-01 00:20:00&#x27;, &#x27;2010-02-01 00:30:00&#x27;,
-               &#x27;2010-02-01 00:40:00&#x27;, &#x27;2010-02-01 00:50:00&#x27;,
-               &#x27;2010-02-01 01:00:00&#x27;, &#x27;2010-02-01 01:10:00&#x27;,
-               &#x27;2010-02-01 01:20:00&#x27;, &#x27;2010-02-01 01:30:00&#x27;,
-               ...
-               &#x27;2010-02-14 22:20:00&#x27;, &#x27;2010-02-14 22:30:00&#x27;,
-               &#x27;2010-02-14 22:40:00&#x27;, &#x27;2010-02-14 22:50:00&#x27;,
-               &#x27;2010-02-14 23:00:00&#x27;, &#x27;2010-02-14 23:10:00&#x27;,
-               &#x27;2010-02-14 23:20:00&#x27;, &#x27;2010-02-14 23:30:00&#x27;,
-               &#x27;2010-02-14 23:40:00&#x27;, &#x27;2010-02-14 23:50:00&#x27;],
-              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=2016, freq=None))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>stations</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-c5c0fd72-5b0b-4a9d-819e-efcf5048c8f5' class='xr-index-data-in' type='checkbox'/><label for='index-c5c0fd72-5b0b-4a9d-819e-efcf5048c8f5' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([13670,  2798,  2799, 13775, 13723,  2797, 13822,  2796, 23305, 22721,
-        2795,  2794,  2793, 13774, 13722,  2792,  2791,  2790,  2789],
-      dtype=&#x27;int32&#x27;, name=&#x27;stations&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-6647fd78-3438-4b63-ac4e-d0019b1f3f32' class='xr-section-summary-in' type='checkbox'  checked><label for='section-6647fd78-3438-4b63-ac4e-d0019b1f3f32' class='xr-section-summary' >Attributes: <span>(6)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>crs :</span></dt><dd>4326</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd></dl></div></li></ul></div></div></div>
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-6b83a7d5-52fa-413c-8b32-9f00043c7d63' class='xr-section-summary-in' type='checkbox'  checked><label for='section-6b83a7d5-52fa-413c-8b32-9f00043c7d63' class='xr-section-summary' >Attributes: <span>(6)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>crs :</span></dt><dd>4326</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd></dl></div></li></ul></div></div></div>
 </div>
 <p>The data can be visualized with the <a class="reference external" href="https://docs.xarray.dev/en/latest/generated/xarray.DataArray.plot.html">DataArray.plot()</a> xarray method. We show the evolution of the water level over time for a specific point location (station).</p>
 <div class="nbinput docutils container">
@@ -1246,7 +1268,7 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&lt;matplotlib.lines.Line2D at 0x7f0e6d292310&gt;]
+[&lt;matplotlib.lines.Line2D at 0x7f4e39245390&gt;]
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1296,9 +1318,7 @@ object: GeoDatasetXarrayDriver does not use kwarg predicate with value intersect
 </symbol>
 </defs>
 </svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
+<style>/* CSS stylesheet for displaying xarray objects in notebooks */
 
 :root {
   --xr-font-color0: var(
@@ -1377,6 +1397,7 @@ body.vscode-dark {
   display: block !important;
   min-width: 300px;
   max-width: 700px;
+  line-height: 1.6;
 }
 
 .xr-text-repr-fallback {
@@ -1399,11 +1420,18 @@ body.vscode-dark {
 }
 
 .xr-obj-type,
-.xr-array-name {
+.xr-obj-name,
+.xr-group-name {
   margin-left: 2px;
   margin-right: 10px;
 }
 
+.xr-group-name::before {
+  content: "📁";
+  padding-right: 0.3em;
+}
+
+.xr-group-name,
 .xr-obj-type {
   color: var(--xr-font-color2);
 }
@@ -1412,6 +1440,8 @@ body.vscode-dark {
   padding-left: 0 !important;
   display: grid;
   grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .xr-section-item {
@@ -1422,6 +1452,7 @@ body.vscode-dark {
   display: inline-block;
   opacity: 0;
   height: 0;
+  margin: 0;
 }
 
 .xr-section-item input + label {
@@ -1480,7 +1511,6 @@ body.vscode-dark {
 .xr-section-summary,
 .xr-section-inline-details {
   padding-top: 4px;
-  padding-bottom: 4px;
 }
 
 .xr-section-inline-details {
@@ -1490,11 +1520,38 @@ body.vscode-dark {
 .xr-section-details {
   display: none;
   grid-column: 1 / -1;
+  margin-top: 4px;
   margin-bottom: 5px;
 }
 
 .xr-section-summary-in:checked ~ .xr-section-details {
   display: contents;
+}
+
+.xr-group-box {
+  display: inline-grid;
+  grid-template-columns: 0px 20px auto;
+  width: 100%;
+}
+
+.xr-group-box-vline {
+  grid-column-start: 1;
+  border-right: 0.2em solid;
+  border-color: var(--xr-border-color);
+  width: 0px;
+}
+
+.xr-group-box-hline {
+  grid-column-start: 2;
+  grid-row-start: 1;
+  height: 1em;
+  width: 20px;
+  border-bottom: 0.2em solid;
+  border-color: var(--xr-border-color);
+}
+
+.xr-group-box-contents {
+  grid-column-start: 3;
 }
 
 .xr-array-wrap {
@@ -1743,7 +1800,7 @@ Attributes:
     paper_ref:       Copernicus Climate Change Service 2019
     source_license:  https://cds.climate.copernicus.eu/cdsapp/#!/terms/licenc...
     source_url:      https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24...
-    source_version:  GTSM v3.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-array-name'>'waterlevel'</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 2</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-1bf1078d-88b6-420d-a5e2-0a5c0de5dd0c' class='xr-array-in' type='checkbox' checked><label for='section-1bf1078d-88b6-420d-a5e2-0a5c0de5dd0c' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(2016, 2), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
+    source_version:  GTSM v3.0</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.DataArray</div><div class='xr-obj-name'>&#x27;waterlevel&#x27;</div><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 2</li></ul></div><ul class='xr-sections'><li class='xr-section-item'><div class='xr-array-wrap'><input id='section-404826fa-e9b5-4cc8-9d0f-f4b64ee6c6b1' class='xr-array-in' type='checkbox' checked><label for='section-404826fa-e9b5-4cc8-9d0f-f4b64ee6c6b1' title='Show/hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-array-preview xr-preview'><span>dask.array&lt;chunksize=(2016, 2), meta=np.ndarray&gt;</span></div><div class='xr-array-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1798,7 +1855,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></div></li><li class='xr-section-item'><input id='section-21fbd006-1d80-43ca-83f9-8f5c808acdeb' class='xr-section-summary-in' type='checkbox'  checked><label for='section-21fbd006-1d80-43ca-83f9-8f5c808acdeb' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;</div><input id='attrs-b6bed69f-d5ca-4137-8c1f-644292ccb3aa' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-b6bed69f-d5ca-4137-8c1f-644292ccb3aa' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-24702cb3-80c7-446e-8d38-82c5b52d8336' class='xr-var-data-in' type='checkbox'><label for='data-24702cb3-80c7-446e-8d38-82c5b52d8336' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
+</table></div></div></li><li class='xr-section-item'><input id='section-3ad6361a-cb83-47d1-9205-f2a67a5f1c55' class='xr-section-summary-in' type='checkbox'  checked><label for='section-3ad6361a-cb83-47d1-9205-f2a67a5f1c55' class='xr-section-summary' >Coordinates: <span>(5)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>lon</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;</div><input id='attrs-1a9f9edf-f5df-4c62-98d3-060fda6aff7c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-1a9f9edf-f5df-4c62-98d3-060fda6aff7c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-15d29aee-84cb-4415-90d0-e926bef191c7' class='xr-var-data-in' type='checkbox'><label for='data-15d29aee-84cb-4415-90d0-e926bef191c7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1853,10 +1910,10 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-01 ... 2010-02-14T23:50:00</div><input id='attrs-441a75be-4164-4709-9067-d9c94165f5e7' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-441a75be-4164-4709-9067-d9c94165f5e7' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f53e6928-3811-4b2d-b494-d4bbdcaa16a2' class='xr-var-data-in' type='checkbox'><label for='data-f53e6928-3811-4b2d-b494-d4bbdcaa16a2' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>T</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>short_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-01T00:00:00.000000000&#x27;, &#x27;2010-02-01T00:10:00.000000000&#x27;,
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-01 ... 2010-02-14T23:50:00</div><input id='attrs-56470959-61b9-4f3a-9e24-d11d9e353982' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-56470959-61b9-4f3a-9e24-d11d9e353982' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ef0e6c10-5505-4939-867b-32c2bc3e5e2b' class='xr-var-data-in' type='checkbox'><label for='data-ef0e6c10-5505-4939-867b-32c2bc3e5e2b' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>axis :</span></dt><dd>T</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>short_name :</span></dt><dd>time</dd></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-01T00:00:00.000000000&#x27;, &#x27;2010-02-01T00:10:00.000000000&#x27;,
        &#x27;2010-02-01T00:20:00.000000000&#x27;, ..., &#x27;2010-02-14T23:30:00.000000000&#x27;,
        &#x27;2010-02-14T23:40:00.000000000&#x27;, &#x27;2010-02-14T23:50:00.000000000&#x27;],
-      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;</div><input id='attrs-ad6a9c9c-5908-4adc-91fe-6e0a7b925bd0' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ad6a9c9c-5908-4adc-91fe-6e0a7b925bd0' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d49d0971-6e01-4211-84cb-af7c59f77ec6' class='xr-var-data-in' type='checkbox'><label for='data-d49d0971-6e01-4211-84cb-af7c59f77ec6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>short_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
+      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>lat</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;</div><input id='attrs-c0c7c3f1-a06c-4d47-b891-5e0104c30221' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c0c7c3f1-a06c-4d47-b891-5e0104c30221' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c3dc3394-ac5e-4b2c-97f6-955b9225e98a' class='xr-var-data-in' type='checkbox'><label for='data-c3dc3394-ac5e-4b2c-97f6-955b9225e98a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>short_name :</span></dt><dd>latitude</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1911,18 +1968,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-ca49e1c2-ca79-4581-a8ba-fbb35b321184' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-ca49e1c2-ca79-4581-a8ba-fbb35b321184' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-685044e6-d746-46a8-8ff8-a1fe3a93d565' class='xr-var-data-in' type='checkbox'><label for='data-685044e6-d746-46a8-8ff8-a1fe3a93d565' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>x_dim :</span></dt><dd>lon</dd><dt><span>y_dim :</span></dt><dd>lat</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_name :</span></dt><dd>lon</dd><dt><span>y_name :</span></dt><dd>lat</dd><dt><span>geom_format :</span></dt><dd>xy</dd><dt><span>index_dim :</span></dt><dd>stations</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>13775 13723</div><input id='attrs-cb42831b-2f46-43b9-99d6-549e4302cacd' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-cb42831b-2f46-43b9-99d6-549e4302cacd' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-fd3e5e49-bf06-45a1-86aa-8e15c1ca9ca7' class='xr-var-data-in' type='checkbox'><label for='data-fd3e5e49-bf06-45a1-86aa-8e15c1ca9ca7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([13775, 13723], dtype=int32)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-109f9e29-7e54-4abd-808c-e1cb9b53cc95' class='xr-section-summary-in' type='checkbox'  ><label for='section-109f9e29-7e54-4abd-808c-e1cb9b53cc95' class='xr-section-summary' >Indexes: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-aaae8b3c-8c06-4c8c-8606-78efc20e0442' class='xr-index-data-in' type='checkbox'/><label for='index-aaae8b3c-8c06-4c8c-8606-78efc20e0442' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;2010-02-01 00:00:00&#x27;, &#x27;2010-02-01 00:10:00&#x27;,
-               &#x27;2010-02-01 00:20:00&#x27;, &#x27;2010-02-01 00:30:00&#x27;,
-               &#x27;2010-02-01 00:40:00&#x27;, &#x27;2010-02-01 00:50:00&#x27;,
-               &#x27;2010-02-01 01:00:00&#x27;, &#x27;2010-02-01 01:10:00&#x27;,
-               &#x27;2010-02-01 01:20:00&#x27;, &#x27;2010-02-01 01:30:00&#x27;,
-               ...
-               &#x27;2010-02-14 22:20:00&#x27;, &#x27;2010-02-14 22:30:00&#x27;,
-               &#x27;2010-02-14 22:40:00&#x27;, &#x27;2010-02-14 22:50:00&#x27;,
-               &#x27;2010-02-14 23:00:00&#x27;, &#x27;2010-02-14 23:10:00&#x27;,
-               &#x27;2010-02-14 23:20:00&#x27;, &#x27;2010-02-14 23:30:00&#x27;,
-               &#x27;2010-02-14 23:40:00&#x27;, &#x27;2010-02-14 23:50:00&#x27;],
-              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=2016, freq=None))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>stations</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-7e5e477e-4047-4338-acc5-4fdbc7888630' class='xr-index-data-in' type='checkbox'/><label for='index-7e5e477e-4047-4338-acc5-4fdbc7888630' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([13775, 13723], dtype=&#x27;int32&#x27;, name=&#x27;stations&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-3b967540-91fb-47fc-adab-6e1f8d85343b' class='xr-section-summary-in' type='checkbox'  ><label for='section-3b967540-91fb-47fc-adab-6e1f8d85343b' class='xr-section-summary' >Attributes: <span>(11)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>sea_surface_height_above_mean_sea_level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>CDI_grid_type :</span></dt><dd>unstructured</dd><dt><span>short_name :</span></dt><dd>waterlevel</dd><dt><span>description :</span></dt><dd>Total water level resulting from the combination of barotropic tides and surges and mean sea-level</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>source_version :</span></dt><dd>GTSM v3.0</dd></dl></div></li></ul></div></div></div>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-083db7da-b983-44f4-9bc9-cd74b6f2c918' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-083db7da-b983-44f4-9bc9-cd74b6f2c918' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-8bbbc195-4a27-4712-a63e-8331bf59bfba' class='xr-var-data-in' type='checkbox'><label for='data-8bbbc195-4a27-4712-a63e-8331bf59bfba' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>x_dim :</span></dt><dd>lon</dd><dt><span>y_dim :</span></dt><dd>lat</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_name :</span></dt><dd>lon</dd><dt><span>y_name :</span></dt><dd>lat</dd><dt><span>geom_format :</span></dt><dd>xy</dd><dt><span>index_dim :</span></dt><dd>stations</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>13775 13723</div><input id='attrs-7d5237a4-57de-4612-b8c5-6b69af7d39ad' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-7d5237a4-57de-4612-b8c5-6b69af7d39ad' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f20614b4-5864-4189-ae56-30508d27c844' class='xr-var-data-in' type='checkbox'><label for='data-f20614b4-5864-4189-ae56-30508d27c844' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([13775, 13723], dtype=int32)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-27b58afa-426b-4b48-bbf1-e3839139010d' class='xr-section-summary-in' type='checkbox'  ><label for='section-27b58afa-426b-4b48-bbf1-e3839139010d' class='xr-section-summary' >Attributes: <span>(11)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>long_name :</span></dt><dd>sea_surface_height_above_mean_sea_level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>CDI_grid_type :</span></dt><dd>unstructured</dd><dt><span>short_name :</span></dt><dd>waterlevel</dd><dt><span>description :</span></dt><dd>Total water level resulting from the combination of barotropic tides and surges and mean sea-level</dd><dt><span>category :</span></dt><dd>ocean</dd><dt><span>paper_doi :</span></dt><dd>10.24381/cds.8c59054f</dd><dt><span>paper_ref :</span></dt><dd>Copernicus Climate Change Service 2019</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp#!/dataset/10.24381/cds.8c59054f?tab=overview</dd><dt><span>source_version :</span></dt><dd>GTSM v3.0</dd></dl></div></li></ul></div></div></div>
 </div>
 <p>With a Geodataset, you can also directly access the associated point geometries using its <a class="reference internal" href="../_generated/hydromt.gis.DataArray.vector.to_gdf.html"><span class="doc">to_gdf()</span></a> method. Multi-dimensional data (e.g. the time series) can be reduced using a statistical method such as the max.</p>
 <div class="nbinput docutils container">
@@ -2008,7 +2054,7 @@ Both formats must contain an index and a crs has to be indicated in the .yml fil
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-GeoDatasetSource(name=&#39;waterlevels_txt&#39;, uri=&#39;stations.csv&#39;, data_adapter=GeoDatasetAdapter(unit_add={}, unit_mult={}, rename={&#39;stations_data&#39;: &#39;waterlevel&#39;}), driver=GeoDatasetVectorDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0e7103c350&gt;, options={&#39;data_path&#39;: &#39;stations_data.csv&#39;}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f0e7103c350&gt;, options={}), root=&#39;data&#39;, version=None, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+GeoDatasetSource(name=&#39;waterlevels_txt&#39;, uri=&#39;stations.csv&#39;, data_adapter=GeoDatasetAdapter(unit_add={}, unit_mult={}, rename={&#39;stations_data&#39;: &#39;waterlevel&#39;}), driver=GeoDatasetVectorDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f4e3d1e4e90&gt;, options={&#39;data_path&#39;: &#39;stations_data.csv&#39;}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f4e3d1e4e90&gt;, options={}), root=&#39;data&#39;, version=None, provider=None, metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -2116,9 +2162,7 @@ Datum: World Geodetic System 1984 ensemble
 </symbol>
 </defs>
 </svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
+<style>/* CSS stylesheet for displaying xarray objects in notebooks */
 
 :root {
   --xr-font-color0: var(
@@ -2197,6 +2241,7 @@ body.vscode-dark {
   display: block !important;
   min-width: 300px;
   max-width: 700px;
+  line-height: 1.6;
 }
 
 .xr-text-repr-fallback {
@@ -2219,11 +2264,18 @@ body.vscode-dark {
 }
 
 .xr-obj-type,
-.xr-array-name {
+.xr-obj-name,
+.xr-group-name {
   margin-left: 2px;
   margin-right: 10px;
 }
 
+.xr-group-name::before {
+  content: "📁";
+  padding-right: 0.3em;
+}
+
+.xr-group-name,
 .xr-obj-type {
   color: var(--xr-font-color2);
 }
@@ -2232,6 +2284,8 @@ body.vscode-dark {
   padding-left: 0 !important;
   display: grid;
   grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .xr-section-item {
@@ -2242,6 +2296,7 @@ body.vscode-dark {
   display: inline-block;
   opacity: 0;
   height: 0;
+  margin: 0;
 }
 
 .xr-section-item input + label {
@@ -2300,7 +2355,6 @@ body.vscode-dark {
 .xr-section-summary,
 .xr-section-inline-details {
   padding-top: 4px;
-  padding-bottom: 4px;
 }
 
 .xr-section-inline-details {
@@ -2310,11 +2364,38 @@ body.vscode-dark {
 .xr-section-details {
   display: none;
   grid-column: 1 / -1;
+  margin-top: 4px;
   margin-bottom: 5px;
 }
 
 .xr-section-summary-in:checked ~ .xr-section-details {
   display: contents;
+}
+
+.xr-group-box {
+  display: inline-grid;
+  grid-template-columns: 0px 20px auto;
+  width: 100%;
+}
+
+.xr-group-box-vline {
+  grid-column-start: 1;
+  border-right: 0.2em solid;
+  border-color: var(--xr-border-color);
+  width: 0px;
+}
+
+.xr-group-box-hline {
+  grid-column-start: 2;
+  grid-row-start: 1;
+  height: 1em;
+  width: 20px;
+  border-bottom: 0.2em solid;
+  border-color: var(--xr-border-color);
+}
+
+.xr-group-box-contents {
+  grid-column-start: 3;
 }
 
 .xr-array-wrap {
@@ -2554,10 +2635,10 @@ Coordinates:
 Data variables:
     waterlevel   (stations, time) float64 32kB dask.array&lt;chunksize=(2, 2016), meta=np.ndarray&gt;
 Attributes:
-    crs:      4326</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-eebfbe5e-b9de-4691-b7fa-421bb8a34818' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-eebfbe5e-b9de-4691-b7fa-421bb8a34818' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 2</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-3b17d663-ab27-4952-92bc-9efe5e2c2481' class='xr-section-summary-in' type='checkbox'  checked><label for='section-3b17d663-ab27-4952-92bc-9efe5e2c2481' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2016-01-01 ... 2021-07-08</div><input id='attrs-6ea87e60-2fa1-45fe-9413-8e1f809542ee' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-6ea87e60-2fa1-45fe-9413-8e1f809542ee' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-294950f6-e62d-44fe-804e-d7a0c45f7a6e' class='xr-var-data-in' type='checkbox'><label for='data-294950f6-e62d-44fe-804e-d7a0c45f7a6e' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2016-01-01T00:00:00.000000000&#x27;, &#x27;2016-01-02T00:00:00.000000000&#x27;,
+    crs:      4326</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-93f983ad-f55e-445f-98d6-7ec7975447e9' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-93f983ad-f55e-445f-98d6-7ec7975447e9' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 2016</li><li><span class='xr-has-index'>stations</span>: 2</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-37895acc-c8d7-4702-bba5-e65782e862f7' class='xr-section-summary-in' type='checkbox'  checked><label for='section-37895acc-c8d7-4702-bba5-e65782e862f7' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2016-01-01 ... 2021-07-08</div><input id='attrs-123d4c53-5738-4da5-9dfc-abe0fbe31c48' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-123d4c53-5738-4da5-9dfc-abe0fbe31c48' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-34bc5b3d-56b1-4c6a-a62e-c77ff048c92d' class='xr-var-data-in' type='checkbox'><label for='data-34bc5b3d-56b1-4c6a-a62e-c77ff048c92d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2016-01-01T00:00:00.000000000&#x27;, &#x27;2016-01-02T00:00:00.000000000&#x27;,
        &#x27;2016-01-03T00:00:00.000000000&#x27;, ..., &#x27;2021-07-06T00:00:00.000000000&#x27;,
        &#x27;2021-07-07T00:00:00.000000000&#x27;, &#x27;2021-07-08T00:00:00.000000000&#x27;],
-      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1001 1002</div><input id='attrs-21e4ef58-1c60-4415-834b-39218c0f9c99' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-21e4ef58-1c60-4415-834b-39218c0f9c99' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-1505e794-5e54-4c1b-b067-5abe71d6aaf3' class='xr-var-data-in' type='checkbox'><label for='data-1505e794-5e54-4c1b-b067-5abe71d6aaf3' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1001, 1002])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>geometry</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;</div><input id='attrs-205b4524-d292-4573-b031-0cac46bda53c' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-205b4524-d292-4573-b031-0cac46bda53c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-d5b97285-e41a-4435-8218-44427ff3b04c' class='xr-var-data-in' type='checkbox'><label for='data-d5b97285-e41a-4435-8218-44427ff3b04c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
+      shape=(2016,), dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>stations</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>1001 1002</div><input id='attrs-e85064aa-aaa0-4d77-9375-644470cb010a' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-e85064aa-aaa0-4d77-9375-644470cb010a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-34155a8c-aa68-4eb9-87c6-44d6b56b32bf' class='xr-var-data-in' type='checkbox'><label for='data-34155a8c-aa68-4eb9-87c6-44d6b56b32bf' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([1001, 1002])</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>geometry</span></div><div class='xr-var-dims'>(stations)</div><div class='xr-var-dtype'>object</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2,), meta=np.ndarray&gt;</div><input id='attrs-6427c0e7-e35d-4403-b0fc-426f3f35282b' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-6427c0e7-e35d-4403-b0fc-426f3f35282b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c03fd2cb-88db-4813-bafd-85506cc863c6' class='xr-var-data-in' type='checkbox'><label for='data-c03fd2cb-88db-4813-bafd-85506cc863c6' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -2612,7 +2693,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-c63be239-733a-43bb-8a56-6a09d2bab748' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-c63be239-733a-43bb-8a56-6a09d2bab748' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-bdba50cf-e0f0-4ada-97b9-fa3ac6a80d22' class='xr-var-data-in' type='checkbox'><label for='data-bdba50cf-e0f0-4ada-97b9-fa3ac6a80d22' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>geom_name :</span></dt><dd>geometry</dd><dt><span>geom_format :</span></dt><dd>geom</dd><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],USAGE[SCOPE[&quot;Horizontal component of 3D system.&quot;],AREA[&quot;World.&quot;],BBOX[-90,-180,90,180]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984 ensemble</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],USAGE[SCOPE[&quot;Horizontal component of 3D system.&quot;],AREA[&quot;World.&quot;],BBOX[-90,-180,90,180]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-2548fbb9-fbdc-4e7f-9f67-3b80fde346b1' class='xr-section-summary-in' type='checkbox'  checked><label for='section-2548fbb9-fbdc-4e7f-9f67-3b80fde346b1' class='xr-section-summary' >Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>waterlevel</span></div><div class='xr-var-dims'>(stations, time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2, 2016), meta=np.ndarray&gt;</div><input id='attrs-54c815f4-6abb-460a-8443-4516d41b3da0' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-54c815f4-6abb-460a-8443-4516d41b3da0' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-87bdd1b4-a052-43a9-9e58-516405d8c62a' class='xr-var-data-in' type='checkbox'><label for='data-87bdd1b4-a052-43a9-9e58-516405d8c62a' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int64</div><div class='xr-var-preview xr-preview'>0</div><input id='attrs-b43b70ab-73de-4ba7-9ba0-dac2219cbe76' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b43b70ab-73de-4ba7-9ba0-dac2219cbe76' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e31df2f1-81dd-4720-8f89-bd286c4ff9d7' class='xr-var-data-in' type='checkbox'><label for='data-e31df2f1-81dd-4720-8f89-bd286c4ff9d7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>geom_name :</span></dt><dd>geometry</dd><dt><span>geom_format :</span></dt><dd>geom</dd><dt><span>index_dim :</span></dt><dd>stations</dd><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],USAGE[SCOPE[&quot;Horizontal component of 3D system.&quot;],AREA[&quot;World.&quot;],BBOX[-90,-180,90,180]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984 ensemble</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,ENSEMBLE[&quot;World Geodetic System 1984 ensemble&quot;,MEMBER[&quot;World Geodetic System 1984 (Transit)&quot;],MEMBER[&quot;World Geodetic System 1984 (G730)&quot;],MEMBER[&quot;World Geodetic System 1984 (G873)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1150)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1674)&quot;],MEMBER[&quot;World Geodetic System 1984 (G1762)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2139)&quot;],MEMBER[&quot;World Geodetic System 1984 (G2296)&quot;],ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]],ENSEMBLEACCURACY[2.0]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],USAGE[SCOPE[&quot;Horizontal component of 3D system.&quot;],AREA[&quot;World.&quot;],BBOX[-90,-180,90,180]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>array(0)</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-544194cd-d268-4dd5-b1dd-5a707f8c27bc' class='xr-section-summary-in' type='checkbox'  checked><label for='section-544194cd-d268-4dd5-b1dd-5a707f8c27bc' class='xr-section-summary' >Data variables: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>waterlevel</span></div><div class='xr-var-dims'>(stations, time)</div><div class='xr-var-dtype'>float64</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(2, 2016), meta=np.ndarray&gt;</div><input id='attrs-9aab266d-e4e2-4d5b-a543-919ce6fb4452' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-9aab266d-e4e2-4d5b-a543-919ce6fb4452' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5ec20412-7391-4912-b9ae-f465c612ab11' class='xr-var-data-in' type='checkbox'><label for='data-5ec20412-7391-4912-b9ae-f465c612ab11' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -2667,14 +2748,7 @@ Attributes:
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-886267c4-0749-4491-8613-665c5da83232' class='xr-section-summary-in' type='checkbox'  ><label for='section-886267c4-0749-4491-8613-665c5da83232' class='xr-section-summary' >Indexes: <span>(2)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-index-name'><div>time</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-0d3f660e-2513-49b7-a3c4-a10290906514' class='xr-index-data-in' type='checkbox'/><label for='index-0d3f660e-2513-49b7-a3c4-a10290906514' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(DatetimeIndex([&#x27;2016-01-01&#x27;, &#x27;2016-01-02&#x27;, &#x27;2016-01-03&#x27;, &#x27;2016-01-04&#x27;,
-               &#x27;2016-01-05&#x27;, &#x27;2016-01-06&#x27;, &#x27;2016-01-07&#x27;, &#x27;2016-01-08&#x27;,
-               &#x27;2016-01-09&#x27;, &#x27;2016-01-10&#x27;,
-               ...
-               &#x27;2021-06-29&#x27;, &#x27;2021-06-30&#x27;, &#x27;2021-07-01&#x27;, &#x27;2021-07-02&#x27;,
-               &#x27;2021-07-03&#x27;, &#x27;2021-07-04&#x27;, &#x27;2021-07-05&#x27;, &#x27;2021-07-06&#x27;,
-               &#x27;2021-07-07&#x27;, &#x27;2021-07-08&#x27;],
-              dtype=&#x27;datetime64[ns]&#x27;, name=&#x27;time&#x27;, length=2016, freq=None))</pre></div></li><li class='xr-var-item'><div class='xr-index-name'><div>stations</div></div><div class='xr-index-preview'>PandasIndex</div><input type='checkbox' disabled/><label></label><input id='index-fba9d7b9-b93d-444e-bccb-3540d6f6d642' class='xr-index-data-in' type='checkbox'/><label for='index-fba9d7b9-b93d-444e-bccb-3540d6f6d642' title='Show/Hide index repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-index-data'><pre>PandasIndex(Index([1001, 1002], dtype=&#x27;int64&#x27;, name=&#x27;stations&#x27;))</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-bd5eeaf1-a722-487e-88ad-9f13262a4b18' class='xr-section-summary-in' type='checkbox'  checked><label for='section-bd5eeaf1-a722-487e-88ad-9f13262a4b18' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>crs :</span></dt><dd>4326</dd></dl></div></li></ul></div></div></div>
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-bd89451c-fbdf-49fe-b7f0-55612d2d6f5c' class='xr-section-summary-in' type='checkbox'  checked><label for='section-bd89451c-fbdf-49fe-b7f0-55612d2d6f5c' class='xr-section-summary' >Attributes: <span>(1)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>crs :</span></dt><dd>4326</dd></dl></div></li></ul></div></div></div>
 </div>
 </section>
 </section>

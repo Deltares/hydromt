@@ -542,7 +542,7 @@ To save a copy of the model provide a new output model root directory with the <
 <p>In the following example a Wflow model at <code class="docutils literal notranslate"><span class="pre">/path/to/model</span></code> is updated and the results are written to a new directory <code class="docutils literal notranslate"><span class="pre">/path/to/model_out</span></code>.
 The pipeline with methods which are updated are outlined in the <code class="docutils literal notranslate"><span class="pre">wflow_config.yaml</span></code> configuration file and used data sources
 in the <code class="docutils literal notranslate"><span class="pre">data_catalog.yml</span></code> catalog file.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.yaml -d /path/to/data_catalog.yml -v</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt update wflow_sbm /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.yaml -d /path/to/data_catalog.yml -v</span>
 </pre></div>
 </div>
 <p>The following example updates (overwrites!) the landuse-landcover based staticmaps in a Wflow model with the <code class="docutils literal notranslate"><span class="pre">setup_lulcmaps</span></code> method
