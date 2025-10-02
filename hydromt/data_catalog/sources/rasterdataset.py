@@ -18,7 +18,6 @@ from pystac import MediaType
 from hydromt._typing import (
     Bbox,
     Geom,
-    NoDataStrategy,
     StrPath,
     TimeRange,
     TotalBounds,
@@ -27,6 +26,7 @@ from hydromt._typing import (
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
+from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 
 logger = logging.getLogger(__name__)

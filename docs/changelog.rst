@@ -32,6 +32,7 @@ Changed
 - Important GIS methods are now public in `hydromt.gis.gis_utils`, `hydromt.gis.raster_utils` and `hydromt.gis.vector_utils`. (#1271)
 - HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils`. (#1271)
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
+- ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
 
 Fixed
 -----

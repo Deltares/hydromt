@@ -12,10 +12,10 @@ import xugrid as xu
 from pyproj import CRS
 from shapely import box
 
-from hydromt._typing import NoDataStrategy
 from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.sources import RasterDatasetSource
+from hydromt.error import NoDataStrategy
 from hydromt.gis import parse_crs
 from hydromt.model.processes.basin_mask import get_basin_geometry
 from hydromt.plugins import PLUGINS

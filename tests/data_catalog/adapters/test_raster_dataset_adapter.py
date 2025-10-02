@@ -5,8 +5,9 @@ import pytest
 import xarray as xr
 from shapely import box
 
-from hydromt._typing import NoDataException, NoDataStrategy, SourceMetadata
+from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
+from hydromt.error import NoDataException, NoDataStrategy
 
 
 class TestRasterDatasetAdapter:

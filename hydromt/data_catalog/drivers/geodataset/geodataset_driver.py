@@ -7,9 +7,9 @@ from typing import List, Optional
 import xarray as xr
 
 from hydromt._typing import Geom, SourceMetadata, StrPath, TimeRange
-from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.type_def import Predicate
 from hydromt.data_catalog.drivers.base_driver import BaseDriver
+from hydromt.error import NoDataStrategy
 
 logger = logging.getLogger(__name__)
 

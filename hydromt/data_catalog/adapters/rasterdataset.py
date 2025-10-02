@@ -13,12 +13,9 @@ from pyproj import CRS
 from hydromt._typing import (
     Data,
     Geom,
-    NoDataException,
-    NoDataStrategy,
     SourceMetadata,
     TimeRange,
     Variables,
-    exec_nodata_strat,
 )
 from hydromt._utils import (
     _has_no_data,
@@ -27,6 +24,7 @@ from hydromt._utils import (
     _slice_temporal_dimension,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
+from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.gis.raster_utils import _meridian_offset
 

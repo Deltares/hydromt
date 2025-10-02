@@ -5,11 +5,11 @@ import pytest
 import xarray as xr
 from pystac import Catalog as StacCatalog
 
-from hydromt._typing.error import NoDataStrategy
 from hydromt.data_catalog.adapters import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources import DatasetSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
+from hydromt.error import NoDataStrategy
 
 
 class TestDatasetSource:

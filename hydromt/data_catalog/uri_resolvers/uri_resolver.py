@@ -8,7 +8,8 @@ from fsspec.implementations.local import LocalFileSystem
 from pydantic import ConfigDict, Field
 
 from hydromt._abstract_base import AbstractBaseModel
-from hydromt._typing import FS, Geom, NoDataStrategy, SourceMetadata, TimeRange, Zoom
+from hydromt._typing import FS, Geom, SourceMetadata, TimeRange, Zoom
+from hydromt.error import NoDataStrategy
 from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
