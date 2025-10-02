@@ -175,10 +175,6 @@ filterwarnings = [
 	"ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
 	'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
 	"ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                 # Pillow 13
-
-	#numpy itself silences these
-	# https://github.com/numpy/numpy/blob/46268caa719db95ab2198bcd619f0e3120d7c52e/numpy/__init__.py#L704-L707
-	"ignore:numpy.ndarray size changed:RuntimeWarning"
 ]
 
 [tool.mypy]
