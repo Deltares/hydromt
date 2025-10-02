@@ -35,7 +35,7 @@ in the ``data_catalog.yml`` catalog file.
 
 .. code-block:: console
 
-    hydromt update wflow /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.yaml -d /path/to/data_catalog.yml -v
+    hydromt update wflow_sbm /path/to/model_root -o /path/to/model_out -i /path/to/wflow_config.yaml -d /path/to/data_catalog.yml -v
 
 The following example updates (overwrites!) the landuse-landcover based staticmaps in a Wflow model with the ``setup_lulcmaps`` method
 based on a the different landuse-landcover dataset according to ``setup_lulcmaps.lulc_fn=vito``.
