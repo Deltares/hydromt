@@ -16,6 +16,7 @@ import zarr
 from dask import config as dask_config
 from pytest_mock import MockerFixture
 from shapely.geometry import box
+from zarr.storage import LocalStore
 
 from hydromt import Model, vector
 from hydromt._typing import SourceMetadata
@@ -36,6 +37,7 @@ from hydromt.model.root import ModelRoot
 from hydromt.plugins import Plugins
 
 dask_config.set(scheduler="single-threaded")
+xr.set_options(use_new_combine_kwarg_defaults=True)
 
 # This is the recommended by pandas and will become default behaviour in pandas 3.0.
 # https://pandas.pydata.org/pandas-docs/stable/user_guide/copy_on_write.html#copy-on-write-chained-assignment
@@ -97,30 +99,55 @@ def _local_catalog_eps(monkeypatch, PLUGINS):
 @pytest.fixture
 def example_zarr_file(managed_tmp_path: Path) -> Path:
     tmp_path = managed_tmp_path / "0s.zarr"
-    store = zarr.DirectoryStore(tmp_path)
-    root: zarr.Group = zarr.group(store=store, overwrite=True)
+    store = LocalStore(tmp_path)
+
+    # Force v3
+    root: zarr.Group = zarr.group(store=store, overwrite=True, zarr_format=3)
+
+    # Main variable
     zarray_var: zarr.Array = root.zeros(
-        "variable", shape=(10, 10), chunks=(5, 5), dtype="int8"
+        name="variable",
+        shape=(10, 10),
+        chunks=(5, 5),
+        dtype="int8",
+        dimension_names=["x", "y"],
     )
     zarray_var[0, 0] = 42  # trigger write
     zarray_var.attrs.update(
         {
-            "_ARRAY_DIMENSIONS": ["x", "y"],
+            "_ARRAY_DIMENSIONS": ["x", "y"],  # still useful for legacy tools
             "coordinates": "xc yc",
             "long_name": "Test Array",
             "type_preferred": "int8",
         }
     )
-    # create symmetrical coords
-    xy = np.linspace(0, 9, 10, dtype=np.dtypes.Int8DType)
+
+    # Create symmetrical coords
+    xy = np.linspace(0, 9, 10, dtype=np.int8)
     xcoords, ycoords = np.meshgrid(xy, xy)
 
-    zarray_x: zarr.Array = root.array("xc", xcoords, chunks=(5, 5), dtype="int8")
+    # Coordinate arrays with values
+    zarray_x: zarr.Array = root.create_array(
+        name="xc",
+        shape=xcoords.shape,
+        chunks=(5, 5),
+        dtype="int8",
+        dimension_names=["x", "y"],
+    )
     zarray_x.attrs["_ARRAY_DIMENSIONS"] = ["x", "y"]
-    zarray_y: zarr.Array = root.array("yc", ycoords, chunks=(5, 5), dtype="int8")
+
+    zarray_y: zarr.Array = root.create_array(
+        name="yc",
+        shape=ycoords.shape,
+        chunks=(5, 5),
+        dtype="int8",
+        dimension_names=["x", "y"],
+    )
     zarray_y.attrs["_ARRAY_DIMENSIONS"] = ["x", "y"]
-    zarr.consolidate_metadata(store)
+
+    zarr.consolidate_metadata(store, zarr_format=3)
     store.close()
+
     return tmp_path
 
 
