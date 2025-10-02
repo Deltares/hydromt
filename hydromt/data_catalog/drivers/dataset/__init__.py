@@ -1,6 +1,6 @@
 """Dataset Drivers."""
 
-from .dataset_driver import DatasetDriver
-from .xarray_driver import DatasetXarrayDriver
+from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
+from hydromt.data_catalog.drivers.dataset.xarray_driver import DatasetXarrayDriver
 
 __all__ = ["DatasetDriver", "DatasetXarrayDriver"]

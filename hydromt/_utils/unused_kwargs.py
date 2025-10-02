@@ -1,9 +1,9 @@
 """Utilities for logging unused kwargs."""
 
-from logging import Logger, getLogger
+import logging
 from typing import Any, Dict
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["_warn_on_unused_kwargs"]
 

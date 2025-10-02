@@ -1,8 +1,10 @@
 """URIResolvers obtain multiple URIs before being passed to Drivers."""
 
-from .convention_resolver import ConventionResolver
-from .raster_tindex_resolver import RasterTindexResolver
-from .uri_resolver import URIResolver
+from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
+from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
+    RasterTindexResolver,
+)
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 
 __all__ = [
     "ConventionResolver",

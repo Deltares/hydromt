@@ -13,6 +13,7 @@ from hydromt._compat import HAS_PYET
 if HAS_PYET:
     import pyet
 
+
 logger = logging.getLogger(__name__)
 
 __all__ = [

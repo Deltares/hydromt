@@ -1,8 +1,8 @@
 """RasterDatasetDriver for zarr data."""
 
+import logging
 from copy import deepcopy
 from functools import partial
-from logging import Logger, getLogger
 from os.path import splitext
 from typing import Callable, ClassVar, List, Optional
 
@@ -23,7 +23,7 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 _ZARR_EXT = ".zarr"
 _NETCDF_EXT = [".nc", ".netcdf"]

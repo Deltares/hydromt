@@ -1,6 +1,6 @@
 """Implementation for grid based workflows."""
 
-from logging import Logger, getLogger
+import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -21,7 +21,7 @@ from hydromt.model.processes.region import (
     parse_region_grid,
 )
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "create_grid_from_region",

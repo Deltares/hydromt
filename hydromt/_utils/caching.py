@@ -15,7 +15,6 @@ from fsspec import AbstractFileSystem, url_to_fs
 from pyproj import CRS
 
 from hydromt._compat import HAS_GDAL
-from hydromt._typing.type_def import StrPath
 from hydromt._utils.uris import _strip_scheme, _strip_vsi
 from hydromt.config import SETTINGS
 
@@ -23,6 +22,7 @@ if HAS_GDAL:
     from osgeo import gdal
 
     gdal.UseExceptions()
+
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ def _cache_vrt_tiles(
     vrt_uri: str,
     fs: Optional[AbstractFileSystem] = None,
     geom: Optional[gpd.GeoSeries] = None,
-    cache_dir: StrPath = SETTINGS.cache_root,
+    cache_dir: str | Path = SETTINGS.cache_root,
 ) -> Path:
     """Cache vrt tiles that intersect with geom.
 

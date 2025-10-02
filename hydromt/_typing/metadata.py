@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, Union
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from typing_extensions import Annotated
 
-from .crs import CRS
+from hydromt._typing.crs import CRS
 
 # always stringify version
 Version = Annotated[str, BeforeValidator(str)]

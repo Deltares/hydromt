@@ -1,6 +1,6 @@
 """DataSource class for the Dataset type."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
@@ -23,7 +23,7 @@ from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DatasetSource(DataSource):

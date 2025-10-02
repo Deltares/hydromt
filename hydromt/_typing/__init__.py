@@ -1,11 +1,10 @@
 """A module for all of the type definitions used in HydroMT."""
 
-from .crs import CRS
-from .deferred_file_close import DeferredFileClose
-from .fsspec_types import FS
-from .metadata import SourceMetadata
-from .model_mode import ModelMode
-from .type_def import (
+from hydromt._typing.crs import CRS
+from hydromt._typing.fsspec_types import FS
+from hydromt._typing.metadata import SourceMetadata
+from hydromt._typing.model_mode import ModelMode
+from hydromt._typing.type_def import (
     Bbox,
     Crs,
     Data,
@@ -18,7 +17,6 @@ from .type_def import (
     GpdShapeGeom,
     ModeLike,
     Number,
-    Pathdantic,
     Predicate,
     RasterDatasetSource,
     SourceSpecDict,
@@ -35,14 +33,12 @@ __all__ = [
     "Crs",
     "CRS",
     "StrPath",
-    "DeferredFileClose",
     "ExportConfigDict",
     "FS",
     "GeoDataframeSource",
     "GeoDatasetSource",
     "ModeLike",
     "Number",
-    "Pathdantic",
     "RasterDatasetSource",
     "SourceSpecDict",
     "TimeRange",

@@ -11,12 +11,10 @@ from pytest_mock import MockerFixture
 from hydromt.model.components.grid import (
     GridComponent,
 )
-from hydromt.model.root import ModelRoot
 
 
 def test_set_dataset(mock_model, hydds):
     grid_component = GridComponent(model=mock_model)
-    grid_component.root.is_reading_mode.return_value = False
     grid_component.set(data=hydds)
     assert len(grid_component.data) > 0
     assert isinstance(grid_component.data, xr.Dataset)
@@ -25,7 +23,6 @@ def test_set_dataset(mock_model, hydds):
 def test_set_dataarray(mock_model, hydds):
     grid_component = GridComponent(model=mock_model)
     data_array = hydds.to_array()
-    grid_component.root.is_reading_mode.return_value = False
     grid_component.set(data=data_array, name="data_array")
     assert "data_array" in grid_component.data.data_vars.keys()
     assert len(grid_component.data.data_vars) == 1
@@ -33,7 +30,6 @@ def test_set_dataarray(mock_model, hydds):
 
 def test_set_raise_errors(mock_model, hydds):
     grid_component = GridComponent(model=mock_model)
-    grid_component.root.is_reading_mode.return_value = False
     # Test setting nameless data array
     data_array = hydds.to_array()
     with pytest.raises(
@@ -60,13 +56,12 @@ def test_write(
     grid_component = GridComponent(model=mock_model)
     mock_model.components["grid"] = grid_component
     mock_model.name = "foo"
-    grid_component.root.is_reading_mode.return_value = False
     # Test skipping writing when no grid data has been set
     with caplog.at_level(logging.INFO):
         grid_component.write()
     assert "foo.grid: No grid data found, skip writing" in caplog.text
     # Test raise IOerror when model is in read only mode
-    mock_model.root = ModelRoot(tmp_path, mode="r")
+    mock_model.root.set(path=tmp_path, mode="r")
     grid_component = GridComponent(model=mock_model)
     mocker.patch.object(GridComponent, "data", ["test"])
     with pytest.raises(IOError, match="Model opened in read-only mode"):
@@ -76,10 +71,9 @@ def test_write(
 def test_read(tmp_path: Path, mock_model, hydds, mocker: MockerFixture):
     # Test for raising IOError when model is in writing mode
     grid_component = GridComponent(model=mock_model)
-    mock_model.root = ModelRoot(path=tmp_path, mode="w")
     with pytest.raises(IOError, match="Model opened in write-only mode"):
         grid_component.read()
-    mock_model.root = ModelRoot(path=tmp_path, mode="r+")
+    mock_model.root.set(path=tmp_path, mode="r+")
     grid_component = GridComponent(model=mock_model)
     mocker.patch("hydromt.model.components.grid.open_ncs", return_value={"grid": hydds})
     grid_component.read()
@@ -88,7 +82,6 @@ def test_read(tmp_path: Path, mock_model, hydds, mocker: MockerFixture):
 
 def test_properties(caplog: pytest.LogCaptureFixture, demda, mock_model):
     grid_component = GridComponent(mock_model)
-    grid_component.root.is_reading_mode.return_value = False
     # Test properties on empty grid
     caplog.set_level(logging.WARNING)
     res = grid_component.res
@@ -117,7 +110,7 @@ def test_properties(caplog: pytest.LogCaptureFixture, demda, mock_model):
 
 
 def test_initialize_grid(mock_model, tmp_path: Path):
-    mock_model.root = ModelRoot(path=tmp_path, mode="r")
+    mock_model.root.set(path=tmp_path, mode="r")
     grid_component = GridComponent(mock_model)
     grid_component.read = MagicMock()
     grid_component._initialize_grid()

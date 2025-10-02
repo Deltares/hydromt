@@ -1,7 +1,7 @@
 """Geoms component."""
 
+import logging
 from glob import glob
-from logging import Logger, getLogger
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -18,8 +18,7 @@ from hydromt.model.steps import hydromt_step
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeomsComponent(SpatialModelComponent):

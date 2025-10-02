@@ -23,6 +23,7 @@ New
 - `_io.writers.write_nc` writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well.
 - `hydromt check` accepts a `--format` flag to check either v1 or v0 data catalogs (#1265)
 - `hydromt check` accepts a `--upgrade` flag to upgrade v0 datacatalogs to the new v1 format (#1265)
+- `Model` can now be used as a context manager. This ensures that all open files are closed when exiting the context. (#1272)
 
 Changed
 -------
@@ -32,7 +33,6 @@ Changed
 - HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils`. (#1271)
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
 - ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
-
 
 Fixed
 -----
@@ -45,6 +45,7 @@ Fixed
 - Passing options to ``geodataframe_table`` driver now works. (#1271)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
+- All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
 
 Deprecated
 ----------

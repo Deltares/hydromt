@@ -44,6 +44,8 @@ xr.set_options(use_new_combine_kwarg_defaults=True)
 # https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
 pd.options.mode.copy_on_write = True
 
+xr.set_options(use_new_combine_kwarg_defaults=True)
+
 CURRENT_DIR = Path(__file__).parent
 DATA_DIR = join(dirname(abspath(__file__)), "..", "data")
 TEST_DATA_DIR = join(dirname(abspath(__file__)), "data")
@@ -654,8 +656,7 @@ def artifact_data():
 def mock_model(tmp_path: Path, mocker: MockerFixture):
     model = mocker.create_autospec(Model)
     model.components = {}
-    model.root = mocker.create_autospec(ModelRoot(tmp_path), instance=True)
-    model.root.path.return_value = tmp_path
+    model.root = ModelRoot(tmp_path)
     model.data_catalog = mocker.create_autospec(DataCatalog)
     return model
 

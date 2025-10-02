@@ -1,6 +1,6 @@
 """Implementation for the geodataset DataAdapter."""
 
-from logging import getLogger
+import logging
 from typing import Dict, List, Optional, Union, cast
 
 import numpy as np
@@ -28,7 +28,7 @@ from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["GeoDatasetAdapter"]
 

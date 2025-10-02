@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 from abc import ABC
 from copy import deepcopy
-from logging import Logger, getLogger
 from os.path import abspath, join, splitext
 from pathlib import Path, PurePath
 from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union
@@ -26,7 +26,7 @@ from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
 from hydromt.error import NoDataException, NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
