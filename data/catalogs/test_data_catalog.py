@@ -25,10 +25,10 @@ import json
 import logging
 from os.path import exists
 
+from hydromt._validators.data_catalog import DataCatalogValidator
 from pydantic_core import ValidationError
 
 from hydromt import DataCatalog
-from hydromt._validators.data_catalog import DataCatalogValidator
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
