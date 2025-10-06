@@ -17,12 +17,12 @@ Data and DataCatalog:
 .. toctree::
     :titlesonly:
 
-    ../_examples/reading_point_data.ipynb
-    ../_examples/reading_raster_data.ipynb
-    ../_examples/reading_tabular_data.ipynb
-    ../_examples/reading_vector_data.ipynb
-    ../_examples/prep_data_catalog.ipynb
-    ../_examples/export_data.ipynb
+    ../_examples/reading_point_data
+    ../_examples/reading_raster_data
+    ../_examples/reading_tabular_data
+    ../_examples/reading_vector_data
+    ../_examples/prep_data_catalog
+    ../_examples/export_data
 
 Working with models:
 ********************
@@ -30,10 +30,10 @@ Working with models:
 .. toctree::
     :titlesonly:
 
-    ../_examples/working_with_models_basics.ipynb
-    ../_examples/working_with_models.ipynb
-    ../_examples/working_with_meshcomponent.ipynb
-    ../_examples/delineate_basin.ipynb
+    ../_examples/working_with_models_basics
+    ../_examples/working_with_models
+    ../_examples/working_with_meshcomponent
+    ../_examples/delineate_basin
 
 GIS operations:
 ***************
@@ -41,9 +41,9 @@ GIS operations:
 .. toctree::
     :titlesonly:
 
-    ../_examples/working_with_raster.ipynb
-    ../_examples/working_with_flow_directions.ipynb
-    ../_examples/working_with_geodatasets.ipynb
+    ../_examples/working_with_raster
+    ../_examples/working_with_flow_directions
+    ../_examples/working_with_geodatasets
 
 Statistical Analysis:
 ***********************
@@ -51,4 +51,4 @@ Statistical Analysis:
 .. toctree::
     :titlesonly:
 
-    ../_examples/doing_extreme_value_analysis.ipynb
+    ../_examples/doing_extreme_value_analysis

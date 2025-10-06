@@ -7,7 +7,24 @@ Drivers
 =======
 
 The Hydromt drivers module provides drivers for various datasets and formats.
-Each driver implements `read` and optionally `write` methods, along with configuration options.
+Each driver implements `read` and optionally `write` methods, along with configuration options and a file system handler.
+
+
+FileSystem
+--------------
+
+All drivers rely on shared type definitions from :mod:`hydromt._typing`.
+
+.. currentmodule:: hydromt._typing
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
+   FSSpecFileSystem
+
+.. currentmodule:: hydromt.data_catalog.drivers
+
 
 Driver Base Classes
 --------------------
@@ -15,7 +32,6 @@ Driver Base Classes
 .. autosummary::
    :toctree: ../_generated
    :nosignatures:
-   :show-inheritance:
 
    BaseDriver
    DriverOptions
@@ -26,7 +42,6 @@ Raster Data Drivers
 .. autosummary::
    :toctree: ../_generated
    :nosignatures:
-   :show-inheritance:
 
    RasterDatasetDriver
    RasterDatasetXarrayDriver
@@ -40,7 +55,6 @@ Vector & Geospatial Drivers
 .. autosummary::
    :toctree: ../_generated
    :nosignatures:
-   :show-inheritance:
 
    GeoDataFrameDriver
    PyogrioDriver
@@ -53,7 +67,6 @@ Tabular Data Drivers
 .. autosummary::
    :toctree: ../_generated
    :nosignatures:
-   :show-inheritance:
 
    DataFrameDriver
    PandasDriver
@@ -64,7 +77,6 @@ Geospatial Dataset Drivers
 .. autosummary::
    :toctree: ../_generated
    :nosignatures:
-   :show-inheritance:
 
    GeoDatasetDriver
    GeoDatasetOptions
@@ -77,7 +89,6 @@ General Dataset Drivers
 .. autosummary::
    :toctree: ../_generated
    :nosignatures:
-   :show-inheritance:
 
    DatasetDriver
    DatasetXarrayDriver
@@ -88,7 +99,6 @@ Preprocessing
 
 .. autosummary::
    :toctree: ../_generated
-   :show-inheritance:
 
    preprocessing.harmonise_dims
    preprocessing.remove_duplicates

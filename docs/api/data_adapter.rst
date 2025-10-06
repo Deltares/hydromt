@@ -1,61 +1,56 @@
 .. currentmodule:: hydromt.data_catalog.adapters
 
+.. _data_adapter:
+
+=============
+Data Adapters
+=============
+
+The Hydromt data adapter module provides an interface layer to harmonize
+different data formats and ensure consistency in transformations, reformatting, and metadata handling.
+
+Base Classes
+------------
 
 .. autosummary::
    :toctree: ../_generated
    :nosignatures:
 
    DataAdapterBase
+
+Raster Data Adapters
+--------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
    RasterDatasetAdapter
+
+Vector & Geospatial Adapters
+----------------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
    GeoDatasetAdapter
    GeoDataFrameAdapter
+
+Tabular Data Adapters
+---------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
    DataFrameAdapter
+
+General Dataset Adapters
+------------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
    DatasetAdapter
-
-DataAdapter
-===========
-
-.. autopydantic_model:: DataAdapterBase
-   :no-index:
-   :show-inheritance:
-   :members: transform
-
-RasterDataset
--------------
-
-.. autopydantic_model:: RasterDatasetAdapter
-   :no-index:
-   :show-inheritance:
-   :members: transform
-
-GeoDataset
-----------
-
-.. autopydantic_model:: GeoDatasetAdapter
-   :no-index:
-   :show-inheritance:
-   :members: transform
-
-GeoDataFrame
-------------
-
-.. autopydantic_model:: GeoDataFrameAdapter
-   :no-index:
-   :show-inheritance:
-   :members: transform
-
-DataFrame
----------
-
-.. autopydantic_model:: DataFrameAdapter
-   :no-index:
-   :show-inheritance:
-   :members: transform
-
-Dataset
--------
-
-.. autopydantic_model:: DatasetAdapter
-   :no-index:
-   :show-inheritance:
-   :members: transform

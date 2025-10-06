@@ -3,56 +3,46 @@
 .. _data_source:
 
 ============
-Data sources
+Data Sources
 ============
+
+The Hydromt data sources module provides access to various types of datasets.
+Each data source wraps data I/O behavior with standardized interfaces, providing consistent
+read and metadata operations across raster, vector, and tabular data.
+
+Base Classes
+------------
 
 .. autosummary::
    :toctree: ../_generated
    :nosignatures:
 
    DataSource
+
+Raster Data Sources
+-------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
    RasterDatasetSource
+
+Vector Data Sources
+-------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
    GeoDataFrameSource
-   DataFrameSource
    GeoDatasetSource
 
+Tabular Data Sources
+--------------------
 
-General
--------
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
 
-.. autopydantic_model:: DataSource
-   :no-index:
-   :show-inheritance:
-   :members: summary
-
-RasterDataset
--------------
-
-.. autopydantic_model:: RasterDatasetSource
-   :no-index:
-   :show-inheritance:
-   :members: read_data, to_stac_catalog, get_bbox, get_time_range, detect_bbox, detect_time_range
-
-GeoDataFrame
-------------
-
-.. autopydantic_model:: GeoDataFrameSource
-   :no-index:
-   :show-inheritance:
-   :members: read_data, to_stac_catalog, get_bbox, detect_bbox
-
-DataFrame
----------
-
-.. autopydantic_model:: DataFrameSource
-   :no-index:
-   :show-inheritance:
-   :members: read_data, to_stac_catalog
-
-GeoDataset
-------------
-
-.. autopydantic_model:: GeoDatasetSource
-   :no-index:
-   :show-inheritance:
-   :members: read_data, to_stac_catalog, get_bbox, detect_bbox
+   DataFrameSource
