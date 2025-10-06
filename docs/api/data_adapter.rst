@@ -1,54 +1,61 @@
 .. currentmodule:: hydromt.data_catalog.adapters
 
-DataAdapter
-===========
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
-   data_adapter_base.DataAdapterBase
+   DataAdapterBase
+   RasterDatasetAdapter
+   GeoDatasetAdapter
+   GeoDataFrameAdapter
+   DataFrameAdapter
+   DatasetAdapter
+
+DataAdapter
+===========
+
+.. autopydantic_model:: DataAdapterBase
+   :no-index:
+   :show-inheritance:
+   :members: transform
 
 RasterDataset
 -------------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   RasterDatasetAdapter
-   RasterDatasetAdapter.transform
+.. autopydantic_model:: RasterDatasetAdapter
+   :no-index:
+   :show-inheritance:
+   :members: transform
 
 GeoDataset
 ----------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   GeoDatasetAdapter
-   GeoDatasetAdapter.transform
+.. autopydantic_model:: GeoDatasetAdapter
+   :no-index:
+   :show-inheritance:
+   :members: transform
 
 GeoDataFrame
 ------------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   GeoDataFrameAdapter
-   GeoDataFrameAdapter.transform
+.. autopydantic_model:: GeoDataFrameAdapter
+   :no-index:
+   :show-inheritance:
+   :members: transform
 
 DataFrame
 ---------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   DataFrameAdapter
-   DataFrameAdapter.transform
+.. autopydantic_model:: DataFrameAdapter
+   :no-index:
+   :show-inheritance:
+   :members: transform
 
 Dataset
 -------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   DatasetAdapter
-   DatasetAdapter.transform
+.. autopydantic_model:: DatasetAdapter
+   :no-index:
+   :show-inheritance:
+   :members: transform

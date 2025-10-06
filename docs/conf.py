@@ -23,7 +23,6 @@ import numpy as np
 import sphinx_autosummary_accessors
 
 import hydromt
-import re
 import hydromt.plugins
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
@@ -109,27 +108,29 @@ version = hydromt.__version__
 
 
 # # -- Copy notebooks to include in docs -------
-if os.path.isdir("_examples"):
-    remove_dir_content("_examples")
-os.makedirs("_examples")
-shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
+nbsphinx_execute = "never"
+nbsphinx_allow_errors = True
+# if os.path.isdir("_examples"):
+#     remove_dir_content("_examples")
+# os.makedirs("_examples")
+# shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
 
 # replace all links of https://deltares.github.io/hydromt/.*/.*.rst.* with ../*.html.*
-for root, _, files in os.walk("_examples"):
-    for file in files:
-        if file.endswith(".ipynb"):
-            file_path = os.path.join(root, file)
-            with open(file_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            content = re.sub(
-                # This regex checks for anything https://deltares.github.io/hydromt/.../*.html.* and replaces it with ../*.html.*
-                # It makes the assumption that links in markdown always end with a closing parenthesis ) or a whitespace \s character
-                r"https://deltares\.github\.io/hydromt/[^\s/]+/([^\s]+)\.html([^\s\)]*)",
-                r"../\1.rst\2",
-                content
-            )
-            with open(file_path, "w", encoding="utf-8") as f:
-                f.write(content)
+# for root, _, files in os.walk("_examples"):
+#     for file in files:
+#         if file.endswith(".ipynb"):
+#             file_path = os.path.join(root, file)
+#             with open(file_path, "r", encoding="utf-8") as f:
+#                 content = f.read()
+#             content = re.sub(
+#                 # This regex checks for anything https://deltares.github.io/hydromt/.../*.html.* and replaces it with ../*.html.*
+#                 # It makes the assumption that links in markdown always end with a closing parenthesis ) or a whitespace \s character
+#                 r"https://deltares\.github\.io/hydromt/[^\s/]+/([^\s]+)\.html([^\s\)]*)",
+#                 r"../\1.rst\2",
+#                 content
+#             )
+#             with open(file_path, "w", encoding="utf-8") as f:
+#                 f.write(content)
 
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
@@ -188,6 +189,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",
     "sphinx_click",
+    "sphinxcontrib.autodoc_pydantic",
 ]
 suppress_warnings = [
     'autosummary.import_cycle',
@@ -214,7 +216,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_examples"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -226,6 +228,24 @@ todo_include_todos = False
 napoleon_numpy_docstring = True
 napoleon_google_docstring = False
 napoleon_preprocess_types = True
+
+# -- autodoc_pydantic settings -----------------------------------------
+# https://autodoc-pydantic.readthedocs.io/en/stable/users/configuration.html
+autodoc_pydantic_model_members = True
+autodoc_pydantic_model_hide_paramlist = True
+autodoc_pydantic_model_undoc_members = True
+autodoc_pydantic_model_show_json = False
+autodoc_pydantic_model_show_config_summary = False
+autodoc_pydantic_model_show_field_summary = False
+autodoc_pydantic_model_show_field_constraints = False
+autodoc_pydantic_model_show_validator_summary = False
+autodoc_pydantic_model_show_validator_members = False
+autodoc_pydantic_field_list_validators = False
+
+autodoc_pydantic_model_summary_list_order = "bysource"
+autodoc_pydantic_model_member_order = "bysource"
+
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

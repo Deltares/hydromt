@@ -1,0 +1,181 @@
+.. currentmodule:: hydromt.data_catalog.drivers
+
+.. _drivers:
+
+=======
+Drivers
+=======
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
+   BaseDriver
+   DriverOptions
+   RasterDatasetDriver
+   RasterDatasetXarrayDriver
+   RasterXarrayOptions
+   RasterioDriver
+   RasterioOptions
+   GeoDataFrameDriver
+   PyogrioDriver
+   GeoDataFrameTableDriver
+   GeoDataFrameTableOptions
+   DataFrameDriver
+   PandasDriver
+   GeoDatasetDriver
+   GeoDatasetOptions
+   GeoDatasetXarrayDriver
+   GeoDatasetVectorDriver
+   DatasetDriver
+   DatasetXarrayDriver
+   DatasetXarrayOptions
+
+Base
+----
+
+.. autopydantic_model:: BaseDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+.. autopydantic_model:: DriverOptions
+   :no-index:
+   :show-inheritance:
+
+.. currentmodule:: hydromt.data_catalog.drivers
+
+RasterDataset
+-------------
+
+.. autopydantic_model:: RasterDatasetDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+RasterDatasetXarrayDriver
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autopydantic_model:: RasterDatasetXarrayDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+.. autopydantic_model:: RasterXarrayOptions
+   :no-index:
+   :show-inheritance:
+
+RasterioDriver
+^^^^^^^^^^^^^^
+
+.. autopydantic_model:: RasterioDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+.. autopydantic_model:: RasterioOptions
+   :no-index:
+   :show-inheritance:
+
+GeoDataFrame
+------------
+
+.. autopydantic_model:: GeoDataFrameDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+PyogrioDriver
+^^^^^^^^^^^^^
+
+.. autopydantic_model:: PyogrioDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+GeoDataFrameTableDriver
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autopydantic_model:: GeoDataFrameTableDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+.. autopydantic_model:: GeoDataFrameTableOptions
+   :no-index:
+   :show-inheritance:
+
+DataFrame
+---------
+
+.. autopydantic_model:: DataFrameDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+PandasDriver
+^^^^^^^^^^^^
+
+.. autopydantic_model:: PandasDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+GeoDataset
+----------
+
+.. autopydantic_model:: GeoDatasetDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+.. autopydantic_model:: GeoDatasetOptions
+   :no-index:
+   :show-inheritance:
+
+GeoDatasetXarrayDriver
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. autopydantic_model:: GeoDatasetXarrayDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+GeoDatasetVectorDriver
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. autopydantic_model:: GeoDatasetVectorDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+Dataset
+-------
+
+.. autopydantic_model:: DatasetDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+DatasetXarrayDriver
+^^^^^^^^^^^^^^^^^^^
+
+.. autopydantic_model:: DatasetXarrayDriver
+   :no-index:
+   :show-inheritance:
+   :members: read, write
+
+.. autopydantic_model:: DatasetXarrayOptions
+   :no-index:
+   :show-inheritance:
+
+Preprocessing
+-------------
+
+.. autosummary::
+   :toctree: ../_generated
+
+   preprocessing.harmonise_dims
+   preprocessing.remove_duplicates
+   preprocessing.round_latlon
+   preprocessing.to_datetimeindex

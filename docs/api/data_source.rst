@@ -6,59 +6,53 @@
 Data sources
 ============
 
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
+   DataSource
+   RasterDatasetSource
+   GeoDataFrameSource
+   DataFrameSource
+   GeoDatasetSource
+
+
 General
 -------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   DataSource
-   DataSource.summary
+.. autopydantic_model:: DataSource
+   :no-index:
+   :show-inheritance:
+   :members: summary
 
 RasterDataset
 -------------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   RasterDatasetSource
-   RasterDatasetSource.read_data
-   RasterDatasetSource.to_stac_catalog
-   RasterDatasetSource.get_bbox
-   RasterDatasetSource.get_time_range
-   RasterDatasetSource.detect_bbox
-   RasterDatasetSource.detect_time_range
+.. autopydantic_model:: RasterDatasetSource
+   :no-index:
+   :show-inheritance:
+   :members: read_data, to_stac_catalog, get_bbox, get_time_range, detect_bbox, detect_time_range
 
 GeoDataFrame
 ------------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   GeoDataFrameSource
-   GeoDataFrameSource.read_data
-   GeoDataFrameSource.to_stac_catalog
-   GeoDataFrameSource.get_bbox
-   GeoDataFrameSource.detect_bbox
+.. autopydantic_model:: GeoDataFrameSource
+   :no-index:
+   :show-inheritance:
+   :members: read_data, to_stac_catalog, get_bbox, detect_bbox
 
 DataFrame
 ---------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   DataFrameSource
-   DataFrameSource.read_data
-   DataFrameSource.to_stac_catalog
+.. autopydantic_model:: DataFrameSource
+   :no-index:
+   :show-inheritance:
+   :members: read_data, to_stac_catalog
 
 GeoDataset
 ------------
 
-.. autosummary::
-   :toctree: ../_generated
-
-   GeoDatasetSource
-   GeoDatasetSource.read_data
-   GeoDatasetSource.to_stac_catalog
-   GeoDatasetSource.get_bbox
-   GeoDatasetSource.detect_bbox
+.. autopydantic_model:: GeoDatasetSource
+   :no-index:
+   :show-inheritance:
+   :members: read_data, to_stac_catalog, get_bbox, detect_bbox

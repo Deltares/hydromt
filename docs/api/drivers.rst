@@ -6,163 +6,89 @@
 Drivers
 =======
 
-Base
-----
+The Hydromt drivers module provides drivers for various datasets and formats.
+Each driver implements `read` and optionally `write` methods, along with configuration options.
+
+Driver Base Classes
+--------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
+   :show-inheritance:
 
    BaseDriver
-
-.. autosummary::
-   :toctree: ../_generated
-
    DriverOptions
 
-RasterDataset
--------------
+Raster Data Drivers
+--------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
+   :show-inheritance:
 
    RasterDatasetDriver
-   RasterDatasetDriver.read
-   RasterDatasetDriver.write
-
-RasterDatasetXarrayDriver
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    RasterDatasetXarrayDriver
-   RasterDatasetXarrayDriver.read
-   RasterDatasetXarrayDriver.write
-
-.. autosummary::
-   :toctree: ../_generated
-
    RasterXarrayOptions
-
-RasterioDriver
-^^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    RasterioDriver
-   RasterioDriver.read
-   RasterioDriver.write
-
-.. autosummary::
-   :toctree: ../_generated
-
    RasterioOptions
 
-GeoDataFrame
-------------
+Vector & Geospatial Drivers
+----------------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
+   :show-inheritance:
 
    GeoDataFrameDriver
-   GeoDataFrameDriver.read
-   GeoDataFrameDriver.write
-
-PyogrioDriver
-^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    PyogrioDriver
-   PyogrioDriver.read
-   PyogrioDriver.write
-
-GeoDataFrameTableDriver
-^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    GeoDataFrameTableDriver
-   GeoDataFrameTableDriver.read
-   GeoDataFrameTableDriver.write
+   GeoDataFrameTableOptions
 
-DataFrame
----------
+Tabular Data Drivers
+---------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
+   :show-inheritance:
 
    DataFrameDriver
-   DataFrameDriver.read
-   DataFrameDriver.write
-
-PandasDriver
-^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
    PandasDriver
-   PandasDriver.read
-   PandasDriver.write
 
-GeoDataset
-----------
+Geospatial Dataset Drivers
+---------------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
+   :show-inheritance:
 
    GeoDatasetDriver
-   GeoDatasetDriver.read
-   GeoDatasetDriver.write
-
-GeoDatasetXarrayDriver
-^^^^^^^^^^^^^^^^^^^^^^
-
-.. autosummary::
-   :toctree: ../_generated
-
+   GeoDatasetOptions
    GeoDatasetXarrayDriver
-   GeoDatasetXarrayDriver.read
-   GeoDatasetXarrayDriver.write
+   GeoDatasetVectorDriver
 
-GeoDatasetVectorDriver
-^^^^^^^^^^^^^^^^^^^^^^
-
-.. autosummary::
-    :toctree: ../_generated
-
-    GeoDatasetVectorDriver
-    GeoDatasetVectorDriver.read
-    GeoDatasetVectorDriver.write
-
-Dataset
--------
-
-.. autosummary::
-    :toctree: ../_generated
-
-    DatasetDriver
-    DatasetDriver.read
-    DatasetDriver.write
-
-DatasetXarrayDriver
-^^^^^^^^^^^^^^^^^^^^^^
+General Dataset Drivers
+------------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
+   :show-inheritance:
 
+   DatasetDriver
    DatasetXarrayDriver
-   DatasetXarrayDriver.read
-   DatasetXarrayDriver.write
+   DatasetXarrayOptions
 
 Preprocessing
 -------------
+
 .. autosummary::
    :toctree: ../_generated
+   :show-inheritance:
 
    preprocessing.harmonise_dims
    preprocessing.remove_duplicates

@@ -102,6 +102,7 @@ doc = [
 	"sphinx_design",                # doc layout
 	"sphinx-click",                 # click integration
 	"sbom4python",                  # generate software bill of materials
+	"autodoc_pydantic",             # pydantic autodoc
 ]
 examples = [
 	"cartopy",    # plotting examples
@@ -175,6 +176,8 @@ filterwarnings = [
 	"ignore:__array_wrap__ must accept context and return_scalar arguments \\(positionally\\) in the future:DeprecationWarning",
 	'ignore:Python 3.14 will, by default, filter extracted tar archives:DeprecationWarning',                                     # pooch tarfile in python 3.12
 	"ignore:'mode' parameter is deprecated and will be removed in Pillow 13:DeprecationWarning",                                 # Pillow 13
+	"ignore:numpy.ndarray size changed, may indicate binary incompatibility:RuntimeWarning",                                     # numpy 2.0
+	"ignore:Consolidated metadata is currently not part in the Zarr format 3 specification:zarr.errors.ZarrUserWarning",         # Investigate later when Zarr 3 is stable
 ]
 
 [tool.mypy]
@@ -234,6 +237,13 @@ docs-build = { cmd = [
 	"-W",
 ], depends-on = [
 	"doctest",
+] }
+docs-build-notest = { cmd = [
+	"sphinx-build",
+	"-M",
+	"html",
+	"docs",
+	"docs/_build",
 ] }
 docs = { depends-on = ["docs-build"] } # alias
 doc = { depends-on = ["docs-build"] } # alias
