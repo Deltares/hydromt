@@ -38,15 +38,6 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
     Supports reading point geometries from csv, excel (xls, xlsx), and parquet files
     using a combination of the pandas and geopandas libraries.
 
-    Driver **options** include:
-
-    * x_dim: Optional[str], name of the column containing the x coordinate. Not needed
-      if one of the default names is used ('x', 'longitude', 'lon', 'long').
-    * y_dim: Optional[str], name of the column containing the y coordinate. Not needed
-      if one of the default names is used ('y', 'latitude', 'lat').
-    * Any other option supported by the underlying pandas read functions,
-      e.g. `pd.read_csv`, `pd.read_excel`, `pd.read_parquet`.
-
     """
 
     name: ClassVar[str] = "geodataframe_table"

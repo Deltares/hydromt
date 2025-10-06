@@ -23,9 +23,6 @@ class PandasDriver(DataFrameDriver):
 
     Supports reading and writing csv, excel (xls, xlsx), parquet, fixed width formatted
     files (fwf) using pandas.
-
-    Driver **options** include any option supported by the pandas read functions,
-    e.g. `pd.read_csv`, `pd.read_excel`, `pd.read_parquet`, `pd.read_fwf`.
     """
 
     name = "pandas"

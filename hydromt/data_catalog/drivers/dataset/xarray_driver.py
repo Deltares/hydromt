@@ -58,13 +58,6 @@ class DatasetXarrayDriver(DatasetDriver):
     zarr files will be read using `xr.open_zarr` and netcdf files using
     `xr.open_mfdataset`.
 
-    Driver **options** include:
-
-    * preprocess: [str | None], name of preprocessor to apply before merging datasets.
-      Available preprocessors include: round_latlon, to_datetimeindex,
-      remove_duplicates, harmonise_dims. See their docstrings for details.
-    * Any other option supported by `xr.open_zarr` or `xr.open_mfdataset`.
-
     """
 
     name: ClassVar[str] = "dataset_xarray"

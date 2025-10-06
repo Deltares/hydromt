@@ -25,8 +25,6 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     Supports reading and writing files supported by the OGR library,
     including geopackage, shapefile, geojson and flatgeobuf.
-
-    Options in this driver are passed to `pyogrio.read_dataframe`.
     """
 
     name: ClassVar[str] = "pyogrio"

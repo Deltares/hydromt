@@ -38,14 +38,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
     Supports reading and writing zarr and netcdf files using xarray.
     zarr files will be read using `xr.open_zarr` and netcdf files using
     `xr.open_mfdataset`.
-
-    Driver **options** include:
-
-    * preprocess: Optional[str], name of preprocessor to apply before merging datasets.
-      Available preprocessors include: round_latlon, to_datetimeindex,
-      remove_duplicates, harmonise_dims. See their docstrings for details.
-    * Any other option supported by `xr.open_zarr` or `xr.open_mfdataset`.
-
     """
 
     name: ClassVar[str] = "geodataset_xarray"

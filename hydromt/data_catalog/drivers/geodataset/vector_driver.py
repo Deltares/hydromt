@@ -34,13 +34,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
     The geometry file and the external data file can be linked using a common column
     (e.g. an ID column).
 
-    Driver **options** include:
-
-    * preprocess: [str | None], name of preprocessor to apply on geodataset after
-      reading. Available preprocessors include: round_latlon, to_datetimeindex,
-      remove_duplicates, harmonise_dims. See their docstrings for details.
-    * Any other option supported by `hydromt.io.open_geodataset`.
-
     """
 
     name: ClassVar[str] = "geodataset_vector"

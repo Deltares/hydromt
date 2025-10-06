@@ -95,21 +95,6 @@ class RasterioDriver(RasterDatasetDriver):
     Driver for RasterDataset using the rasterio library: ``rasterio``.
 
     Supports reading and writing raster files using rasterio.
-
-    Driver **options** include:
-
-    * mosaic: bool, if True and multiple uris are given, will mosaic the datasets
-      together using `rasterio.merge.merge`. Default is False.
-    * mosaic_kwargs: dict, additional keyword arguments to pass to
-      `rasterio.merge.merge`.
-    * cache: bool, if True and reading from VRT files, will cache the tiles
-      locally to speed up reading. Default is False.
-    * cache_root: str, root directory for caching. Default is taken from
-      `hydromt.config.SETTINGS.cache_root`.
-    * cache_dir: str, subdirectory for caching. Default is the stem of the first
-      uri without extension.
-    * Any other option supported by `hydromt.io.readers.open_mfraster`.
-
     """
 
     name = "rasterio"
