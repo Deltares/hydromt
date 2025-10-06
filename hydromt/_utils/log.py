@@ -1,6 +1,7 @@
 """Implementations related to logging."""
 
 import logging
+import sys
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -26,10 +27,12 @@ def initialize_logging() -> None:
     If the root logger has a handler before hydromt is imported, no new handler will be added.
     """
     logging.captureWarnings(True)
-    logging.basicConfig(
-        format=_LOG_FORMAT,
-        level=logging.INFO,
-    )
+    _ROOT_LOGGER.setLevel(logging.INFO)
+    if not _ROOT_LOGGER.hasHandlers():
+        console = logging.StreamHandler(sys.stdout)
+        console.setLevel(logging.INFO)
+        console.setFormatter(_DEFAULT_FORMATTER)
+        _ROOT_LOGGER.addHandler(console)
     _ROOT_LOGGER.info(f"HydroMT version: {__version__}")
 
 
