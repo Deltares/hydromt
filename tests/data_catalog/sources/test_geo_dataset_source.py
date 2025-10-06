@@ -18,7 +18,7 @@ class TestGeoDatasetSource:
     def test_read_data(
         self,
         geoda: xr.DataArray,
-        mock_geo_ds_driver: GeoDatasetDriver,
+        MockGeoDatasetDriver: type[GeoDatasetDriver],
         mock_geo_ds_adapter: GeoDatasetAdapter,
         mock_resolver: URIResolver,
         managed_tmp_path: Path,
@@ -27,7 +27,7 @@ class TestGeoDatasetSource:
         source = GeoDatasetSource(
             root=".",
             name="geoda.zarr",
-            driver=mock_geo_ds_driver,
+            driver=MockGeoDatasetDriver(),
             data_adapter=mock_geo_ds_adapter,
             uri_resolver=mock_resolver,
             uri=str(managed_tmp_path / "geoda.zarr"),

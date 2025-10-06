@@ -24,7 +24,7 @@ class TestValidators:
         [
             (DataFrameSource, "mock_df_adapter"),
             (DatasetSource, "mock_ds_adapter"),
-            (GeoDataFrameSource, "mock_geodataframe_adapter"),
+            (GeoDataFrameSource, "mock_gdf_adapter"),
             (GeoDatasetSource, "mock_geo_ds_adapter"),
             (RasterDatasetSource, "mock_raster_ds_adapter"),
         ],
@@ -55,7 +55,7 @@ class TestValidators:
         [
             (DataFrameSource, "MockDataFrameDriver", "mock_df_adapter"),
             (DatasetSource, "MockDatasetDriver", "mock_ds_adapter"),
-            (GeoDataFrameSource, "MockGeoDataFrameDriver", "mock_geodataframe_adapter"),
+            (GeoDataFrameSource, "MockGeoDataFrameDriver", "mock_gdf_adapter"),
             (GeoDatasetSource, "MockGeoDatasetDriver", "mock_geo_ds_adapter"),
             (RasterDatasetSource, "MockRasterDatasetDriver", "mock_raster_ds_adapter"),
         ],
@@ -174,7 +174,7 @@ class TestValidators:
             (
                 GeoDataFrameSource,
                 "MockGeoDataFrameDriver",
-                "mock_geodataframe_adapter",
+                "mock_gdf_adapter",
                 "test.gpkg",
             ),
             (
@@ -233,7 +233,7 @@ class TestValidators:
             (
                 GeoDataFrameSource,
                 "MockGeoDataFrameReadOnlyDriver",
-                "mock_geodataframe_adapter",
+                "mock_gdf_adapter",
                 "test.gpkg",
             ),
             (

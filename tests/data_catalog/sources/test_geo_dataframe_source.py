@@ -35,16 +35,16 @@ class TestGeoDataFrameSource:
 
     def test_raises_on_invalid_fields(
         self,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
-        mock_geodf_driver: GeoDataFrameDriver,
+        mock_gdf_adapter: GeoDataFrameAdapter,
+        MockGeoDataFrameDriver: type[GeoDataFrameDriver],
     ):
         with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
             GeoDataFrameSource(
                 root=".",
                 name="name",
                 uri="uri",
-                data_adapter=mock_geodataframe_adapter,
-                driver=mock_geodf_driver,
+                data_adapter=mock_gdf_adapter,
+                driver=MockGeoDataFrameDriver(),
                 foo="bar",
             )
 
@@ -52,15 +52,15 @@ class TestGeoDataFrameSource:
         self,
         geodf: gpd.GeoDataFrame,
         mock_resolver: URIResolver,
-        mock_geodf_driver: GeoDataFrameDriver,
-        mock_geodataframe_adapter: GeoDataFrameAdapter,
+        MockGeoDataFrameDriver: type[GeoDataFrameDriver],
+        mock_gdf_adapter: GeoDataFrameAdapter,
     ):
         data_source = GeoDataFrameSource(
             root=".",
             name="geojsonfile",
             data_type="GeoDataFrame",
-            driver=mock_geodf_driver,
-            data_adapter=mock_geodataframe_adapter,
+            driver=MockGeoDataFrameDriver(),
+            data_adapter=mock_gdf_adapter,
             uri_resolver=mock_resolver,
             uri="testuri",
         )
