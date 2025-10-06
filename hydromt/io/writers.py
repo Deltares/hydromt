@@ -141,7 +141,7 @@ def write_nc(
     # Try to write the file
     try:
         ds.to_netcdf(file_path, **kwargs)
-    except PermissionError:
+    except OSError:
         logger.debug(f"Could not write to file {file_path.as_posix()}, deferring write")
 
         unique_str = f"{file_path}_{uuid.uuid4()}"

@@ -8,10 +8,10 @@ from typing import Any, ClassVar
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from hydromt._abstract_base import AbstractBaseModel
-from hydromt._typing.error import NoDataStrategy
 from hydromt._typing.fsspec_types import (
     FSSpecFileSystem,
 )
+from hydromt.error import NoDataStrategy
 from hydromt.plugins import PLUGINS
 
 logger: Logger = getLogger(__name__)

@@ -10,14 +10,13 @@ from fsspec.core import split_protocol
 
 from hydromt._typing import (
     Geom,
-    NoDataStrategy,
     SourceMetadata,
     TimeRange,
     Zoom,
-    exec_nodata_strat,
 )
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import zoom_to_overview_level
 
 logger: Logger = getLogger(__name__)

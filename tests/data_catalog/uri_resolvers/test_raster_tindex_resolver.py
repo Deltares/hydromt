@@ -5,11 +5,11 @@ import geopandas as gpd
 import pytest
 from shapely.geometry import box
 
-from hydromt._typing import NoDataException, SourceMetadata
-from hydromt._typing.fsspec_types import FSSpecFileSystem
+from hydromt._typing import FSSpecFileSystem, SourceMetadata
 from hydromt.data_catalog.uri_resolvers.raster_tindex_resolver import (
     RasterTindexResolver,
 )
+from hydromt.error import NoDataException
 
 
 class TestRasterTindexResolver:

@@ -1,6 +1,6 @@
 import logging
 
-from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 
 _LOGGER_NAME = "test_logger"
 logger = logging.getLogger(_LOGGER_NAME)

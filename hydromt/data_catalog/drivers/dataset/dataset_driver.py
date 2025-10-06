@@ -1,4 +1,4 @@
-"""Driver for Datasets."""
+"""Abstract driver to read datasets."""
 
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
@@ -12,10 +12,10 @@ from hydromt._typing import (
     TimeRange,
     Variables,
 )
-from hydromt._typing.error import NoDataStrategy
 from hydromt.data_catalog.drivers.base_driver import (
     BaseDriver,
 )
+from hydromt.error import NoDataStrategy
 
 logger: Logger = getLogger(__name__)
 

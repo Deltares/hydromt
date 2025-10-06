@@ -9,12 +9,11 @@ import pandas as pd
 from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
 
-from hydromt._typing import Bbox, Geom, StrPath
-from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
-from hydromt._typing.metadata import SourceMetadata
+from hydromt._typing import Bbox, Geom, SourceMetadata, StrPath
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 
 logger: Logger = getLogger(__name__)
 

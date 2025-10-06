@@ -9,12 +9,10 @@ import xarray as xr
 
 from hydromt._typing import (
     Geom,
-    NoDataStrategy,
     Predicate,
     SourceMetadata,
     TimeRange,
     Variables,
-    exec_nodata_strat,
 )
 from hydromt._typing.type_def import Number
 from hydromt._utils import (
@@ -27,6 +25,7 @@ from hydromt._utils import (
     _slice_temporal_dimension,
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
 
 logger = getLogger(__name__)

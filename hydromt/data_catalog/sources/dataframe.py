@@ -8,7 +8,6 @@ from pydantic import Field
 from pystac import Catalog as StacCatalog
 
 from hydromt._typing import (
-    NoDataStrategy,
     StrPath,
     TimeRange,
 )
@@ -16,6 +15,7 @@ from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataSource
+from hydromt.error import NoDataStrategy
 
 logger: Logger = getLogger(__name__)
 

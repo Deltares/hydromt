@@ -5,10 +5,10 @@ from typing import Any, Dict, Iterator
 import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
-from hydromt._typing import NoDataException
 from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
+from hydromt.error import NoDataException
 
 
 class TestConventionResolver:

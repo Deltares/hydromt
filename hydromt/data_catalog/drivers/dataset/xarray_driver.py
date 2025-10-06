@@ -13,7 +13,6 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
 )
-from hydromt._typing.error import NoDataStrategy, exec_nodata_strat
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
@@ -21,6 +20,7 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
+from hydromt.error import NoDataStrategy, exec_nodata_strat
 
 logger: Logger = getLogger(__name__)
 

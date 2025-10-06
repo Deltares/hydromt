@@ -4,11 +4,11 @@ from typing import Any, Dict, List
 import pandas as pd
 import pytest
 
-from hydromt._typing import NoDataException
 from hydromt.data_catalog.adapters import DataFrameAdapter, GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver, GeoDataFrameDriver
 from hydromt.data_catalog.sources import DataFrameSource, DataSource, GeoDataFrameSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
+from hydromt.error import NoDataException
 
 
 class TestDataSource:

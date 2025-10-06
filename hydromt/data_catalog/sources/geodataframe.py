@@ -17,7 +17,6 @@ from pystac import MediaType
 from hydromt._typing import (
     Bbox,
     Geom,
-    NoDataStrategy,
     StrPath,
     TotalBounds,
 )
@@ -25,6 +24,7 @@ from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources.data_source import DataSource
+from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 
 logger: Logger = getLogger(__name__)

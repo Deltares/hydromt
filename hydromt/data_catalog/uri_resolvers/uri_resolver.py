@@ -10,11 +10,11 @@ from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import (
     FSSpecFileSystem,
     Geom,
-    NoDataStrategy,
     SourceMetadata,
     TimeRange,
     Zoom,
 )
+from hydromt.error import NoDataStrategy
 from hydromt.plugins import PLUGINS
 
 logger: Logger = getLogger(__name__)
