@@ -32,3 +32,4 @@ help you get started with HydroMT. Our user guide is separated into four (main) 
   advanced_user/index
   plugin_dev/index
   core_dev/index
+  examples_index

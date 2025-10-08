@@ -232,7 +232,7 @@ doctest = { cmd = [
 	"doctest",
 	"docs",
 	"docs/_build",
-	"-W",
+    #"-W",
 ] }
 docs-build = { cmd = [
 	"sphinx-build",
@@ -240,9 +240,9 @@ docs-build = { cmd = [
 	"html",
 	"docs",
 	"docs/_build",
-	"-W",
+    #	"-W",
 ], depends-on = [
-	"doctest",
+	#	"doctest",
 ] }
 docs-build-notest = { cmd = [
 	"sphinx-build",

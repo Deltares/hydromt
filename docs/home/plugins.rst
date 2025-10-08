@@ -11,7 +11,7 @@ Plugins
         :link: https://deltares.github.io/hydromt_wflow/
         :link-type: url
 
-        .. image:: _static/wflow.png
+        .. image:: ../_static/wflow.png
 
         +++
         Wflow plugin :octicon:`link-external`
@@ -21,7 +21,7 @@ Plugins
         :link: https://deltares.github.io/hydromt_sfincs/
         :link-type: url
 
-        .. image:: _static/SFINCS_logo.png
+        .. image:: ../_static/SFINCS_logo.png
 
         +++
         SFINCS plugin :octicon:`link-external`
@@ -31,7 +31,7 @@ Plugins
         :link: https://deltares.github.io/hydromt_delwaq/
         :link-type: url
 
-        .. image:: _static/Delft3D.png
+        .. image:: ../_static/Delft3D.png
 
         +++
         Delwaq plugin :octicon:`link-external`
@@ -52,7 +52,7 @@ Plugins
         :link: https://deltares.github.io/hydromt_delft3dfm/
         :link-type: url
 
-        .. image:: _static/Delft3D.png
+        .. image:: ../_static/Delft3D.png
 
         +++
         Delft3D FM plugin :octicon:`link-external`

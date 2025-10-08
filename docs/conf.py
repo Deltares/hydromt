@@ -108,10 +108,10 @@ author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 version = hydromt.__version__
 
 # # -- Copy notebooks to include in docs -------
-if os.path.isdir("_examples"):
-    remove_dir_content("_examples")
-os.makedirs("_examples")
-shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
+# if os.path.isdir("_examples"):
+#     remove_dir_content("_examples")
+# os.makedirs("_examples")
+# shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
 
 # replace all links of https://deltares.github.io/hydromt/.*/.*.rst.* with ../*.html.*
 for root, _, files in os.walk("_examples"):
@@ -156,8 +156,8 @@ for name in predefined_catalogs:
         print(e)
         continue
     write_nested_dropdown(name, data_cat, categories=categories)
-    write_nested_dropdown(name, data_cat, categories=categories)
     data_cat._sources = {}  # reset
+
 with open("_generated/predefined_catalogs.rst", "w") as f:
     f.writelines(
         [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
