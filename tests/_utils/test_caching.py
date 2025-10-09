@@ -8,16 +8,16 @@ import rasterio as rio
 
 from hydromt._compat import HAS_GDAL
 from hydromt._utils.caching import (
-    _cache_vrt_tiles,
-    _copy_to_local,
     _overlaps,
+    cache_vrt_tiles,
+    copy_to_local,
 )
 
 
 def test__copy_to_local(tmp_path: Path, data_dir: Path):
     # Call the function
-    _copy_to_local(
-        Path(data_dir, "parameters_data.yml"),
+    copy_to_local(
+        str(Path(data_dir, "parameters_data.yml")),
         tmp_path,
     )
 
@@ -28,6 +28,7 @@ def test__copy_to_local(tmp_path: Path, data_dir: Path):
 def test__overlaps_true(vrt_dataset: ET.Element, vrt_affine: rio.Affine):
     # Get a source element
     source = vrt_dataset.find("VRTRasterBand/SimpleSource")
+    assert source is not None
 
     # Call the function with a bbox overlapping with the tile
     out = _overlaps(source, affine=vrt_affine, bbox=[1, 0.5, 2.5, 2.5])
@@ -40,6 +41,7 @@ def test__overlaps_true(vrt_dataset: ET.Element, vrt_affine: rio.Affine):
 def test__overlaps_false(vrt_dataset: ET.Element, vrt_affine: rio.Affine):
     # Get a source element
     source = vrt_dataset.find("VRTRasterBand/SimpleSource")
+    assert source is not None
 
     # Call the function with a bbox not overlapping with the tile (lies to the right)
     out = _overlaps(source, affine=vrt_affine, bbox=[2.5, 0.5, 4.5, 2.5])
@@ -56,7 +58,7 @@ def test__cache_vrt_files(
     geom_select1: gpd.GeoDataFrame,
 ):
     # Call the function
-    out = _cache_vrt_tiles(
+    out = cache_vrt_tiles(
         vrt_uri=vrt_path.as_posix(),
         geom=geom_select1,
         cache_dir=vrt_cache_dir,
@@ -84,7 +86,7 @@ def test__cache_vrt_files_import_error(
         match="Can't cache vrt's without GDAL installed.",
     ):
         # Call the function
-        _ = _cache_vrt_tiles(
+        _ = cache_vrt_tiles(
             vrt_uri=vrt_path.as_posix(),
         )
 
@@ -96,7 +98,7 @@ def test__cache_vrt_files_append(
     geom_select1: gpd.GeoDataFrame,
 ):
     # Call the function
-    out = _cache_vrt_tiles(
+    out = cache_vrt_tiles(
         vrt_uri=vrt_path.as_posix(),
         geom=geom_select1,
         cache_dir=vrt_cache_dir,
@@ -105,7 +107,7 @@ def test__cache_vrt_files_append(
     assert out.is_file()
 
     # Call the function again, but on a larger area that encompasses the first file
-    out = _cache_vrt_tiles(
+    out = cache_vrt_tiles(
         vrt_uri=vrt_path.as_posix(),
         cache_dir=vrt_cache_dir,
     )
@@ -127,7 +129,7 @@ def test__cache_vrt_files_exists(
     geom_select1: gpd.GeoDataFrame,
 ):
     # Call the function
-    out = _cache_vrt_tiles(
+    out = cache_vrt_tiles(
         vrt_uri=vrt_path.as_posix(),
         geom=geom_select1,
         cache_dir=vrt_cache_dir,
@@ -136,7 +138,7 @@ def test__cache_vrt_files_exists(
     assert out.is_file()
 
     # Re-call with the same extent
-    out2 = _cache_vrt_tiles(
+    out2 = cache_vrt_tiles(
         vrt_uri=vrt_path.as_posix(),
         geom=geom_select1,
         cache_dir=vrt_cache_dir,
@@ -152,7 +154,7 @@ def test__cache_vrt_files_not_found(
     geom_select2: gpd.GeoDataFrame,
 ):
     # Call the function with a geometry that lies above
-    out = _cache_vrt_tiles(
+    out = cache_vrt_tiles(
         vrt_uri=vrt_path.as_posix(),
         geom=geom_select2,
         cache_dir=vrt_cache_dir,
@@ -170,22 +172,26 @@ def test__cache_vrt_files_meta_errors(
     # Without geotransform
     p = Path(tmp_path, "no_gtf.vrt")
     tmp_vrt = deepcopy(vrt_dataset)
-    tmp_vrt.remove(tmp_vrt.find("GeoTransform"))
+    geo_transform_el = tmp_vrt.find("GeoTransform")
+    assert geo_transform_el is not None
+    tmp_vrt.remove(geo_transform_el)
     ET.ElementTree(tmp_vrt).write(p)
 
     # Call the function, which should error
     with pytest.raises(ValueError, match="No GeoTransform found in:"):
-        _ = _cache_vrt_tiles(p.as_posix())
+        _ = cache_vrt_tiles(p.as_posix())
 
     # Without srs
     p = Path(tmp_path, "no_srs.vrt")
     tmp_vrt = deepcopy(vrt_dataset)
-    tmp_vrt.remove(tmp_vrt.find("SRS"))
+    srs_el = tmp_vrt.find("SRS")
+    assert srs_el is not None
+    tmp_vrt.remove(srs_el)
     ET.ElementTree(tmp_vrt).write(p)
 
     # Call the function, which should error
     with pytest.raises(ValueError, match="No SRS info found at:"):
-        _ = _cache_vrt_tiles(p.as_posix())
+        _ = cache_vrt_tiles(p.as_posix())
 
 
 @pytest.mark.skipif(not HAS_GDAL, reason="GDAL not installed.")
@@ -196,32 +202,38 @@ def test__cache_vrt_files_source_errors(
     # Without band
     p = Path(tmp_path, "no_band.vrt")
     tmp_vrt = deepcopy(vrt_dataset)
-    tmp_vrt.remove(tmp_vrt.find("VRTRasterBand"))
+    vrt_raster_band_el = tmp_vrt.find("VRTRasterBand")
+    assert vrt_raster_band_el is not None
+    tmp_vrt.remove(vrt_raster_band_el)
     ET.ElementTree(tmp_vrt).write(p)
 
     # Call the function, which should error
     with pytest.raises(ValueError, match="Could not find VRTRasterBand in:"):
-        _ = _cache_vrt_tiles(p.as_posix())
+        _ = cache_vrt_tiles(p.as_posix())
 
     # Without proper source data
     p = Path(tmp_path, "no_sources.vrt")
     tmp_vrt = deepcopy(vrt_dataset)
     band = tmp_vrt.find("VRTRasterBand")
-    for item in list(band.findall("SimpleSource")):
+    assert band is not None
+    for item in band.findall("SimpleSource"):
         band.remove(item)
     ET.ElementTree(tmp_vrt).write(p)
 
     # Call the function, which should error
     with pytest.raises(ValueError, match="No Source information found at:"):
-        _ = _cache_vrt_tiles(p.as_posix())
+        _ = cache_vrt_tiles(p.as_posix())
 
     # Without proper source data
     p = Path(tmp_path, "no_source_file.vrt")
     tmp_vrt = deepcopy(vrt_dataset)
     source = tmp_vrt.find("VRTRasterBand/SimpleSource")
-    source.remove(source.find("SourceFilename"))
+    assert source is not None
+    source_file_name_el = source.find("SourceFilename")
+    assert source_file_name_el is not None
+    source.remove(source_file_name_el)
     ET.ElementTree(tmp_vrt).write(p)
 
     # Call the function, which should error
     with pytest.raises(ValueError, match="Could not find Source File in vrt:"):
-        _ = _cache_vrt_tiles(p.as_posix())
+        _ = cache_vrt_tiles(p.as_posix())
