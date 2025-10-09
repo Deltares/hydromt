@@ -128,7 +128,7 @@ class DataFrameAdapter(DataAdapterBase):
         if time_range is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"Slicing time dime {time_range}")
             try:
-                df = df.iloc[df.index.slice_indexer(*time_range)]
+                df = df.iloc[df.index.slice_indexer(time_range.start, time_range.end)]
             except IndexError:
                 df = pd.DataFrame()
 

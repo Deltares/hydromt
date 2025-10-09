@@ -36,7 +36,7 @@ class ConventionResolver(URIResolver):
         time_range: TimeRange,
     ) -> pd.PeriodIndex:
         """Obtain the dates the user is searching for."""
-        t_range: pd.DatetimeIndex = pd.to_datetime(list(time_range))
+        t_range: pd.DatetimeIndex = pd.to_datetime([time_range.start, time_range.end])
         freq: str = "M" if "month" in keys else "Y"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates

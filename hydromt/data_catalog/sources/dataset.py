@@ -188,15 +188,18 @@ class DatasetSource(DataSource):
 
         Returns
         -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
+        range: TimeRange
+            Instance containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
         if ds is None:
             ds = self.read_data()
 
         try:
-            return (ds.time[0].values, ds.time[-1].values)
+            return TimeRange(
+                start=pd.to_datetime(ds.time[0].values).to_pydatetime(),
+                end=pd.to_datetime(ds.time[-1].values).to_pydatetime(),
+            )
         except AttributeError:
             raise AttributeError("Dataset has no dimension called 'time'")
 
@@ -222,9 +225,7 @@ class DatasetSource(DataSource):
           if the dataset was skipped.
         """
         try:
-            start_dt, end_dt = self.get_time_range(detect=True)
-            start_dt = pd.to_datetime(start_dt)
-            end_dt = pd.to_datetime(end_dt)
+            time_range = self.get_time_range(detect=True)
             props = {**self.metadata.model_dump(exclude_none=True, exclude_unset=True)}
             ext = splitext(self.full_uri)[-1]
             if ext == ".nc":
@@ -255,8 +256,8 @@ class DatasetSource(DataSource):
             bbox=None,
             properties=props,
             datetime=None,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
+            start_datetime=time_range.start,
+            end_datetime=time_range.end,
         )
         stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
         base_name = basename(self.full_uri)

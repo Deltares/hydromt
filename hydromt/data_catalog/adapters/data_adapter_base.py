@@ -37,7 +37,10 @@ class DataAdapterBase(BaseModel):
             return None
         elif dt := self.unit_add.get("time"):
             # subtract from source unit add
-            return (time - timedelta(seconds=dt) for time in time_range)
+            return TimeRange(
+                start=time_range.start - timedelta(seconds=dt),
+                end=time_range.end - timedelta(seconds=dt),
+            )
         else:
             return time_range
 

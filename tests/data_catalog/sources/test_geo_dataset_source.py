@@ -2,11 +2,11 @@ from pathlib import Path
 from typing import Type
 
 import numpy as np
-import pandas as pd
 import pytest
 import xarray as xr
 
 from hydromt._typing import SourceMetadata
+from hydromt._typing.type_def import TimeRange
 from hydromt.data_catalog.adapters import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 from hydromt.data_catalog.sources import GeoDatasetSource
@@ -93,7 +93,7 @@ class TestGeoDatasetSource:
     def test_detect_time_range(
         self, writable_source: GeoDatasetSource, geoda: xr.DataArray
     ):
-        geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
+        geoda_expected_time_range = TimeRange(start="01-01-2000", end="12-31-2000")
         geoda_detected_time_range = writable_source.detect_time_range(geoda)
         assert geoda_expected_time_range == geoda_detected_time_range
 

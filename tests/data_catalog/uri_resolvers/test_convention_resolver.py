@@ -6,6 +6,7 @@ import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
 from hydromt._typing.fsspec_types import FSSpecFileSystem
+from hydromt._typing.type_def import TimeRange
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.error import NoDataException
@@ -51,7 +52,7 @@ class TestConventionResolver:
         uris = sorted(
             resolver.resolve(
                 uri,
-                time_range=("2021-03-01", "2021-05-01"),
+                time_range=TimeRange(start="2021-03-01", end="2021-05-01"),
                 variables=["precip"],
             )
         )

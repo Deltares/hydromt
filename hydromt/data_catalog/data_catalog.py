@@ -22,7 +22,6 @@ from typing import (
     cast,
 )
 
-import dateutil.parser
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -1066,9 +1065,6 @@ class DataCatalog(object):
         new_root = new_root.absolute()
         new_root.mkdir(exist_ok=True)
 
-        if time_range:
-            time_range: TimeRange = _parse_time_range(time_range)
-
         # create copy of data with selected source names
         source_vars = {}
         if len(source_names) > 0:
@@ -1288,9 +1284,6 @@ class DataCatalog(object):
         """
         if isinstance(variables, str):
             variables = [variables]
-
-        if time_range:
-            time_range = _parse_time_range(time_range)
 
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
@@ -1552,9 +1545,6 @@ class DataCatalog(object):
         else:
             mask = None
 
-        if time_range:
-            time_range = _parse_time_range(time_range)
-
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1670,9 +1660,6 @@ class DataCatalog(object):
                 data_like, provider, version
             )
 
-        if time_range:
-            time_range = _parse_time_range(time_range)
-
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
@@ -1756,9 +1743,6 @@ class DataCatalog(object):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
             )
-
-        if time_range:
-            time_range = _parse_time_range(time_range)
 
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
@@ -1895,12 +1879,3 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             data_list.extend(_denormalise_data_dict(item))
 
     return data_list
-
-
-def _parse_time_range(
-    time_range: Tuple[Union[str, datetime], Union[str, datetime]],
-) -> TimeRange:
-    """Parse timerange with strings to datetime."""
-    if any(map(lambda t: not isinstance(t, datetime), time_range)):
-        time_range = tuple(map(lambda t: dateutil.parser.parse(t), time_range))
-    return cast(TimeRange, time_range)

@@ -442,7 +442,7 @@ def export_test_slice_objects(
     tmp_path: Path, data_catalog: DataCatalog
 ) -> Tuple[DataCatalog, Bbox, TimeRange, List[str], Path]:
     bbox = [12.0, 46.0, 13.0, 46.5]  # Piava river
-    time_range = ("2010-02-10", "2010-02-15")
+    time_range = TimeRange(start="2010-02-10", end="2010-02-15")
     data_lib_path = tmp_path / "data_catalog.yml"
     source_names = [
         "era5[precip,temp]",
@@ -569,7 +569,7 @@ def test_export_dataframe(tmp_path: Path, df, df_time):
     data_catalog_reread_path = tmp_path / "newdir_filter"
     data_catalog.export_data(
         str(data_catalog_reread_path),
-        time_range=("2010-02-01", "2010-02-14"),
+        time_range=TimeRange(start="2010-02-01", end="2010-02-14"),
         bbox=[11.70, 45.35, 12.95, 46.70],
         handle_nodata=NoDataStrategy.IGNORE,
     )
@@ -685,9 +685,7 @@ class TestGetRasterDataset:
         name = "chirps_global"
         source = cast(RasterDatasetSource, data_catalog.get_source(name))
         bbox, _ = source.get_bbox()
-        start_dt, end_dt = source.get_time_range(detect=True)
-        start_dt = pd.to_datetime(start_dt)
-        end_dt = pd.to_datetime(end_dt)
+        time_range = source.get_time_range(detect=True)
         raster_stac_catalog = StacCatalog(id=name, description=name)
         raster_stac_item = StacItem(
             name,
@@ -695,8 +693,8 @@ class TestGetRasterDataset:
             bbox=list(bbox),
             properties=source.metadata.model_dump(exclude_none=True),
             datetime=None,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
+            start_datetime=time_range.start,
+            end_datetime=time_range.end,
         )
         raster_stac_asset = StacAsset(str(source.uri))
         raster_base_name = basename(source.uri)
@@ -920,7 +918,7 @@ class TestGetRasterDataset:
         ds = data_catalog.get_rasterdataset(
             "cmip6_NOAA-GFDL/GFDL-ESM4_historical_r1i1p1f1_Amon",
             variables=["precip", "temp"],
-            time_range=("1990-01-01", "1990-03-01"),
+            time_range=TimeRange(start="1990-01-01", end="1990-03-01"),
         )
         # Check reading and some preprocess
         assert "precip" in ds
@@ -1298,9 +1296,7 @@ class TestGetGeoDataset:
         name = "gtsmv3_eu_era5"
         source = cast(GeoDatasetSource, data_catalog.get_source(name))
         bbox, _ = source.get_bbox()
-        start_dt, end_dt = source.get_time_range(detect=True)
-        start_dt = pd.to_datetime(start_dt)
-        end_dt = pd.to_datetime(end_dt)
+        time_range = source.get_time_range(detect=True)
         gds_stac_catalog = StacCatalog(id=name, description=name)
         gds_stac_item = StacItem(
             name,
@@ -1308,8 +1304,8 @@ class TestGetGeoDataset:
             bbox=list(bbox),
             properties=source.metadata.model_dump(exclude_none=True),
             datetime=None,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
+            start_datetime=time_range.start,
+            end_datetime=time_range.end,
         )
         gds_stac_asset = StacAsset(str(source.uri))
         gds_base_name = basename(source.uri)
@@ -1345,7 +1341,7 @@ def test_get_geodataset_bbox_time_range(data_catalog: DataCatalog):
     da = data_catalog.get_geodataset(
         da,
         bbox=bbox,
-        time_range=("2010-02-01", "2010-02-05"),
+        time_range=TimeRange(start="2010-02-01", end="2010-02-05"),
         driver="geodataset_xarray",
     )
     assert da.vector.index.size == 2
@@ -1372,9 +1368,9 @@ def test_get_geodataset_unknown_keys(data_catalog):
 def test_get_dataset(timeseries_df: pd.DataFrame, data_catalog: DataCatalog):
     test_dataset: xr.Dataset = timeseries_df.to_xarray()
     subset_timeseries = timeseries_df.iloc[[0, len(timeseries_df) // 2]]
-    time_range = (
-        subset_timeseries.index[0].to_pydatetime(),
-        subset_timeseries.index[1].to_pydatetime(),
+    time_range = TimeRange(
+        start=subset_timeseries.index[0].to_pydatetime(),
+        end=subset_timeseries.index[1].to_pydatetime(),
     )
     ds = data_catalog.get_dataset(test_dataset, time_range=time_range)
     assert isinstance(ds, xr.Dataset)
@@ -1527,7 +1523,7 @@ class TestGetDataFrame:
     def test_time_slice(self, csv_uri_time: str, data_catalog: DataCatalog):
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
-            time_range=("2007-01-02", "2007-01-04"),
+            time_range=TimeRange(start="2007-01-02", end="2007-01-04"),
             driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
         )
         assert dfts.shape[0] == 3
@@ -1631,9 +1627,9 @@ def test_detect_extent_geodataframe(data_catalog):
 def test_detect_extent_geodataset(data_catalog):
     name = "gtsmv3_eu_era5"
     bbox = (12.22412, 45.22705, 12.99316, 45.62256)
-    expected_temporal_range = (
-        np.datetime64("2010-02-01"),
-        np.datetime64("2010-02-14T23:50:00.000000000"),
+    expected_temporal_range = TimeRange(
+        start=pd.to_datetime("2010-02-01"),
+        end=pd.to_datetime("2010-02-14T23:50:00.000000000"),
     )
     ds = cast(GeoDatasetAdapter, data_catalog.get_source(name))
     detected_spatial_range = _to_geographic_bbox(*ds.get_bbox(detect=True))

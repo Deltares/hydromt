@@ -259,15 +259,15 @@ class GeoDatasetSource(DataSource):
 
         Returns
         -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
+        range: TimeRange
+            A TimeRange containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
         if ds is None:
             ds = self.read_data()
-        return (
-            ds[ds.vector.time_dim].min().values,
-            ds[ds.vector.time_dim].max().values,
+        return TimeRange(
+            start=pd.to_datetime(ds[ds.vector.time_dim].min().values).to_pydatetime(),
+            end=pd.to_datetime(ds[ds.vector.time_dim].max().values).to_pydatetime(),
         )
 
     def to_stac_catalog(
@@ -294,9 +294,7 @@ class GeoDatasetSource(DataSource):
         try:
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
-            start_dt, end_dt = self.get_time_range(detect=True)
-            start_dt = pd.to_datetime(start_dt)
-            end_dt = pd.to_datetime(end_dt)
+            time_range = self.get_time_range(detect=True)
             props = {**self.metadata.model_dump(exclude_none=True), "crs": crs}
             ext = splitext(self.uri)[-1]
             if ext in [".nc", ".vrt"]:
@@ -325,8 +323,8 @@ class GeoDatasetSource(DataSource):
             bbox=bbox,
             properties=props,
             datetime=None,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
+            start_datetime=time_range.start,
+            end_datetime=time_range.end,
         )
         stac_asset = StacAsset(str(self.uri), media_type=media_type)
         base_name = basename(self.uri)

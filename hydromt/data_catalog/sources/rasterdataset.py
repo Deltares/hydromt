@@ -4,7 +4,6 @@ from logging import Logger, getLogger
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
 
-import pandas as pd
 import xarray as xr
 from pydantic import Field
 from pyproj import CRS
@@ -300,9 +299,7 @@ class RasterDatasetSource(DataSource):
         try:
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
-            start_dt, end_dt = self.get_time_range(detect=True)
-            start_dt = pd.to_datetime(start_dt)
-            end_dt = pd.to_datetime(end_dt)
+            time_range = self.get_time_range(detect=True)
             props = {**self.metadata.model_dump(exclude_none=True), "crs": crs}
             ext = splitext(self.full_uri)[-1]
             if ext == ".nc" or ext == ".vrt":
@@ -339,8 +336,8 @@ class RasterDatasetSource(DataSource):
                 bbox=list(bbox),
                 properties=props,
                 datetime=None,
-                start_datetime=start_dt,
-                end_datetime=end_dt,
+                start_datetime=time_range.start,
+                end_datetime=time_range.end,
             )
             stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
             base_name = basename(self.full_uri)
