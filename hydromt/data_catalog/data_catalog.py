@@ -293,8 +293,9 @@ class DataCatalog(object):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        _source: DataSource = self.get_source(source, provider, version)
-        return _source.get_bbox(detect=detect)
+        return self.get_source(source, provider, version).get_bbox(
+            detect=detect, strict=strict
+        )
 
     def get_source_time_range(
         self,
@@ -328,8 +329,9 @@ class DataCatalog(object):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        _source = self.get_source(source, provider, version)
-        return _source.get_time_range(detect=detect, strict=strict)
+        return self.get_source(source, provider, version).get_time_range(
+            detect=detect, strict=strict
+        )
 
     def get_source(
         self,
