@@ -13,6 +13,7 @@ import pytest
 import xarray as xr
 import xugrid as xu
 import zarr
+import zarr.storage
 from dask import config as dask_config
 from pytest_mock import MockerFixture
 from shapely.geometry import box
@@ -99,8 +100,10 @@ def _local_catalog_eps(monkeypatch, PLUGINS):
 @pytest.fixture
 def example_zarr_file(managed_tmp_path: Path) -> Path:
     tmp_path = managed_tmp_path / "0s.zarr"
-    store = zarr.DirectoryStore(tmp_path)
-    root: zarr.Group = zarr.group(store=store, overwrite=True)
+    store = zarr.storage.LocalStore(tmp_path)
+
+    # Force v3
+    root: zarr.Group = zarr.group(store=store, overwrite=True, zarr_format=3)
 
     # Main variable
     zarray_var: zarr.Array = root.zeros(
@@ -108,6 +111,7 @@ def example_zarr_file(managed_tmp_path: Path) -> Path:
         shape=(10, 10),
         chunks=(5, 5),
         dtype="int8",
+        dimension_names=["x", "y"],
     )
     zarray_var[0, 0] = 42  # trigger write
     zarray_var.attrs.update(
@@ -118,28 +122,31 @@ def example_zarr_file(managed_tmp_path: Path) -> Path:
             "type_preferred": "int8",
         }
     )
+
     # Create symmetrical coords
     xy = np.linspace(0, 9, 10, dtype=np.int8)
     xcoords, ycoords = np.meshgrid(xy, xy)
 
     # Coordinate arrays with values
-    zarray_x: zarr.Array = root.array(
+    zarray_x: zarr.Array = root.create_array(
         name="xc",
-        data=xcoords,
+        shape=xcoords.shape,
         chunks=(5, 5),
         dtype="int8",
+        dimension_names=["x", "y"],
     )
     zarray_x.attrs["_ARRAY_DIMENSIONS"] = ["x", "y"]
 
-    zarray_y: zarr.Array = root.array(
+    zarray_y: zarr.Array = root.create_array(
         name="yc",
-        data=ycoords,
+        shape=ycoords.shape,
         chunks=(5, 5),
         dtype="int8",
+        dimension_names=["x", "y"],
     )
     zarray_y.attrs["_ARRAY_DIMENSIONS"] = ["x", "y"]
 
-    zarr.consolidate_metadata(store)
+    zarr.consolidate_metadata(store, zarr_format=3)
     store.close()
 
     return tmp_path
