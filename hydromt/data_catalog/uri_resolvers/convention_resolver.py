@@ -1,8 +1,8 @@
 """URIResolver using HydroMT naming conventions."""
 
+import logging
 from functools import reduce
 from itertools import chain, product
-from logging import Logger, getLogger
 from typing import Any, Iterable, Optional
 
 import pandas as pd
@@ -19,7 +19,7 @@ from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import zoom_to_overview_level
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ConventionResolver(URIResolver):

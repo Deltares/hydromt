@@ -1,7 +1,7 @@
 """Base class for different drivers."""
 
+import logging
 from abc import ABC
-from logging import Logger, getLogger
 from typing import Any, ClassVar, Dict
 
 from fsspec.implementations.local import LocalFileSystem
@@ -14,7 +14,7 @@ from hydromt._abstract_base import AbstractBaseModel
 from hydromt._typing import FS
 from hydromt.plugins import PLUGINS
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BaseDriver(AbstractBaseModel, ABC):

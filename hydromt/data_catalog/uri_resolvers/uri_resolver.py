@@ -1,7 +1,7 @@
 """URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
 from typing import Any, Dict, List, Optional
 
 from fsspec.implementations.local import LocalFileSystem
@@ -12,7 +12,7 @@ from hydromt._typing import FS, Geom, SourceMetadata, TimeRange, Zoom
 from hydromt.error import NoDataStrategy
 from hydromt.plugins import PLUGINS
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class URIResolver(AbstractBaseModel, ABC):

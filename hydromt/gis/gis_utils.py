@@ -29,6 +29,7 @@ __all__ = [
     "zoom_to_overview_level",
 ]
 
+
 logger = logging.getLogger(__name__)
 
 

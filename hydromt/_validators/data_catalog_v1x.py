@@ -299,12 +299,12 @@ class DataCatalogV1Item(BaseModel):
         )
 
     @model_validator(mode="after")
-    def uri_in_item_or_variants(cls, values):
-        if values.uri is not None or (
-            values.variants is not None
-            and all(variant.uri is not None for variant in values.variants)
+    def uri_in_item_or_variants(self):
+        if self.uri is not None or (
+            self.variants is not None
+            and all(variant.uri is not None for variant in self.variants)
         ):
-            return values
+            return self
         else:
             raise ValueError(
                 "Source must either have a uri, or all of it's variants must have one."

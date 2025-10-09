@@ -1,6 +1,6 @@
 """Xarrays component."""
 
-from logging import Logger, getLogger
+import logging
 from typing import TYPE_CHECKING, Union, cast
 
 import xarray as xr
@@ -16,7 +16,7 @@ from hydromt.model.steps import hydromt_step
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DatasetsComponent(ModelComponent):

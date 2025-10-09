@@ -352,8 +352,9 @@ def append_zarr(
     """
     import zarr
     from cftime import date2num
+    from numcodecs import Blosc
 
-    compressor = zarr.Blosc(cname="zstd", clevel=3, shuffle=1)
+    compressor = Blosc(cname="zstd", clevel=3, shuffle=1)
 
     encoding = {}
     ds.encoding = {}
@@ -442,7 +443,7 @@ def append_zarr(
         consolidated=False,
     )
     # consolidate metadata
-    zarr.convenience.consolidate_metadata(store)
+    zarr.consolidate_metadata(store)
 
 
 def update_hourly_nc(

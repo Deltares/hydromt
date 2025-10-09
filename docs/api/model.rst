@@ -34,6 +34,8 @@ General methods
    Model.get_component
    Model.add_component
    Model.test_equal
+   Model.__enter__
+   Model.__exit__
 
 Model attributes
 ----------------
