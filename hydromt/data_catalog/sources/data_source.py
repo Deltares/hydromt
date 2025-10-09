@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from copy import deepcopy
-from logging import Logger, getLogger
 from os.path import abspath, join, splitext
 from pathlib import Path, PurePath
 from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
@@ -29,7 +29,7 @@ from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
 from hydromt.error import NoDataException, NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
@@ -232,7 +232,8 @@ class DataSource(BaseModel, ABC):
         bbox = self.metadata.extent.get("bbox", None)
         crs = cast(int, crs)
         if bbox is None and detect:
-            if res := self._detect_bbox(strict=strict) is None:
+            res = self._detect_bbox(strict=strict)
+            if res is None:
                 return None
             else:
                 bbox, crs = res
@@ -306,6 +307,7 @@ class DataSource(BaseModel, ABC):
     ## Optional overrides if applicable in subclasses
     def _detect_time_range(
         self,
+        *,
         ds: Any = None,
         strict: bool = False,
     ) -> TimeRange | None:
@@ -334,7 +336,7 @@ class DataSource(BaseModel, ABC):
             logger.warning(msg + " skipping...")
         return None
 
-    def _detect_bbox(self, strict: bool = False) -> TotalBounds | None:
+    def _detect_bbox(self, *, strict: bool = False) -> TotalBounds | None:
         """Detect the bounding box and crs of the dataset if applicable.
 
         This method should be overridden in subclasses.

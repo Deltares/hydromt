@@ -11,14 +11,9 @@ from dateutil.parser import parse
 from pydantic import (
     BaseModel,
     Field,
-    ValidationInfo,
-    ValidatorFunctionWrapHandler,
     field_serializer,
     field_validator,
     model_validator,
-)
-from pydantic.functional_validators import (
-    WrapValidator,
 )
 from shapely.geometry.base import BaseGeometry
 from typing_extensions import Annotated
@@ -44,16 +39,6 @@ DataType = Literal[
 ]
 Bbox = Annotated[Tuple[float, float, float, float], _validate_bbox]
 
-
-def _validate_path(
-    path: Any, handler: ValidatorFunctionWrapHandler, info: ValidationInfo
-):
-    if isinstance(path, str):
-        path = Path(str)
-    return handler(path, info)
-
-
-Pathdantic = Annotated[Path, WrapValidator(_validate_path)]
 
 StrPath = Union[str, Path]
 GeoDataframeSource = StrPath

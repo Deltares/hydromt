@@ -296,7 +296,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f5/48/64cabb7daced2968dd08e8a1b7988bf358d7bd5bcd5dc89a652f4668543c/rpds_py-0.27.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -641,7 +641,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/24/75/3b7ffe0d50dc86a6a964af0d1cc3a4a2cdf437cb7b099a4747bbb96d1819/rpds_py-0.27.1-cp311-cp311-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -1002,7 +1002,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/03/36/0a14aebbaa26fe7fab4780c76f2239e76cc95a0090bdb25e31d95c492fcd/rpds_py-0.27.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -1346,7 +1346,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ce/2c/5867b14a81dc217b56d95a9f2a40fdbc56a1ab0181b80132beeecbd4b2d6/rpds_py-0.27.1-cp313-cp313-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -1709,7 +1709,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f5/48/64cabb7daced2968dd08e8a1b7988bf358d7bd5bcd5dc89a652f4668543c/rpds_py-0.27.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -2054,7 +2054,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/24/75/3b7ffe0d50dc86a6a964af0d1cc3a4a2cdf437cb7b099a4747bbb96d1819/rpds_py-0.27.1-cp311-cp311-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -2415,7 +2415,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ed/7b/8f4fee9ba1fb5ec856eb22d725a4efa3deb47f769597c809e03578b0f9d9/rpds_py-0.27.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -2758,7 +2758,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/67/b6/c82f0faa9af1c6a64669f73a17ee0eeef25aff30bb9a1c318509efe45d84/rpds_py-0.27.1-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -3119,7 +3119,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/03/36/0a14aebbaa26fe7fab4780c76f2239e76cc95a0090bdb25e31d95c492fcd/rpds_py-0.27.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -3463,7 +3463,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ff/9a/9afaade874b2fa6c752c36f1548f718b5b83af81ed9b76628329dab81c1b/rfc3986-2.0.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/9e/51/17023c0f8f1869d8806b979a2bffa3f861f26a3f1a66b094288323fba52f/rfc3986_validator-0.1.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/71/44ce230e1b7fadd372515a97e32a83011f906ddded8d03e3c6aafbdedbb7/rfc3987_syntax-1.1.0-py3-none-any.whl
-      - pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/2a/2f/63d2cacc0e525f8e3398bcf32bd3620385f22cd1600834ec49d7f3597a7b/rioxarray-0.19.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/ce/2c/5867b14a81dc217b56d95a9f2a40fdbc56a1ab0181b80132beeecbd4b2d6/rpds_py-0.27.1-cp313-cp313-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/64/8d/0133e4eb4beed9e425d9a98ed6e081a55d195481b7632472be1af08d2f6b/rsa-4.9.1-py3-none-any.whl
@@ -7512,7 +7512,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.2.0.dev0
-  sha256: 38503d3b867dec86d8cea208d401cfd8d4d868e60aa3e62d4a00106dc332bdd2
+  sha256: b2aac059c64943a6e64a2a1fdcdf80f28b04fcf9a402d99d600681ba71ff2ba5
   requires_dist:
   - affine
   - bottleneck
@@ -7547,7 +7547,7 @@ packages:
   - xarray
   - xmltodict
   - xugrid>=0.9.0
-  - zarr>=3,<4
+  - zarr>=2.17,<4
   - flit ; extra == 'dev'
   - mypy ; extra == 'dev'
   - pandas-stubs ; extra == 'dev'
@@ -13159,10 +13159,10 @@ packages:
   - lark>=1.2.2
   - pytest>=8.3.5 ; extra == 'testing'
   requires_python: '>=3.9'
-- pypi: https://files.pythonhosted.org/packages/e3/30/3c4d035596d3cf444529e0b2953ad0466f6049528a879d27534700580395/rich-14.1.0-py3-none-any.whl
+- pypi: https://files.pythonhosted.org/packages/25/7a/b0178788f8dc6cafce37a212c99565fa1fe7872c70c6c9c1e1a372d9d88f/rich-14.2.0-py3-none-any.whl
   name: rich
-  version: 14.1.0
-  sha256: 536f5f1785986d6dbdea3c75205c473f970777b4a0d6c6dd1b696aa05a3fa04f
+  version: 14.2.0
+  sha256: 76bc51fe2e57d2b1be1f96c524b890b816e334ab4c1e45888799bfaab0021edd
   requires_dist:
   - ipywidgets>=7.5.1,<9 ; extra == 'jupyter'
   - markdown-it-py>=2.2.0

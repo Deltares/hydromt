@@ -1,6 +1,6 @@
 """DataSource class for the Dataset type."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
@@ -22,7 +22,7 @@ from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DatasetSource(DataSource):
@@ -144,6 +144,8 @@ class DatasetSource(DataSource):
 
     def _detect_time_range(
         self,
+        *,
+        strict: bool = False,
         ds: Union[xr.DataArray, xr.Dataset] = None,
     ) -> TimeRange | None:
         """Get the temporal range of a dataset.
@@ -154,7 +156,6 @@ class DatasetSource(DataSource):
             The dataset to detect the time range of. It must have a time dimension set.
             If none is provided, :py:meth:`hydromt.DatasetAdapter.get_data`
             will be used to fetch the it before detecting.
-
 
         Returns
         -------

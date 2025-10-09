@@ -1,6 +1,6 @@
 """Grid Component."""
 
-from logging import Logger, getLogger
+import logging
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 __all__ = ["GridComponent"]
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GridComponent(SpatialModelComponent):

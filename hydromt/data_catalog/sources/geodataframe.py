@@ -1,7 +1,7 @@
 """DataSource class for the GeoDataFrame type."""
 
+import logging
 from datetime import datetime
-from logging import Logger, getLogger
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional
 
@@ -26,7 +26,7 @@ from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeoDataFrameSource(DataSource):
@@ -145,6 +145,8 @@ class GeoDataFrameSource(DataSource):
 
     def _detect_bbox(
         self,
+        *,
+        strict: bool = False,
         gdf: Optional[gpd.GeoDataFrame] = None,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.

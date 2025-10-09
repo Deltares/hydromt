@@ -146,7 +146,7 @@ def example_zarr_file(managed_tmp_path: Path) -> Path:
     )
     zarray_y.attrs["_ARRAY_DIMENSIONS"] = ["x", "y"]
 
-    zarr.consolidate_metadata(store, zarr_format=3)
+    zarr.consolidate_metadata(store)
     store.close()
 
     return tmp_path
@@ -588,8 +588,7 @@ def artifact_data():
 def mock_model(tmp_path: Path, mocker: MockerFixture):
     model = mocker.create_autospec(Model)
     model.components = {}
-    model.root = mocker.create_autospec(ModelRoot(tmp_path), instance=True)
-    model.root.path.return_value = tmp_path
+    model.root = ModelRoot(tmp_path)
     model.data_catalog = mocker.create_autospec(DataCatalog)
     return model
 

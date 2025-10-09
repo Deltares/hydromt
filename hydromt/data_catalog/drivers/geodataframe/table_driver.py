@@ -1,6 +1,6 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
 
-from logging import Logger, getLogger
+import logging
 from typing import Any, ClassVar
 
 import geopandas as gpd
@@ -17,7 +17,7 @@ from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.io.readers import open_vector_from_table
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # possible labels for the x and y dimensions
 X_DIM_LABELS = ("x", "longitude", "lon", "long")

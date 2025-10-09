@@ -1,6 +1,6 @@
 """DataSource class for the RasterDataset type."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
@@ -27,7 +27,7 @@ from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class RasterDatasetSource(DataSource):
@@ -157,6 +157,8 @@ class RasterDatasetSource(DataSource):
 
     def _detect_bbox(
         self,
+        *,
+        strict: bool = False,
         ds: Optional[xr.Dataset] = None,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
@@ -191,6 +193,8 @@ class RasterDatasetSource(DataSource):
 
     def _detect_time_range(
         self,
+        *,
+        strict: bool = False,
         ds: Optional[xr.Dataset] = None,
     ) -> TimeRange:
         """Detect the temporal range of the dataset.

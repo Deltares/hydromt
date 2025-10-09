@@ -3,6 +3,7 @@
 
 import logging
 import os
+import shutil
 import typing
 from abc import ABCMeta
 from inspect import _empty, signature
@@ -13,9 +14,7 @@ from typing import Any, Dict, List, Optional, TypeVar, Union, cast
 import geopandas as gdp
 from pyproj import CRS
 
-from hydromt._typing import StrPath
-from hydromt._utils import _rgetattr
-from hydromt._utils.steps_validator import _validate_steps
+from hydromt._utils import _rgetattr, _validate_steps, log
 from hydromt.data_catalog import DataCatalog
 from hydromt.io.readers import read_yaml
 from hydromt.model.components import (
@@ -32,6 +31,7 @@ __all__ = ["Model"]
 # see also hydromt.model group in pyproject.toml
 __hydromt_eps__ = ["Model"]
 
+
 logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=ModelComponent)
 
@@ -46,7 +46,7 @@ class Model(object, metaclass=ABCMeta):
 
     def __init__(
         self,
-        root: StrPath | None = None,
+        root: str | Path | None = None,
         *,
         components: Optional[Dict[str, Any]] = None,
         mode: str = "w",
@@ -58,8 +58,8 @@ class Model(object, metaclass=ABCMeta):
 
         Parameters
         ----------
-        root : str, optional
-            Model root, by default None
+        root : str, Path, optional
+            Model root, by default the current working directory: ``Path.cwd()``
         components: Dict[str, Any], optional
             Dictionary of components to add to the model, by default None
             Every entry in this dictionary contains the name of the component as key,
@@ -85,8 +85,6 @@ class Model(object, metaclass=ABCMeta):
             If None, the model will can automatically determine the region component if there is only one `SpatialModelComponent`.
             Otherwise it will raise an error.
             If there are no `SpatialModelComponent` it will raise a warning that `region` functionality will not work.
-        logger:
-            The logger to be used.
         **catalog_keys:
             Additional keyword arguments to be passed down to the DataCatalog.
         """
@@ -100,7 +98,8 @@ class Model(object, metaclass=ABCMeta):
         """DataCatalog for data access"""
 
         # file system
-        self.root: ModelRoot = ModelRoot(root or ".", mode=mode)
+        path = Path(root) if root is not None else Path.cwd()
+        self.root: ModelRoot = ModelRoot(path, mode=mode)
         """Model root"""
 
         self.components: Dict[str, ModelComponent] = {}
@@ -206,6 +205,55 @@ class Model(object, metaclass=ABCMeta):
         """Returns coordinate reference system embedded in region."""
         return self.region.crs if self.region is not None else None
 
+    def __enter__(self) -> "Model":
+        """Enter the model runtime context.
+
+        This allows the model to be used as a context manager in a ``with`` block.
+        The method returns the model instance itself, enabling setup and write
+        operations to be performed within the block.
+
+        Example
+        -------
+        >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
+        ...     model.setup_x()
+        ...     model.setup_y()
+        ...     model.write()
+        # Exiting the with block will call __exit__, ensuring resources are cleaned up.
+
+        Returns
+        -------
+        Model
+            The model instance.
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        """Exit the model runtime context.
+
+        Ensures that resources associated with the model are properly released
+        when leaving a ``with`` block, even if an exception occurred during its
+        execution. This method delegates cleanup to :meth:`close`.
+
+        Example
+        -------
+        >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
+        ...     model.setup_x()
+        ...     model.setup_y()
+        ...     model.write()
+        # Exiting the with block will call __exit__, ensuring resources are cleaned up.
+
+        Parameters
+        ----------
+        exc_type : type or None
+            The type of the exception raised in the ``with`` block, or ``None``
+            if no exception occurred.
+        exc_value : BaseException or None
+            The exception instance raised in the ``with`` block, or ``None``.
+        traceback : types.TracebackType or None
+            The traceback object associated with the exception, or ``None``.
+        """
+        self.close()
+
     def build(
         self,
         *,
@@ -250,40 +298,41 @@ class Model(object, metaclass=ABCMeta):
                 ]
 
         """
-        steps = steps or []
-        _validate_steps(self, steps)
+        with log.to_file(Path(self.root.path) / "hydromt.log"):
+            steps = steps or []
+            _validate_steps(self, steps)
 
-        for step_dict in steps:
-            step, kwargs = next(iter(step_dict.items()))
-            logger.info(f"build: {step}")
-            # Call the methods.
-            method = _rgetattr(self, step)
-            params = {
-                param: arg.default
-                for param, arg in signature(method).parameters.items()
-                if arg.default != _empty
-            }
-            merged: dict[str, Any] = {}
-            if params:
-                merged.update(**params)
-            if kwargs:
-                merged.update(**kwargs)
-            for k, v in merged.items():
-                logger.info(f"{step}.{k}={v}")
+            for step_dict in steps:
+                step, kwargs = next(iter(step_dict.items()))
+                logger.info(f"build: {step}")
+                # Call the methods.
+                method = _rgetattr(self, step)
+                params = {
+                    param: arg.default
+                    for param, arg in signature(method).parameters.items()
+                    if arg.default != _empty
+                }
+                merged: dict[str, Any] = {}
+                if params:
+                    merged.update(**params)
+                if kwargs:
+                    merged.update(**kwargs)
+                for k, v in merged.items():
+                    logger.info(f"{step}.{k}={v}")
 
-            method(**merged)
+                method(**merged)
 
-        # If there are any write options included in the steps,
-        # we don't need to write the whole model.
-        if write and not self._options_contain_write(steps):
-            self.write()
+            # If there are any write options included in the steps,
+            # we don't need to write the whole model.
+            if write and not self._options_contain_write(steps):
+                self.write()
 
-        self.close()
+            self.close()
 
     def update(
         self,
         *,
-        model_out: Optional[StrPath] = None,
+        model_out: str | Path | None = None,
         write: Optional[bool] = True,
         steps: Optional[List[Dict[str, Dict[str, Any]]]] = None,
         forceful_overwrite: bool = False,
@@ -328,49 +377,64 @@ class Model(object, metaclass=ABCMeta):
             try to write to a file that's already opened. The output will be written
             to a temporary file in case the original file cannot be written to.
         """
-        steps = steps or []
-        _validate_steps(self, steps)
+        # read current model & optionally clear log file
+        with log.to_file(
+            self.root.path / "hydromt.log",
+            append=self.root.is_reading_mode(),
+        ):
+            steps = steps or []
+            _validate_steps(self, steps)
+            if not self.root.is_writing_mode():
+                if model_out is None:
+                    raise ValueError(
+                        '"model_out" directory required when updating in "read-only" mode.'
+                    )
+                # Copy log file
+                model_out = Path(model_out)
+                if model_out != self.root.path:
+                    model_out.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(
+                        self.root.path / "hydromt.log", model_out / "hydromt.log"
+                    )
 
-        # read current model
-        if not self.root.is_writing_mode():
-            if model_out is None:
+                self.read()
+                mode = "w+" if forceful_overwrite else "w"
+                self.root.set(model_out, mode=mode)
+
+        # No need to clear the log file here since we did that already if needed above
+        with log.to_file(self.root.path / "hydromt.log", append=True):
+            # check if model has a region
+            if self._region_component_name is not None and self.region is None:
                 raise ValueError(
-                    '"model_out" directory required when updating in "read-only" mode.'
+                    "Model region not found, setup model using `build` first."
                 )
-            self.read()
-            mode = "w+" if forceful_overwrite else "w"
-            self.root.set(model_out, mode=mode)
 
-        # check if model has a region
-        if self._region_component_name is not None and self.region is None:
-            raise ValueError("Model region not found, setup model using `build` first.")
+            # loop over methods from config file
+            for step_dict in steps:
+                step, kwargs = next(iter(step_dict.items()))
+                logger.info(f"update: {step}")
+                # Call the methods.
+                method = _rgetattr(self, step)
+                params = {
+                    param: arg.default
+                    for param, arg in signature(method).parameters.items()
+                    if arg.default != _empty
+                }
+                merged = {}
+                if params:
+                    merged.update(**params)
+                if kwargs:
+                    merged.update(**kwargs)
+                for k, v in merged.items():
+                    logger.info(f"{step}.{k}={v}")
+                method(**merged)
 
-        # loop over methods from config file
-        for step_dict in steps:
-            step, kwargs = next(iter(step_dict.items()))
-            logger.info(f"update: {step}")
-            # Call the methods.
-            method = _rgetattr(self, step)
-            params = {
-                param: arg.default
-                for param, arg in signature(method).parameters.items()
-                if arg.default != _empty
-            }
-            merged = {}
-            if params:
-                merged.update(**params)
-            if kwargs:
-                merged.update(**kwargs)
-            for k, v in merged.items():
-                logger.info(f"{step}.{k}={v}")
-            method(**merged)
+            # If there are any write options included in the steps,
+            # we don't need to write the whole model.
+            if write and not self._options_contain_write(steps):
+                self.write()
 
-        # If there are any write options included in the steps,
-        # we don't need to write the whole model.
-        if write and not self._options_contain_write(steps):
-            self.write()
-
-        self.close()
+            self.close()
 
     def close(self) -> None:
         """Close all components by closing their open files."""
@@ -417,8 +481,8 @@ class Model(object, metaclass=ABCMeta):
     @hydromt_step
     def write_data_catalog(
         self,
-        root: Optional[StrPath] = None,
-        data_lib_path: StrPath = "hydromt_data.yml",
+        root: str | Path | None = None,
+        data_lib_path: str | Path = "hydromt_data.yml",
         used_only: bool = True,
         append: bool = True,
         save_csv: bool = False,

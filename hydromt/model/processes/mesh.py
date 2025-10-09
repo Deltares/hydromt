@@ -1,6 +1,6 @@
 """Implementation for mesh based workflows."""
 
-from logging import Logger, getLogger
+import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
@@ -20,7 +20,7 @@ from hydromt.model.processes.region import (
     parse_region_mesh,
 )
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "create_mesh2d_from_region",

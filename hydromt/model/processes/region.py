@@ -1,6 +1,6 @@
 """parse a region from a dict. See parse_region for information on usage."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import isdir, isfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -23,7 +23,8 @@ from hydromt.plugins import PLUGINS
 if TYPE_CHECKING:
     from hydromt.model.model import Model
 
-logger: Logger = getLogger(__name__)
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "parse_region_basin",

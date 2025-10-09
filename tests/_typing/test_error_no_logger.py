@@ -7,7 +7,7 @@ from hydromt.error import NoDataStrategy, exec_nodata_strat
 
 def test_logger_from_frame_in_nodata_strat(caplog):
     exec_nodata_strat("foo", NoDataStrategy.WARN)
-    assert caplog.records[0].levelname == "WARNING"
-    assert caplog.records[0].message == "foo"
+    assert caplog.records[-1].levelname == "WARNING"
+    assert caplog.records[-1].message == "foo"
     # Test that the name of the logger is this current frame's module, not the error.py logger.
-    assert caplog.records[0].name == __name__
+    assert caplog.records[-1].name == __name__

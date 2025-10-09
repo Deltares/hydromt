@@ -1,7 +1,7 @@
 """Generic driver for reading and writing DataFrames."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
 from typing import Any, ClassVar
 
 import pandas as pd
@@ -15,7 +15,7 @@ from hydromt._typing import (
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.error import NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DataFrameDriver(BaseDriver, ABC):

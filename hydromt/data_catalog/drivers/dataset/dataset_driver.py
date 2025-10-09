@@ -1,7 +1,7 @@
 """Abstract driver to read datasets."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
 from typing import Any
 
 import xarray as xr
@@ -17,7 +17,7 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.error import NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DatasetDriver(BaseDriver, ABC):

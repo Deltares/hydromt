@@ -14,26 +14,24 @@ import numpy as np
 import pandas as pd
 import pyproj
 import rasterio
+import requests
 import rioxarray
+import tomli
 import xarray as xr
+import yaml
 from pyogrio import read_dataframe
 from pyproj import CRS
-from requests import get as fetch
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
-from tomli import load as load_toml
-from yaml import safe_load as load_yaml
 
-from hydromt._typing.type_def import StrPath
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
 from hydromt._utils.path import _make_config_paths_abs
 from hydromt._utils.uris import _is_valid_url
-from hydromt.gis import gis_utils, raster, vector, vector_utils
-from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.gis.raster_utils import merge
+from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
 
 if TYPE_CHECKING:
     from hydromt._validators.model_config import HydromtModelStep
+
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +173,7 @@ def open_mfcsv(
 
 
 def open_raster(
-    uri: Union[StrPath, IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
+    uri: Union[str, Path, IOBase, rasterio.DatasetReader, rasterio.vrt.WarpedVRT],
     *,
     mask_nodata: bool = False,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
@@ -238,7 +236,7 @@ def open_raster(
 
 
 def open_mfraster(
-    uris: Union[str, List[StrPath]],
+    uris: Union[str, list[str | Path]],
     *,
     chunks: Union[int, Tuple[int, ...], Dict[str, int], None] = None,
     concat: bool = False,
@@ -362,7 +360,7 @@ def open_mfraster(
                 da = da.sortby(concat_dim).transpose(concat_dim, ...)
                 da.attrs.update(da_lst[0].attrs)
         else:
-            da = merge(da_lst, **mosaic_kwargs)  # spatial merge
+            da = raster_utils.merge(da_lst, **mosaic_kwargs)  # spatial merge
             da.attrs.update({"source_file": "; ".join(file_attrs)})
         ds = da.to_dataset()  # dataset for consistency
     else:
@@ -596,7 +594,7 @@ def open_timeseries_from_table(path, *, name=None, index_dim="index", **kwargs):
 
 
 def open_vector(
-    path: StrPath,
+    path: str | Path,
     *,
     driver: Optional[OPEN_VECTOR_DRIVER] = None,
     crs: Optional[CRS] = None,
@@ -768,12 +766,12 @@ def open_vector_from_table(
 
 
 def read_workflow_yaml(
-    path: StrPath,
+    path: str | Path,
     modeltype: Optional[str] = None,
     defaults: Optional[Dict[str, Any]] = None,
     abs_path: bool = True,
     skip_abspath_sections: Optional[List[str]] = None,
-) -> Tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
+) -> tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
     """Read HydroMT workflow yaml file.
 
     Parameters
@@ -939,9 +937,9 @@ def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
     """
     ds = xr.open_dataset(filepath, **kwargs)
     # set geo coord if present as coordinate of dataset
-    if GEO_MAP_COORD in ds.data_vars:
+    if raster.GEO_MAP_COORD in ds.data_vars:
         org_close = ds._close
-        ds = ds.set_coords(GEO_MAP_COORD)
+        ds = ds.set_coords(raster.GEO_MAP_COORD)
         ds.set_close(org_close)
 
     # Return the dataset
@@ -949,7 +947,7 @@ def open_nc(filepath: Path | str, **kwargs) -> xr.Dataset:
 
 
 def open_ncs(
-    filename_template: StrPath,
+    filename_template: str | Path,
     root: Path,
     **kwargs,
 ) -> Dict[str, xr.Dataset]:
@@ -984,29 +982,29 @@ def open_ncs(
     return ncs
 
 
-def read_yaml(path: StrPath) -> Dict[str, Any]:
+def read_yaml(path: str | Path) -> dict[str, Any]:
     """Read yaml file and return as dict."""
     with open(path, "rb") as stream:
-        yml = load_yaml(stream)
+        yml = yaml.safe_load(stream)
 
     return yml
 
 
 def _parse_yaml(text: str) -> Dict[str, Any]:
-    return load_yaml(text)
+    return yaml.safe_load(text)
 
 
-def read_toml(path: StrPath) -> Dict[str, Any]:
+def read_toml(path: str | Path) -> dict[str, Any]:
     """Read toml file and return as dict."""
     with open(path, "rb") as f:
-        data = load_toml(f)
+        data = tomli.load(f)
 
     return data
 
 
-def _yml_from_uri_or_path(uri_or_path: StrPath) -> Dict[str, Any]:
+def _yml_from_uri_or_path(uri_or_path: str | Path) -> Dict[str, Any]:
     if _is_valid_url(str(uri_or_path)):
-        with fetch(str(uri_or_path), stream=True) as r:
+        with requests.get(str(uri_or_path), stream=True) as r:
             r.raise_for_status()
             yml = _parse_yaml(r.text)
 

@@ -1,7 +1,7 @@
 """Driver for RasterDatasets."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import getLogger
 from typing import Any
 
 import xarray as xr
@@ -19,7 +19,7 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.error import NoDataStrategy
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class RasterDatasetDriver(BaseDriver, ABC):
