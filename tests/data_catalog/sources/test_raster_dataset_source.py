@@ -47,7 +47,7 @@ class TestRasterDatasetSource:
         self, writable_source: RasterDatasetSource, rioda: xr.DataArray
     ):
         rioda_expected_bbox = (3.0, -11.0, 6.0, -9.0)
-        rioda_detected_bbox = _to_geographic_bbox(*writable_source.detect_bbox(rioda))
+        rioda_detected_bbox = _to_geographic_bbox(*writable_source._detect_bbox(rioda))
 
         assert np.all(np.equal(rioda_expected_bbox, rioda_detected_bbox))
 

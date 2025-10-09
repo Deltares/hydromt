@@ -4,7 +4,6 @@ from logging import Logger, getLogger
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
-import pandas as pd
 import xarray as xr
 from pydantic import Field
 from pyproj.exceptions import CRSError
@@ -143,39 +142,10 @@ class DatasetSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_time_range(
-        self,
-        detect: bool = True,
-    ) -> TimeRange:
-        """Detect the time range of the dataset.
-
-        if the time range is not set and detect is True,
-        :py:meth:`hydromt.GeoDatasetAdapter.detect_time_range` will be used
-        to detect it.
-
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the time range if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
-            inclusive on both sides.
-        """
-        time_range = self.metadata.extent.get("time_range", None)
-        if time_range is None and detect:
-            time_range = self.detect_time_range()
-
-        return time_range
-
-    def detect_time_range(
+    def _detect_time_range(
         self,
         ds: Union[xr.DataArray, xr.Dataset] = None,
-    ) -> TimeRange:
+    ) -> TimeRange | None:
         """Get the temporal range of a dataset.
 
         Parameters
@@ -188,17 +158,17 @@ class DatasetSource(DataSource):
 
         Returns
         -------
-        range: TimeRange
+        range: TimeRange, optional
             Instance containing the start and end of the time dimension. Range is
-            inclusive on both sides.
+            inclusive on both sides. None if the dataset has no time dimension.
         """
         if ds is None:
             ds = self.read_data()
 
         try:
             return TimeRange(
-                start=pd.to_datetime(ds.time[0].values).to_pydatetime(),
-                end=pd.to_datetime(ds.time[-1].values).to_pydatetime(),
+                start=ds.time[0].values,
+                end=ds.time[-1].values,
             )
         except AttributeError:
             raise AttributeError("Dataset has no dimension called 'time'")

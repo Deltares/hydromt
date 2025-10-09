@@ -87,14 +87,14 @@ class TestGeoDatasetSource:
 
     def test_detect_bbox(self, writable_source: GeoDatasetSource, geoda: xr.DataArray):
         geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-        geoda_detected_bbox = _to_geographic_bbox(*writable_source.detect_bbox(geoda))
+        geoda_detected_bbox = _to_geographic_bbox(*writable_source._detect_bbox(geoda))
         assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
 
     def test_detect_time_range(
         self, writable_source: GeoDatasetSource, geoda: xr.DataArray
     ):
         geoda_expected_time_range = TimeRange(start="01-01-2000", end="12-31-2000")
-        geoda_detected_time_range = writable_source.detect_time_range(geoda)
+        geoda_detected_time_range = writable_source._detect_time_range(geoda)
         assert geoda_expected_time_range == geoda_detected_time_range
 
     @pytest.mark.parametrize(

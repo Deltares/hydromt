@@ -293,17 +293,8 @@ class DataCatalog(object):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        s: DataSource = self.get_source(source, provider, version)
-        try:
-            return s.get_bbox(detect=detect)  # type: ignore
-        except TypeError as e:
-            if strict:
-                raise e
-            else:
-                logger.warning(
-                    f"Source of type {type(s)} does not support detecting spatial"
-                    "extents. skipping..."
-                )
+        _source: DataSource = self.get_source(source, provider, version)
+        return _source.get_bbox(detect=detect)
 
     def get_source_time_range(
         self,
@@ -337,17 +328,8 @@ class DataCatalog(object):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        s = self.get_source(source, provider, version)
-        try:
-            return s.get_time_range(detect=detect)  # type: ignore
-        except TypeError as e:
-            if strict:
-                raise e
-            else:
-                logger.warning(
-                    f"Source of type {type(s)} does not support detecting"
-                    " temporalextents. skipping..."
-                )
+        _source = self.get_source(source, provider, version)
+        return _source.get_time_range(detect=detect, strict=strict)
 
     def get_source(
         self,

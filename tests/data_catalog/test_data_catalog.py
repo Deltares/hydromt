@@ -1606,7 +1606,7 @@ def test_detect_extent_rasterdataset(data_catalog):
     # raster dataset
     name = "chirps_global"
     bbox = 11.60, 45.20, 13.00, 46.80
-    expected_temporal_range = tuple(pd.to_datetime(["2010-02-02", "2010-02-15"]))
+    expected_temporal_range = TimeRange(start="2010-02-02", end="2010-02-15")
     ds = cast(RasterDatasetAdapter, data_catalog.get_source(name))
     detected_spatial_range = _to_geographic_bbox(*ds.get_bbox(detect=True))
     detected_temporal_range = ds.get_time_range(detect=True)

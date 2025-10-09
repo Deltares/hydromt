@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 
 import geopandas as gpd
+import numpy as np
+import pandas as pd
 from dateutil.parser import parse
 from pydantic import (
     BaseModel,
@@ -105,6 +107,8 @@ class TimeRange(BaseModel):
             except ValueError:
                 # fallback to more flexible parsing
                 return parse(v)
+        elif isinstance(v, np.datetime64):
+            return pd.to_datetime(v).to_pydatetime()
         return v
 
     @model_validator(mode="after")
@@ -118,3 +122,16 @@ class TimeRange(BaseModel):
     @field_serializer("start", "end", mode="plain")
     def serialize_datetime(self, v: datetime) -> str:
         return v.strftime(DATETIME_FORMAT)
+
+    @staticmethod
+    def create(data: Any) -> "TimeRange":
+        if isinstance(data, TimeRange):
+            return data
+        elif isinstance(data, dict):
+            return TimeRange(**data)
+        elif isinstance(data, (list, tuple)) and len(data) == 2:
+            return TimeRange(start=data[0], end=data[1])
+        else:
+            raise ValueError(
+                f"Cannot create TimeRange from data: '{data}' of type '{type(data)}'."
+            )

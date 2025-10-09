@@ -2,11 +2,10 @@
 
 from logging import Logger, getLogger
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
 import xarray as xr
 from pydantic import Field
-from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
@@ -156,63 +155,7 @@ class RasterDatasetSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
-        """Return the bounding box and espg code of the dataset.
-
-        if the bounding box is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_bbox` will be used to detect it.
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the bounding box if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
-            the bounding box coordinates of the data. coordinates are returned as
-            [xmin,ymin,xmax,ymax]
-        crs: int
-            The ESPG code of the CRS of the coordinates returned in bbox
-        """
-        bbox = self.metadata.extent.get("bbox", None)
-        crs = cast(int, crs)
-        if bbox is None and detect:
-            bbox, crs = self.detect_bbox()
-
-        return bbox, crs
-
-    def get_time_range(
-        self,
-        detect: bool = True,
-    ) -> TimeRange:
-        """Detect the time range of the dataset.
-
-        if the time range is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_time_range` will be used
-        to detect it.
-
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the time range if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
-            inclusive on both sides.
-        """
-        time_range = self.metadata.extent.get("time_range", None)
-        if time_range is None and detect:
-            time_range = self.detect_time_range()
-
-        return time_range
-
-    def detect_bbox(
+    def _detect_bbox(
         self,
         ds: Optional[xr.Dataset] = None,
     ) -> TotalBounds:
@@ -246,7 +189,7 @@ class RasterDatasetSource(DataSource):
 
         return bounds, crs
 
-    def detect_time_range(
+    def _detect_time_range(
         self,
         ds: Optional[xr.Dataset] = None,
     ) -> TimeRange:
@@ -264,15 +207,15 @@ class RasterDatasetSource(DataSource):
 
         Returns
         -------
-        range: Tuple[np.datetime64, np.datetime64]
+        range: TimeRange
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
         if ds is None:
             ds = self.read_data()
-        return (
-            ds[ds.raster.time_dim].min().values,
-            ds[ds.raster.time_dim].max().values,
+        return TimeRange(
+            start=ds[ds.raster.time_dim].min().values,
+            end=ds[ds.raster.time_dim].max().values,
         )
 
     def to_stac_catalog(
