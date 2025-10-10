@@ -2,7 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Any
 
 import xarray as xr
 
@@ -14,7 +14,9 @@ from hydromt._typing import (
     Variables,
     Zoom,
 )
-from hydromt.data_catalog.drivers.base_driver import BaseDriver
+from hydromt.data_catalog.drivers.base_driver import (
+    BaseDriver,
+)
 from hydromt.error import NoDataStrategy
 
 logger = logging.getLogger(__name__)
@@ -26,15 +28,16 @@ class RasterDatasetDriver(BaseDriver, ABC):
     @abstractmethod
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        mask: Optional[Geom] = None,
-        variables: Optional[Variables] = None,
-        time_range: Optional[TimeRange] = None,
-        zoom_level: Optional[Zoom] = None,
-        chunks: Optional[dict] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        kwargs_for_open: dict[str, Any] | None = None,
+        mask: Geom | None = None,
+        variables: Variables | None = None,
+        time_range: TimeRange | None = None,
+        zoom: Zoom | None = None,
+        chunks: dict[str, Any] | None = None,
+        metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """
         Read in any compatible data source to an xarray Dataset.

@@ -1,12 +1,16 @@
 """Driver for reading in GeoDataFrames from tabular formats."""
 
 import logging
-from copy import deepcopy
-from typing import ClassVar, List, Optional
+from typing import Any, ClassVar
 
 import geopandas as gpd
+from pydantic import Field
 
 from hydromt._typing.metadata import SourceMetadata
+from hydromt.data_catalog.drivers.base_driver import (
+    DRIVER_OPTIONS_DESCRIPTION,
+    DriverOptions,
+)
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -20,6 +24,13 @@ X_DIM_LABELS = ("x", "longitude", "lon", "long")
 Y_DIM_LABELS = ("y", "latitude", "lat")
 
 
+class GeoDataFrameTableOptions(DriverOptions):
+    """Options for the GeoDataFrameTableDriver."""
+
+    x_dim: str | None = None
+    y_dim: str | None = None
+
+
 class GeoDataFrameTableDriver(GeoDataFrameDriver):
     """
     Driver for GeoDataFrame from tabular formats: ``geodataframe_table``.
@@ -27,27 +38,25 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
     Supports reading point geometries from csv, excel (xls, xlsx), and parquet files
     using a combination of the pandas and geopandas libraries.
 
-    Driver **options** include:
-
-    * x_dim: Optional[str], name of the column containing the x coordinate. Not needed
-      if one of the default names is used ('x', 'longitude', 'lon', 'long').
-    * y_dim: Optional[str], name of the column containing the y coordinate. Not needed
-      if one of the default names is used ('y', 'latitude', 'lat').
-    * Any other option supported by the underlying pandas read functions,
-      e.g. `pd.read_csv`, `pd.read_excel`, `pd.read_parquet`.
-
     """
 
     name: ClassVar[str] = "geodataframe_table"
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
 
+    options: GeoDataFrameTableOptions = Field(
+        default_factory=GeoDataFrameTableOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    )
+
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
+        kwargs_for_open: dict[str, Any] | None = None,
+        metadata: SourceMetadata | None = None,
+        mask: Any = None,
+        predicate: str = "intersects",
+        variables: str | list[str] | None = None,
     ) -> gpd.GeoDataFrame:
         """Read tabular data using a combination of the pandas and geopandas libraries."""
         if not metadata:
@@ -59,16 +68,14 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             )
 
         _uri: str = uris[0]
-
-        options = deepcopy(self.options)
-        x_dim = options.pop("x_dim", None)
-        y_dim = options.pop("y_dim", None)
+        kwargs_for_open = kwargs_for_open or {}
+        kwargs = self.options.get_kwargs() | kwargs_for_open
         gdf = open_vector_from_table(
             path=_uri,
-            x_dim=x_dim,
-            y_dim=y_dim,
+            x_dim=self.options.x_dim,
+            y_dim=self.options.y_dim,
             crs=metadata.crs,
-            **options,
+            **kwargs,
         )
         if gdf.index.size == 0:
             exec_nodata_strat(

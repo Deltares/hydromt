@@ -72,7 +72,7 @@ def _slice_temporal_dimension(
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
             logger.debug(f"Slicing time dim {time_range}")
-            ds = ds.sel(time=slice(*time_range))
+            ds = ds.sel(time=slice(time_range.start, time_range.end))
         if _has_no_data(ds):
             return None
         else:

@@ -1,16 +1,20 @@
 """GeoDatasetVectorDriver class for reading vector data from table like files such as csv or parquet."""
 
 import logging
-from copy import copy
-from typing import Callable, ClassVar, List, Optional
+from typing import Any, ClassVar
 
 import xarray as xr
+from pydantic import Field
 
-from hydromt._typing import CRS, SourceMetadata
-from hydromt._typing.type_def import Geom, Predicate, StrPath, TimeRange
+from hydromt._typing import CRS, Geom, Predicate, SourceMetadata, StrPath, TimeRange
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
-from hydromt.data_catalog.drivers.preprocessing import PREPROCESSORS
+from hydromt.data_catalog.drivers.base_driver import (
+    DRIVER_OPTIONS_DESCRIPTION,
+)
+from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
+    GeoDatasetDriver,
+    GeoDatasetOptions,
+)
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.io import open_geodataset
 
@@ -29,13 +33,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
     The geometry file and the external data file can be linked using a common column
     (e.g. an ID column).
 
-    Driver **options** include:
-
-    * preprocess: Optional[str], name of preprocessor to apply on geodataset after
-      reading. Available preprocessors include: round_latlon, to_datetimeindex,
-      remove_duplicates, harmonise_dims. See their docstrings for details.
-    * Any other option supported by `hydromt.io.open_geodataset`.
-
     """
 
     name: ClassVar[str] = "geodataset_vector"
@@ -51,16 +48,21 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         ".fgb",
     }
 
+    options: GeoDatasetOptions = Field(
+        default_factory=GeoDatasetOptions, description=DRIVER_OPTIONS_DESCRIPTION
+    )
+
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        mask: Optional[Geom] = None,
-        predicate: Predicate = "intersects",
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        kwargs_for_open: dict[str, Any] | None = None,
+        mask: Geom | None = None,
+        predicate: Predicate = "intersects",
+        variables: list[str] | None = None,
+        time_range: TimeRange | None = None,
+        metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """
         Read tabular datafiles like csv or parquet into to an xarray DataSet.
@@ -83,17 +85,12 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         else:
             uri = uris[0]
 
-        options = copy(self.options)
-        preprocessor: Optional[Callable] = None
-        preprocessor_name: Optional[str] = options.pop("preprocess", None)
-        if preprocessor_name:
-            preprocessor = PREPROCESSORS.get(preprocessor_name)
-            if not preprocessor:
-                raise ValueError(f"unknown preprocessor: '{preprocessor_name}'")
-
-        crs: Optional[CRS] = metadata.crs if metadata else None
+        preprocessor = self.options.get_preprocessor()
+        kwargs_for_open = kwargs_for_open or {}
+        kwargs = self.options.get_kwargs() | kwargs_for_open
+        crs: CRS | None = metadata.crs if metadata else None
         data = open_geodataset(
-            loc_path=uri, geom=mask, crs=crs, predicate=predicate, **options
+            loc_path=uri, geom=mask, crs=crs, predicate=predicate, **kwargs
         )
 
         if preprocessor is None:

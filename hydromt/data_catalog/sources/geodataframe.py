@@ -6,9 +6,7 @@ from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import geopandas as gpd
-from fsspec import filesystem
 from pydantic import Field
-from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
@@ -21,6 +19,7 @@ from hydromt._typing import (
     StrPath,
     TotalBounds,
 )
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters.geodataframe import GeoDataFrameAdapter
 from hydromt.data_catalog.drivers import GeoDataFrameDriver
 from hydromt.data_catalog.sources.data_source import DataSource
@@ -119,7 +118,7 @@ class GeoDataFrameSource(DataSource):
         else:
             # use local filesystem
             driver: GeoDataFrameDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         gdf: Optional[gpd.GeoDataFrame] = self.read_data(
@@ -144,34 +143,10 @@ class GeoDataFrameSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
-        """Return the bounding box and espg code of the dataset.
-
-        if the bounding box is not set and detect is True,
-        :py:meth:`hydromt.GeoDataframeAdapter.detect_bbox` will be used to detect it.
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the bounding box if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
-            the bounding box coordinates of the data. coordinates are returned as
-            [xmin,ymin,xmax,ymax]
-        crs: int
-            The ESPG code of the CRS of the coordinates returned in bbox
-        """
-        bbox = self.metadata.extent.get("bbox", None)
-        if bbox is None and detect:
-            bbox, crs = self.detect_bbox()
-
-        return bbox, crs
-
-    def detect_bbox(
+    def _detect_bbox(
         self,
+        *,
+        strict: bool = False,
         gdf: Optional[gpd.GeoDataFrame] = None,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.

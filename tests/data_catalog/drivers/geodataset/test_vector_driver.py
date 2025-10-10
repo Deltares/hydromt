@@ -4,11 +4,13 @@ from pathlib import Path
 from typing import List, Optional
 from unittest.mock import MagicMock
 
+import pandas as pd
 import pytest
 from pytest_mock import MockerFixture
 from xarray import Dataset
 
-from hydromt.data_catalog.drivers import GeoDatasetVectorDriver
+from hydromt.data_catalog.drivers import GeoDatasetVectorDriver, preprocessing
+from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetOptions
 from hydromt.gis import vector
 from hydromt.io.readers import open_geodataset
 
@@ -19,30 +21,31 @@ class TestGeoDatasetVectorDriver:
             "hydromt.data_catalog.drivers.geodataset.vector_driver.open_geodataset",
             spec=open_geodataset,
         )
-        mock_geods_open.return_value = Dataset()
-
-        mock_preprocess: mocker.MagicMock = mocker.patch(
-            "hydromt.data_catalog.drivers.geodataset.vector_driver.PREPROCESSORS",
-            spec=dict,
+        mock_ds = Dataset(
+            coords={"time": pd.date_range("2023-01-01", periods=3)},
+            data_vars={"var1": ("time", [1, 2, 2])},
         )
+        mock_geods_open.return_value = mock_ds
 
-        mocked_function = MagicMock(return_value=Dataset())
-        mock_preprocess.get.return_value = mocked_function
+        # Patch PREPROCESSORS so every preprocessor just returns its input
+        mock_preprocessor = mocker.MagicMock(side_effect=lambda data: data)
+
+        mocker.patch.object(
+            preprocessing,
+            "PREPROCESSORS",
+            {name: mock_preprocessor for name in preprocessing.PREPROCESSORS.keys()},
+        )
 
         uris: List[str] = ["file.geojson"]
         driver = GeoDatasetVectorDriver(
-            options={"preprocess": "remove_duplicates"},
+            options=GeoDatasetOptions(preprocess="remove_duplicates"),
         )
         res: Optional[Dataset] = driver.read(
             uris,
             variables=["var1"],
         )
         assert res is not None
-        call_args = mock_geods_open.call_args
-
-        print(call_args[1])
-        assert call_args[1]["loc_path"] == uris[0]  # first arg
-        assert mocked_function.call_count == 1
+        mock_preprocessor.assert_called_once_with(mock_ds)
 
     def test_write_raises(self):
         driver = GeoDatasetVectorDriver()

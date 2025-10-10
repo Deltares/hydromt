@@ -13,7 +13,7 @@ import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__
-from hydromt._typing.type_def import StrPath
+from hydromt._typing.type_def import StrPath, TimeRange
 from hydromt._utils import log
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
@@ -571,26 +571,25 @@ def export(
                 tup = time_range
             time_start = datetime.strptime(tup[0], "%Y-%m-%d")
             time_end = datetime.strptime(tup[1], "%Y-%m-%d")
-            time_tup = (time_start, time_end)
+            time_range = TimeRange(start=time_start, end=time_end)
         else:
-            time_tup = None
+            time_range = None
 
-        if isinstance(bbox, str):
-            bbox = literal_eval(bbox)
+            if isinstance(bbox, str):
+                bbox = literal_eval(bbox)
 
         try:
             data_catalog.export_data(
                 export_dest_path,
                 source_names=sources,
                 bbox=bbox,
-                time_range=time_tup,
+                time_range=time_range,
                 unit_conversion=unit_conversion,
                 metadata=meta,
                 append=append,
                 handle_nodata=handle_nodata,
                 force_overwrite=fo,
             )
-
         except Exception as e:
             logger.exception(e)  # catch and log errors
             raise

@@ -17,13 +17,13 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import shutil
 
 import numpy as np
 import sphinx_autosummary_accessors
 
 import hydromt
-import re
 import hydromt.plugins
 
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
@@ -107,7 +107,6 @@ author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 # The short version which is displayed
 version = hydromt.__version__
 
-
 # # -- Copy notebooks to include in docs -------
 if os.path.isdir("_examples"):
     remove_dir_content("_examples")
@@ -188,6 +187,7 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
     "nbsphinx",
     "sphinx_click",
+    "sphinxcontrib.autodoc_pydantic",
 ]
 suppress_warnings = [
     'autosummary.import_cycle',
@@ -226,6 +226,25 @@ todo_include_todos = False
 napoleon_numpy_docstring = True
 napoleon_google_docstring = False
 napoleon_preprocess_types = True
+
+# -- autodoc_pydantic settings -----------------------------------------
+# All subclasses of pydantic.BaseModel that are documented using `autosummary`,
+# will be documented automatically according to the settings below.
+# https://autodoc-pydantic.readthedocs.io/en/stable/users/configuration.html
+autodoc_pydantic_model_members = True
+autodoc_pydantic_model_hide_paramlist = True
+autodoc_pydantic_model_undoc_members = True
+autodoc_pydantic_model_show_json = False
+autodoc_pydantic_model_show_config_summary = False
+autodoc_pydantic_model_show_field_summary = False
+autodoc_pydantic_model_show_field_constraints = False
+autodoc_pydantic_model_show_validator_summary = False
+autodoc_pydantic_model_show_validator_members = False
+autodoc_pydantic_field_list_validators = False
+autodoc_pydantic_model_summary_list_order = "bysource"
+autodoc_pydantic_model_member_order = "bysource"
+
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

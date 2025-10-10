@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from copy import deepcopy
 from os.path import abspath, join, splitext
 from pathlib import Path, PurePath
-from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union
+from typing import Any, ClassVar, Dict, List, Optional, TypeVar, Union, cast
 
 from pydantic import (
     BaseModel,
@@ -18,8 +18,11 @@ from pydantic import (
     model_serializer,
     model_validator,
 )
+from pyproj import CRS
+from pystac import Catalog as StacCatalog
 
 from hydromt._typing import DataType, SourceMetadata
+from hydromt._typing.type_def import TimeRange, TotalBounds
 from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
@@ -111,6 +114,14 @@ class DataSource(BaseModel, ABC):
             cls._fallback_driver_read,
         )
 
+    @model_validator(mode="wrap")
+    @classmethod
+    def _wrap_driver_validation(cls, data, handler):
+        driver = data.get("driver")
+        if isinstance(driver, BaseDriver):
+            data["driver"] = driver.model_dump()
+        return handler(data)
+
     @model_validator(mode="after")
     def _validate_fs_equal_if_not_set(self) -> DataSource:
         """
@@ -146,6 +157,7 @@ class DataSource(BaseModel, ABC):
         """Serialize data_type."""
         res: Dict[str, Any] = nxt(self)
         res["data_type"] = self.data_type
+
         return res
 
     def _get_uri_basename(self, handle_nodata: NoDataStrategy, **query_kwargs) -> str:
@@ -170,6 +182,178 @@ class DataSource(BaseModel, ABC):
             raise ValueError(f"Failed to get basename of uri: {self.uri}")
         else:
             return basename
+
+    def get_time_range(
+        self, detect: bool = True, strict: bool = False
+    ) -> TimeRange | None:
+        """Detect the time range of the dataset if applicable.
+
+        Override in subclasses if applicable.
+
+        Parameters
+        ----------
+        detect: bool, Optional
+            If True and the time range is not set in metadata, attempt to detect it.
+            If False, only use the time range in metadata if it exists.
+
+        Returns
+        -------
+        range: TimeRange, optional
+            Instance containing the start and end of the time dimension. Range is
+            inclusive on both sides. None if not set and detect is False.
+        """
+        time_range = self.metadata.extent.get("time_range", None)
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+        else:
+            if detect:
+                time_range = self._detect_time_range(strict=strict)
+
+        return time_range
+
+    def get_bbox(
+        self, crs: CRS | None = None, detect: bool = True, strict: bool = False
+    ) -> TotalBounds | None:
+        """Get the bounding box and crs of the data source if applicable.
+
+        This method should be overridden in subclasses if applicable.
+
+        Returns
+        -------
+        bbox: TotalBounds | None
+            The bounding box of the data source.
+            None if not applicable.
+
+        Notes
+        -----
+        TotalBounds is a tuple of (bbox, crs), where bbox is a tuple of
+        (minx, miny, maxx, maxy) and crs is the coordinate reference system.
+        """
+        bbox = self.metadata.extent.get("bbox", None)
+        crs = cast(int, crs)
+        if bbox is None and detect:
+            res = self._detect_bbox(strict=strict)
+            if res is None:
+                return None
+            else:
+                bbox, crs = res
+
+        return bbox, crs
+
+    ## Abstract methods
+    @abstractmethod
+    def read_data(self, **kwargs):
+        """Read data from the source."""
+        pass
+
+    @abstractmethod
+    def to_stac_catalog(
+        self,
+        handle_nodata: NoDataStrategy = NoDataStrategy.IGNORE,
+    ) -> Optional[StacCatalog]:
+        """
+        Convert source into a STAC Catalog representation.
+
+        The collection will contain an asset for each of the associated files.
+
+        Parameters
+        ----------
+        handle_nodata: NoDataStrategy, optional
+            The error handling strategy. Options are: "raise" to raise an error on
+            failure, "skip" to skip the source on failure, and "coerce" (default) to
+            set default values on failure.
+
+        Returns
+        -------
+        StacCatalog, optional
+            The STAC Catalog representation of the source, or None if the dataset was
+            skipped.
+        """
+        ...
+
+    @abstractmethod
+    def to_file(
+        self,
+        file_path: Path | str,
+        *,
+        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        driver_override: Optional[BaseDriver] = None,
+        **kwargs,
+    ) -> "DataSource":
+        """
+        Write the DataSource to a local file.
+
+        Parameters
+        ----------
+        file_path: Path | str
+            The path to write the data to.
+        handle_nodata: NoDataStrategy, optional
+            The error handling strategy. Options are: "raise" to raise an error on
+            failure, "ignore" to skip the dataset on failure.
+        driver_override: BaseDriver, optional
+            If provided, use this driver to write the data instead of the one
+            specified in the source. The driver must support writing.
+        **kwargs: Any
+            Additional keyword arguments for the implementation of `to_file`
+            from subclasses of DataSource. Will be passed to the driver's write method.
+
+        Returns
+        -------
+        DataSource
+            A new instance of the DataSource with the updated uri and driver.
+        """
+        ...
+
+    ## Optional overrides if applicable in subclasses
+    def _detect_time_range(
+        self,
+        *,
+        ds: Any = None,
+        strict: bool = False,
+    ) -> TimeRange | None:
+        """Detect the temporal range of the dataset if applicable.
+
+        This method should be overridden in subclasses.
+
+        Parameters
+        ----------
+        ds: Any, optional
+            If provided, use this dataset to detect the time range. If None, the
+            dataset will be fetched according to the settings in the DataSource.
+
+        Returns
+        -------
+        range: TimeRange, optional
+            Instance containing the start and end of the time dimension. Range is
+            inclusive on both sides. None if no time dimension could be found.
+        """
+        msg = (
+            f"Source of type {type(self)} does not support detecting temporal extents."
+        )
+        if strict:
+            raise NotImplementedError(msg)
+        else:
+            logger.warning(msg + " skipping...")
+        return None
+
+    def _detect_bbox(self, *, strict: bool = False) -> TotalBounds | None:
+        """Detect the bounding box and crs of the dataset if applicable.
+
+        This method should be overridden in subclasses.
+
+        Returns
+        -------
+        bbox: TotalBounds, optional
+            The bounding box coordinates of the data as (bbox, crs), where bbox is
+            (minx, miny, maxx, maxy) and crs is the EPSG code of the CRS of the
+            coordinates returned in bbox. None if not applicable.
+        """
+        msg = f"Source of type {type(self)} does not support detecting spatial extents."
+        if strict:
+            raise NotImplementedError(msg)
+        else:
+            logger.warning(msg + " skipping...")
+        return None
 
 
 def _abs_path(root: Union[Path, str], rel_path: Union[Path, str]) -> str:

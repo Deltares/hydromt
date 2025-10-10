@@ -1,7 +1,7 @@
 """A module for all of the type definitions used in HydroMT."""
 
 from hydromt._typing.crs import CRS
-from hydromt._typing.fsspec_types import FS
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt._typing.metadata import SourceMetadata
 from hydromt._typing.model_mode import ModelMode
 from hydromt._typing.type_def import (
@@ -34,7 +34,7 @@ __all__ = [
     "CRS",
     "StrPath",
     "ExportConfigDict",
-    "FS",
+    "FSSpecFileSystem",
     "GeoDataframeSource",
     "GeoDatasetSource",
     "ModeLike",

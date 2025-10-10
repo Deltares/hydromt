@@ -1,54 +1,56 @@
 .. currentmodule:: hydromt.data_catalog.adapters
 
-DataAdapter
-===========
+.. _data_adapter:
 
-.. autosummary::
-   :toctree: ../_generated
+=============
+Data Adapters
+=============
 
-   data_adapter_base.DataAdapterBase
+The Hydromt data adapter module provides an interface layer to harmonize
+different data formats and ensure consistency in transformations, reformatting, and metadata handling.
 
-RasterDataset
--------------
-
-.. autosummary::
-   :toctree: ../_generated
-
-   RasterDatasetAdapter
-   RasterDatasetAdapter.transform
-
-GeoDataset
-----------
-
-.. autosummary::
-   :toctree: ../_generated
-
-   GeoDatasetAdapter
-   GeoDatasetAdapter.transform
-
-GeoDataFrame
+Base Classes
 ------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
-   GeoDataFrameAdapter
-   GeoDataFrameAdapter.transform
+   DataAdapterBase
 
-DataFrame
----------
+Raster Data Adapters
+--------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
+
+   RasterDatasetAdapter
+
+Vector & Geospatial Adapters
+----------------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
+
+   GeoDatasetAdapter
+   GeoDataFrameAdapter
+
+Tabular Data Adapters
+---------------------
+
+.. autosummary::
+   :toctree: ../_generated
+   :nosignatures:
 
    DataFrameAdapter
-   DataFrameAdapter.transform
 
-Dataset
--------
+General Dataset Adapters
+------------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    DatasetAdapter
-   DatasetAdapter.transform
