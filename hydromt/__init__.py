@@ -1,7 +1,7 @@
 """HydroMT: Automated and reproducible model building and analysis."""
 
 # version number without 'v' at start
-__version__ = "1.3.0-rc2"
+__version__ = "1.3.0-rc3"
 
 # This is only here to suppress the bug described in
 # https://github.com/pydata/xarray/issues/7259
