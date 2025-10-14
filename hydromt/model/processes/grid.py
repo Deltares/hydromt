@@ -11,7 +11,6 @@ from affine import Affine
 from pyproj import CRS, Transformer
 from shapely.geometry import Polygon
 
-from hydromt._typing.type_def import Number
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import parse_crs, raster_utils
 from hydromt.model.processes.region import (
@@ -20,6 +19,7 @@ from hydromt.model.processes.region import (
     parse_region_geom,
     parse_region_grid,
 )
+from hydromt.typing.type_def import Number
 
 logger = logging.getLogger(__name__)
 

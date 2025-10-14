@@ -11,14 +11,6 @@ import xarray as xr
 from pydantic import Field, field_serializer, model_validator
 from pyproj import CRS
 
-from hydromt._typing import (
-    Geom,
-    SourceMetadata,
-    StrPath,
-    TimeRange,
-    Variables,
-    Zoom,
-)
 from hydromt._utils.caching import _cache_vrt_tiles
 from hydromt._utils.temp_env import temp_env
 from hydromt._utils.uris import _strip_scheme
@@ -30,6 +22,14 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.io.readers import open_mfraster
+from hydromt.typing import (
+    Geom,
+    SourceMetadata,
+    StrPath,
+    TimeRange,
+    Variables,
+    Zoom,
+)
 
 logger = logging.getLogger(__name__)
 

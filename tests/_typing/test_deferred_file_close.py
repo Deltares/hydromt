@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from hydromt._typing.deferred_file_close import _MAX_CLOSE_ATTEMPTS, DeferredFileClose
+from hydromt.typing.deferred_file_close import _MAX_CLOSE_ATTEMPTS, DeferredFileClose
 
 
 def test_close_successful_move(monkeypatch):

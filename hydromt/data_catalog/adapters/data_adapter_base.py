@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from hydromt._typing import TimeRange
+from hydromt.typing import TimeRange
 
 
 class DataAdapterBase(BaseModel):

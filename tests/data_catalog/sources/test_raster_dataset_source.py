@@ -5,12 +5,12 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
 from hydromt.gis.gis_utils import _to_geographic_bbox
+from hydromt.typing import SourceMetadata
 
 
 class TestRasterDatasetSource:

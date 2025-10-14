@@ -34,7 +34,6 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt import __version__
-from hydromt._typing import Bbox, SourceSpecDict, TimeRange
 from hydromt._utils import (
     _deep_merge,
     _partition_dictionaries,
@@ -66,6 +65,7 @@ from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
+from hydromt.typing import Bbox, SourceSpecDict, TimeRange
 
 logger = logging.getLogger(__name__)
 
@@ -1005,7 +1005,7 @@ class DataCatalog(object):
         self,
         new_root: Union[Path, str],
         bbox: Optional[Bbox] = None,
-        time_range: Optional[TimeRange] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         source_names: Optional[List[str]] = None,
         unit_conversion: bool = True,
         metadata: Optional[Dict[str, Any]] = None,
@@ -1021,9 +1021,10 @@ class DataCatalog(object):
             Path to output folder
         bbox : array-like of floats
             (xmin, ymin, xmax, ymax) bounding box of area of interest.
-        time_range: tuple of str, datetime, optional
+        time_range : TimeRange | tuple | dict | None, optional
             Start and end date of period of interest. By default the entire time period
-            of the dataset is returned.
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         source_names: list, optional
             List of source names to export, by default None in which case all sources
             are exported. Specific variables can be selected by appending them to the
@@ -1040,6 +1041,9 @@ class DataCatalog(object):
         append: bool, optional
             If True, append to existing data catalog, by default False.
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         # Create new root
         source_names = source_names or []
         metadata = metadata or {}
@@ -1197,7 +1201,7 @@ class DataCatalog(object):
         chunks: Optional[dict] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         variables: Optional[Union[List, str]] = None,
-        time_range: Optional[TimeRange] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1242,8 +1246,10 @@ class DataCatalog(object):
             How to react when no data is found, by default NoDataStrategy.RAISE
         variables : Optional[List], optional
             Names of RasterDataset variables to return, or all if None, by default None
-        time_range : Optional[TimeRange], optional
-            Start and end date of period of interest, or entire period if None, by default None
+        time_range : TimeRange | tuple | dict | None, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1266,6 +1272,9 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(variables, str):
             variables = [variables]
 
@@ -1457,7 +1466,7 @@ class DataCatalog(object):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
         variables: Optional[List[str]] = None,
-        time_range: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1500,8 +1509,10 @@ class DataCatalog(object):
             by default 'intersects'
         variables : Optional[List], optional
             Names of GeoDataset variables to return, or all if None, by default None
-        time_range : Optional[TimeRange], optional
-            Start and end date of period of interest, or entire period if None, by default None
+        time_range : TimeRange | tuple | dict | None, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1524,6 +1535,9 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if geom is not None or bbox is not None:
             mask = _parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
         else:
@@ -1587,7 +1601,7 @@ class DataCatalog(object):
         ],
         variables: Optional[List] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        time_range: Optional[TimeRange] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1615,8 +1629,10 @@ class DataCatalog(object):
             Names of Dataset variables to return, or all if None, by default None
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
-        time_range : Optional[TimeRange], optional
-            Start and end date of period of interest, or entire period if None, by default None
+        time_range : TimeRange | tuple | dict | None, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         single_var_as_array : bool, optional
             Wether to return a xr.DataArray if the dataset consists of a single variable,
             by default True
@@ -1639,6 +1655,9 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1681,7 +1700,7 @@ class DataCatalog(object):
         self,
         data_like: Union[str, SourceSpecDict, Path, pd.DataFrame, DataFrameSource],
         variables: Optional[List] = None,
-        time_range: Optional[TimeRange] = None,
+        time_range: TimeRange | tuple | dict | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1700,8 +1719,10 @@ class DataCatalog(object):
             to the catalog with its based on the file basename.
         variables : Optional[List], optional
             Names of DataFrame variables to return, or all if None, by default None
-        time_range : Optional[TimeRange], optional
-            Start and end date of period of interest, or entire period if None, by default None
+        time_range : TimeRange | tuple | dict | None, optional
+            Start and end date of period of interest. By default the entire time period
+            of the dataset is returned. If not None, must be parsable by TimeRange.create,
+            by default None
         handle_nodata : NoDataStrategy, optional
             How to react when no data is found, by default NoDataStrategy.RAISE
         provider : Optional[str], optional
@@ -1723,6 +1744,9 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version

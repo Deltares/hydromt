@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from hydromt._typing import ModeLike, ModelMode
+from hydromt.typing import ModeLike, ModelMode
 
 logger = logging.getLogger(__name__)
 

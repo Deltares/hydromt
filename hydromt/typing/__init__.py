@@ -1,10 +1,10 @@
 """A module for all of the type definitions used in HydroMT."""
 
-from hydromt._typing.crs import CRS
-from hydromt._typing.fsspec_types import FSSpecFileSystem
-from hydromt._typing.metadata import SourceMetadata
-from hydromt._typing.model_mode import ModelMode
-from hydromt._typing.type_def import (
+from hydromt.typing.crs import CRS
+from hydromt.typing.fsspec_types import FSSpecFileSystem
+from hydromt.typing.metadata import SourceMetadata
+from hydromt.typing.model_mode import ModelMode
+from hydromt.typing.type_def import (
     Bbox,
     Crs,
     Data,

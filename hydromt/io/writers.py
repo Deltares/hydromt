@@ -12,7 +12,7 @@ import xarray as xr
 from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
-from hydromt._typing.deferred_file_close import DeferredFileClose
+from hydromt.typing.deferred_file_close import DeferredFileClose
 
 logger = logging.getLogger(__name__)
 

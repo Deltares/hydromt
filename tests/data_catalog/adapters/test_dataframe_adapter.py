@@ -2,8 +2,8 @@ from copy import copy
 
 import pandas as pd
 
-from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters.dataframe import DataFrameAdapter
+from hydromt.typing import SourceMetadata
 
 
 class TestDataFrameAdapter:

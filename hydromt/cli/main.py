@@ -13,7 +13,6 @@ import numpy as np
 from pydantic import ValidationError
 
 from hydromt import __version__
-from hydromt._typing.type_def import StrPath, TimeRange
 from hydromt._utils import log
 from hydromt._validators import Format
 from hydromt._validators.data_catalog_v0x import DataCatalogV0Validator
@@ -24,6 +23,7 @@ from hydromt.data_catalog import DataCatalog
 from hydromt.error import NoDataStrategy
 from hydromt.io import read_workflow_yaml, read_yaml, write_yaml
 from hydromt.plugins import PLUGINS
+from hydromt.typing.type_def import StrPath, TimeRange
 
 logger = logging.getLogger(__name__)
 

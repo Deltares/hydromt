@@ -7,7 +7,6 @@ from typing import Any, Callable
 import xarray as xr
 from pydantic import Field
 
-from hydromt._typing import Geom, Predicate, SourceMetadata, StrPath, TimeRange
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
     BaseDriver,
@@ -15,6 +14,7 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 from hydromt.error import NoDataStrategy
+from hydromt.typing import Geom, Predicate, SourceMetadata, StrPath, TimeRange
 
 logger = logging.getLogger(__name__)
 

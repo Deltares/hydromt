@@ -7,15 +7,15 @@ from typing import Any, Dict, List, Optional
 from pydantic import ConfigDict, Field
 
 from hydromt._abstract_base import AbstractBaseModel
-from hydromt._typing import (
+from hydromt.error import NoDataStrategy
+from hydromt.plugins import PLUGINS
+from hydromt.typing import (
     FSSpecFileSystem,
     Geom,
     SourceMetadata,
     TimeRange,
     Zoom,
 )
-from hydromt.error import NoDataStrategy
-from hydromt.plugins import PLUGINS
 
 logger = logging.getLogger(__name__)
 

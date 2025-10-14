@@ -2,7 +2,7 @@ from os.path import abspath
 
 import pytest
 
-from hydromt._typing import ModelMode
+from hydromt.typing import ModelMode
 
 # we need to compensate for where the repo is located when
 # we run the tests

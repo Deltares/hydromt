@@ -1,3 +1,5 @@
+"""Deferred file close handling to ensure data integrity during file operations."""
+
 import logging
 import shutil
 from pathlib import Path
@@ -8,12 +10,15 @@ _MAX_CLOSE_ATTEMPTS = 2
 
 
 class DeferredFileClose:
+    """Class to handle deferred file closing operations."""
+
     def __init__(self, *, original_path: Path, temp_path: Path):
         self._original_path = original_path
         self._temp_path = temp_path
         self._close_attempts = 0
 
     def close(self) -> None:
+        """Attempt to move the temporary file to the original path up to a maximum number of attempts."""
         while self._close_attempts < _MAX_CLOSE_ATTEMPTS:
             try:
                 logger.debug(
