@@ -34,7 +34,6 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt import __version__
-from hydromt._typing import Bbox, SourceSpecDict, TimeRange
 from hydromt._utils import (
     _deep_merge,
     _partition_dictionaries,
@@ -66,6 +65,7 @@ from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
+from hydromt.typing import Bbox, SourceSpecDict, TimeRange
 
 logger = logging.getLogger(__name__)
 
@@ -1040,6 +1040,9 @@ class DataCatalog(object):
         append: bool, optional
             If True, append to existing data catalog, by default False.
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         # Create new root
         source_names = source_names or []
         metadata = metadata or {}
@@ -1266,6 +1269,9 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(variables, str):
             variables = [variables]
 
@@ -1457,7 +1463,7 @@ class DataCatalog(object):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         predicate: str = "intersects",
         variables: Optional[List[str]] = None,
-        time_range: Optional[Union[Tuple[str, str], Tuple[datetime, datetime]]] = None,
+        time_range: TimeRange | None | Any = None,
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
@@ -1524,6 +1530,9 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if geom is not None or bbox is not None:
             mask = _parse_geom_bbox_buffer(geom=geom, bbox=bbox, buffer=buffer)
         else:
@@ -1639,6 +1648,9 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1723,6 +1735,9 @@ class DataCatalog(object):
         NoDataException
             If no data is found and handle_nodata is NoDataStrategy.RAISE
         """
+        if time_range is not None:
+            time_range = TimeRange.create(time_range)
+
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
