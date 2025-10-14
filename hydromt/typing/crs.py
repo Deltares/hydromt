@@ -1,3 +1,5 @@
+"""Coordinate Reference System type based on pyproj.CRS with pydantic validation and serialization."""
+
 from typing import Any, List, Optional, Union
 
 from pydantic import PlainSerializer, PlainValidator

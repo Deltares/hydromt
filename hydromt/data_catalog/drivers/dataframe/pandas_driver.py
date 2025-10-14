@@ -5,15 +5,15 @@ from typing import Any, Callable, Optional
 
 import pandas as pd
 
-from hydromt._typing import (
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
+from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
+from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.typing import (
     StrPath,
     TimeRange,
     Variables,
 )
-from hydromt._typing.metadata import SourceMetadata
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
-from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
-from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.typing.metadata import SourceMetadata
 
 
 class PandasDriver(DataFrameDriver):

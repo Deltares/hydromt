@@ -5,13 +5,13 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from hydromt._typing import SourceMetadata
-from hydromt._typing.type_def import TimeRange
 from hydromt.data_catalog.adapters import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 from hydromt.data_catalog.sources import GeoDatasetSource
 from hydromt.data_catalog.uri_resolvers import URIResolver
 from hydromt.gis.gis_utils import _to_geographic_bbox
+from hydromt.typing import SourceMetadata
+from hydromt.typing.type_def import TimeRange
 
 
 class TestGeoDatasetSource:

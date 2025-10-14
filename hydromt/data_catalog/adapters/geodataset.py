@@ -7,14 +7,6 @@ import numpy as np
 import pyproj
 import xarray as xr
 
-from hydromt._typing import (
-    Geom,
-    Predicate,
-    SourceMetadata,
-    TimeRange,
-    Variables,
-)
-from hydromt._typing.type_def import Number
 from hydromt._utils import (
     _has_no_data,
     _rename_vars,
@@ -27,6 +19,14 @@ from hydromt._utils import (
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
+from hydromt.typing import (
+    Geom,
+    Predicate,
+    SourceMetadata,
+    TimeRange,
+    Variables,
+)
+from hydromt.typing.type_def import Number
 
 logger = logging.getLogger(__name__)
 

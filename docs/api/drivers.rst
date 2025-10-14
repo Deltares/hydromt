@@ -13,9 +13,9 @@ Each driver implements `read` and optionally `write` methods, along with configu
 FileSystem
 --------------
 
-All drivers rely on shared type definitions from :mod:`hydromt._typing`.
+All drivers rely on shared type definitions from :mod:`hydromt.typing`.
 
-.. currentmodule:: hydromt._typing
+.. currentmodule:: hydromt.typing
 
 .. autosummary::
    :toctree: ../_generated

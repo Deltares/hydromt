@@ -7,13 +7,13 @@ from typing import List, Optional, Union
 
 import geopandas as gpd
 
-from hydromt._typing import (
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
+from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.typing import (
     SourceMetadata,
     TimeRange,
     Zoom,
 )
-from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
-from hydromt.error import NoDataStrategy, exec_nodata_strat
 
 logger = logging.getLogger(__name__)
 

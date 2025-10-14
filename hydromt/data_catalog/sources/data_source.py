@@ -21,13 +21,13 @@ from pydantic import (
 from pyproj import CRS
 from pystac import Catalog as StacCatalog
 
-from hydromt._typing import DataType, SourceMetadata
-from hydromt._typing.type_def import TimeRange, TotalBounds
 from hydromt._utils.uris import _is_valid_url
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.uri_resolvers import ConventionResolver, URIResolver
 from hydromt.error import NoDataException, NoDataStrategy
+from hydromt.typing import DataType, SourceMetadata
+from hydromt.typing.type_def import TimeRange, TotalBounds
 
 logger = logging.getLogger(__name__)
 

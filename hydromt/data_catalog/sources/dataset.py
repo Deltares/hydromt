@@ -12,15 +12,15 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt._typing import (
-    StrPath,
-    TimeRange,
-)
-from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
+from hydromt.typing import (
+    StrPath,
+    TimeRange,
+)
+from hydromt.typing.fsspec_types import FSSpecFileSystem
 
 logger = logging.getLogger(__name__)
 

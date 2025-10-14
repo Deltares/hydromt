@@ -12,13 +12,13 @@ import xugrid as xu
 from pyproj import CRS
 from shapely import box
 
-from hydromt._typing.type_def import StrPath
 from hydromt.data_catalog import DataCatalog
 from hydromt.data_catalog.sources import RasterDatasetSource
 from hydromt.error import NoDataStrategy
 from hydromt.gis import parse_crs
 from hydromt.model.processes.basin_mask import get_basin_geometry
 from hydromt.plugins import PLUGINS
+from hydromt.typing.type_def import StrPath
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model

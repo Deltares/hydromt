@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 import xarray as xr
 
-from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters import (
     DataFrameAdapter,
     DatasetAdapter,
@@ -22,6 +21,7 @@ from hydromt.data_catalog.drivers import (
     RasterDatasetDriver,
 )
 from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
+from hydromt.typing import SourceMetadata
 
 # ======================================================================================
 # Helper utilities

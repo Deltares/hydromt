@@ -6,7 +6,7 @@ from fsspec.implementations.local import LocalFileSystem
 from fsspec.implementations.memory import MemoryFileSystem
 
 from hydromt._compat import HAS_S3FS
-from hydromt._typing.fsspec_types import (
+from hydromt.typing.fsspec_types import (
     FSSpecFileSystem,
 )
 

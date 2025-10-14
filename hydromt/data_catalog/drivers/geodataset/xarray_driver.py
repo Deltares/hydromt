@@ -8,13 +8,6 @@ from typing import Any, Callable, ClassVar
 import xarray as xr
 from pydantic import Field
 
-from hydromt._typing import (
-    Geom,
-    SourceMetadata,
-    StrPath,
-    TimeRange,
-)
-from hydromt._typing.type_def import Predicate
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
@@ -24,6 +17,13 @@ from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
     GeoDatasetOptions,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.typing import (
+    Geom,
+    SourceMetadata,
+    StrPath,
+    TimeRange,
+)
+from hydromt.typing.type_def import Predicate
 
 logger = logging.getLogger(__name__)
 

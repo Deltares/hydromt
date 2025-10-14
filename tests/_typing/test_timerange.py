@@ -3,8 +3,8 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
-from hydromt._typing import TimeRange
-from hydromt._typing.type_def import DATETIME_FORMAT
+from hydromt.typing import TimeRange
+from hydromt.typing.type_def import DATETIME_FORMAT
 
 
 def test_valid_datetimes():

@@ -7,15 +7,15 @@ import pandas as pd
 from pydantic import Field
 from pystac import Catalog as StacCatalog
 
-from hydromt._typing import (
-    StrPath,
-    TimeRange,
-)
-from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataSource
 from hydromt.error import NoDataStrategy
+from hydromt.typing import (
+    StrPath,
+    TimeRange,
+)
+from hydromt.typing.fsspec_types import FSSpecFileSystem
 
 logger = logging.getLogger(__name__)
 

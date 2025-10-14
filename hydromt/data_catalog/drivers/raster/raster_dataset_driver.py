@@ -6,7 +6,11 @@ from typing import Any
 
 import xarray as xr
 
-from hydromt._typing import (
+from hydromt.data_catalog.drivers.base_driver import (
+    BaseDriver,
+)
+from hydromt.error import NoDataStrategy
+from hydromt.typing import (
     Geom,
     SourceMetadata,
     StrPath,
@@ -14,10 +18,6 @@ from hydromt._typing import (
     Variables,
     Zoom,
 )
-from hydromt.data_catalog.drivers.base_driver import (
-    BaseDriver,
-)
-from hydromt.error import NoDataStrategy
 
 logger = logging.getLogger(__name__)
 

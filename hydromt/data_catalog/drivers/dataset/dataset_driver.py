@@ -6,16 +6,16 @@ from typing import Any
 
 import xarray as xr
 
-from hydromt._typing import (
+from hydromt.data_catalog.drivers.base_driver import (
+    BaseDriver,
+)
+from hydromt.error import NoDataStrategy
+from hydromt.typing import (
     SourceMetadata,
     StrPath,
     TimeRange,
     Variables,
 )
-from hydromt.data_catalog.drivers.base_driver import (
-    BaseDriver,
-)
-from hydromt.error import NoDataStrategy
 
 logger = logging.getLogger(__name__)
 

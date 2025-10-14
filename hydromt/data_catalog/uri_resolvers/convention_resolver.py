@@ -8,16 +8,16 @@ from typing import Any, Iterable, Optional
 import pandas as pd
 from fsspec.core import split_protocol
 
-from hydromt._typing import (
+from hydromt._utils.naming_convention import _expand_uri_placeholders
+from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
+from hydromt.error import NoDataStrategy, exec_nodata_strat
+from hydromt.gis.gis_utils import zoom_to_overview_level
+from hydromt.typing import (
     Geom,
     SourceMetadata,
     TimeRange,
     Zoom,
 )
-from hydromt._utils.naming_convention import _expand_uri_placeholders
-from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
-from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.gis.gis_utils import zoom_to_overview_level
 
 logger = logging.getLogger(__name__)
 

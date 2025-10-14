@@ -8,12 +8,6 @@ from typing import Optional
 import numpy as np
 import xarray as xr
 
-from hydromt._typing import (
-    Data,
-    SourceMetadata,
-    TimeRange,
-    Variables,
-)
 from hydromt._utils import (
     _has_no_data,
     _set_metadata,
@@ -22,6 +16,12 @@ from hydromt._utils import (
 )
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
+from hydromt.typing import (
+    Data,
+    SourceMetadata,
+    TimeRange,
+    Variables,
+)
 
 logger = logging.getLogger(__name__)
 

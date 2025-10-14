@@ -10,13 +10,6 @@ import pyproj
 import xarray as xr
 from pyproj import CRS
 
-from hydromt._typing import (
-    Data,
-    Geom,
-    SourceMetadata,
-    TimeRange,
-    Variables,
-)
 from hydromt._utils import (
     _has_no_data,
     _shift_dataset_time,
@@ -27,6 +20,13 @@ from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.raster import GEO_MAP_COORD
 from hydromt.gis.raster_utils import _meridian_offset
+from hydromt.typing import (
+    Data,
+    Geom,
+    SourceMetadata,
+    TimeRange,
+    Variables,
+)
 
 logger = logging.getLogger(__name__)
 
