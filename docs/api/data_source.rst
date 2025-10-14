@@ -3,62 +3,46 @@
 .. _data_source:
 
 ============
-Data sources
+Data Sources
 ============
 
-General
--------
+The Hydromt data sources module provides access to various types of datasets.
+Each data source wraps data I/O behavior with standardized interfaces, providing consistent
+read and metadata operations across raster, vector, and tabular data.
+
+Base Classes
+------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    DataSource
-   DataSource.summary
 
-RasterDataset
--------------
+Raster Data Sources
+-------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    RasterDatasetSource
-   RasterDatasetSource.read_data
-   RasterDatasetSource.to_stac_catalog
-   RasterDatasetSource.get_bbox
-   RasterDatasetSource.get_time_range
-   RasterDatasetSource.detect_bbox
-   RasterDatasetSource.detect_time_range
 
-GeoDataFrame
-------------
+Vector Data Sources
+-------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    GeoDataFrameSource
-   GeoDataFrameSource.read_data
-   GeoDataFrameSource.to_stac_catalog
-   GeoDataFrameSource.get_bbox
-   GeoDataFrameSource.detect_bbox
+   GeoDatasetSource
 
-DataFrame
----------
+Tabular Data Sources
+--------------------
 
 .. autosummary::
    :toctree: ../_generated
+   :nosignatures:
 
    DataFrameSource
-   DataFrameSource.read_data
-   DataFrameSource.to_stac_catalog
-
-GeoDataset
-------------
-
-.. autosummary::
-   :toctree: ../_generated
-
-   GeoDatasetSource
-   GeoDatasetSource.read_data
-   GeoDatasetSource.to_stac_catalog
-   GeoDatasetSource.get_bbox
-   GeoDatasetSource.detect_bbox

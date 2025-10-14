@@ -27,6 +27,7 @@ from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0MetaData,
     DataCatalogV0Validator,
 )
+from hydromt.data_catalog.drivers.base_driver import DriverOptions
 from hydromt.io.readers import _yml_from_uri_or_path
 
 DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
@@ -87,7 +88,7 @@ class DataCatalogV1UriResolverItem(BaseModel):
 
 class DataCatalogV1DriverItem(BaseModel):
     name: str
-    options: Dict[str, Any] | None = None
+    options: DriverOptions | None = None
 
 
 class SourceVariant(BaseModel):
@@ -299,12 +300,12 @@ class DataCatalogV1Item(BaseModel):
         )
 
     @model_validator(mode="after")
-    def uri_in_item_or_variants(cls, values):
-        if values.uri is not None or (
-            values.variants is not None
-            and all(variant.uri is not None for variant in values.variants)
+    def uri_in_item_or_variants(self):
+        if self.uri is not None or (
+            self.variants is not None
+            and all(variant.uri is not None for variant in self.variants)
         ):
-            return values
+            return self
         else:
             raise ValueError(
                 "Source must either have a uri, or all of it's variants must have one."

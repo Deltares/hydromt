@@ -1,25 +1,30 @@
 """URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
 from typing import Any, Dict, List, Optional
 
-from fsspec.implementations.local import LocalFileSystem
 from pydantic import ConfigDict, Field
 
 from hydromt._abstract_base import AbstractBaseModel
-from hydromt._typing import FS, Geom, SourceMetadata, TimeRange, Zoom
+from hydromt._typing import (
+    FSSpecFileSystem,
+    Geom,
+    SourceMetadata,
+    TimeRange,
+    Zoom,
+)
 from hydromt.error import NoDataStrategy
 from hydromt.plugins import PLUGINS
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class URIResolver(AbstractBaseModel, ABC):
     """URI Resolver responsible for finding the data using the URI in the Data Catalog."""
 
     model_config = ConfigDict(extra="forbid")
-    filesystem: FS = Field(default_factory=LocalFileSystem)
+    filesystem: FSSpecFileSystem = Field(default_factory=FSSpecFileSystem)
     options: Dict[str, Any] = Field(default_factory=dict)
 
     @abstractmethod

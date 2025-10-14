@@ -22,7 +22,6 @@ from typing import (
     cast,
 )
 
-import dateutil.parser
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -35,7 +34,7 @@ from pystac import Catalog as StacCatalog
 from pystac import CatalogType, MediaType
 
 from hydromt import __version__
-from hydromt._typing import Bbox, SourceSpecDict, StrPath, TimeRange
+from hydromt._typing import Bbox, SourceSpecDict, TimeRange
 from hydromt._utils import (
     _deep_merge,
     _partition_dictionaries,
@@ -124,7 +123,7 @@ class DataCatalog(object):
 
         self._sources: Dict[str, DataSource] = {}
         self._catalogs: Dict[str, PredefinedCatalog] = {}
-        self.root: Optional[StrPath] = None
+        self.root: str | Path | None = None
         self._fallback_lib = fallback_lib
 
         # caching
@@ -294,17 +293,9 @@ class DataCatalog(object):
         crs: int
             The ESPG code of the CRS of the coordinates returned in bbox
         """
-        s: DataSource = self.get_source(source, provider, version)
-        try:
-            return s.get_bbox(detect=detect)  # type: ignore
-        except TypeError as e:
-            if strict:
-                raise e
-            else:
-                logger.warning(
-                    f"Source of type {type(s)} does not support detecting spatial"
-                    "extents. skipping..."
-                )
+        return self.get_source(source, provider, version).get_bbox(
+            detect=detect, strict=strict
+        )
 
     def get_source_time_range(
         self,
@@ -338,17 +329,9 @@ class DataCatalog(object):
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
-        s = self.get_source(source, provider, version)
-        try:
-            return s.get_time_range(detect=detect)  # type: ignore
-        except TypeError as e:
-            if strict:
-                raise e
-            else:
-                logger.warning(
-                    f"Source of type {type(s)} does not support detecting"
-                    " temporalextents. skipping..."
-                )
+        return self.get_source(source, provider, version).get_time_range(
+            detect=detect, strict=strict
+        )
 
     def get_source(
         self,
@@ -662,7 +645,7 @@ class DataCatalog(object):
     def from_yml(
         self,
         urlpath: Union[Path, str],
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         catalog_name: Optional[str] = None,
         catalog_version: Optional[str] = None,
         mark_used: bool = False,
@@ -783,7 +766,7 @@ class DataCatalog(object):
         data_dict: Dict[str, Any],
         catalog_name: str = "",
         catalog_version: Optional[str] = None,
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         category: Optional[str] = None,
         mark_used: bool = False,
     ) -> DataCatalog:
@@ -924,7 +907,7 @@ class DataCatalog(object):
     def to_dict(
         self,
         source_names: Optional[List[str]] = None,
-        root: Optional[StrPath] = None,
+        root: str | Path | None = None,
         meta: Optional[Dict[str, Any]] = None,
         used_only: bool = False,
     ) -> Dict[str, Any]:
@@ -1065,9 +1048,6 @@ class DataCatalog(object):
 
         new_root = new_root.absolute()
         new_root.mkdir(exist_ok=True)
-
-        if time_range:
-            time_range: TimeRange = _parse_time_range(time_range)
 
         # create copy of data with selected source names
         source_vars = {}
@@ -1289,9 +1269,6 @@ class DataCatalog(object):
         if isinstance(variables, str):
             variables = [variables]
 
-        if time_range:
-            time_range = _parse_time_range(time_range)
-
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1343,7 +1320,8 @@ class DataCatalog(object):
 
         # This isnt briliant but works the best at this stage
         if isinstance(source.driver, RasterioDriver):
-            source.driver.options.update({"cache": self.cache})
+            source.driver.options.cache = self.cache
+            source.driver.options.cache_root = self._cache_dir.as_posix()
 
         return source.read_data(
             bbox=bbox,
@@ -1551,9 +1529,6 @@ class DataCatalog(object):
         else:
             mask = None
 
-        if time_range:
-            time_range = _parse_time_range(time_range)
-
         if isinstance(data_like, dict):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
@@ -1669,9 +1644,6 @@ class DataCatalog(object):
                 data_like, provider, version
             )
 
-        if time_range:
-            time_range = _parse_time_range(time_range)
-
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
                 name = data_like
@@ -1755,9 +1727,6 @@ class DataCatalog(object):
             data_like, provider, version = _parse_data_like_dict(
                 data_like, provider, version
             )
-
-        if time_range:
-            time_range = _parse_time_range(time_range)
 
         if isinstance(data_like, (str, Path)):
             if isinstance(data_like, str) and data_like in self.sources:
@@ -1894,12 +1863,3 @@ def _denormalise_data_dict(data_dict) -> List[Tuple[str, Dict]]:
             data_list.extend(_denormalise_data_dict(item))
 
     return data_list
-
-
-def _parse_time_range(
-    time_range: Tuple[Union[str, datetime], Union[str, datetime]],
-) -> TimeRange:
-    """Parse timerange with strings to datetime."""
-    if any(map(lambda t: not isinstance(t, datetime), time_range)):
-        time_range = tuple(map(lambda t: dateutil.parser.parse(t), time_range))
-    return cast(TimeRange, time_range)

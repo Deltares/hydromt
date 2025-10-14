@@ -1,6 +1,6 @@
 """Data adapter for DataFrames."""
 
-from logging import Logger, getLogger
+import logging
 from typing import Optional
 
 import numpy as np
@@ -14,7 +14,7 @@ from hydromt._typing import (
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DataFrameAdapter(DataAdapterBase):
@@ -128,7 +128,7 @@ class DataFrameAdapter(DataAdapterBase):
         if time_range is not None and np.dtype(df.index).type == np.datetime64:
             logger.debug(f"Slicing time dime {time_range}")
             try:
-                df = df.iloc[df.index.slice_indexer(*time_range)]
+                df = df.iloc[df.index.slice_indexer(time_range.start, time_range.end)]
             except IndexError:
                 df = pd.DataFrame()
 

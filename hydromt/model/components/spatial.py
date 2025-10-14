@@ -1,7 +1,7 @@
 """Model Region class."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, cast
 
 import geopandas as gpd
@@ -14,8 +14,7 @@ from hydromt.model.components.base import ModelComponent
 if TYPE_CHECKING:
     from hydromt.model import Model
 
-
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SpatialModelComponent(ModelComponent, ABC):

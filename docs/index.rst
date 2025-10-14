@@ -4,9 +4,9 @@
    :titlesonly:
    :hidden:
 
+   api/api
    overview/intro
    guides/intro
    plugins
-   api/api
    ../_generated/predefined_catalogs
    changelog

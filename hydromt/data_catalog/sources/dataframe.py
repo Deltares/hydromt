@@ -1,10 +1,9 @@
 """DataSource class for the DataFrame type."""
 
-from logging import Logger, getLogger
+import logging
 from typing import Any, ClassVar, Dict, List, Literal, Optional
 
 import pandas as pd
-from fsspec import filesystem
 from pydantic import Field
 from pystac import Catalog as StacCatalog
 
@@ -12,12 +11,13 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
 )
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataSource
 from hydromt.error import NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DataFrameSource(DataSource):
@@ -97,7 +97,7 @@ class DataFrameSource(DataSource):
         else:
             # use local filesystem
             driver: DataFrameDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
         df: Optional[pd.DataFrame] = self.read_data(
             variables=variables, time_range=time_range, handle_nodata=handle_nodata

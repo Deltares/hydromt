@@ -24,7 +24,7 @@ class TestValidators:
         [
             (DataFrameSource, "mock_df_adapter"),
             (DatasetSource, "mock_ds_adapter"),
-            (GeoDataFrameSource, "mock_geodataframe_adapter"),
+            (GeoDataFrameSource, "mock_gdf_adapter"),
             (GeoDatasetSource, "mock_geo_ds_adapter"),
             (RasterDatasetSource, "mock_raster_ds_adapter"),
         ],
@@ -55,7 +55,7 @@ class TestValidators:
         [
             (DataFrameSource, "MockDataFrameDriver", "mock_df_adapter"),
             (DatasetSource, "MockDatasetDriver", "mock_ds_adapter"),
-            (GeoDataFrameSource, "MockGeoDataFrameDriver", "mock_geodataframe_adapter"),
+            (GeoDataFrameSource, "MockGeoDataFrameDriver", "mock_gdf_adapter"),
             (GeoDatasetSource, "MockGeoDatasetDriver", "mock_geo_ds_adapter"),
             (RasterDatasetSource, "MockRasterDatasetDriver", "mock_raster_ds_adapter"),
         ],
@@ -174,7 +174,7 @@ class TestValidators:
             (
                 GeoDataFrameSource,
                 "MockGeoDataFrameDriver",
-                "mock_geodataframe_adapter",
+                "mock_gdf_adapter",
                 "test.gpkg",
             ),
             (
@@ -215,7 +215,7 @@ class TestValidators:
         )
         driver2 = driver_cls(filesystem="memory")
         new_source = source.to_file("test", driver_override=driver2)
-        assert new_source.driver.filesystem.protocol == "memory"
+        assert new_source.driver.filesystem.get_fs().protocol == "memory"
         # make sure we are not changing the state
         assert id(new_source) != id(source)
         assert id(driver2) == id(new_source.driver)
@@ -233,7 +233,7 @@ class TestValidators:
             (
                 GeoDataFrameSource,
                 "MockGeoDataFrameReadOnlyDriver",
-                "mock_geodataframe_adapter",
+                "mock_gdf_adapter",
                 "test.gpkg",
             ),
             (
@@ -274,7 +274,8 @@ class TestValidators:
             driver=driver_cls(),
         ).to_file(new_path)
         assert new_source.root is None
-        assert new_source.driver.filesystem.protocol == ("file", "local")
+        assert new_source.driver.filesystem.protocol == "file"
+        assert new_source.driver.filesystem.get_fs().protocol == ("file", "local")
 
     @pytest.mark.parametrize(
         ("source_cls", "_driver_cls"),

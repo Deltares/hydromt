@@ -1,8 +1,8 @@
 """Driver for GeoDataFrames."""
 
+import logging
 from abc import ABC, abstractmethod
-from logging import Logger, getLogger
-from typing import List, Optional
+from typing import Any
 
 import geopandas as gpd
 
@@ -10,7 +10,7 @@ from hydromt._typing import SourceMetadata, StrPath
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.error import NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class GeoDataFrameDriver(BaseDriver, ABC):
@@ -19,11 +19,14 @@ class GeoDataFrameDriver(BaseDriver, ABC):
     @abstractmethod
     def read(
         self,
-        uris: List[str],
+        uris: list[str],
         *,
-        metadata: Optional[SourceMetadata] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
+        kwargs_for_open: dict[str, Any] | None = None,
+        metadata: SourceMetadata | None = None,
+        mask: Any = None,
+        predicate: str = "intersects",
+        variables: str | list[str] | None = None,
     ) -> gpd.GeoDataFrame:
         """Read in any compatible data source to a geopandas `GeoDataFrame`."""
         ...

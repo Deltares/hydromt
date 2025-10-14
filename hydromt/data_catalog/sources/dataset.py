@@ -1,12 +1,10 @@
 """DataSource class for the Dataset type."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
-import pandas as pd
 import xarray as xr
-from fsspec import filesystem
 from pydantic import Field
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
@@ -18,12 +16,13 @@ from hydromt._typing import (
     StrPath,
     TimeRange,
 )
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters.dataset import DatasetAdapter
 from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class DatasetSource(DataSource):
@@ -121,7 +120,7 @@ class DatasetSource(DataSource):
         else:
             # use local filesystem
             driver: DatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         ds: Optional[xr.Dataset] = self.read_data(
@@ -143,39 +142,12 @@ class DatasetSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_time_range(
+    def _detect_time_range(
         self,
-        detect: bool = True,
-    ) -> TimeRange:
-        """Detect the time range of the dataset.
-
-        if the time range is not set and detect is True,
-        :py:meth:`hydromt.GeoDatasetAdapter.detect_time_range` will be used
-        to detect it.
-
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the time range if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
-            inclusive on both sides.
-        """
-        time_range = self.metadata.extent.get("time_range", None)
-        if time_range is None and detect:
-            time_range = self.detect_time_range()
-
-        return time_range
-
-    def detect_time_range(
-        self,
+        *,
+        strict: bool = False,
         ds: Union[xr.DataArray, xr.Dataset] = None,
-    ) -> TimeRange:
+    ) -> TimeRange | None:
         """Get the temporal range of a dataset.
 
         Parameters
@@ -185,18 +157,20 @@ class DatasetSource(DataSource):
             If none is provided, :py:meth:`hydromt.DatasetAdapter.get_data`
             will be used to fetch the it before detecting.
 
-
         Returns
         -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
-            inclusive on both sides.
+        range: TimeRange, optional
+            Instance containing the start and end of the time dimension. Range is
+            inclusive on both sides. None if the dataset has no time dimension.
         """
         if ds is None:
             ds = self.read_data()
 
         try:
-            return (ds.time[0].values, ds.time[-1].values)
+            return TimeRange(
+                start=ds.time[0].values,
+                end=ds.time[-1].values,
+            )
         except AttributeError:
             raise AttributeError("Dataset has no dimension called 'time'")
 
@@ -222,9 +196,7 @@ class DatasetSource(DataSource):
           if the dataset was skipped.
         """
         try:
-            start_dt, end_dt = self.get_time_range(detect=True)
-            start_dt = pd.to_datetime(start_dt)
-            end_dt = pd.to_datetime(end_dt)
+            time_range = self.get_time_range(detect=True)
             props = {**self.metadata.model_dump(exclude_none=True, exclude_unset=True)}
             ext = splitext(self.full_uri)[-1]
             if ext == ".nc":
@@ -255,8 +227,8 @@ class DatasetSource(DataSource):
             bbox=None,
             properties=props,
             datetime=None,
-            start_datetime=start_dt,
-            end_datetime=end_dt,
+            start_datetime=time_range.start,
+            end_datetime=time_range.end,
         )
         stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
         base_name = basename(self.full_uri)

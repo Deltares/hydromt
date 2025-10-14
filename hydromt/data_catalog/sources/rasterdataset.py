@@ -1,14 +1,11 @@
 """DataSource class for the RasterDataset type."""
 
-from logging import Logger, getLogger
+import logging
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union, cast
+from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
-import pandas as pd
 import xarray as xr
-from fsspec import filesystem
 from pydantic import Field
-from pyproj import CRS
 from pyproj.exceptions import CRSError
 from pystac import Asset as StacAsset
 from pystac import Catalog as StacCatalog
@@ -23,13 +20,14 @@ from hydromt._typing import (
     TotalBounds,
     Zoom,
 )
+from hydromt._typing.fsspec_types import FSSpecFileSystem
 from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
 from hydromt.data_catalog.drivers import RasterDatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class RasterDatasetSource(DataSource):
@@ -132,7 +130,7 @@ class RasterDatasetSource(DataSource):
         else:
             # use local filesystem
             driver: RasterDatasetDriver = self.driver.model_copy(
-                update={"filesystem": filesystem("local")}
+                update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         ds: Optional[xr.Dataset] = self.read_data(
@@ -157,64 +155,10 @@ class RasterDatasetSource(DataSource):
 
         return self.model_copy(update=update)
 
-    def get_bbox(self, crs: Optional[CRS] = None, detect: bool = True) -> TotalBounds:
-        """Return the bounding box and espg code of the dataset.
-
-        if the bounding box is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_bbox` will be used to detect it.
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the bounding box if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        bbox: Tuple[np.float64,np.float64,np.float64,np.float64]
-            the bounding box coordinates of the data. coordinates are returned as
-            [xmin,ymin,xmax,ymax]
-        crs: int
-            The ESPG code of the CRS of the coordinates returned in bbox
-        """
-        bbox = self.metadata.extent.get("bbox", None)
-        crs = cast(int, crs)
-        if bbox is None and detect:
-            bbox, crs = self.detect_bbox()
-
-        return bbox, crs
-
-    def get_time_range(
+    def _detect_bbox(
         self,
-        detect: bool = True,
-    ) -> TimeRange:
-        """Detect the time range of the dataset.
-
-        if the time range is not set and detect is True,
-        :py:meth:`hydromt.RasterdatasetAdapter.detect_time_range` will be used
-        to detect it.
-
-
-        Parameters
-        ----------
-        detect: bool, Optional
-            whether to detect the time range if it is not set. If False, and it's not
-            set None will be returned.
-
-        Returns
-        -------
-        range: Tuple[np.datetime64, np.datetime64]
-            A tuple containing the start and end of the time dimension. Range is
-            inclusive on both sides.
-        """
-        time_range = self.metadata.extent.get("time_range", None)
-        if time_range is None and detect:
-            time_range = self.detect_time_range()
-
-        return time_range
-
-    def detect_bbox(
-        self,
+        *,
+        strict: bool = False,
         ds: Optional[xr.Dataset] = None,
     ) -> TotalBounds:
         """Detect the bounding box and crs of the dataset.
@@ -247,8 +191,10 @@ class RasterDatasetSource(DataSource):
 
         return bounds, crs
 
-    def detect_time_range(
+    def _detect_time_range(
         self,
+        *,
+        strict: bool = False,
         ds: Optional[xr.Dataset] = None,
     ) -> TimeRange:
         """Detect the temporal range of the dataset.
@@ -265,15 +211,15 @@ class RasterDatasetSource(DataSource):
 
         Returns
         -------
-        range: Tuple[np.datetime64, np.datetime64]
+        range: TimeRange
             A tuple containing the start and end of the time dimension. Range is
             inclusive on both sides.
         """
         if ds is None:
             ds = self.read_data()
-        return (
-            ds[ds.raster.time_dim].min().values,
-            ds[ds.raster.time_dim].max().values,
+        return TimeRange(
+            start=ds[ds.raster.time_dim].min().values,
+            end=ds[ds.raster.time_dim].max().values,
         )
 
     def to_stac_catalog(
@@ -300,9 +246,7 @@ class RasterDatasetSource(DataSource):
         try:
             bbox, crs = self.get_bbox(detect=True)
             bbox = list(bbox)
-            start_dt, end_dt = self.get_time_range(detect=True)
-            start_dt = pd.to_datetime(start_dt)
-            end_dt = pd.to_datetime(end_dt)
+            time_range = self.get_time_range(detect=True)
             props = {**self.metadata.model_dump(exclude_none=True), "crs": crs}
             ext = splitext(self.full_uri)[-1]
             if ext == ".nc" or ext == ".vrt":
@@ -339,8 +283,8 @@ class RasterDatasetSource(DataSource):
                 bbox=list(bbox),
                 properties=props,
                 datetime=None,
-                start_datetime=start_dt,
-                end_datetime=end_dt,
+                start_datetime=time_range.start,
+                end_datetime=time_range.end,
             )
             stac_asset = StacAsset(str(self.full_uri), media_type=media_type)
             base_name = basename(self.full_uri)

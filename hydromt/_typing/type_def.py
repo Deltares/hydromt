@@ -5,37 +5,21 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 
 import geopandas as gpd
+import numpy as np
+import pandas as pd
 from dateutil.parser import parse
-from pydantic import ValidationInfo, ValidatorFunctionWrapHandler
-from pydantic.functional_validators import (
-    AfterValidator,
-    BeforeValidator,
-    WrapValidator,
+from pydantic import (
+    BaseModel,
+    Field,
+    field_serializer,
+    field_validator,
+    model_validator,
 )
 from shapely.geometry.base import BaseGeometry
 from typing_extensions import Annotated
 from xarray import DataArray, Dataset
 
 from hydromt._typing.model_mode import ModelMode
-
-
-def _time_range_from_str(
-    t: Tuple[Union[str, datetime], Union[str, datetime]],
-) -> "TimeRange":
-    if isinstance(t[0], str):
-        t0 = parse(t[0])
-    else:
-        t0 = t[0]
-    if isinstance(t[1], str):
-        t1 = parse(t[1])
-    else:
-        t1 = t[1]
-    return (t0, t1)
-
-
-def _time_range_validate(tr: tuple[datetime, datetime]) -> tuple[datetime, datetime]:
-    assert tr[0] >= tr[1], f"time range t0: '{tr[0]}' should be less than t1: '{tr[1]}'"
-    return tr
 
 
 def _validate_bbox(
@@ -56,16 +40,6 @@ DataType = Literal[
 Bbox = Annotated[Tuple[float, float, float, float], _validate_bbox]
 
 
-def _validate_path(
-    path: Any, handler: ValidatorFunctionWrapHandler, info: ValidationInfo
-):
-    if isinstance(path, str):
-        path = Path(str)
-    return handler(path, info)
-
-
-Pathdantic = Annotated[Path, WrapValidator(_validate_path)]
-
 StrPath = Union[str, Path]
 GeoDataframeSource = StrPath
 GeoDatasetSource = StrPath
@@ -74,11 +48,6 @@ DatasetSource = StrPath
 
 Crs = int
 TotalBounds = Tuple[Bbox, Crs]
-TimeRange = Annotated[
-    Tuple[datetime, datetime],
-    BeforeValidator(_time_range_from_str),
-    AfterValidator(_time_range_validate),
-]
 Zoom = Union[int, Tuple[float, str]]  # level OR (resolution, unit)
 Number = Union[int, float]
 SourceSpecDict = TypedDict(
@@ -106,3 +75,48 @@ Variables = Union[str, List[str]]
 GeomBuffer = int
 
 ModeLike = Union[ModelMode, str]
+
+DATETIME_FORMAT: str = "%Y-%m-%d_%H:%M:%S"
+
+
+class TimeRange(BaseModel):
+    start: datetime = Field(..., description="Start of the time range.")
+    end: datetime = Field(..., description="End of the time range.")
+
+    @field_validator("start", "end", mode="before")
+    def parse_datetime(cls, v: Union[str, datetime]) -> datetime:
+        if isinstance(v, str):
+            try:
+                # first try to parse as exact format
+                return datetime.strptime(v, DATETIME_FORMAT)
+            except ValueError:
+                # fallback to more flexible parsing
+                return parse(v)
+        elif isinstance(v, np.datetime64):
+            return pd.to_datetime(v).to_pydatetime()
+        return v
+
+    @model_validator(mode="after")
+    def validate(self) -> "TimeRange":
+        if self.start > self.end:
+            raise ValueError(
+                f"time range start: '{self.start}' should be less than end: '{self.end}'"
+            )
+        return self
+
+    @field_serializer("start", "end", mode="plain")
+    def serialize_datetime(self, v: datetime) -> str:
+        return v.strftime(DATETIME_FORMAT)
+
+    @staticmethod
+    def create(data: Any) -> "TimeRange":
+        if isinstance(data, TimeRange):
+            return data
+        elif isinstance(data, dict):
+            return TimeRange(**data)
+        elif isinstance(data, (list, tuple)) and len(data) == 2:
+            return TimeRange(start=data[0], end=data[1])
+        else:
+            raise ValueError(
+                f"Cannot create TimeRange from data: '{data}' of type '{type(data)}'."
+            )

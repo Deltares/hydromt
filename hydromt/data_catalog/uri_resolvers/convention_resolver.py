@@ -1,8 +1,8 @@
 """URIResolver using HydroMT naming conventions."""
 
+import logging
 from functools import reduce
 from itertools import chain, product
-from logging import Logger, getLogger
 from typing import Any, Iterable, Optional
 
 import pandas as pd
@@ -19,7 +19,7 @@ from hydromt.data_catalog.uri_resolvers.uri_resolver import URIResolver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import zoom_to_overview_level
 
-logger: Logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ConventionResolver(URIResolver):
@@ -36,7 +36,7 @@ class ConventionResolver(URIResolver):
         time_range: TimeRange,
     ) -> pd.PeriodIndex:
         """Obtain the dates the user is searching for."""
-        t_range: pd.DatetimeIndex = pd.to_datetime(list(time_range))
+        t_range: pd.DatetimeIndex = pd.to_datetime([time_range.start, time_range.end])
         freq: str = "M" if "month" in keys else "Y"
         dates: pd.PeriodIndex = pd.period_range(*t_range, freq=freq)
         return dates
@@ -46,14 +46,14 @@ class ConventionResolver(URIResolver):
 
         def split_and_glob(uri: str) -> tuple[Optional[str], list[str]]:
             protocol, _ = split_protocol(uri)
-            return (protocol, self.filesystem.glob(uri))
+            return (protocol, self.filesystem.get_fs().glob(uri))
 
         def maybe_unstrip_protocol(
             pair: tuple[Optional[str], Iterable[str]],
         ) -> Iterable[str]:
             if pair[0] is not None:
                 return map(
-                    lambda uri: self.filesystem.unstrip_protocol(uri)
+                    lambda uri: self.filesystem.get_fs().unstrip_protocol(uri)
                     if not uri.startswith(pair[0])
                     else uri,
                     pair[1],

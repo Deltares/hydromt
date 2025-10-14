@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from logging import getLogger
+import logging
 from typing import Optional
 
 import numpy as np
@@ -23,7 +23,7 @@ from hydromt._utils import (
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 __all__ = ["DatasetAdapter"]
 
@@ -160,7 +160,7 @@ class DatasetAdapter(DataAdapterBase):
             and np.issubdtype(ds["time"].dtype, np.datetime64)
         ):
             logger.debug(f"Slicing time dim {time_range}")
-            ds = ds.sel(time=slice(*time_range))
+            ds = ds.sel(time=slice(time_range.start, time_range.end))
         if _has_no_data(ds):
             return None
         else:

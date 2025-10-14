@@ -2,11 +2,11 @@ from pathlib import Path
 from typing import Type
 
 import numpy as np
-import pandas as pd
 import pytest
 import xarray as xr
 
 from hydromt._typing import SourceMetadata
+from hydromt._typing.type_def import TimeRange
 from hydromt.data_catalog.adapters import GeoDatasetAdapter
 from hydromt.data_catalog.drivers import GeoDatasetDriver, GeoDatasetXarrayDriver
 from hydromt.data_catalog.sources import GeoDatasetSource
@@ -18,7 +18,7 @@ class TestGeoDatasetSource:
     def test_read_data(
         self,
         geoda: xr.DataArray,
-        mock_geo_ds_driver: GeoDatasetDriver,
+        MockGeoDatasetDriver: type[GeoDatasetDriver],
         mock_geo_ds_adapter: GeoDatasetAdapter,
         mock_resolver: URIResolver,
         managed_tmp_path: Path,
@@ -27,7 +27,7 @@ class TestGeoDatasetSource:
         source = GeoDatasetSource(
             root=".",
             name="geoda.zarr",
-            driver=mock_geo_ds_driver,
+            driver=MockGeoDatasetDriver(),
             data_adapter=mock_geo_ds_adapter,
             uri_resolver=mock_resolver,
             uri=str(managed_tmp_path / "geoda.zarr"),
@@ -56,7 +56,7 @@ class TestGeoDatasetSource:
         local_driver = GeoDatasetXarrayDriver()
         local_path = managed_tmp_path / "geods_source_writes_netcdf.nc"
         writable_source.to_file(file_path=local_path, driver_override=local_driver)
-        assert local_driver.filesystem.exists(local_path)
+        assert local_driver.filesystem.get_fs().exists(local_path)
 
     @pytest.mark.integration
     def test_writes_to_netcdf_variables(
@@ -71,7 +71,7 @@ class TestGeoDatasetSource:
             driver_override=local_driver,
             variables="test1",
         )
-        assert local_driver.filesystem.exists(local_path)
+        assert local_driver.filesystem.get_fs().exists(local_path)
 
     @pytest.mark.integration
     def test_writes_to_zarr(
@@ -83,18 +83,20 @@ class TestGeoDatasetSource:
             file_path=local_path,
             driver_override=local_driver,
         )
-        assert local_driver.filesystem.exists(local_path)
+        assert local_driver.filesystem.get_fs().exists(local_path)
 
     def test_detect_bbox(self, writable_source: GeoDatasetSource, geoda: xr.DataArray):
         geoda_expected_bbox = (-74.08, -34.58, -47.91, 10.48)
-        geoda_detected_bbox = _to_geographic_bbox(*writable_source.detect_bbox(geoda))
+        geoda_detected_bbox = _to_geographic_bbox(
+            *writable_source._detect_bbox(ds=geoda)
+        )
         assert np.all(np.equal(geoda_expected_bbox, geoda_detected_bbox))
 
     def test_detect_time_range(
         self, writable_source: GeoDatasetSource, geoda: xr.DataArray
     ):
-        geoda_expected_time_range = tuple(pd.to_datetime(["01-01-2000", "12-31-2000"]))
-        geoda_detected_time_range = writable_source.detect_time_range(geoda)
+        geoda_expected_time_range = TimeRange(start="01-01-2000", end="12-31-2000")
+        geoda_detected_time_range = writable_source._detect_time_range(ds=geoda)
         assert geoda_expected_time_range == geoda_detected_time_range
 
     @pytest.mark.parametrize(
