@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, model_validator
 
-from hydromt._typing.type_def import Bbox
+from hydromt.typing.type_def import Bbox
 
 
 class PathRegion(BaseModel):

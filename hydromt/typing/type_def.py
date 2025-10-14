@@ -19,7 +19,7 @@ from shapely.geometry.base import BaseGeometry
 from typing_extensions import Annotated
 from xarray import DataArray, Dataset
 
-from hydromt._typing.model_mode import ModelMode
+from hydromt.typing.model_mode import ModelMode
 
 
 def _validate_bbox(
@@ -80,11 +80,14 @@ DATETIME_FORMAT: str = "%Y-%m-%d_%H:%M:%S"
 
 
 class TimeRange(BaseModel):
+    """A time range with start and end datetime."""
+
     start: datetime = Field(..., description="Start of the time range.")
     end: datetime = Field(..., description="End of the time range.")
 
     @field_validator("start", "end", mode="before")
     def parse_datetime(cls, v: Union[str, datetime]) -> datetime:
+        """Parse a datetime from string or numpy datetime64."""
         if isinstance(v, str):
             try:
                 # first try to parse as exact format
@@ -98,6 +101,7 @@ class TimeRange(BaseModel):
 
     @model_validator(mode="after")
     def validate(self) -> "TimeRange":
+        """Validate the time range."""
         if self.start > self.end:
             raise ValueError(
                 f"time range start: '{self.start}' should be less than end: '{self.end}'"
@@ -106,10 +110,12 @@ class TimeRange(BaseModel):
 
     @field_serializer("start", "end", mode="plain")
     def serialize_datetime(self, v: datetime) -> str:
+        """Serialize a datetime to string."""
         return v.strftime(DATETIME_FORMAT)
 
     @staticmethod
     def create(data: Any) -> "TimeRange":
+        """Create a TimeRange from various input types."""
         if isinstance(data, TimeRange):
             return data
         elif isinstance(data, dict):

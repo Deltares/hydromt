@@ -12,20 +12,20 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt._typing import (
+from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
+from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
+from hydromt.data_catalog.sources.data_source import DataSource
+from hydromt.error import NoDataStrategy
+from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
+from hydromt.typing import (
     Bbox,
     Geom,
     StrPath,
     TimeRange,
     TotalBounds,
 )
-from hydromt._typing.fsspec_types import FSSpecFileSystem
-from hydromt._typing.type_def import GeomBuffer, Predicate
-from hydromt.data_catalog.adapters.geodataset import GeoDatasetAdapter
-from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetDriver
-from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy
-from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
+from hydromt.typing.fsspec_types import FSSpecFileSystem
+from hydromt.typing.type_def import GeomBuffer, Predicate
 
 logger = logging.getLogger(__name__)
 

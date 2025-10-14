@@ -11,13 +11,13 @@ import rasterio
 import xarray as xr
 
 from hydromt._compat import HAS_GDAL
-from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.drivers.raster.rasterio_driver import (
     RasterioDriver,
     RasterioOptions,
 )
 from hydromt.gis.raster_utils import full_from_transform
 from hydromt.io import open_mfraster, open_raster
+from hydromt.typing import SourceMetadata
 from tests.conftest import TEST_DATA_DIR
 
 

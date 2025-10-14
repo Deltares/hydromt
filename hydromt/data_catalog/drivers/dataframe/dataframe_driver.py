@@ -6,14 +6,14 @@ from typing import Any, ClassVar
 
 import pandas as pd
 
-from hydromt._typing import (
+from hydromt.data_catalog.drivers import BaseDriver
+from hydromt.error import NoDataStrategy
+from hydromt.typing import (
     SourceMetadata,
     StrPath,
     TimeRange,
     Variables,
 )
-from hydromt.data_catalog.drivers import BaseDriver
-from hydromt.error import NoDataStrategy
 
 logger = logging.getLogger(__name__)
 

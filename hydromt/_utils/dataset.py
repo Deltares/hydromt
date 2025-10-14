@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from hydromt._typing.metadata import SourceMetadata
-from hydromt._typing.type_def import TimeRange, Variables
 from hydromt._utils.nodata import _has_no_data
+from hydromt.typing.metadata import SourceMetadata
+from hydromt.typing.type_def import TimeRange, Variables
 
 if TYPE_CHECKING:
     from pandas._libs.tslibs.timedeltas import TimeDeltaUnitChoices

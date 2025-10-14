@@ -5,11 +5,11 @@ from typing import Any, Dict, Iterator
 import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
-from hydromt._typing.fsspec_types import FSSpecFileSystem
-from hydromt._typing.type_def import TimeRange
 from hydromt._utils.naming_convention import _expand_uri_placeholders
 from hydromt.data_catalog.uri_resolvers.convention_resolver import ConventionResolver
 from hydromt.error import NoDataException
+from hydromt.typing.fsspec_types import FSSpecFileSystem
+from hydromt.typing.type_def import TimeRange
 
 
 class TestConventionResolver:

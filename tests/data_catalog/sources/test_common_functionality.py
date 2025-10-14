@@ -4,7 +4,6 @@ from typing import Type
 import pytest
 from pydantic import ValidationError
 
-from hydromt._typing import SourceMetadata
 from hydromt.data_catalog.adapters.data_adapter_base import DataAdapterBase
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.data_catalog.sources import (
@@ -16,6 +15,7 @@ from hydromt.data_catalog.sources import (
     RasterDatasetSource,
 )
 from hydromt.data_catalog.uri_resolvers import URIResolver
+from hydromt.typing import SourceMetadata
 
 
 class TestValidators:

@@ -12,7 +12,12 @@ from pystac import Catalog as StacCatalog
 from pystac import Item as StacItem
 from pystac import MediaType
 
-from hydromt._typing import (
+from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
+from hydromt.data_catalog.drivers import RasterDatasetDriver
+from hydromt.data_catalog.sources.data_source import DataSource
+from hydromt.error import NoDataStrategy
+from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
+from hydromt.typing import (
     Bbox,
     Geom,
     StrPath,
@@ -20,12 +25,7 @@ from hydromt._typing import (
     TotalBounds,
     Zoom,
 )
-from hydromt._typing.fsspec_types import FSSpecFileSystem
-from hydromt.data_catalog.adapters.rasterdataset import RasterDatasetAdapter
-from hydromt.data_catalog.drivers import RasterDatasetDriver
-from hydromt.data_catalog.sources.data_source import DataSource
-from hydromt.error import NoDataStrategy
-from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
+from hydromt.typing.fsspec_types import FSSpecFileSystem
 
 logger = logging.getLogger(__name__)
 

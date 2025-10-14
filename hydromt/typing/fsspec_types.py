@@ -1,3 +1,5 @@
+"""Pydantic compatible fsspec AbstractFileSystem type."""
+
 from typing import Any
 
 from fsspec import AbstractFileSystem, filesystem
