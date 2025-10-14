@@ -214,6 +214,7 @@ class Model(object, metaclass=ABCMeta):
 
         Example
         -------
+        >>> from hydromt import Model
         >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
         ...     model.setup_x()
         ...     model.setup_y()
@@ -236,6 +237,7 @@ class Model(object, metaclass=ABCMeta):
 
         Example
         -------
+        >>> from hydromt import Model
         >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
         ...     model.setup_x()
         ...     model.setup_y()
