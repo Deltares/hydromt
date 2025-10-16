@@ -24,9 +24,10 @@ html[data-theme="light"] {
     --sd-color-tabs-label-active: #080c80;
     --sd-color-tabs-label-hover: #080c80;
     --sd-color-tabs-underline-active: #080c80;
+    --sd-color-icon: #080c80;
 }
 
 /* enlarge deltares & github icon size; only works with local/url svg files; not with fa icons */
 img.icon-link-image {
-    height: 2.5em !important;
+    height: 2em !important;
 }

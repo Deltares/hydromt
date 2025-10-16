@@ -58,32 +58,6 @@ Getting started
         +++
         Examples
 
-    .. grid-item-card::
-        :text-align: center
-        :link: user_stories
-        :link-type: ref
-
-        :octicon:`file-media;10em`
-        +++
-        User's stories
-
-    .. grid-item-card::
-        :text-align: center
-        :link: publications
-        :link-type: ref
-
-        :octicon:`mortar-board;10em`
-        +++
-        Publications
-
-    .. grid-item-card::
-        :text-align: center
-        :link: plugins
-        :link-type: ref
-
-        :octicon:`package-dependents;10em`
-        +++
-        Model plugins
 
 .. toctree::
    :caption: Table of Contents
@@ -93,6 +67,3 @@ Getting started
    quick_overview.rst
    faq.rst
    examples_index.rst
-   use_case_examples.rst
-   publications.rst
-   team
