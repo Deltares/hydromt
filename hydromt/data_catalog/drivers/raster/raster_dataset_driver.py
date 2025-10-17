@@ -14,7 +14,6 @@ from hydromt.typing import (
     Geom,
     SourceMetadata,
     StrPath,
-    TimeRange,
     Variables,
     Zoom,
 )
@@ -34,7 +33,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
         open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
-        time_range: TimeRange | None = None,
         zoom: Zoom | None = None,
         chunks: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,

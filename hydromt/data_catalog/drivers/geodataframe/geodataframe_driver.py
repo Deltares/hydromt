@@ -25,7 +25,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         open_kwargs: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
         mask: Any = None,
-        predicate: str = "intersects",
         variables: str | list[str] | None = None,
     ) -> gpd.GeoDataFrame:
         """Read in any compatible data source to a geopandas `GeoDataFrame`."""

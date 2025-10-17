@@ -345,7 +345,7 @@ def test_catalog_entry_merging_round_trip(aws_worldcover, legacy_aws_worldcover)
 def test_versioned_catalogs_no_version(data_catalog):
     data_catalog._sources = {}  # reset
     data_catalog.from_predefined_catalogs("deltares_data")
-    assert len(data_catalog.sources) > 0
+    assert len(data_catalog) > 0
 
 
 def test_version_catalogs_errors_on_unknown_version(data_catalog):
@@ -357,7 +357,7 @@ def test_data_catalog_lazy_loading():
     data_catalog = DataCatalog()
     assert len(data_catalog._sources) == 0
     # global data sources from artifacts are automatically added
-    assert len(data_catalog.sources) > 0
+    assert len(data_catalog) > 0
 
 
 def test_data_catalog_contains_source_version_permissive(data_catalog):
@@ -865,9 +865,11 @@ class TestGetRasterDataset:
         data = r"s3://copernicus-dem-30m/Copernicus_DSM_COG_10_N29_00_E105_00_DEM/Copernicus_DSM_COG_10_N29_00_E105_00_DEM.tif"
         da = data_catalog.get_rasterdataset(
             data,
-            driver={
-                "name": "rasterio",
-                "filesystem": {"protocol": "s3", "anon": "true"},
+            source_kwargs={
+                "driver": {
+                    "name": "rasterio",
+                    "filesystem": {"protocol": "s3", "anon": "true"},
+                },
             },
         )
 
@@ -994,7 +996,7 @@ class TestGetGeoDataFrame:
             uri_geojson,
             bbox=geodf.total_bounds,
             buffer=1000,
-            data_adapter={"rename": {"test": "test1"}},
+            source_kwargs={"data_adapter": {"rename": {"test": "test1"}}},
         )
         assert np.all(gdf == geodf)
 
@@ -1006,7 +1008,7 @@ class TestGetGeoDataFrame:
             uri_shp,
             bbox=geodf.total_bounds,
             buffer=1000,
-            data_adapter={"rename": {"test": "test1"}},
+            source_kwargs={"data_adapter": {"rename": {"test": "test1"}}},
         )
         assert np.all(gdf == geodf)
 
@@ -1095,18 +1097,18 @@ def test_get_geodataframe_path(data_catalog):
 def test_get_geodataframe_geodataframe_table_driver(data_catalog):
     uri = data_catalog.get_source("grdc").uri
     p = Path(data_catalog.root) / uri
-    gdf = data_catalog.get_geodataframe(p, metadata={"crs": 4326})
+    gdf = data_catalog.get_geodataframe(p, source_kwargs={"metadata": {"crs": 4326}})
     assert isinstance(gdf, gpd.GeoDataFrame)
-    assert "grdc.csv" in data_catalog.sources
+    assert data_catalog.contains_source("grdc.csv")
     grdc_source = data_catalog.get_source("grdc.csv")
     assert grdc_source.driver.name == "geodataframe_table"
 
     # Should get the same results when supplying driver argument
     data_catalog.sources.pop("grdc.csv")
     gdf = data_catalog.get_geodataframe(
-        p, metadata={"crs": 4326}, driver="geodataframe_table"
+        p, source_kwargs={"metadata": {"crs": 4326}, "driver": "geodataframe_table"}
     )
-    assert "grdc.csv" in data_catalog.sources
+    assert data_catalog.contains_source("grdc.csv")
     grdc_source = data_catalog.get_source("grdc.csv")
     assert grdc_source.driver.name == "geodataframe_table"
 
@@ -1180,7 +1182,12 @@ class TestGetGeoDataset:
     ):
         da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
             geojson_dataset,
-            driver={"name": "geodataset_vector", "options": {"data_path": csv_dataset}},
+            source_kwargs={
+                "driver": {
+                    "name": "geodataset_vector",
+                    "options": {"data_path": csv_dataset},
+                }
+            },
         )
         assert isinstance(da, xr.DataArray), type(da)
         da = da.sortby("index")
@@ -1194,7 +1201,7 @@ class TestGetGeoDataset:
             nc_dataset,
             variables=["test1"],
             bbox=geoda.vector.bounds,
-            driver="geodataset_xarray",
+            source_kwargs={"driver": "geodataset_xarray"},
         )
         assert isinstance(da, xr.DataArray)
         da = da.sortby("index")
@@ -1206,7 +1213,9 @@ class TestGetGeoDataset:
         self, nc_dataset: str, data_catalog: DataCatalog
     ):
         ds: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
-            nc_dataset, single_var_as_array=False, driver="geodataset_xarray"
+            nc_dataset,
+            single_var_as_array=False,
+            source_kwargs={"driver": "geodataset_xarray"},
         )
         assert isinstance(ds, xr.Dataset)
         assert "test" in ds
@@ -1222,11 +1231,13 @@ class TestGetGeoDataset:
     ):
         da: Union[xr.DataArray, xr.Dataset, None] = data_catalog.get_geodataset(
             xy_dataset,
-            driver={
-                "name": "geodataset_vector",
-                "options": {"data_path": csv_dataset},
+            source_kwargs={
+                "driver": {
+                    "name": "geodataset_vector",
+                    "options": {"data_path": csv_dataset},
+                },
+                "metadata": {"crs": 4326},
             },
-            metadata={"crs": geodf.crs},
         )
         assert isinstance(da, xr.DataArray)
         da = da.sortby("index")
@@ -1243,7 +1254,7 @@ class TestGetGeoDataset:
         da: Optional[xr.DataArray] = data_catalog.get_geodataset(
             nc_dataset,
             # only really care that the bbox doesn't intersect with anythign
-            driver="geodataset_xarray",
+            source_kwargs={"driver": "geodataset_xarray"},
             bbox=[12.5, 12.6, 12.7, 12.8],
             handle_nodata=NoDataStrategy.IGNORE,
         )
@@ -1254,7 +1265,7 @@ class TestGetGeoDataset:
         with pytest.raises(NoDataException):
             data_catalog.get_geodataset(
                 nc_dataset,
-                driver="geodataset_xarray",
+                source_kwargs={"driver": "geodataset_xarray"},
                 # only really care that the bbox doesn't intersect with anythign
                 bbox=(12.5, 12.6, 12.7, 12.8),
                 handle_nodata=NoDataStrategy.RAISE,
@@ -1336,13 +1347,16 @@ def test_get_geodataset_bbox_time_range(data_catalog: DataCatalog):
     p = Path(data_catalog.root) / uri
 
     # vector dataset using three different ways
-    da = data_catalog.get_geodataset(p, driver="geodataset_xarray")
+    da = data_catalog.get_geodataset(
+        p,
+        source_kwargs={"driver": "geodataset_xarray"},
+    )
     bbox = [12.22412, 45.25635, 12.25342, 45.271]
     da = data_catalog.get_geodataset(
         da,
         bbox=bbox,
         time_range=TimeRange(start="2010-02-01", end="2010-02-05"),
-        driver="geodataset_xarray",
+        source_kwargs={"driver": "geodataset_xarray"},
     )
     assert da.vector.index.size == 2
     assert da.time.size == 4 * 24 * 6 + 1  # 4 days, 24 hours, data point per 10 minutes
@@ -1411,7 +1425,8 @@ class TestGetDataFrame:
 
     def test_reads_csv(self, df: pd.DataFrame, uri_csv: str, data_catalog: DataCatalog):
         df1 = data_catalog.get_dataframe(
-            uri_csv, driver={"name": "pandas", "options": {"index_col": 0}}
+            uri_csv,
+            source_kwargs={"driver": {"name": "pandas", "options": {"index_col": 0}}},
         )
         assert isinstance(df1, pd.DataFrame)
         pd.testing.assert_frame_equal(df, df1)
@@ -1425,7 +1440,10 @@ class TestGetDataFrame:
 
     def test_reads_fwf(self, df: pd.DataFrame, uri_fwf: str, data_catalog: DataCatalog):
         df1 = data_catalog.get_dataframe(
-            uri_fwf, driver={"name": "pandas", "options": {"colspecs": "infer"}}
+            uri_fwf,
+            source_kwargs={
+                "driver": {"name": "pandas", "options": {"colspecs": "infer"}}
+            },
         )
         assert isinstance(df1, pd.DataFrame)
         pd.testing.assert_frame_equal(df1, df)
@@ -1435,7 +1453,8 @@ class TestGetDataFrame:
         self, df: pd.DataFrame, uri_xlsx: str, data_catalog: DataCatalog
     ):
         df1 = data_catalog.get_dataframe(
-            uri_xlsx, driver={"name": "pandas", "options": {"index_col": 0}}
+            uri_xlsx,
+            source_kwargs={"driver": {"name": "pandas", "options": {"index_col": 0}}},
         )
         assert isinstance(df1, pd.DataFrame)
         pd.testing.assert_frame_equal(df1, df.set_index("id"))
@@ -1477,7 +1496,12 @@ class TestGetDataFrame:
     ):
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
-            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": 0, "parse_dates": True},
+                }
+            },
         )
         assert isinstance(dfts, pd.DataFrame)
         assert np.all(
@@ -1493,8 +1517,13 @@ class TestGetDataFrame:
         }
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
-            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
-            data_adapter={"rename": rename},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": 0, "parse_dates": True},
+                },
+                "data_adapter": {"rename": rename},
+            },
         )
         assert np.all(list(dfts.columns) == list(rename.values()))
 
@@ -1513,8 +1542,13 @@ class TestGetDataFrame:
         }
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
-            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
-            data_adapter={"unit_mult": unit_mult, "unit_add": unit_add},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": 0, "parse_dates": True},
+                },
+                "data_adapter": {"unit_mult": unit_mult, "unit_add": unit_add},
+            },
         )
         # Do checks
         for var in df_time.columns:
@@ -1524,7 +1558,12 @@ class TestGetDataFrame:
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
             time_range=TimeRange(start="2007-01-02", end="2007-01-04"),
-            driver={"name": "pandas", "options": {"index_col": 0, "parse_dates": True}},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"index_col": 0, "parse_dates": True},
+                }
+            },
         )
         assert dfts.shape[0] == 3
 
@@ -1534,9 +1573,11 @@ class TestGetDataFrame:
         dfts = data_catalog.get_dataframe(
             csv_uri_time,
             variables=vars_slice,
-            driver={
-                "name": "pandas",
-                "options": {"parse_dates": True, "index_col": 0},
+            source_kwargs={
+                "driver": {
+                    "name": "pandas",
+                    "options": {"parse_dates": True, "index_col": 0},
+                },
             },
         )
         assert np.all(dfts.columns == vars_slice)
@@ -1639,8 +1680,13 @@ def test_detect_extent_geodataset(data_catalog):
 
 
 def test_to_stac_raster_dataset(tmp_path: Path, data_catalog):
-    data_catalog._sources = {}
-    _ = data_catalog.get_rasterdataset("chirps_global")
+    data_catalog._sources = {}  # clea sources to test just one source
+    _ = data_catalog.get_rasterdataset(  # register the source
+        data_catalog.root / "chirps_global.nc",
+        source_kwargs={
+            "metadata": {"crs": 4326},
+        },
+    )
 
     sources = [
         "chirps_global",

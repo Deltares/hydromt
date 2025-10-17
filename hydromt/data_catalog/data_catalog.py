@@ -181,7 +181,12 @@ class DataCatalog(object):
         """
         meta = meta or {}
         stac_catalog = StacCatalog(id=catalog_name, description=description)
-        for _name, source in self.list_sources(used_only):
+
+        sources = self.list_sources(used_only)
+        if not used_only and source_names is not None:
+            sources = [s for s in sources if s[0] in source_names]
+
+        for _name, source in sources:
             stac_child_catalog = source.to_stac_catalog(handle_nodata)
             if stac_child_catalog:
                 stac_catalog.add_child(stac_child_catalog)
@@ -1298,7 +1303,7 @@ class DataCatalog(object):
                 driver: str = source_kwargs.pop(
                     "driver", RasterDatasetSource._fallback_driver_read
                 )
-                name = basename(data_like)
+                name = Path(data_like).stem
                 source = RasterDatasetSource(
                     name=name,
                     uri=str(data_like),

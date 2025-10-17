@@ -19,11 +19,10 @@ from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
     Geom,
+    Predicate,
     SourceMetadata,
     StrPath,
-    TimeRange,
 )
-from hydromt.typing.type_def import Predicate
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +53,8 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
-        metadata: SourceMetadata | None = None,
         predicate: Predicate = "intersects",
-        time_range: TimeRange | None = None,
-        variables: str | list[str] | None = None,
+        metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """
         Read zarr data to an xarray DataSet.
@@ -68,12 +65,10 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             self.__class__.__name__,
             {
                 "mask": mask,
-                "time_range": time_range,
-                "variables": variables,
                 "predicate": predicate,
+                "metadata": metadata,
             },
         )
-
         preprocessor = self.options.get_preprocessor()
         first_ext = splitext(uris[0])[-1]
         open_kwargs = open_kwargs or {}

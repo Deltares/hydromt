@@ -6,6 +6,7 @@ from typing import Any, ClassVar
 import geopandas as gpd
 from pydantic import Field
 
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
     DriverOptions,
@@ -55,10 +56,13 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         open_kwargs: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
         mask: Any = None,
-        predicate: str = "intersects",
         variables: str | list[str] | None = None,
     ) -> gpd.GeoDataFrame:
         """Read tabular data using a combination of the pandas and geopandas libraries."""
+        _warn_on_unused_kwargs(
+            self.__class__.__name__, {"mask": mask, "variables": variables}
+        )
+
         if not metadata:
             metadata = SourceMetadata()
         if len(uris) > 1:

@@ -22,7 +22,6 @@ from hydromt.typing import (
     Geom,
     SourceMetadata,
     StrPath,
-    TimeRange,
     Variables,
     Zoom,
 )
@@ -80,7 +79,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
-        time_range: TimeRange | None = None,
         zoom: Zoom | None = None,
         chunks: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
@@ -93,10 +91,13 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         _warn_on_unused_kwargs(
             self.__class__.__name__,
             {
+                "mask": mask,
+                "variables": variables,
                 "zoom": zoom,
+                "chunks": chunks,
+                "metadata": metadata,
             },
         )
-
         # Sort out the preprocessor
         preprocessor: Callable | None = self.options.get_preprocessor()
 

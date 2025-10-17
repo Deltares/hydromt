@@ -9,9 +9,7 @@ import pandas as pd
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.error import NoDataStrategy
 from hydromt.typing import (
-    SourceMetadata,
     StrPath,
-    TimeRange,
     Variables,
 )
 
@@ -31,8 +29,6 @@ class DataFrameDriver(BaseDriver, ABC):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         open_kwargs: dict[str, Any] | None = None,
         variables: Variables | None = None,
-        time_range: TimeRange | None = None,
-        metadata: SourceMetadata | None = None,
     ) -> pd.DataFrame:
         """Read in any compatible data source to a pandas `DataFrame`."""
         ...

@@ -11,14 +11,9 @@ import xarray as xr
 from pydantic import Field, field_serializer, model_validator
 from pyproj import CRS
 
-from hydromt._utils.caching import _cache_vrt_tiles
-from hydromt._utils.temp_env import temp_env
-from hydromt._utils.uris import _strip_scheme
+from hydromt._utils import _cache_vrt_tiles, _strip_scheme, temp_env
 from hydromt.config import SETTINGS
-from hydromt.data_catalog.drivers.base_driver import DriverOptions
-from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
-    RasterDatasetDriver,
-)
+from hydromt.data_catalog.drivers import DriverOptions, RasterDatasetDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.io.readers import open_mfraster
@@ -26,7 +21,6 @@ from hydromt.typing import (
     Geom,
     SourceMetadata,
     StrPath,
-    TimeRange,
     Variables,
     Zoom,
 )
@@ -113,7 +107,6 @@ class RasterioDriver(RasterDatasetDriver):
         open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
-        time_range: TimeRange | None = None,
         zoom: Zoom | None = None,
         chunks: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,

@@ -14,7 +14,7 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 from hydromt.error import NoDataStrategy
-from hydromt.typing import Geom, Predicate, SourceMetadata, StrPath, TimeRange
+from hydromt.typing import Geom, Predicate, SourceMetadata, StrPath
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +48,6 @@ class GeoDatasetDriver(BaseDriver, ABC):
         open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
-        variables: list[str] | None = None,
-        time_range: TimeRange | None = None,
         metadata: SourceMetadata | None = None,
     ) -> xr.Dataset | None:
         """

@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Tuple, TypedDict, Union
 
+import cftime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -97,6 +98,10 @@ class TimeRange(BaseModel):
                 return parse(v)
         elif isinstance(v, np.datetime64):
             return pd.to_datetime(v).to_pydatetime()
+        elif isinstance(v, cftime.DatetimeGregorian):
+            return v._to_real_datetime()
+        elif isinstance(v, pd.Timestamp):
+            return v.to_pydatetime()
         return v
 
     @model_validator(mode="after")

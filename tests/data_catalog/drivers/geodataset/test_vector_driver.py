@@ -40,10 +40,7 @@ class TestGeoDatasetVectorDriver:
         driver = GeoDatasetVectorDriver(
             options=GeoDatasetOptions(preprocess="remove_duplicates"),
         )
-        res: Optional[Dataset] = driver.read(
-            uris,
-            variables=["var1"],
-        )
+        res: Optional[Dataset] = driver.read(uris)
         assert res is not None
         mock_preprocessor.assert_called_once_with(mock_ds)
 

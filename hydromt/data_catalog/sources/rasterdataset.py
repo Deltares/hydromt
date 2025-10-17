@@ -4,6 +4,7 @@ import logging
 from os.path import basename, splitext
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
+import numpy as np
 import xarray as xr
 from pydantic import Field
 from pyproj.exceptions import CRSError
@@ -66,12 +67,12 @@ class RasterDatasetSource(DataSource):
             mask = _parse_geom_bbox_buffer(mask, bbox)
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter._to_source_timerange(time_range)
+        time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=tr,
+            time_range=time_range,
             mask=mask,
             variables=vrs,
             zoom=zoom,
@@ -81,14 +82,13 @@ class RasterDatasetSource(DataSource):
 
         ds: xr.Dataset = self.driver.read(
             uris,
+            handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
             mask=mask,
-            time_range=tr,
             variables=vrs,
             zoom=zoom,
             chunks=chunks,
             metadata=self.metadata,
-            handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs or {},
         )
         return self.data_adapter.transform(
             ds,
@@ -219,9 +219,13 @@ class RasterDatasetSource(DataSource):
         """
         if ds is None:
             ds = self.read_data()
+
+        if not np.issubdtype(ds[ds.raster.time_dim].dtype, np.datetime64):
+            ds = ds.convert_calendar("standard")
+
         return TimeRange(
-            start=ds[ds.raster.time_dim].min().values,
-            end=ds[ds.raster.time_dim].max().values,
+            start=ds[ds.raster.time_dim].values.min(),
+            end=ds[ds.raster.time_dim].values.max(),
         )
 
     def to_stac_catalog(

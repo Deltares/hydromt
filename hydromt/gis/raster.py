@@ -7,15 +7,17 @@
 
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: I001
 
+import datetime
 import itertools
 import logging
 import math
 import os
 from os.path import join
 from typing import Any, Optional, Tuple, Union
-
+import rioxarray  # noqa: F401
+import cftime
 import dask
 import geopandas as gpd
 import numpy as np
@@ -23,7 +25,6 @@ import pandas as pd
 import pyproj
 import rasterio.fill
 import rasterio.warp
-import rioxarray  # noqa: F401
 import shapely
 import xarray as xr
 from affine import Affine
@@ -84,15 +85,29 @@ class XGeoBase(object):
     def time_dim(self):
         """Time dimension name."""
         dim = self.get_attrs("time_dim")
-        if dim not in self._obj.dims or np.dtype(self._obj[dim]).type != np.datetime64:
+        # Try early return the timedim in attrs
+        if dim and dim in self._obj.dims:
+            coord = self._obj.coords.get(dim)
+            if coord is not None and np.dtype(coord).type == np.datetime64:
+                return dim
+
+        # Not found, so try detect
+        tdims = [
+            d
+            for d in self._obj.dims
+            if d in self._obj.coords and self._is_datetime_coord(self._obj.coords[d])
+        ]
+        if len(tdims) == 0:
             self.set_attrs(time_dim=None)
-            tdims = []
-            for dim in self._obj.dims:
-                if np.dtype(self._obj[dim]).type == np.datetime64:
-                    tdims.append(dim)
-            if len(tdims) == 1:
-                self.set_attrs(time_dim=tdims[0])
-        return self.get_attrs("time_dim")
+            return None
+        elif len(tdims) == 1:
+            self.set_attrs(time_dim=tdims[0])
+            return tdims[0]
+        else:
+            raise ValueError(
+                f"Multiple time dimensions found: {tdims}. "
+                "Set 'time_dim' attribute manually to resolve."
+            )
 
     @property
     def crs(self) -> CRS:
@@ -158,6 +173,29 @@ class XGeoBase(object):
                 self.set_attrs(**grid_map_attrs)
             self._crs = input_crs
             return input_crs
+
+    @staticmethod
+    def _is_datetime_coord(coord) -> bool:
+        """Return True if coord is datetime64 or object of datetimes."""
+        dtype = np.asarray(coord).dtype
+        if np.issubdtype(dtype, np.datetime64):
+            return True
+        if np.issubdtype(dtype, np.object_):
+            # Handle object arrays of datetime.datetime or np.datetime64
+            values = np.asarray(coord)
+            if values.size == 0:
+                return False
+            sample = values.ravel()[0]
+            return isinstance(
+                sample,
+                (
+                    datetime.datetime,
+                    np.datetime64,
+                    pd.Timestamp,
+                    cftime.DatetimeGregorian,
+                ),
+            )
+        return False
 
 
 class XRasterBase(XGeoBase):

@@ -71,21 +71,18 @@ class DatasetSource(DataSource):
         self._log_start_read_data()
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter._to_source_timerange(time_range)
+        time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=tr,
+            time_range=time_range,
             variables=vrs,
             handle_nodata=handle_nodata,
         )
 
         ds: xr.Dataset = self.driver.read(
             uris,
-            time_range=tr,
-            variables=vrs,
-            metadata=self.metadata,
             handle_nodata=handle_nodata,
             open_kwargs=open_kwargs or {},
         )

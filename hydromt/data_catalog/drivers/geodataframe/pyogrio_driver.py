@@ -9,6 +9,7 @@ import pandas as pd
 from pyogrio import read_dataframe, read_info, write_dataframe
 from pyproj import CRS
 
+from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
@@ -36,10 +37,9 @@ class PyogrioDriver(GeoDataFrameDriver):
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         open_kwargs: dict[str, Any] | None = None,
+        metadata: SourceMetadata | None = None,
         mask: Any = None,
         variables: str | list[str] | None = None,
-        metadata: SourceMetadata | None = None,
-        predicate: str = "intersects",
     ) -> gpd.GeoDataFrame:
         """
         Read data using pyogrio.
@@ -50,6 +50,8 @@ class PyogrioDriver(GeoDataFrameDriver):
         are only present in the method's signature for compatibility with other
         functions.
         """
+        _warn_on_unused_kwargs(self.__class__.__name__, {"metadata": metadata})
+
         open_kwargs = open_kwargs or {}
         kwargs = self.options.get_kwargs() | open_kwargs
         if len(uris) > 1:

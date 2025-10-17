@@ -45,22 +45,21 @@ class DataFrameSource(DataSource):
         self._mark_as_used()
         self._log_start_read_data()
 
-        tr: TimeRange = self.data_adapter._to_source_timerange(time_range)
+        time_range: TimeRange = self.data_adapter._to_source_timerange(time_range)
         vrs: Optional[List[str]] = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
             variables=vrs,
-            time_range=tr,
+            time_range=time_range,
             handle_nodata=handle_nodata,
         )
 
         df: pd.DataFrame = self.driver.read(
             uris,
-            variables=vrs,
-            time_range=tr,
             handle_nodata=handle_nodata,
             open_kwargs=open_kwargs or {},
+            variables=vrs,
         )
 
         return self.data_adapter.transform(

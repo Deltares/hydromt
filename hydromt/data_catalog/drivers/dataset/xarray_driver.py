@@ -16,9 +16,7 @@ from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
-    SourceMetadata,
     StrPath,
-    TimeRange,
 )
 
 logger = logging.getLogger(__name__)
@@ -73,9 +71,6 @@ class DatasetXarrayDriver(DatasetDriver):
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         open_kwargs: dict[str, Any] | None = None,
-        metadata: SourceMetadata | None = None,
-        time_range: TimeRange | None = None,
-        variables: str | list[str] | None = None,
     ) -> xr.Dataset:
         """
         Read zarr data to an xarray DataSet.
