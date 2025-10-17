@@ -1,6 +1,5 @@
 """Driver for DataFrames using the pandas library."""
 
-import logging
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -9,11 +8,8 @@ import pandas as pd
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
-    StrPath,
     Variables,
 )
-
-logger = logging.getLogger(__name__)
 
 
 class PandasDriver(DataFrameDriver):
@@ -35,7 +31,38 @@ class PandasDriver(DataFrameDriver):
         open_kwargs: dict[str, Any] | None = None,
         variables: Variables | None = None,
     ) -> pd.DataFrame:
-        """Read in any compatible data source to a pandas `DataFrame`."""
+        """
+        Read tabular data into a pandas DataFrame using the pandas library.
+
+        Supports multiple file formats including CSV, Parquet, Excel (xls, xlsx),
+        and fixed-width text files (fwf). Applies hydromt's `NoDataStrategy` if no
+        records are found. Column selection can be controlled through the `variables`
+        argument. Only a single file can be read per call.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List containing a single URI to read from. Multiple files are not supported.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments passed to the pandas reader (`read_csv`, `read_excel`,
+            `read_parquet`, or `read_fwf`). Default is None.
+        variables : Variables | None, optional
+            List of columns to read from the file. Ignored if None.
+
+        Returns
+        -------
+        pd.DataFrame
+            The loaded DataFrame containing the data from the source file.
+
+        Raises
+        ------
+        ValueError
+            If multiple files are provided or the file extension is unsupported.
+        IOError
+            If the file extension is not recognized.
+        """
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
@@ -83,17 +110,37 @@ class PandasDriver(DataFrameDriver):
 
     def write(
         self,
-        path: StrPath,
-        df: pd.DataFrame,
-        **kwargs,
+        path: Path | str,
+        data: pd.DataFrame,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
     ) -> str:
         """
-        Write out a DataFrame to file.
+        Write a pandas DataFrame to disk using the pandas library.
 
-        Not all drivers should have a write function, so this method is not
-        abstract.
+        Supports writing to common tabular formats including CSV, Parquet, and Excel (xls, xlsx).
+        The file format is automatically inferred from the file extension in the provided path.
 
-        args:
+        Parameters
+        ----------
+        path : Path | str
+            Destination path where the DataFrame will be saved.
+            The file extension determines the output format: `.csv`, `.parquet`, `.xls`, `.xlsx`.
+        data : pd.DataFrame
+            The DataFrame to be written.
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments passed to the pandas write function (e.g., compression, index, sheet_name).
+            Default is None.
+
+        Returns
+        -------
+        str
+            The string representation of the written file path.
+
+        Raises
+        ------
+        ValueError
+            If the path type or file extension is unsupported.
         """
         if isinstance(path, str):
             extension: str = path.split(".")[-1]
@@ -104,11 +151,11 @@ class PandasDriver(DataFrameDriver):
             raise ValueError(f"unknown pathlike: {path}")
 
         if extension == "csv":
-            df.to_csv(path, **kwargs)
+            data.to_csv(path, **(write_kwargs or {}))
         elif extension == "parquet":
-            df.to_parquet(path, **kwargs)
+            data.to_parquet(path, **(write_kwargs or {}))
         elif extension in ["xlsx", "xls"]:
-            df.to_excel(path, engine="openpyxl", **kwargs)
+            data.to_excel(path, engine="openpyxl", **(write_kwargs or {}))
         else:
             raise ValueError(f"DataFrame: file extension {extension} is unknown.")
 

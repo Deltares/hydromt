@@ -3,6 +3,7 @@
 import logging
 from functools import partial
 from os.path import splitext
+from pathlib import Path
 from typing import Any, Callable, ClassVar
 
 import xarray as xr
@@ -15,9 +16,6 @@ from hydromt.data_catalog.drivers.base_driver import (
 from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.typing import (
-    StrPath,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -73,9 +71,32 @@ class DatasetXarrayDriver(DatasetDriver):
         open_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset:
         """
-        Read zarr data to an xarray DataSet.
+        Read zarr or netCDF data into an xarray Dataset.
 
-        Args:
+        Supports reading multiple compatible datasets and merging them into a single
+        xarray Dataset. File format is automatically inferred from the file extension,
+        unless overridden via the driver options. Optionally applies a preprocessor
+        function to each dataset before merging.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from. All files must share the same format.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments passed to the underlying `xarray` open
+            functions (`xr.open_zarr` or `xr.open_mfdataset`). Default is None.
+
+        Returns
+        -------
+        xr.Dataset
+            The dataset read from the source files.
+
+        Raises
+        ------
+        ValueError
+            If the provided files have mixed or unsupported extensions.
         """
         preprocessor: Callable | None = self.options.get_preprocessor()
         first_ext = self.options.get_ext_override(uris)
@@ -116,17 +137,46 @@ class DatasetXarrayDriver(DatasetDriver):
                 )
         return ds
 
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> str:
+    def write(
+        self,
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> str:
         """
-        Write the Dataset to a local file using zarr.
+        Write an xarray Dataset to disk using the xarray I/O engine.
 
-        args:
+        Supports writing to both Zarr and NetCDF formats. The file format is inferred
+        from the file extension. If the extension is not recognized, a ValueError is raised.
+
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the Dataset will be written.
+            The file extension determines the output format:
+            `.zarr`, `.nc`, or `.netcdf`.
+        data : xr.Dataset
+            The Dataset to write to disk.
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments passed to the xarray write function
+            (`Dataset.to_zarr` or `Dataset.to_netcdf`). Default is None.
+
+        Returns
+        -------
+        str
+            The string representation of the written file path.
+
+        Raises
+        ------
+        ValueError
+            If the provided file extension is unsupported.
         """
         ext = splitext(path)[-1]
         if ext == ".zarr":
-            ds.to_zarr(path, **kwargs)
+            data.to_zarr(path, **(write_kwargs or {}))
         elif ext in [".nc", ".netcdf"]:
-            ds.to_netcdf(path, **kwargs)
+            data.to_netcdf(path, **(write_kwargs or {}))
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {ext} ")
 

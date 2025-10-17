@@ -3,6 +3,7 @@
 import logging
 from functools import partial
 from os.path import splitext
+from pathlib import Path
 from typing import Any, Callable, ClassVar
 
 import xarray as xr
@@ -21,7 +22,6 @@ from hydromt.typing import (
     Geom,
     Predicate,
     SourceMetadata,
-    StrPath,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,9 +57,27 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """
-        Read zarr data to an xarray DataSet.
+        Read in data to an xarray Dataset.
 
-        Args:
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing data. Default is NoDataStrategy.RAISE.
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments to pass to the underlying open function. Default is None.
+        mask : Geom | None, optional
+            Optional spatial mask to clip the dataset.
+        predicate : Predicate, optional
+            Spatial predicate for filtering geometries. Default is "intersects".
+        metadata : SourceMetadata | None, optional
+            Optional metadata object to attach to the loaded dataset.
+
+        Returns
+        -------
+        xr.Dataset | None
+            The dataset read from the source, or None if no data found and strategy allows.
         """
         _warn_on_unused_kwargs(
             self.__class__.__name__,
@@ -110,17 +128,42 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 )
         return ds
 
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> str:
+    def write(
+        self,
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> str:
         """
-        Write the GeoDataset to a local file using zarr.
+        Write a GeoDataset to disk in Zarr or NetCDF format.
 
-        args:
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the dataset will be written. Must end with a
+            supported extension ('.zarr', '.nc', or '.netcdf').
+        data : xr.Dataset
+            The xarray Dataset to write.
+        write_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments passed to the underlying write function.
+            For example, `encoding` for NetCDF, or `mode` for Zarr. Default is None.
+
+        Returns
+        -------
+        str
+            The path to the written dataset.
+
+        Raises
+        ------
+        ValueError
+            If the file extension is not supported.
         """
         ext = splitext(path)[-1]
         if ext == _ZARR_EXT:
-            ds.vector.to_zarr(path, **kwargs)
+            data.vector.to_zarr(path, **(write_kwargs or {}))
         elif ext in _NETCDF_EXT:
-            ds.vector.to_netcdf(path, **kwargs)
+            data.vector.to_netcdf(path, **(write_kwargs or {}))
         else:
             raise ValueError(f"Unknown extension for GeoDatasetXarrayDriver: {ext} ")
 

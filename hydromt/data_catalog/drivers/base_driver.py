@@ -124,17 +124,31 @@ class BaseDriver(AbstractBaseModel, ABC):
         ...
 
     @abstractmethod
-    def write(self, path: str | Path, *args, **kwargs):
-        """Write data using the driver.
+    def write(
+        self,
+        path: Path | str,
+        data: Any,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> None:
+        """
+        Write data using the driver.
 
         Parameters
         ----------
-        path : str | Path
-            Path to write data to.
-        *args
-            Positional arguments for the write function.
-        **kwargs
-            Keyword arguments for the write function.
+        path : Path | str
+            Destination path where the data will be written. Can be a local or remote URI.
+        data : Any
+            The data object to write. The expected type depends on the specific driver implementation
+            (e.g., pandas DataFrame, xarray Dataset, GeoDataFrame, etc.).
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments passed to the underlying writer function (e.g., `to_csv`, `to_zarr`, etc.).
+            Default is None.
+
+        Raises
+        ------
+        NotImplementedError
+            Must be implemented by subclasses that support writing.
         """
         ...
 

@@ -355,8 +355,11 @@ def test_version_catalogs_errors_on_unknown_version(data_catalog):
 
 def test_data_catalog_lazy_loading():
     data_catalog = DataCatalog()
-    assert len(data_catalog._sources) == 0
-    # global data sources from artifacts are automatically added
+
+    assert len(data_catalog) == 0
+
+    # global data sources from fallback_lib are automatically added
+    _ = data_catalog.sources  # trigger loading
     assert len(data_catalog) > 0
 
 
@@ -1679,10 +1682,12 @@ def test_detect_extent_geodataset(data_catalog):
     assert detected_temporal_range == expected_temporal_range
 
 
-def test_to_stac_raster_dataset(tmp_path: Path, data_catalog):
-    data_catalog._sources = {}  # clea sources to test just one source
-    _ = data_catalog.get_rasterdataset(  # register the source
-        data_catalog.root / "chirps_global.nc",
+def test_to_stac_raster_dataset(tmp_path: Path):
+    data_catalog = DataCatalog()
+    _ = data_catalog.sources  # load artifact data
+
+    _ = data_catalog.get_rasterdataset(  # mark as used
+        "chirps_global",
         source_kwargs={
             "metadata": {"crs": 4326},
         },

@@ -34,7 +34,7 @@ Changed
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
 - ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
 - `hydromt.typing` and its functions are now public (underscore removed). (#1286)
-
+- `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have separate ``source_kwargs`` (passed to `DataSource.__init__`) and ``open_kwargs`` (passed to `DataSource.driver.read`) instead of just ``kwargs``. (#1291)
 
 Fixed
 -----
@@ -48,6 +48,8 @@ Fixed
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 - All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
+- `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now correctly pass ``source_kwargs`` and ``open_kwargs`` to the `DataSource` and its driver. (#1291)
+
 
 Deprecated
 ----------

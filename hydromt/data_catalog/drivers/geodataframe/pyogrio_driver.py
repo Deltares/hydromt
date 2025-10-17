@@ -3,6 +3,7 @@
 import logging
 from os.path import splitext
 from typing import Any, ClassVar
+from zipfile import Path
 
 import geopandas as gpd
 import pandas as pd
@@ -14,7 +15,7 @@ from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.typing import Bbox, Geom, SourceMetadata, StrPath
+from hydromt.typing import Bbox, Geom, SourceMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +43,44 @@ class PyogrioDriver(GeoDataFrameDriver):
         variables: str | list[str] | None = None,
     ) -> gpd.GeoDataFrame:
         """
-        Read data using pyogrio.
+        Read geospatial data using the pyogrio library into a GeoDataFrame.
+
+        Supports formats such as GeoPackage, Shapefile, GeoJSON, and FlatGeobuf.
+        Optionally applies spatial filtering through a bounding box derived
+        from a provided mask.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from. Only one file is supported per read operation.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments passed to `pyogrio.read_dataframe`. Default is None.
+        metadata : SourceMetadata | None, optional
+            Optional metadata object describing the dataset source (e.g. CRS).
+        mask : Any, optional
+            Optional geometry or GeoDataFrame used to spatially filter the data
+            while reading.
+        variables : str | list[str] | None, optional
+            Optional list of columns to load from the dataset.
+
+        Returns
+        -------
+        gpd.GeoDataFrame
+            The loaded geospatial data.
+
+        Raises
+        ------
+        ValueError
+            If multiple URIs are provided.
+        IOError
+            If the source file contains no geometry column.
 
         Warning
         -------
-        The 'predicate' and 'metadata' keyword arguments are unused in this method and
-        are only present in the method's signature for compatibility with other
-        functions.
+        The `metadata` parameter is not used directly in this driver, but is included
+        for consistency with the GeoDataFrameDriver interface.
         """
         _warn_on_unused_kwargs(self.__class__.__name__, {"metadata": metadata})
 
@@ -79,14 +111,38 @@ class PyogrioDriver(GeoDataFrameDriver):
 
     def write(
         self,
-        path: StrPath,
-        gdf: gpd.GeoDataFrame,
-        **kwargs,
+        path: Path | str,
+        data: gpd.GeoDataFrame,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
     ) -> str:
         """
-        Write out a GeoDataFrame to file using pyogrio.
+        Write a GeoDataFrame to disk using the pyogrio library.
 
-        args:
+        Supports writing to vector formats supported by the OGR library, including
+        GeoPackage (`.gpkg`), Shapefile (`.shp`), GeoJSON (`.geojson`), and FlatGeobuf (`.fgb`).
+        The file format is inferred from the file extension. If the extension is unsupported,
+        it falls back to FlatGeobuf (`.fgb`).
+
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the GeoDataFrame will be written.
+            Supported extensions are `.gpkg`, `.shp`, `.geojson`, and `.fgb`.
+        data : gpd.GeoDataFrame
+            The GeoDataFrame to write.
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments passed to `pyogrio.write_dataframe`. Default is None.
+
+        Returns
+        -------
+        str
+            The string representation of the written file path.
+
+        Raises
+        ------
+        ValueError
+            If the file extension cannot be determined or writing fails.
         """
         no_ext, ext = splitext(path)
         if ext not in self.SUPPORTED_EXTENSIONS:
@@ -96,7 +152,7 @@ class PyogrioDriver(GeoDataFrameDriver):
             )
             path = no_ext + ".fgb"
 
-        write_dataframe(gdf, path, **kwargs)
+        write_dataframe(data, path, **(write_kwargs or {}))
 
         return str(path)
 

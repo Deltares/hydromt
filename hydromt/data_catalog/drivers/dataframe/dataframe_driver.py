@@ -2,6 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, ClassVar
 
 import pandas as pd
@@ -9,7 +10,6 @@ import pandas as pd
 from hydromt.data_catalog.drivers import BaseDriver
 from hydromt.error import NoDataStrategy
 from hydromt.typing import (
-    StrPath,
     Variables,
 )
 
@@ -30,23 +30,68 @@ class DataFrameDriver(BaseDriver, ABC):
         open_kwargs: dict[str, Any] | None = None,
         variables: Variables | None = None,
     ) -> pd.DataFrame:
-        """Read in any compatible data source to a pandas `DataFrame`."""
+        """
+        Read data from one or more URIs into a pandas DataFrame.
+
+        This abstract method defines the interface for all DataFrame-based drivers.
+        Subclasses should implement data loading logic appropriate for the format being read.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from. The driver decides how to handle multiple files.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments passed to the underlying pandas read function.
+            Default is None.
+        variables : Variables | None, optional
+            List of variable names (columns) to select from the source data. Default is None.
+
+        Returns
+        -------
+        pd.DataFrame
+            The loaded DataFrame.
+
+        Raises
+        ------
+        NotImplementedError
+            If not implemented by a subclass.
+        """
         ...
 
+    @abstractmethod
     def write(
         self,
-        path: StrPath,
-        df: pd.DataFrame,
-        **kwargs,
+        path: Path | str,
+        data: pd.DataFrame,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
     ) -> str:
         """
-        Write out a DataFrame to file.
+        Write a pandas DataFrame to a file.
 
-        Not all drivers should have a write function, so this method is not
-        abstract.
+        This abstract method defines the interface for writing DataFrames in all DataFrame-based drivers.
+        Subclasses should implement logic appropriate for the target file format (e.g., CSV, Parquet, Excel).
 
-        args:
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the DataFrame should be written.
+        data : pd.DataFrame
+            The DataFrame to be written to disk.
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments to pass to the underlying pandas write function
+            (e.g., `to_csv`, `to_excel`, `to_parquet`). Default is None.
+
+        Returns
+        -------
+        str
+            The string representation of the output path.
+
+        Raises
+        ------
+        NotImplementedError
+            If the subclass does not implement this method.
         """
-        raise NotImplementedError(
-            f"Writing using driver '{self.name}' is not supported."
-        )
+        ...

@@ -2,6 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, Callable
 
 import xarray as xr
@@ -14,7 +15,7 @@ from hydromt.data_catalog.drivers.base_driver import (
 )
 from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
 from hydromt.error import NoDataStrategy
-from hydromt.typing import Geom, Predicate, SourceMetadata, StrPath
+from hydromt.typing import Geom, Predicate, SourceMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -51,26 +52,57 @@ class GeoDatasetDriver(BaseDriver, ABC):
         metadata: SourceMetadata | None = None,
     ) -> xr.Dataset | None:
         """
-        Read in any compatible data source to an xarray Dataset.
+        Read in data to an xarray Dataset.
 
-        args:
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing data. Default is NoDataStrategy.RAISE.
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments to pass to the underlying open function. Default is None.
+        mask : Geom | None, optional
+            Optional spatial mask to clip the dataset.
+        predicate : Predicate, optional
+            Spatial predicate for filtering geometries. Default is "intersects".
+        metadata : SourceMetadata | None, optional
+            Optional metadata object to attach to the loaded dataset.
+
+        Returns
+        -------
+        xr.Dataset | None
+            The dataset read from the source, or None if no data found and strategy allows.
         """
         ...
 
+    @abstractmethod
     def write(
         self,
-        path: StrPath,
-        ds: xr.Dataset,
-        **kwargs,
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
     ) -> str:
         """
-        Write out a GeoDataset to file.
+        Write a GeoDataset to disk.
 
-        Not all drivers should have a write function, so this method is not
-        abstract.
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the dataset will be written. The path should
+            have a supported extension depending on the concrete driver implementation.
+        data : xr.Dataset
+            The xarray Dataset to write.
+        write_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments to pass to the underlying write function.
+            These may include encoding options for NetCDF, or mode/format options for Zarr.
+            Default is None.
 
-        args:
+        Returns
+        -------
+        str
+            The path to the written dataset.
+
         """
-        raise NotImplementedError(
-            f"Writing using driver '{self.name}' is not supported."
-        )
+        ...

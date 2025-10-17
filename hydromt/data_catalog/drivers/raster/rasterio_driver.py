@@ -13,14 +13,14 @@ from pyproj import CRS
 
 from hydromt._utils import _cache_vrt_tiles, _strip_scheme, temp_env
 from hydromt.config import SETTINGS
-from hydromt.data_catalog.drivers import DriverOptions, RasterDatasetDriver
+from hydromt.data_catalog.drivers.base_driver import DriverOptions
+from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import zoom_to_overview_level
 from hydromt.io.readers import open_mfraster
 from hydromt.typing import (
     Geom,
     SourceMetadata,
-    StrPath,
     Variables,
     Zoom,
 )
@@ -111,7 +111,44 @@ class RasterioDriver(RasterDatasetDriver):
         chunks: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
-        """Read data using rasterio."""
+        """
+        Read raster data using the rasterio library.
+
+        Supports reading single or multiple raster files (optionally mosaicked),
+        applying spatial masks, caching VRT tiles, and reading overviews at
+        different zoom levels. Returns an xarray Dataset constructed from raster bands.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of raster file URIs to read.
+        handle_nodata : NoDataStrategy, optional
+            Strategy for handling missing or empty data. Default is NoDataStrategy.RAISE.
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments passed to `rasterio.open` or `hydromt.io.open_mfraster`. Default is None.
+        mask : Geom | None, optional
+            Geometry used to mask or clip the raster data. Default is None.
+        variables : Variables | None, optional
+            List of variables or band names to read. Default is None.
+        zoom : Zoom | None, optional
+            Requested zoom level or resolution. Used to determine the appropriate overview level. Default is None.
+        chunks : dict[str, Any] | None, optional
+            Dask chunking configuration for lazy loading. Default is None.
+        metadata : SourceMetadata | None, optional
+            Optional metadata describing CRS, nodata, and overview levels. Default is None.
+
+        Returns
+        -------
+        xr.Dataset
+            The loaded raster dataset as an xarray Dataset.
+
+        Raises
+        ------
+        ValueError
+            If the file extension is unsupported or invalid.
+        rasterio.errors.RasterioIOError
+            If an I/O error occurs during reading.
+        """
         if metadata is None:
             metadata = SourceMetadata()
 
@@ -206,8 +243,33 @@ class RasterioDriver(RasterDatasetDriver):
                 )
         return ds
 
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> str:
-        """Write out a RasterDataset using rasterio."""
+    def write(
+        self,
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> str:
+        """
+        Write a RasterDataset to disk using the rasterio library.
+
+        This method is not implemented in this driver. Concrete implementations
+        must provide a way to write raster datasets to supported formats.
+
+        Parameters
+        ----------
+        path : Path | str
+            Destination path for the raster dataset.
+        data : xr.Dataset
+            The xarray Dataset to write.
+        write_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments for writing. Default is None.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised because writing is not supported in this driver.
+        """
         raise NotImplementedError()
 
     @staticmethod
