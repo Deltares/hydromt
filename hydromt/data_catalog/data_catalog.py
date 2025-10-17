@@ -1205,7 +1205,8 @@ class DataCatalog(object):
         single_var_as_array: Optional[bool] = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: Dict[str, Any] | None = None,
+        open_kwargs: Dict[str, Any] | None = None,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """Return a clipped, sliced and unified RasterDataset.
 
@@ -1257,8 +1258,10 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict
             Extra keyword arguments passed to the RasterDatasetSource construction
+        open_kwargs : dict
+            Extra keyword arguments passed to the RasterDatasetSource.read_data method
 
         Returns
         -------
@@ -1284,19 +1287,23 @@ class DataCatalog(object):
             )
 
         if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
+                source_kwargs = source_kwargs or {}
+                if "provider" not in source_kwargs:
+                    source_kwargs.update({"provider": "user"})
 
-                driver: str = kwargs.pop(
+                driver: str = source_kwargs.pop(
                     "driver", RasterDatasetSource._fallback_driver_read
                 )
                 name = basename(data_like)
                 source = RasterDatasetSource(
-                    name=name, uri=str(data_like), driver=driver, **kwargs
+                    name=name,
+                    uri=str(data_like),
+                    driver=driver,
+                    **source_kwargs,
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
@@ -1342,6 +1349,7 @@ class DataCatalog(object):
             time_range=time_range,
             handle_nodata=handle_nodata,
             single_var_as_array=single_var_as_array,
+            open_kwargs=open_kwargs or {},
         )
 
     def get_geodataframe(
@@ -1357,7 +1365,8 @@ class DataCatalog(object):
         predicate: str = "intersects",
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[gpd.GeoDataFrame]:
         """Return a clipped and unified GeoDataFrame (vector).
 
@@ -1396,8 +1405,10 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict[str, Any]
             Extra keyword arguments passed to the GeoDataFrameSource construction
+        open_kwargs : dict[str, Any]
+            Extra keyword arguments passed to the GeoDataFrameSource.read_data method
 
         Returns
         -------
@@ -1420,14 +1431,17 @@ class DataCatalog(object):
                 data_like, provider, version
             )
         if isinstance(data_like, (str, Path)):
-            if str(data_like) in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = str(data_like)
                 source = self.get_source(name, provider=provider, version=version)
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
+                source_kwargs = source_kwargs or {}
+                if "provider" not in source_kwargs:
+                    source_kwargs.update({"provider": "user"})
                 name = basename(data_like)
-                source = GeoDataFrameSource(name=name, uri=str(data_like), **kwargs)
+                source = GeoDataFrameSource(
+                    name=name, uri=str(data_like), **source_kwargs
+                )
                 self.add_source(name, source)
         elif isinstance(data_like, gpd.GeoDataFrame):
             data_like = GeoDataFrameAdapter._slice_data(
@@ -1447,13 +1461,13 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown vector data type "{type(data_like).__name__}"')
 
-        gdf = source.read_data(
+        return source.read_data(
             mask=mask,
             handle_nodata=handle_nodata,
             predicate=predicate,
             variables=variables,
+            open_kwargs=open_kwargs or {},
         )
-        return gdf
 
     def get_geodataset(
         self,
@@ -1470,7 +1484,8 @@ class DataCatalog(object):
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified GeoDataset.
 
@@ -1520,8 +1535,10 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the GeoDatasetSource construction
+        open_kwargs : dict[str, Any] | None
+            Extra keyword arguments passed to the GeoDatasetSource.read_data method
 
         Returns
         -------
@@ -1549,13 +1566,14 @@ class DataCatalog(object):
             )
 
         if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop(
+                source_kwargs = source_kwargs or {}
+                if "provider" not in source_kwargs:
+                    source_kwargs.update({"provider": "user"})
+                driver: str = source_kwargs.pop(
                     "driver", GeoDatasetSource._fallback_driver_read
                 )
                 name = basename(data_like)
@@ -1563,7 +1581,7 @@ class DataCatalog(object):
                     name=name,
                     uri=str(data_like),
                     driver=driver,
-                    **kwargs,
+                    **source_kwargs,
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
@@ -1592,6 +1610,7 @@ class DataCatalog(object):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
+            open_kwargs=open_kwargs or {},
         )
 
     def get_dataset(
@@ -1605,7 +1624,8 @@ class DataCatalog(object):
         single_var_as_array: bool = True,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified Dataset.
 
@@ -1640,8 +1660,10 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the DatasetSource construction
+        open_kwargs : dict[str, Any] | None
+            Extra keyword arguments passed to the DatasetSource.read_data method
 
         Returns
         -------
@@ -1664,14 +1686,15 @@ class DataCatalog(object):
             )
 
         if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = data_like
                 source = self.get_source(name, provider=provider, version=version)
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
+                source_kwargs = source_kwargs or {}
+                if "provider" not in source_kwargs:
+                    source_kwargs.update({"provider": "user"})
                 name = basename(data_like)
-                source = DatasetSource(uri=str(data_like), name=name, **kwargs)
+                source = DatasetSource(uri=str(data_like), name=name, **source_kwargs)
                 self.add_source(name, source)
 
         elif isinstance(data_like, (xr.DataArray, xr.Dataset)):
@@ -1694,6 +1717,7 @@ class DataCatalog(object):
             time_range=time_range,
             single_var_as_array=single_var_as_array,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
         )
 
     def get_dataframe(
@@ -1704,7 +1728,8 @@ class DataCatalog(object):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         provider: Optional[str] = None,
         version: Optional[str] = None,
-        **kwargs,
+        source_kwargs: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> pd.DataFrame:
         """Return a clipped, sliced and unified DataFrame.
 
@@ -1729,8 +1754,10 @@ class DataCatalog(object):
             Specifies a data provider, by default None
         version : Optional[str], optional
             Specifies a data version, by default None
-        **kwargs:
+        source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the DataFrameSource construction
+        open_kwargs : dict[str, Any] | None
+            Extra keyword arguments passed to the DataFrameSource.read_data method
 
         Returns
         -------
@@ -1753,7 +1780,7 @@ class DataCatalog(object):
             )
 
         if isinstance(data_like, (str, Path)):
-            if isinstance(data_like, str) and data_like in self.sources:
+            if isinstance(data_like, str) and self.contains_source(data_like):
                 name = data_like
                 source: DataSource = self.get_source(
                     name, provider=provider, version=version
@@ -1761,14 +1788,15 @@ class DataCatalog(object):
                 if not isinstance(source, DataFrameSource):
                     raise ValueError(f"Source '{source.name}' is not a DataFrame.")
             else:
-                if "provider" not in kwargs:
-                    kwargs.update({"provider": "user"})
-                driver: str = kwargs.pop(
+                source_kwargs = source_kwargs or {}
+                if "provider" not in source_kwargs:
+                    source_kwargs.update({"provider": "user"})
+                driver: str = source_kwargs.pop(
                     "driver", DataFrameSource._fallback_driver_read
                 )
                 name = basename(data_like)
                 source = DataFrameSource(
-                    uri=str(data_like), name=name, driver=driver, **kwargs
+                    uri=str(data_like), name=name, driver=driver, **source_kwargs
                 )
                 self.add_source(name, source)
         elif isinstance(data_like, pd.DataFrame):
@@ -1782,12 +1810,12 @@ class DataCatalog(object):
         else:
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
-        obj = source.read_data(
+        return source.read_data(
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
         )
-        return obj
 
 
 def _parse_data_like_dict(

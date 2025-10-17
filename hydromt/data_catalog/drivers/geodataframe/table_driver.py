@@ -52,7 +52,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
         mask: Any = None,
         predicate: str = "intersects",
@@ -68,8 +68,8 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             )
 
         _uri: str = uris[0]
-        kwargs_for_open = kwargs_for_open or {}
-        kwargs = self.options.get_kwargs() | kwargs_for_open
+        open_kwargs = open_kwargs or {}
+        kwargs = self.options.get_kwargs() | open_kwargs
         gdf = open_vector_from_table(
             path=_uri,
             x_dim=self.options.x_dim,

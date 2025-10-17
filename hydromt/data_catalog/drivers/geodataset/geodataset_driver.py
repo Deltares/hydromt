@@ -45,7 +45,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
         variables: list[str] | None = None,

@@ -77,7 +77,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
         time_range: TimeRange | None = None,
@@ -104,11 +104,11 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         first_ext = self.options.get_ext_override(uris)
 
         # When is zarr, open like a zarr archive
-        kwargs_for_open = kwargs_for_open or {}
+        open_kwargs = open_kwargs or {}
         if first_ext == _ZARR_EXT:
             opn: Callable = partial(
                 xr.open_zarr,
-                **self.options.get_kwargs() | kwargs_for_open,
+                **self.options.get_kwargs() | open_kwargs,
             )
             datasets = []
             for _uri in uris:
@@ -135,7 +135,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,
-                **self.options.get_kwargs() | kwargs_for_open,
+                **self.options.get_kwargs() | open_kwargs,
             )
         else:
             raise ValueError(

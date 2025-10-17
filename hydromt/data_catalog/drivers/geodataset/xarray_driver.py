@@ -52,7 +52,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         metadata: SourceMetadata | None = None,
         predicate: Predicate = "intersects",
@@ -76,8 +76,8 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
         preprocessor = self.options.get_preprocessor()
         first_ext = splitext(uris[0])[-1]
-        kwargs_for_open = kwargs_for_open or {}
-        kwargs = self.options.get_kwargs() | kwargs_for_open
+        open_kwargs = open_kwargs or {}
+        kwargs = self.options.get_kwargs() | open_kwargs
         if first_ext == _ZARR_EXT:
             opn: Callable = partial(xr.open_zarr, **kwargs)
             datasets = []

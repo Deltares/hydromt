@@ -242,7 +242,7 @@ class DataSource(BaseModel, ABC):
 
     ## Abstract methods
     @abstractmethod
-    def read_data(self, **kwargs):
+    def read_data(self):
         """Read data from the source."""
         pass
 

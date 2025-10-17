@@ -29,7 +29,7 @@ class DatasetDriver(BaseDriver, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         variables: Variables | None = None,
         time_range: TimeRange | None = None,
         metadata: SourceMetadata | None = None,

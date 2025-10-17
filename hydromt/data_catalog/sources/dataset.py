@@ -42,6 +42,7 @@ class DatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> Union[xr.Dataset, xr.DataArray]:
         """Use the resolver, driver, and data adapter to read and harmonize the data.
 
@@ -55,7 +56,11 @@ class DatasetSource(DataSource):
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
         single_var_as_array : bool, optional
-            _description_, by default True
+            If only a single variable is requested, return as DataArray instead of
+            Dataset, by default True
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments passed to the underlying open function,
+            by default None
 
         Returns
         -------
@@ -82,6 +87,7 @@ class DatasetSource(DataSource):
             variables=vrs,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
         )
 
         return self.data_adapter.transform(

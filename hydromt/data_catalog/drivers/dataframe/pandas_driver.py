@@ -1,19 +1,19 @@
 """Driver for DataFrames using the pandas library."""
 
+import logging
 from pathlib import Path
 from typing import Any, Callable, Optional
 
 import pandas as pd
 
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.typing import (
     StrPath,
-    TimeRange,
     Variables,
 )
-from hydromt.typing.metadata import SourceMetadata
+
+logger = logging.getLogger(__name__)
 
 
 class PandasDriver(DataFrameDriver):
@@ -32,16 +32,10 @@ class PandasDriver(DataFrameDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         variables: Variables | None = None,
-        time_range: TimeRange | None = None,
-        metadata: SourceMetadata | None = None,
     ) -> pd.DataFrame:
         """Read in any compatible data source to a pandas `DataFrame`."""
-        _warn_on_unused_kwargs(
-            self.__class__.__name__,
-            {"time_range": time_range},
-        )
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
@@ -52,8 +46,8 @@ class PandasDriver(DataFrameDriver):
         else:
             uri = uris[0]
             extension: str = uri.split(".")[-1]
-            kwargs_for_open = kwargs_for_open or {}
-            kwargs = self.options.get_kwargs() | kwargs_for_open
+            open_kwargs = open_kwargs or {}
+            kwargs = self.options.get_kwargs() | open_kwargs
 
             if extension == "csv":
                 variables = self._unify_variables_and_pandas_kwargs(
@@ -77,9 +71,6 @@ class PandasDriver(DataFrameDriver):
                     **kwargs,
                 )
             elif extension in ["fwf", "txt"]:
-                _warn_on_unused_kwargs(
-                    self.__class__.__name__, {"variables": variables}
-                )
                 df = pd.read_fwf(uri, **kwargs)
             else:
                 raise IOError(f"DataFrame: extension {extension} unknown.")

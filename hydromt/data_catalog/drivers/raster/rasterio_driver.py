@@ -110,7 +110,7 @@ class RasterioDriver(RasterDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
         time_range: TimeRange | None = None,
@@ -136,9 +136,9 @@ class RasterioDriver(RasterDatasetDriver):
         if mask is not None:
             self.options.mosaic_kwargs.update({"mask": mask})
 
-        kwargs_for_open = kwargs_for_open or {}
+        open_kwargs = open_kwargs or {}
         if np.issubdtype(type(metadata.nodata), np.number):
-            kwargs_for_open.update({"nodata": metadata.nodata})
+            open_kwargs.update({"nodata": metadata.nodata})
 
         # Fix overview level
         if zoom:
@@ -153,12 +153,12 @@ class RasterioDriver(RasterDatasetDriver):
             )
             if overview_level:
                 # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
-                kwargs_for_open.update(overview_level=overview_level - 1)
+                open_kwargs.update(overview_level=overview_level - 1)
 
         if chunks is not None:
-            kwargs_for_open.update({"chunks": chunks})
+            open_kwargs.update({"chunks": chunks})
 
-        kwargs = self.options.get_kwargs() | kwargs_for_open
+        kwargs = self.options.get_kwargs() | open_kwargs
         mosaic: bool = self.options.mosaic and len(uris) > 1
 
         # If the metadata resolver has already resolved the overview level,

@@ -35,7 +35,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         mask: Any = None,
         variables: str | list[str] | None = None,
         metadata: SourceMetadata | None = None,
@@ -50,8 +50,8 @@ class PyogrioDriver(GeoDataFrameDriver):
         are only present in the method's signature for compatibility with other
         functions.
         """
-        kwargs_for_open = kwargs_for_open or {}
-        kwargs = self.options.get_kwargs() | kwargs_for_open
+        open_kwargs = open_kwargs or {}
+        kwargs = self.options.get_kwargs() | open_kwargs
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "

@@ -51,6 +51,7 @@ class GeoDataFrameSource(DataSource):
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[gpd.GeoDataFrame]:
         """Use the driver and data adapter to read and harmonize the data."""
         self._mark_as_used()
@@ -76,6 +77,7 @@ class GeoDataFrameSource(DataSource):
             variables=vrs,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
         )
         return self.data_adapter.transform(
             gdf,

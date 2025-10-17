@@ -108,7 +108,7 @@ class BaseDriver(AbstractBaseModel, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
     ):
         """Read data using the driver.
 
@@ -118,7 +118,7 @@ class BaseDriver(AbstractBaseModel, ABC):
             List of URIs to read data from.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle no data situations. Default is NoDataStrategy.RAISE.
-        kwargs_for_open : dict[str, Any] | None, optional
+        open_kwargs : dict[str, Any] | None, optional
             Additional keyword arguments to pass to the underlying open function. Default is None.
         """
         ...

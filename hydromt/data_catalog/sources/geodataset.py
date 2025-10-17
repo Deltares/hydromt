@@ -49,6 +49,7 @@ class GeoDatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """
         Read data from this source.
@@ -76,6 +77,7 @@ class GeoDatasetSource(DataSource):
             variables=vrs,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
         )
         return self.data_adapter.transform(
             ds,

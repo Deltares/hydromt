@@ -8,7 +8,6 @@ from typing import Any, Callable, ClassVar
 import xarray as xr
 from pydantic import Field
 
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
     DriverOptions,
@@ -73,7 +72,7 @@ class DatasetXarrayDriver(DatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
+        open_kwargs: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
         time_range: TimeRange | None = None,
         variables: str | list[str] | None = None,
@@ -83,18 +82,10 @@ class DatasetXarrayDriver(DatasetDriver):
 
         Args:
         """
-        _warn_on_unused_kwargs(
-            self.__class__.__name__,
-            {
-                "time_range": time_range,
-                "variables": variables,
-                "metadata": metadata,
-            },
-        )
         preprocessor: Callable | None = self.options.get_preprocessor()
         first_ext = self.options.get_ext_override(uris)
-        kwargs_for_open = kwargs_for_open or {}
-        kwargs = self.options.get_kwargs() | kwargs_for_open
+        open_kwargs = open_kwargs or {}
+        kwargs = self.options.get_kwargs() | open_kwargs
         if first_ext == ".zarr":
             opn: Callable = partial(xr.open_zarr, **kwargs)
             datasets = []

@@ -38,8 +38,8 @@ class DataFrameSource(DataSource):
         *,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[pd.DataFrame]:
         """Use the resolver, driver, and data adapter to read and harmonize the data."""
         self._mark_as_used()
@@ -60,6 +60,7 @@ class DataFrameSource(DataSource):
             variables=vrs,
             time_range=tr,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
         )
 
         return self.data_adapter.transform(
