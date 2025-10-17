@@ -78,6 +78,11 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         -------
         xr.Dataset | None
             The dataset read from the source, or None if no data found and strategy allows.
+
+        Warning
+        -------
+        The `mask`, `predicate` and `metadata` parameters are not used directly in this driver,
+        but are included for consistency with the GeoDataFrameDriver interface.
         """
         _warn_on_unused_kwargs(
             self.__class__.__name__,

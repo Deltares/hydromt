@@ -119,6 +119,11 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         ------
         ValueError
             If the file extension is unsupported.
+
+        Warning
+        -------
+        The `mask`, `variables`, `zoom`, `chunks` and `metadata` parameters are not used directly in this driver,
+        but are included for consistency with the GeoDataFrameDriver interface.
         """
         _warn_on_unused_kwargs(
             self.__class__.__name__,

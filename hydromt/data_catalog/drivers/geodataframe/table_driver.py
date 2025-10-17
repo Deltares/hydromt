@@ -91,6 +91,11 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         ------
         ValueError
             If multiple URIs are provided.
+
+        Warning
+        -------
+        The `mask` and `variables` parameters are not used directly in this driver, but are included
+        for consistency with the GeoDataFrameDriver interface.
         """
         _warn_on_unused_kwargs(
             self.__class__.__name__, {"mask": mask, "variables": variables}
