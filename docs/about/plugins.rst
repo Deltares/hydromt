@@ -1,4 +1,4 @@
-.. _about_plugins:
+.. _plugins:
 
 Plugins
 =======

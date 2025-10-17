@@ -1,3 +1,5 @@
+.. _intro_plugin_guide:
+
 Plugin Developer guide
 ======================
 

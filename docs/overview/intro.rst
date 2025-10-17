@@ -6,19 +6,10 @@ Getting started
 
     .. grid-item-card::
         :text-align: center
-        :link: quick_overview
-        :link-type: ref
-
-        :octicon:`rocket;10em`
-        +++
-        Quick overview
-
-    .. grid-item-card::
-        :text-align: center
         :link: installation_guide
         :link-type: ref
 
-        :octicon:`gear;10em`
+        :octicon:`gear;5em;sd-text-icon blue-icon`
         +++
         Installation guide
 
@@ -27,43 +18,53 @@ Getting started
         :link: intro_user_guide
         :link-type: ref
 
-        :octicon:`book;10em`
+        :octicon:`device-desktop;5em;sd-text-icon blue-icon`
         +++
-        User guide
+        How to use HydroMT ?
 
     .. grid-item-card::
         :text-align: center
-        :link: faq
+        :link: intro_plugin_guide
         :link-type: ref
 
-        :octicon:`question;10em`
+        :octicon:`terminal;5em;sd-text-icon blue-icon`
         +++
-        FAQ
+        Creating your own plugin
 
     .. grid-item-card::
         :text-align: center
-        :link: api
+        :link: examples_models
         :link-type: ref
 
-        :octicon:`list-unordered;10em`
+        :octicon:`graph;5em;sd-text-icon blue-icon`
         +++
-        API reference
+        Examples: Working with models
 
     .. grid-item-card::
         :text-align: center
-        :link: examples
+        :link: examples_data
         :link-type: ref
 
-        :octicon:`graph;10em`
+        :octicon:`stack;5em;sd-text-icon blue-icon`
         +++
-        Examples
+        Examples: Data Catalog
+
+    .. grid-item-card::
+        :text-align: center
+        :link: examples_gis
+        :link-type: ref
+
+        :octicon:`tools;5em;sd-text-icon blue-icon`
+        +++
+        Examples: GIS functionalities (advanced)
 
 
 .. toctree::
-   :caption: Table of Contents
+   :caption: Getting started
    :maxdepth: 2
    :hidden:
 
-   quick_overview.rst
-   faq.rst
-   examples_index.rst
+   Installation <installation>
+   Examples: Working with models <examples_models>
+   Examples: Data Catalog <examples_data>
+   Examples: GIS functionalities (advanced) <examples_gis>

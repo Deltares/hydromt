@@ -64,11 +64,13 @@ dynamic = ['version', 'description']
 [project.optional-dependencies]
 io = [
 	"gcsfs>=2023.12.1", # google cloud file system
-	"gdal>=3.5.0",      # Our favourite geospatial library
 	"fastparquet",      # parquet IO
 	"openpyxl",         # excel IO
 	"pillow",           # image IO
 	"s3fs",             # S3 file system
+]
+gdal = [
+	"gdal>=3.5.0",      # Our favourite geospatial library
 ]
 extra = [
 	"matplotlib", # plotting; required for slippy tiles
@@ -109,6 +111,7 @@ examples = [
 	"jupyterlab", # run examples in jupyter notebook
 	"notebook",   # jupyter integration
 ]
+slim = ["hydromt[io,extra,examples]"]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
@@ -378,6 +381,7 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 default = { features = [
 	"py311",
 	"io",
+	"gdal",
 	"extra",
 	"dev",
 	"test",
@@ -388,6 +392,7 @@ default = { features = [
 full-latest = { features = [
 	"py313",
 	"io",
+	"gdal",
 	"extra",
 	"dev",
 	"test",
@@ -398,6 +403,7 @@ min-latest = { features = ["py313", "test"], solve-group = "py313" }
 slim-latest = { features = [
 	"py313",
 	"io",
+	"gdal",
 	"extra",
 	"examples",
 ], solve-group = "py313" }
@@ -405,6 +411,7 @@ slim-latest = { features = [
 full-py313 = { features = [
 	"py313",
 	"io",
+	"gdal",
 	"extra",
 	"dev",
 	"test",
@@ -416,6 +423,7 @@ min-py313 = { features = ["py313", "test"], solve-group = "py313" }
 full-py312 = { features = [
 	"py312",
 	"io",
+	"gdal",
 	"extra",
 	"dev",
 	"test",
@@ -427,6 +435,7 @@ min-py312 = { features = ["py312", "test"], solve-group = "py312" }
 full-py311 = { features = [
 	"py311",
 	"io",
+	"gdal",
 	"extra",
 	"dev",
 	"test",

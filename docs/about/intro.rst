@@ -9,7 +9,7 @@ About HydroMT
         :link: about_why_hydromt
         :link-type: ref
 
-        :octicon:`question;5em;sd-text-icon`
+        :octicon:`question;5em;sd-text-icon blue-icon`
         +++
         Why HydroMT?
 
@@ -18,16 +18,16 @@ About HydroMT
         :link: user_stories
         :link-type: ref
 
-        :octicon:`book;5em;sd-text-icon`
+        :octicon:`book;5em;sd-text-icon blue-icon`
         +++
         User Stories
 
     .. grid-item-card::
         :text-align: center
-        :link: about_plugins
+        :link: plugins
         :link-type: ref
 
-        :octicon:`database;5em;sd-text-icon`
+        :octicon:`database;5em;sd-text-icon blue-icon`
         +++
         Plugins
 
@@ -36,7 +36,7 @@ About HydroMT
         :link: publications
         :link-type: ref
 
-        :octicon:`mortar-board;5em;sd-text-icon`
+        :octicon:`mortar-board;5em;sd-text-icon blue-icon`
         +++
         Publications
 
@@ -45,7 +45,7 @@ About HydroMT
         :link: contributors
         :link-type: ref
 
-        :octicon:`person;5em;sd-text-icon`
+        :octicon:`people;5em;sd-text-icon blue-icon`
         +++
         Contributors
 
@@ -54,7 +54,7 @@ About HydroMT
         :link: dependencies
         :link-type: ref
 
-        :octicon:`list-unordered;5em;sd-text-icon`
+        :octicon:`list-unordered;5em;sd-text-icon blue-icon`
         +++
         Dependencies
 
