@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import uuid
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any, cast
 
@@ -97,8 +98,8 @@ def write_nc(
         If True, forces the dataset to have South -> North orientation. Only used
         if ``gdal_compliant`` is set to True. By default False
     progressbar : bool, optional
-        If True, the netcdf will be computed and writen with a visable progressbar.
-        This is only usefull when the dataset to be written is lazily read and modified
+        If True, the netcdf will be computed and written with a visible progressbar.
+        This is only useful when the dataset to be written is lazily read and modified
         using dask. By default False
     **kwargs : dict
         Additional keyword arguments that are passed to the `to_netcdf`
@@ -147,13 +148,10 @@ def write_nc(
         """Small function for really writing the netcdf."""
         obj = ds.to_netcdf(
             file_path,
-            compute=progressbar,
+            compute=False,
             **kwargs,
         )
-        if progressbar:
-            return
-
-        with ProgressBar():
+        with ProgressBar() if progressbar else nullcontext():
             obj.compute()
         # Dereference
         obj = None

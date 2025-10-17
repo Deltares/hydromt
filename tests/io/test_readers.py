@@ -26,6 +26,9 @@ from hydromt.io.readers import (
 from hydromt.io.writers import write_xy
 
 
+# TODO what is this test, dont do this, split this up
+# Also, we rely on geopandas for reading vector data
+# We can assume that is can handle the different drivers...
 def test_open_vector(tmp_path: Path, df, geodf, world):
     csv_path = tmp_path / "test.csv"
     parquet_path = tmp_path / "test.parquet"
@@ -39,7 +42,7 @@ def test_open_vector(tmp_path: Path, df, geodf, world):
     if _compat.HAS_OPENPYXL:
         df.to_excel(xls_path)
     geodf.to_file(geojson_path, driver="GeoJSON")
-    write_xy(xy_path, geodf)
+    write_xy(xy_path, geodf)  # TODO dont do this, integration in unit test...
     geodf.to_file(shp_path)
     geodf.to_file(gpkg_path, driver="GPKG")
     # read csv
