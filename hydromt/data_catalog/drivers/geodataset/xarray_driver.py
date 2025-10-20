@@ -139,7 +139,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         data: xr.Dataset,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a GeoDataset to disk in Zarr or NetCDF format.
 
@@ -156,15 +156,17 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
 
         Returns
         -------
-        str
-            The path to the written dataset.
+        Path
+            The path where the dataset was written.
 
         Raises
         ------
         ValueError
             If the file extension is not supported.
         """
-        ext = splitext(path)[-1]
+        if isinstance(path, str):
+            path = Path(path)
+        ext = path.suffix
         if ext == _ZARR_EXT:
             data.vector.to_zarr(path, **(write_kwargs or {}))
         elif ext in _NETCDF_EXT:

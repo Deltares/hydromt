@@ -114,7 +114,7 @@ class PandasDriver(DataFrameDriver):
         data: pd.DataFrame,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a pandas DataFrame to disk using the pandas library.
 
@@ -134,8 +134,8 @@ class PandasDriver(DataFrameDriver):
 
         Returns
         -------
-        str
-            The string representation of the written file path.
+        Path
+            The path where the DataFrame was written.
 
         Raises
         ------
@@ -143,7 +143,8 @@ class PandasDriver(DataFrameDriver):
             If the path type or file extension is unsupported.
         """
         if isinstance(path, str):
-            extension: str = path.split(".")[-1]
+            path = Path(path)
+            extension: str = path.suffix[1:]
         elif isinstance(path, Path):
             # suffix includes the '.' which we don't want
             extension: str = path.suffix[1:]
@@ -159,7 +160,7 @@ class PandasDriver(DataFrameDriver):
         else:
             raise ValueError(f"DataFrame: file extension {extension} is unknown.")
 
-        return str(path)
+        return path
 
     def _unify_variables_and_pandas_kwargs(
         self,

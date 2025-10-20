@@ -81,7 +81,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
         data: xr.Dataset,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a RasterDataset to a local file.
 
@@ -101,11 +101,9 @@ class RasterDatasetDriver(BaseDriver, ABC):
         str
             The path to the written raster dataset.
 
-        Raises
-        ------
-        ValueError
-            If the file extension is unsupported by the concrete driver.
-        NotImplementedError
-            If writing is not implemented by a subclass.
+        Returns
+        -------
+        Path
+            The path where the dataset was written.
         """
         ...

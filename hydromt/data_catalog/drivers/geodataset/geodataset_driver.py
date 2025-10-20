@@ -83,7 +83,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         data: xr.Dataset,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a GeoDataset to disk.
 
@@ -101,8 +101,8 @@ class GeoDatasetDriver(BaseDriver, ABC):
 
         Returns
         -------
-        str
-            The path to the written dataset.
+        Path
+            The path where the dataset was written.
 
         """
         ...

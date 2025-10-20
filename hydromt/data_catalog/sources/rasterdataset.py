@@ -146,14 +146,18 @@ class RasterDatasetSource(DataSource):
         if ds is None:  # handle_nodata == ignore
             return None
 
-        dest_path: str = driver.write(
+        dest_path = driver.write(
             file_path,
             ds,
             **kwargs,
         )
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update: Dict[str, Any] = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 

@@ -44,7 +44,6 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
 
     name: ClassVar[str] = "geodataframe_table"
     SUPPORTED_EXTENSIONS: ClassVar[set[str]] = {".csv", ".xlsx", ".xls", ".parquet"}
-    supports_writing: ClassVar[bool] = False
 
     options: GeoDataFrameTableOptions = Field(
         default_factory=GeoDataFrameTableOptions, description=DRIVER_OPTIONS_DESCRIPTION
@@ -132,7 +131,7 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         data: gpd.GeoDataFrame,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a GeoDataFrame to disk.
 
@@ -152,8 +151,8 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
 
         Returns
         -------
-        str
-            The output path, if implemented.
+        Path
+            The path where the GeoDataFrame would be written.
 
         Raises
         ------

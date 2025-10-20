@@ -61,7 +61,7 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         data: gpd.GeoDataFrame,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a GeoDataFrame to disk.
 
@@ -81,12 +81,8 @@ class GeoDataFrameDriver(BaseDriver, ABC):
 
         Returns
         -------
-        str
-            String representation of the output path.
+        Path
+            The path where the data was written.
 
-        Raises
-        ------
-        NotImplementedError
-            If not implemented by a subclass.
         """
         ...

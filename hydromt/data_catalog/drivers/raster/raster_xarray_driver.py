@@ -234,4 +234,4 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         else:
             data.to_netcdf(path, **(write_kwargs or {}))
 
-        return str(path)
+        return Path(path)

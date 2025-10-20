@@ -60,7 +60,7 @@ class DatasetDriver(BaseDriver, ABC):
         data: xr.Dataset,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write an xarray Dataset to disk.
 
@@ -80,12 +80,8 @@ class DatasetDriver(BaseDriver, ABC):
 
         Returns
         -------
-        str
-            String representation of the output path.
+        Path
+            The path where the data was written.
 
-        Raises
-        ------
-        NotImplementedError
-            If not implemented by a subclass.
         """
         ...

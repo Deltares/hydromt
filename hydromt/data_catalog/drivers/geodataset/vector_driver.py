@@ -126,7 +126,7 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         data: xr.Dataset,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a GeoDataset to disk.
 

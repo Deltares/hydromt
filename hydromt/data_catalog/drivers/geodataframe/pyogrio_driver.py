@@ -115,7 +115,7 @@ class PyogrioDriver(GeoDataFrameDriver):
         data: gpd.GeoDataFrame,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a GeoDataFrame to disk using the pyogrio library.
 
@@ -136,8 +136,8 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         Returns
         -------
-        str
-            The string representation of the written file path.
+        Path
+            The path where the GeoDataFrame was written.
 
         Raises
         ------
@@ -154,7 +154,7 @@ class PyogrioDriver(GeoDataFrameDriver):
 
         write_dataframe(data, path, **(write_kwargs or {}))
 
-        return str(path)
+        return Path(path)
 
 
 def _bbox_from_file_and_mask(

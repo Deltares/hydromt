@@ -67,7 +67,7 @@ class DataFrameDriver(BaseDriver, ABC):
         data: pd.DataFrame,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a pandas DataFrame to a file.
 
@@ -86,12 +86,8 @@ class DataFrameDriver(BaseDriver, ABC):
 
         Returns
         -------
-        str
-            The string representation of the output path.
+        Path
+            The path where the data was written.
 
-        Raises
-        ------
-        NotImplementedError
-            If the subclass does not implement this method.
         """
         ...

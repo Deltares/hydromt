@@ -143,7 +143,7 @@ class DatasetXarrayDriver(DatasetDriver):
         data: xr.Dataset,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write an xarray Dataset to disk using the xarray I/O engine.
 
@@ -164,15 +164,17 @@ class DatasetXarrayDriver(DatasetDriver):
 
         Returns
         -------
-        str
-            The string representation of the written file path.
+        Path
+            The path where the dataset was written.
 
         Raises
         ------
         ValueError
             If the provided file extension is unsupported.
         """
-        ext = splitext(path)[-1]
+        if isinstance(path, str):
+            path = Path(path)
+        ext = path.suffix
         if ext == ".zarr":
             data.to_zarr(path, **(write_kwargs or {}))
         elif ext in [".nc", ".netcdf"]:
@@ -180,4 +182,4 @@ class DatasetXarrayDriver(DatasetDriver):
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {ext} ")
 
-        return str(path)
+        return path

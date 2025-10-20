@@ -109,7 +109,7 @@ class BaseDriver(AbstractBaseModel, ABC):
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         open_kwargs: dict[str, Any] | None = None,
-    ):
+    ) -> Any:
         """Read data using the driver.
 
         Parameters
@@ -130,7 +130,7 @@ class BaseDriver(AbstractBaseModel, ABC):
         data: Any,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> None:
+    ) -> Path:
         """
         Write data using the driver.
 
@@ -145,10 +145,10 @@ class BaseDriver(AbstractBaseModel, ABC):
             Additional keyword arguments passed to the underlying writer function (e.g., `to_csv`, `to_zarr`, etc.).
             Default is None.
 
-        Raises
-        ------
-        NotImplementedError
-            Must be implemented by subclasses that support writing.
+        Returns
+        -------
+        Path
+            The path where the data was written.
         """
         ...
 
