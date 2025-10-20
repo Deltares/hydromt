@@ -2,8 +2,8 @@
 
 import logging
 from os.path import splitext
+from pathlib import Path
 from typing import Any, ClassVar
-from zipfile import Path
 
 import geopandas as gpd
 import pandas as pd

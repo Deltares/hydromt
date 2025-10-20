@@ -1,4 +1,4 @@
-from zipfile import Path
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np

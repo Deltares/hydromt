@@ -1303,7 +1303,7 @@ class DataCatalog(object):
                 driver: str = source_kwargs.pop(
                     "driver", RasterDatasetSource._fallback_driver_read
                 )
-                name = Path(data_like).stem
+                name = basename(data_like)
                 source = RasterDatasetSource(
                     name=name,
                     uri=str(data_like),
