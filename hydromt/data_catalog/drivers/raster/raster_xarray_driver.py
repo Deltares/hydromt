@@ -194,7 +194,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         data: xr.Dataset,
         *,
         write_kwargs: dict[str, Any] | None = None,
-    ) -> str:
+    ) -> Path:
         """
         Write a RasterDataset to disk using Zarr or NetCDF format.
 
