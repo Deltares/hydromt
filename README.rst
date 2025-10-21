@@ -71,6 +71,10 @@ So far, it has been developed and tested with a range of `Deltares <https://www.
 we believe it is applicable to a much wider set of geoscientific models and are
 happy to discuss how it can be implemented for your model.
 
+Changelog
+---------
+See the :doc:`full changelog <changelog>` for a complete list of changes and release notes.
+
 
 .. _scipy: https://scipy.org/
 .. _xarray: https://xarray.pydata.org

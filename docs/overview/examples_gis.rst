@@ -13,6 +13,8 @@ development or advanced data processing tasks in python tools or scripts.
 Please see the :ref:`installation guide <installation_guide>` to see how to install HydroMT
 and to :ref:`download the examples <installation_examples>`.
 
+**Available examples**
+
 .. toctree::
     :titlesonly:
 

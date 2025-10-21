@@ -9,6 +9,8 @@ Python API and how to delineate and define basins as your model region.
 Please see the :ref:`installation guide <installation_guide>` to see how to install HydroMT
 and to :ref:`download the examples <installation_examples>`.
 
+**Available examples**
+
 .. toctree::
     :titlesonly:
 
