@@ -7512,7 +7512,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.2.0.dev0
-  sha256: b2aac059c64943a6e64a2a1fdcdf80f28b04fcf9a402d99d600681ba71ff2ba5
+  sha256: 5913e64e38afc0a70e24f1e3112d540a8478e2101cd9a82ed036919f24bcd780
   requires_dist:
   - affine
   - bottleneck
@@ -7573,12 +7573,13 @@ packages:
   - notebook ; extra == 'examples'
   - matplotlib ; extra == 'extra'
   - pyet ; extra == 'extra'
+  - gdal>=3.5.0 ; extra == 'gdal'
   - gcsfs>=2023.12.1 ; extra == 'io'
-  - gdal>=3.5.0 ; extra == 'io'
   - fastparquet ; extra == 'io'
   - openpyxl ; extra == 'io'
   - pillow ; extra == 'io'
   - s3fs ; extra == 'io'
+  - hydromt[io,extra,examples] ; extra == 'slim'
   - pytest>=8 ; extra == 'test'
   - pytest-cov ; extra == 'test'
   - pytest-mock ; extra == 'test'

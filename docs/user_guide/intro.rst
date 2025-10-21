@@ -26,9 +26,13 @@ different functionalities of HydroMT. We will also provide examples and tutorial
 help you get started with HydroMT. Our user guide is separated into four (main) sections:
 
 .. toctree::
+  :maxdepth: 2
+  :caption: User Guide
 
-
-  user_guide/index
-  advanced_user/index
-  plugin_dev/index
-  core_dev/index
+  Overview <overview/index>
+  Data Catalog <data_catalog/data_overview>
+  Working with models <models/model_overview>
+  Supporting functionalities <supporting_functions/methods_main>
+  Migration guide <migration_guide/index>
+  Terminology <terminology>
+  Frequently Asked Questions <faq>

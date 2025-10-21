@@ -6,7 +6,7 @@
 
    About <about/intro>
    Getting started <overview/intro>
-   User guide <guides/intro>
-   Developer guide <plugins>
+   User guide <user_guide/intro>
+   Developer guide <dev/intro>
    API <api/api>
    What's new <changelog>

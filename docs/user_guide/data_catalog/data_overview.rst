@@ -67,3 +67,11 @@ For related functions see:
  - :ref: `DataCatalog API <api_data_catalog>`
  - :ref: `DataCatalog.get_* methods`
  - :ref: `data reading-methods <open_methods>`
+
+.. toctree::
+   :hidden:
+
+   Pre-defined data catalogs <data_existing_cat>
+   Preparing a data catalog <data_prepare_cat>
+   Supported data types <data_types>
+   Data conventions <data_conventions>

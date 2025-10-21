@@ -15,3 +15,12 @@ The exact process of building or updating a model can be configured in a single 
 This file describes the full pipeline of model methods and their arguments. The methods vary for the
 different model classes and :ref:`plugins`, as documented in this documentation or for
 each plugin documentation website.
+
+.. toctree::
+   :hidden:
+
+   Building a model <model_build>
+   Updating a model <model_update>
+   Model workflow file <model_workflow>
+   Defining a region <model_region>
+   Model components (advanced) <model_components>
