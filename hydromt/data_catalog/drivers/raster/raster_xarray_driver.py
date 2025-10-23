@@ -14,7 +14,7 @@ from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
     DriverOptions,
 )
-from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
+from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
 from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
     RasterDatasetDriver,
 )
@@ -41,10 +41,8 @@ class RasterXarrayOptions(DriverOptions):
     ext_override: str | None = None
     """Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension."""
 
-    def get_preprocessor(self) -> Callable | None:
+    def get_preprocessor(self) -> Preprocessor:
         """Get the preprocessor function."""
-        if self.preprocess is None:
-            return None
         return get_preprocessor(self.preprocess)
 
     def get_ext_override(self, uris: list[str]) -> str | None:
@@ -136,7 +134,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             },
         )
         # Sort out the preprocessor
-        preprocessor: Callable | None = self.options.get_preprocessor()
+        preprocessor = self.options.get_preprocessor()
 
         # Check for the override flag
         first_ext = self.options.get_ext_override(uris)
@@ -155,9 +153,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 if ext != first_ext and not self.options.ext_override:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
                 else:
-                    datasets.append(
-                        preprocessor(opn(_uri)) if preprocessor else opn(_uri)
-                    )
+                    datasets.append(preprocessor(opn(_uri)))
 
             ds: xr.Dataset = xr.merge(datasets)
 
@@ -170,7 +166,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                     logger.warning(f"Reading netcdf and {_uri} was not, skipping...")
                 else:
                     filtered_uris.append(_uri)
-            ds: xr.Dataset = xr.open_mfdataset(
+            ds = xr.open_mfdataset(
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,

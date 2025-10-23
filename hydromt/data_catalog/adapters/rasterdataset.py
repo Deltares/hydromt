@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, cast
 
 import numpy as np
 import pyproj
@@ -48,7 +48,7 @@ class RasterDatasetAdapter(DataAdapterBase):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         buffer: int = 0,
-    ) -> Union[xr.Dataset, xr.DataArray, None]:
+    ) -> xr.Dataset | xr.DataArray | None:
         """Filter and harmonize the input RasterDataset.
 
         Parameters
@@ -114,6 +114,7 @@ class RasterDatasetAdapter(DataAdapterBase):
                 "No data was read from source",
                 strategy=handle_nodata,
             )
+            return None  # if handle_nodata ignore
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}

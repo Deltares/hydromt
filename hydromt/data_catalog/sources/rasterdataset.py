@@ -2,7 +2,7 @@
 
 import logging
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
+from typing import Any, ClassVar, List, Literal, Optional
 
 import numpy as np
 import xarray as xr
@@ -45,7 +45,7 @@ class RasterDatasetSource(DataSource):
         *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0,
+        buffer: int = 0,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         zoom: Optional[Zoom] = None,
@@ -53,7 +53,7 @@ class RasterDatasetSource(DataSource):
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         open_kwargs: dict[str, Any] | None = None,
-    ) -> Union[xr.Dataset, xr.DataArray]:
+    ) -> xr.Dataset | xr.DataArray | None:
         """
         Read data from this source.
 
@@ -107,12 +107,12 @@ class RasterDatasetSource(DataSource):
         driver_override: Optional[RasterDatasetDriver] = None,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0.0,
+        buffer: int = 0,
         time_range: Optional[TimeRange] = None,
         zoom: Optional[Zoom] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
-    ) -> "RasterDatasetSource":
+    ) -> "RasterDatasetSource | None":
         """
         Write the RasterDatasetSource to a local file.
 
@@ -135,16 +135,19 @@ class RasterDatasetSource(DataSource):
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
-        ds: Optional[xr.Dataset] = self.read_data(
+        ds = self.read_data(
             bbox=bbox,
             mask=mask,
             buffer=buffer,
             time_range=time_range,
             zoom=zoom,
             handle_nodata=handle_nodata,
+            single_var_as_array=False,
         )
         if ds is None:  # handle_nodata == ignore
             return None
+        elif isinstance(ds, xr.DataArray):
+            ds = ds.to_dataset()
 
         dest_path = driver.write(
             file_path,
@@ -153,7 +156,7 @@ class RasterDatasetSource(DataSource):
         )
 
         # update driver based on local path
-        update: Dict[str, Any] = {
+        update: dict[str, Any] = {
             "uri": dest_path.as_posix(),
             "root": None,
             "driver": driver,

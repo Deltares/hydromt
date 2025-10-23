@@ -43,7 +43,7 @@ class DatasetSource(DataSource):
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
         open_kwargs: dict[str, Any] | None = None,
-    ) -> Union[xr.Dataset, xr.DataArray]:
+    ) -> xr.Dataset | None:
         """Use the resolver, driver, and data adapter to read and harmonize the data.
 
         Parameters

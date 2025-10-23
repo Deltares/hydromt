@@ -14,7 +14,7 @@ from hydromt.data_catalog.drivers.base_driver import (
     DriverOptions,
 )
 from hydromt.data_catalog.drivers.dataset.dataset_driver import DatasetDriver
-from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
+from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 
 logger = logging.getLogger(__name__)
@@ -32,10 +32,8 @@ class DatasetXarrayOptions(DriverOptions):
         description="Override the file extension check and try to read all files as the given extension. Useful when reading zarr files without the .zarr extension.",
     )
 
-    def get_preprocessor(self) -> Callable | None:
+    def get_preprocessor(self) -> Preprocessor:
         """Get the preprocessor function."""
-        if self.preprocess is None:
-            return None
         return get_preprocessor(self.preprocess)
 
     def get_ext_override(self, uris: list[str]) -> str:
@@ -98,7 +96,7 @@ class DatasetXarrayDriver(DatasetDriver):
         ValueError
             If the provided files have mixed or unsupported extensions.
         """
-        preprocessor: Callable | None = self.options.get_preprocessor()
+        preprocessor = self.options.get_preprocessor()
         first_ext = self.options.get_ext_override(uris)
         open_kwargs = open_kwargs or {}
         kwargs = self.options.get_kwargs() | open_kwargs
@@ -110,9 +108,7 @@ class DatasetXarrayDriver(DatasetDriver):
                 if ext != first_ext:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
                 else:
-                    datasets.append(
-                        preprocessor(opn(_uri)) if preprocessor else opn(_uri)
-                    )
+                    datasets.append(preprocessor(opn(_uri)))
 
             ds: xr.Dataset = xr.merge(datasets)
         elif first_ext in [".nc", ".netcdf"]:

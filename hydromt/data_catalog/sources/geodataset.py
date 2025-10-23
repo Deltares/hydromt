@@ -71,7 +71,7 @@ class GeoDatasetSource(DataSource):
             handle_nodata=handle_nodata,
         )
 
-        ds: Optional[xr.Dataset] = self.driver.read(
+        ds: xr.Dataset = self.driver.read(
             uris,
             handle_nodata=handle_nodata,
             open_kwargs=open_kwargs or {},

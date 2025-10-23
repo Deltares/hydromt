@@ -99,18 +99,14 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         data = open_geodataset(
             loc_path=uri, geom=mask, crs=crs, predicate=predicate, **kwargs
         )
-
-        if preprocessor is None:
-            out = data
-        else:
-            out = preprocessor(data)
+        out = preprocessor(data)
 
         if isinstance(out, xr.DataArray):
             if out.size == 0:
                 exec_nodata_strat(
                     f"No data from driver {self}'.", strategy=handle_nodata
                 )
-                return out.to_dataset()
+            return out.to_dataset()
         else:
             for variable in out.data_vars:
                 if out[variable].size == 0:

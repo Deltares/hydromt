@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import xarray as xr
 from pydantic import Field
@@ -13,7 +13,7 @@ from hydromt.data_catalog.drivers.base_driver import (
     BaseDriver,
     DriverOptions,
 )
-from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
+from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
 from hydromt.error import NoDataStrategy
 from hydromt.typing import Geom, Predicate, SourceMetadata
 
@@ -26,10 +26,8 @@ class GeoDatasetOptions(DriverOptions):
     preprocess: str | None = None
     """Name of preprocessor to apply on geodataset after reading. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
 
-    def get_preprocessor(self) -> Callable | None:
+    def get_preprocessor(self) -> Preprocessor:
         """Get the preprocessor function."""
-        if self.preprocess is None:
-            return None
         return get_preprocessor(self.preprocess)
 
 
@@ -50,7 +48,7 @@ class GeoDatasetDriver(BaseDriver, ABC):
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
         metadata: SourceMetadata | None = None,
-    ) -> xr.Dataset | None:
+    ) -> xr.Dataset:
         """
         Read in data to an xarray Dataset.
 

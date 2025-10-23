@@ -157,7 +157,7 @@ class RasterioDriver(RasterDatasetDriver):
             cache_dir: Path = self.options.get_cache_path(uris)
             uris_cached = []
             for uri in uris:
-                cached_uri: str = _cache_vrt_tiles(
+                cached_uri = _cache_vrt_tiles(
                     uri, geom=mask, fs=self.filesystem.get_fs(), cache_dir=cache_dir
                 )
                 uris_cached.append(cached_uri)
@@ -195,7 +195,7 @@ class RasterioDriver(RasterDatasetDriver):
         # trying to open zoom levels here will result in an error.
         # Better would be to separate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023
         # Then we can implement looking for a overview level in the driver.
-        def _open() -> xr.DataArray | xr.Dataset:
+        def _open() -> xr.Dataset:
             try:
                 return open_mfraster(
                     uris,

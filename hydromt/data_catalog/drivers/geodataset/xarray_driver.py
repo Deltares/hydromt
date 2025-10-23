@@ -104,9 +104,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 if ext != first_ext:
                     logger.warning(f"Reading zarr and {_uri} was not, skipping...")
                 else:
-                    datasets.append(
-                        preprocessor(opn(_uri)) if preprocessor else opn(_uri)
-                    )
+                    datasets.append(preprocessor(opn(_uri)))
 
             ds: xr.Dataset = xr.merge(datasets)
         elif first_ext in _NETCDF_EXT:

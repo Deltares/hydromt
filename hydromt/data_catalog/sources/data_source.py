@@ -88,8 +88,8 @@ class DataSource(BaseModel, ABC):
     @classmethod
     def _validate_data_type(cls, data: Any) -> Any:
         """Pydantic does not check class variables, so it is checked here."""
-        if isinstance(data, dict):
-            copy_data: dict = deepcopy(data)
+        copy_data: dict = deepcopy(data)
+        if isinstance(copy_data, dict):
             if data_type := copy_data.pop("data_type", None):
                 if data_type != cls.data_type:
                     raise ValueError(f"'data_type' must be '{cls.data_type}'.")
@@ -242,7 +242,7 @@ class DataSource(BaseModel, ABC):
 
     ## Abstract methods
     @abstractmethod
-    def read_data(self):
+    def read_data(self) -> Any | None:
         """Read data from the source."""
         pass
 
