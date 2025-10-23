@@ -53,10 +53,6 @@ class DataFrameDriver(BaseDriver, ABC):
         pd.DataFrame
             The loaded DataFrame.
 
-        Raises
-        ------
-        NotImplementedError
-            If not implemented by a subclass.
         """
         ...
 

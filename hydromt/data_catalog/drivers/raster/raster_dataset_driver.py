@@ -67,10 +67,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
         xr.Dataset
             The loaded raster dataset.
 
-        Raises
-        ------
-        NotImplementedError
-            If not implemented by a subclass.
         """
         ...
 

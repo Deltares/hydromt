@@ -45,11 +45,6 @@ class DatasetDriver(BaseDriver, ABC):
         -------
         xr.Dataset
             The loaded dataset.
-
-        Raises
-        ------
-        NotImplementedError
-            If not implemented by a subclass.
         """
         ...
 
