@@ -94,12 +94,7 @@ class RasterDatasetDriver(BaseDriver, ABC):
 
         Returns
         -------
-        str
-            The path to the written raster dataset.
-
-        Returns
-        -------
         Path
-            The path where the dataset was written.
+            The path to the written raster dataset.
         """
         ...

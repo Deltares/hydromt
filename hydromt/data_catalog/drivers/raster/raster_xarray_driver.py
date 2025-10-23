@@ -212,7 +212,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
         Returns
         -------
-        str
+        Path
             The path to the written dataset.
 
         Raises

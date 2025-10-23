@@ -7,7 +7,7 @@
 
 """Extension for xarray to provide rasterio capabilities to xarray datasets/arrays."""
 
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 import datetime
 import itertools
@@ -16,7 +16,7 @@ import math
 import os
 from os.path import join
 from typing import Any, Optional, Tuple, Union
-import rioxarray  # noqa: F401
+
 import cftime
 import dask
 import geopandas as gpd
@@ -25,6 +25,7 @@ import pandas as pd
 import pyproj
 import rasterio.fill
 import rasterio.warp
+import rioxarray  # noqa: F401
 import shapely
 import xarray as xr
 from affine import Affine
