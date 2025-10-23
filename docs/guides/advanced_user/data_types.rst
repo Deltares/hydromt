@@ -53,13 +53,13 @@ Raster data (RasterDataset)
    * - Driver
      - File formats
      - Comments
-   * - :py:class:`raster <raster.rasterio_driver.RasterioDriver>`
+   * - :py:class:`rasterio <raster.rasterio_driver.RasterioDriver>`
      - GeoTIFF, ArcASCII, VRT, etc. (see `GDAL formats <http://www.gdal.org/formats_list.html>`_)
      - Based on :py:func:`xarray.open_rasterio`
        and :py:func:`rasterio.open`
-   * - :py:class:`raster <raster.rasterio_driver.RasterioDriver>` with the
+   * - :py:class:`rasterio <raster.rasterio_driver.RasterioDriver>` with the
        :py:class:`raster_tindex <hydromt.data_catalog.uri_resolvers.raster_tindex_resolver.RasterTindexResolver>` resolver
-     - raster tile index file (see `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_)
+     - rasterio tile index file (see `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_)
      - Options to merge tiles via `options -> mosaic_kwargs`.
    * - :py:class:`raster_xarray <raster.raster_xarray_driver.RasterDatasetXarrayDriver>`
      - NetCDF and Zarr
@@ -490,7 +490,7 @@ dimension.
    * - Driver
      - File formats
      - Comments
-   * - :py:class:`csv <dataframe.pandas_driver.PandasDriver>`
+   * - :py:class:`pandas <dataframe.pandas_driver.PandasDriver>`
      - any file readable by pandas
      - Provide a sheet name or formatting through options
 
