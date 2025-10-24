@@ -60,7 +60,22 @@ def test_write_nc_gdal_compliant(tmp_path: Path, rioda: xr.DataArray):
     assert "longitude" in ds.dims
 
 
-def test_write_nc_progress(
+def test_write_nc_no_progress(
+    tmp_path: Path,
+    rioda: xr.DataArray,
+):
+    # Redirect the stdout as caplog only catches logging from the logging module
+    s = io.StringIO()
+    sys.stdout = s
+    # Call the function with the progressbar disabled
+    write_nc(ds=rioda, file_path=Path(tmp_path, "foo.nc"), progressbar=False)
+
+    # Assert the logging output
+    s.seek(0)
+    assert "#####" not in s.read()
+
+
+def test_write_nc_with_progress(
     tmp_path: Path,
     rioda: xr.DataArray,
 ):
