@@ -3,12 +3,14 @@
 import hashlib
 import logging
 import uuid
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any, cast
 
 import geopandas as gpd
 import numpy as np
 import xarray as xr
+from dask.diagnostics import ProgressBar
 from tomli_w import dump as dump_toml
 from yaml import dump as dump_yaml
 
@@ -65,6 +67,7 @@ def write_nc(
     rename_dims: bool = False,
     force_sn: bool = False,
     force_overwrite: bool = False,
+    progressbar: bool = False,
     **kwargs,
 ) -> DeferredFileClose | None:
     """Write xarray.Dataset and/or xarray.DataArray to netcdf file.
@@ -94,6 +97,10 @@ def write_nc(
     force_sn : bool, optional
         If True, forces the dataset to have South -> North orientation. Only used
         if ``gdal_compliant`` is set to True. By default False
+    progressbar : bool, optional
+        If True, the netcdf will be computed and written with a visible progressbar.
+        This is only useful when the dataset to be written is lazily read and modified
+        using dask. By default False
     **kwargs : dict
         Additional keyword arguments that are passed to the `to_netcdf`
         function
@@ -137,16 +144,28 @@ def write_nc(
         encoding[y_dim] = encoding.pop(y_old)
         encoding[x_dim] = encoding.pop(x_old)
 
+    def nc_progress(ds: xr.Dataset, file_path: Path, progressbar: bool, **kwargs):
+        """Small function for really writing the netcdf."""
+        obj = ds.to_netcdf(
+            file_path,
+            compute=False,
+            **kwargs,
+        )
+        with ProgressBar() if progressbar else nullcontext():
+            obj.compute()
+        # Dereference
+        obj = None
+
     # Try to write the file
     try:
-        ds.to_netcdf(file_path, **kwargs)
+        nc_progress(ds, file_path=file_path, progressbar=progressbar, **kwargs)
     except OSError:
         logger.debug(f"Could not write to file {file_path.as_posix()}, deferring write")
 
         unique_str = f"{file_path}_{uuid.uuid4()}"
         hash_str = hashlib.sha256(unique_str.encode()).hexdigest()[:8]
         temp_filepath = file_path.with_stem(f"{file_path.stem}_{hash_str}")
-        ds.to_netcdf(temp_filepath, **kwargs)
+        nc_progress(ds, file_path=temp_filepath, progressbar=progressbar, **kwargs)
 
         return DeferredFileClose(original_path=file_path, temp_path=temp_filepath)
 
