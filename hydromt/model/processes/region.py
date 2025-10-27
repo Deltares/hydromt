@@ -252,7 +252,12 @@ def parse_region_grid(
         value0,
         handle_nodata=NoDataStrategy.RAISE,
         single_var_as_array=True,
-        driver={"name": RasterDatasetSource._fallback_driver_read, "options": kwargs},
+        source_kwargs={
+            "driver": {
+                "name": RasterDatasetSource._fallback_driver_read,
+                "options": kwargs,
+            }
+        },
     )
 
     return da

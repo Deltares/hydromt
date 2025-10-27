@@ -86,31 +86,31 @@ def test_region_from_grid_cat(tmp_path: Path, rioda: xr.Dataset):
     xr.testing.assert_equal(region, rioda)
 
 
-def test_region_from_basin_ids():
+def test_region_from_basin_ids(data_catalog: DataCatalog):
     basin_ids = [210000018, 210000030, 210000039]
     region = {"basin": basin_ids}
     region = parse_region_basin(
         region,
-        data_catalog=DataCatalog(),
+        data_catalog=data_catalog,
         hydrography_path="merit_hydro",
         basin_index_path="merit_hydro_index",
     )
     assert set(map(lambda x: int(x), region["value"])) == set(basin_ids)
 
 
-def test_region_from_basin_id():
+def test_region_from_basin_id(data_catalog: DataCatalog):
     basin_id = 210000018
     region = {"basin": basin_id}
     region = parse_region_basin(
         region,
-        data_catalog=DataCatalog(),
+        data_catalog=data_catalog,
         hydrography_path="merit_hydro",
         basin_index_path="merit_hydro_index",
     )
     assert set(region["value"]) == {basin_id}
 
 
-def test_region_from_subbasin():
+def test_region_from_subbasin(data_catalog: DataCatalog):
     region_dict = {
         "subbasin": [12.3, 46.2],
         "uparea": 5.0,
@@ -118,7 +118,7 @@ def test_region_from_subbasin():
     }
     region: gpd.GeoDataFrame = parse_region_basin(
         region_dict,
-        data_catalog=DataCatalog(),
+        data_catalog=data_catalog,
         hydrography_path="merit_hydro",
         basin_index_path="merit_hydro_index",
     )
@@ -127,25 +127,25 @@ def test_region_from_subbasin():
     assert region.shape == (1, 2)
 
 
-def test_region_from_basin_xy():
+def test_region_from_basin_xy(data_catalog: DataCatalog):
     region = {"basin": [[12.0, 46.0], [12.3, 46.5]]}
     region = parse_region_basin(
         region,
-        data_catalog=DataCatalog(),
+        data_catalog=data_catalog,
         hydrography_path="merit_hydro",
         basin_index_path="merit_hydro_index",
     )
     assert region.shape == (4, 2)
 
 
-def test_region_from_inter_basin():
+def test_region_from_inter_basin(data_catalog: DataCatalog):
     region = {
         "interbasin": [12.0, 46.0, 12.5, 46.5],
         "xy": [12.0, 46.0],
     }
     region = parse_region_basin(
         region,
-        data_catalog=DataCatalog(),
+        data_catalog=data_catalog,
         hydrography_path="merit_hydro",
         basin_index_path="merit_hydro_index",
     )

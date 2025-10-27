@@ -1,4 +1,5 @@
 import uuid
+from pathlib import Path
 from typing import Any
 
 import geopandas as gpd
@@ -101,16 +102,14 @@ def mock_raster_ds_adapter():
 
 # ---- DataFrame Driver ----
 @pytest.fixture
-def MockDataFrameDriver(
-    df: pd.DataFrame,
-) -> type[DataFrameDriver]:
+def MockDataFrameDriver(df: pd.DataFrame, tmp_path: Path) -> type[DataFrameDriver]:
     def read(self, *args, **kwargs):
         return df
 
     def write(self, data, *args, **kwargs):
         self._written_data = data
         self._write_called = True
-        return True
+        return tmp_path
 
     return make_driver_class(
         DataFrameDriver,
@@ -130,14 +129,14 @@ def MockDataFrameReadOnlyDriver(MockDataFrameDriver) -> type[DataFrameDriver]:
 
 # ---- Dataset Driver ----
 @pytest.fixture
-def MockDatasetDriver(timeseries_ds: xr.Dataset) -> type[DatasetDriver]:
+def MockDatasetDriver(timeseries_ds: xr.Dataset, tmp_path: Path) -> type[DatasetDriver]:
     def read(self, *args, **kwargs):
         return timeseries_ds
 
     def write(self, data, *args, **kwargs):
         self._written_ds = data
         self._write_called = True
-        return True
+        return tmp_path
 
     return make_driver_class(
         DatasetDriver,
@@ -157,14 +156,16 @@ def MockDatasetReadOnlyDriver(MockDatasetDriver) -> type[DatasetDriver]:
 
 # ---- GeoDataFrame Driver ----
 @pytest.fixture
-def MockGeoDataFrameDriver(geodf: gpd.GeoDataFrame) -> type[GeoDataFrameDriver]:
+def MockGeoDataFrameDriver(
+    geodf: gpd.GeoDataFrame, tmp_path: Path
+) -> type[GeoDataFrameDriver]:
     def read(self, *args, **kwargs):
         return geodf
 
     def write(self, data, *args, **kwargs):
         self._written_gdf = data
         self._write_called = True
-        return True
+        return tmp_path
 
     return make_driver_class(
         GeoDataFrameDriver,
@@ -184,14 +185,14 @@ def MockGeoDataFrameReadOnlyDriver(MockGeoDataFrameDriver) -> type[GeoDataFrameD
 
 # ---- GeoDataset Driver ----
 @pytest.fixture
-def MockGeoDatasetDriver(geoda: xr.DataArray) -> type[GeoDatasetDriver]:
+def MockGeoDatasetDriver(geoda: xr.DataArray, tmp_path: Path) -> type[GeoDatasetDriver]:
     def read(self, *args, **kwargs):
         return geoda.to_dataset()
 
     def write(self, data, *args, **kwargs):
         self._written_ds = data
         self._write_called = True
-        return True
+        return tmp_path
 
     return make_driver_class(
         GeoDatasetDriver,
@@ -211,14 +212,16 @@ def MockGeoDatasetReadOnlyDriver(MockGeoDatasetDriver) -> type[GeoDatasetDriver]
 
 # ---- RasterDataset Driver ----
 @pytest.fixture
-def MockRasterDatasetDriver(raster_ds: xr.Dataset) -> type[RasterDatasetDriver]:
+def MockRasterDatasetDriver(
+    raster_ds: xr.Dataset, tmp_path: Path
+) -> type[RasterDatasetDriver]:
     def read(self, *args, **kwargs):
         return raster_ds
 
     def write(self, data, *args, **kwargs):
         self._written_raster = data
         self._write_called = True
-        return True
+        return tmp_path
 
     return make_driver_class(
         RasterDatasetDriver,

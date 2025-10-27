@@ -69,7 +69,8 @@ def harmonise_dims(ds: xr.Dataset) -> xr.Dataset:
     return ds
 
 
-PREPROCESSORS: dict[str, Callable] = {
+Preprocessor = Callable[[xr.Dataset], xr.Dataset]
+PREPROCESSORS: dict[str, Preprocessor] = {
     "round_latlon": round_latlon,
     "to_datetimeindex": to_datetimeindex,
     "remove_duplicates": remove_duplicates,
@@ -77,19 +78,27 @@ PREPROCESSORS: dict[str, Callable] = {
 }
 
 
-def get_preprocessor(name: str) -> Callable:
+def _no_op_preprocessor(ds: xr.Dataset) -> xr.Dataset:
+    """No-op preprocessor that returns the dataset unchanged."""
+    return ds
+
+
+def get_preprocessor(name: str | None = None) -> Preprocessor:
     """Get a preprocessor function by name.
 
     Parameters
     ----------
-    name: str
-        Name of the preprocessor function.
+    name: str | None
+        Name of the preprocessor function. If None, returns a no-op preprocessor.
 
     Returns
     -------
-    preprocessor: Callable
+    preprocessor: Preprocessor
         Preprocessor function.
     """
+    if name is None:
+        return _no_op_preprocessor
+
     if name not in PREPROCESSORS:
         raise ValueError(
             f"Preprocessor '{name}' not found. Available: {list(PREPROCESSORS.keys())}"

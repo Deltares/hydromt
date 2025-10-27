@@ -112,7 +112,7 @@ class TestPandasDriver:
         driver: PandasDriver,
     ):
         df_path = managed_tmp_path / filename
-        driver.write(df_path, df, index=False)
+        driver.write(df_path, df, write_kwargs={"index": False})
         reread = driver.read([str(df_path)])
         assert np.all(reread == df)
 

@@ -42,7 +42,8 @@ class DatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
-    ) -> Union[xr.Dataset, xr.DataArray]:
+        open_kwargs: dict[str, Any] | None = None,
+    ) -> xr.Dataset | None:
         """Use the resolver, driver, and data adapter to read and harmonize the data.
 
         Parameters
@@ -55,7 +56,11 @@ class DatasetSource(DataSource):
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
         single_var_as_array : bool, optional
-            _description_, by default True
+            If only a single variable is requested, return as DataArray instead of
+            Dataset, by default True
+        open_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments passed to the underlying open function,
+            by default None
 
         Returns
         -------
@@ -66,22 +71,20 @@ class DatasetSource(DataSource):
         self._log_start_read_data()
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter._to_source_timerange(time_range)
+        time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=tr,
+            time_range=time_range,
             variables=vrs,
             handle_nodata=handle_nodata,
         )
 
         ds: xr.Dataset = self.driver.read(
             uris,
-            time_range=tr,
-            variables=vrs,
-            metadata=self.metadata,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
         )
 
         return self.data_adapter.transform(
@@ -131,14 +134,18 @@ class DatasetSource(DataSource):
             return None
 
         # driver can return different path if file ext changes
-        dest_path: str = driver.write(
+        dest_path = driver.write(
             file_path,
             ds,
             **kwargs,
         )
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update: Dict[str, Any] = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 

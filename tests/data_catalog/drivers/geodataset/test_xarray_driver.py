@@ -25,10 +25,7 @@ class TestGeoDatasetXarrayDriver:
         driver = GeoDatasetXarrayDriver(
             options={"preprocess": "round_latlon"},
         )
-        res: xr.Dataset = driver.read(
-            uris,
-            variables=["var1", "var2"],
-        )
+        res: xr.Dataset = driver.read(uris)
         call_args = mock_xr_open.call_args
         assert call_args[0][0] == uris  # first arg
         assert call_args[1].get("preprocess") == round_latlon

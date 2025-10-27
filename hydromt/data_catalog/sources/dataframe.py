@@ -38,28 +38,28 @@ class DataFrameSource(DataSource):
         *,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
-        predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[pd.DataFrame]:
         """Use the resolver, driver, and data adapter to read and harmonize the data."""
         self._mark_as_used()
         self._log_start_read_data()
 
-        tr: TimeRange = self.data_adapter._to_source_timerange(time_range)
+        time_range: TimeRange = self.data_adapter._to_source_timerange(time_range)
         vrs: Optional[List[str]] = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
             variables=vrs,
-            time_range=tr,
+            time_range=time_range,
             handle_nodata=handle_nodata,
         )
 
         df: pd.DataFrame = self.driver.read(
             uris,
-            variables=vrs,
-            time_range=tr,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
+            variables=vrs,
         )
 
         return self.data_adapter.transform(
@@ -106,14 +106,18 @@ class DataFrameSource(DataSource):
             return None
 
         # driver can return different path if file ext changes
-        dest_path: str = driver.write(
+        dest_path = driver.write(
             file_path,
             df,
             **kwargs,
         )
 
         # update source and its driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update: Dict[str, Any] = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 

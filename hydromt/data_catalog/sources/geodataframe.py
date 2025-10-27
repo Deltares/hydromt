@@ -51,6 +51,7 @@ class GeoDataFrameSource(DataSource):
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
+        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[gpd.GeoDataFrame]:
         """Use the driver and data adapter to read and harmonize the data."""
         self._mark_as_used()
@@ -71,11 +72,11 @@ class GeoDataFrameSource(DataSource):
 
         gdf: gpd.GeoDataFrame = self.driver.read(
             uris,
-            mask=mask,
-            predicate=predicate,
-            variables=vrs,
-            metadata=self.metadata,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
+            metadata=self.metadata,
+            mask=mask,
+            variables=vrs,
         )
         return self.data_adapter.transform(
             gdf,
@@ -132,14 +133,18 @@ class GeoDataFrameSource(DataSource):
         if gdf is None:  # handle_nodata == ignore
             return None
 
-        dest_path: str = driver.write(
+        dest_path = driver.write(
             file_path,
             gdf,
             **kwargs,
         )
 
         # update source and its driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update: Dict[str, Any] = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 

@@ -2,8 +2,9 @@
 
 import logging
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
+from typing import Any, ClassVar, List, Literal, Optional
 
+import numpy as np
 import xarray as xr
 from pydantic import Field
 from pyproj.exceptions import CRSError
@@ -44,14 +45,15 @@ class RasterDatasetSource(DataSource):
         *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0,
+        buffer: int = 0,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         zoom: Optional[Zoom] = None,
         chunks: Optional[dict] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> Union[xr.Dataset, xr.DataArray]:
+        open_kwargs: dict[str, Any] | None = None,
+    ) -> xr.Dataset | xr.DataArray | None:
         """
         Read data from this source.
 
@@ -65,12 +67,12 @@ class RasterDatasetSource(DataSource):
             mask = _parse_geom_bbox_buffer(mask, bbox)
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter._to_source_timerange(time_range)
+        time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=tr,
+            time_range=time_range,
             mask=mask,
             variables=vrs,
             zoom=zoom,
@@ -80,13 +82,13 @@ class RasterDatasetSource(DataSource):
 
         ds: xr.Dataset = self.driver.read(
             uris,
+            handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs or {},
             mask=mask,
-            time_range=tr,
             variables=vrs,
             zoom=zoom,
             chunks=chunks,
             metadata=self.metadata,
-            handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
             ds,
@@ -105,12 +107,12 @@ class RasterDatasetSource(DataSource):
         driver_override: Optional[RasterDatasetDriver] = None,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0.0,
+        buffer: int = 0,
         time_range: Optional[TimeRange] = None,
         zoom: Optional[Zoom] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         **kwargs,
-    ) -> "RasterDatasetSource":
+    ) -> "RasterDatasetSource | None":
         """
         Write the RasterDatasetSource to a local file.
 
@@ -133,25 +135,32 @@ class RasterDatasetSource(DataSource):
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
-        ds: Optional[xr.Dataset] = self.read_data(
+        ds = self.read_data(
             bbox=bbox,
             mask=mask,
             buffer=buffer,
             time_range=time_range,
             zoom=zoom,
             handle_nodata=handle_nodata,
+            single_var_as_array=False,
         )
         if ds is None:  # handle_nodata == ignore
             return None
+        elif isinstance(ds, xr.DataArray):
+            ds = ds.to_dataset()
 
-        dest_path: str = driver.write(
+        dest_path = driver.write(
             file_path,
             ds,
             **kwargs,
         )
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update: dict[str, Any] = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 
@@ -217,9 +226,13 @@ class RasterDatasetSource(DataSource):
         """
         if ds is None:
             ds = self.read_data()
+
+        if not np.issubdtype(ds[ds.raster.time_dim].dtype, np.datetime64):
+            ds = ds.convert_calendar("standard")
+
         return TimeRange(
-            start=ds[ds.raster.time_dim].min().values,
-            end=ds[ds.raster.time_dim].max().values,
+            start=ds[ds.raster.time_dim].values.min(),
+            end=ds[ds.raster.time_dim].values.max(),
         )
 
     def to_stac_catalog(
