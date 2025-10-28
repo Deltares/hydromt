@@ -15,21 +15,21 @@ About HydroMT
 
     .. grid-item-card::
         :text-align: center
-        :link: user_stories
-        :link-type: ref
-
-        :octicon:`book;5em;sd-text-icon blue-icon`
-        +++
-        User Stories
-
-    .. grid-item-card::
-        :text-align: center
         :link: plugins
         :link-type: ref
 
         :octicon:`database;5em;sd-text-icon blue-icon`
         +++
         Plugins
+
+    .. grid-item-card::
+        :text-align: center
+        :link: user_stories
+        :link-type: ref
+
+        :octicon:`book;5em;sd-text-icon blue-icon`
+        +++
+        User Stories
 
     .. grid-item-card::
         :text-align: center

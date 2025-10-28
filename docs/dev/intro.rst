@@ -1,3 +1,5 @@
+.. _intro_developer_guide:
+
 .. toctree::
     :maxdepth: 2
     :caption: Developer Guide

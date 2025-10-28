@@ -4,14 +4,14 @@ Using HydroMT in Python
 =======================
 
 As HydroMT's architecture is modular, it is possible to use HydroMT as a python library
-without using the command line interface (CLI). Using the libary, you have more of
-HydroMTs functionalities at your disposal. This can be useful if you want to for
+without using the command line interface (CLI). Using the library, you have more of
+HydroMT's functionalities at your disposal. This can be useful if you want to for
 example:
 
-- build / update / clip models, check configurations or export data in Python instead of
+- build / update models, check configurations or export data in Python instead of
   the CLI
-- analyse model inputs or results
-- analyse and compare input data without connecting to a specific model
+- analyze model inputs or results
+- analyze and compare input data without connecting to a specific model
 - process input data for another reason than building a model
 - create your own HydroMT plugin
 
@@ -19,11 +19,182 @@ So first, let's go deeper into the API of HydroMT. You have all available functi
 and their documentation in the `API reference <../api.rst>`_.
 
 HydroMT is here to read and harmonize **input data**, and to process it via its
-**methods and workflows** in order to prepare ready to run **models**. So HydroMT's
+**methods and (GIS) processes** in order to prepare ready to run **models**. So HydroMT's
 methods are organized around these main objects.
 
-Input data
-----------
+.. dropdown:: **Model functions**
+
+   - :ref:`build a model <hydromt_build_python>`
+   - :ref:`update a model <hydromt_update_python>`
+   - :ref:`loading a model <hydromt_load_python>`
+
+.. dropdown:: **Data catalog functions**
+
+   - :ref:`export data <hydromt_export_python>`
+   - :ref:`reading data <hydromt_data_read_python>`
+
+.. dropdown:: **Methods and processes**
+
+   - :ref:`methods <hydromt_methods_python>`
+   - :ref:`processes <hydromt_processes_python>`
+
+Model functions
+---------------
+
+You can use HydroMT to build or update a model in Python instead of the CLI. Additionally
+with Python, you can also load an existing model to read or analyze its inputs or results.
+
+.. _hydromt_build_python:
+Building a model
+^^^^^^^^^^^^^^^^
+
+The ``build`` function is used to build models from scratch. In Python, you can also
+use the build function in combination with the build workflow file to build a model. Here
+is a small example of how to use the build function in Python:
+
+.. code-block:: python
+
+    from hydromt import ExampleModel
+    from hydromt.io import read_workflow_yaml
+
+    # Instantiate model
+    model = ExampleModel(
+        root="./path/to/example_model",
+        data_catalog=["./path/to/data_catalog.yml"],
+    )
+    # Read build options from yaml
+    _, _, build_options = read_workflow_yaml(
+        "./path/to/build_options.yaml"
+    )
+    # Build model
+    model.build(steps=build_options)
+
+Additionally, in Python, you can also build the model step-by step by calling each of the
+model steps as methods, instead of using a workflow file. For example:
+
+.. code-block:: python
+
+    from hydromt import ExampleModel
+
+    # Instantiate model
+    model = ExampleModel(
+        root="./path/to/example_model",
+        data_catalog=["./path/to/data_catalog.yml"],
+    )
+    # Build model step by step
+    # Step 1: populate the config with some values
+    model.config.update(
+        data = {'starttime': '2000-01-01', 'endtime': '2010-12-31'}
+    )
+    # Step 2: define the model grid
+    model.grid.create_from_region(
+        region={"subbasin": [12.2051, 45.8331], "uparea": 50},
+        res=1000,
+        crs="utm",
+        hydrography_fn="merit_hydro_1k",
+        basin_index_fn="merit_hydro_index",
+    )
+    # Step 3: add DEM data to the model grid
+    model.grid.add_data_from_rasterdataset(
+        raster_fn="merit_hydro_1k",
+        variables="elevtn",
+        fill_method=None,
+        reproject_method="bilinear",
+        rename={"elevtn": "DEM"},
+    )
+    # Write the model to disk
+    model.write()
+
+.. _hydromt_update_python:
+Updating a model
+^^^^^^^^^^^^^^^^
+The ``update`` function is used to update an existing model. In Python, you can also
+use the update function in combination with the workflow file to update a model. Here
+is a small example of how to use the update function in Python:
+
+.. code-block:: python
+
+    from hydromt import ExampleModel
+    from hydromt.io import read_workflow_yaml
+
+    # Instantiate model
+    model = ExampleModel(
+        root="./path/to/example_model_to_update",
+        data_catalog=["./path/to/data_catalog.yml"],
+        mode = "r+", # open model in read and write mode
+    )
+    # Read update options from yaml
+    _, _, update_options = read_workflow_yaml(
+        "./path/to/update_options.yaml"
+    )
+    # If you want to save the model in a different folder
+    model.read()
+    model.root.set("./path/to/updated_example_model", mode="w")
+    # Update model
+    model.update(steps=update_options)
+
+Similarly to build, you can also update the model step by step by calling each of the
+model steps as methods, instead of using a workflow file. For example:
+
+.. code-block:: python
+
+    from hydromt import ExampleModel
+
+    # Instantiate model
+    model = ExampleModel(
+        root="./path/to/example_model_to_update",
+        data_catalog=["./path/to/data_catalog.yml"],
+        mode = "r+", # open model in read and write mode
+    )
+    # If you want to save the model in a different folder
+    model.read()
+    model.root.set("./path/to/updated_example_model", mode="w")
+    # Update model step by step
+    # Step 1: update the config with new values
+    model.config.update(
+        data = {'starttime': '2010-01-01', 'endtime': '2020-12-31'}
+    )
+    # Step 2: add landuse data in the model grid
+    model.grid.add_data_from_rasterdataset(
+        raster_fn="vito",
+        reproject_method="mode",
+        rename={"vito": "landuse"},
+    )
+    # Write the updated model to disk
+    model.write()
+
+.. _hydromt_load_python:
+Loading and analyzing a model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+You can also use HydroMT and its :class:`~model.Model` and
+:class:`~components.base.ModelComponent` classes to do some analysis on your model
+inputs or results. HydroMT views a model as a combination of different components to
+represent the different type of inputs of a model, like ``config`` for the model run
+configuration file, ``forcing`` for the dynamic forcing data of the model etc. For each
+component, there are methods to ``<component>.set`` (update or add a new data layer),
+``<component>.read`` and ``<component>.write``.
+
+Here is a small example of how to use the :class:`~model.Model` class in python to plot
+or analyze your model:
+
+.. code-block:: python
+
+    from hydromt import ExampleModel
+    # create a ExampleModel instance for an existing model saved in "example_model" folder
+    model = hydromt.ExampleModel(root="example_model", mode="r")
+    # read/get the grid data
+    grid = model.grid.data
+    # plot the DEM
+    grid["DEM"].plot()
+
+You can find more detailed examples on using the Model class in Python in:
+
+* `Working with models in python <../_examples/working_with_models.ipynb>`_
+
+And feel free to visit some of the :ref:`plugins <plugins>` documentation to find even more examples!
+
+Data catalog functions
+----------------------
 
 .. currentmodule:: hydromt.data_catalog
 
@@ -147,44 +318,3 @@ You can find a couple of detailed examples of how to use HydroMT methods and wor
 * `Working with flow direction data <../_examples/working_with_flow_directions.ipynb>`_
 * `Define hydrological model regions <../_examples/delineate_basin.ipynb>`_
 * `Extreme Value Analysis <../_examples/doing_extreme_value_analysis.ipynb>`_
-
-Models
-------
-
-You can also use HydroMT and its :class:`~model.Model` and
-:class:`~components.base.ModelComponent` classes to do some analysis on your model
-inputs or results. HydroMT views a model as a combination of different components to
-represent the different type of inputs of a model, like ``config`` for the model run
-configuration file, ``forcing`` for the dynamic forcing data of the model etc. For each
-component, there are methods to ``set_<component>`` (update or add a new data layer),
-``read_<component>`` and ``write_<component>``.
-
-Here is a small example of how to use the :class:`~model.Model` class in python to plot
-or analyse your model:
-
-.. code-block:: python
-
-    import hydromt
-    # create a GridModel instance for an existing grid model saved in "grid_model" folder
-    model = hydromt.GridModel(root="grid_model", mode="r")
-    # read/get the grid data
-    forcing = model.grid
-    # plot the DEM
-    grid["dem"].plot()
-
-    # read the model results
-    results = model.results
-    # Get the simulated discharge
-    qsim = results["qsim"]
-    # Read observations using a local data catalog
-    cat = hydromt.DataCatalog("data_catalog.yml")
-    qobs = cat.get_geodataset("qobs")
-    # Compute some skill scores like NSE
-    nse = hydromt.stats.nashsutcliffe(qobs, qsim)
-
-You can find more detailed examples on using the Model class in Python in:
-
-* `Working with (grid) models in python <../_examples/working_with_models.ipynb>`_
-* `Working with mesh models <../_examples/working_with_meshmodel.ipynb>`_
-
-And feel free to visit some of the :ref:`plugins <plugins>` documentation to find even more examples!

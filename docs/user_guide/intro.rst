@@ -4,34 +4,94 @@
 User guide
 ==========
 
-**HydroMT** (Hydro Model Tools) is an open-source Python package that facilitates the process of
-building and analysing spatial geoscientific models with a focus on water system models.
-It does so by automating the workflow to go from raw data to a complete model instance which
-is ready to run and to analyse model results once the simulation has finished.
-As such it is an interface between *user*, *data* and *models*.
+In this user guide, you will find detailed descriptions and examples that describe many
+common tasks that you can accomplish with HydroMT. If you want to develop your own plugin,
+please refer to our :ref:`developer guide <intro_developer_guide>`.
 
-.. figure:: ../_static/hydromt_using.jpg
+.. grid:: 2
+    :gutter: 1
 
-  A sequence describing how to prepare ready-to-run models using HydroMT
+    .. grid-item-card::
+        :text-align: center
+        :link: overview_index
+        :link-type: ref
 
-In short the most common usage of hydromt is to build/update models via the following
-steps (see also :ref:`the quick overview on how to use HydroMT <quick_overview>`):
+        :octicon:`device-desktop;5em;sd-text-icon blue-icon`
+        +++
+        **Overview**
 
-1. Collect and catalog raw input data (e.g. DEM, land use, soil, climate, etc.)
-2. Prepare a HydroMT configuration file to let HydroMT know which part of your model you wish to prepare, how and using which data (e.g. DEM from SRTM, MERIT Hydro, Copernicus or other source)
-3. Run HydroMT to do all the data reading and processing for you either via the command line interface or via the Python API.
+        Relatively new to HydroMT? Start here with an introduction about HydroMT, common usage and
+        introduction on the CLI and Python interface.
 
-In this user guide, we will go through the different steps of the workflow and the
-different functionalities of HydroMT. We will also provide examples and tutorials to
-help you get started with HydroMT. Our user guide is separated into four (main) sections:
+    .. grid-item-card::
+        :text-align: center
+        :link: model_main
+        :link-type: ref
+
+        :octicon:`graph;5em;sd-text-icon blue-icon`
+        +++
+        **Working with models**
+
+        Want to know in more details how to work with models in HydroMT? Look here for details
+        on model build/update, the structure of the workflow file or region options.
+
+    .. grid-item-card::
+        :text-align: center
+        :link: get_data
+        :link-type: ref
+
+        :octicon:`stack;5em;sd-text-icon blue-icon`
+        +++
+        **Data Catalog**
+
+        Learn how to manage your data using the HydroMT Data Catalog, including existing
+        pre-defined catalogs and how to create your own.
+
+    .. grid-item-card::
+        :text-align: center
+        :link: methods_processes
+        :link-type: ref
+
+        :octicon:`tools;5em;sd-text-icon blue-icon`
+        +++
+        **Supporting (GIS) functionalities**
+
+        Interested in the supporting and GIS functionalities of HydroMT that you would
+        like to use in your own plugin or python script? Check it out here.
+
+    .. grid-item-card::
+        :text-align: center
+        :link: migration_guide
+        :link-type: ref
+
+        :octicon:`file-moved;5em;sd-text-icon blue-icon`
+        +++
+        **Migration Guide**
+
+        Already familiar with HydroMT but need help to update your code and workflow files for
+        HydroMT version 1.0? Check out our migration guide.
+
+    .. grid-item-card::
+        :text-align: center
+        :link: faq
+        :link-type: ref
+
+        :octicon:`question;5em;sd-text-icon blue-icon`
+        +++
+        **Frequently Asked Questions**
+
+        Find answers to the most commonly asked questions about HydroMT, as well as
+        tips and tricks for using the software effectively in this page.
+
 
 .. toctree::
   :maxdepth: 2
   :caption: User Guide
+  :hidden:
 
   Overview <overview/index>
-  Data Catalog <data_catalog/data_overview>
   Working with models <models/model_overview>
+  Data Catalog <data_catalog/data_overview>
   Supporting functionalities <supporting_functions/methods_main>
   Migration guide <migration_guide/index>
   Terminology <terminology>

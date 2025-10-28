@@ -1,3 +1,5 @@
+.. _getting_started:
+
 Getting started
 ===============
 
@@ -15,7 +17,7 @@ Getting started
 
     .. grid-item-card::
         :text-align: center
-        :link: intro_user_guide
+        :link: overview_usage
         :link-type: ref
 
         :octicon:`device-desktop;5em;sd-text-icon blue-icon`
@@ -65,6 +67,7 @@ Getting started
    :hidden:
 
    Installation <installation>
+   Overview: How to use HydroMT ? <overview_usage>
    Examples: Working with models <examples_models>
    Examples: Data Catalog <examples_data>
    Examples: GIS functionalities (advanced) <examples_gis>

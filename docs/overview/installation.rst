@@ -4,10 +4,11 @@
 Installation guide
 ==================
 
-The most common usage of HydroMT is through a model plugin, e.g. via hydromt_wflow,
-hydromt_sfincs etc. These plugins install HydroMT as a dependency. However, if you want
-to use HydroMT directly, e.g. to develop your own model plugin or to use the HydroMT
-Python API without a plugin, you can install HydroMT using the following steps.
+HydroMT is available on PyPI and conda-forge. The most common usage of HydroMT is
+through a model plugin, e.g. via hydromt_wflow, hydromt_sfincs etc. These plugins
+install HydroMT as a dependency. However, if you want to use HydroMT directly, e.g. to
+develop your own model plugin or to use the HydroMT Python API without a plugin, you can
+install HydroMT using the following steps.
 
 .. _installation_prerequisites:
 
@@ -31,25 +32,28 @@ If you do not yet have such a package manager, we recommend using either:
 Installing HydroMT
 ==================
 
-HydroMT is available from pypi and conda-forge, and can be installed using pip, conda or
-mamba. Here we will describe the installation using **pip** and the **conda** package
+HydroMT is available from PyPI and conda-forge, and can be installed using pip, conda or
+mamba. For an even faster installation, we recommend using `uv <https://docs.astral.sh/uv/>`_
+package manager. It is an equivalent to pip but 10-100x faster for installing packages.
+
+Here we will describe the installation using **uv** and the **conda** package
 manager (for mamba just replace `conda` with `mamba` in the commands below).
 
 Basic installation
 ------------------
 
-We strongly recommend installing HydroMT in a separate conda environment to avoid conflicts
-with other packages. You can create a new conda environment and install HydroMT in it
+We strongly recommend installing HydroMT in a separate environment to avoid conflicts
+with other packages. You can create a new environment and install HydroMT in it
 using the following command:
 
 .. code-block:: console
 
-    $ conda create -n hydromt pip
+    $ conda create -n hydromt uv python -c conda-forge
     $ conda activate hydromt
-    $ pip install hydromt
+    $ uv pip install hydromt
 
 This will create a new isolated environment called **hydromt** and install hydromt into
-it using pip. To test whether the installation was successful you can run
+it using uv and pip. To test whether the installation was successful you can run
 :code:`hydromt --plugins` and the output should look approximately like the one below:
 
 .. code-block:: shell
@@ -88,7 +92,7 @@ HydroMT comes with a minimal set of dependencies. However, depending on your use
 you might want to install additional optional dependencies. For example, if you want to
 work with cloud data from AWS or Google Cloud Storage.
 
-Some of the optional dependencies can be installed using pip and predefined lists of
+Some of the optional dependencies can be installed using uv/pip and predefined lists of
 dependencies:
 
 - **io**: for additional input data support (e.g. cloud data, parquet or excel files...).
@@ -96,14 +100,26 @@ dependencies:
 - **examples**: for running jupyter notebooks and HydroMT examples.
 - **slim**: installs optional dependencies in io, extra and examples.
 
-To install these optional dependencies, you can use the following pip commands:
+To install these optional dependencies, you can use the following uv/pip commands:
 
 .. code-block:: console
 
-    $ pip install "hydromt[io]"
-    $ pip install "hydromt[extra]"
-    $ pip install "hydromt[examples]"
-    $ pip install "hydromt[slim]"
+    $ uv pip install "hydromt[io]"
+    $ uv pip install "hydromt[extra]"
+    $ uv pip install "hydromt[examples]"
+    $ uv pip install "hydromt[slim]"
+
+.. note::
+
+  If you are using caching of mosaic rasters and vrt files, the gdal library needs to be
+  installed in your conda environment. Unfortunately this cannot be done using pip.
+  Therefore, if you want to use this functionality, please install gdal using conda or
+  mamba:
+
+  .. code-block:: console
+
+    $ conda install -c conda-forge gdal
+
 
 Developer's installation
 ------------------------

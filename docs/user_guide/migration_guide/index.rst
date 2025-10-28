@@ -1,3 +1,5 @@
+.. _migration_guide:
+
 Migration Guide
 ===============
 
