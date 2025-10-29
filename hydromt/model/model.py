@@ -27,11 +27,6 @@ from hydromt.plugins import PLUGINS
 
 __all__ = ["Model"]
 
-# define hydromt model entry points
-# see also hydromt.model group in pyproject.toml
-__hydromt_eps__ = ["Model"]
-
-
 logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=ModelComponent)
 

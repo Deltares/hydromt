@@ -17,7 +17,8 @@ from hydromt import data_catalog, gis, io, model, stats
 from hydromt._utils.log import initialize_logging
 from hydromt.data_catalog import DataCatalog
 from hydromt.gis import raster, vector
-from hydromt.model import Model, hydromt_step
+from hydromt.model import Model
+from hydromt.model.steps import hydromt_step
 from hydromt.plugins import PLUGINS
 
 initialize_logging()

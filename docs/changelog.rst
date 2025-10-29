@@ -14,6 +14,7 @@ ModelComponent API now contains functions for `ModelComponent.cleanup` and `Mode
 
 New
 ---
+- Added ``ExampleModel`` class and ``example_model`` entrypoint for demonstration purposes.
 - Added option for delayed compute in writing netcdf files
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
