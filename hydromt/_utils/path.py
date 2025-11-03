@@ -44,12 +44,18 @@ def _make_config_paths_abs(
         return value
 
     # loop through n-level of dict
+    cfdict = cfdict
     for key, val in cfdict.items():
         if isinstance(val, dict):
             if key not in skip_abspath_sections:
                 cfdict[key] = _make_config_paths_abs(val, root)
         elif isinstance(val, list) and all([isinstance(v, str) for v in val]):
             cfdict[key] = [_abspath(v, root) for v in val]
+        # hydromt steps config case
+        elif isinstance(val, list) and all([isinstance(v, dict) for v in val]):
+            cfdict[key] = [
+                _make_config_paths_abs(v, root, skip_abspath_sections) for v in val
+            ]
         elif isinstance(val, str):
             cfdict[key] = _abspath(val, root)
     return cfdict

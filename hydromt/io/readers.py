@@ -767,10 +767,10 @@ def open_vector_from_table(
 
 def read_workflow_yaml(
     path: str | Path,
-    modeltype: Optional[str] = None,
-    defaults: Optional[Dict[str, Any]] = None,
+    modeltype: str | None = None,
+    defaults: Dict[str, Any] | None = None,
     abs_path: bool = True,
-    skip_abspath_sections: Optional[List[str]] = None,
+    skip_abspath_sections: List[str] | None = ["global"],  # noqa: B006
 ) -> tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
     """Read HydroMT workflow yaml file.
 
@@ -787,9 +787,9 @@ def read_workflow_yaml(
         If True, parse string values to an absolute path if the a file or folder
         with that name (string value) relative to the config file exist,
         by default True
-    skip_abspath_sections: list, optional
+    skip_abspath_sections: list
         These sections are not evaluated for absolute paths if abs_path=True,
-        by default ['setup_config']
+        by default ['global']
 
     Returns
     -------
