@@ -25,7 +25,7 @@ from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
-from hydromt._utils.path import _make_config_paths_abs
+from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
 
@@ -867,7 +867,7 @@ def _config_read(
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_path))
-        cfdict = _make_config_paths_abs(cfdict, root, skip_abspath_sections)
+        cfdict = _make_config_paths_absolute(cfdict, root, skip_abspath_sections)
 
     # update defaults
     if defaults:

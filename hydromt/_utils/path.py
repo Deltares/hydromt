@@ -4,7 +4,7 @@ from os.path import abspath, exists, join
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-__all__ = ["_make_config_paths_relative", "_make_config_paths_abs"]
+__all__ = ["_make_config_paths_relative", "_make_config_paths_absolute"]
 
 
 def _make_config_paths_relative(cfdict: Dict[str, Any], root: Path) -> Dict[str, Any]:
@@ -30,7 +30,7 @@ def _make_config_paths_relative(cfdict: Dict[str, Any], root: Path) -> Dict[str,
     return cfdict
 
 
-def _make_config_paths_abs(
+def _make_config_paths_absolute(
     cfdict: Dict[str, Any],
     root: Path,
     skip_abspath_sections: Optional[List[str]] = None,
@@ -44,17 +44,16 @@ def _make_config_paths_abs(
         return value
 
     # loop through n-level of dict
-    cfdict = cfdict
     for key, val in cfdict.items():
         if isinstance(val, dict):
             if key not in skip_abspath_sections:
-                cfdict[key] = _make_config_paths_abs(val, root)
+                cfdict[key] = _make_config_paths_absolute(val, root)
         elif isinstance(val, list) and all([isinstance(v, str) for v in val]):
             cfdict[key] = [_abspath(v, root) for v in val]
         # hydromt steps config case
         elif isinstance(val, list) and all([isinstance(v, dict) for v in val]):
             cfdict[key] = [
-                _make_config_paths_abs(v, root, skip_abspath_sections) for v in val
+                _make_config_paths_absolute(v, root, skip_abspath_sections) for v in val
             ]
         elif isinstance(val, str):
             cfdict[key] = _abspath(val, root)
