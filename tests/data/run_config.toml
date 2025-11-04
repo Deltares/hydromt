@@ -1,0 +1,6 @@
+starttime = 2011-01-01
+endtime = 2011-12-31
+
+[model]
+name = "example"
+type = "model"

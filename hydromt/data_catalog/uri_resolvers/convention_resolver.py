@@ -154,7 +154,8 @@ class ConventionResolver(URIResolver):
         )
         if not uris:
             exec_nodata_strat(
-                f"resolver '{self.name}' found no files.", strategy=handle_nodata
+                f"resolver '{self.name}' found no files at {uri_expanded}.",
+                strategy=handle_nodata,
             )
             return []  # if ignore
 

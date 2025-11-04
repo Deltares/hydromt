@@ -2,8 +2,8 @@
 Change log predefined datasets
 ==============================
 
-Pre-defined catalog refactor
-============================
+Pre-defined catalog refactor (2024.05)
+======================================
 
 Changed
 -------
@@ -17,18 +17,34 @@ the data catalogs present in the folders.
 
 Added
 -----
-- v0.0.6, v0.0.7, v0.0.9 of the artifact_data
+- v0.0.6, v0.0.7, v0.0.8, v0.0.9 of the artifact_data
 - v0.5.0, v0.6.0 of the deltares_data
+
+Changed
+-------
+- latest datum versions of aws_data and cmip6_data are now combined into v0.1.0 of the respective catalogs and are not available anymore as separate versions.
 
 
 deltares_data
 =============
+
+version v1.1.0
+--------------
+
+changed
+^^^^^^^
+- updated water demands variable names of pcr_globwb dataset to new conventions (e.g. domestic_net instead of dom_net)
+
+version v1.0.0
+--------------
+Converted the data catalog to hydromt version 1.0.0 format.
 
 version v0.7.0
 --------------
 
 added
 ^^^^^
+- HydroMT version to catalog
 - version argument to data source where applicable
 - variants argument for data sources that are of the same dataset but different versions
 - processing_script / processing_notes arguments to data sources that have been (pre-) processed
@@ -102,17 +118,16 @@ the default version has changed.
 
 
 
-version: 2024.1.30
----------------
+version v0.6.0 (2024.1.30)
+--------------------------
 
 added
 ^^^^^
-- HydroMT version to catalog
-- GRDC dataset
+- update GRDC dataset
 
 
-version: 2023.12
------------------
+version v0.5.0 (2023.12)
+------------------------
 
 changed
 ^^^^^^^
@@ -171,11 +186,22 @@ fixed
 ^^^^^
 - enable versioning of yml.files
 
+artifact_data
+=============
+
+version v1.0.0
+--------------
+Converted the data catalog to hydromt version 1.0.0 format.
+
 cmip6_data
 ==========
 
-version: 2024.1.30
----------------
+version v1.0.0
+--------------
+Converted the data catalog to hydromt version 1.0.0 format.
+
+version v0.1.0 (2024.1.30)
+--------------------------
 
 added
 ^^^^^
@@ -191,8 +217,12 @@ added
 aws_data
 ========
 
-version: 2024.1.30
----------------
+version v1.0.0
+--------------
+Converted the data catalog to hydromt version 1.0.0 format.
+
+version v0.1.0 (2024.1.30)
+--------------------------
 
 added
 ^^^^^

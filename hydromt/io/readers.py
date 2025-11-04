@@ -25,7 +25,7 @@ from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
-from hydromt._utils.path import _make_config_paths_abs
+from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
 
@@ -767,10 +767,10 @@ def open_vector_from_table(
 
 def read_workflow_yaml(
     path: str | Path,
-    modeltype: Optional[str] = None,
-    defaults: Optional[Dict[str, Any]] = None,
+    modeltype: str | None = None,
+    defaults: Dict[str, Any] | None = None,
     abs_path: bool = True,
-    skip_abspath_sections: Optional[List[str]] = None,
+    skip_abspath_sections: List[str] | None = ["global"],  # noqa: B006
 ) -> tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
     """Read HydroMT workflow yaml file.
 
@@ -787,9 +787,9 @@ def read_workflow_yaml(
         If True, parse string values to an absolute path if the a file or folder
         with that name (string value) relative to the config file exist,
         by default True
-    skip_abspath_sections: list, optional
+    skip_abspath_sections: list
         These sections are not evaluated for absolute paths if abs_path=True,
-        by default ['setup_config']
+        by default ['global']
 
     Returns
     -------
@@ -867,7 +867,7 @@ def _config_read(
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_path))
-        cfdict = _make_config_paths_abs(cfdict, root, skip_abspath_sections)
+        cfdict = _make_config_paths_absolute(cfdict, root, skip_abspath_sections)
 
     # update defaults
     if defaults:
