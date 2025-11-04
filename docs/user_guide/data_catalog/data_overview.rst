@@ -64,7 +64,7 @@ Related API references
 
 For related functions see:
 
- - :ref: `DataCatalog API <api_data_catalog>`
+ - :ref: `DataCatalog API <data_catalog_api>`
  - :ref: `DataCatalog.get_* methods`
  - :ref: `data reading-methods <open_methods>`
 

@@ -1,6 +1,6 @@
 .. currentmodule:: hydromt.data_catalog.adapters
 
-.. _data_adapter:
+.. _data_adapter_api:
 
 =============
 Data Adapters

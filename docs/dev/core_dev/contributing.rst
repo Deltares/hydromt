@@ -68,7 +68,7 @@ If you found a bug or an issue you would like to tackle or contribute to a new d
 Git conventions
 ---------------
 
-We follow the `GitHub workflow <https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests-github-flow>`__
+We follow the `GitHub workflow <https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests-github-flow>`_
 to allow many people to work together on the project.
 
 After discussing a new proposal or implementation in the issue tracker, you can start
@@ -199,57 +199,6 @@ This is a simple introduction into a potentially very complicated subject. You c
 
 *  `Merge Conflicts <https://www.atlassian.com/git/tutorials/using-branches/merge-conflicts>`_
 * `Merge Strategies <https://www.atlassian.com/git/tutorials/using-branches/merge-strategy>`_
-
-
-
-
-HydroMT design conventions
---------------------------
-
-General
-^^^^^^^
-- We use :ref:`naming and unit conventions <data_convention>` for frequently used
-  variables to assure consistency within HydroMT
-
-Data
-^^^^
-- Currently, :ref:`these data types <data_types>` are supported, but this list can be extended based on demand.
-- Input data is defined in the :ref:`data catalog <data_yaml>` and parsed by HydroMT to the associated
-  Python data type through the DataAdapter class. The goal of this class is to unify the internal representation
-  of the data (its data type, variables names and units) through minimal preprocessing. When accessing data
-  from the data catalog with any ``DataCatalog.get_<data_type>`` method, it is passed through the adapter to
-  ensure a consistent representation of data within HydroMT. The `get_*` methods take additional arguments to
-  define a spatial or temporal subset of the dataset.
-
-Model Class
-^^^^^^^^^^^
-The HydroMT :ref:`Model class <model_api>` consists of several methods and attributes with specific design/naming conventions.
-To implement HydroMT for a specific model kernel/software, a child class named `<Name>Model` (e.g. SfincsModel for Sfincs)
-should be created with model-specific data readers, writers and setup methods as is appropriate.
-
-- :ref:`Model data components </guides/advanced_user/model_components.rst>` are data attributes which together define a model instance and
-  are identical for all models. Each component represents a specific model component and is parsed to a specific
-  Python data object that should adhere to certain specifications. For instance, the ``grid`` component represent
-  all static regular grids of a model in a :py:class:`xarray.Dataset` object.
-- Most model components have an associated `write` and `read` method to read/write with model
-  specific data formats and parse to / from the model component. These methods may have additional optional arguments
-  (i.e. with default values), but no required arguments. The results component does not have write method.
-- All public model methods may only contain arguments which require one of the following basic python types:
-  string, numeric integer and float, boolean, None, list and dict types. This is requirement makes it possible to
-  expose these methods and their arguments via a :ref:`model workflow .yml file <model_workflow>`.
-- Data is exposed to each model method through the ``Model.data_catalog`` attribute which is an instance of the
-  :py:class:`hydromt.DataCatalog`. Data of :ref:`supported data types <data_types>` is provided to model methods
-  by arguments which end with ``_fn`` (short for filename) which refer to a source in the data catalog
-  based on the source name or a file based on the (relative) path to the file. Within a model method the data is read
-  by calling any ``DataCatalog.get_<data_type>`` method which work for both source and file names.
-- The Model class currently contains two high-level methods (:py:meth:`~hydromt.Model.build`,
-  :py:meth:`~hydromt.Model.update` is are common for all model plugins and
-  exposed through the CLI. This list of methods might be extended going forward.
-- A Model child class implementation for a specific model kernel can be exposed to HydroMT as a plugin by specifying a
-  ``hydromt.models`` `entry-point <https://packaging.python.org/en/latest/specifications/entry-points/>`_ in the pyproject.toml file of a package.
-  For a more detailed explanation of how to build a plugin please refer to the
-  :ref:`register_plugins` section.
-- We highly recommend writing integration tests to ensure the correctness of your code.
 
 
 Code conventions

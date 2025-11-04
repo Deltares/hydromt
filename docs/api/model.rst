@@ -76,6 +76,8 @@ General Methods
 
    ModelRoot.set
 
+.. _model_components_api:
+
 Model components
 ================
 

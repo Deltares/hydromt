@@ -9,9 +9,9 @@ in the configuration `.yaml file <https://en.wikipedia.org/wiki/YAML>`_
 
 **Steps in brief:**
 
-1) Start with a template of the :ref:`HydroMT model plugin <plugins>` with which you want to build / update a model. Templates can be found in the online documentation of each model plugin.
-2) Edit / add / remove sections (i.e. methods) based on which components you want to build or adapt. The arguments of specific methods can be found in the API chapter in the online documentation of each model plugin.
-3) Save the configuration file and use it in combination with the HydroMT :ref:`build <model_build>` and :ref:`update <model_update>` methods.
+1. Start with a template of the :ref:`HydroMT model plugin <plugins>` with which you want to build / update a model. Templates can be found in the online documentation of each model plugin.
+2. Edit / add / remove sections (i.e. methods) based on which components you want to build or adapt. The arguments of specific methods can be found in the API chapter in the online documentation of each model plugin.
+3. Save the configuration file and use it in combination with the HydroMT :ref:`build <model_build>` and :ref:`update <model_update>` methods.
 
 
 Workflow (.yaml) file

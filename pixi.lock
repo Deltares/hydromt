@@ -7512,7 +7512,7 @@ packages:
 - pypi: ./
   name: hydromt
   version: 1.2.0.dev0
-  sha256: 5913e64e38afc0a70e24f1e3112d540a8478e2101cd9a82ed036919f24bcd780
+  sha256: 4e2acfac14d20ec19a9cabb7ef582f11a85115982d1d8580dececdee1e5a4b4e
   requires_dist:
   - affine
   - bottleneck
@@ -7547,7 +7547,7 @@ packages:
   - xarray
   - xmltodict
   - xugrid>=0.9.0
-  - zarr>=2.17,<4
+  - zarr>=3.1,<4
   - flit ; extra == 'dev'
   - mypy ; extra == 'dev'
   - pandas-stubs ; extra == 'dev'
@@ -7573,7 +7573,6 @@ packages:
   - notebook ; extra == 'examples'
   - matplotlib ; extra == 'extra'
   - pyet ; extra == 'extra'
-  - gdal>=3.5.0 ; extra == 'gdal'
   - gcsfs>=2023.12.1 ; extra == 'io'
   - fastparquet ; extra == 'io'
   - openpyxl ; extra == 'io'
@@ -7584,6 +7583,7 @@ packages:
   - pytest-cov ; extra == 'test'
   - pytest-mock ; extra == 'test'
   - pytest-timeout ; extra == 'test'
+  - gdal>=3.5.0 ; extra == 'vrt'
   requires_python: '>=3.11'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/icu-75.1-he02047a_0.conda

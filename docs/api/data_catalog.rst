@@ -1,6 +1,6 @@
 .. currentmodule:: hydromt.data_catalog
 
-.. _api_data_catalog:
+.. _data_catalog_api:
 
 Data catalog
 ============
@@ -35,7 +35,6 @@ Add data sources
    DataCatalog.from_dict
    DataCatalog.from_stac_catalog
 
-.. _api_data_catalog_get:
 
 Get data
 --------
