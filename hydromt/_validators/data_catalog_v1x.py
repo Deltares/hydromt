@@ -163,6 +163,7 @@ class DataCatalogV1ItemMetadata(BaseModel):
     """The metadata for a data source."""
 
     crs: str | int | None = None
+    nodata: Number | dict[str, Number] | None = None
     category: str | None = None
     paper_doi: str | None = None
     paper_ref: str | None = None
@@ -173,7 +174,11 @@ class DataCatalogV1ItemMetadata(BaseModel):
     temporal_extent: dict | None = None
     spatial_extent: dict | None = None
 
-    model_config = ConfigDict(str_strip_whitespace=True, coerce_numbers_to_str=True)
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        coerce_numbers_to_str=True,
+        extra="allow",
+    )
 
     @field_validator("crs", mode="after")
     @classmethod
@@ -187,13 +192,16 @@ class DataCatalogV1ItemMetadata(BaseModel):
 
     @staticmethod
     def from_v0(
-        v0_metadata: DataCatalogV0ItemMetadata | None, crs: str | int | None = None
+        v0_metadata: DataCatalogV0ItemMetadata | None,
+        crs: str | int | None = None,
+        nodata: Number | dict[str, Number] | None = None,
     ):
-        if (v0_metadata is None or v0_metadata.is_empty()) and not crs:
+        if (v0_metadata is None or v0_metadata.is_empty()) and not crs and not nodata:
             return None
         elif v0_metadata:
             return DataCatalogV1ItemMetadata(
                 crs=crs,
+                nodata=nodata,
                 category=v0_metadata.category,
                 paper_doi=v0_metadata.paper_doi,
                 paper_ref=v0_metadata.paper_ref,
@@ -203,9 +211,10 @@ class DataCatalogV1ItemMetadata(BaseModel):
                 notes=v0_metadata.notes,
                 temporal_extent=v0_metadata.temporal_extent,
                 spatial_extent=v0_metadata.spatial_extent,
+                **v0_metadata.model_extra,
             )
         else:
-            return DataCatalogV1ItemMetadata(crs=crs)
+            return DataCatalogV1ItemMetadata(crs=crs, nodata=nodata)
 
     @staticmethod
     def from_dict(input_dict):
@@ -271,7 +280,7 @@ class DataCatalogV1Item(BaseModel):
             driver = None
 
         metadata = DataCatalogV1ItemMetadata.from_v0(
-            v0_metadata=v0_item.meta, crs=v0_item.crs
+            v0_metadata=v0_item.meta, crs=v0_item.crs, nodata=v0_item.nodata
         )
 
         adapter_dict = {}

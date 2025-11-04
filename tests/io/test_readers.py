@@ -22,8 +22,10 @@ from hydromt.io.readers import (
     open_timeseries_from_table,
     open_vector,
     open_vector_from_table,
+    read_workflow_yaml,
 )
 from hydromt.io.writers import write_xy
+from tests.conftest import TEST_DATA_DIR
 
 
 def test_open_vector(tmp_path: Path, df, geodf, world):
@@ -256,3 +258,33 @@ def test_open_nc_geo_map_coord_sets_close(tmpdir):
     assert len(ds2.data_vars) == 0
     assert GEO_MAP_COORD in ds2.coords
     assert ds2._close is not None
+
+
+def test_read_workflow_yaml():
+    model_type, model_init, steps = read_workflow_yaml(
+        Path(TEST_DATA_DIR, "build_config.yml")
+    )
+
+    assert model_type is None
+    assert "components" in model_init
+    assert len(steps) == 2
+
+    # Check relative path was skipped in global section
+    config_filename = model_init["components"]["config"]["filename"]
+    assert config_filename == "run_config.toml"
+
+
+def test_read_workflow_yaml_extended():
+    model_type, model_init, steps = read_workflow_yaml(
+        Path(TEST_DATA_DIR, "build_config_extended.yml")
+    )
+
+    assert model_type == "model"
+    assert "components" in model_init
+    assert len(steps) == 3
+
+    # Check relative paths
+    config_filename = model_init["components"]["config"]["filename"]
+    assert config_filename == "run_config.toml"
+    config_template = steps[0]["config.create"]["template"]
+    assert config_template == Path(TEST_DATA_DIR, "run_config.toml")

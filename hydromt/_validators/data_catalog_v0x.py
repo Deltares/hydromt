@@ -113,7 +113,11 @@ class DataCatalogV0ItemMetadata(BaseModel):
     temporal_extent: Optional[dict] = None
     spatial_extent: Optional[dict] = None
 
-    model_config = ConfigDict(str_strip_whitespace=True, coerce_numbers_to_str=True)
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        coerce_numbers_to_str=True,
+        extra="allow",
+    )
 
     @model_serializer
     def serialize(self):
@@ -173,21 +177,21 @@ class DataCatalogV0Item(BaseModel):
         ]
         | None
     ) = None
-    path: Optional[Path] = None
-    crs: Optional[Union[int, str]] = None
-    filesystem: Optional[str] = None
-    provider: Optional[str] = None
-    driver_kwargs: Dict[str, Any] = Field(default_factory=dict)
-    kwargs: Dict[str, Any] = Field(default_factory=dict)  # deprecated
-    storage_options: Dict[str, Any] = Field(default_factory=dict)
-    placeholders: Optional[Dict[str, Any]] = None
-    rename: Dict[str, str] = Field(default_factory=dict)
-    nodata: Optional[Number] = None
-    meta: Optional[DataCatalogV0ItemMetadata] = None
-    unit_add: Optional[Dict[str, Number]] = None
-    unit_mult: Optional[Dict[str, Number]] = None
-    variants: Optional[List[SourceVariant]] = None
-    version: Optional[Union[str, Number]] = None
+    path: Path | None = None
+    crs: int | str | None = None
+    filesystem: str | None = None
+    provider: str | None = None
+    driver_kwargs: dict[str, Any] = Field(default_factory=dict)
+    kwargs: dict[str, Any] = Field(default_factory=dict)  # deprecated
+    storage_options: dict[str, Any] = Field(default_factory=dict)
+    placeholders: dict[str, Any] | None = None
+    rename: dict[str, str] = Field(default_factory=dict)
+    nodata: Number | dict[str, Number] | None = None
+    meta: DataCatalogV0ItemMetadata | None = None
+    unit_add: dict[str, Number] | None = None
+    unit_mult: dict[str, Number] | None = None
+    variants: list[SourceVariant] | None = None
+    version: str | Number | None = None
 
     model_config = ConfigDict(
         str_strip_whitespace=True,
