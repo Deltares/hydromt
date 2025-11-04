@@ -1297,8 +1297,7 @@ class DataCatalog(object):
                 source = self.get_source(name, provider=provider, version=version)
             else:
                 source_kwargs = source_kwargs or {}
-                if "provider" not in source_kwargs:
-                    source_kwargs.update({"provider": "user"})
+                source_kwargs.setdefault("provider", "user")
 
                 driver: str = source_kwargs.pop(
                     "driver", RasterDatasetSource._fallback_driver_read
@@ -1441,8 +1440,7 @@ class DataCatalog(object):
                 source = self.get_source(name, provider=provider, version=version)
             else:
                 source_kwargs = source_kwargs or {}
-                if "provider" not in source_kwargs:
-                    source_kwargs.update({"provider": "user"})
+                source_kwargs.setdefault("provider", "user")
                 name = basename(data_like)
                 source = GeoDataFrameSource(
                     name=name, uri=str(data_like), **source_kwargs
@@ -1576,8 +1574,7 @@ class DataCatalog(object):
                 source = self.get_source(name, provider=provider, version=version)
             else:
                 source_kwargs = source_kwargs or {}
-                if "provider" not in source_kwargs:
-                    source_kwargs.update({"provider": "user"})
+                source_kwargs.setdefault("provider", "user")
                 driver: str = source_kwargs.pop(
                     "driver", GeoDatasetSource._fallback_driver_read
                 )
@@ -1696,8 +1693,7 @@ class DataCatalog(object):
                 source = self.get_source(name, provider=provider, version=version)
             else:
                 source_kwargs = source_kwargs or {}
-                if "provider" not in source_kwargs:
-                    source_kwargs.update({"provider": "user"})
+                source_kwargs.setdefault("provider", "user")
                 name = basename(data_like)
                 source = DatasetSource(uri=str(data_like), name=name, **source_kwargs)
                 self.add_source(name, source)
@@ -1794,8 +1790,7 @@ class DataCatalog(object):
                     raise ValueError(f"Source '{source.name}' is not a DataFrame.")
             else:
                 source_kwargs = source_kwargs or {}
-                if "provider" not in source_kwargs:
-                    source_kwargs.update({"provider": "user"})
+                source_kwargs.setdefault("provider", "user")
                 driver: str = source_kwargs.pop(
                     "driver", DataFrameSource._fallback_driver_read
                 )

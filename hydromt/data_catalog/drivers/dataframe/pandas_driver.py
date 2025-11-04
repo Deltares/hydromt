@@ -7,9 +7,7 @@ import pandas as pd
 
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.typing import (
-    Variables,
-)
+from hydromt.typing import Variables
 
 
 class PandasDriver(DataFrameDriver):

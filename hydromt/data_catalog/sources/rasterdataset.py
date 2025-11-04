@@ -142,12 +142,9 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             zoom=zoom,
             handle_nodata=handle_nodata,
-            single_var_as_array=False,
         )
         if ds is None:  # handle_nodata == ignore
             return None
-        elif isinstance(ds, xr.DataArray):
-            ds = ds.to_dataset()
 
         dest_path = driver.write(
             file_path,
