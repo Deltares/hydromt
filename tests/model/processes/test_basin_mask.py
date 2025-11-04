@@ -9,7 +9,7 @@ import pytest
 
 from hydromt.gis import raster_utils
 from hydromt.model.processes.basin_mask import (
-    _check_size,
+    __check_size,
     get_basin_geometry,
 )
 
@@ -223,5 +223,5 @@ def test_check_size(caplog):
         crs=4326,
         lazy=True,  # create lazy dask array instead of numpy array
     )
-    _check_size(test_raster)
+    __check_size(test_raster)
     assert "Loading very large spatial domain to derive a subbasin." in caplog.text
