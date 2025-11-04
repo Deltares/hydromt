@@ -58,7 +58,7 @@ class DataFrameSource(DataSource):
         df: pd.DataFrame = self.driver.read(
             uris,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs or {},
+            open_kwargs=open_kwargs,
             variables=vrs,
         )
 

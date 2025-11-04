@@ -109,14 +109,13 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             )
 
         _uri: str = uris[0]
-        open_kwargs = open_kwargs or {}
-        kwargs = self.options.get_kwargs() | open_kwargs
+        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
         gdf = open_vector_from_table(
             path=_uri,
             x_dim=self.options.x_dim,
             y_dim=self.options.y_dim,
             crs=metadata.crs,
-            **kwargs,
+            **open_kwargs,
         )
         if gdf.index.size == 0:
             exec_nodata_strat(

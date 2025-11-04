@@ -133,19 +133,15 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 "metadata": metadata,
             },
         )
-        # Sort out the preprocessor
+
         preprocessor = self.options.get_preprocessor()
-
-        # Check for the override flag
         first_ext = self.options.get_ext_override(uris)
+        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
 
-        # When is zarr, open like a zarr archive
-        open_kwargs = open_kwargs or {}
-        kwargs = self.options.get_kwargs() | open_kwargs
         if first_ext == _ZARR_EXT:
             opn: Callable = partial(
                 xr.open_zarr,
-                **kwargs,
+                **open_kwargs,
             )
             datasets = []
             for _uri in uris:
@@ -156,7 +152,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                     datasets.append(preprocessor(opn(_uri)))
 
             ds: xr.Dataset = xr.merge(datasets)
-
         # Normal netcdf file(s)
         elif first_ext in _NETCDF_EXT:
             filtered_uris = []
@@ -170,7 +165,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,
-                **kwargs,
+                **open_kwargs,
             )
         else:
             raise ValueError(
@@ -217,6 +212,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             If the file extension is not recognized or supported.
         """
         no_ext, ext = splitext(path)
+        write_kwargs = write_kwargs or {}
         # set filepath if incompat
         if ext not in self.SUPPORTED_EXTENSIONS:
             logger.warning(
@@ -226,8 +222,8 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             path = no_ext + _ZARR_EXT
             ext = _ZARR_EXT
         if ext == _ZARR_EXT:
-            data.to_zarr(path, mode="w", **(write_kwargs or {}))
+            data.to_zarr(path, mode="w", **write_kwargs)
         else:
-            data.to_netcdf(path, **(write_kwargs or {}))
+            data.to_netcdf(path, **write_kwargs)
 
         return Path(path)

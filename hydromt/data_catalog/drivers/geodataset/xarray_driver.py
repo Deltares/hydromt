@@ -94,10 +94,10 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         )
         preprocessor = self.options.get_preprocessor()
         first_ext = splitext(uris[0])[-1]
-        open_kwargs = open_kwargs or {}
-        kwargs = self.options.get_kwargs() | open_kwargs
+        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
+
         if first_ext == _ZARR_EXT:
-            opn: Callable = partial(xr.open_zarr, **kwargs)
+            opn: Callable = partial(xr.open_zarr, **open_kwargs)
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -117,7 +117,10 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                     filtered_uris.append(_uri)
 
             ds: xr.Dataset = xr.open_mfdataset(
-                filtered_uris, decode_coords="all", preprocess=preprocessor, **kwargs
+                filtered_uris,
+                decode_coords="all",
+                preprocess=preprocessor,
+                **open_kwargs,
             )
         else:
             raise ValueError(
@@ -162,13 +165,13 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         ValueError
             If the file extension is not supported.
         """
-        if isinstance(path, str):
-            path = Path(path)
+        path = Path(path)
         ext = path.suffix
+        write_kwargs = write_kwargs or {}
         if ext == _ZARR_EXT:
-            data.vector.to_zarr(path, **(write_kwargs or {}))
+            data.vector.to_zarr(path, **write_kwargs)
         elif ext in _NETCDF_EXT:
-            data.vector.to_netcdf(path, **(write_kwargs or {}))
+            data.vector.to_netcdf(path, **write_kwargs)
         else:
             raise ValueError(f"Unknown extension for GeoDatasetXarrayDriver: {ext} ")
 

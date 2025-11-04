@@ -73,8 +73,7 @@ class PandasDriver(DataFrameDriver):
         else:
             uri = uris[0]
             extension: str = uri.split(".")[-1]
-            open_kwargs = open_kwargs or {}
-            kwargs = self.options.get_kwargs() | open_kwargs
+            open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
 
             if extension == "csv":
                 variables = self._unify_variables_and_pandas_kwargs(
@@ -83,10 +82,10 @@ class PandasDriver(DataFrameDriver):
                 df = pd.read_csv(
                     uri,
                     usecols=variables,
-                    **kwargs,
+                    **open_kwargs,
                 )
             elif extension == "parquet":
-                df = pd.read_parquet(uri, columns=variables, **kwargs)
+                df = pd.read_parquet(uri, columns=variables, **open_kwargs)
             elif extension in ["xls", "xlsx"]:
                 variables = self._unify_variables_and_pandas_kwargs(
                     uri, pd.read_excel, variables
@@ -95,10 +94,10 @@ class PandasDriver(DataFrameDriver):
                     uri,
                     usecols=variables,
                     engine="openpyxl",
-                    **kwargs,
+                    **open_kwargs,
                 )
             elif extension in ["fwf", "txt"]:
-                df = pd.read_fwf(uri, **kwargs)
+                df = pd.read_fwf(uri, **open_kwargs)
             else:
                 raise IOError(f"DataFrame: extension {extension} unknown.")
         if df.index.size == 0:

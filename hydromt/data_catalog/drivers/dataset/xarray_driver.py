@@ -98,10 +98,9 @@ class DatasetXarrayDriver(DatasetDriver):
         """
         preprocessor = self.options.get_preprocessor()
         first_ext = self.options.get_ext_override(uris)
-        open_kwargs = open_kwargs or {}
-        kwargs = self.options.get_kwargs() | open_kwargs
+        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
         if first_ext == ".zarr":
-            opn: Callable = partial(xr.open_zarr, **kwargs)
+            opn: Callable = partial(xr.open_zarr, **open_kwargs)
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -121,7 +120,10 @@ class DatasetXarrayDriver(DatasetDriver):
                     filtered_uris.append(_uri)
 
             ds: xr.Dataset = xr.open_mfdataset(
-                filtered_uris, decode_coords="all", preprocess=preprocessor, **kwargs
+                filtered_uris,
+                decode_coords="all",
+                preprocess=preprocessor,
+                **open_kwargs,
             )
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext} ")
@@ -168,13 +170,13 @@ class DatasetXarrayDriver(DatasetDriver):
         ValueError
             If the provided file extension is unsupported.
         """
-        if isinstance(path, str):
-            path = Path(path)
+        path = Path(path)
         ext = path.suffix
+        write_kwargs = write_kwargs or {}
         if ext == ".zarr":
-            data.to_zarr(path, **(write_kwargs or {}))
+            data.to_zarr(path, **write_kwargs)
         elif ext in [".nc", ".netcdf"]:
-            data.to_netcdf(path, **(write_kwargs or {}))
+            data.to_netcdf(path, **write_kwargs)
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {ext} ")
 

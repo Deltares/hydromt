@@ -43,6 +43,5 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "deltares",
         "projectKey": "Deltares_hydromt"
-    },
-    "python.analysis.typeCheckingMode": "standard"
+    }
 }

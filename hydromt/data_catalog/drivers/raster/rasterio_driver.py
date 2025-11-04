@@ -188,7 +188,7 @@ class RasterioDriver(RasterDatasetDriver):
         if chunks is not None:
             open_kwargs.update({"chunks": chunks})
 
-        kwargs = self.options.get_kwargs() | open_kwargs
+        open_kwargs = self.options.get_kwargs() | open_kwargs
         mosaic: bool = self.options.mosaic and len(uris) > 1
 
         # If the metadata resolver has already resolved the overview level,
@@ -200,15 +200,15 @@ class RasterioDriver(RasterDatasetDriver):
                 return open_mfraster(
                     uris,
                     mosaic=mosaic,
-                    **kwargs,
+                    **open_kwargs,
                 )
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
-                    kwargs.pop("overview_level", None)
+                    open_kwargs.pop("overview_level", None)
                     return open_mfraster(
                         uris,
                         mosaic=mosaic,
-                        **kwargs,
+                        **open_kwargs,
                     )
                 else:
                     raise
@@ -227,7 +227,7 @@ class RasterioDriver(RasterDatasetDriver):
 
         # Mosaic's can mess up the chunking, which can error during writing
         # Or maybe setting
-        chunks = kwargs.get("chunks", None)
+        chunks = open_kwargs.get("chunks", None)
         if chunks is not None:
             ds = ds.chunk(chunks=chunks)
 

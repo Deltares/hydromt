@@ -1354,7 +1354,7 @@ class DataCatalog(object):
             time_range=time_range,
             handle_nodata=handle_nodata,
             single_var_as_array=single_var_as_array,
-            open_kwargs=open_kwargs or {},
+            open_kwargs=open_kwargs,
         )
 
     def get_geodataframe(
@@ -1471,7 +1471,7 @@ class DataCatalog(object):
             handle_nodata=handle_nodata,
             predicate=predicate,
             variables=variables,
-            open_kwargs=open_kwargs or {},
+            open_kwargs=open_kwargs,
         )
 
     def get_geodataset(
@@ -1615,7 +1615,7 @@ class DataCatalog(object):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
-            open_kwargs=open_kwargs or {},
+            open_kwargs=open_kwargs,
         )
 
     def get_dataset(
@@ -1722,7 +1722,7 @@ class DataCatalog(object):
             time_range=time_range,
             single_var_as_array=single_var_as_array,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs or {},
+            open_kwargs=open_kwargs,
         )
 
     def get_dataframe(
@@ -1819,7 +1819,7 @@ class DataCatalog(object):
             variables=variables,
             time_range=time_range,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs or {},
+            open_kwargs=open_kwargs,
         )
 
 

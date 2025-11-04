@@ -73,7 +73,7 @@ class GeoDataFrameSource(DataSource):
         gdf: gpd.GeoDataFrame = self.driver.read(
             uris,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs or {},
+            open_kwargs=open_kwargs,
             metadata=self.metadata,
             mask=mask,
             variables=vrs,

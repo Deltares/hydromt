@@ -84,7 +84,7 @@ class DatasetSource(DataSource):
         ds: xr.Dataset = self.driver.read(
             uris,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs or {},
+            open_kwargs=open_kwargs,
         )
 
         return self.data_adapter.transform(

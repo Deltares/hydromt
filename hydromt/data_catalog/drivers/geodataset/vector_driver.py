@@ -93,11 +93,14 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
             uri = uris[0]
 
         preprocessor = self.options.get_preprocessor()
-        open_kwargs = open_kwargs or {}
-        kwargs = self.options.get_kwargs() | open_kwargs
+        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
         crs: CRS | None = metadata.crs if metadata else None
         data = open_geodataset(
-            loc_path=uri, geom=mask, crs=crs, predicate=predicate, **kwargs
+            loc_path=uri,
+            geom=mask,
+            crs=crs,
+            predicate=predicate,
+            **open_kwargs,
         )
         out = preprocessor(data)
 

@@ -84,8 +84,8 @@ class PyogrioDriver(GeoDataFrameDriver):
         """
         _warn_on_unused_kwargs(self.__class__.__name__, {"metadata": metadata})
 
-        open_kwargs = open_kwargs or {}
-        kwargs = self.options.get_kwargs() | open_kwargs
+        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
+
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
@@ -96,11 +96,11 @@ class PyogrioDriver(GeoDataFrameDriver):
         else:
             _uri = uris[0]
             if mask is not None:
-                bbox = _bbox_from_file_and_mask(_uri, mask=mask, **kwargs)
+                bbox = _bbox_from_file_and_mask(_uri, mask=mask, **open_kwargs)
             else:
                 bbox = None
             gdf: pd.DataFrame | gpd.GeoDataFrame = read_dataframe(
-                _uri, bbox=bbox, columns=variables, **kwargs
+                _uri, bbox=bbox, columns=variables, **open_kwargs
             )
         if not isinstance(gdf, gpd.GeoDataFrame):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")
@@ -145,6 +145,7 @@ class PyogrioDriver(GeoDataFrameDriver):
             If the file extension cannot be determined or writing fails.
         """
         no_ext, ext = splitext(path)
+        write_kwargs = write_kwargs or {}
         if ext not in self.SUPPORTED_EXTENSIONS:
             logger.warning(
                 f"driver {self.name} has no support for extension {ext}"
@@ -152,7 +153,7 @@ class PyogrioDriver(GeoDataFrameDriver):
             )
             path = no_ext + ".fgb"
 
-        write_dataframe(data, path, **(write_kwargs or {}))
+        write_dataframe(data, path, **write_kwargs)
 
         return Path(path)
 
