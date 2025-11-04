@@ -298,5 +298,8 @@ class RasterDatasetAdapter(DataAdapterBase):
         for k in attrs:
             ds[k].attrs.update(attrs[k])
         # set meta data
-        ds.attrs.update(metadata.model_dump(exclude=["attrs"], exclude_unset=True))
+        # exclude extent and attrs that are dict
+        ds.attrs.update(
+            metadata.model_dump(exclude=["attrs", "extent"], exclude_unset=True)
+        )
         return ds
