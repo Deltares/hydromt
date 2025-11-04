@@ -34,6 +34,7 @@ Changed
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
 - ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
 - `hydromt.typing` and its functions are now public (underscore removed). (#1286)
+- `write_nc` function no longer accepts kwargs, instead a dict `to_netcdf_kwargs` is used to pass arguments to `xarray.to_netcdf`. The function raises an error when "compute" is one of the arguments.
 
 
 Fixed

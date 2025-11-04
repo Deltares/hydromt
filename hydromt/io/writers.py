@@ -68,7 +68,7 @@ def write_nc(
     force_sn: bool = False,
     force_overwrite: bool = False,
     progressbar: bool = False,
-    **kwargs,
+    to_netcdf_kwargs: dict[str, Any] | None = None,
 ) -> DeferredFileClose | None:
     """Write xarray.Dataset and/or xarray.DataArray to netcdf file.
 
@@ -101,9 +101,8 @@ def write_nc(
         If True, the netcdf will be computed and written with a visible progressbar.
         This is only useful when the dataset to be written is lazily read and modified
         using dask. By default False
-    **kwargs : dict
-        Additional keyword arguments that are passed to the `to_netcdf`
-        function
+    to_netcdf_kwargs : dict
+        Additional keyword arguments that are passed to the `to_netcdf` function.
     """
     # Check the typing
     if not isinstance(ds, (xr.Dataset, xr.DataArray)) or len(ds) == 0:
@@ -119,7 +118,84 @@ def write_nc(
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Focus on the encoding and set these for all dims, coords and data vars
-    encoding = kwargs.pop("encoding", {})
+    to_netcdf_kwargs = to_netcdf_kwargs or {}
+    encoding = to_netcdf_kwargs.pop("encoding", {})
+    encoding.update(_get_dataset_encoding(ds, compress))
+
+    # Make gdal compliant if True, only in case of a spatial dataset
+    if gdal_compliant:
+        y_old, x_old = ds.raster.dims
+        ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
+        y_dim, x_dim = ds.raster.dims
+        encoding[y_dim] = encoding.pop(y_old)
+        encoding[x_dim] = encoding.pop(x_old)
+
+    to_netcdf_kwargs["encoding"] = encoding
+
+    # Try to write the file
+    try:
+        _nc_progress(
+            ds,
+            file_path=file_path,
+            progressbar=progressbar,
+            to_netcdf_kwargs=to_netcdf_kwargs,
+        )
+    except OSError:
+        logger.debug(f"Could not write to file {file_path.as_posix()}, deferring write")
+        unique_str = f"{file_path}_{uuid.uuid4()}"
+        hash_str = hashlib.sha256(unique_str.encode()).hexdigest()[:8]
+        temp_filepath = file_path.with_stem(f"{file_path.stem}_{hash_str}")
+        _nc_progress(
+            ds,
+            file_path=temp_filepath,
+            progressbar=progressbar,
+            to_netcdf_kwargs=to_netcdf_kwargs,
+        )
+        return DeferredFileClose(original_path=file_path, temp_path=temp_filepath)
+
+    return None
+
+
+def write_region(
+    region: gpd.GeoDataFrame, file_path: Path, *, to_wgs84=False, **write_kwargs
+):
+    """Write the model region to a file."""
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    gdf = cast(gpd.GeoDataFrame, region.copy())
+
+    if to_wgs84 and (
+        write_kwargs.get("driver") == "GeoJSON"
+        or file_path.suffix.lower() == ".geojson"
+    ):
+        gdf = gdf.to_crs(4326)
+
+    gdf.to_file(file_path, **write_kwargs)
+
+
+def _nc_progress(
+    ds: xr.Dataset | xr.DataArray,
+    *,
+    file_path: Path,
+    progressbar: bool,
+    to_netcdf_kwargs: dict[str, Any],
+):
+    if "compute" in to_netcdf_kwargs:
+        raise ValueError(
+            "'compute' argument is ignored in ds.to_netcdf function. Did you mean to use 'progressbar'?"
+        )
+
+    obj = ds.to_netcdf(file_path, compute=False, **to_netcdf_kwargs)
+    with ProgressBar() if progressbar else nullcontext():
+        obj.compute()
+    # Dereference
+    obj = None
+
+
+def _get_dataset_encoding(
+    ds: xr.Dataset | xr.DataArray, compress: bool
+) -> dict[str, Any]:
+    encoding: dict[Any, Any] = {}
     for var in set(ds.coords) | set(ds.data_vars):
         if var not in encoding:
             encoding[var] = {}
@@ -134,60 +210,5 @@ def write_nc(
     if compress:
         for var in ds.data_vars:
             encoding[var].update({"zlib": True})
-    kwargs["encoding"] = encoding
 
-    # Make gdal compliant if True, only in case of a spatial dataset
-    if gdal_compliant:
-        y_old, x_old = ds.raster.dims
-        ds = ds.raster.gdal_compliant(rename_dims=rename_dims, force_sn=force_sn)
-        y_dim, x_dim = ds.raster.dims
-        encoding[y_dim] = encoding.pop(y_old)
-        encoding[x_dim] = encoding.pop(x_old)
-
-    def nc_progress(ds: xr.Dataset, file_path: Path, progressbar: bool, **kwargs):
-        """Small function for really writing the netcdf."""
-        obj = ds.to_netcdf(
-            file_path,
-            compute=False,
-            **kwargs,
-        )
-        with ProgressBar() if progressbar else nullcontext():
-            obj.compute()
-        # Dereference
-        obj = None
-
-    # Try to write the file
-    try:
-        nc_progress(ds, file_path=file_path, progressbar=progressbar, **kwargs)
-    except OSError:
-        logger.debug(f"Could not write to file {file_path.as_posix()}, deferring write")
-
-        unique_str = f"{file_path}_{uuid.uuid4()}"
-        hash_str = hashlib.sha256(unique_str.encode()).hexdigest()[:8]
-        temp_filepath = file_path.with_stem(f"{file_path.stem}_{hash_str}")
-        nc_progress(ds, file_path=temp_filepath, progressbar=progressbar, **kwargs)
-
-        return DeferredFileClose(original_path=file_path, temp_path=temp_filepath)
-
-    return None
-
-
-def write_region(
-    region: gpd.GeoDataFrame,
-    file_path: Path,
-    *,
-    to_wgs84=False,
-    **write_kwargs,
-):
-    """Write the model region to a file."""
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-
-    gdf = cast(gpd.GeoDataFrame, region.copy())
-
-    if to_wgs84 and (
-        write_kwargs.get("driver") == "GeoJSON"
-        or file_path.suffix.lower() == ".geojson"
-    ):
-        gdf = gdf.to_crs(4326)
-
-    gdf.to_file(file_path, **write_kwargs)
+    return encoding
