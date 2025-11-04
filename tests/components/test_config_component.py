@@ -5,7 +5,7 @@ import pytest
 from tomli_w import dump as toml_dump
 from yaml import dump as yaml_dump
 
-from hydromt._utils.path import _make_config_paths_abs, _make_config_paths_relative
+from hydromt._utils.path import _make_config_paths_absolute, _make_config_paths_relative
 from hydromt.io.readers import _config_read, read_yaml
 from hydromt.io.writers import write_yaml
 from hydromt.model import Model
@@ -120,7 +120,7 @@ def test_make_config_abs(tmp_path: Path, test_config_dict):
     open(p, "w").close()
     test_config_dict["section2"]["path"] = p
     test_config_dict["section2"]["path2"] = abspath(p)
-    parsed_config = _make_config_paths_abs(test_config_dict, tmp_path)
+    parsed_config = _make_config_paths_absolute(test_config_dict, tmp_path)
     assert all(
         isabs(p) for p in parsed_config["section2"].values() if isinstance(p, Path)
     ), parsed_config["section2"]
