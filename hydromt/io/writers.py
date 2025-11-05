@@ -119,6 +119,7 @@ def write_nc(
 
     # Focus on the encoding and set these for all dims, coords and data vars
     to_netcdf_kwargs = to_netcdf_kwargs or {}
+    to_netcdf_kwargs = to_netcdf_kwargs.copy()
     encoding = to_netcdf_kwargs.pop("encoding", {})
 
     for var in set(ds.coords) | set(ds.data_vars):
