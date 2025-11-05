@@ -120,7 +120,21 @@ def write_nc(
     # Focus on the encoding and set these for all dims, coords and data vars
     to_netcdf_kwargs = to_netcdf_kwargs or {}
     encoding = to_netcdf_kwargs.pop("encoding", {})
-    encoding.update(_get_dataset_encoding(ds, compress))
+
+    for var in set(ds.coords) | set(ds.data_vars):
+        if var not in encoding:
+            encoding[var] = {}
+
+    # Remove the nodata val specifier for the dimensions, CF compliant that is
+    for dim in ds.dims:
+        ds[dim].attrs.pop("_FillValue", None)
+        if dim in encoding:
+            encoding[dim].update({"_FillValue": None})
+
+    # Set compression if True
+    if compress:
+        for var in ds.data_vars:
+            encoding[var].update({"zlib": True})
 
     # Make gdal compliant if True, only in case of a spatial dataset
     if gdal_compliant:
@@ -190,25 +204,3 @@ def _nc_progress(
         obj.compute()
     # Dereference
     obj = None
-
-
-def _get_dataset_encoding(
-    ds: xr.Dataset | xr.DataArray, compress: bool
-) -> dict[str, Any]:
-    encoding: dict[Any, Any] = {}
-    for var in set(ds.coords) | set(ds.data_vars):
-        if var not in encoding:
-            encoding[var] = {}
-
-    # Remove the nodata val specifier for the dimensions, CF compliant that is
-    for dim in ds.dims:
-        ds[dim].attrs.pop("_FillValue", None)
-        if dim in encoding:
-            encoding[dim].update({"_FillValue": None})
-
-    # Set compression if True
-    if compress:
-        for var in ds.data_vars:
-            encoding[var].update({"zlib": True})
-
-    return encoding
