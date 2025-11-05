@@ -172,20 +172,35 @@ def write_nc(
 
 
 def write_region(
-    region: gpd.GeoDataFrame, file_path: Path, *, to_wgs84=False, **write_kwargs
+    region: gpd.GeoDataFrame,
+    file_path: Path,
+    *,
+    to_wgs84=False,
+    to_file_kwargs: dict[str, Any] | None = None,
 ):
-    """Write the model region to a file."""
+    """Write the model region to a file.
+
+    Parameters
+    ----------
+    file_path : Path
+        The filename to write the region to.
+    to_wgs84 : bool, optional
+        If True, the region is reprojected to WGS84 before writing. default is False.
+    to_file_kwargs: dict, optional
+        Additional keyword arguments passed to the `geopandas.GeoDataFrame.to_file` function.
+    """
     file_path.parent.mkdir(parents=True, exist_ok=True)
+    to_file_kwargs = to_file_kwargs or {}
 
     gdf = cast(gpd.GeoDataFrame, region.copy())
 
     if to_wgs84 and (
-        write_kwargs.get("driver") == "GeoJSON"
+        to_file_kwargs.get("driver") == "GeoJSON"
         or file_path.suffix.lower() == ".geojson"
     ):
         gdf = gdf.to_crs(4326)
 
-    gdf.to_file(file_path, **write_kwargs)
+    gdf.to_file(file_path, **to_file_kwargs)
 
 
 def _nc_progress(
