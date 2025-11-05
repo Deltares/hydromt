@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import xarray as xr
 
-from hydromt.io.writers import write_nc
+from hydromt.writers import write_nc
 
 
 def test_write_nc(tmp_path: Path, demda: xr.DataArray):
