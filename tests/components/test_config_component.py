@@ -6,10 +6,10 @@ from tomli_w import dump as toml_dump
 from yaml import dump as yaml_dump
 
 from hydromt._utils.path import _make_config_paths_absolute, _make_config_paths_relative
-from hydromt.io.readers import _config_read, read_yaml
-from hydromt.io.writers import write_yaml
 from hydromt.model import Model
 from hydromt.model.components.config import ConfigComponent
+from hydromt.readers import _config_read, read_yaml
+from hydromt.writers import write_yaml
 
 ABS_PATH = Path(abspath(__name__))
 

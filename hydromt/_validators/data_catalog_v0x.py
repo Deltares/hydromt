@@ -19,7 +19,7 @@ from pyproj import CRS
 from pyproj.exceptions import CRSError
 
 from hydromt import __version__ as HYDROMT_VERSION
-from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.readers import _yml_from_uri_or_path
 from hydromt.typing import Bbox, Number, TimeRange
 
 DEFAULT_DRIVER_MAPPING = {

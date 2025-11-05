@@ -406,7 +406,7 @@ def open_raster_from_tindex(
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`~hydromt.merge.merge()` for options.
     **kwargs:
-        key-word arguments are passed to :py:meth:`hydromt.io.open_mfraster()`
+        key-word arguments are passed to :py:meth:`hydromt.readers.open_mfraster()`
 
 
     Returns
@@ -465,7 +465,7 @@ def open_geodataset(
     loc_path: path, str
         Path to geometry location file, see :py:meth:`geopandas.read_file` for options.
         For point location, the file can also be a csv, parquet, xls(x) or xy file,
-        see :py:meth:`hydromt.io.open_vector_from_table` for options.
+        see :py:meth:`hydromt.open_vector_from_table` for options.
     data_path: path, str
         Path to data file of which the index dimension which should match the geospatial
         coordinates index.
@@ -617,7 +617,7 @@ def open_vector(
         path to geometry file
     driver: {'csv', 'xls', 'xy', 'pyogrio', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
-        files, :py:meth:`hydromt.io.open_vector_from_table`
+        files, :py:meth:`hydromt.open_vector_from_table`
         for csv, parquet, xls(x) and xy files. By default None, and inferred from
         file extension.
     crs: str, `pyproj.CRS`, or dict

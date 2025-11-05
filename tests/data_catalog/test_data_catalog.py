@@ -45,8 +45,8 @@ from hydromt.data_catalog.sources import (
 from hydromt.data_catalog.sources.dataframe import DataFrameSource
 from hydromt.error import NoDataException, NoDataStrategy
 from hydromt.gis.gis_utils import _to_geographic_bbox
-from hydromt.io.writers import write_xy
 from hydromt.typing import Bbox, TimeRange
+from hydromt.writers import write_xy
 from tests.conftest import DATA_DIR, TEST_DATA_DIR
 
 _CATALOG_DIR = join(DATA_DIR, "catalogs")

@@ -16,7 +16,7 @@ from hydromt.data_catalog.drivers.raster.rasterio_driver import (
     RasterioOptions,
 )
 from hydromt.gis.raster_utils import full_from_transform
-from hydromt.io import open_mfraster, open_raster
+from hydromt.readers import open_mfraster, open_raster
 from hydromt.typing import SourceMetadata
 from tests.conftest import TEST_DATA_DIR
 
