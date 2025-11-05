@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import xarray as xr
 from geopandas import GeoDataFrame
@@ -170,7 +170,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
-        **kwargs,
+        to_netcdf_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Write dictionary of xarray.Dataset and/or xarray.DataArray to netcdf files.
 
@@ -197,7 +197,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         force_sn: bool, optional
             If True, forces the dataset to have South -> North orientation. Only used
             if ``gdal_compliant`` is set to True. By default, False.
-        **kwargs:
+        to_netcdf_kwargs: dict, optional
             Additional keyword arguments that are passed to the `to_netcdf`
             function.
         """
@@ -209,7 +209,8 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             )
             return
 
-        kwargs.setdefault("engine", "netcdf4")
+        to_netcdf_kwargs = to_netcdf_kwargs or {}
+        to_netcdf_kwargs.setdefault("engine", "netcdf4")
         filename = filename or self._filename
 
         for name, ds in self.data.items():
@@ -226,7 +227,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
                 rename_dims=rename_dims,
                 force_sn=force_sn,
                 force_overwrite=self.root.mode.is_override_mode(),
-                **kwargs,
+                to_netcdf_kwargs=to_netcdf_kwargs,
             )
             if close_handle is not None:
                 self._deferred_file_close_handles.append(close_handle)
