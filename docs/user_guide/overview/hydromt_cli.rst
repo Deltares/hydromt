@@ -7,7 +7,7 @@ The HydroMT command line interface (CLI) is a command line tool that allows you 
 HydroMT commands from the terminal. It is installed as part of the HydroMT package.
 
 To use the HydroMT CLI, open a terminal, (activate the environment where HydroMT is installed)
-and type ``hydromt`` followed by the command you want to run. you can also run ``hydromt --help``
+and type ``hydromt`` followed by the command you want to run. You can also run ``hydromt --help``
 to get an overview of which commands are available.  The following commands are available:
 
 .. dropdown:: **Information commands**

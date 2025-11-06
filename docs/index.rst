@@ -12,7 +12,8 @@ system models. It does so by automating the workflow to go from raw data to a co
 model instance which is ready to run and to analyse model results once the simulation
 has finished. As such it is an interface between **user**, **data** and **models**.
 
-HydroMT uses **model plugins** to interface with specific software like Wflow or SFINCS.
+This documentation describes the core functionality of HydroMT. In practice, HydroMT
+uses **model plugins** to interface with specific software like Wflow or SFINCS.
 Users are encouraged to explore the :ref:`available model plugins <plugins>`
 and consult both this documentation and that of the plugin they are using.
 
@@ -28,7 +29,7 @@ and consult both this documentation and that of the plugin they are using.
         :link: getting_started
         :link-type: ref
 
-        :octicon:`gear;5em;sd-text-icon blue-icon`
+        :octicon:`rocket;5em;sd-text-icon blue-icon`
         +++
         **Getting started**
 
@@ -39,7 +40,7 @@ and consult both this documentation and that of the plugin they are using.
         :link: intro_user_guide
         :link-type: ref
 
-        :octicon:`device-desktop;5em;sd-text-icon blue-icon`
+        :octicon:`book;5em;sd-text-icon blue-icon`
         +++
         **User Guide**
 
