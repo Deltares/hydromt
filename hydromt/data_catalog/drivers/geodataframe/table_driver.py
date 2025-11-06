@@ -14,7 +14,7 @@ from hydromt.data_catalog.drivers.geodataframe.geodataframe_driver import (
     GeoDataFrameDriver,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.io.readers import open_vector_from_table
+from hydromt.readers import open_vector_from_table
 from hydromt.typing.metadata import SourceMetadata
 
 logger = logging.getLogger(__name__)

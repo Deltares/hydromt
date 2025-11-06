@@ -33,7 +33,8 @@ Changed
 - HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils`. (#1271)
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
 - ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
-- `hydromt.typing` and its functions are now public (underscore removed). (#1286)
+- ``hydromt.typing`` and its functions are now public (underscore removed). (#1286)
+- remove ``io`` submodule and move ``readers`` and ``writers`` to the root module (#1308)
 - `write_nc` function no longer accepts kwargs, instead a dict `to_netcdf_kwargs` is used to pass arguments to `xarray.to_netcdf`. The function raises an error when "compute" is one of the arguments.
 
 

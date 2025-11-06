@@ -10,11 +10,11 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt.io.readers import open_ncs
-from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import open_ncs
+from hydromt.writers import write_nc
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model

@@ -74,7 +74,7 @@ Single raster files are parsed to a **RasterDataset** based on the **raster** dr
 This driver supports 2D raster for which the dimensions are names "x" and "y".
 A potential third dimension is called "dim0".
 The variable name is based on the filename, in this case `"GLOBCOVER_200901_200912_300x300m"`.
-The `chunks` key-word argument is passed to :py:meth:`~hydromt.io.open_mfraster`
+The `chunks` key-word argument is passed to :py:meth:`~hydromt.readers.open_mfraster`
 and allows lazy reading of the data.
 
 .. literalinclude:: ../../assets/data_types/single_variable_geotiff_raster.yml

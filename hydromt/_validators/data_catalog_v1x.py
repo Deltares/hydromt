@@ -27,7 +27,7 @@ from hydromt._validators.data_catalog_v0x import (
     DataCatalogV0Validator,
 )
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
-from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.readers import _yml_from_uri_or_path
 from hydromt.typing import Bbox, Number, TimeRange
 
 DRIVER_RENAME_MAPPING: Dict[str, Dict[str, str]] = {
