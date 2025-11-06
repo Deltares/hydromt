@@ -15,7 +15,7 @@ from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
     GeoDatasetOptions,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.io import open_geodataset
+from hydromt.readers import open_geodataset
 from hydromt.typing import CRS, Geom, Predicate, SourceMetadata
 
 logger = logging.getLogger(__name__)

@@ -33,7 +33,8 @@ Changed
 - HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils`. (#1271)
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
 - ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
-- `hydromt.typing` and its functions are now public (underscore removed). (#1286)
+- ``hydromt.typing`` and its functions are now public (underscore removed). (#1286)
+- remove ``io`` submodule and move ``readers`` and ``writers`` to the root module (#1308)
 - Function signatures of `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have: ``source_kwargs`` (passed to `DataSource.__init__`), ``open_kwargs`` (passed to `DataSource.driver.read`) instead of just ``kwargs``, and ``time_tuple`` was renamed to ``time_range``. (#1291)
 
 Fixed
@@ -51,7 +52,6 @@ Fixed
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 - All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)
-
 
 Deprecated
 ----------

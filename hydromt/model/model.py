@@ -16,7 +16,6 @@ from pyproj import CRS
 
 from hydromt._utils import _rgetattr, _validate_steps, log
 from hydromt.data_catalog import DataCatalog
-from hydromt.io.readers import read_yaml
 from hydromt.model.components import (
     ModelComponent,
     SpatialModelComponent,
@@ -24,6 +23,7 @@ from hydromt.model.components import (
 from hydromt.model.root import ModelRoot
 from hydromt.model.steps import hydromt_step
 from hydromt.plugins import PLUGINS
+from hydromt.readers import read_yaml
 
 __all__ = ["Model"]
 
@@ -279,7 +279,7 @@ class Model(object, metaclass=ABCMeta):
             Write complete model after executing all methods in opt, by default True.
         steps: Optional[List[Dict[str, Dict[str, Any]]]]
             Model build steps. The steps can be parsed from a hydromt workflow/
-            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.
+            configuration file using :py:meth:`~hydromt.read_workflow_yaml`.
             This is a list of nested dictionary where the first-level keys are the names
             of the method for a ``Model`` method (e.g. `write`) OR the name of a
             component followed by the name of the method to run separated by a dot for
@@ -357,7 +357,7 @@ class Model(object, metaclass=ABCMeta):
             Write the updated model schematization to disk. By default True.
         steps: Optional[List[Dict[str, Dict[str, Any]]]]
             Model build steps. The steps can be parsed from a hydromt workflow/
-            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.
+            configuration file using :py:meth:`~hydromt.read_workflow_yaml`.
             This is a list of nested dictionary where the first-level keys are the names
             of a component followed by the name of the method to run separated by a dot.
             any subsequent pairs will be passed to the method as arguments.

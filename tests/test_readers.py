@@ -15,7 +15,7 @@ from upath import UPath
 import hydromt
 from hydromt import _compat
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io.readers import (
+from hydromt.readers import (
     open_geodataset,
     open_mfcsv,
     open_nc,
@@ -24,7 +24,7 @@ from hydromt.io.readers import (
     open_vector_from_table,
     read_workflow_yaml,
 )
-from hydromt.io.writers import write_xy
+from hydromt.writers import write_xy
 from tests.conftest import TEST_DATA_DIR
 
 
@@ -60,13 +60,13 @@ def test_open_vector(tmp_path: Path, df, geodf, world):
     gdf1 = open_vector(xy_path, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
     # read shapefile
-    gdf1 = hydromt.io.open_vector(shp_path, bbox=list(geodf.total_bounds))
+    gdf1 = hydromt.readers.open_vector(shp_path, bbox=list(geodf.total_bounds))
     assert np.all(gdf1 == geodf)
     mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
-    gdf1 = hydromt.io.open_vector(shp_path, geom=mask)
+    gdf1 = hydromt.readers.open_vector(shp_path, geom=mask)
     assert np.all(gdf1 == geodf)
     # read geopackage
-    gdf1 = hydromt.io.open_vector(gpkg_path)
+    gdf1 = hydromt.readers.open_vector(gpkg_path)
     assert np.all(gdf1 == geodf)
     # read parquet
     gdf1 = open_vector(parquet_path, crs=4326)
@@ -107,7 +107,7 @@ def test_open_vector_s3(geodf: gpd.GeoDataFrame):
     m = MagicMock()
     m.return_value = geodf
     with patch("geopandas.io.file._read_file_pyogrio", m):
-        df = hydromt.io.open_vector(UPath("s3://fake_url/file.geojson"))
+        df = hydromt.readers.open_vector(UPath("s3://fake_url/file.geojson"))
     assert np.all(geodf == df)
 
 

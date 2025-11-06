@@ -15,11 +15,11 @@ from affine import Affine
 from shapely.geometry import LineString, Point, Polygon, box
 
 from hydromt.gis import parse_crs, raster, raster_utils
-from hydromt.io import open_raster
 from hydromt.model.processes.grid import (
     create_grid_from_region,
     create_rotated_grid_from_geom,
 )
+from hydromt.readers import open_raster
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported

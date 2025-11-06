@@ -63,8 +63,8 @@ from hydromt.data_catalog.sources import (
 )
 from hydromt.error import NoDataException, NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
-from hydromt.io.readers import _yml_from_uri_or_path
 from hydromt.plugins import PLUGINS
+from hydromt.readers import _yml_from_uri_or_path
 from hydromt.typing import Bbox, SourceSpecDict, TimeRange
 
 logger = logging.getLogger(__name__)
