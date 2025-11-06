@@ -2,6 +2,7 @@
 
 import logging
 from os.path import basename, splitext
+from pathlib import Path
 from typing import Any, ClassVar, List, Literal, Optional
 
 import numpy as np
@@ -21,7 +22,6 @@ from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
     Geom,
-    StrPath,
     TimeRange,
     TotalBounds,
     Zoom,
@@ -102,16 +102,17 @@ class RasterDatasetSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[RasterDatasetDriver] = None,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
+        driver_override: RasterDatasetDriver | None = None,
+        bbox: Bbox | None = None,
+        mask: Geom | None = None,
         buffer: int = 0,
-        time_range: Optional[TimeRange] = None,
-        zoom: Optional[Zoom] = None,
+        time_range: TimeRange | None = None,
+        zoom: Zoom | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
+        open_kwargs: dict[str, Any] | None = None,
+        write_kwargs: dict[str, Any] | None = None,
     ) -> "RasterDatasetSource | None":
         """
         Write the RasterDatasetSource to a local file.
@@ -120,18 +121,16 @@ class RasterDatasetSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver
-            driver: RasterDatasetDriver = RasterDatasetDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = RasterDatasetDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: RasterDatasetDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: RasterDatasetDriver = self.driver.model_copy(
+            driver = self.driver.model_copy(
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
@@ -142,18 +141,15 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             zoom=zoom,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs,
         )
         if ds is None:  # handle_nodata == ignore
             return None
 
-        dest_path = driver.write(
-            file_path,
-            ds,
-            **kwargs,
-        )
+        dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
 
         # update driver based on local path
-        update: dict[str, Any] = {
+        update = {
             "uri": dest_path.as_posix(),
             "root": None,
             "driver": driver,

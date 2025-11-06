@@ -3,7 +3,8 @@
 import logging
 from datetime import datetime
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional
+from pathlib import Path
+from typing import Any, ClassVar, List, Literal, Optional
 
 import geopandas as gpd
 from pydantic import Field
@@ -21,7 +22,6 @@ from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
     Geom,
-    StrPath,
     TotalBounds,
 )
 from hydromt.typing.fsspec_types import FSSpecFileSystem
@@ -89,17 +89,18 @@ class GeoDataFrameSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[GeoDataFrameDriver] = None,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
+        driver_override: GeoDataFrameDriver | None = None,
+        bbox: Bbox | None = None,
+        mask: Geom | None = None,
         buffer: float = 0.0,
-        variables: Optional[List[str]] = None,
+        variables: list[str] | None = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> "GeoDataFrameSource":
+        open_kwargs: dict[str, Any] | None = None,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "GeoDataFrameSource | None":
         """
         Write the GeoDataFrameSource to a local file.
 
@@ -107,18 +108,16 @@ class GeoDataFrameSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver
-            driver: GeoDataFrameDriver = GeoDataFrameDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = GeoDataFrameDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: GeoDataFrameDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: GeoDataFrameDriver = self.driver.model_copy(
+            driver = self.driver.model_copy(
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
@@ -129,18 +128,15 @@ class GeoDataFrameSource(DataSource):
             variables=variables,
             predicate=predicate,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs,
         )
         if gdf is None:  # handle_nodata == ignore
             return None
 
-        dest_path = driver.write(
-            file_path,
-            gdf,
-            **kwargs,
-        )
+        dest_path = driver.write(file_path, gdf, write_kwargs=write_kwargs)
 
         # update source and its driver based on local path
-        update: Dict[str, Any] = {
+        update = {
             "uri": dest_path.as_posix(),
             "root": None,
             "driver": driver,

@@ -2,7 +2,8 @@
 
 import logging
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
+from pathlib import Path
+from typing import Any, ClassVar, List, Literal, Optional, Union
 
 import xarray as xr
 from pydantic import Field
@@ -20,7 +21,6 @@ from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
     Geom,
-    StrPath,
     TimeRange,
     TotalBounds,
 )
@@ -92,19 +92,20 @@ class GeoDatasetSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[GeoDatasetDriver] = None,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
+        driver_override: GeoDatasetDriver | None = None,
+        bbox: Bbox | None = None,
+        mask: Geom | None = None,
         buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
+        variables: list[str] | None = None,
+        time_range: TimeRange | None = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> Optional["GeoDatasetSource"]:
+        open_kwargs: dict[str, Any] | None = None,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "GeoDatasetSource | None":
         """
         Write the GeoDatasetSource to a local file.
 
@@ -112,18 +113,16 @@ class GeoDatasetSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver.
-            driver: GeoDatasetDriver = GeoDatasetDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = GeoDatasetDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: GeoDatasetDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: GeoDatasetDriver = self.driver.model_copy(
+            driver = self.driver.model_copy(
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
@@ -136,18 +135,15 @@ class GeoDatasetSource(DataSource):
             single_var_as_array=single_var_as_array,
             time_range=time_range,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs,
         )
         if ds is None:  # handle_nodata == ignore
             return None
 
-        dest_path = driver.write(
-            file_path,
-            ds,
-            **kwargs,
-        )
+        dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
 
         # update driver based on local path
-        update: Dict[str, Any] = {
+        update = {
             "uri": dest_path.as_posix(),
             "root": None,
             "driver": driver,

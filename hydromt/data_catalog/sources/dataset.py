@@ -2,6 +2,7 @@
 
 import logging
 from os.path import basename, splitext
+from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
 import xarray as xr
@@ -17,7 +18,6 @@ from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 from hydromt.typing import (
-    StrPath,
     TimeRange,
 )
 from hydromt.typing.fsspec_types import FSSpecFileSystem
@@ -97,13 +97,14 @@ class DatasetSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[DatasetDriver] = None,
-        time_range: Optional[TimeRange] = None,
+        driver_override: DatasetDriver | None = None,
+        time_range: TimeRange | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> "DatasetSource":
+        open_kwargs: dict[str, Any] | None = None,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "DatasetSource | None":
         """
         Write the DatasetSource to a local file.
 
@@ -111,37 +112,36 @@ class DatasetSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver
-            driver: DatasetDriver = DatasetDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = DatasetDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: DatasetDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: DatasetDriver = self.driver.model_copy(
+            driver = self.driver.model_copy(
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         ds: Optional[xr.Dataset] = self.read_data(
             time_range=time_range,
             handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs,
         )
-        if ds is None:  # handle_nodata == ignore
+        if ds is None:
             return None
 
         # driver can return different path if file ext changes
         dest_path = driver.write(
             file_path,
             ds,
-            **kwargs,
+            write_kwargs=write_kwargs,
         )
 
         # update driver based on local path
-        update: Dict[str, Any] = {
+        update = {
             "uri": dest_path.as_posix(),
             "root": None,
             "driver": driver,

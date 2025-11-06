@@ -1,7 +1,8 @@
 """DataSource class for the DataFrame type."""
 
 import logging
-from typing import Any, ClassVar, Dict, List, Literal, Optional
+from pathlib import Path
+from typing import Any, ClassVar, List, Literal, Optional
 
 import pandas as pd
 from pydantic import Field
@@ -11,10 +12,7 @@ from hydromt.data_catalog.adapters import DataFrameAdapter
 from hydromt.data_catalog.drivers import DataFrameDriver
 from hydromt.data_catalog.sources import DataSource
 from hydromt.error import NoDataStrategy
-from hydromt.typing import (
-    StrPath,
-    TimeRange,
-)
+from hydromt.typing import TimeRange
 from hydromt.typing.fsspec_types import FSSpecFileSystem
 
 logger = logging.getLogger(__name__)
@@ -72,14 +70,15 @@ class DataFrameSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[DataFrameDriver] = None,
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
+        driver_override: DataFrameDriver | None = None,
+        variables: list[str] | None = None,
+        time_range: TimeRange | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> "DataFrameSource":
+        open_kwargs: dict[str, Any] | None = None,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "DataFrameSource | None":
         """
         Write the DataFrameSource to a local file.
 
@@ -93,27 +92,30 @@ class DataFrameSource(DataSource):
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: DataFrameDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: DataFrameDriver = self.driver.model_copy(
+            driver = self.driver.model_copy(
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
-        df: Optional[pd.DataFrame] = self.read_data(
-            variables=variables, time_range=time_range, handle_nodata=handle_nodata
+        df = self.read_data(
+            variables=variables,
+            time_range=time_range,
+            handle_nodata=handle_nodata,
+            open_kwargs=open_kwargs,
         )
-        if df is None:  # handle_nodata == ignore
+        if df is None:
             return None
 
         # driver can return different path if file ext changes
         dest_path = driver.write(
             file_path,
             df,
-            **kwargs,
+            write_kwargs=write_kwargs,
         )
 
         # update source and its driver based on local path
-        update: Dict[str, Any] = {
+        update = {
             "uri": dest_path.as_posix(),
             "root": None,
             "driver": driver,

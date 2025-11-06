@@ -244,7 +244,7 @@ class DataSource(BaseModel, ABC):
     @abstractmethod
     def read_data(self) -> Any | None:
         """Read data from the source."""
-        pass
+        ...
 
     @abstractmethod
     def to_stac_catalog(
@@ -272,14 +272,7 @@ class DataSource(BaseModel, ABC):
         ...
 
     @abstractmethod
-    def to_file(
-        self,
-        file_path: Path | str,
-        *,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        driver_override: Optional[BaseDriver] = None,
-        **kwargs,
-    ) -> "DataSource":
+    def to_file(self, file_path: Path | str) -> "DataSource | None":
         """
         Write the DataSource to a local file.
 
@@ -287,20 +280,12 @@ class DataSource(BaseModel, ABC):
         ----------
         file_path: Path | str
             The path to write the data to.
-        handle_nodata: NoDataStrategy, optional
-            The error handling strategy. Options are: "raise" to raise an error on
-            failure, "ignore" to skip the dataset on failure.
-        driver_override: BaseDriver, optional
-            If provided, use this driver to write the data instead of the one
-            specified in the source. The driver must support writing.
-        **kwargs: Any
-            Additional keyword arguments for the implementation of `to_file`
-            from subclasses of DataSource. Will be passed to the driver's write method.
 
         Returns
         -------
         DataSource
             A new instance of the DataSource with the updated uri and driver.
+            Or None if there is no data available.
         """
         ...
 
