@@ -209,10 +209,8 @@ def parse_region_geom(
 
 
 def parse_region_grid(
-    region: dict,
-    *,
-    data_catalog: Optional[DataCatalog],
-) -> Union[xr.DataArray, xr.Dataset]:
+    region: dict[str, Any], *, data_catalog: DataCatalog | None = None
+) -> xr.DataArray | xr.Dataset | None:
     """Parse a region of kind grid and return the corresponding xarray object.
 
     Note that additional arguments from the region can be passed to the
@@ -226,7 +224,7 @@ def parse_region_grid(
         For a region based on a grid:
 
         * {'grid': /path/to/grid}
-    data_catalog : DataCatalog
+    data_catalog : DataCatalog, optional
         DataCatalog object containing the data sources.
 
     Returns
@@ -234,18 +232,18 @@ def parse_region_grid(
     xr.DataArray or xr.Dataset
         The parsed xarray object.
     """
-    kwargs = region.copy()
+    options = region.copy()
     kind = next(iter(region))
-    value0 = kwargs.pop(kind)
+    value0 = options.pop(kind)
 
     _assert_parse_key(kind, "grid")
 
-    kwargs_str = dict()
-    for k, v in kwargs.items():
+    parsed_region = {}
+    for k, v in options.items():
         if isinstance(v, xr.DataArray):
             v = f"DataArray {v.raster.bounds} (crs = {v.raster.crs})"
-        kwargs_str.update({k: v})
-    logger.debug(f"Parsed region (kind={kind}): {str(kwargs_str)}")
+        parsed_region.update({k: v})
+    logger.debug(f"Parsed region (kind={kind}): {str(parsed_region)}")
 
     data_catalog = data_catalog or DataCatalog()
     da = data_catalog.get_rasterdataset(
@@ -255,7 +253,7 @@ def parse_region_grid(
         source_kwargs={
             "driver": {
                 "name": RasterDatasetSource._fallback_driver_read,
-                "options": kwargs,
+                "options": options,
             }
         },
     )
