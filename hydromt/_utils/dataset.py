@@ -92,7 +92,10 @@ def _set_metadata(
             for k in metadata.attrs:
                 ds[k].attrs.update(metadata.attrs[k])
 
-    ds.attrs.update(metadata.model_dump(exclude_unset=True, exclude={"attrs"}))
+    # exclude extent and attrs that are dict
+    ds.attrs.update(
+        metadata.model_dump(exclude_unset=True, exclude={"attrs", "extent"})
+    )
     return ds
 
 

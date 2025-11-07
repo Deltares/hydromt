@@ -9,12 +9,12 @@ from geopandas import GeoDataFrame
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt.io.readers import open_ncs
-from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import open_ncs
 from hydromt.typing.type_def import XArrayDict
+from hydromt.writers import write_nc
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -137,7 +137,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
         """Read model dataset files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`hydromt.io.readers.open_nc`
+        key-word arguments are passed to :py:func:`hydromt.readers.open_nc`
 
         Parameters
         ----------
@@ -147,7 +147,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.io.readers.open_nc` function.
+            `hydromt.readers.open_nc` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)

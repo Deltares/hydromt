@@ -21,7 +21,7 @@ from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import zoom_to_overview_level
-from hydromt.io.readers import open_mfraster
+from hydromt.readers import open_mfraster
 from hydromt.typing import (
     Geom,
     SourceMetadata,

@@ -21,9 +21,10 @@ from hydromt._validators.model_config import HydromtModelSetup
 from hydromt.cli import _utils
 from hydromt.data_catalog import DataCatalog
 from hydromt.error import NoDataStrategy
-from hydromt.io import read_workflow_yaml, read_yaml, write_yaml
 from hydromt.plugins import PLUGINS
+from hydromt.readers import read_workflow_yaml, read_yaml
 from hydromt.typing.type_def import StrPath, TimeRange
+from hydromt.writers import write_yaml
 
 logger = logging.getLogger(__name__)
 

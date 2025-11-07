@@ -34,7 +34,8 @@ Changed
 - HydroMT raster utilities such as `full`, `full_from_transform`, `full_like` and `merge` have been moved to `hydromt.gis.raster_utils`. (#1271)
 - `DataCatalog.driver.preprocessing` and its functions are now public (underscore removed). (#1271)
 - ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
-- `hydromt.typing` and its functions are now public (underscore removed). (#1286)
+- ``hydromt.typing`` and its functions are now public (underscore removed). (#1286)
+- remove ``io`` submodule and move ``readers`` and ``writers`` to the root module (#1308)
 
 
 Fixed
@@ -46,6 +47,9 @@ Fixed
 - Improved logging information for build and update functions. (#1237)
 - Better documentation of drivers and their options. (#1271)
 - Passing options to ``geodataframe_table`` driver now works. (#1271)
+- Relative path in the workflow yaml were not correctly resolved. (#1304)
+- Fix pydantic for V1 catalog for nodata and fix the catalog upgrade to convert nodata and extra metadata arguments. (#1304)
+- Do not pass metadata "extent" from catalog in xarray objects to avoid issues when writting to netcdf. (#1304)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
 - All handling of log files is now done with the context manager `hydromt._utils.log.to_file`. This means that they are always closed by the the function that opened them. (#1272)

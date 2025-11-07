@@ -53,13 +53,13 @@ Raster data (RasterDataset)
    * - Driver
      - File formats
      - Comments
-   * - :py:class:`raster <raster.rasterio_driver.RasterioDriver>`
+   * - :py:class:`rasterio <raster.rasterio_driver.RasterioDriver>`
      - GeoTIFF, ArcASCII, VRT, etc. (see `GDAL formats <http://www.gdal.org/formats_list.html>`_)
      - Based on :py:func:`xarray.open_rasterio`
        and :py:func:`rasterio.open`
-   * - :py:class:`raster <raster.rasterio_driver.RasterioDriver>` with the
+   * - :py:class:`rasterio <raster.rasterio_driver.RasterioDriver>` with the
        :py:class:`raster_tindex <hydromt.data_catalog.uri_resolvers.raster_tindex_resolver.RasterTindexResolver>` resolver
-     - raster tile index file (see `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_)
+     - rasterio tile index file (see `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_)
      - Options to merge tiles via `options -> mosaic_kwargs`.
    * - :py:class:`raster_xarray <raster.raster_xarray_driver.RasterDatasetXarrayDriver>`
      - NetCDF and Zarr
@@ -74,7 +74,7 @@ Single raster files are parsed to a **RasterDataset** based on the **raster** dr
 This driver supports 2D raster for which the dimensions are names "x" and "y".
 A potential third dimension is called "dim0".
 The variable name is based on the filename, in this case `"GLOBCOVER_200901_200912_300x300m"`.
-The `chunks` key-word argument is passed to :py:meth:`~hydromt.io.open_mfraster`
+The `chunks` key-word argument is passed to :py:meth:`~hydromt.readers.open_mfraster`
 and allows lazy reading of the data.
 
 .. literalinclude:: ../../assets/data_types/single_variable_geotiff_raster.yml
@@ -490,7 +490,7 @@ dimension.
    * - Driver
      - File formats
      - Comments
-   * - :py:class:`csv <dataframe.pandas_driver.PandasDriver>`
+   * - :py:class:`pandas <dataframe.pandas_driver.PandasDriver>`
      - any file readable by pandas
      - Provide a sheet name or formatting through options
 

@@ -25,7 +25,7 @@ from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.base import GEOMETRY_TYPES
 
 from hydromt._utils.naming_convention import _expand_uri_placeholders, _placeholders
-from hydromt._utils.path import _make_config_paths_abs
+from hydromt._utils.path import _make_config_paths_absolute
 from hydromt._utils.uris import _is_valid_url
 from hydromt.gis import gis_utils, raster, raster_utils, vector, vector_utils
 
@@ -406,7 +406,7 @@ def open_raster_from_tindex(
         Mosaic key_word arguments to unify raster crs and/or resolution. See
         :py:meth:`~hydromt.merge.merge()` for options.
     **kwargs:
-        key-word arguments are passed to :py:meth:`hydromt.io.open_mfraster()`
+        key-word arguments are passed to :py:meth:`hydromt.readers.open_mfraster()`
 
 
     Returns
@@ -465,7 +465,7 @@ def open_geodataset(
     loc_path: path, str
         Path to geometry location file, see :py:meth:`geopandas.read_file` for options.
         For point location, the file can also be a csv, parquet, xls(x) or xy file,
-        see :py:meth:`hydromt.io.open_vector_from_table` for options.
+        see :py:meth:`hydromt.open_vector_from_table` for options.
     data_path: path, str
         Path to data file of which the index dimension which should match the geospatial
         coordinates index.
@@ -617,7 +617,7 @@ def open_vector(
         path to geometry file
     driver: {'csv', 'xls', 'xy', 'pyogrio', 'parquet'}, optional
         driver used to read the file: :py:meth:`geopandas.open_file` for gdal vector
-        files, :py:meth:`hydromt.io.open_vector_from_table`
+        files, :py:meth:`hydromt.open_vector_from_table`
         for csv, parquet, xls(x) and xy files. By default None, and inferred from
         file extension.
     crs: str, `pyproj.CRS`, or dict
@@ -767,10 +767,10 @@ def open_vector_from_table(
 
 def read_workflow_yaml(
     path: str | Path,
-    modeltype: Optional[str] = None,
-    defaults: Optional[Dict[str, Any]] = None,
+    modeltype: str | None = None,
+    defaults: Dict[str, Any] | None = None,
     abs_path: bool = True,
-    skip_abspath_sections: Optional[List[str]] = None,
+    skip_abspath_sections: List[str] | None = ["global"],  # noqa: B006
 ) -> tuple[str, Dict[str, Any], List["HydromtModelStep"]]:
     """Read HydroMT workflow yaml file.
 
@@ -787,9 +787,9 @@ def read_workflow_yaml(
         If True, parse string values to an absolute path if the a file or folder
         with that name (string value) relative to the config file exist,
         by default True
-    skip_abspath_sections: list, optional
+    skip_abspath_sections: list
         These sections are not evaluated for absolute paths if abs_path=True,
-        by default ['setup_config']
+        by default ['global']
 
     Returns
     -------
@@ -867,7 +867,7 @@ def _config_read(
     # parse absolute paths
     if abs_path:
         root = Path(dirname(config_path))
-        cfdict = _make_config_paths_abs(cfdict, root, skip_abspath_sections)
+        cfdict = _make_config_paths_absolute(cfdict, root, skip_abspath_sections)
 
     # update defaults
     if defaults:
