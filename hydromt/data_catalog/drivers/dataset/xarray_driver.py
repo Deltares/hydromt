@@ -62,11 +62,7 @@ class DatasetXarrayDriver(DatasetDriver):
     )
 
     def read(
-        self,
-        uris: list[str],
-        *,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
+        self, uris: list[str], *, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
     ) -> xr.Dataset:
         """
         Read zarr or netCDF data into an xarray Dataset.
@@ -82,9 +78,6 @@ class DatasetXarrayDriver(DatasetDriver):
             List of URIs to read data from. All files must share the same format.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to the underlying `xarray` open
-            functions (`xr.open_zarr` or `xr.open_mfdataset`). Default is None.
 
         Returns
         -------
@@ -98,9 +91,8 @@ class DatasetXarrayDriver(DatasetDriver):
         """
         preprocessor = self.options.get_preprocessor()
         first_ext = self.options.get_ext_override(uris)
-        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
         if first_ext == ".zarr":
-            opn: Callable = partial(xr.open_zarr, **open_kwargs)
+            opn: Callable = partial(xr.open_zarr, **self.options.get_kwargs())
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -123,7 +115,7 @@ class DatasetXarrayDriver(DatasetDriver):
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,
-                **open_kwargs,
+                **self.options.get_kwargs(),
             )
         else:
             raise ValueError(f"Unknown extension for DatasetXarrayDriver: {first_ext} ")

@@ -26,7 +26,6 @@ class PandasDriver(DataFrameDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         variables: Variables | None = None,
     ) -> pd.DataFrame:
         """
@@ -43,9 +42,6 @@ class PandasDriver(DataFrameDriver):
             List containing a single URI to read from. Multiple files are not supported.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to the pandas reader (`read_csv`, `read_excel`,
-            `read_parquet`, or `read_fwf`). Default is None.
         variables : Variables | None, optional
             List of columns to read from the file. Ignored if None.
 
@@ -71,19 +67,16 @@ class PandasDriver(DataFrameDriver):
         else:
             uri = uris[0]
             extension: str = uri.split(".")[-1]
-            open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
 
             if extension == "csv":
                 variables = self._unify_variables_and_pandas_kwargs(
                     uri, pd.read_csv, variables
                 )
-                df = pd.read_csv(
-                    uri,
-                    usecols=variables,
-                    **open_kwargs,
-                )
+                df = pd.read_csv(uri, usecols=variables, **self.options.get_kwargs())
             elif extension == "parquet":
-                df = pd.read_parquet(uri, columns=variables, **open_kwargs)
+                df = pd.read_parquet(
+                    uri, columns=variables, **self.options.get_kwargs()
+                )
             elif extension in ["xls", "xlsx"]:
                 variables = self._unify_variables_and_pandas_kwargs(
                     uri, pd.read_excel, variables
@@ -92,17 +85,14 @@ class PandasDriver(DataFrameDriver):
                     uri,
                     usecols=variables,
                     engine="openpyxl",
-                    **open_kwargs,
+                    **self.options.get_kwargs(),
                 )
             elif extension in ["fwf", "txt"]:
-                df = pd.read_fwf(uri, **open_kwargs)
+                df = pd.read_fwf(uri, **self.options.get_kwargs())
             else:
                 raise IOError(f"DataFrame: extension {extension} unknown.")
         if df.index.size == 0:
-            exec_nodata_strat(
-                f"No data from driver {self}'.",
-                strategy=handle_nodata,
-            )
+            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
         return df
 
     def write(

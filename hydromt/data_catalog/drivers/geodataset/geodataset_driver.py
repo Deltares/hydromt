@@ -44,7 +44,6 @@ class GeoDatasetDriver(BaseDriver, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
         metadata: SourceMetadata | None = None,
@@ -58,8 +57,6 @@ class GeoDatasetDriver(BaseDriver, ABC):
             List of URIs to read data from.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments to pass to the underlying open function. Default is None.
         mask : Geom | None, optional
             Optional spatial mask to clip the dataset.
         predicate : Predicate, optional

@@ -37,7 +37,6 @@ class DataFrameSource(DataSource):
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[pd.DataFrame]:
         """Use the resolver, driver, and data adapter to read and harmonize the data."""
         self._mark_as_used()
@@ -54,10 +53,7 @@ class DataFrameSource(DataSource):
         )
 
         df: pd.DataFrame = self.driver.read(
-            uris,
-            handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
-            variables=vrs,
+            uris, handle_nodata=handle_nodata, variables=vrs
         )
 
         return self.data_adapter.transform(
@@ -76,7 +72,6 @@ class DataFrameSource(DataSource):
         variables: list[str] | None = None,
         time_range: TimeRange | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         write_kwargs: dict[str, Any] | None = None,
     ) -> "DataFrameSource | None":
         """
@@ -99,20 +94,13 @@ class DataFrameSource(DataSource):
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
         df = self.read_data(
-            variables=variables,
-            time_range=time_range,
-            handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
+            variables=variables, time_range=time_range, handle_nodata=handle_nodata
         )
         if df is None:
             return None
 
         # driver can return different path if file ext changes
-        dest_path = driver.write(
-            file_path,
-            df,
-            write_kwargs=write_kwargs,
-        )
+        dest_path = driver.write(file_path, df, write_kwargs=write_kwargs)
 
         # update source and its driver based on local path
         update = {

@@ -37,7 +37,6 @@ class PyogrioDriver(GeoDataFrameDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
         mask: Any = None,
         variables: str | list[str] | None = None,
@@ -55,8 +54,6 @@ class PyogrioDriver(GeoDataFrameDriver):
             List of URIs to read data from. Only one file is supported per read operation.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to `pyogrio.read_dataframe`. Default is None.
         metadata : SourceMetadata | None, optional
             Optional metadata object describing the dataset source (e.g. CRS).
         mask : Any, optional
@@ -84,8 +81,6 @@ class PyogrioDriver(GeoDataFrameDriver):
         """
         _warn_on_unused_kwargs(self.__class__.__name__, {"metadata": metadata})
 
-        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
-
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
@@ -96,11 +91,13 @@ class PyogrioDriver(GeoDataFrameDriver):
         else:
             _uri = uris[0]
             if mask is not None:
-                bbox = _bbox_from_file_and_mask(_uri, mask=mask, **open_kwargs)
+                bbox = _bbox_from_file_and_mask(
+                    _uri, mask=mask, **self.options.get_kwargs()
+                )
             else:
                 bbox = None
             gdf: pd.DataFrame | gpd.GeoDataFrame = read_dataframe(
-                _uri, bbox=bbox, columns=variables, **open_kwargs
+                _uri, bbox=bbox, columns=variables, **self.options.get_kwargs()
             )
         if not isinstance(gdf, gpd.GeoDataFrame):
             raise IOError(f"DataFrame from uri: '{_uri}' contains no geometry column.")

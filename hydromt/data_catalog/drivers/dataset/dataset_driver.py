@@ -20,11 +20,7 @@ class DatasetDriver(BaseDriver, ABC):
 
     @abstractmethod
     def read(
-        self,
-        uris: list[str],
-        *,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
+        self, uris: list[str], *, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
     ) -> xr.Dataset:
         """
         Read data from one or more URIs into an xarray Dataset.
@@ -38,8 +34,6 @@ class DatasetDriver(BaseDriver, ABC):
             List of URIs to read data from.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to the underlying open function. Default is None.
 
         Returns
         -------

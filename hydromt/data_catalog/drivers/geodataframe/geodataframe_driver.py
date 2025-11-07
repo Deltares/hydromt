@@ -23,7 +23,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
         mask: Any = None,
         variables: str | list[str] | None = None,
@@ -37,8 +36,6 @@ class GeoDataFrameDriver(BaseDriver, ABC):
             List of URIs to read data from.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to the underlying open function. Default is None.
         metadata : SourceMetadata | None, optional
             Optional metadata object describing the dataset source (e.g. CRS).
         mask : Any, optional

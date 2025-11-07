@@ -27,7 +27,6 @@ class DataFrameDriver(BaseDriver, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         variables: Variables | None = None,
     ) -> pd.DataFrame:
         """
@@ -42,9 +41,6 @@ class DataFrameDriver(BaseDriver, ABC):
             List of URIs to read data from. The driver decides how to handle multiple files.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to the underlying pandas read function.
-            Default is None.
         variables : Variables | None, optional
             List of variable names (columns) to select from the source data. Default is None.
 

@@ -30,7 +30,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
         zoom: Zoom | None = None,
@@ -49,8 +48,6 @@ class RasterDatasetDriver(BaseDriver, ABC):
             List of file URIs to read from.
         handle_nodata : NoDataStrategy, optional
             Strategy for handling missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments to pass to the underlying open function. Default is None.
         mask : Geom | None, optional
             Optional geometry to spatially mask or clip the data. Default is None.
         variables : Variables | None, optional

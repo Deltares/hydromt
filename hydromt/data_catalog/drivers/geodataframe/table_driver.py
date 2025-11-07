@@ -54,7 +54,6 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
         mask: Any = None,
         variables: str | list[str] | None = None,
@@ -72,8 +71,6 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             List of URIs to read data from. Only one file is supported per read operation.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to the underlying read function (pandas). Default is None.
         metadata : SourceMetadata | None, optional
             Optional metadata object describing the dataset source (e.g. CRS).
         mask : Any, optional
@@ -109,19 +106,15 @@ class GeoDataFrameTableDriver(GeoDataFrameDriver):
             )
 
         _uri: str = uris[0]
-        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
         gdf = open_vector_from_table(
             path=_uri,
             x_dim=self.options.x_dim,
             y_dim=self.options.y_dim,
             crs=metadata.crs,
-            **open_kwargs,
+            **self.options.get_kwargs(),
         )
         if gdf.index.size == 0:
-            exec_nodata_strat(
-                f"No data from driver {self}'.",
-                strategy=handle_nodata,
-            )
+            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
         return gdf
 
     def write(

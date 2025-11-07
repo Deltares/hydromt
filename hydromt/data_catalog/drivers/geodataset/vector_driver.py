@@ -57,7 +57,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
         metadata: SourceMetadata | None = None,
@@ -71,8 +70,6 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
             List of URIs to read data from.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments to pass to the underlying open function. Default is None.
         mask : Geom | None, optional
             Optional spatial mask to clip the dataset.
         predicate : Predicate, optional
@@ -93,14 +90,13 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
             uri = uris[0]
 
         preprocessor = self.options.get_preprocessor()
-        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
         crs: CRS | None = metadata.crs if metadata else None
         data = open_geodataset(
             loc_path=uri,
             geom=mask,
             crs=crs,
             predicate=predicate,
-            **open_kwargs,
+            **self.options.get_kwargs(),
         )
         out = preprocessor(data)
 

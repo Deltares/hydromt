@@ -4,7 +4,7 @@ import logging
 from functools import partial
 from os.path import splitext
 from pathlib import Path
-from typing import Any, Callable, ClassVar
+from typing import Any, ClassVar
 
 import xarray as xr
 from pydantic import Field
@@ -51,7 +51,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
         metadata: SourceMetadata | None = None,
@@ -65,8 +64,6 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
             List of URIs to read data from.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle missing data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments to pass to the underlying open function. Default is None.
         mask : Geom | None, optional
             Optional spatial mask to clip the dataset.
         predicate : Predicate, optional
@@ -94,10 +91,9 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
         )
         preprocessor = self.options.get_preprocessor()
         first_ext = splitext(uris[0])[-1]
-        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
 
         if first_ext == _ZARR_EXT:
-            opn: Callable = partial(xr.open_zarr, **open_kwargs)
+            opn = partial(xr.open_zarr, **self.options.get_kwargs())
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -120,7 +116,7 @@ class GeoDatasetXarrayDriver(GeoDatasetDriver):
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,
-                **open_kwargs,
+                **self.options.get_kwargs(),
             )
         else:
             raise ValueError(

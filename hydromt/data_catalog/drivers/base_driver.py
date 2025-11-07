@@ -57,7 +57,7 @@ class DriverOptions(BaseModel):
         """Return dict of kwargs excluding reserved/internal keys, and including the extra kwargs."""
         return self.model_dump(exclude=exclude, exclude_unset=True)
 
-    def get_kwargs(self) -> dict:
+    def get_kwargs(self) -> dict[str, Any]:
         """Return attributes set that are not explicitly declared fields."""
         return self.model_dump(
             exclude=self.get_excluded_kwarg_names_for_open(), exclude_unset=True
@@ -104,11 +104,7 @@ class BaseDriver(AbstractBaseModel, ABC):
 
     @abstractmethod
     def read(
-        self,
-        uris: list[str],
-        *,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
+        self, uris: list[str], *, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
     ) -> Any:
         """Read data using the driver.
 
@@ -118,8 +114,6 @@ class BaseDriver(AbstractBaseModel, ABC):
             List of URIs to read data from.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle no data situations. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments to pass to the underlying open function. Default is None.
         """
         ...
 

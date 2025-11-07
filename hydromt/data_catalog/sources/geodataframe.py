@@ -51,7 +51,6 @@ class GeoDataFrameSource(DataSource):
         variables: Optional[List[str]] = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[gpd.GeoDataFrame]:
         """Use the driver and data adapter to read and harmonize the data."""
         self._mark_as_used()
@@ -73,7 +72,6 @@ class GeoDataFrameSource(DataSource):
         gdf: gpd.GeoDataFrame = self.driver.read(
             uris,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
             metadata=self.metadata,
             mask=mask,
             variables=vrs,
@@ -98,7 +96,6 @@ class GeoDataFrameSource(DataSource):
         variables: list[str] | None = None,
         predicate: str = "intersects",
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         write_kwargs: dict[str, Any] | None = None,
     ) -> "GeoDataFrameSource | None":
         """
@@ -128,7 +125,6 @@ class GeoDataFrameSource(DataSource):
             variables=variables,
             predicate=predicate,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
         )
         if gdf is None:  # handle_nodata == ignore
             return None

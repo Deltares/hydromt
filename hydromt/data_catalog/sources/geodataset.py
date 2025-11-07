@@ -49,7 +49,6 @@ class GeoDatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """
         Read data from this source.
@@ -74,7 +73,6 @@ class GeoDatasetSource(DataSource):
         ds: xr.Dataset = self.driver.read(
             uris,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
             mask=mask,
             predicate=predicate,
             metadata=self.metadata,
@@ -103,7 +101,6 @@ class GeoDatasetSource(DataSource):
         time_range: TimeRange | None = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         write_kwargs: dict[str, Any] | None = None,
     ) -> "GeoDatasetSource | None":
         """
@@ -135,7 +132,6 @@ class GeoDatasetSource(DataSource):
             single_var_as_array=single_var_as_array,
             time_range=time_range,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
         )
         if ds is None:  # handle_nodata == ignore
             return None

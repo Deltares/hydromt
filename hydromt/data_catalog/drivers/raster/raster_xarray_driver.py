@@ -74,7 +74,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
         zoom: Zoom | None = None,
@@ -95,8 +94,6 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
             List of URIs pointing to zarr or netCDF files.
         handle_nodata : NoDataStrategy, optional
             Strategy for handling missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to `xr.open_zarr` or `xr.open_mfdataset`. Default is None.
         mask : Geom | None, optional
             Spatial mask or geometry (currently unused). Default is None.
         variables : Variables | None, optional
@@ -136,13 +133,9 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
 
         preprocessor = self.options.get_preprocessor()
         first_ext = self.options.get_ext_override(uris)
-        open_kwargs = self.options.get_kwargs() | (open_kwargs or {})
 
         if first_ext == _ZARR_EXT:
-            opn: Callable = partial(
-                xr.open_zarr,
-                **open_kwargs,
-            )
+            opn: Callable = partial(xr.open_zarr, **self.options.get_kwargs())
             datasets = []
             for _uri in uris:
                 ext = splitext(_uri)[-1]
@@ -165,7 +158,7 @@ class RasterDatasetXarrayDriver(RasterDatasetDriver):
                 filtered_uris,
                 decode_coords="all",
                 preprocess=preprocessor,
-                **open_kwargs,
+                **self.options.get_kwargs(),
             )
         else:
             raise ValueError(

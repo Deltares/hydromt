@@ -104,7 +104,6 @@ class RasterioDriver(RasterDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
         zoom: Zoom | None = None,
@@ -124,8 +123,6 @@ class RasterioDriver(RasterDatasetDriver):
             List of raster file URIs to read.
         handle_nodata : NoDataStrategy, optional
             Strategy for handling missing or empty data. Default is NoDataStrategy.RAISE.
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to `rasterio.open` or `hydromt.io.open_mfraster`. Default is None.
         mask : Geom | None, optional
             Geometry used to mask or clip the raster data. Default is None.
         variables : Variables | None, optional
@@ -166,7 +163,7 @@ class RasterioDriver(RasterDatasetDriver):
         if mask is not None:
             self.options.mosaic_kwargs.update({"mask": mask})
 
-        open_kwargs = open_kwargs or {}
+        open_kwargs = self.options.get_kwargs()
         if np.issubdtype(type(metadata.nodata), np.number):
             open_kwargs.update({"nodata": metadata.nodata})
 
@@ -188,7 +185,6 @@ class RasterioDriver(RasterDatasetDriver):
         if chunks is not None:
             open_kwargs.update({"chunks": chunks})
 
-        open_kwargs = self.options.get_kwargs() | open_kwargs
         mosaic: bool = self.options.mosaic and len(uris) > 1
 
         # If the metadata resolver has already resolved the overview level,
@@ -197,19 +193,11 @@ class RasterioDriver(RasterDatasetDriver):
         # Then we can implement looking for a overview level in the driver.
         def _open() -> xr.Dataset:
             try:
-                return open_mfraster(
-                    uris,
-                    mosaic=mosaic,
-                    **open_kwargs,
-                )
+                return open_mfraster(uris, mosaic=mosaic, **open_kwargs)
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
                     open_kwargs.pop("overview_level", None)
-                    return open_mfraster(
-                        uris,
-                        mosaic=mosaic,
-                        **open_kwargs,
-                    )
+                    return open_mfraster(uris, mosaic=mosaic, **open_kwargs)
                 else:
                     raise
 
@@ -217,7 +205,7 @@ class RasterioDriver(RasterDatasetDriver):
         try:
             anon: str = self.filesystem.get_fs().anon
         except AttributeError:
-            anon: str = ""
+            anon = ""
 
         if anon:
             with temp_env(**{"AWS_NO_SIGN_REQUEST": "true"}):

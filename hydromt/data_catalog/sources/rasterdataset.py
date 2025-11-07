@@ -52,7 +52,6 @@ class RasterDatasetSource(DataSource):
         chunks: Optional[dict] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset | xr.DataArray | None:
         """
         Read data from this source.
@@ -83,7 +82,6 @@ class RasterDatasetSource(DataSource):
         ds: xr.Dataset = self.driver.read(
             uris,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
             mask=mask,
             variables=vrs,
             zoom=zoom,
@@ -111,7 +109,6 @@ class RasterDatasetSource(DataSource):
         time_range: TimeRange | None = None,
         zoom: Zoom | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         write_kwargs: dict[str, Any] | None = None,
     ) -> "RasterDatasetSource | None":
         """
@@ -141,7 +138,6 @@ class RasterDatasetSource(DataSource):
             time_range=time_range,
             zoom=zoom,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
         )
         if ds is None:  # handle_nodata == ignore
             return None

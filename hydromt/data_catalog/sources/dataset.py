@@ -42,7 +42,6 @@ class DatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset | None:
         """Use the resolver, driver, and data adapter to read and harmonize the data.
 
@@ -58,9 +57,6 @@ class DatasetSource(DataSource):
         single_var_as_array : bool, optional
             If only a single variable is requested, return as DataArray instead of
             Dataset, by default True
-        open_kwargs : dict[str, Any] | None, optional
-            Additional keyword arguments passed to the underlying open function,
-            by default None
 
         Returns
         -------
@@ -81,11 +77,7 @@ class DatasetSource(DataSource):
             handle_nodata=handle_nodata,
         )
 
-        ds: xr.Dataset = self.driver.read(
-            uris,
-            handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
-        )
+        ds: xr.Dataset = self.driver.read(uris, handle_nodata=handle_nodata)
 
         return self.data_adapter.transform(
             ds,
@@ -102,7 +94,6 @@ class DatasetSource(DataSource):
         driver_override: DatasetDriver | None = None,
         time_range: TimeRange | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        open_kwargs: dict[str, Any] | None = None,
         write_kwargs: dict[str, Any] | None = None,
     ) -> "DatasetSource | None":
         """
@@ -126,9 +117,7 @@ class DatasetSource(DataSource):
             )
 
         ds: Optional[xr.Dataset] = self.read_data(
-            time_range=time_range,
-            handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
+            time_range=time_range, handle_nodata=handle_nodata
         )
         if ds is None:
             return None

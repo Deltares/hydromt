@@ -1211,7 +1211,6 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         source_kwargs: Dict[str, Any] | None = None,
-        open_kwargs: Dict[str, Any] | None = None,
     ) -> Optional[Union[xr.Dataset, xr.DataArray]]:
         """Return a clipped, sliced and unified RasterDataset.
 
@@ -1265,8 +1264,6 @@ class DataCatalog(object):
             Specifies a data version, by default None
         source_kwargs : dict
             Extra keyword arguments passed to the RasterDatasetSource construction
-        open_kwargs : dict
-            Extra keyword arguments passed to the RasterDatasetSource.read_data method
 
         Returns
         -------
@@ -1353,7 +1350,6 @@ class DataCatalog(object):
             time_range=time_range,
             handle_nodata=handle_nodata,
             single_var_as_array=single_var_as_array,
-            open_kwargs=open_kwargs,
         )
 
     def get_geodataframe(
@@ -1370,7 +1366,6 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         source_kwargs: dict[str, Any] | None = None,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> Optional[gpd.GeoDataFrame]:
         """Return a clipped and unified GeoDataFrame (vector).
 
@@ -1411,8 +1406,6 @@ class DataCatalog(object):
             Specifies a data version, by default None
         source_kwargs : dict[str, Any]
             Extra keyword arguments passed to the GeoDataFrameSource construction
-        open_kwargs : dict[str, Any]
-            Extra keyword arguments passed to the GeoDataFrameSource.read_data method
 
         Returns
         -------
@@ -1469,7 +1462,6 @@ class DataCatalog(object):
             handle_nodata=handle_nodata,
             predicate=predicate,
             variables=variables,
-            open_kwargs=open_kwargs,
         )
 
     def get_geodataset(
@@ -1488,7 +1480,6 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         source_kwargs: dict[str, Any] | None = None,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified GeoDataset.
 
@@ -1540,8 +1531,6 @@ class DataCatalog(object):
             Specifies a data version, by default None
         source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the GeoDatasetSource construction
-        open_kwargs : dict[str, Any] | None
-            Extra keyword arguments passed to the GeoDatasetSource.read_data method
 
         Returns
         -------
@@ -1612,7 +1601,6 @@ class DataCatalog(object):
             variables=variables,
             time_range=time_range,
             single_var_as_array=single_var_as_array,
-            open_kwargs=open_kwargs,
         )
 
     def get_dataset(
@@ -1627,7 +1615,6 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         source_kwargs: dict[str, Any] | None = None,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> xr.Dataset:
         """Return a clipped, sliced and unified Dataset.
 
@@ -1664,8 +1651,6 @@ class DataCatalog(object):
             Specifies a data version, by default None
         source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the DatasetSource construction
-        open_kwargs : dict[str, Any] | None
-            Extra keyword arguments passed to the DatasetSource.read_data method
 
         Returns
         -------
@@ -1718,7 +1703,6 @@ class DataCatalog(object):
             time_range=time_range,
             single_var_as_array=single_var_as_array,
             handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
         )
 
     def get_dataframe(
@@ -1730,7 +1714,6 @@ class DataCatalog(object):
         provider: Optional[str] = None,
         version: Optional[str] = None,
         source_kwargs: dict[str, Any] | None = None,
-        open_kwargs: dict[str, Any] | None = None,
     ) -> pd.DataFrame:
         """Return a clipped, sliced and unified DataFrame.
 
@@ -1757,8 +1740,6 @@ class DataCatalog(object):
             Specifies a data version, by default None
         source_kwargs : dict[str, Any] | None
             Extra keyword arguments passed to the DataFrameSource construction
-        open_kwargs : dict[str, Any] | None
-            Extra keyword arguments passed to the DataFrameSource.read_data method
 
         Returns
         -------
@@ -1811,10 +1792,7 @@ class DataCatalog(object):
             raise ValueError(f'Unknown tabular data type "{type(data_like).__name__}"')
 
         return source.read_data(
-            variables=variables,
-            time_range=time_range,
-            handle_nodata=handle_nodata,
-            open_kwargs=open_kwargs,
+            variables=variables, time_range=time_range, handle_nodata=handle_nodata
         )
 
 
