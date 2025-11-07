@@ -30,6 +30,7 @@
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/theme-deltares.css?v=aa503ec8" />
   
@@ -140,6 +141,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../overview/intro.html">
     Getting started
   </a>
@@ -156,13 +164,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -300,6 +301,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../overview/intro.html">
     Getting started
   </a>
@@ -316,13 +324,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -458,21 +459,80 @@
   <h1>Source code for hydromt.data_catalog.drivers.base_driver</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Base class for different drivers.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">fsspec.implementations.local</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalFileSystem</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">ConfigDict</span><span class="p">,</span>
-    <span class="n">Field</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_validator</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._abstract_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractBaseModel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PLUGINS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing.fsspec_types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FSSpecFileSystem</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="n">DRIVER_OPTIONS_DESCRIPTION</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Driver options that can be used to configure the behavior of the driver.</span>
+<span class="s2">DriverOptions allows for setting arbitrary kwargs. Any options not explicitly declared</span>
+<span class="s2">in the DriverOptions class are passed as kwargs to the underlying `open` functions.</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="DriverOptions">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.DriverOptions.html#hydromt.data_catalog.drivers.DriverOptions">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DriverOptions</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Options for the driver.</span>
+
+<span class="sd">    Fields declared in this class or its subclasses are used to configure the behavior of the driver.</span>
+<span class="sd">    Any other undeclared keyword arguments are allowed and will be stored in the instance.</span>
+<span class="sd">    These extra keyword arguments are passed as kwargs to the underlying `open` functions used by the driver.</span>
+
+<span class="sd">    Retrieving the extra kwargs can be done using the `get_kwargs` method:</span>
+<span class="sd">    - Some options may be solely used internally by the driver and not passed to the `open` functions.</span>
+<span class="sd">    - Some options may be used both internally and passed to the `open` functions.</span>
+<span class="sd">    - To specify which declared fields should be passed to the `open` functions, set the class variable `KWARGS_FOR_OPEN`.</span>
+<span class="sd">    - By default, all declared fields are excluded, and only extra kwargs are passed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># allow arbitrary kwargs, usually passed to some `open_dataset` function()</span>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;allow&quot;</span><span class="p">)</span>
+
+    <span class="n">KWARGS_FOR_OPEN</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fields that are to be included as kwargs when passing to `open` functions.</span>
+<span class="sd">    By default, all fields defined in the class are excluded.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DriverOptions.get_excluded_kwarg_names_for_open">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.DriverOptions.html#hydromt.data_catalog.drivers.DriverOptions.get_excluded_kwarg_names_for_open">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_excluded_kwarg_names_for_open</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the fields that are to be excluded when passing to `open` functions.</span>
+
+<span class="sd">        This includes all declared fields in the class, minus those defined in `KWARGS_FOR_OPEN`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">model_fields</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">KWARGS_FOR_OPEN</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DriverOptions.to_dict">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.DriverOptions.html#hydromt.data_catalog.drivers.DriverOptions.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return dict of kwargs excluding reserved/internal keys, and including the extra kwargs.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span> <span class="n">exclude_unset</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DriverOptions.get_kwargs">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.DriverOptions.html#hydromt.data_catalog.drivers.DriverOptions.get_kwargs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return attributes set that are not explicitly declared fields.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span>
+            <span class="n">exclude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_excluded_kwarg_names_for_open</span><span class="p">(),</span> <span class="n">exclude_unset</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="BaseDriver">
@@ -484,11 +544,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">supports_writing</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">filesystem</span><span class="p">:</span> <span class="n">FS</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">LocalFileSystem</span><span class="p">)</span>
-    <span class="n">options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;Whether the driver supports writing data.&quot;&quot;&quot;</span>
 
-    <span class="n">model_config</span><span class="p">:</span> <span class="n">ConfigDict</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
+    <span class="n">model_config</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">ConfigDict</span><span class="p">]</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">extra</span><span class="o">=</span><span class="s2">&quot;forbid&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;Forbid extra fields in the driver configuration and allow arbitrary types.&quot;&quot;&quot;</span>
+
     <span class="n">SUPPORTED_EXTENSIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;Set of supported file extensions for this driver.&quot;&quot;&quot;</span>
+
+    <span class="n">filesystem</span><span class="p">:</span> <span class="n">FSSpecFileSystem</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">FSSpecFileSystem</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Filesystem to use for accessing the data.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">options</span><span class="p">:</span> <span class="n">DriverOptions</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">DriverOptions</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">DRIVER_OPTIONS_DESCRIPTION</span>
+    <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compare equality.</span>
@@ -503,7 +573,55 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_plugins</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load Driver plugins.&quot;&quot;&quot;</span>
         <span class="n">plugins</span> <span class="o">=</span> <span class="n">PLUGINS</span><span class="o">.</span><span class="n">driver_plugins</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loaded </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> plugins: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugins</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;loaded </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> plugins: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">plugins</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseDriver.read">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver.read">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
+        <span class="n">kwargs_for_open</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read data using the driver.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uris : list[str]</span>
+<span class="sd">            List of URIs to read data from.</span>
+<span class="sd">        handle_nodata : NoDataStrategy, optional</span>
+<span class="sd">            Strategy to handle no data situations. Default is NoDataStrategy.RAISE.</span>
+<span class="sd">        kwargs_for_open : dict[str, Any] | None, optional</span>
+<span class="sd">            Additional keyword arguments to pass to the underlying open function. Default is None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="BaseDriver.write">
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver.write">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write data using the driver.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : str | Path</span>
+<span class="sd">            Path to write data to.</span>
+<span class="sd">        *args</span>
+<span class="sd">            Positional arguments for the write function.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Keyword arguments for the write function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;filesystem&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;before&quot;</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_filesystem</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FSSpecFileSystem</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Allow filesystem to be provided as string, dict, or FSSpecFileSystem.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FSSpecFileSystem</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">v</span><span class="p">)</span></div>
 
 </pre></div>
 

@@ -31,6 +31,7 @@
 <link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/theme-deltares.css?v=aa503ec8" />
   
@@ -142,6 +143,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="overview/intro.html">
     Getting started
   </a>
@@ -158,13 +166,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/api.html">
-    API reference
   </a>
 </li>
 
@@ -304,6 +305,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="overview/intro.html">
     Getting started
   </a>
@@ -320,13 +328,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/api.html">
-    API reference
   </a>
 </li>
 
@@ -485,6 +486,7 @@
 <li><p><cite>_io.writers.write_nc</cite> writes to a temporary file inside of the working folder of the caller, not to a temporary directory. Changed, because hydromt cannot know how much space is required. The caller should handle their workspaces well.</p></li>
 <li><p><cite>hydromt check</cite> accepts a <cite>–format</cite> flag to check either v1 or v0 data catalogs (#1265)</p></li>
 <li><p><cite>hydromt check</cite> accepts a <cite>–upgrade</cite> flag to upgrade v0 datacatalogs to the new v1 format (#1265)</p></li>
+<li><p><cite>Model</cite> can now be used as a context manager. This ensures that all open files are closed when exiting the context. (#1272)</p></li>
 </ul>
 </section>
 <section id="changed">
@@ -496,6 +498,9 @@
 <li><p>HydroMT raster utilities such as <cite>full</cite>, <cite>full_from_transform</cite>, <cite>full_like</cite> and <cite>merge</cite> have been moved to <cite>hydromt.gis.raster_utils</cite>. (#1271)</p></li>
 <li><p><cite>DataCatalog.driver.preprocessing</cite> and its functions are now public (underscore removed). (#1271)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">NoDataStrategy</span></code> is now part of of <code class="docutils literal notranslate"><span class="pre">hydromt.error</span></code> and thus public (#1277)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hydromt.typing</span></code> and its functions are now public (underscore removed). (#1286)</p></li>
+<li><p>remove <code class="docutils literal notranslate"><span class="pre">io</span></code> submodule and move <code class="docutils literal notranslate"><span class="pre">readers</span></code> and <code class="docutils literal notranslate"><span class="pre">writers</span></code> to the root module (#1308)</p></li>
+<li><p><cite>write_nc</cite> function no longer accepts kwargs, instead a dict <cite>to_netcdf_kwargs</cite> is used to pass arguments to <cite>xarray.to_netcdf</cite>. The function raises an error when “compute” is one of the arguments.</p></li>
 </ul>
 </section>
 <section id="fixed">
@@ -508,8 +513,12 @@
 <li><p>Improved logging information for build and update functions. (#1237)</p></li>
 <li><p>Better documentation of drivers and their options. (#1271)</p></li>
 <li><p>Passing options to <code class="docutils literal notranslate"><span class="pre">geodataframe_table</span></code> driver now works. (#1271)</p></li>
+<li><p>Relative path in the workflow yaml were not correctly resolved. (#1304)</p></li>
+<li><p>Fix pydantic for V1 catalog for nodata and fix the catalog upgrade to convert nodata and extra metadata arguments. (#1304)</p></li>
+<li><p>Do not pass metadata “extent” from catalog in xarray objects to avoid issues when writting to netcdf. (#1304)</p></li>
 <li><p>Build and update functions call <cite>ModelComponent.cleanup</cite> and <cite>ModelComponent.finish_write</cite>. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)</p></li>
 <li><p><cite>hydromt check</cite> has been updated to validate v1 data catalogs (#1265)</p></li>
+<li><p>All handling of log files is now done with the context manager <cite>hydromt._utils.log.to_file</cite>. This means that they are always closed by the the function that opened them. (#1272)</p></li>
 </ul>
 </section>
 <section id="deprecated">

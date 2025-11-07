@@ -30,6 +30,7 @@
 <link href="../../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/theme-deltares.css?v=aa503ec8" />
   
@@ -140,6 +141,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../../overview/intro.html">
     Getting started
   </a>
@@ -156,13 +164,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -300,6 +301,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../../overview/intro.html">
     Getting started
   </a>
@@ -316,13 +324,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -458,22 +459,22 @@
   <h1>Source code for hydromt.data_catalog.drivers.geodataframe.pyogrio_driver</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Driver to read geodataframes using Pyogrio.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">splitext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyogrio</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_dataframe</span><span class="p">,</span> <span class="n">read_info</span><span class="p">,</span> <span class="n">write_dataframe</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bbox</span><span class="p">,</span> <span class="n">Geom</span><span class="p">,</span> <span class="n">StrPath</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.geodataframe.geodataframe_driver</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">GeoDataFrameDriver</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bbox</span><span class="p">,</span> <span class="n">Geom</span><span class="p">,</span> <span class="n">SourceMetadata</span><span class="p">,</span> <span class="n">StrPath</span>
 
-<span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PyogrioDriver">
@@ -484,24 +485,24 @@
 
 <span class="sd">    Supports reading and writing files supported by the OGR library,</span>
 <span class="sd">    including geopackage, shapefile, geojson and flatgeobuf.</span>
-
-<span class="sd">    Options in this driver are passed to `pyogrio.read_dataframe`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;pyogrio&quot;</span>
-    <span class="n">supports_writing</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;pyogrio&quot;</span>
+    <span class="n">supports_writing</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">SUPPORTED_EXTENSIONS</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;.gpkg&quot;</span><span class="p">,</span> <span class="s2">&quot;.shp&quot;</span><span class="p">,</span> <span class="s2">&quot;.geojson&quot;</span><span class="p">,</span> <span class="s2">&quot;.fgb&quot;</span><span class="p">}</span>
 
 <div class="viewcode-block" id="PyogrioDriver.read">
-<a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.PyogrioDriver.read.html#hydromt.data_catalog.drivers.PyogrioDriver.read">[docs]</a>
+<a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.PyogrioDriver.html#hydromt.data_catalog.drivers.PyogrioDriver.read">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">uris</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Geom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">variables</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">kwargs_for_open</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">variables</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">predicate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read data using pyogrio.</span>
@@ -512,6 +513,8 @@
 <span class="sd">        are only present in the method&#39;s signature for compatibility with other</span>
 <span class="sd">        functions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kwargs_for_open</span> <span class="o">=</span> <span class="n">kwargs_for_open</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">()</span> <span class="o">|</span> <span class="n">kwargs_for_open</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;DataFrame: Reading multiple files with the &quot;</span>
@@ -522,11 +525,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_uri</span> <span class="o">=</span> <span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">bbox</span> <span class="o">=</span> <span class="n">_bbox_from_file_and_mask</span><span class="p">(</span><span class="n">_uri</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">)</span>
+                <span class="n">bbox</span> <span class="o">=</span> <span class="n">_bbox_from_file_and_mask</span><span class="p">(</span><span class="n">_uri</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">bbox</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">gdf</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="n">read_dataframe</span><span class="p">(</span>
-                <span class="n">_uri</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span>
+            <span class="n">gdf</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span> <span class="o">=</span> <span class="n">read_dataframe</span><span class="p">(</span>
+                <span class="n">_uri</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">variables</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">gdf</span><span class="p">,</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DataFrame from uri: &#39;</span><span class="si">{</span><span class="n">_uri</span><span class="si">}</span><span class="s2">&#39; contains no geometry column.&quot;</span><span class="p">)</span>
@@ -537,7 +540,7 @@
 
 
 <div class="viewcode-block" id="PyogrioDriver.write">
-<a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.PyogrioDriver.write.html#hydromt.data_catalog.drivers.PyogrioDriver.write">[docs]</a>
+<a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.PyogrioDriver.html#hydromt.data_catalog.drivers.PyogrioDriver.write">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span>
@@ -567,7 +570,8 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_bbox_from_file_and_mask</span><span class="p">(</span>
     <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">mask</span><span class="p">:</span> <span class="n">Geom</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Bbox</span><span class="p">]:</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Bbox</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a bbox from the file metadata and mask given.</span>
 
 <span class="sd">    Pyogrio&#39;s mask or bbox arguments require a mask or bbox in the same CRS as the data.</span>
@@ -582,7 +586,7 @@
 <span class="sd">        mask to filter the data while reading.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">source_crs</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">source_crs_str</span> <span class="o">:=</span> <span class="n">read_info</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">source_crs_str</span> <span class="o">:=</span> <span class="n">read_info</span><span class="p">(</span><span class="n">uri</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">):</span>
         <span class="n">source_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_user_input</span><span class="p">(</span><span class="n">source_crs_str</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">source_crs</span><span class="p">:</span>

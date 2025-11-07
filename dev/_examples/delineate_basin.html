@@ -31,6 +31,7 @@
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
@@ -145,6 +146,13 @@
 <nav>
   <ul class="bd-navbar-elements navbar-nav">
     
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/api.html">
+    API reference
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../overview/intro.html">
     Getting started
@@ -162,13 +170,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -307,6 +308,13 @@
 <nav>
   <ul class="bd-navbar-elements navbar-nav">
     
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/api.html">
+    API reference
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../overview/intro.html">
     Getting started
@@ -324,13 +332,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -549,7 +550,7 @@
 <h2>Read data<a class="headerlink" href="#Read-data" title="Link to this heading">#</a></h2>
 <p>Read data using the <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html"><span class="doc">DataCatalog</span></a>. If no yml files with data sources are provided, by default data for the Piave basin is downloaded from the hydromt-artifacts to to <code class="docutils literal notranslate"><span class="pre">~/.hydromt_data/</span></code>. Links to the original data sources and data licenses can be found in the meta dict of each source. Here we use flow direction data from <a class="reference external" href="http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro">MERIT Hydro</a>. Note that the original <code class="docutils literal notranslate"><span class="pre">'MERIT</span> <span class="pre">Hydro'</span></code> data has
 been extended with a basin mask layer, which together with the basin index vector data makes faster basin delineation possible.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
@@ -557,6 +558,15 @@ been extended with a basin mask layer, which together with the basin index vecto
 <span class="n">data_catalog</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="n">data_libs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;artifact_data=v1.0.0&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:01:40,665 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
+2025-11-07 11:01:40,665 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -573,7 +583,7 @@ been extended with a basin mask layer, which together with the basin index vecto
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-name=&#39;merit_hydro&#39; uri=&#39;merit_hydro/{variable}.tif&#39; data_adapter=RasterDatasetAdapter(unit_add={}, unit_mult={}, rename={}) driver=RasterioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f17ad7d9490&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f17ad7d9490&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=&#39;1.0&#39; provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+name=&#39;merit_hydro&#39; uri=&#39;merit_hydro/{variable}.tif&#39; data_adapter=RasterDatasetAdapter(unit_add={}, unit_mult={}, rename={}) driver=RasterioDriver(filesystem=FSSpecFileSystem(protocol=&#39;file&#39;, storage_options={}), options=RasterioOptions(mosaic=False, mosaic_kwargs={}, cache=False, cache_root=&#39;/home/runner/.hydromt&#39;, cache_dir=None)) uri_resolver=ConventionResolver(filesystem=FSSpecFileSystem(protocol=&#39;file&#39;, storage_options={}), options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=&#39;1.0&#39; provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -585,6 +595,7 @@ Datum: World Geodetic System 1984 ensemble
 - Ellipsoid: WGS 84
 - Prime Meridian: Greenwich
 , unit=None, extent={}, nodata=None, attrs={}, category=&#39;topography&#39;, paper_doi=&#39;10.1029/2019WR024873&#39;, paper_ref=&#39;Yamazaki et al. (2019)&#39;, url=&#39;http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro&#39;, license=&#39;CC-BY-NC 4.0 or ODbL 1.0&#39;)
+2025-11-07 11:01:41,342 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -604,7 +615,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-name=&#39;merit_hydro_index&#39; uri=&#39;merit_hydro_index.gpkg&#39; data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}) driver=PyogrioDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f17ad7d9490&gt;, options={}) uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7f17ad7d9490&gt;, options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=None provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
+name=&#39;merit_hydro_index&#39; uri=&#39;merit_hydro_index.gpkg&#39; data_adapter=GeoDataFrameAdapter(unit_add={}, unit_mult={}, rename={}) driver=PyogrioDriver(filesystem=FSSpecFileSystem(protocol=&#39;file&#39;, storage_options={}), options=DriverOptions()) uri_resolver=ConventionResolver(filesystem=FSSpecFileSystem(protocol=&#39;file&#39;, storage_options={}), options={}) root=&#39;/home/runner/.hydromt/artifact_data/v1.0.0&#39; version=None provider=None metadata=SourceMetadata(crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
 Name: WGS 84
 Axis Info [ellipsoidal]:
 - Lat[north]: Geodetic latitude (degree)
@@ -645,7 +656,7 @@ Datum: World Geodetic System 1984 ensemble
 <h2>Delineate basins<a class="headerlink" href="#Delineate-basins" title="Link to this heading">#</a></h2>
 <p>Several examples to delineate sub-, inter- or full basins are provided below together with the command line interface (CLI) syntax for the HydroMT <a class="reference internal" href="../guides/user_guide/model_build.html"><span class="doc">build</span></a> command. All CLI options are described in the <a class="reference internal" href="../_generated/hydromt.model.processes.region.parse_region_basin.html"><span class="doc">parse_region_basin()</span></a> method.</p>
 <p>Get the basin based on a point location <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y]</span></code>.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
@@ -662,6 +673,15 @@ Datum: World Geodetic System 1984 ensemble
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:01:43,854 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_index GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro_index.gpkg
+2025-11-07 11:01:43,960 - hydromt.model.processes.basin_mask - basin_mask - INFO - basin bbox: [12.1958, 45.5850, 12.8983, 46.4167]
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
@@ -673,16 +693,6 @@ Datum: World Geodetic System 1984 ensemble
 <span class="n">plot</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">gdf_bas</span><span class="p">,</span> <span class="n">gdf_xy</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/tmp/ipykernel_4389/1510890054.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
-
-  extent = np.array(gdf_bas.buffer(0.1).total_bounds)[[0, 2, 1, 3]]
-</pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
@@ -697,7 +707,7 @@ Datum: World Geodetic System 1984 ensemble
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_delineate_basin_16_2.png" src="../_images/_examples_delineate_basin_16_2.png" />
+<img alt="../_images/_examples_delineate_basin_16_1.png" src="../_images/_examples_delineate_basin_16_1.png" />
 </div>
 </div>
 </section>
@@ -705,7 +715,7 @@ Datum: World Geodetic System 1984 ensemble
 <h2>Delineate sub-basins<a class="headerlink" href="#Delineate-sub-basins" title="Link to this heading">#</a></h2>
 <p>We need an initial bounding box to delineate the sub-basin. This can be derived from the <em>merit_hydro_index</em> or user provided initial <code class="docutils literal notranslate"><span class="pre">bounds</span></code>. The latter might be faster if delineating a small sub-basin from a large basin. A warning is raised if not all contributing cells are included.</p>
 <p>Get a subbasin based on its outlet location <code class="docutils literal notranslate"><span class="pre">[x,y]</span></code>, snapped to a stream defined by a <code class="docutils literal notranslate"><span class="pre">&lt;variable&gt;:&lt;threshold&gt;</span></code> pair, in this case a stream order larger or equal to 7. The <code class="docutils literal notranslate"><span class="pre">variable</span></code> should be present in the dataset <code class="docutils literal notranslate"><span class="pre">ds</span></code>.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
@@ -724,6 +734,14 @@ Datum: World Geodetic System 1984 ensemble
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:01:47,341 - hydromt.model.processes.basin_mask - basin_mask - INFO - subbasin bbox: [12.2350, 45.7950, 12.8783, 46.4167]
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
@@ -738,16 +756,6 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/tmp/ipykernel_4389/3041410776.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
-
-  extent = gdf_bounds.buffer(0.05).total_bounds[[0, 2, 1, 3]]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
@@ -760,11 +768,11 @@ Datum: World Geodetic System 1984 ensemble
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_delineate_basin_21_2.png" src="../_images/_examples_delineate_basin_21_2.png" />
+<img alt="../_images/_examples_delineate_basin_21_1.png" src="../_images/_examples_delineate_basin_21_1.png" />
 </div>
 </div>
 <p>Get a sub-basin based on the location where the stream flows out of a <code class="docutils literal notranslate"><span class="pre">bbox</span></code>. Here the stream defined by a <code class="docutils literal notranslate"><span class="pre">&lt;variable&gt;:&lt;threshold&gt;</span></code> pair, in this case a stream order larger or equal to 8. The <code class="docutils literal notranslate"><span class="pre">variable</span></code> should be present in the dataset <code class="docutils literal notranslate"><span class="pre">ds</span></code>.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
@@ -782,6 +790,15 @@ Datum: World Geodetic System 1984 ensemble
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:01:48,427 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_index GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro_index.gpkg
+2025-11-07 11:01:48,734 - hydromt.model.processes.basin_mask - basin_mask - INFO - subbasin bbox: [12.1958, 45.7192, 12.8783, 46.4167]
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
@@ -796,16 +813,6 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/tmp/ipykernel_4389/2647821985.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
-
-  extent = gdf_bas.buffer(0.05).total_bounds[[0, 2, 1, 3]]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
@@ -818,14 +825,14 @@ Datum: World Geodetic System 1984 ensemble
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_delineate_basin_24_2.png" src="../_images/_examples_delineate_basin_24_2.png" />
+<img alt="../_images/_examples_delineate_basin_24_1.png" src="../_images/_examples_delineate_basin_24_1.png" />
 </div>
 </div>
 </section>
 <section id="Delineate-interbasins">
 <h2>Delineate interbasins<a class="headerlink" href="#Delineate-interbasins" title="Link to this heading">#</a></h2>
 <p>Get an inter-basin based on the streams within a <code class="docutils literal notranslate"><span class="pre">bbox</span></code>. The inter-basin is limited to the most downstream contiguous area within the bbox that drains to the stream. Here the stream defined by a <code class="docutils literal notranslate"><span class="pre">&lt;variable&gt;:&lt;threshold&gt;</span></code> pair, in this case a stream order larger or equal to 8. The <code class="docutils literal notranslate"><span class="pre">variable</span></code> should be present in the dataset <code class="docutils literal notranslate"><span class="pre">ds</span></code>. The <code class="docutils literal notranslate"><span class="pre">buffer</span></code> is required to check wether streams flow in and out of the bbox.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
@@ -843,6 +850,14 @@ Datum: World Geodetic System 1984 ensemble
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:01:51,394 - hydromt.model.processes.basin_mask - basin_mask - INFO - interbasin bbox: [12.5000, 45.7200, 12.7000, 46.0000]
+</pre></div></div>
+</div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
@@ -857,16 +872,6 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/tmp/ipykernel_4389/1881121779.py:3: UserWarning: Geometry is in a geographic CRS. Results from &#39;buffer&#39; are likely incorrect. Use &#39;GeoSeries.to_crs()&#39; to re-project geometries to a projected CRS before this operation.
-
-  extent = gdf_bbox.buffer(0.02).total_bounds[[0, 2, 1, 3]]
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
@@ -879,7 +884,7 @@ Datum: World Geodetic System 1984 ensemble
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_delineate_basin_28_2.png" src="../_images/_examples_delineate_basin_28_2.png" />
+<img alt="../_images/_examples_delineate_basin_28_1.png" src="../_images/_examples_delineate_basin_28_1.png" />
 </div>
 </div>
 </section>

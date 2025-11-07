@@ -31,6 +31,7 @@
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=aa503ec8" />
   
@@ -143,6 +144,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../overview/intro.html">
     Getting started
   </a>
@@ -159,13 +167,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -305,6 +306,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../overview/intro.html">
     Getting started
   </a>
@@ -321,13 +329,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -531,7 +532,7 @@
 <li><p><a class="reference internal" href="#dataframe"><span class="std std-ref">DataFrame</span></a>: 2D tabular data</p></li>
 </ul>
 <p>Internally the RasterDataset, GeoDataset, and Dataset are represented by
-<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.9.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects, the GeoDataFrame by
+<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> objects, the GeoDataFrame by
 <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a>, and the DataFrame by <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>.
 We use drivers, typically from third-party packages and sometimes wrapped in HydroMT
 functions, to parse many different file formats to this standardized internal data
@@ -569,14 +570,14 @@ representation.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver" title="hydromt.data_catalog.drivers.raster.rasterio_driver.RasterioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">raster</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver" title="hydromt.data_catalog.drivers.raster.rasterio_driver.RasterioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">rasterio</span></code></a></p></td>
 <td><p>GeoTIFF, ArcASCII, VRT, etc. (see <a class="reference external" href="http://www.gdal.org/formats_list.html">GDAL formats</a>)</p></td>
 <td><p>Based on <code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_rasterio()</span></code>
 and <a class="reference external" href="https://rasterio.readthedocs.io/en/latest/api/rasterio.html#rasterio.open" title="(in rasterio)"><code class="xref py py-func docutils literal notranslate"><span class="pre">rasterio.open()</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver" title="hydromt.data_catalog.drivers.raster.rasterio_driver.RasterioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">raster</span></code></a> with the
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver" title="hydromt.data_catalog.drivers.raster.rasterio_driver.RasterioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">rasterio</span></code></a> with the
 <a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.RasterTindexResolver.html#hydromt.data_catalog.uri_resolvers.RasterTindexResolver" title="hydromt.data_catalog.uri_resolvers.raster_tindex_resolver.RasterTindexResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">raster_tindex</span></code></a> resolver</p></td>
-<td><p>raster tile index file (see <a class="reference external" href="https://gdal.org/programs/gdaltindex.html">gdaltindex</a>)</p></td>
+<td><p>rasterio tile index file (see <a class="reference external" href="https://gdal.org/programs/gdaltindex.html">gdaltindex</a>)</p></td>
 <td><p>Options to merge tiles via <cite>options -&gt; mosaic_kwargs</cite>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.html#hydromt.data_catalog.drivers.RasterDatasetXarrayDriver" title="hydromt.data_catalog.drivers.raster.raster_xarray_driver.RasterDatasetXarrayDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">raster_xarray</span></code></a></p></td>
@@ -591,7 +592,7 @@ and <a class="reference external" href="https://rasterio.readthedocs.io/en/lates
 This driver supports 2D raster for which the dimensions are names “x” and “y”.
 A potential third dimension is called “dim0”.
 The variable name is based on the filename, in this case <cite>“GLOBCOVER_200901_200912_300x300m”</cite>.
-The <cite>chunks</cite> key-word argument is passed to <a class="reference internal" href="../../_generated/hydromt.io.open_mfraster.html#hydromt.io.open_mfraster" title="hydromt.io.open_mfraster"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_mfraster()</span></code></a>
+The <cite>chunks</cite> key-word argument is passed to <a class="reference internal" href="../../_generated/hydromt.readers.open_mfraster.html#hydromt.readers.open_mfraster" title="hydromt.readers.open_mfraster"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_mfraster()</span></code></a>
 and allows lazy reading of the data.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">globcover</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">uri</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">base/landcover/globcover/GLOBCOVER_200901_200912_300x300m.tif</span>
@@ -713,8 +714,8 @@ See list of recognized <a class="reference internal" href="#dimensions">dimensio
 </pre></div>
 </div>
 <p>To read a raster dataset from a multiple file netcdf archive the following data entry
-is used, where the <cite>options</cite> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.9.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
-(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2025.9.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
+is used, where the <cite>options</cite> are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.10.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
+(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2025.10.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
 In case the CRS cannot be inferred from the netcdf metadata it should be defined with
 the <cite>crs</cite> <cite>metadata`</cite> here.
 The path to multiple files can be set using a sting glob or several keys,
@@ -750,7 +751,7 @@ unify the data to match the HydroMT naming and unit <a class="reference internal
 </div>
 <section id="preprocess-functions-when-combining-multiple-files">
 <h4>Preprocess functions when combining multiple files<a class="headerlink" href="#preprocess-functions-when-combining-multiple-files" title="Link to this heading">#</a></h4>
-<p>In <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.9.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, xarray allows for a <strong>preprocess</strong> function to be
+<p>In <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.10.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>, xarray allows for a <strong>preprocess</strong> function to be
 run before merging several netcdf files together. In hydroMT, some preprocess functions
 are available and can be passed through the options in the same way as any
 xr.open_mfdataset options. These preprocess functions are found at
@@ -902,8 +903,8 @@ on a list of recognized <a class="reference internal" href="#dimensions">dimensi
 </pre></div>
 </div>
 <p>To read a point time-series dataset from a multiple file netcdf archive the following data entry
-is used, where the options are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.9.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
-(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2025.9.2)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
+is used, where the options are passed to <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_mfdataset.html#xarray.open_mfdataset" title="(in xarray v2025.10.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_mfdataset()</span></code></a>
+(or <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.open_zarr.html#xarray.open_zarr" title="(in xarray v2025.10.1)"><code class="xref py py-func docutils literal notranslate"><span class="pre">xarray.open_zarr()</span></code></a> for zarr data).
 In case the CRS cannot be inferred from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys,
 see description of the <cite>uri</cite> argument in the <a class="reference internal" href="data_prepare_cat.html#data-yaml"><span class="std std-ref">yaml file description</span></a>.
@@ -1018,7 +1019,7 @@ dimension.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.PandasDriver.html#hydromt.data_catalog.drivers.PandasDriver" title="hydromt.data_catalog.drivers.dataframe.pandas_driver.PandasDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">csv</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.PandasDriver.html#hydromt.data_catalog.drivers.PandasDriver" title="hydromt.data_catalog.drivers.dataframe.pandas_driver.PandasDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas</span></code></a></p></td>
 <td><p>any file readable by pandas</p></td>
 <td><p>Provide a sheet name or formatting through options</p></td>
 </tr>

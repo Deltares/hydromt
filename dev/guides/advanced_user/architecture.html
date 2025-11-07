@@ -31,6 +31,7 @@
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=aa503ec8" />
   
@@ -143,6 +144,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../overview/intro.html">
     Getting started
   </a>
@@ -159,13 +167,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -305,6 +306,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../overview/intro.html">
     Getting started
   </a>
@@ -321,13 +329,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -557,7 +558,7 @@ catalogs, using a <cite>yaml</cite> format, or they can share their
 <p>The <a class="reference internal" href="../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource" title="hydromt.data_catalog.sources.data_source.DataSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></a> is the python representation of a parsed
 entry in the <a class="reference internal" href="../../_generated/hydromt.data_catalog.DataCatalog.html#hydromt.data_catalog.DataCatalog" title="hydromt.data_catalog.DataCatalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code></a>. The source is responsible for
 validating the catalog entry. It also carries the
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase.html#hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a>,
+<a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.DataAdapterBase.html#hydromt.data_catalog.adapters.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a>,
 <a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html#hydromt.data_catalog.uri_resolvers.URIResolver" title="hydromt.data_catalog.uri_resolvers.URIResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code></a> and
 <a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.base_driver.BaseDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a> and serves as an entrypoint to the data.
 Per HydroMT data type (e.g. <code class="docutils literal notranslate"><span class="pre">RasterDataset</span></code>, <code class="docutils literal notranslate"><span class="pre">GeoDataFrame</span></code>), HydroMT has one
@@ -567,7 +568,7 @@ Per HydroMT data type (e.g. <code class="docutils literal notranslate"><span cla
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> method governs the full process of discovery
 with the <a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html#hydromt.data_catalog.uri_resolvers.URIResolver" title="hydromt.data_catalog.uri_resolvers.URIResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code></a>, reading data with the
 <a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.base_driver.BaseDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a>, and transforming the data to a HydroMT
-standard with a <a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase.html#hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a>.</p>
+standard with a <a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.DataAdapterBase.html#hydromt.data_catalog.adapters.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a>.</p>
 </section>
 <section id="uriresolver">
 <h2>URIResolver<a class="headerlink" href="#uriresolver" title="Link to this heading">#</a></h2>
@@ -587,7 +588,7 @@ conventions for data discovery.</p>
 <p>The <a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.base_driver.BaseDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a> class is responsible for reading a
 set of geospatial data formats, like a <code class="docutils literal notranslate"><span class="pre">geojson</span></code> file or <code class="docutils literal notranslate"><span class="pre">zarr</span></code> archive, into their
 python in-memory representations: <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a> or
-<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.9.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> respectively. This class can also be extended using the
+<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> respectively. This class can also be extended using the
 <a class="reference internal" href="../../plugins.html#plugins"><span class="std std-ref">Plugins</span></a>. Because the merging of different files from different
 <a class="reference internal" href="../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource" title="hydromt.data_catalog.sources.data_source.DataSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></a> s can be non-trivial, the driver is responsible
 to merge the different python objects coming from the driver to a single representation.
@@ -599,13 +600,13 @@ different filesystems, the driver class is handed a <code class="xref py py-clas
 </section>
 <section id="dataadapter">
 <h2>DataAdapter<a class="headerlink" href="#dataadapter" title="Link to this heading">#</a></h2>
-<p>The <a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase.html#hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a> homogenizes the
+<p>The <a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.DataAdapterBase.html#hydromt.data_catalog.adapters.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a> homogenizes the
 data coming from the <a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.base_driver.BaseDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a>. This means slicing
 the data to the right region, renaming variables, changing units, regridding and more.
 The adapter has a <code class="xref py py-meth docutils literal notranslate"><span class="pre">transform()</span></code> method that takes a python object and returns the
 same type, e.g. an <cite>xr.Dataset</cite>. This method also accepts query parameters based on the
 data type, so there is a single
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase.html#hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a> per HydroMT data type.</p>
+<a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.DataAdapterBase.html#hydromt.data_catalog.adapters.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a> per HydroMT data type.</p>
 </section>
 </section>
 <section id="architecture-diagram">

@@ -30,6 +30,7 @@
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/theme-deltares.css?v=aa503ec8" />
   
@@ -140,6 +141,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../overview/intro.html">
     Getting started
   </a>
@@ -156,13 +164,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -300,6 +301,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../overview/intro.html">
     Getting started
   </a>
@@ -316,13 +324,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -461,6 +462,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABCMeta</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">inspect</span><span class="w"> </span><span class="kn">import</span> <span class="n">_empty</span><span class="p">,</span> <span class="n">signature</span>
@@ -471,11 +473,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gdp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrPath</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_rgetattr</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.steps_validator</span><span class="w"> </span><span class="kn">import</span> <span class="n">_validate_steps</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_rgetattr</span><span class="p">,</span> <span class="n">_validate_steps</span><span class="p">,</span> <span class="n">log</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataCatalog</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.io.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_yaml</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.components</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ModelComponent</span><span class="p">,</span>
     <span class="n">SpatialModelComponent</span><span class="p">,</span>
@@ -483,12 +482,14 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.root</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelRoot</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model.steps</span><span class="w"> </span><span class="kn">import</span> <span class="n">hydromt_step</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.plugins</span><span class="w"> </span><span class="kn">import</span> <span class="n">PLUGINS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_yaml</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span>
 
 <span class="c1"># define hydromt model entry points</span>
 <span class="c1"># see also hydromt.model group in pyproject.toml</span>
 <span class="n">__hydromt_eps__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span>
+
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">ModelComponent</span><span class="p">)</span>
@@ -508,7 +509,7 @@
 <a class="viewcode-back" href="../../../_generated/hydromt.model.Model.html#hydromt.model.Model.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">root</span><span class="p">:</span> <span class="n">StrPath</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">components</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span>
@@ -520,8 +521,8 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        root : str, optional</span>
-<span class="sd">            Model root, by default None</span>
+<span class="sd">        root : str, Path, optional</span>
+<span class="sd">            Model root, by default the current working directory: ``Path.cwd()``</span>
 <span class="sd">        components: Dict[str, Any], optional</span>
 <span class="sd">            Dictionary of components to add to the model, by default None</span>
 <span class="sd">            Every entry in this dictionary contains the name of the component as key,</span>
@@ -547,8 +548,6 @@
 <span class="sd">            If None, the model will can automatically determine the region component if there is only one `SpatialModelComponent`.</span>
 <span class="sd">            Otherwise it will raise an error.</span>
 <span class="sd">            If there are no `SpatialModelComponent` it will raise a warning that `region` functionality will not work.</span>
-<span class="sd">        logger:</span>
-<span class="sd">            The logger to be used.</span>
 <span class="sd">        **catalog_keys:</span>
 <span class="sd">            Additional keyword arguments to be passed down to the DataCatalog.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -562,7 +561,8 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;DataCatalog for data access&quot;&quot;&quot;</span>
 
         <span class="c1"># file system</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span> <span class="n">ModelRoot</span> <span class="o">=</span> <span class="n">ModelRoot</span><span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span> <span class="n">ModelRoot</span> <span class="o">=</span> <span class="n">ModelRoot</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Model root&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">components</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ModelComponent</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -675,6 +675,65 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns coordinate reference system embedded in region.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">crs</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
+<div class="viewcode-block" id="Model.__enter__">
+<a class="viewcode-back" href="../../../_generated/hydromt.model.Model.__enter__.html#hydromt.model.Model.__enter__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enter the model runtime context.</span>
+
+<span class="sd">        This allows the model to be used as a context manager in a ``with`` block.</span>
+<span class="sd">        The method returns the model instance itself, enabling setup and write</span>
+<span class="sd">        operations to be performed within the block.</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            with Model(root=&quot;path/to/model&quot;) as model: # This is where __enter__ is called</span>
+<span class="sd">                model.setup_x()</span>
+<span class="sd">                model.setup_y()</span>
+<span class="sd">                model.write()</span>
+<span class="sd">            # Exiting the with block will call __exit__, ensuring resources are cleaned up.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Model</span>
+<span class="sd">            The model instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Model.__exit__">
+<a class="viewcode-back" href="../../../_generated/hydromt.model.Model.__exit__.html#hydromt.model.Model.__exit__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Exit the model runtime context.</span>
+
+<span class="sd">        Ensures that resources associated with the model are properly released</span>
+<span class="sd">        when leaving a ``with`` block, even if an exception occurred during its</span>
+<span class="sd">        execution. This method delegates cleanup to :meth:`close`.</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            with Model(root=&quot;path/to/model&quot;) as model: # This is where __enter__ is called</span>
+<span class="sd">                model.setup_x()</span>
+<span class="sd">                model.setup_y()</span>
+<span class="sd">                model.write()</span>
+<span class="sd">            # Exiting the with block will call __exit__, ensuring resources are cleaned up.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        exc_type : type or None</span>
+<span class="sd">            The type of the exception raised in the ``with`` block, or ``None``</span>
+<span class="sd">            if no exception occurred.</span>
+<span class="sd">        exc_value : BaseException or None</span>
+<span class="sd">            The exception instance raised in the ``with`` block, or ``None``.</span>
+<span class="sd">        traceback : types.TracebackType or None</span>
+<span class="sd">            The traceback object associated with the exception, or ``None``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
 <div class="viewcode-block" id="Model.build">
 <a class="viewcode-back" href="../../../_generated/hydromt.model.Model.build.html#hydromt.model.Model.build">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span>
@@ -702,7 +761,7 @@
 <span class="sd">            Write complete model after executing all methods in opt, by default True.</span>
 <span class="sd">        steps: Optional[List[Dict[str, Dict[str, Any]]]]</span>
 <span class="sd">            Model build steps. The steps can be parsed from a hydromt workflow/</span>
-<span class="sd">            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.</span>
+<span class="sd">            configuration file using :py:meth:`~hydromt.read_workflow_yaml`.</span>
 <span class="sd">            This is a list of nested dictionary where the first-level keys are the names</span>
 <span class="sd">            of the method for a ``Model`` method (e.g. `write`) OR the name of a</span>
 <span class="sd">            component followed by the name of the method to run separated by a dot for</span>
@@ -721,35 +780,37 @@
 <span class="sd">                ]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">steps</span> <span class="o">=</span> <span class="n">steps</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="n">_validate_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">log</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;hydromt.log&quot;</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">log_version</span><span class="p">()</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="n">steps</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="n">_validate_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">step_dict</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
-            <span class="n">step</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">step_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;build: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1"># Call the methods.</span>
-            <span class="n">method</span> <span class="o">=</span> <span class="n">_rgetattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">param</span><span class="p">:</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span>
-                <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="o">!=</span> <span class="n">_empty</span>
-            <span class="p">}</span>
-            <span class="n">merged</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
-                <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-                <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">merged</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">step_dict</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+                <span class="n">step</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">step_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;build: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># Call the methods.</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">_rgetattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">param</span><span class="p">:</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span>
+                    <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="o">!=</span> <span class="n">_empty</span>
+                <span class="p">}</span>
+                <span class="n">merged</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
+                    <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">merged</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">merged</span><span class="p">)</span>
+                <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">merged</span><span class="p">)</span>
 
-        <span class="c1"># If there are any write options included in the steps,</span>
-        <span class="c1"># we don&#39;t need to write the whole model.</span>
-        <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options_contain_write</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+            <span class="c1"># If there are any write options included in the steps,</span>
+            <span class="c1"># we don&#39;t need to write the whole model.</span>
+            <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options_contain_write</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Model.update">
@@ -757,7 +818,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">model_out</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">model_out</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">write</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">steps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">forceful_overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -782,7 +843,7 @@
 <span class="sd">            Write the updated model schematization to disk. By default True.</span>
 <span class="sd">        steps: Optional[List[Dict[str, Dict[str, Any]]]]</span>
 <span class="sd">            Model build steps. The steps can be parsed from a hydromt workflow/</span>
-<span class="sd">            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.</span>
+<span class="sd">            configuration file using :py:meth:`~hydromt.read_workflow_yaml`.</span>
 <span class="sd">            This is a list of nested dictionary where the first-level keys are the names</span>
 <span class="sd">            of a component followed by the name of the method to run separated by a dot.</span>
 <span class="sd">            any subsequent pairs will be passed to the method as arguments.</span>
@@ -802,49 +863,65 @@
 <span class="sd">            try to write to a file that&#39;s already opened. The output will be written</span>
 <span class="sd">            to a temporary file in case the original file cannot be written to.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">steps</span> <span class="o">=</span> <span class="n">steps</span> <span class="ow">or</span> <span class="p">[]</span>
-        <span class="n">_validate_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+        <span class="c1"># read current model &amp; optionally clear log file</span>
+        <span class="k">with</span> <span class="n">log</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;hydromt.log&quot;</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">is_reading_mode</span><span class="p">()</span>
+        <span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">log_version</span><span class="p">()</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="n">steps</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="n">_validate_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">is_writing_mode</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">model_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;&quot;model_out&quot; directory required when updating in &quot;read-only&quot; mode.&#39;</span>
+                    <span class="p">)</span>
+                <span class="c1"># Copy log file</span>
+                <span class="n">model_out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_out</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">model_out</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+                    <span class="n">model_out</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;hydromt.log&quot;</span><span class="p">,</span> <span class="n">model_out</span> <span class="o">/</span> <span class="s2">&quot;hydromt.log&quot;</span>
+                    <span class="p">)</span>
 
-        <span class="c1"># read current model</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">is_writing_mode</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">model_out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;w+&quot;</span> <span class="k">if</span> <span class="n">forceful_overwrite</span> <span class="k">else</span> <span class="s2">&quot;w&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">model_out</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+        <span class="c1"># No need to clear the log file here since we did that already if needed above</span>
+        <span class="k">with</span> <span class="n">log</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;hydromt.log&quot;</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">log_version</span><span class="p">()</span>
+            <span class="c1"># check if model has a region</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_component_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s1">&#39;&quot;model_out&quot; directory required when updating in &quot;read-only&quot; mode.&#39;</span>
+                    <span class="s2">&quot;Model region not found, setup model using `build` first.&quot;</span>
                 <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-            <span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;w+&quot;</span> <span class="k">if</span> <span class="n">forceful_overwrite</span> <span class="k">else</span> <span class="s2">&quot;w&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">model_out</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
 
-        <span class="c1"># check if model has a region</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_region_component_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">region</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model region not found, setup model using `build` first.&quot;</span><span class="p">)</span>
+            <span class="c1"># loop over methods from config file</span>
+            <span class="k">for</span> <span class="n">step_dict</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+                <span class="n">step</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">step_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;update: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="c1"># Call the methods.</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">_rgetattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">param</span><span class="p">:</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span>
+                    <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="o">!=</span> <span class="n">_empty</span>
+                <span class="p">}</span>
+                <span class="n">merged</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
+                    <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">merged</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">merged</span><span class="p">)</span>
 
-        <span class="c1"># loop over methods from config file</span>
-        <span class="k">for</span> <span class="n">step_dict</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
-            <span class="n">step</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">step_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;update: </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="c1"># Call the methods.</span>
-            <span class="n">method</span> <span class="o">=</span> <span class="n">_rgetattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">param</span><span class="p">:</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span>
-                <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">signature</span><span class="p">(</span><span class="n">method</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="o">!=</span> <span class="n">_empty</span>
-            <span class="p">}</span>
-            <span class="n">merged</span> <span class="o">=</span> <span class="p">{}</span>
-            <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
-                <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-                <span class="n">merged</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">merged</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">method</span><span class="p">(</span><span class="o">**</span><span class="n">merged</span><span class="p">)</span>
+            <span class="c1"># If there are any write options included in the steps,</span>
+            <span class="c1"># we don&#39;t need to write the whole model.</span>
+            <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options_contain_write</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 
-        <span class="c1"># If there are any write options included in the steps,</span>
-        <span class="c1"># we don&#39;t need to write the whole model.</span>
-        <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options_contain_write</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -900,8 +977,8 @@
     <span class="nd">@hydromt_step</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">write_data_catalog</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StrPath</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_lib_path</span><span class="p">:</span> <span class="n">StrPath</span> <span class="o">=</span> <span class="s2">&quot;hydromt_data.yml&quot;</span><span class="p">,</span>
+        <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_lib_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">=</span> <span class="s2">&quot;hydromt_data.yml&quot;</span><span class="p">,</span>
         <span class="n">used_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">append</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">save_csv</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>

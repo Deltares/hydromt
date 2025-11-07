@@ -30,6 +30,7 @@
 <link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/theme-deltares.css?v=aa503ec8" />
   
@@ -140,6 +141,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../overview/intro.html">
     Getting started
   </a>
@@ -156,13 +164,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -300,6 +301,13 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api/api.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../overview/intro.html">
     Getting started
   </a>
@@ -316,13 +324,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -458,26 +459,26 @@
   <h1>Source code for hydromt.data_catalog.uri_resolvers.convention_resolver</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;URIResolver using HydroMT naming conventions.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">product</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">getLogger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fsspec.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">split_protocol</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.naming_convention</span><span class="w"> </span><span class="kn">import</span> <span class="n">_expand_uri_placeholders</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.uri_resolvers.uri_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">URIResolver</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">zoom_to_overview_level</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Geom</span><span class="p">,</span>
     <span class="n">SourceMetadata</span><span class="p">,</span>
     <span class="n">TimeRange</span><span class="p">,</span>
     <span class="n">Zoom</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.naming_convention</span><span class="w"> </span><span class="kn">import</span> <span class="n">_expand_uri_placeholders</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.uri_resolvers.uri_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">URIResolver</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">zoom_to_overview_level</span>
 
-<span class="n">logger</span><span class="p">:</span> <span class="n">Logger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ConventionResolver">
@@ -496,7 +497,7 @@
         <span class="n">time_range</span><span class="p">:</span> <span class="n">TimeRange</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">PeriodIndex</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Obtain the dates the user is searching for.&quot;&quot;&quot;</span>
-        <span class="n">t_range</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">time_range</span><span class="p">))</span>
+        <span class="n">t_range</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">([</span><span class="n">time_range</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">time_range</span><span class="o">.</span><span class="n">end</span><span class="p">])</span>
         <span class="n">freq</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;M&quot;</span> <span class="k">if</span> <span class="s2">&quot;month&quot;</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">else</span> <span class="s2">&quot;Y&quot;</span>
         <span class="n">dates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">PeriodIndex</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">period_range</span><span class="p">(</span><span class="o">*</span><span class="n">t_range</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">dates</span>
@@ -506,14 +507,14 @@
 
         <span class="k">def</span><span class="w"> </span><span class="nf">split_and_glob</span><span class="p">(</span><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
             <span class="n">protocol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">split_protocol</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">uri</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">get_fs</span><span class="p">()</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">uri</span><span class="p">))</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">maybe_unstrip_protocol</span><span class="p">(</span>
             <span class="n">pair</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">map</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">uri</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">unstrip_protocol</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+                    <span class="k">lambda</span> <span class="n">uri</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">get_fs</span><span class="p">()</span><span class="o">.</span><span class="n">unstrip_protocol</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">uri</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="k">else</span> <span class="n">uri</span><span class="p">,</span>
                     <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
@@ -535,7 +536,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="ConventionResolver.resolve">
-<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.uri_resolvers.ConventionResolver.resolve.html#hydromt.data_catalog.uri_resolvers.ConventionResolver.resolve">[docs]</a>
+<a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.uri_resolvers.ConventionResolver.html#hydromt.data_catalog.uri_resolvers.ConventionResolver.resolve">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -616,7 +617,8 @@
         <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">uris</span><span class="p">:</span>
             <span class="n">exec_nodata_strat</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;resolver &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; found no files.&quot;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span>
+                <span class="sa">f</span><span class="s2">&quot;resolver &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; found no files at </span><span class="si">{</span><span class="n">uri_expanded</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>  <span class="c1"># if ignore</span>
 

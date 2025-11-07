@@ -31,6 +31,7 @@
 <link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
     <link rel="stylesheet" type="text/css" href="../_static/theme-deltares.css?v=aa503ec8" />
@@ -145,6 +146,13 @@
 <nav>
   <ul class="bd-navbar-elements navbar-nav">
     
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/api.html">
+    API reference
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../overview/intro.html">
     Getting started
@@ -162,13 +170,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -307,6 +308,13 @@
 <nav>
   <ul class="bd-navbar-elements navbar-nav">
     
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api/api.html">
+    API reference
+  </a>
+</li>
+
+
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="../overview/intro.html">
     Getting started
@@ -324,13 +332,6 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../plugins.html">
     Plugins
-  </a>
-</li>
-
-
-<li class="nav-item ">
-  <a class="nav-link nav-internal" href="../api/api.html">
-    API reference
   </a>
 </li>
 
@@ -509,7 +510,7 @@
 <section id="Example:-Reading-2D-tabular-data-(DataFrame)">
 <h1>Example: Reading 2D tabular data (DataFrame)<a class="headerlink" href="#Example:-Reading-2D-tabular-data-(DataFrame)" title="Link to this heading">#</a></h1>
 <p>This example illustrates the how to read 2D tabular data using the HydroMT <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html"><span class="doc">DataCatalog</span></a> with the <code class="docutils literal notranslate"><span class="pre">csv</span></code> driver.</p>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
@@ -518,6 +519,14 @@
 <span class="n">data_catalog</span> <span class="o">=</span> <span class="n">DataCatalog</span><span class="p">(</span><span class="s2">&quot;data/tabular_data_catalog.yml&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:02:46,955 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/tabular_data_catalog.yml
+</pre></div></div>
 </div>
 <section id="Pandas-driver">
 <h2>Pandas driver<a class="headerlink" href="#Pandas-driver" title="Link to this heading">#</a></h2>
@@ -541,7 +550,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#39;, data_adapter=DataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=PandasDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fa84ae2bd90&gt;, options={&#39;parse_dates&#39;: True, &#39;index_col&#39;: &#39;time&#39;}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fa84ae2bd90&gt;, options={}), root=&#39;data&#39;, version=None, provider=None, metadata=SourceMetadata(crs=None, unit=None, extent={}, nodata=None, attrs={}, category=None))
+DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#39;, data_adapter=DataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=PandasDriver(filesystem=FSSpecFileSystem(protocol=&#39;file&#39;, storage_options={}), options=DriverOptions(parse_dates=True, index_col=&#39;time&#39;)), uri_resolver=ConventionResolver(filesystem=FSSpecFileSystem(protocol=&#39;file&#39;, storage_options={}), options={}), root=&#39;data&#39;, version=None, provider=None, metadata=SourceMetadata(crs=None, unit=None, extent={}, nodata=None, attrs={}, category=None))
 </pre></div></div>
 </div>
 <p>We can load any 2D tabular data using <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.get_dataframe.html"><span class="doc">DataCatalog.get_dataframe()</span></a>. Note that if we don’t provide any arguments it returns the full dataframe.</p>
@@ -553,6 +562,14 @@ DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:02:46,985 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading example_csv_data DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/example_csv_data.csv
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -655,13 +672,23 @@ DataFrameSource(name=&#39;example_csv_data&#39;, uri=&#39;example_csv_data.csv&#
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:02:47,519 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from data/vito_reclass.yml
+2025-11-07 11:02:47,536 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2025-11-07 11:02:47,536 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, data_adapter=DataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=PandasDriver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fa84ae2bd90&gt;, options={&#39;index_col&#39;: 0}), uri_resolver=ConventionResolver(filesystem=&lt;fsspec.implementations.local.LocalFileSystem object at 0x7fa84ae2bd90&gt;, options={}), root=&#39;data&#39;, version=None, provider=None, metadata=SourceMetadata(crs=None, unit=None, extent={}, nodata=None, attrs={}, category=None, notes=&#39;reclass table for manning values&#39;))
+DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, data_adapter=DataFrameAdapter(unit_add={}, unit_mult={}, rename={}), driver=PandasDriver(filesystem=FSSpecFileSystem(protocol=&#39;file&#39;, storage_options={}), options=DriverOptions(index_col=0)), uri_resolver=ConventionResolver(filesystem=FSSpecFileSystem(protocol=&#39;file&#39;, storage_options={}), options={}), root=&#39;data&#39;, version=None, provider=None, metadata=SourceMetadata(crs=None, unit=None, extent={}, nodata=None, attrs={}, category=None, notes=&#39;reclass table for manning values&#39;))
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -672,6 +699,14 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:02:48,200 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_reclass DataFrame data from /home/runner/work/hydromt/hydromt/docs/_examples/data/vito_reclass.csv
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -753,19 +788,27 @@ DataFrameSource(name=&#39;vito_reclass&#39;, uri=&#39;vito_reclass.csv&#39;, dat
 </div>
 </div>
 <div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-07 11:02:48,211 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.image.AxesImage at 0x7fa849c8b810&gt;
+&lt;matplotlib.image.AxesImage at 0x7f10dcf142d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/_examples_reading_tabular_data_15_1.png" src="../_images/_examples_reading_tabular_data_15_1.png" />
+<img alt="../_images/_examples_reading_tabular_data_15_2.png" src="../_images/_examples_reading_tabular_data_15_2.png" />
 </div>
 </div>
 </section>
