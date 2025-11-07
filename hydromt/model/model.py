@@ -299,6 +299,7 @@ class Model(object, metaclass=ABCMeta):
 
         """
         with log.to_file(Path(self.root.path) / "hydromt.log"):
+            log.log_version()
             steps = steps or []
             _validate_steps(self, steps)
 
@@ -379,9 +380,9 @@ class Model(object, metaclass=ABCMeta):
         """
         # read current model & optionally clear log file
         with log.to_file(
-            self.root.path / "hydromt.log",
-            append=self.root.is_reading_mode(),
+            self.root.path / "hydromt.log", append=self.root.is_reading_mode()
         ):
+            log.log_version()
             steps = steps or []
             _validate_steps(self, steps)
             if not self.root.is_writing_mode():
@@ -403,6 +404,7 @@ class Model(object, metaclass=ABCMeta):
 
         # No need to clear the log file here since we did that already if needed above
         with log.to_file(self.root.path / "hydromt.log", append=True):
+            log.log_version()
             # check if model has a region
             if self._region_component_name is not None and self.region is None:
                 raise ValueError(

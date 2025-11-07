@@ -33,7 +33,6 @@ def initialize_logging() -> None:
         console.setLevel(logging.INFO)
         console.setFormatter(_DEFAULT_FORMATTER)
         _ROOT_LOGGER.addHandler(console)
-    _ROOT_LOGGER.info(f"HydroMT version: {__version__}")
 
 
 def set_log_level(log_level: int) -> None:
@@ -89,6 +88,10 @@ def _add_filehandler(
     else:
         logger.debug(f"Writing log messages to new file {path}.")
     return filehandler
+
+
+def log_version() -> None:
+    _ROOT_LOGGER.info(f"HydroMT version: {__version__}")
 
 
 @contextmanager
