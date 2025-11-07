@@ -214,11 +214,13 @@ class Model(object, metaclass=ABCMeta):
 
         Example
         -------
-        >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
-        ...     model.setup_x()
-        ...     model.setup_y()
-        ...     model.write()
-        # Exiting the with block will call __exit__, ensuring resources are cleaned up.
+        .. code-block:: python
+
+            with Model(root="path/to/model") as model: # This is where __enter__ is called
+                model.setup_x()
+                model.setup_y()
+                model.write()
+            # Exiting the with block will call __exit__, ensuring resources are cleaned up.
 
         Returns
         -------
@@ -236,11 +238,13 @@ class Model(object, metaclass=ABCMeta):
 
         Example
         -------
-        >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
-        ...     model.setup_x()
-        ...     model.setup_y()
-        ...     model.write()
-        # Exiting the with block will call __exit__, ensuring resources are cleaned up.
+        .. code-block:: python
+
+            with Model(root="path/to/model") as model: # This is where __enter__ is called
+                model.setup_x()
+                model.setup_y()
+                model.write()
+            # Exiting the with block will call __exit__, ensuring resources are cleaned up.
 
         Parameters
         ----------
