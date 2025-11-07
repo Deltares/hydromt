@@ -141,7 +141,7 @@ description = { file = "hydromt/__init__.py" }
 [tool.ruff]
 line-length = 88
 target-version = "py311"
-exclude = ["docs"]
+exclude = ["docs", "hydromt/model/__init__.py"]
 
 [tool.ruff.lint]
 # enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
