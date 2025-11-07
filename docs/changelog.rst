@@ -35,7 +35,8 @@ Changed
 - ``NoDataStrategy`` is now part of of ``hydromt.error`` and thus public (#1277)
 - ``hydromt.typing`` and its functions are now public (underscore removed). (#1286)
 - remove ``io`` submodule and move ``readers`` and ``writers`` to the root module (#1308)
-- Function signatures of `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have: ``source_kwargs`` (passed to `DataSource.__init__`), ``open_kwargs`` (passed to `DataSource.driver.read`) instead of just ``kwargs``, and ``time_tuple`` was renamed to ``time_range``. (#1291)
+- `write_nc` function no longer accepts kwargs, instead a dict `to_netcdf_kwargs` is used to pass arguments to `xarray.to_netcdf`. The function raises an error when "compute" is one of the arguments.
+- Function signatures of `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have: ``source_kwargs`` (passed to `DataSource.__init__`) instead of just ``kwargs``, and ``time_tuple`` was renamed to ``time_range``. (#1291)
 
 Fixed
 -----
