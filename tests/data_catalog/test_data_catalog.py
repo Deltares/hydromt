@@ -1731,3 +1731,24 @@ def test_yml_from_uri_path():
     yml = _yml_from_uri_or_path(uri)
     assert isinstance(yml, dict)
     assert len(yml) > 0
+
+
+def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
+    region = gpd.GeoDataFrame(
+        [],
+        geometry=[box(12.008333333333351, 46.341666666666661, 12.325, 46.675)],
+        crs="EPSG:4326",
+    )
+
+    ds = data_catalog.get_rasterdataset(
+        "era5",
+        geom=region,
+        buffer=1,
+        time_range=("2010-02-01T00:00:00", "2010-02-10T00:00:00"),
+        variables=["temp", "press_msl", "kin", "kout"],
+        single_var_as_array=False,
+    )
+
+    # assert that the ds goes from 2010-02-02 to 2010-02-10, because of unit_add time (+1 day) in the data catalog
+    assert ds["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
+    assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")

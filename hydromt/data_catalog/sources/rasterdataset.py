@@ -66,12 +66,12 @@ class RasterDatasetSource(DataSource):
             mask = _parse_geom_bbox_buffer(mask, bbox)
 
         # Transform time_range and variables to match the data source
-        time_range = self.data_adapter._to_source_timerange(time_range)
+        src_time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=time_range,
+            time_range=src_time_range,
             mask=mask,
             variables=vrs,
             zoom=zoom,

@@ -67,12 +67,12 @@ class DatasetSource(DataSource):
         self._log_start_read_data()
 
         # Transform time_range and variables to match the data source
-        time_range = self.data_adapter._to_source_timerange(time_range)
+        src_time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=time_range,
+            time_range=src_time_range,
             variables=vrs,
             handle_nodata=handle_nodata,
         )
