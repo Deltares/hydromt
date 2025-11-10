@@ -237,6 +237,7 @@ def build(
     """  # noqa: E501
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log.set_log_level(log_level=log_level)
+    log.log_version()
     # Model.build will manage the filehandlers and logging
 
     modeltype, kwargs, steps = read_workflow_yaml(config, modeltype=model)
@@ -318,6 +319,7 @@ def update(
     # logger
     log_level = max(10, 30 - 10 * (verbose - quiet))
     log.set_log_level(log_level=log_level)
+    log.log_version()
     # Model.update will manage the filehandlers and logging
 
     mode = "r+" if model_root == model_out else "r"
@@ -450,6 +452,7 @@ def check(
     log_path = Path.cwd() / "hydromt_check.log"
     log.set_log_level(log_level=log_level)
     with log.to_file(log_path):
+        log.log_version()
         results = []
         for cat_path in data:
             results.append(_validate_catalog(Path(cat_path), format, upgrade))
@@ -526,6 +529,7 @@ def export(
     log.set_log_level(log_level=log_level)
     log_path = Path(export_dest_path, "hydromt_export.log")
     with log.to_file(log_path):
+        log.log_version()
         if error_on_empty:
             handle_nodata = NoDataStrategy.RAISE
         else:
