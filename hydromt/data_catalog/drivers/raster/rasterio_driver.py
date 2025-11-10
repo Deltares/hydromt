@@ -11,22 +11,16 @@ import xarray as xr
 from pydantic import Field, field_serializer, model_validator
 from pyproj import CRS
 
-from hydromt._utils.caching import _cache_vrt_tiles
-from hydromt._utils.temp_env import temp_env
-from hydromt._utils.uris import _strip_scheme
+from hydromt._utils import _cache_vrt_tiles, _strip_scheme, temp_env
 from hydromt.config import SETTINGS
 from hydromt.data_catalog.drivers.base_driver import DriverOptions
-from hydromt.data_catalog.drivers.raster.raster_dataset_driver import (
-    RasterDatasetDriver,
-)
+from hydromt.data_catalog.drivers.raster import RasterDatasetDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
 from hydromt.gis.gis_utils import zoom_to_overview_level
-from hydromt.io.readers import open_mfraster
+from hydromt.readers import open_mfraster
 from hydromt.typing import (
     Geom,
     SourceMetadata,
-    StrPath,
-    TimeRange,
     Variables,
     Zoom,
 )
@@ -110,15 +104,48 @@ class RasterioDriver(RasterDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
-        time_range: TimeRange | None = None,
         zoom: Zoom | None = None,
         chunks: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
-        """Read data using rasterio."""
+        """
+        Read raster data using the rasterio library.
+
+        Supports reading single or multiple raster files (optionally mosaicked),
+        applying spatial masks, caching VRT tiles, and reading overviews at
+        different zoom levels. Returns an xarray Dataset constructed from raster bands.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of raster file URIs to read.
+        handle_nodata : NoDataStrategy, optional
+            Strategy for handling missing or empty data. Default is NoDataStrategy.RAISE.
+        mask : Geom | None, optional
+            Geometry used to mask or clip the raster data. Default is None.
+        variables : Variables | None, optional
+            List of variables or band names to read. Default is None.
+        zoom : Zoom | None, optional
+            Requested zoom level or resolution. Used to determine the appropriate overview level. Default is None.
+        chunks : dict[str, Any] | None, optional
+            Dask chunking configuration for lazy loading. Default is None.
+        metadata : SourceMetadata | None, optional
+            Optional metadata describing CRS, nodata, and overview levels. Default is None.
+
+        Returns
+        -------
+        xr.Dataset
+            The loaded raster dataset as an xarray Dataset.
+
+        Raises
+        ------
+        ValueError
+            If the file extension is unsupported or invalid.
+        rasterio.errors.RasterioIOError
+            If an I/O error occurs during reading.
+        """
         if metadata is None:
             metadata = SourceMetadata()
 
@@ -127,7 +154,7 @@ class RasterioDriver(RasterDatasetDriver):
             cache_dir: Path = self.options.get_cache_path(uris)
             uris_cached = []
             for uri in uris:
-                cached_uri: str = _cache_vrt_tiles(
+                cached_uri = _cache_vrt_tiles(
                     uri, geom=mask, fs=self.filesystem.get_fs(), cache_dir=cache_dir
                 )
                 uris_cached.append(cached_uri)
@@ -136,9 +163,9 @@ class RasterioDriver(RasterDatasetDriver):
         if mask is not None:
             self.options.mosaic_kwargs.update({"mask": mask})
 
-        kwargs_for_open = kwargs_for_open or {}
+        open_kwargs = self.options.get_kwargs()
         if np.issubdtype(type(metadata.nodata), np.number):
-            kwargs_for_open.update({"nodata": metadata.nodata})
+            open_kwargs.update({"nodata": metadata.nodata})
 
         # Fix overview level
         if zoom:
@@ -153,33 +180,24 @@ class RasterioDriver(RasterDatasetDriver):
             )
             if overview_level:
                 # NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs
-                kwargs_for_open.update(overview_level=overview_level - 1)
+                open_kwargs.update(overview_level=overview_level - 1)
 
         if chunks is not None:
-            kwargs_for_open.update({"chunks": chunks})
+            open_kwargs.update({"chunks": chunks})
 
-        kwargs = self.options.get_kwargs() | kwargs_for_open
         mosaic: bool = self.options.mosaic and len(uris) > 1
 
         # If the metadata resolver has already resolved the overview level,
         # trying to open zoom levels here will result in an error.
         # Better would be to separate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023
         # Then we can implement looking for a overview level in the driver.
-        def _open() -> xr.DataArray | xr.Dataset:
+        def _open() -> xr.Dataset:
             try:
-                return open_mfraster(
-                    uris,
-                    mosaic=mosaic,
-                    **kwargs,
-                )
+                return open_mfraster(uris, mosaic=mosaic, **open_kwargs)
             except rasterio.errors.RasterioIOError as e:
                 if "Cannot open overview level" in str(e):
-                    kwargs.pop("overview_level", None)
-                    return open_mfraster(
-                        uris,
-                        mosaic=mosaic,
-                        **kwargs,
-                    )
+                    open_kwargs.pop("overview_level", None)
+                    return open_mfraster(uris, mosaic=mosaic, **open_kwargs)
                 else:
                     raise
 
@@ -187,7 +205,7 @@ class RasterioDriver(RasterDatasetDriver):
         try:
             anon: str = self.filesystem.get_fs().anon
         except AttributeError:
-            anon: str = ""
+            anon = ""
 
         if anon:
             with temp_env(**{"AWS_NO_SIGN_REQUEST": "true"}):
@@ -197,7 +215,7 @@ class RasterioDriver(RasterDatasetDriver):
 
         # Mosaic's can mess up the chunking, which can error during writing
         # Or maybe setting
-        chunks = kwargs.get("chunks", None)
+        chunks = open_kwargs.get("chunks", None)
         if chunks is not None:
             ds = ds.chunk(chunks=chunks)
 
@@ -213,8 +231,33 @@ class RasterioDriver(RasterDatasetDriver):
                 )
         return ds
 
-    def write(self, path: StrPath, ds: xr.Dataset, **kwargs) -> str:
-        """Write out a RasterDataset using rasterio."""
+    def write(
+        self,
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
+        """
+        Write a RasterDataset to disk using the rasterio library.
+
+        This method is not implemented in this driver. Concrete implementations
+        must provide a way to write raster datasets to supported formats.
+
+        Parameters
+        ----------
+        path : Path | str
+            Destination path for the raster dataset.
+        data : xr.Dataset
+            The xarray Dataset to write.
+        write_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments for writing. Default is None.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised because writing is not supported in this driver.
+        """
         raise NotImplementedError()
 
     @staticmethod

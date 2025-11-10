@@ -1,10 +1,7 @@
-.. currentmodule:: hydromt.io
 
-.. _io:
+.. currentmodule:: hydromt.readers
 
-=========================
-Reading and writing files
-=========================
+.. _readers:
 
 Readers
 =======
@@ -25,15 +22,3 @@ Readers
    read_toml
    read_workflow_yaml
    read_yaml
-
-Writers
-=======
-
-.. autosummary::
-   :toctree: ../_generated
-
-   write_nc
-   write_region
-   write_toml
-   write_xy
-   write_yaml

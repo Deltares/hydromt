@@ -2,8 +2,10 @@
 
 import logging
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
+from pathlib import Path
+from typing import Any, ClassVar, List, Literal, Optional
 
+import numpy as np
 import xarray as xr
 from pydantic import Field
 from pyproj.exceptions import CRSError
@@ -20,7 +22,6 @@ from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
     Geom,
-    StrPath,
     TimeRange,
     TotalBounds,
     Zoom,
@@ -44,14 +45,14 @@ class RasterDatasetSource(DataSource):
         *,
         bbox: Optional[Bbox] = None,
         mask: Optional[Geom] = None,
-        buffer: float = 0,
+        buffer: int = 0,
         variables: Optional[List[str]] = None,
         time_range: Optional[TimeRange] = None,
         zoom: Optional[Zoom] = None,
         chunks: Optional[dict] = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-    ) -> Union[xr.Dataset, xr.DataArray]:
+    ) -> xr.Dataset | xr.DataArray | None:
         """
         Read data from this source.
 
@@ -65,12 +66,12 @@ class RasterDatasetSource(DataSource):
             mask = _parse_geom_bbox_buffer(mask, bbox)
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter._to_source_timerange(time_range)
+        time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=tr,
+            time_range=time_range,
             mask=mask,
             variables=vrs,
             zoom=zoom,
@@ -80,13 +81,12 @@ class RasterDatasetSource(DataSource):
 
         ds: xr.Dataset = self.driver.read(
             uris,
+            handle_nodata=handle_nodata,
             mask=mask,
-            time_range=tr,
             variables=vrs,
             zoom=zoom,
             chunks=chunks,
             metadata=self.metadata,
-            handle_nodata=handle_nodata,
         )
         return self.data_adapter.transform(
             ds,
@@ -100,17 +100,17 @@ class RasterDatasetSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[RasterDatasetDriver] = None,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
-        buffer: float = 0.0,
-        time_range: Optional[TimeRange] = None,
-        zoom: Optional[Zoom] = None,
+        driver_override: RasterDatasetDriver | None = None,
+        bbox: Bbox | None = None,
+        mask: Geom | None = None,
+        buffer: int = 0,
+        time_range: TimeRange | None = None,
+        zoom: Zoom | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> "RasterDatasetSource":
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "RasterDatasetSource | None":
         """
         Write the RasterDatasetSource to a local file.
 
@@ -118,22 +118,20 @@ class RasterDatasetSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver
-            driver: RasterDatasetDriver = RasterDatasetDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = RasterDatasetDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: RasterDatasetDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: RasterDatasetDriver = self.driver.model_copy(
+            driver = self.driver.model_copy(
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
-        ds: Optional[xr.Dataset] = self.read_data(
+        ds = self.read_data(
             bbox=bbox,
             mask=mask,
             buffer=buffer,
@@ -144,14 +142,14 @@ class RasterDatasetSource(DataSource):
         if ds is None:  # handle_nodata == ignore
             return None
 
-        dest_path: str = driver.write(
-            file_path,
-            ds,
-            **kwargs,
-        )
+        dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 
@@ -217,9 +215,13 @@ class RasterDatasetSource(DataSource):
         """
         if ds is None:
             ds = self.read_data()
+
+        if not np.issubdtype(ds[ds.raster.time_dim].dtype, np.datetime64):
+            ds = ds.convert_calendar("standard")
+
         return TimeRange(
-            start=ds[ds.raster.time_dim].min().values,
-            end=ds[ds.raster.time_dim].max().values,
+            start=ds[ds.raster.time_dim].values.min(),
+            end=ds[ds.raster.time_dim].values.max(),
         )
 
     def to_stac_catalog(

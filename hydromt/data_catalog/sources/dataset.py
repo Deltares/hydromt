@@ -2,6 +2,7 @@
 
 import logging
 from os.path import basename, splitext
+from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
 
 import xarray as xr
@@ -17,7 +18,6 @@ from hydromt.data_catalog.drivers import DatasetDriver
 from hydromt.data_catalog.sources.data_source import DataSource
 from hydromt.error import NoDataStrategy
 from hydromt.typing import (
-    StrPath,
     TimeRange,
 )
 from hydromt.typing.fsspec_types import FSSpecFileSystem
@@ -42,7 +42,7 @@ class DatasetSource(DataSource):
         time_range: Optional[TimeRange] = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
         single_var_as_array: bool = True,
-    ) -> Union[xr.Dataset, xr.DataArray]:
+    ) -> xr.Dataset | None:
         """Use the resolver, driver, and data adapter to read and harmonize the data.
 
         Parameters
@@ -55,7 +55,8 @@ class DatasetSource(DataSource):
         handle_nodata : NoDataStrategy, optional
             how to react when no data is found, by default NoDataStrategy.RAISE
         single_var_as_array : bool, optional
-            _description_, by default True
+            If only a single variable is requested, return as DataArray instead of
+            Dataset, by default True
 
         Returns
         -------
@@ -66,23 +67,17 @@ class DatasetSource(DataSource):
         self._log_start_read_data()
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter._to_source_timerange(time_range)
+        time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=tr,
+            time_range=time_range,
             variables=vrs,
             handle_nodata=handle_nodata,
         )
 
-        ds: xr.Dataset = self.driver.read(
-            uris,
-            time_range=tr,
-            variables=vrs,
-            metadata=self.metadata,
-            handle_nodata=handle_nodata,
-        )
+        ds: xr.Dataset = self.driver.read(uris, handle_nodata=handle_nodata)
 
         return self.data_adapter.transform(
             ds,
@@ -94,13 +89,13 @@ class DatasetSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[DatasetDriver] = None,
-        time_range: Optional[TimeRange] = None,
+        driver_override: DatasetDriver | None = None,
+        time_range: TimeRange | None = None,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> "DatasetSource":
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "DatasetSource | None":
         """
         Write the DatasetSource to a local file.
 
@@ -108,37 +103,38 @@ class DatasetSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver
-            driver: DatasetDriver = DatasetDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = DatasetDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: DatasetDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: DatasetDriver = self.driver.model_copy(
+            driver = self.driver.model_copy(
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
         ds: Optional[xr.Dataset] = self.read_data(
-            time_range=time_range,
-            handle_nodata=handle_nodata,
+            time_range=time_range, handle_nodata=handle_nodata
         )
-        if ds is None:  # handle_nodata == ignore
+        if ds is None:
             return None
 
         # driver can return different path if file ext changes
-        dest_path: str = driver.write(
+        dest_path = driver.write(
             file_path,
             ds,
-            **kwargs,
+            write_kwargs=write_kwargs,
         )
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 

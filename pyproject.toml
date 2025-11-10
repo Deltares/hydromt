@@ -184,6 +184,8 @@ filterwarnings = [
 
 	# zarr v3 experimental warning
 	"ignore:Consolidated metadata is currently not part in the Zarr format 3 specification:UserWarning",
+	# irrelevant radolan engine warning
+	"ignore:Engine 'radolan' loading failed.*:RuntimeWarning",
 ]
 
 [tool.mypy]
@@ -202,7 +204,7 @@ disallow_subclassing_any = true
 disallow_untyped_decorators = true
 disallow_any_generics = true
 
-[tool.pixi.project]
+[tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64"]
 

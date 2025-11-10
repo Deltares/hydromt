@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 import xarray as xr
 
-from hydromt.io.writers import write_nc
+from hydromt.writers import write_nc
 
 
 def test_write_nc(tmp_path: Path, demda: xr.DataArray):
@@ -111,3 +111,14 @@ def test_write_nc_errors(tmp_path: Path, raster_ds: xr.Dataset):
         match=f"File {p.as_posix()} already exists",
     ):
         write_nc(ds=raster_ds, file_path=p)
+
+
+def test_write_nc_compute_warns(tmp_path: Path, rioda: xr.DataArray):
+    with pytest.raises(
+        ValueError, match="'compute' argument is ignored in ds.to_netcdf function."
+    ):
+        write_nc(
+            ds=rioda,
+            file_path=Path(tmp_path, "foo.nc"),
+            to_netcdf_kwargs={"compute": False},
+        )

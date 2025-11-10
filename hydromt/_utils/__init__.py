@@ -16,6 +16,7 @@ from hydromt._utils.nodata import _has_no_data, _set_raster_nodata, _set_vector_
 from hydromt._utils.path import _make_config_paths_absolute, _make_config_paths_relative
 from hydromt._utils.rgetattr import _rgetattr
 from hydromt._utils.steps_validator import _validate_steps
+from hydromt._utils.temp_env import temp_env
 from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt._utils.uris import _is_valid_url, _strip_scheme
 
@@ -43,6 +44,7 @@ __all__ = [
     "_strip_scheme",
     "_make_config_paths_absolute",
     "_make_config_paths_relative",
+    "temp_env",
 ]
 
 

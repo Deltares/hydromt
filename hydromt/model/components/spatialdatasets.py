@@ -2,19 +2,19 @@
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
 import xarray as xr
 from geopandas import GeoDataFrame
 from pandas import DataFrame
 from xarray import DataArray, Dataset
 
-from hydromt.io.readers import open_ncs
-from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import open_ncs
 from hydromt.typing.type_def import XArrayDict
+from hydromt.writers import write_nc
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -137,7 +137,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
     def read(self, filename: Optional[str] = None, **kwargs) -> None:
         """Read model dataset files at <root>/<filename>.
 
-        key-word arguments are passed to :py:func:`hydromt.io.readers.open_nc`
+        key-word arguments are passed to :py:func:`hydromt.readers.open_nc`
 
         Parameters
         ----------
@@ -147,7 +147,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             if None, the path that was provided at init will be used.
         **kwargs:
             Additional keyword arguments that are passed to the
-            `hydromt.io.readers.open_nc` function.
+            `hydromt.readers.open_nc` function.
         """
         self.root._assert_read_mode()
         self._initialize(skip_read=True)
@@ -170,7 +170,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
-        **kwargs,
+        to_netcdf_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Write dictionary of xarray.Dataset and/or xarray.DataArray to netcdf files.
 
@@ -197,7 +197,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
         force_sn: bool, optional
             If True, forces the dataset to have South -> North orientation. Only used
             if ``gdal_compliant`` is set to True. By default, False.
-        **kwargs:
+        to_netcdf_kwargs: dict, optional
             Additional keyword arguments that are passed to the `to_netcdf`
             function.
         """
@@ -209,7 +209,8 @@ class SpatialDatasetsComponent(SpatialModelComponent):
             )
             return
 
-        kwargs.setdefault("engine", "netcdf4")
+        to_netcdf_kwargs = to_netcdf_kwargs or {}
+        to_netcdf_kwargs.setdefault("engine", "netcdf4")
         filename = filename or self._filename
 
         for name, ds in self.data.items():
@@ -226,7 +227,7 @@ class SpatialDatasetsComponent(SpatialModelComponent):
                 rename_dims=rename_dims,
                 force_sn=force_sn,
                 force_overwrite=self.root.mode.is_override_mode(),
-                **kwargs,
+                to_netcdf_kwargs=to_netcdf_kwargs,
             )
             if close_handle is not None:
                 self._deferred_file_close_handles.append(close_handle)

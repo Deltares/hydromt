@@ -12,7 +12,7 @@ from xarray import Dataset
 from hydromt.data_catalog.drivers import GeoDatasetVectorDriver, preprocessing
 from hydromt.data_catalog.drivers.geodataset.geodataset_driver import GeoDatasetOptions
 from hydromt.gis import vector
-from hydromt.io.readers import open_geodataset
+from hydromt.readers import open_geodataset
 
 
 class TestGeoDatasetVectorDriver:
@@ -40,10 +40,7 @@ class TestGeoDatasetVectorDriver:
         driver = GeoDatasetVectorDriver(
             options=GeoDatasetOptions(preprocess="remove_duplicates"),
         )
-        res: Optional[Dataset] = driver.read(
-            uris,
-            variables=["var1"],
-        )
+        res: Optional[Dataset] = driver.read(uris)
         assert res is not None
         mock_preprocessor.assert_called_once_with(mock_ds)
 
