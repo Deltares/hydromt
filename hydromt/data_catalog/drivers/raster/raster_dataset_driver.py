@@ -2,6 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any
 
 import xarray as xr
@@ -13,8 +14,6 @@ from hydromt.error import NoDataStrategy
 from hydromt.typing import (
     Geom,
     SourceMetadata,
-    StrPath,
-    TimeRange,
     Variables,
     Zoom,
 )
@@ -31,35 +30,68 @@ class RasterDatasetDriver(BaseDriver, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
         mask: Geom | None = None,
         variables: Variables | None = None,
-        time_range: TimeRange | None = None,
         zoom: Zoom | None = None,
         chunks: dict[str, Any] | None = None,
         metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """
-        Read in any compatible data source to an xarray Dataset.
+        Read raster data from one or more URIs into an xarray Dataset.
 
-        args:
+        This abstract method defines the common interface for raster-based drivers.
+        Implementations must return an xarray Dataset representing the loaded raster data.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of file URIs to read from.
+        handle_nodata : NoDataStrategy, optional
+            Strategy for handling missing or empty data. Default is NoDataStrategy.RAISE.
+        mask : Geom | None, optional
+            Optional geometry to spatially mask or clip the data. Default is None.
+        variables : Variables | None, optional
+            List of variable names or bands to read from the dataset. Default is None.
+        zoom : Zoom | None, optional
+            Optional zoom level or resolution control for multi-resolution raster data. Default is None.
+        chunks : dict[str, Any] | None, optional
+            Chunking configuration for Dask-based reading. Default is None.
+        metadata : SourceMetadata | None, optional
+            Metadata about the source such as CRS, nodata values, and zoom levels. Default is None.
+
+        Returns
+        -------
+        xr.Dataset
+            The loaded raster dataset.
+
         """
         ...
 
+    @abstractmethod
     def write(
         self,
-        path: StrPath,
-        ds: xr.Dataset,
-        **kwargs,
-    ) -> str:
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
         """
-        Write out a RasterDataset to file.
+        Write a RasterDataset to a local file.
 
-        Not all drivers should have a write function, so this method is not
-        abstract.
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the raster dataset will be written. The path
+            should have a supported extension depending on the concrete driver implementation.
+        data : xr.Dataset
+            The xarray Dataset representing the raster data to write.
+        write_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments to pass to the underlying write function.
+            Default is None.
 
-        args:
+        Returns
+        -------
+        Path
+            The path to the written raster dataset.
         """
-        raise NotImplementedError(
-            f"Writing using driver '{self.name}' is not supported."
-        )
+        ...

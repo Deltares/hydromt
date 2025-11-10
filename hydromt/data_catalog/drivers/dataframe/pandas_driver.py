@@ -5,15 +5,9 @@ from typing import Any, Callable, Optional
 
 import pandas as pd
 
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.dataframe import DataFrameDriver
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.typing import (
-    StrPath,
-    TimeRange,
-    Variables,
-)
-from hydromt.typing.metadata import SourceMetadata
+from hydromt.typing import Variables
 
 
 class PandasDriver(DataFrameDriver):
@@ -32,16 +26,37 @@ class PandasDriver(DataFrameDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
         variables: Variables | None = None,
-        time_range: TimeRange | None = None,
-        metadata: SourceMetadata | None = None,
     ) -> pd.DataFrame:
-        """Read in any compatible data source to a pandas `DataFrame`."""
-        _warn_on_unused_kwargs(
-            self.__class__.__name__,
-            {"time_range": time_range},
-        )
+        """
+        Read tabular data into a pandas DataFrame using the pandas library.
+
+        Supports multiple file formats including CSV, Parquet, Excel (xls, xlsx),
+        and fixed-width text files (fwf). Applies hydromt's `NoDataStrategy` if no
+        records are found. Column selection can be controlled through the `variables`
+        argument. Only a single file can be read per call.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List containing a single URI to read from. Multiple files are not supported.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+        variables : Variables | None, optional
+            List of columns to read from the file. Ignored if None.
+
+        Returns
+        -------
+        pd.DataFrame
+            The loaded DataFrame containing the data from the source file.
+
+        Raises
+        ------
+        ValueError
+            If multiple files are provided or the file extension is unsupported.
+        IOError
+            If the file extension is not recognized.
+        """
         if len(uris) > 1:
             raise ValueError(
                 "DataFrame: Reading multiple files with the "
@@ -52,20 +67,16 @@ class PandasDriver(DataFrameDriver):
         else:
             uri = uris[0]
             extension: str = uri.split(".")[-1]
-            kwargs_for_open = kwargs_for_open or {}
-            kwargs = self.options.get_kwargs() | kwargs_for_open
 
             if extension == "csv":
                 variables = self._unify_variables_and_pandas_kwargs(
                     uri, pd.read_csv, variables
                 )
-                df = pd.read_csv(
-                    uri,
-                    usecols=variables,
-                    **kwargs,
-                )
+                df = pd.read_csv(uri, usecols=variables, **self.options.get_kwargs())
             elif extension == "parquet":
-                df = pd.read_parquet(uri, columns=variables, **kwargs)
+                df = pd.read_parquet(
+                    uri, columns=variables, **self.options.get_kwargs()
+                )
             elif extension in ["xls", "xlsx"]:
                 variables = self._unify_variables_and_pandas_kwargs(
                     uri, pd.read_excel, variables
@@ -74,38 +85,53 @@ class PandasDriver(DataFrameDriver):
                     uri,
                     usecols=variables,
                     engine="openpyxl",
-                    **kwargs,
+                    **self.options.get_kwargs(),
                 )
             elif extension in ["fwf", "txt"]:
-                _warn_on_unused_kwargs(
-                    self.__class__.__name__, {"variables": variables}
-                )
-                df = pd.read_fwf(uri, **kwargs)
+                df = pd.read_fwf(uri, **self.options.get_kwargs())
             else:
                 raise IOError(f"DataFrame: extension {extension} unknown.")
         if df.index.size == 0:
-            exec_nodata_strat(
-                f"No data from driver {self}'.",
-                strategy=handle_nodata,
-            )
+            exec_nodata_strat(f"No data from driver {self}'.", strategy=handle_nodata)
         return df
 
     def write(
         self,
-        path: StrPath,
-        df: pd.DataFrame,
-        **kwargs,
-    ) -> str:
+        path: Path | str,
+        data: pd.DataFrame,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
         """
-        Write out a DataFrame to file.
+        Write a pandas DataFrame to disk using the pandas library.
 
-        Not all drivers should have a write function, so this method is not
-        abstract.
+        Supports writing to common tabular formats including CSV, Parquet, and Excel (xls, xlsx).
+        The file format is automatically inferred from the file extension in the provided path.
 
-        args:
+        Parameters
+        ----------
+        path : Path | str
+            Destination path where the DataFrame will be saved.
+            The file extension determines the output format: `.csv`, `.parquet`, `.xls`, `.xlsx`.
+        data : pd.DataFrame
+            The DataFrame to be written.
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments passed to the pandas write function (e.g., compression, index, sheet_name).
+            Default is None.
+
+        Returns
+        -------
+        Path
+            The path where the DataFrame was written.
+
+        Raises
+        ------
+        ValueError
+            If the path type or file extension is unsupported.
         """
         if isinstance(path, str):
-            extension: str = path.split(".")[-1]
+            path = Path(path)
+            extension: str = path.suffix[1:]
         elif isinstance(path, Path):
             # suffix includes the '.' which we don't want
             extension: str = path.suffix[1:]
@@ -113,15 +139,15 @@ class PandasDriver(DataFrameDriver):
             raise ValueError(f"unknown pathlike: {path}")
 
         if extension == "csv":
-            df.to_csv(path, **kwargs)
+            data.to_csv(path, **(write_kwargs or {}))
         elif extension == "parquet":
-            df.to_parquet(path, **kwargs)
+            data.to_parquet(path, **(write_kwargs or {}))
         elif extension in ["xlsx", "xls"]:
-            df.to_excel(path, engine="openpyxl", **kwargs)
+            data.to_excel(path, engine="openpyxl", **(write_kwargs or {}))
         else:
             raise ValueError(f"DataFrame: file extension {extension} is unknown.")
 
-        return str(path)
+        return path
 
     def _unify_variables_and_pandas_kwargs(
         self,

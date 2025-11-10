@@ -2,6 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any
 
 import xarray as xr
@@ -10,12 +11,6 @@ from hydromt.data_catalog.drivers.base_driver import (
     BaseDriver,
 )
 from hydromt.error import NoDataStrategy
-from hydromt.typing import (
-    SourceMetadata,
-    StrPath,
-    TimeRange,
-    Variables,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -25,36 +20,57 @@ class DatasetDriver(BaseDriver, ABC):
 
     @abstractmethod
     def read(
-        self,
-        uris: list[str],
-        *,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
-        variables: Variables | None = None,
-        time_range: TimeRange | None = None,
-        metadata: SourceMetadata | None = None,
+        self, uris: list[str], *, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
     ) -> xr.Dataset:
         """
-        Read in any compatible data source to an xarray Dataset.
+        Read data from one or more URIs into an xarray Dataset.
 
-        args:
+        This abstract method defines the interface for all dataset drivers. Subclasses
+        should implement data loading logic appropriate for the format being read.
+
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing or empty data. Default is NoDataStrategy.RAISE.
+
+        Returns
+        -------
+        xr.Dataset
+            The loaded dataset.
         """
         ...
 
+    @abstractmethod
     def write(
         self,
-        path: StrPath,
-        ds: xr.Dataset,
-        **kwargs,
-    ) -> str:
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
         """
-        Write out a Dataset to file.
+        Write an xarray Dataset to disk.
 
-        Not all drivers should have a write function, so this method is not
-        abstract.
+        This abstract method defines the interface for all Dataset-based drivers.
+        Subclasses should implement logic for writing datasets in specific formats
+        (e.g., NetCDF, Zarr).
 
-        args:
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the Dataset should be written.
+        data : xr.Dataset
+            The Dataset to write.
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments to pass to the underlying xarray write function
+            (e.g., `to_zarr`, `to_netcdf`). Default is None.
+
+        Returns
+        -------
+        Path
+            The path where the data was written.
+
         """
-        raise NotImplementedError(
-            f"Writing using driver '{self.name}' is not supported."
-        )
+        ...

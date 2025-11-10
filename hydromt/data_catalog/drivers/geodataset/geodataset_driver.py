@@ -2,7 +2,8 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from pathlib import Path
+from typing import Any
 
 import xarray as xr
 from pydantic import Field
@@ -12,9 +13,9 @@ from hydromt.data_catalog.drivers.base_driver import (
     BaseDriver,
     DriverOptions,
 )
-from hydromt.data_catalog.drivers.preprocessing import get_preprocessor
+from hydromt.data_catalog.drivers.preprocessing import Preprocessor, get_preprocessor
 from hydromt.error import NoDataStrategy
-from hydromt.typing import Geom, Predicate, SourceMetadata, StrPath, TimeRange
+from hydromt.typing import Geom, Predicate, SourceMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +26,8 @@ class GeoDatasetOptions(DriverOptions):
     preprocess: str | None = None
     """Name of preprocessor to apply on geodataset after reading. Available preprocessors include: round_latlon, to_datetimeindex, remove_duplicates, harmonise_dims. See their docstrings for details."""
 
-    def get_preprocessor(self) -> Callable | None:
+    def get_preprocessor(self) -> Preprocessor:
         """Get the preprocessor function."""
-        if self.preprocess is None:
-            return None
         return get_preprocessor(self.preprocess)
 
 
@@ -45,34 +44,60 @@ class GeoDatasetDriver(BaseDriver, ABC):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
-        variables: list[str] | None = None,
-        time_range: TimeRange | None = None,
         metadata: SourceMetadata | None = None,
-    ) -> xr.Dataset | None:
+    ) -> xr.Dataset:
         """
-        Read in any compatible data source to an xarray Dataset.
+        Read in data to an xarray Dataset.
 
-        args:
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing data. Default is NoDataStrategy.RAISE.
+        mask : Geom | None, optional
+            Optional spatial mask to clip the dataset.
+        predicate : Predicate, optional
+            Spatial predicate for filtering geometries. Default is "intersects".
+        metadata : SourceMetadata | None, optional
+            Optional metadata object to attach to the loaded dataset.
+
+        Returns
+        -------
+        xr.Dataset | None
+            The dataset read from the source, or None if no data found and strategy allows.
         """
         ...
 
+    @abstractmethod
     def write(
         self,
-        path: StrPath,
-        ds: xr.Dataset,
-        **kwargs,
-    ) -> str:
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
         """
-        Write out a GeoDataset to file.
+        Write a GeoDataset to disk.
 
-        Not all drivers should have a write function, so this method is not
-        abstract.
+        Parameters
+        ----------
+        path : Path | str
+            Destination path or URI where the dataset will be written. The path should
+            have a supported extension depending on the concrete driver implementation.
+        data : xr.Dataset
+            The xarray Dataset to write.
+        write_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments to pass to the underlying write function.
+            These may include encoding options for NetCDF, or mode/format options for Zarr.
+            Default is None.
 
-        args:
+        Returns
+        -------
+        Path
+            The path where the dataset was written.
+
         """
-        raise NotImplementedError(
-            f"Writing using driver '{self.name}' is not supported."
-        )
+        ...

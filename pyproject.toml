@@ -184,6 +184,8 @@ filterwarnings = [
 
 	# zarr v3 experimental warning
 	"ignore:Consolidated metadata is currently not part in the Zarr format 3 specification:UserWarning",
+	# irrelevant radolan engine warning
+	"ignore:Engine 'radolan' loading failed.*:RuntimeWarning",
 ]
 
 [tool.mypy]

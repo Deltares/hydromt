@@ -2,7 +2,8 @@
 
 import logging
 from os.path import basename, splitext
-from typing import Any, ClassVar, Dict, List, Literal, Optional, Union
+from pathlib import Path
+from typing import Any, ClassVar, List, Literal, Optional, Union
 
 import xarray as xr
 from pydantic import Field
@@ -20,7 +21,6 @@ from hydromt.gis.gis_utils import _parse_geom_bbox_buffer
 from hydromt.typing import (
     Bbox,
     Geom,
-    StrPath,
     TimeRange,
     TotalBounds,
 )
@@ -59,23 +59,23 @@ class GeoDatasetSource(DataSource):
         self._log_start_read_data()
 
         # Transform time_range and variables to match the data source
-        tr = self.data_adapter._to_source_timerange(time_range)
+        time_range = self.data_adapter._to_source_timerange(time_range)
         vrs = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
-            time_range=tr,
+            time_range=time_range,
             variables=vrs,
             metadata=self.metadata,
             handle_nodata=handle_nodata,
         )
 
-        ds: Optional[xr.Dataset] = self.driver.read(
+        ds: xr.Dataset = self.driver.read(
             uris,
-            time_range=tr,
-            variables=vrs,
-            metadata=self.metadata,
             handle_nodata=handle_nodata,
+            mask=mask,
+            predicate=predicate,
+            metadata=self.metadata,
         )
         return self.data_adapter.transform(
             ds,
@@ -90,19 +90,19 @@ class GeoDatasetSource(DataSource):
 
     def to_file(
         self,
-        file_path: StrPath,
+        file_path: Path | str,
         *,
-        driver_override: Optional[GeoDatasetDriver] = None,
-        bbox: Optional[Bbox] = None,
-        mask: Optional[Geom] = None,
+        driver_override: GeoDatasetDriver | None = None,
+        bbox: Bbox | None = None,
+        mask: Geom | None = None,
         buffer: GeomBuffer = 0,
         predicate: Predicate = "intersects",
-        variables: Optional[List[str]] = None,
-        time_range: Optional[TimeRange] = None,
+        variables: list[str] | None = None,
+        time_range: TimeRange | None = None,
         single_var_as_array: bool = True,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        **kwargs,
-    ) -> Optional["GeoDatasetSource"]:
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> "GeoDatasetSource | None":
         """
         Write the GeoDatasetSource to a local file.
 
@@ -110,18 +110,16 @@ class GeoDatasetSource(DataSource):
         """
         if driver_override is None and not self.driver.supports_writing:
             # default to fallback driver.
-            driver: GeoDatasetDriver = GeoDatasetDriver.model_validate(
-                self._fallback_driver_write
-            )
+            driver = GeoDatasetDriver.model_validate(self._fallback_driver_write)
         elif driver_override:
             if not driver_override.supports_writing:
                 raise RuntimeError(
                     f"driver: '{driver_override.name}' does not support writing data."
                 )
-            driver: GeoDatasetDriver = driver_override
+            driver = driver_override
         else:
             # use local filesystem
-            driver: GeoDatasetDriver = self.driver.model_copy(
+            driver = self.driver.model_copy(
                 update={"filesystem": FSSpecFileSystem.create("local")}
             )
 
@@ -138,14 +136,14 @@ class GeoDatasetSource(DataSource):
         if ds is None:  # handle_nodata == ignore
             return None
 
-        dest_path: str = driver.write(
-            file_path,
-            ds,
-            **kwargs,
-        )
+        dest_path = driver.write(file_path, ds, write_kwargs=write_kwargs)
 
         # update driver based on local path
-        update: Dict[str, Any] = {"uri": dest_path, "root": None, "driver": driver}
+        update = {
+            "uri": dest_path.as_posix(),
+            "root": None,
+            "driver": driver,
+        }
 
         return self.model_copy(update=update)
 
