@@ -1,6 +1,7 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import glob
+import io
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -1731,3 +1732,31 @@ def test_yml_from_uri_path():
     yml = _yml_from_uri_or_path(uri)
     assert isinstance(yml, dict)
     assert len(yml) > 0
+
+
+def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
+    region_str = """
+    {
+    "type": "FeatureCollection",
+    "name": "region",
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": [
+    { "type": "Feature", "properties": { }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 12.325, 46.341666666666661 ], [ 12.325, 46.675 ], [ 12.008333333333351, 46.675 ], [ 12.008333333333351, 46.341666666666661 ], [ 12.325, 46.341666666666661 ] ] ] } }
+    ]
+    }
+    """
+
+    region = gpd.read_file(io.StringIO(region_str))
+
+    ds = data_catalog.get_rasterdataset(
+        "era5",
+        geom=region,
+        buffer=1,
+        time_range=("2010-02-01T00:00:00", "2010-02-10T00:00:00"),
+        variables=["temp", "press_msl", "kin", "kout"],
+        single_var_as_array=False,
+    )
+
+    # assert that the ds goes from 2010-02-02 to 2010-02-10, because of unit_add time (+1 day) in the data catalog
+    assert ds["time"].values[0] == np.datetime64("2010-02-02T00:00:00")
+    assert ds["time"].values[-1] == np.datetime64("2010-02-10T00:00:00")
