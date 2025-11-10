@@ -23,8 +23,8 @@ such that different installations do not conflict.
 
 If you do not yet have such a package manager, we recommend using either:
 
-- `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_: uses the `conda package manager <https://docs.conda.io/en/latest/>`_
 - `Miniforge <https://github.com/conda-forge/miniforge#mambaforge>`_: uses the `mamba package manager <https://github.com/mamba-org/mamba>`_
+- `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_: uses the `conda package manager <https://docs.conda.io/en/latest/>`_
 
 
 .. _installation_hydromt:

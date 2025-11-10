@@ -35,25 +35,25 @@ To access the grid component data you call ``model.grid.data`` instead of ``mode
 
 In the core of HydroMT, the available components are:
 
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
-| v0.x                                                      | v1.x                       | Description                                   |
-+===========================================================+============================+===============================================+
-| Model.config                                              | ConfigComponent            | Component for managing model configuration    |
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
-| Model.geoms                                               | GeomsComponent             | Component for managing 1D vector data         |
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
-| Model.tables                                              | TablesComponent            | Component for managing non-geospatial data    |
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
-| -                                                         | DatasetsComponent          | Component for managing non-geospatial data    |
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
-| Model.maps / Model.forcing / Model.results / Model.states | SpatialDatasetsComponent   | Component for managing geospatial data        |
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
-| GridModel.grid                                            | GridComponent              | Component for managing regular gridded data   |
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
-| MeshModel.mesh                                            | MeshComponent              | Component for managing unstructured grids     |
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
-| VectorModel.vector                                        | VectorComponent            | Component for managing geospatial vector data |
-+-----------------------------------------------------------+----------------------------+-----------------------------------------------+
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
+| v0.x                                                      | v1.x                                                           | Description                                   |
++===========================================================+================================================================+===============================================+
+| Model.config                                              | :py:class:`~hydromt.model.components.ConfigComponent`          | Component for managing model configuration    |
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
+| Model.geoms                                               | :py:class:`~hydromt.model.components.GeomsComponent`           | Component for managing 1D vector data         |
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
+| Model.tables                                              | :py:class:`~hydromt.model.components.TablesComponent`          | Component for managing non-geospatial data    |
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
+| -                                                         | :py:class:`~hydromt.model.components.DatasetsComponent`        | Component for managing non-geospatial data    |
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
+| Model.maps / Model.forcing / Model.results / Model.states | :py:class:`~hydromt.model.components.SpatialDatasetsComponent` | Component for managing geospatial data        |
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
+| GridModel.grid                                            | :py:class:`~hydromt.model.components.GridComponent`            | Component for managing regular gridded data   |
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
+| MeshModel.mesh                                            | :py:class:`~hydromt.model.components.MeshComponent`            | Component for managing unstructured grids     |
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
+| VectorModel.vector                                        | :py:class:`~hydromt.model.components.VectorComponent`          | Component for managing geospatial vector data |
++-----------------------------------------------------------+----------------------------------------------------------------+-----------------------------------------------+
 
 Example: Accessing Component Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

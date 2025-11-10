@@ -267,7 +267,7 @@ html_css_files = ["theme-deltares.css"]
 html_theme_options = {
     "show_nav_level": 1,
     "navbar_align": "content",
-    #"use_edit_page_button": True,
+    "use_edit_page_button": False,
     "icon_links": [
         {
             "name": "GitHub",
