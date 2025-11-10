@@ -1,7 +1,6 @@
 """Tests for the hydromt.data_catalog submodule."""
 
 import glob
-import io
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -1735,18 +1734,11 @@ def test_yml_from_uri_path():
 
 
 def test_get_rasterdataset_with_unit_add(data_catalog: DataCatalog):
-    region_str = """
-    {
-    "type": "FeatureCollection",
-    "name": "region",
-    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-    "features": [
-    { "type": "Feature", "properties": { }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 12.325, 46.341666666666661 ], [ 12.325, 46.675 ], [ 12.008333333333351, 46.675 ], [ 12.008333333333351, 46.341666666666661 ], [ 12.325, 46.341666666666661 ] ] ] } }
-    ]
-    }
-    """
-
-    region = gpd.read_file(io.StringIO(region_str))
+    region = gpd.GeoDataFrame(
+        [],
+        geometry=[box(12.008333333333351, 46.341666666666661, 12.325, 46.675)],
+        crs="EPSG:4326",
+    )
 
     ds = data_catalog.get_rasterdataset(
         "era5",
