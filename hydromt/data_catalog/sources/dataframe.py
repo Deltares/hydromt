@@ -42,13 +42,13 @@ class DataFrameSource(DataSource):
         self._mark_as_used()
         self._log_start_read_data()
 
-        time_range: TimeRange = self.data_adapter._to_source_timerange(time_range)
+        src_time_range = self.data_adapter._to_source_timerange(time_range)
         vrs: Optional[List[str]] = self.data_adapter._to_source_variables(variables)
 
         uris: List[str] = self.uri_resolver.resolve(
             self.full_uri,
             variables=vrs,
-            time_range=time_range,
+            time_range=src_time_range,
             handle_nodata=handle_nodata,
         )
 
