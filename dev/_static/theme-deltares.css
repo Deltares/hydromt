@@ -28,5 +28,10 @@ html[data-theme="light"] {
 
 /* enlarge deltares & github icon size; only works with local/url svg files; not with fa icons */
 img.icon-link-image {
-    height: 2.5em !important;
+    height: 2em !important;
+}
+
+
+.sd-text-icon.blue-icon {
+    color: #080c80;
 }

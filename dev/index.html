@@ -33,7 +33,7 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
-    <link rel="stylesheet" type="text/css" href="_static/theme-deltares.css?v=aa503ec8" />
+    <link rel="stylesheet" type="text/css" href="_static/theme-deltares.css?v=d7afb10b" />
   
   <!-- So that users can add custom icons -->
   <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
@@ -59,7 +59,7 @@
     <link rel="icon" href="_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="API reference" href="api/api.html" />
+    <link rel="next" title="About HydroMT" href="about/intro.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.2.0.dev0" />
@@ -145,8 +145,8 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/api.html">
-    API reference
+  <a class="nav-link nav-internal" href="about/intro.html">
+    About
   </a>
 </li>
 
@@ -159,22 +159,22 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="guides/intro.html">
+  <a class="nav-link nav-internal" href="user_guide/intro.html">
     User guide
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="plugins.html">
-    Plugins
+  <a class="nav-link nav-internal" href="dev/intro.html">
+    Developer guide
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="_generated/predefined_catalogs.html">
-    <no title>
+  <a class="nav-link nav-internal" href="api/api.html">
+    API
   </a>
 </li>
 
@@ -188,7 +188,7 @@
                     
 <li class=" ">
   <a class="nav-link dropdown-item nav-internal" href="changelog.html">
-    What’s new
+    What's new
   </a>
 </li>
 
@@ -240,26 +240,6 @@
         </li>
 </ul></div>
       
-        <div class="navbar-item">
-<div class="version-switcher__container dropdown pst-js-only">
-  <button id="pst-version-switcher-button-2"
-    type="button"
-    class="version-switcher__button btn btn-sm dropdown-toggle"
-    data-bs-toggle="dropdown"
-    aria-haspopup="listbox"
-    aria-controls="pst-version-switcher-list-2"
-    aria-label="Version switcher list"
-  >
-    Choose version  <!-- this text may get changed later by javascript -->
-    <span class="caret"></span>
-  </button>
-  <div id="pst-version-switcher-list-2"
-    class="version-switcher__menu dropdown-menu list-group-flush py-0"
-    role="listbox" aria-labelledby="pst-version-switcher-button-2">
-    <!-- dropdown will be populated by javascript on page load -->
-  </div>
-</div></div>
-      
     </div>
     
   </div>
@@ -309,8 +289,8 @@
   <ul class="bd-navbar-elements navbar-nav">
     
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="api/api.html">
-    API reference
+  <a class="nav-link nav-internal" href="about/intro.html">
+    About
   </a>
 </li>
 
@@ -323,29 +303,29 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="guides/intro.html">
+  <a class="nav-link nav-internal" href="user_guide/intro.html">
     User guide
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="plugins.html">
-    Plugins
+  <a class="nav-link nav-internal" href="dev/intro.html">
+    Developer guide
   </a>
 </li>
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="_generated/predefined_catalogs.html">
-    <no title>
+  <a class="nav-link nav-internal" href="api/api.html">
+    API
   </a>
 </li>
 
 
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="changelog.html">
-    What’s new
+    What's new
   </a>
 </li>
 
@@ -385,26 +365,6 @@
         </li>
 </ul></div>
         
-          <div class="navbar-item">
-<div class="version-switcher__container dropdown pst-js-only">
-  <button id="pst-version-switcher-button-3"
-    type="button"
-    class="version-switcher__button btn btn-sm dropdown-toggle"
-    data-bs-toggle="dropdown"
-    aria-haspopup="listbox"
-    aria-controls="pst-version-switcher-list-3"
-    aria-label="Version switcher list"
-  >
-    Choose version  <!-- this text may get changed later by javascript -->
-    <span class="caret"></span>
-  </button>
-  <div id="pst-version-switcher-list-3"
-    class="version-switcher__menu dropdown-menu list-group-flush py-0"
-    role="listbox" aria-labelledby="pst-version-switcher-button-3">
-    <!-- dropdown will be populated by javascript on page load -->
-  </div>
-</div></div>
-        
       </div>
     
   </div>
@@ -440,167 +400,69 @@
   <section id="hydromt-automated-and-reproducible-model-building-and-analysis">
 <span id="readme"></span><h1>HydroMT: Automated and reproducible model building and analysis<a class="headerlink" href="#hydromt-automated-and-reproducible-model-building-and-analysis" title="Link to this heading">#</a></h1>
 <p><a class="reference external" href="https://pypi.org/project/hydromt/"><img alt="PyPI" src="https://img.shields.io/pypi/v/hydromt.svg?style=flat" /></a> <a class="reference external" href="https://anaconda.org/conda-forge/hydromt"><img alt="Conda-Forge" src="https://anaconda.org/conda-forge/hydromt/badges/version.svg" /></a> <a class="reference external" href="https://deltares.github.io/hydromt/latest"><img alt="Latest developers docs" src="https://img.shields.io/badge/docs-latest-brightgreen.svg" /></a> <a class="reference external" href="https://deltares.github.io/hydromt/stable"><img alt="Stable docs last release" src="https://img.shields.io/badge/docs-stable-brightgreen.svg" /></a> <a class="reference external" href="https://mybinder.org/v2/gh/Deltares/hydromt/main?urlpath=lab/tree/examples"><img alt="Binder" src="https://mybinder.org/badge_logo.svg" /></a> <a class="reference external" href="https://github.com/Deltares/hydromt/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/Deltares/hydromt?style=flat" /></a> <a class="reference external" href="https://zenodo.org/badge/latestdoi/348020332"><img alt="Zenodo" src="https://zenodo.org/badge/348020332.svg" /></a> <a class="reference external" href="https://doi.org/10.21105/joss.04897"><img alt="joss_paper" src="https://joss.theoj.org/papers/10.21105/joss.04897/status.svg" /></a> <a class="reference external" href="https://sonarcloud.io/summary/new_code?id=Deltares_hydromt"><img alt="Coverage" src="https://sonarcloud.io/api/project_badges/measure?project=Deltares_hydromt&amp;metric=coverage" /></a> <a class="reference external" href="https://sonarcloud.io/summary/new_code?id=Deltares_hydromt"><img alt="SonarQube status" src="https://sonarcloud.io/api/project_badges/measure?project=Deltares_hydromt&amp;metric=alert_status" /></a></p>
-<section id="what-is-hydromt">
-<h2>What is HydroMT?<a class="headerlink" href="#what-is-hydromt" title="Link to this heading">#</a></h2>
-<p><strong>HydroMT</strong> (Hydro Model Tools) is an open-source Python package that facilitates the process of
-building and analyzing spatial geoscientific models with a focus on water system models.
-It does so by automating the workflow to go from raw data to a complete model instance which
-is ready to run and to analyse model results once the simulation has finished.
-HydroMT builds on the latest packages in the scientific and geospatial python eco-system including
-<a class="reference external" href="https://xarray.pydata.org">xarray</a>, <a class="reference external" href="https://rasterio.readthedocs.io">rasterio</a>, <a class="reference external" href="https://corteva.github.io/rioxarray/stable/">rioxarray</a>, <a class="reference external" href="https://geopandas.org">geopandas</a>, <a class="reference external" href="https://scipy.org/">scipy</a> and <a class="reference external" href="https://deltares.github.io/pyflwdir">pyflwdir</a>.</p>
-</section>
-<section id="why-hydromt">
-<h2>Why HydroMT?<a class="headerlink" href="#why-hydromt" title="Link to this heading">#</a></h2>
-<p>Setting up spatial geoscientific models typically requires many (manual) steps
-to process input data and might therefore be time consuming and hard to reproduce.
-Especially improving models based on global geospatial datasets, which are
-rapidly becoming available at increasingly high resolutions, might be challenging.
-Furthermore, analyzing model schematization and results from different models,
-which often use model-specific peculiar data formats, can be time consuming.
-This package aims to make the model building process <strong>fast</strong>, <strong>modular</strong> and <strong>reproducible</strong>
-by configuring the model building process from a single <em>yaml</em> configuration file
-and <strong>model- and data-agnostic</strong> through a common model and data interface.</p>
-</section>
-<section id="how-to-use-hydromt">
-<h2>How to use HydroMT?<a class="headerlink" href="#how-to-use-hydromt" title="Link to this heading">#</a></h2>
-<p>HydroMT can be used as a <strong>command line</strong> application (CLI) which provides commands to <em>build</em>,
-<em>update</em> and <em>clip</em> models with a single line, or <strong>from Python</strong> to exploit its rich interface.
-You can learn more about how to use HydroMT in its <a class="reference external" href="https://deltares.github.io/hydromt/latest/">online documentation.</a>
-For a smooth installing experience, we recommend installing HydroMT and its dependencies
-from conda-forge in a clean environment, see <a class="reference external" href="https://deltares.github.io/hydromt/latest/getting_started/installation">installation guide.</a></p>
-</section>
-<section id="hydromt-model-plugins">
-<h2>HydroMT model plugins<a class="headerlink" href="#hydromt-model-plugins" title="Link to this heading">#</a></h2>
-<p>HydroMT is commonly used in combination with a <strong>model plugin</strong> which
-provides a HydroMT implementation for specific model software. Using the plugins allows to prepare a ready-to-run set of input files from raw geoscientific datasets and analyse model results in a fast and reproducible way.
-Known model plugins include:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_wflow">hydromt_wflow</a>: A framework for distributed rainfall-runoff (wflow_sbm) and sediment transport (wflow_sediment) modelling.</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_delwaq">hydromt_delwaq</a>: A framework for water quality (D-Water Quality) and emissions (D-Emissions) modelling.</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_sfincs">hydromt_sfincs</a>: A fast 2D hydrodynamic flood model (SFINCS).</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_fiat">hydromt_fiat</a>: A flood impact model (FIAT).</p></li>
-<li><p><a class="reference external" href="https://deltares.github.io/hydromt_delft3dfm">hydromt_delft3dfm</a>: A flexible mesh hydrodynamic suite for 1D2D and 2D3D modelling (Delft3D FM).</p></li>
-</ul>
-</section>
-<section id="how-to-cite">
-<h2>How to cite?<a class="headerlink" href="#how-to-cite" title="Link to this heading">#</a></h2>
-<p>For publications, please cite our JOSS paper <a class="reference external" href="https://doi.org/10.21105/joss.04897"><img alt="joss_paper" src="https://joss.theoj.org/papers/10.21105/joss.04897/status.svg" /></a></p>
-<dl class="simple">
-<dt>::</dt><dd><p>Eilander et al., (2023). HydroMT: Automated and reproducible model building and analysis. Journal of Open Source Software, 8(83), 4897, <a class="reference external" href="https://doi.org/10.21105/joss.04897">https://doi.org/10.21105/joss.04897</a></p>
-</dd>
-</dl>
-<p>To cite a specific software version please use the DOI provided in the Zenodo badge <a class="reference external" href="https://zenodo.org/badge/latestdoi/348020332"><img alt="Zenodo" src="https://zenodo.org/badge/348020332.svg" /></a> that points to the latest release.</p>
-</section>
-<section id="how-to-contribute">
-<h2>How to contribute?<a class="headerlink" href="#how-to-contribute" title="Link to this heading">#</a></h2>
-<p>If you find any issues in the code or documentation feel free to leave an issue on the <a class="reference external" href="https://github.com/Deltares/hydromt/issues">github issue tracker.</a>
-You can find information about how to contribute to the HydroMT project at our <a class="reference external" href="https://deltares.github.io/hydromt/latest/dev/contributing">contributing page.</a></p>
-<p>HydroMT seeks active contribution from the (hydro) geoscientific community.
-So far, it has been developed and tested with a range of <a class="reference external" href="https://www.deltares.nl/en/">Deltares</a> models, but
-we believe it is applicable to a much wider set of geoscientific models and are
-happy to discuss how it can be implemented for your model.</p>
-</section>
-<section id="attribution">
-<h2>Attribution<a class="headerlink" href="#attribution" title="Link to this heading">#</a></h2>
-<p>HydroMT relies on these excellent packages:</p>
-<ul class="simple">
-<li><p>affine</p></li>
-<li><p>aiohappyeyeballs</p></li>
-<li><p>aiohttp</p></li>
-<li><p>aiosignal</p></li>
-<li><p>annotated-types</p></li>
-<li><p>asciitree</p></li>
-<li><p>async-timeout</p></li>
-<li><p>attrs</p></li>
-<li><p>bottleneck</p></li>
-<li><p>branca</p></li>
-<li><p>certifi</p></li>
-<li><p>cftime</p></li>
-<li><p>charset-normalizer</p></li>
-<li><p>click</p></li>
-<li><p>click-plugins</p></li>
-<li><p>cligj</p></li>
-<li><p>cloudpickle</p></li>
-<li><p>contourpy</p></li>
-<li><p>cycler</p></li>
-<li><p>dask</p></li>
-<li><p>fasteners</p></li>
-<li><p>folium</p></li>
-<li><p>fonttools</p></li>
-<li><p>frozenlist</p></li>
-<li><p>fsspec</p></li>
-<li><p>geoalchemy2</p></li>
-<li><p>geographiclib</p></li>
-<li><p>geopandas</p></li>
-<li><p>geopy</p></li>
-<li><p>greenlet</p></li>
-<li><p>idna</p></li>
-<li><p>importlib-metadata</p></li>
-<li><p>importlib-resources</p></li>
-<li><p>jinja2</p></li>
-<li><p>joblib</p></li>
-<li><p>kiwisolver</p></li>
-<li><p>llvmlite</p></li>
-<li><p>locket</p></li>
-<li><p>mapclassify</p></li>
-<li><p>markupsafe</p></li>
-<li><p>matplotlib</p></li>
-<li><p>mercantile</p></li>
-<li><p>multidict</p></li>
-<li><p>netcdf4</p></li>
-<li><p>networkx</p></li>
-<li><p>numba</p></li>
-<li><p>numba-celltree</p></li>
-<li><p>numcodecs</p></li>
-<li><p>numpy</p></li>
-<li><p>packaging</p></li>
-<li><p>pandas</p></li>
-<li><p>partd</p></li>
-<li><p>pillow</p></li>
-<li><p>platformdirs</p></li>
-<li><p>pooch</p></li>
-<li><p>propcache</p></li>
-<li><p>psycopg-binary</p></li>
-<li><p>pyarrow</p></li>
-<li><p>pydantic</p></li>
-<li><p>pydantic-core</p></li>
-<li><p>pydantic-settings</p></li>
-<li><p>pyflwdir</p></li>
-<li><p>pyogrio</p></li>
-<li><p>pyparsing</p></li>
-<li><p>pyproj</p></li>
-<li><p>pystac</p></li>
-<li><p>python-dateutil</p></li>
-<li><p>python-dotenv</p></li>
-<li><p>pytz</p></li>
-<li><p>pyyaml</p></li>
-<li><p>rasterio</p></li>
-<li><p>requests</p></li>
-<li><p>rioxarray</p></li>
-<li><p>scikit-learn</p></li>
-<li><p>scipy</p></li>
-<li><p>shapely</p></li>
-<li><p>six</p></li>
-<li><p>sqlalchemy</p></li>
-<li><p>threadpoolctl</p></li>
-<li><p>tomlkit</p></li>
-<li><p>toolz</p></li>
-<li><p>typing-extensions</p></li>
-<li><p>typing-inspection</p></li>
-<li><p>tzdata</p></li>
-<li><p>universal-pathlib</p></li>
-<li><p>urllib3</p></li>
-<li><p>xarray</p></li>
-<li><p>xmltodict</p></li>
-<li><p>xugrid</p></li>
-<li><p>xyzservices</p></li>
-<li><p>yarl</p></li>
-<li><p>zarr</p></li>
-<li><p>zipp</p></li>
-</ul>
+<p>HydroMT (Hydro Model Tools) is an open-source Python package that facilitates the
+process of building and analysing spatial geoscientific models with a focus on water
+system models. It does so by automating the workflow to go from raw data to a complete
+model instance which is ready to run and to analyse model results once the simulation
+has finished. As such it is an interface between <strong>user</strong>, <strong>data</strong> and <strong>models</strong>.</p>
+<p>This documentation describes the core functionality of HydroMT. In practice, HydroMT
+uses <strong>model plugins</strong> to interface with specific software like Wflow or SFINCS.
+Users are encouraged to explore the <a class="reference internal" href="about/plugins.html#plugins"><span class="std std-ref">available model plugins</span></a>
+and consult both this documentation and that of the plugin they are using.</p>
+<figure class="align-default">
+<img alt="_images/hydromt_using.jpg" src="_images/hydromt_using.jpg" />
+</figure>
+<p><strong>Useful links</strong></p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 sd-g-1 sd-g-xs-1 sd-g-sm-1 sd-g-md-1 sd-g-lg-1 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text"><svg version="1.1" width="5.0em" height="5.0em" class="sd-octicon sd-octicon-rocket sd-text-icon blue-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.322.75h1.176a1.75 1.75 0 0 1 1.75 1.749v1.177a10.75 10.75 0 0 1-2.925 7.374l-1.228 1.304a23.699 23.699 0 0 1-1.596 1.542v5.038c0 .615-.323 1.184-.85 1.5l-4.514 2.709a.75.75 0 0 1-1.12-.488l-.963-4.572a1.305 1.305 0 0 1-.14-.129L8.04 15.96l-1.994-1.873a1.305 1.305 0 0 1-.129-.14l-4.571-.963a.75.75 0 0 1-.49-1.12l2.71-4.514c.316-.527.885-.85 1.5-.85h5.037a23.668 23.668 0 0 1 1.542-1.594l1.304-1.23A10.753 10.753 0 0 1 20.321.75Zm-6.344 4.018v-.001l-1.304 1.23a22.275 22.275 0 0 0-3.255 3.851l-2.193 3.29 1.859 1.744a.545.545 0 0 1 .034.034l1.743 1.858 3.288-2.192a22.263 22.263 0 0 0 3.854-3.257l1.228-1.303a9.251 9.251 0 0 0 2.517-6.346V2.5a.25.25 0 0 0-.25-.25h-1.177a9.252 9.252 0 0 0-6.344 2.518ZM6.5 21c-1.209 1.209-3.901 1.445-4.743 1.49a.236.236 0 0 1-.18-.067.236.236 0 0 1-.067-.18c.045-.842.281-3.534 1.49-4.743.9-.9 2.6-.9 3.5 0 .9.9.9 2.6 0 3.5Zm-.592-8.588L8.17 9.017c.23-.346.47-.685.717-1.017H5.066a.25.25 0 0 0-.214.121l-2.167 3.612ZM16 15.112c-.333.248-.672.487-1.018.718l-3.393 2.262.678 3.223 3.612-2.167a.25.25 0 0 0 .121-.214ZM17.5 8a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 17.5 8Z"></path></svg></p>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text"><strong>Getting started</strong></p>
+<p class="sd-card-text">New to HydroMT? Start here with our installation instructions and a brief overview of HydroMT.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="overview/intro.html#getting-started"><span class="std std-ref">Getting started</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text"><svg version="1.1" width="5.0em" height="5.0em" class="sd-octicon sd-octicon-book sd-text-icon blue-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M0 3.75A.75.75 0 0 1 .75 3h7.497c1.566 0 2.945.8 3.751 2.014A4.495 4.495 0 0 1 15.75 3h7.5a.75.75 0 0 1 .75.75v15.063a.752.752 0 0 1-.755.75l-7.682-.052a3 3 0 0 0-2.142.878l-.89.891a.75.75 0 0 1-1.061 0l-.902-.901a2.996 2.996 0 0 0-2.121-.879H.75a.75.75 0 0 1-.75-.75Zm12.75 15.232a4.503 4.503 0 0 1 2.823-.971l6.927.047V4.5h-6.75a3 3 0 0 0-3 3ZM11.247 7.497a3 3 0 0 0-3-2.997H1.5V18h6.947c1.018 0 2.006.346 2.803.98Z"></path></svg></p>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text"><strong>User Guide</strong></p>
+<p class="sd-card-text">Want to know more about how to use HydroMT? Then visit our user guide.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="user_guide/intro.html#intro-user-guide"><span class="std std-ref">User guide</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text"><svg version="1.1" width="5.0em" height="5.0em" class="sd-octicon sd-octicon-terminal sd-text-icon blue-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.25 12a.75.75 0 0 1-.22.53l-2.75 2.75a.75.75 0 0 1-1.06-1.06L7.44 12 5.22 9.78a.75.75 0 1 1 1.06-1.06l2.75 2.75c.141.14.22.331.22.53Zm2 2a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Z"></path><path d="M0 4.75C0 3.784.784 3 1.75 3h20.5c.966 0 1.75.784 1.75 1.75v14.5A1.75 1.75 0 0 1 22.25 21H1.75A1.75 1.75 0 0 1 0 19.25Zm1.75-.25a.25.25 0 0 0-.25.25v14.5c0 .138.112.25.25.25h20.5a.25.25 0 0 0 .25-.25V4.75a.25.25 0 0 0-.25-.25Z"></path></svg></p>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text"><strong>Creating your own plugin</strong></p>
+<p class="sd-card-text">Interested in developing your own HydroMT plugin? Check out our plugin developer guide to get started.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="dev/plugin_dev/index.html#intro-plugin-guide"><span class="std std-ref">Plugin Developer guide</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text"><svg version="1.1" width="5.0em" height="5.0em" class="sd-octicon sd-octicon-graph sd-text-icon blue-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 2.75a.75.75 0 0 0-1.5 0v18.5c0 .414.336.75.75.75H20a.75.75 0 0 0 0-1.5H2.5V2.75Z"></path><path d="M22.28 7.78a.75.75 0 0 0-1.06-1.06l-5.72 5.72-3.72-3.72a.75.75 0 0 0-1.06 0l-6 6a.75.75 0 1 0 1.06 1.06l5.47-5.47 3.72 3.72a.75.75 0 0 0 1.06 0l6.25-6.25Z"></path></svg></p>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text"><strong>What’s new</strong></p>
+<p class="sd-card-text">Stay up to date with the latest changes and improvements in HydroMT by visiting our changelog.</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="changelog.html"><span class="doc">What’s new</span></a></div>
+</div>
+</div>
+</div>
 <div class="toctree-wrapper compound">
 </div>
-</section>
 </section>
 
 
@@ -614,11 +476,11 @@ happy to discuss how it can be implemented for your model.</p>
                   
 <div class="prev-next-area">
     <a class="right-next"
-       href="api/api.html"
+       href="about/intro.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">API reference</p>
+        <p class="prev-next-title">About HydroMT</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -634,47 +496,24 @@ happy to discuss how it can be implemented for your model.</p>
 
 
   <div class="sidebar-secondary-item">
-<div
-    id="pst-page-navigation-heading-2"
-    class="page-toc tocsection onthispage">
-    <i class="fa-solid fa-list"></i> On this page
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-hydromt">What is HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-hydromt">Why HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-use-hydromt">How to use HydroMT?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#hydromt-model-plugins">HydroMT model plugins</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-cite">How to cite?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-contribute">How to contribute?</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attribution">Attribution</a></li>
-</ul>
-  </nav></div>
-
-  <div class="sidebar-secondary-item">
-
-  
-  <div class="tocsection editthispage">
-    <a href="https://github.com/Deltares/hydromt/edit/main/docs/index.rst">
-      <i class="fa-solid fa-pencil"></i>
-      
-      
-        
-          Edit on GitHub
-        
-      
-    </a>
-  </div>
-</div>
-
-  <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/index.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+</div></div>
 
 </div></div>
               

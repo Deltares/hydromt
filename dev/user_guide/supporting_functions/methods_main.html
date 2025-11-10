@@ -1,0 +1,720 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Supporting functionalities &#8212; HydroMT  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/theme-deltares.css?v=d7afb10b" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/supporting_functions/methods_main';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '1.2.0';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../_static/hydromt-icon.svg"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Migration Guide" href="../migration_guide/index.html" />
+    <link rel="prev" title="Data conventions" href="../data_catalog/data_conventions.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="1.2.0.dev0" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+    
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-light" alt=""/>
+    <img src="../../_static/hydromt-icon.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">HydroMT Core</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/intro.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev/intro.html">
+    Developer guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../changelog.html">
+    What's new
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../about/intro.html">
+    About
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../overview/intro.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../intro.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../dev/intro.html">
+    Developer guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api/api.html">
+    API
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../changelog.html">
+    What's new
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/Deltares/hydromt" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="icon-link-image" alt="GitHub"/></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://www.deltares.nl/en/" title="Deltares" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><img src="../../_static/deltares-blue.svg" class="icon-link-image" alt="Deltares"/></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../overview/index.html">Overview</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../overview/hydromt_intro.html">Introduction to HydroMT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview/hydromt_cli.html">HydroMT CLI interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../overview/hydromt_python.html">HydroMT Python API</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../models/model_overview.html">Working with models</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_build.html">Building a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_update.html">Updating a model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_workflow.html">Model workflow file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_region.html">Defining a region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_components.html">Model components (advanced)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../models/model_processes.html">Model processes (advanced)</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../data_catalog/data_overview.html">Data Catalog</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../data_catalog/data_existing_cat.html">Pre-defined data catalogs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_catalog/data_prepare_cat.html">Preparing a data catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_catalog/data_types.html">Supported data types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_catalog/data_conventions.html">Data conventions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Supporting functionalities</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../migration_guide/index.html">Migration guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../migration_guide/data_catalog.html">Migrating the Data Catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../migration_guide/model_workflow.html">Migrating the model workflow file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../migration_guide/python_updates.html">Updates for python users</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq.html">Frequently Asked Questions</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">User guide</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Supporting functionalities</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="supporting-functionalities">
+<span id="methods-processes"></span><h1>Supporting functionalities<a class="headerlink" href="#supporting-functionalities" title="Link to this heading">#</a></h1>
+<p>Supporting functions and (GIS) methods are the engine of HydroMT. Methods
+provide the low-level functionality, only accessible through the Python interface,
+to do the required processing of common data types such as grid and vector data.</p>
+<p>HydroMT also provides higher-level processes that combine multiple methods to
+accomplish common tasks. These processes are used in the HydroMT model components to
+prepare model input data, but can also be used directly through the Python API.
+You can find which model processes are available in the <a class="reference internal" href="../models/model_processes.html#model-processes"><span class="std std-ref">model processes documentation</span></a></p>
+<p>HydroMT provides a wide range of supporting functionalities, including:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#raster-accessor"><span class="std std-ref">RasterDataset accessor</span></a></p></li>
+<li><p><a class="reference internal" href="#geodataset-accessor"><span class="std std-ref">GeoDataset accessor</span></a></p></li>
+<li><p><a class="reference internal" href="#pyflwdir-wrappers"><span class="std std-ref">Flow Directions methods</span></a></p></li>
+<li><p><a class="reference internal" href="#stats"><span class="std std-ref">Statistical methods</span></a></p></li>
+<li><p><a class="reference internal" href="#extreme-value-analysis"><span class="std std-ref">Extreme Value Analysis methods</span></a></p></li>
+</ul>
+<section id="rasterdataset">
+<span id="raster-accessor"></span><h2>RasterDataset<a class="headerlink" href="#rasterdataset" title="Link to this heading">#</a></h2>
+<p>Some powerful functionality that HydroMT uses is exposed in the <code class="docutils literal notranslate"><span class="pre">gis</span></code> module. In this
+module <a class="reference external" href="https://docs.xarray.dev/en/stable/internals/extending-xarray.html">xarray accessors</a> are located. These
+allow for powerful new methods on top of xarray <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">DataArray</span></code> classes.</p>
+<p>HydroMT <code class="xref py py-class docutils literal notranslate"><span class="pre">RasterDataset</span></code> builds on top of these accessors to
+work with raster data. Available methods include reprojection, resampling, transforming,
+interpolating nodata or zonal statistics. And properties such as crs, bounds, or resolution .</p>
+<p>To access these methods in python, first load a xarray Dataset or DataArray, for example
+using the HydroMT <a class="reference internal" href="../../_generated/hydromt.data_catalog.DataCatalog.get_rasterdataset.html#hydromt.data_catalog.DataCatalog.get_rasterdataset" title="hydromt.data_catalog.DataCatalog.get_rasterdataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">get_rasterdataset</span></code></a> method
+and use the <code class="docutils literal notranslate"><span class="pre">raster</span></code> accessor following by the method or attribute you want to use.</p>
+<p>All available methods and properties are documented in the <a class="reference internal" href="../../api/gis.html#raster-api"><span class="std std-ref">raster API documentation</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hydromt</span>
+
+<span class="c1"># Load a raster dataset from the data catalog</span>
+<span class="n">cat</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="s1">&#39;path_to_your_catalog.yml&#39;</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span><span class="s1">&#39;your_raster_key&#39;</span><span class="p">)</span>
+
+<span class="c1"># Use the raster accessor to reproject the dataset</span>
+<span class="n">ds_reprojected</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span><span class="n">dst_crs</span><span class="o">=</span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get the bounds of the dataset</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more example, you can check the <a class="reference internal" href="../../_examples/working_with_raster.html"><span class="doc">working with raster data notebook</span></a>.</p>
+</section>
+<section id="geodataset">
+<span id="geodataset-accessor"></span><h2>GeoDataset<a class="headerlink" href="#geodataset" title="Link to this heading">#</a></h2>
+<p>Some powerful functionality that HydroMT uses is exposed in the <code class="docutils literal notranslate"><span class="pre">gis</span></code> module. In this
+module <a class="reference external" href="https://docs.xarray.dev/en/stable/internals/extending-xarray.html">xarray accessors</a> are located. These
+allow for powerful new methods on top of xarray <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">DataArray</span></code> classes.</p>
+<p>HydroMT <code class="xref py py-class docutils literal notranslate"><span class="pre">GeoDataset</span></code> builds on top of these accessors to work
+with geospatial vector data (N-dim point/line/polygon geometry). Available methods include
+reprojection, transforming, updating geometry or converting to geopandas.GeoDataFrame to
+access further GIS methods. And properties such as crs, bounds or geometry.</p>
+<p>To access these methods in python, first load a xarray Dataset or DataArray, for example
+using the HydroMT <a class="reference internal" href="../../_generated/hydromt.data_catalog.DataCatalog.get_geodataset.html#hydromt.data_catalog.DataCatalog.get_geodataset" title="hydromt.data_catalog.DataCatalog.get_geodataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">get_geodataset</span></code></a> method
+and use the <code class="docutils literal notranslate"><span class="pre">vector</span></code> accessor following by the method or attribute you want to use.</p>
+<p>All available methods and properties are documented in the <a class="reference internal" href="../../api/gis.html#geodataset-api"><span class="std std-ref">GeoDataset API documentation</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">hydromt</span>
+
+<span class="c1"># Load a geodataset from the data catalog</span>
+<span class="n">cat</span> <span class="o">=</span> <span class="n">hydromt</span><span class="o">.</span><span class="n">DataCatalog</span><span class="p">(</span><span class="s1">&#39;path_to_your_catalog.yml&#39;</span><span class="p">)</span>
+<span class="n">gds</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">get_geodataset</span><span class="p">(</span><span class="s1">&#39;your_geodataset_key&#39;</span><span class="p">)</span>
+
+<span class="c1"># Use the vector accessor to reproject the geodataset</span>
+<span class="n">gds_reprojected</span> <span class="o">=</span> <span class="n">gds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">dst_crs</span><span class="o">=</span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">)</span>
+
+<span class="c1"># Convert to geopandas GeoDataFrame</span>
+<span class="n">gdf</span> <span class="o">=</span> <span class="n">gds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">geometry</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">gdf</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>For more example, you can check the <a class="reference internal" href="../../_examples/working_with_geodatasets.html"><span class="doc">working with geodataset notebook</span></a>.</p>
+</section>
+<section id="flow-directions">
+<span id="pyflwdir-wrappers"></span><h2>Flow directions<a class="headerlink" href="#flow-directions" title="Link to this heading">#</a></h2>
+<p><a class="reference external" href="https://deltares.github.io/pyflwdir/latest/index.html">PyFlwDir</a> contains a series of
+methods to work with gridded DEM and flow direction datasets. The <code class="docutils literal notranslate"><span class="pre">gis.flw</span></code> module
+builds on top of this and provides hydrological methods for raster DEM and flow direction data. For
+example, calculate flow direction, flow accumulation, stream network, catchments, or
+reproject hydrography.</p>
+<p>Available methods are listed in the <a class="reference internal" href="../../api/gis.html#flw-api"><span class="std std-ref">flow directions API documentation</span></a>.</p>
+<p>You can find examples of how to use these methods in the <a class="reference internal" href="../../_examples/working_with_flow_directions.html"><span class="doc">working with flow direction notebook</span></a>.</p>
+</section>
+<section id="statistical-methods">
+<span id="stats"></span><h2>Statistical methods<a class="headerlink" href="#statistical-methods" title="Link to this heading">#</a></h2>
+<p>HydroMT <code class="docutils literal notranslate"><span class="pre">stats.skills</span></code> module provides different statistical functions to compare model results with observations.
+They include:</p>
+<ul class="simple">
+<li><p>Absolute and percentual bias</p></li>
+<li><p>Nash-Sutcliffe model Efficiency (NSE) and log Nash-Sutcliffe model Efficiency (log-NSE)</p></li>
+<li><p>Various versions of the Kling-Gupta model Efficiency (KGE)</p></li>
+<li><p>Coefficient of determination (R-squared)</p></li>
+<li><p>Mean Squared Error (MSE) and Root Mean Squared Error  (RMSE)</p></li>
+</ul>
+<p>The full list is available in the <a class="reference internal" href="../../api/stats.html#statistics-skills"><span class="std std-ref">skills statistics API</span></a>.</p>
+<p>As HydroMT provides methods to easily read the model results, applying a skill statistic just takes a few lines of code and can be
+applied directly across all observation locations in your model.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">from hydromt.stats import nashsutcliffe</span>
+<span class="go">from hydromt_wflow import WflowModel</span>
+<span class="go">import xarray as xr</span>
+<span class="gp"># </span><span class="nb">read</span><span class="w"> </span>model<span class="w"> </span>results
+<span class="gp"># </span>NOTE:<span class="w"> </span>the<span class="w"> </span>name<span class="w"> </span>of<span class="w"> </span>the<span class="w"> </span>results<span class="w"> </span>depends<span class="w"> </span>on<span class="w"> </span>the<span class="w"> </span>wflow<span class="w"> </span>run<span class="w"> </span>configuration<span class="w"> </span><span class="o">(</span>toml<span class="w"> </span>file<span class="o">)</span>
+<span class="go">mod = WflowModel(root=r&#39;/path/to/wflow_model/root&#39;, mode=&#39;r&#39;)</span>
+<span class="go">sim = mod.results[&#39;Q_gauges_grdc&#39;]</span>
+<span class="gp"># </span><span class="nb">read</span><span class="w"> </span>observations
+<span class="go">obs = xr.open_dataset(r&#39;/path/to/grdc_obs.nc&#39;)</span>
+<span class="gp"># </span>calculate<span class="w"> </span>skill<span class="w"> </span>statistic
+<span class="go">nse = nashsutcliffe(sim, obs)</span>
+</pre></div>
+</div>
+</section>
+<section id="extreme-value-analysis">
+<span id="id2"></span><h2>Extreme Value Analysis<a class="headerlink" href="#extreme-value-analysis" title="Link to this heading">#</a></h2>
+<p>HydroMT <code class="docutils literal notranslate"><span class="pre">stats.extremes</span></code> module provides different functions to perform Extreme Value Analysis (EVA) on hydrological data.
+They include full extreme value analysis or sub methods to get peaks, fit extremes or get return values.</p>
+<p>The full list is available in the <a class="reference internal" href="../../api/stats.html#statistics-extremes"><span class="std std-ref">extreme value analysis API</span></a>.</p>
+<p>You can find examples of how to use these methods in the <a class="reference internal" href="../../_examples/doing_extreme_value_analysis.html"><span class="doc">extreme value analysis notebook</span></a>.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../data_catalog/data_conventions.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Data conventions</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../migration_guide/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Migration Guide</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#rasterdataset">RasterDataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#geodataset">GeoDataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#flow-directions">Flow directions</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#statistical-methods">Statistical methods</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#extreme-value-analysis">Extreme Value Analysis</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright Deltares.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
