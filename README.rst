@@ -56,7 +56,6 @@ How to cite?
 ------------
 For publications, please cite our JOSS paper |joss_paper|
 
-::
     Eilander et al., (2023). HydroMT: Automated and reproducible model building and analysis. Journal of Open Source Software, 8(83), 4897, https://doi.org/10.21105/joss.04897
 
 To cite a specific software version please use the DOI provided in the Zenodo badge |doi| that points to the latest release.
@@ -71,6 +70,10 @@ HydroMT seeks active contribution from the (hydro) geoscientific community.
 So far, it has been developed and tested with a range of `Deltares <https://www.deltares.nl/en/>`_ models, but
 we believe it is applicable to a much wider set of geoscientific models and are
 happy to discuss how it can be implemented for your model.
+
+Changelog
+---------
+See the :doc:`full changelog <changelog>` for a complete list of changes and release notes.
 
 
 .. _scipy: https://scipy.org/
@@ -123,101 +126,3 @@ happy to discuss how it can be implemented for your model.
 .. |sonarqube| image:: https://sonarcloud.io/api/project_badges/measure?project=Deltares_hydromt&metric=alert_status
     :target: https://sonarcloud.io/summary/new_code?id=Deltares_hydromt
     :alt: SonarQube status
-
-Attribution
------------
-HydroMT relies on these excellent packages:
-
-- affine
-- aiohappyeyeballs
-- aiohttp
-- aiosignal
-- annotated-types
-- asciitree
-- async-timeout
-- attrs
-- bottleneck
-- branca
-- certifi
-- cftime
-- charset-normalizer
-- click
-- click-plugins
-- cligj
-- cloudpickle
-- contourpy
-- cycler
-- dask
-- fasteners
-- folium
-- fonttools
-- frozenlist
-- fsspec
-- geoalchemy2
-- geographiclib
-- geopandas
-- geopy
-- greenlet
-- idna
-- importlib-metadata
-- importlib-resources
-- jinja2
-- joblib
-- kiwisolver
-- llvmlite
-- locket
-- mapclassify
-- markupsafe
-- matplotlib
-- mercantile
-- multidict
-- netcdf4
-- networkx
-- numba
-- numba-celltree
-- numcodecs
-- numpy
-- packaging
-- pandas
-- partd
-- pillow
-- platformdirs
-- pooch
-- propcache
-- psycopg-binary
-- pyarrow
-- pydantic
-- pydantic-core
-- pydantic-settings
-- pyflwdir
-- pyogrio
-- pyparsing
-- pyproj
-- pystac
-- python-dateutil
-- python-dotenv
-- pytz
-- pyyaml
-- rasterio
-- requests
-- rioxarray
-- scikit-learn
-- scipy
-- shapely
-- six
-- sqlalchemy
-- threadpoolctl
-- tomlkit
-- toolz
-- typing-extensions
-- typing-inspection
-- tzdata
-- universal-pathlib
-- urllib3
-- xarray
-- xmltodict
-- xugrid
-- xyzservices
-- yarl
-- zarr
-- zipp
