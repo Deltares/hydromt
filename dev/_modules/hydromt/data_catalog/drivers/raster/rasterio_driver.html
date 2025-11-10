@@ -470,22 +470,16 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">field_serializer</span><span class="p">,</span> <span class="n">model_validator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.caching</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cache_vrt_tiles</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.temp_env</span><span class="w"> </span><span class="kn">import</span> <span class="n">temp_env</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.uris</span><span class="w"> </span><span class="kn">import</span> <span class="n">_strip_scheme</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_cache_vrt_tiles</span><span class="p">,</span> <span class="n">_strip_scheme</span><span class="p">,</span> <span class="n">temp_env</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">SETTINGS</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.base_driver</span><span class="w"> </span><span class="kn">import</span> <span class="n">DriverOptions</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.raster.raster_dataset_driver</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">RasterDatasetDriver</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.raster</span><span class="w"> </span><span class="kn">import</span> <span class="n">RasterDatasetDriver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.gis.gis_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">zoom_to_overview_level</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_mfraster</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Geom</span><span class="p">,</span>
     <span class="n">SourceMetadata</span><span class="p">,</span>
-    <span class="n">StrPath</span><span class="p">,</span>
-    <span class="n">TimeRange</span><span class="p">,</span>
     <span class="n">Variables</span><span class="p">,</span>
     <span class="n">Zoom</span><span class="p">,</span>
 <span class="p">)</span>
@@ -582,15 +576,48 @@
         <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">kwargs_for_open</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">:</span> <span class="n">Geom</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">variables</span><span class="p">:</span> <span class="n">Variables</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">time_range</span><span class="p">:</span> <span class="n">TimeRange</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zoom</span><span class="p">:</span> <span class="n">Zoom</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">chunks</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read data using rasterio.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read raster data using the rasterio library.</span>
+
+<span class="sd">        Supports reading single or multiple raster files (optionally mosaicked),</span>
+<span class="sd">        applying spatial masks, caching VRT tiles, and reading overviews at</span>
+<span class="sd">        different zoom levels. Returns an xarray Dataset constructed from raster bands.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uris : list[str]</span>
+<span class="sd">            List of raster file URIs to read.</span>
+<span class="sd">        handle_nodata : NoDataStrategy, optional</span>
+<span class="sd">            Strategy for handling missing or empty data. Default is NoDataStrategy.RAISE.</span>
+<span class="sd">        mask : Geom | None, optional</span>
+<span class="sd">            Geometry used to mask or clip the raster data. Default is None.</span>
+<span class="sd">        variables : Variables | None, optional</span>
+<span class="sd">            List of variables or band names to read. Default is None.</span>
+<span class="sd">        zoom : Zoom | None, optional</span>
+<span class="sd">            Requested zoom level or resolution. Used to determine the appropriate overview level. Default is None.</span>
+<span class="sd">        chunks : dict[str, Any] | None, optional</span>
+<span class="sd">            Dask chunking configuration for lazy loading. Default is None.</span>
+<span class="sd">        metadata : SourceMetadata | None, optional</span>
+<span class="sd">            Optional metadata describing CRS, nodata, and overview levels. Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        xr.Dataset</span>
+<span class="sd">            The loaded raster dataset as an xarray Dataset.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the file extension is unsupported or invalid.</span>
+<span class="sd">        rasterio.errors.RasterioIOError</span>
+<span class="sd">            If an I/O error occurs during reading.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">metadata</span> <span class="o">=</span> <span class="n">SourceMetadata</span><span class="p">()</span>
 
@@ -599,7 +626,7 @@
             <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_cache_path</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span>
             <span class="n">uris_cached</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">:</span>
-                <span class="n">cached_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">_cache_vrt_tiles</span><span class="p">(</span>
+                <span class="n">cached_uri</span> <span class="o">=</span> <span class="n">_cache_vrt_tiles</span><span class="p">(</span>
                     <span class="n">uri</span><span class="p">,</span> <span class="n">geom</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">get_fs</span><span class="p">(),</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span>
                 <span class="p">)</span>
                 <span class="n">uris_cached</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cached_uri</span><span class="p">)</span>
@@ -608,9 +635,9 @@
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">mosaic_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">mask</span><span class="p">})</span>
 
-        <span class="n">kwargs_for_open</span> <span class="o">=</span> <span class="n">kwargs_for_open</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">open_kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">nodata</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">):</span>
-            <span class="n">kwargs_for_open</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">nodata</span><span class="p">})</span>
+            <span class="n">open_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;nodata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="o">.</span><span class="n">nodata</span><span class="p">})</span>
 
         <span class="c1"># Fix overview level</span>
         <span class="k">if</span> <span class="n">zoom</span><span class="p">:</span>
@@ -625,33 +652,24 @@
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">overview_level</span><span class="p">:</span>
                 <span class="c1"># NOTE: overview levels start at zoom_level 1, see _get_zoom_levels_and_crs</span>
-                <span class="n">kwargs_for_open</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">overview_level</span><span class="o">=</span><span class="n">overview_level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">open_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">overview_level</span><span class="o">=</span><span class="n">overview_level</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">kwargs_for_open</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;chunks&quot;</span><span class="p">:</span> <span class="n">chunks</span><span class="p">})</span>
+            <span class="n">open_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;chunks&quot;</span><span class="p">:</span> <span class="n">chunks</span><span class="p">})</span>
 
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">()</span> <span class="o">|</span> <span class="n">kwargs_for_open</span>
         <span class="n">mosaic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">mosaic</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
         <span class="c1"># If the metadata resolver has already resolved the overview level,</span>
         <span class="c1"># trying to open zoom levels here will result in an error.</span>
         <span class="c1"># Better would be to separate uriresolver and driver: https://github.com/Deltares/hydromt/issues/1023</span>
         <span class="c1"># Then we can implement looking for a overview level in the driver.</span>
-        <span class="k">def</span><span class="w"> </span><span class="nf">_open</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_open</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">open_mfraster</span><span class="p">(</span>
-                    <span class="n">uris</span><span class="p">,</span>
-                    <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span>
-                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="k">return</span> <span class="n">open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">open_kwargs</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">RasterioIOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;Cannot open overview level&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
-                    <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;overview_level&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                    <span class="k">return</span> <span class="n">open_mfraster</span><span class="p">(</span>
-                        <span class="n">uris</span><span class="p">,</span>
-                        <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                    <span class="p">)</span>
+                    <span class="n">open_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;overview_level&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">open_mfraster</span><span class="p">(</span><span class="n">uris</span><span class="p">,</span> <span class="n">mosaic</span><span class="o">=</span><span class="n">mosaic</span><span class="p">,</span> <span class="o">**</span><span class="n">open_kwargs</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span>
 
@@ -659,7 +677,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">anon</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filesystem</span><span class="o">.</span><span class="n">get_fs</span><span class="p">()</span><span class="o">.</span><span class="n">anon</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">anon</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">anon</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">anon</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">temp_env</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="s2">&quot;AWS_NO_SIGN_REQUEST&quot;</span><span class="p">:</span> <span class="s2">&quot;true&quot;</span><span class="p">}):</span>
@@ -669,7 +687,7 @@
 
         <span class="c1"># Mosaic&#39;s can mess up the chunking, which can error during writing</span>
         <span class="c1"># Or maybe setting</span>
-        <span class="n">chunks</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;chunks&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">chunks</span> <span class="o">=</span> <span class="n">open_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;chunks&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">chunks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">chunks</span><span class="o">=</span><span class="n">chunks</span><span class="p">)</span>
 
@@ -688,8 +706,33 @@
 
 <div class="viewcode-block" id="RasterioDriver.write">
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver.write">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write out a RasterDataset using rasterio.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">write_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a RasterDataset to disk using the rasterio library.</span>
+
+<span class="sd">        This method is not implemented in this driver. Concrete implementations</span>
+<span class="sd">        must provide a way to write raster datasets to supported formats.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : Path | str</span>
+<span class="sd">            Destination path for the raster dataset.</span>
+<span class="sd">        data : xr.Dataset</span>
+<span class="sd">            The xarray Dataset to write.</span>
+<span class="sd">        write_kwargs : dict[str, Any] | None, optional</span>
+<span class="sd">            Additional keyword arguments for writing. Default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            Always raised because writing is not supported in this driver.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
 

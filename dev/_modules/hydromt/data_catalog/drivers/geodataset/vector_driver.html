@@ -460,12 +460,12 @@
 <span></span><span class="sd">&quot;&quot;&quot;GeoDatasetVectorDriver class for reading vector data from table like files such as csv or parquet.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt._utils.unused_kwargs</span><span class="w"> </span><span class="kn">import</span> <span class="n">_warn_on_unused_kwargs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.data_catalog.drivers.base_driver</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DRIVER_OPTIONS_DESCRIPTION</span><span class="p">,</span>
 <span class="p">)</span>
@@ -475,7 +475,7 @@
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.readers</span><span class="w"> </span><span class="kn">import</span> <span class="n">open_geodataset</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span><span class="p">,</span> <span class="n">Geom</span><span class="p">,</span> <span class="n">Predicate</span><span class="p">,</span> <span class="n">SourceMetadata</span><span class="p">,</span> <span class="n">StrPath</span><span class="p">,</span> <span class="n">TimeRange</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span><span class="p">,</span> <span class="n">Geom</span><span class="p">,</span> <span class="n">Predicate</span><span class="p">,</span> <span class="n">SourceMetadata</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -520,27 +520,31 @@
         <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">kwargs_for_open</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">:</span> <span class="n">Geom</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">predicate</span><span class="p">:</span> <span class="n">Predicate</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
-        <span class="n">variables</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">time_range</span><span class="p">:</span> <span class="n">TimeRange</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read tabular datafiles like csv or parquet into to an xarray DataSet.</span>
+<span class="sd">        Read tabular or vector dataset files (e.g., CSV, Parquet) into an xarray Dataset.</span>
 
-<span class="sd">        Args:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uris : list[str]</span>
+<span class="sd">            List of URIs to read data from.</span>
+<span class="sd">        handle_nodata : NoDataStrategy, optional</span>
+<span class="sd">            Strategy to handle missing data. Default is NoDataStrategy.RAISE.</span>
+<span class="sd">        mask : Geom | None, optional</span>
+<span class="sd">            Optional spatial mask to clip the dataset.</span>
+<span class="sd">        predicate : Predicate, optional</span>
+<span class="sd">            Spatial predicate for filtering geometries. Default is &quot;intersects&quot;.</span>
+<span class="sd">        metadata : SourceMetadata | None, optional</span>
+<span class="sd">            Optional metadata object to attach to the loaded dataset.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        xr.Dataset</span>
+<span class="sd">            The dataset read from the source.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_warn_on_unused_kwargs</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="n">variables</span><span class="p">,</span>
-                <span class="s2">&quot;time_range&quot;</span><span class="p">:</span> <span class="n">time_range</span><span class="p">,</span>
-                <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
-            <span class="p">},</span>
-        <span class="p">)</span>
-        <span class="c1"># we want to maintain a list as argument to keep the interface compatible with other drivers.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uris</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;GeodatasetVectorDriver only supports reading from one URI per source&quot;</span>
@@ -549,24 +553,22 @@
             <span class="n">uri</span> <span class="o">=</span> <span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">preprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_preprocessor</span><span class="p">()</span>
-        <span class="n">kwargs_for_open</span> <span class="o">=</span> <span class="n">kwargs_for_open</span> <span class="ow">or</span> <span class="p">{}</span>
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">()</span> <span class="o">|</span> <span class="n">kwargs_for_open</span>
         <span class="n">crs</span><span class="p">:</span> <span class="n">CRS</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">crs</span> <span class="k">if</span> <span class="n">metadata</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">open_geodataset</span><span class="p">(</span>
-            <span class="n">loc_path</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span> <span class="n">geom</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="n">loc_path</span><span class="o">=</span><span class="n">uri</span><span class="p">,</span>
+            <span class="n">geom</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span>
+            <span class="n">predicate</span><span class="o">=</span><span class="n">predicate</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">(),</span>
         <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">preprocessor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">preprocessor</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">preprocessor</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">exec_nodata_strat</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;No data from driver </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span>
                 <span class="p">)</span>
-                <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">to_dataset</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -581,11 +583,33 @@
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.html#hydromt.data_catalog.drivers.GeoDatasetVectorDriver.write">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span>
-        <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Not implemented.&quot;&quot;&quot;</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">write_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a GeoDataset to disk.</span>
+
+<span class="sd">        Writing is not supported for this driver, as vector and tabular sources such as</span>
+<span class="sd">        CSV or Parquet are read-only in this context. This method exists for interface</span>
+<span class="sd">        consistency with GeoDatasetDriver.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : Path | str</span>
+<span class="sd">            Destination path where the dataset would be written.</span>
+<span class="sd">        data : xr.Dataset</span>
+<span class="sd">            The dataset to write.</span>
+<span class="sd">        write_kwargs : dict[str, Any] | None, optional</span>
+<span class="sd">            Additional keyword arguments that would be passed to the underlying write</span>
+<span class="sd">            function. Default is None.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        NotImplementedError</span>
+<span class="sd">            Always raised, as writing is not supported for this driver.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;GeodatasetVectorDriver does not support writing. &quot;</span><span class="p">)</span></div>
 </div>
 

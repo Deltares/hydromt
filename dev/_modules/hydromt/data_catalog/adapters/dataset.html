@@ -527,7 +527,8 @@
             <span class="n">ds</span> <span class="o">=</span> <span class="n">_single_var_as_array</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">single_var_as_array</span><span class="p">,</span> <span class="n">variable_name</span><span class="o">=</span><span class="n">variables</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ds</span>
         <span class="k">except</span> <span class="n">NoDataException</span><span class="p">:</span>
-            <span class="n">exec_nodata_strat</span><span class="p">(</span><span class="s2">&quot;No data to export&quot;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">)</span></div>
+            <span class="n">exec_nodata_strat</span><span class="p">(</span><span class="s2">&quot;No data to export&quot;</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="n">handle_nodata</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_rename_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>

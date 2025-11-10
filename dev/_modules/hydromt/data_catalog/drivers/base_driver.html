@@ -526,7 +526,7 @@
 
 <div class="viewcode-block" id="DriverOptions.get_kwargs">
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.DriverOptions.html#hydromt.data_catalog.drivers.DriverOptions.get_kwargs">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return attributes set that are not explicitly declared fields.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span>
             <span class="n">exclude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_excluded_kwarg_names_for_open</span><span class="p">(),</span> <span class="n">exclude_unset</span><span class="o">=</span><span class="kc">True</span>
@@ -579,12 +579,8 @@
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver.read">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="o">*</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">kwargs_for_open</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read data using the driver.</span>
 
 <span class="sd">        Parameters</span>
@@ -593,8 +589,6 @@
 <span class="sd">            List of URIs to read data from.</span>
 <span class="sd">        handle_nodata : NoDataStrategy, optional</span>
 <span class="sd">            Strategy to handle no data situations. Default is NoDataStrategy.RAISE.</span>
-<span class="sd">        kwargs_for_open : dict[str, Any] | None, optional</span>
-<span class="sd">            Additional keyword arguments to pass to the underlying open function. Default is None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span></div>
 
@@ -602,17 +596,31 @@
 <div class="viewcode-block" id="BaseDriver.write">
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver.write">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write data using the driver.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">write_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write data using the driver.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        path : str | Path</span>
-<span class="sd">            Path to write data to.</span>
-<span class="sd">        *args</span>
-<span class="sd">            Positional arguments for the write function.</span>
-<span class="sd">        **kwargs</span>
-<span class="sd">            Keyword arguments for the write function.</span>
+<span class="sd">        path : Path | str</span>
+<span class="sd">            Destination path where the data will be written. Can be a local or remote URI.</span>
+<span class="sd">        data : Any</span>
+<span class="sd">            The data object to write. The expected type depends on the specific driver implementation</span>
+<span class="sd">            (e.g., pandas DataFrame, xarray Dataset, GeoDataFrame, etc.).</span>
+<span class="sd">        write_kwargs : dict[str, Any], optional</span>
+<span class="sd">            Additional keyword arguments passed to the underlying writer function (e.g., `to_csv`, `to_zarr`, etc.).</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Path</span>
+<span class="sd">            The path where the data was written.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span></div>
 

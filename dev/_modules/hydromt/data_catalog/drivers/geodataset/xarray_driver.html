@@ -462,7 +462,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">os.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">splitext</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Field</span>
@@ -478,11 +479,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoDataStrategy</span><span class="p">,</span> <span class="n">exec_nodata_strat</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Geom</span><span class="p">,</span>
+    <span class="n">Predicate</span><span class="p">,</span>
     <span class="n">SourceMetadata</span><span class="p">,</span>
-    <span class="n">StrPath</span><span class="p">,</span>
-    <span class="n">TimeRange</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.typing.type_def</span><span class="w"> </span><span class="kn">import</span> <span class="n">Predicate</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -515,43 +514,56 @@
         <span class="n">uris</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">kwargs_for_open</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mask</span><span class="p">:</span> <span class="n">Geom</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">predicate</span><span class="p">:</span> <span class="n">Predicate</span> <span class="o">=</span> <span class="s2">&quot;intersects&quot;</span><span class="p">,</span>
-        <span class="n">time_range</span><span class="p">:</span> <span class="n">TimeRange</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">variables</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">metadata</span><span class="p">:</span> <span class="n">SourceMetadata</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read zarr data to an xarray DataSet.</span>
+<span class="sd">        Read in data to an xarray Dataset.</span>
 
-<span class="sd">        Args:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        uris : list[str]</span>
+<span class="sd">            List of URIs to read data from.</span>
+<span class="sd">        handle_nodata : NoDataStrategy, optional</span>
+<span class="sd">            Strategy to handle missing data. Default is NoDataStrategy.RAISE.</span>
+<span class="sd">        mask : Geom | None, optional</span>
+<span class="sd">            Optional spatial mask to clip the dataset.</span>
+<span class="sd">        predicate : Predicate, optional</span>
+<span class="sd">            Spatial predicate for filtering geometries. Default is &quot;intersects&quot;.</span>
+<span class="sd">        metadata : SourceMetadata | None, optional</span>
+<span class="sd">            Optional metadata object to attach to the loaded dataset.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        xr.Dataset | None</span>
+<span class="sd">            The dataset read from the source, or None if no data found and strategy allows.</span>
+
+<span class="sd">        Warning</span>
+<span class="sd">        -------</span>
+<span class="sd">        The `mask`, `predicate` and `metadata` parameters are not used directly in this driver,</span>
+<span class="sd">        but are included for consistency with the GeoDataFrameDriver interface.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_warn_on_unused_kwargs</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
             <span class="p">{</span>
                 <span class="s2">&quot;mask&quot;</span><span class="p">:</span> <span class="n">mask</span><span class="p">,</span>
-                <span class="s2">&quot;time_range&quot;</span><span class="p">:</span> <span class="n">time_range</span><span class="p">,</span>
-                <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="n">variables</span><span class="p">,</span>
                 <span class="s2">&quot;predicate&quot;</span><span class="p">:</span> <span class="n">predicate</span><span class="p">,</span>
+                <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="n">metadata</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-
         <span class="n">preprocessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_preprocessor</span><span class="p">()</span>
         <span class="n">first_ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">uris</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">kwargs_for_open</span> <span class="o">=</span> <span class="n">kwargs_for_open</span> <span class="ow">or</span> <span class="p">{}</span>
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">()</span> <span class="o">|</span> <span class="n">kwargs_for_open</span>
+
         <span class="k">if</span> <span class="n">first_ext</span> <span class="o">==</span> <span class="n">_ZARR_EXT</span><span class="p">:</span>
-            <span class="n">opn</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">open_zarr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">opn</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">xr</span><span class="o">.</span><span class="n">open_zarr</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">())</span>
             <span class="n">datasets</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">_uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">:</span>
                 <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">_uri</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">ext</span> <span class="o">!=</span> <span class="n">first_ext</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading zarr and </span><span class="si">{</span><span class="n">_uri</span><span class="si">}</span><span class="s2"> was not, skipping...&quot;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">preprocessor</span><span class="p">(</span><span class="n">opn</span><span class="p">(</span><span class="n">_uri</span><span class="p">))</span> <span class="k">if</span> <span class="n">preprocessor</span> <span class="k">else</span> <span class="n">opn</span><span class="p">(</span><span class="n">_uri</span><span class="p">)</span>
-                    <span class="p">)</span>
+                    <span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">preprocessor</span><span class="p">(</span><span class="n">opn</span><span class="p">(</span><span class="n">_uri</span><span class="p">)))</span>
 
             <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">first_ext</span> <span class="ow">in</span> <span class="n">_NETCDF_EXT</span><span class="p">:</span>
@@ -564,7 +576,10 @@
                     <span class="n">filtered_uris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_uri</span><span class="p">)</span>
 
             <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_mfdataset</span><span class="p">(</span>
-                <span class="n">filtered_uris</span><span class="p">,</span> <span class="n">decode_coords</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">preprocess</span><span class="o">=</span><span class="n">preprocessor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+                <span class="n">filtered_uris</span><span class="p">,</span>
+                <span class="n">decode_coords</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span>
+                <span class="n">preprocess</span><span class="o">=</span><span class="n">preprocessor</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get_kwargs</span><span class="p">(),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -581,17 +596,44 @@
 
 <div class="viewcode-block" id="GeoDatasetXarrayDriver.write">
 <a class="viewcode-back" href="../../../../../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.html#hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.write">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">write_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Write the GeoDataset to a local file using zarr.</span>
+<span class="sd">        Write a GeoDataset to disk in Zarr or NetCDF format.</span>
 
-<span class="sd">        args:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : Path | str</span>
+<span class="sd">            Destination path or URI where the dataset will be written. Must end with a</span>
+<span class="sd">            supported extension (&#39;.zarr&#39;, &#39;.nc&#39;, or &#39;.netcdf&#39;).</span>
+<span class="sd">        data : xr.Dataset</span>
+<span class="sd">            The xarray Dataset to write.</span>
+<span class="sd">        write_kwargs : dict[str, Any] | None, optional</span>
+<span class="sd">            Additional keyword arguments passed to the underlying write function.</span>
+<span class="sd">            For example, `encoding` for NetCDF, or `mode` for Zarr. Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Path</span>
+<span class="sd">            The path where the dataset was written.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If the file extension is not supported.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ext</span> <span class="o">=</span> <span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span>
+        <span class="n">write_kwargs</span> <span class="o">=</span> <span class="n">write_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="n">_ZARR_EXT</span><span class="p">:</span>
-            <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">to_zarr</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">to_zarr</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">write_kwargs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">ext</span> <span class="ow">in</span> <span class="n">_NETCDF_EXT</span><span class="p">:</span>
-            <span class="n">ds</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">vector</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">write_kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown extension for GeoDatasetXarrayDriver: </span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
 

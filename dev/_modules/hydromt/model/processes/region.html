@@ -679,10 +679,8 @@
 <div class="viewcode-block" id="parse_region_grid">
 <a class="viewcode-back" href="../../../../_generated/hydromt.model.processes.region.parse_region_grid.html#hydromt.model.processes.region.parse_region_grid">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">parse_region_grid</span><span class="p">(</span>
-    <span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">data_catalog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">DataCatalog</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
+    <span class="n">region</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">data_catalog</span><span class="p">:</span> <span class="n">DataCatalog</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span> <span class="o">|</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a region of kind grid and return the corresponding xarray object.</span>
 
 <span class="sd">    Note that additional arguments from the region can be passed to the</span>
@@ -696,7 +694,7 @@
 <span class="sd">        For a region based on a grid:</span>
 
 <span class="sd">        * {&#39;grid&#39;: /path/to/grid}</span>
-<span class="sd">    data_catalog : DataCatalog</span>
+<span class="sd">    data_catalog : DataCatalog, optional</span>
 <span class="sd">        DataCatalog object containing the data sources.</span>
 
 <span class="sd">    Returns</span>
@@ -704,25 +702,30 @@
 <span class="sd">    xr.DataArray or xr.Dataset</span>
 <span class="sd">        The parsed xarray object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">kind</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">region</span><span class="p">))</span>
-    <span class="n">value0</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+    <span class="n">value0</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
 
     <span class="n">_assert_parse_key</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">)</span>
 
-    <span class="n">kwargs_str</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">parsed_region</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
             <span class="n">v</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;DataArray </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">bounds</span><span class="si">}</span><span class="s2"> (crs = </span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="si">}</span><span class="s2">)&quot;</span>
-        <span class="n">kwargs_str</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">})</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsed region (kind=</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">kwargs_str</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">parsed_region</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">})</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parsed region (kind=</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">): </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">parsed_region</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">data_catalog</span> <span class="o">=</span> <span class="n">data_catalog</span> <span class="ow">or</span> <span class="n">DataCatalog</span><span class="p">()</span>
     <span class="n">da</span> <span class="o">=</span> <span class="n">data_catalog</span><span class="o">.</span><span class="n">get_rasterdataset</span><span class="p">(</span>
         <span class="n">value0</span><span class="p">,</span>
         <span class="n">handle_nodata</span><span class="o">=</span><span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
         <span class="n">single_var_as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">driver</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">RasterDatasetSource</span><span class="o">.</span><span class="n">_fallback_driver_read</span><span class="p">,</span> <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">},</span>
+        <span class="n">source_kwargs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;driver&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">RasterDatasetSource</span><span class="o">.</span><span class="n">_fallback_driver_read</span><span class="p">,</span>
+                <span class="s2">&quot;options&quot;</span><span class="p">:</span> <span class="n">options</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">da</span></div>

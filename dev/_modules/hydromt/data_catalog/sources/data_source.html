@@ -552,8 +552,8 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_validate_data_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Pydantic does not check class variables, so it is checked here.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">copy_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">copy_data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">copy_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">data_type</span> <span class="o">:=</span> <span class="n">copy_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;data_type&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">data_type</span> <span class="o">!=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">data_type</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;data_type&#39; must be &#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="n">data_type</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
@@ -714,9 +714,9 @@
 <div class="viewcode-block" id="DataSource.read_data">
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource.read_data">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read data from the source.&quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="o">...</span></div>
 
 
 <div class="viewcode-block" id="DataSource.to_stac_catalog">
@@ -750,14 +750,7 @@
 <div class="viewcode-block" id="DataSource.to_file">
 <a class="viewcode-back" href="../../../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource.to_file">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_file</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="o">*</span><span class="p">,</span>
-        <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-        <span class="n">driver_override</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">BaseDriver</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataSource&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataSource | None&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write the DataSource to a local file.</span>
 
@@ -765,20 +758,12 @@
 <span class="sd">        ----------</span>
 <span class="sd">        file_path: Path | str</span>
 <span class="sd">            The path to write the data to.</span>
-<span class="sd">        handle_nodata: NoDataStrategy, optional</span>
-<span class="sd">            The error handling strategy. Options are: &quot;raise&quot; to raise an error on</span>
-<span class="sd">            failure, &quot;ignore&quot; to skip the dataset on failure.</span>
-<span class="sd">        driver_override: BaseDriver, optional</span>
-<span class="sd">            If provided, use this driver to write the data instead of the one</span>
-<span class="sd">            specified in the source. The driver must support writing.</span>
-<span class="sd">        **kwargs: Any</span>
-<span class="sd">            Additional keyword arguments for the implementation of `to_file`</span>
-<span class="sd">            from subclasses of DataSource. Will be passed to the driver&#39;s write method.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        DataSource</span>
 <span class="sd">            A new instance of the DataSource with the updated uri and driver.</span>
+<span class="sd">            Or None if there is no data available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span></div>
 
