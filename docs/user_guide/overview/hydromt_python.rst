@@ -55,7 +55,7 @@ is a small example of how to use the build function in Python:
 .. code-block:: python
 
     from hydromt import ExampleModel
-    from hydromt.io import read_workflow_yaml
+    from hydromt.readers import read_workflow_yaml
 
     # Instantiate model
     model = ExampleModel(
@@ -116,7 +116,7 @@ is a small example of how to use the update function in Python:
 .. code-block:: python
 
     from hydromt import ExampleModel
-    from hydromt.io import read_workflow_yaml
+    from hydromt.readers import read_workflow_yaml
 
     # Instantiate model
     model = ExampleModel(

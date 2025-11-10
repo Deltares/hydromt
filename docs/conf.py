@@ -107,28 +107,28 @@ author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 # The short version which is displayed
 version = hydromt.__version__
 
-# # -- Copy notebooks to include in docs -------
-# if os.path.isdir("_examples"):
-#     remove_dir_content("_examples")
-# os.makedirs("_examples")
-# shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
+# -- Copy notebooks to include in docs -------
+if os.path.isdir("_examples"):
+    remove_dir_content("_examples")
+os.makedirs("_examples")
+shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
 
 # replace all links of https://deltares.github.io/hydromt/.*/.*.rst.* with ../*.html.*
-# for root, _, files in os.walk("_examples"):
-#     for file in files:
-#         if file.endswith(".ipynb"):
-#             file_path = os.path.join(root, file)
-#             with open(file_path, "r", encoding="utf-8") as f:
-#                 content = f.read()
-#             content = re.sub(
-#                 # This regex checks for anything https://deltares.github.io/hydromt/.../*.html.* and replaces it with ../*.html.*
-#                 # It makes the assumption that links in markdown always end with a closing parenthesis ) or a whitespace \s character
-#                 r"https://deltares\.github\.io/hydromt/[^\s/]+/([^\s]+)\.html([^\s\)]*)",
-#                 r"../\1.rst\2",
-#                 content
-#             )
-#             with open(file_path, "w", encoding="utf-8") as f:
-#                 f.write(content)
+for root, _, files in os.walk("_examples"):
+    for file in files:
+        if file.endswith(".ipynb"):
+            file_path = os.path.join(root, file)
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            content = re.sub(
+                # This regex checks for anything https://deltares.github.io/hydromt/.../*.html.* and replaces it with ../*.html.*
+                # It makes the assumption that links in markdown always end with a closing parenthesis ) or a whitespace \s character
+                r"https://deltares\.github\.io/hydromt/[^\s/]+/([^\s]+)\.html([^\s\)]*)",
+                r"../\1.rst\2",
+                content
+            )
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(content)
 
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
@@ -157,10 +157,10 @@ for name in predefined_catalogs:
         continue
     write_nested_dropdown(name, data_cat, categories=categories)
     data_cat._sources = {}  # reset
-with open("_generated/predefined_catalogs.rst", "w") as f:
-    f.writelines(
-        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
-    )
+#with open("_generated/predefined_catalogs.rst", "w") as f:
+#    f.writelines(
+#        [f".. include:: ../../_generated/{name}.rst\n" for name in predefined_catalogs]
+#    )
 
 # -- General configuration ------------------------------------------------
 

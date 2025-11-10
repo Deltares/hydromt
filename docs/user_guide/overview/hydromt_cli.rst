@@ -36,6 +36,7 @@ The base commands or options are here to get some information about HydroMT like
 help, installed version and available models.
 
 .. _hydromt_help:
+
 help
 ^^^^^
 The ``hydromt --help`` command prints the help message for the HydroMT CLI. It shows the available commands and options
@@ -63,6 +64,7 @@ that can be used with HydroMT. For example:
       update  Update models
 
 .. _hydromt_version:
+
 version
 ^^^^^^^
 The ``hydromt --version`` command prints the installed version of HydroMT. For example:
@@ -74,6 +76,7 @@ The ``hydromt --version`` command prints the installed version of HydroMT. For e
     HydroMT version: 1.0.0
 
 .. _hydromt_models:
+
 models
 ^^^^^^
 The ``hydromt --models`` command prints the available generic models from HydroMT core and
@@ -89,6 +92,7 @@ the installed plugins together with their versions. For example:
         - wflow_sediment (hydromt_wflow 1.0.0)
 
 .. _hydromt_plugins:
+
 plugins
 ^^^^^^^
 The ``hydromt --plugins`` command prints the installed HydroMT plugins together with their versions.
@@ -127,6 +131,7 @@ Model commands
 --------------
 
 .. _hydromt_build:
+
 build
 ^^^^^
 The ``hydromt build`` command is used to build models from scratch. It has two mandatory
@@ -154,6 +159,7 @@ In this section, you will also find how to :ref:`prepare a workflow file <model_
 Finally you can check the :ref:`hydromt build API <build_api>` for all the available options for the build command.
 
 .. _hydromt_update:
+
 update
 ^^^^^^
 The ``hydromt update`` command is used to update an existing model. It is quite similar to the
@@ -185,6 +191,7 @@ Data catalog commands
 ---------------------
 
 .. _hydromt_export:
+
 export
 ^^^^^^
 The ``hydromt export`` command is used to export sample data from a data catalog for
@@ -247,6 +254,7 @@ Validation commands
 -------------------
 
 .. _hydromt_check:
+
 check
 ^^^^^
 The ``hydromt check`` command is used to validate the configuration file, and the data catalog.

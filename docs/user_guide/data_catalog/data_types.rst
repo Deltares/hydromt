@@ -320,10 +320,10 @@ example pandas can write the same data structure to parquet as it can csv.
 
 .. _GeoDataset:
 
-Geospatial point time-series (GeoDataset)
------------------------------------------
+Geospatial time-series (GeoDataset)
+-----------------------------------
 
-- :ref:`Netcdf point time-series dataset <NC_point>`
+- :ref:`Netcdf time-series dataset <NC_point>`
 - :ref:`CSV point time-series data <CSV_point>`
 
 .. _geo_formats:
@@ -346,8 +346,8 @@ Geospatial point time-series (GeoDataset)
 
 .. _NC_point:
 
-Netcdf point time-series dataset
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Netcdf time-series dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Netcdf and Zarr point time-series data are parsed to **GeoDataset** using the **netcdf** and **zarr** drivers.
 A typical netcdf or zarr point time-series dataset has the following structure with

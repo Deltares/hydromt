@@ -55,7 +55,7 @@ Here is how to update a model from:
         .. code-block:: python
 
             from hydromt import ExampleModel
-            from hydromt.io import read_workflow_yaml
+            from hydromt.readers import read_workflow_yaml
 
             # Instantiate model
             model = ExampleModel(
@@ -76,7 +76,7 @@ Here is how to update a model from:
         .. code-block:: python
 
             from hydromt import ExampleModel
-            from hydromt.io import read_workflow_yaml
+            from hydromt.readers import read_workflow_yaml
 
             # Instantiate model
             model = ExampleModel(
@@ -99,7 +99,7 @@ Here is how to update a model from:
         .. code-block:: python
 
             from hydromt_wflow import WflowSbmModel
-            from hydromt.io import read_workflow_yaml
+            from hydromt.readers import read_workflow_yaml
 
             # Instantiate model
             model = WflowSbmModel(

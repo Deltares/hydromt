@@ -125,7 +125,7 @@ Developer's installation
 ------------------------
 If you want to contribute to the HydroMT codebase, or make some local changes, we advise
 you to install HydroMT in developer mode. We have some different recommendations for this
-available in the :ref:`developer's installation guide <guides/core_dev/dev_install>`_.
+available in the :ref:`developer's installation guide <dev_install>`.
 
 .. _installation_examples:
 
