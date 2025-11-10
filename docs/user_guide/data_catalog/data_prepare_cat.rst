@@ -67,7 +67,7 @@ The following are **required arguments for each data source**:
 - **driver**: data_type specific :Class:`Driver` to read a dataset. If the default
   settings of a driver are sufficient, then a string with the name of the driver is
   enough. Otherwise, a dictionary with the driver class properties can be used. Refer to
-  the :Class:`Driver` :ref:`documentation <data_types>`to see which options are available.
+  the :Class:`Driver` :ref:`documentation <data_types>` to see which options are available.
 - **uri**: URI pointing to where the data can be queried. Relative paths are combined
   with the global ``root`` option of the yaml file (if available) or the directory of
   the yaml file itself. To read multiple files in a single dataset (if supported by the
@@ -154,31 +154,31 @@ also possible.
 
       Example 1:
 
-    .. code-block:: yaml
+      .. code-block:: yaml
 
-      steps:
-        - setup_region:
-            region:
-            bbox: [4.5, 51.5, 6.5, 53.5]
+        steps:
+          - setup_region:
+              region:
+              bbox: [4.5, 51.5, 6.5, 53.5]
 
-        - setup_maps_from_rasterdataset:
-            raster_fn:
-              source: 'esa_worldcover'
-              version: '2020'
+          - setup_maps_from_rasterdataset:
+              raster_fn:
+                source: 'esa_worldcover'
+                version: '2020'
 
-    Example 2:
+      Example 2:
 
-    .. code-block:: yaml
+      .. code-block:: yaml
 
-      steps:
-        - setup_region:
-            region:
-            bbox: [4.5, 51.5, 6.5, 53.5]
+        steps:
+          - setup_region:
+              region:
+              bbox: [4.5, 51.5, 6.5, 53.5]
 
-        - setup_maps_from_rasterdataset:
-            raster_fn:
-              source: 'era5'
-              provider: 'zarr'
+          - setup_maps_from_rasterdataset:
+              raster_fn:
+                source: 'era5'
+                provider: 'zarr'
 
     .. tab-item:: Python API
 
@@ -211,3 +211,7 @@ also possible.
         ds = dc.get_rasterdataset("era5", provider="netcdf")
         # get the zarr provider
         ds = dc.get_rasterdataset("era5", provider="zarr")
+
+.. note::
+    The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argument should be used instead.
+    This is parsed to the Python code as a `None`.

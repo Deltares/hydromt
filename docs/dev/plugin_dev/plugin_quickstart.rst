@@ -13,12 +13,12 @@ section.
 
 .. NOTE::
 
-  Most of this section of the docs is dedicated to creating *new* functinoality. If you
+  Most of this section of the docs is dedicated to creating *new* functionality. If you
   already have a plugin and want to know how to port that to the new V1 architecture
-  please refer to :ref:`The migration guide <migration>` specifically.
+  please refer to :ref:`The migration guide <migration_plugin>` specifically.
 
-The new V1 architecture of HdydroMT already offers a lot more flexibility to customise
-the behaviour of HydroMT without the need for a plugin, by adding `ModelComponents`
+The new V1 architecture of HydroMT already offers a lot more flexibility to customize
+the behavior of HydroMT without the need for a plugin, by adding `ModelComponents`
 however there are still plenty of use cases you might want to make a plugin, including
 but not limited to:
 

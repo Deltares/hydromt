@@ -1,80 +1,155 @@
 .. _methods_processes:
 
-Overview methods and processes
-==============================
+Supporting functionalities
+==========================
 
-Methods and workflows are the engine of HydroMT. Methods provide the low-level functionality, only accessible through the Python interface,
-to do the required processing of common data types such as grid and vector data. Workflows combine several methods to go from raw input
-data to a model component. Examples of workflows include the delineation of hydrological basins (watersheds), conversion of landuse-landcover to model parameter maps, etc.
+Supporting functions and (GIS) methods are the engine of HydroMT. Methods
+provide the low-level functionality, only accessible through the Python interface,
+to do the required processing of common data types such as grid and vector data.
+
+HydroMT also provides higher-level processes that combine multiple methods to
+accomplish common tasks. These processes are used in the HydroMT model components to
+prepare model input data, but can also be used directly through the Python API.
+You can find which model processes are available in the :ref:`model processes documentation <model_processes>`
+
+HydroMT provides a wide range of supporting functionalities, including:
+
+- :ref:`RasterDataset accessor <raster_accessor>`
+- :ref:`GeoDataset accessor <geodataset_accessor>`
+- :ref:`Flow Directions methods <pyflwdir_wrappers>`
+- :ref:`Statistical methods <stats>`
+- :ref:`Extreme Value Analysis methods <extreme_value_analysis>`
 
 
-.. _xarray_accessors:
+.. _raster_accessor:
 
-Xarray Accessors
-----------------
+RasterDataset
+-------------
 Some powerful functionality that HydroMT uses is exposed in the ``gis`` module. In this
 module `xarray accessors
 <https://docs.xarray.dev/en/stable/internals/extending-xarray.html>`_ are located. These
 allow for powerful new methods on top of xarray ``Dataset`` and ``DataArray`` classes.
-There is the :ref:`raster API <raster_api>`, such as functionality to repoject,
-resample, transform, interpolate nodata or zonal statistics. There is also the
-:ref:`GeoDataset API <geodataset_api>` to work with geodataset data (N-dim
-point/line/polygon geometry). For example, reprojecting, transform, update geometry or
-convert to geopandas.GeoDataFrame to access further GIS methods.
 
-.. warning::
-    Remember to close any open datasets when you are finished working with them.
-    Leaving datasets open may cause xarray to lock the files, which can prevent
-    access by other processes until your Python session ends. For example, if you
-    open a NetCDF file used by a model and do not close it before calling
-    ``Model.update()``, HydroMT will raise a ``PermissionError`` when attempting
-    to write to the model.
+HydroMT :py:class:`~hydromt.gis.raster.RasterDataset` builds on top of these accessors to
+work with raster data. Available methods include reprojection, resampling, transforming,
+interpolating nodata or zonal statistics. And properties such as crs, bounds, or resolution .
 
-.. _flowpy_wrappers:
+To access these methods in python, first load a xarray Dataset or DataArray, for example
+using the HydroMT :py:class:`~hydromt.data_catalog.DataCatalog.get_rasterdataset` method
+and use the ``raster`` accessor following by the method or attribute you want to use.
 
-FlowPy Wrappers:
-----------------
+All available methods and properties are documented in the :ref:`raster API documentation <raster_api>`.
 
-`PyFlwDir <https://deltares.github.io/pyflwdir/latest/index.html>` contains a series of
+.. code-block:: python
+
+    import hydromt
+
+    # Load a raster dataset from the data catalog
+    cat = hydromt.DataCatalog('path_to_your_catalog.yml')
+    ds = cat.get_rasterdataset('your_raster_key')
+
+    # Use the raster accessor to reproject the dataset
+    ds_reprojected = ds.raster.reproject(dst_crs='EPSG:4326', method="nearest")
+
+    # Get the bounds of the dataset
+    bounds = ds.raster.bounds
+    print(bounds)
+
+For more example, you can check the `working with raster data notebook <../../_examples/working_with_raster.ipynb>`_.
+
+.. _geodataset_accessor:
+
+GeoDataset
+----------
+Some powerful functionality that HydroMT uses is exposed in the ``gis`` module. In this
+module `xarray accessors
+<https://docs.xarray.dev/en/stable/internals/extending-xarray.html>`_ are located. These
+allow for powerful new methods on top of xarray ``Dataset`` and ``DataArray`` classes.
+
+HydroMT :py:class:`~hydromt.gis.vector.GeoDataset` builds on top of these accessors to work
+with geospatial vector data (N-dim point/line/polygon geometry). Available methods include
+reprojection, transforming, updating geometry or converting to geopandas.GeoDataFrame to
+access further GIS methods. And properties such as crs, bounds or geometry.
+
+To access these methods in python, first load a xarray Dataset or DataArray, for example
+using the HydroMT :py:class:`~hydromt.data_catalog.DataCatalog.get_geodataset` method
+and use the ``vector`` accessor following by the method or attribute you want to use.
+
+All available methods and properties are documented in the :ref:`GeoDataset API documentation <geodataset_api>`.
+
+.. code-block:: python
+
+    import hydromt
+
+    # Load a geodataset from the data catalog
+    cat = hydromt.DataCatalog('path_to_your_catalog.yml')
+    gds = cat.get_geodataset('your_geodataset_key')
+
+    # Use the vector accessor to reproject the geodataset
+    gds_reprojected = gds.vector.to_crs(dst_crs='EPSG:4326')
+
+    # Convert to geopandas GeoDataFrame
+    gdf = gds.vector.geometry
+    print(gdf.head())
+
+For more example, you can check the `working with geodataset notebook <../../_examples/working_with_geodatasets.ipynb>`_.
+
+
+.. _pyflwdir_wrappers:
+
+Flow directions
+---------------
+
+`PyFlwDir <https://deltares.github.io/pyflwdir/latest/index.html>`_ contains a series of
 methods to work with gridded DEM and flow direction datasets. The ``gis.flw`` module
-builds on top of this and provides hydrological methods for raster DEM data. For
+builds on top of this and provides hydrological methods for raster DEM and flow direction data. For
 example, calculate flow direction, flow accumulation, stream network, catchments, or
 reproject hydrography.
 
+Available methods are listed in the :ref:`flow directions API documentation <flw_api>`.
+
+You can find examples of how to use these methods in the `working with flow direction notebook <../../_examples/working_with_flow_directions.ipynb>`_.
+
 .. _stats:
 
-Stats:
-------
+Statistical methods
+-------------------
 
-The ``stats`` module has statistical methods including ``skills`` to compute skill
-scores of models (e.g. NSE, KGE, bias and many more) and ``extremes`` to analyse extreme
-events (extract peaks or compute return values).
+HydroMT ``stats.skills`` module provides different statistical functions to compare model results with observations.
+They include:
 
-.. _processes:
+- Absolute and percentual bias
+- Nash-Sutcliffe model Efficiency (NSE) and log Nash-Sutcliffe model Efficiency (log-NSE)
+- Various versions of the Kling-Gupta model Efficiency (KGE)
+- Coefficient of determination (R-squared)
+- Mean Squared Error (MSE) and Root Mean Squared Error  (RMSE)
 
-.. currentmodule:: hydromt.model
+The full list is available in the :ref:`skills statistics API <statistics_skills>`.
 
-The ``model`` module has a ``processes`` submodule. This module contains some functions
-to work with different kinds of model in- and ouput.
+As HydroMT provides methods to easily read the model results, applying a skill statistic just takes a few lines of code and can be
+applied directly across all observation locations in your model.
 
-* :ref:`grid <workflows_grid_api>`: generic workflows to prepare regular gridded data.
-    Used with the :class:`~grid.GridComponent`. For example to prepare regular grid data
-    from constant, from RasterDataset (with or without reclassification) or from GeoDataFrame.
-* :ref:`mesh <workflows_mesh_api>`: generic workflows to prepare unstructured mesh
-    data. Used with :class:`~mesh.MeshComponent`. For example to create a mesh grid or
-    prepare unstructured mesh data from RasterDataset.
-* :ref:`basin_mask <workflows_basin_api>`: workflows to prepare a basin mask based on
-    different region definitions (bounding box, point coordinates, polygon etc.)
-* :ref:`rivers <workflows_rivers_api>`: workflows to prepare river profile data like
-    width and depth.
-* :ref:`temp <workflows_forcing_api>`: workflows to prepare meteorological forcing
-    data. For example to prepare precipitation, temperature, or compute
-    evapotranspiration data. Advanced downscaling methods are also available within
-    these workflows.
+.. code-block:: console
 
-You can find a couple of detailed examples of how to use HydroMT methods and workflows in Python:
+    from hydromt.stats import nashsutcliffe
+    from hydromt_wflow import WflowModel
+    import xarray as xr
+    # read model results
+    # NOTE: the name of the results depends on the wflow run configuration (toml file)
+    mod = WflowModel(root=r'/path/to/wflow_model/root', mode='r')
+    sim = mod.results['Q_gauges_grdc']
+    # read observations
+    obs = xr.open_dataset(r'/path/to/grdc_obs.nc')
+    # calculate skill statistic
+    nse = nashsutcliffe(sim, obs)
 
-* `Working with raster data <../_examples/working_with_raster.ipynb>`_
-* `Working with flow direction data <../_examples/working_with_flow_directions.ipynb>`_
-* `Define hydrological model regions <../_examples/delineate_basin.ipynb>`_
-* `Extreme Value Analysis <../_examples/doing_extreme_value_analysis.ipynb>`_
+.. _extreme_value_analysis:
+
+Extreme Value Analysis
+----------------------
+HydroMT ``stats.extremes`` module provides different functions to perform Extreme Value Analysis (EVA) on hydrological data.
+They include full extreme value analysis or sub methods to get peaks, fit extremes or get return values.
+
+The full list is available in the :ref:`extreme value analysis API <statistics_extremes>`.
+
+You can find examples of how to use these methods in the `extreme value analysis notebook <../../_examples/doing_extreme_value_analysis.ipynb>`_.

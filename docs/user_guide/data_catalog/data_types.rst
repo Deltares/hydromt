@@ -9,7 +9,7 @@ HydroMT currently supports the following data types:
 
 - :ref:`RasterDataset <RasterDataset>`: static and dynamic raster (or gridded) data
 - :ref:`GeoDataFrame <GeoDataFrame>`: static vector data
-- :ref:`GeoDataset <GeoDataset>`: dynamic point location data
+- :ref:`GeoDataset <GeoDataset>`: dynamic vector data
 - :ref:`Dataset <Dataset>`:  non-spatial n-dimensional data
 - :ref:`DataFrame <DataFrame>`: 2D tabular data
 
@@ -47,22 +47,26 @@ Raster data (RasterDataset)
 .. _raster_formats:
 
 .. list-table::
-   :widths: 17, 25, 30
+   :widths: 17, 25, 28, 30
    :header-rows: 1
 
    * - Driver
      - File formats
+     - Method(s)
      - Comments
    * - :py:class:`rasterio <raster.rasterio_driver.RasterioDriver>`
      - GeoTIFF, ArcASCII, VRT, etc. (see `GDAL formats <http://www.gdal.org/formats_list.html>`_)
+     - :py:meth:`~hydromt.readers.open_mfraster`
      - Based on :py:func:`xarray.open_rasterio`
        and :py:func:`rasterio.open`
    * - :py:class:`rasterio <raster.rasterio_driver.RasterioDriver>` with the
        :py:class:`raster_tindex <hydromt.data_catalog.uri_resolvers.raster_tindex_resolver.RasterTindexResolver>` resolver
      - rasterio tile index file (see `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_)
-     - Options to merge tiles via `options -> mosaic_kwargs`.
+     - :py:meth:`~hydromt.readers.open_mfraster`
+     - Options to merge tiles via ``mosaic_kwargs`` option.
    * - :py:class:`raster_xarray <raster.raster_xarray_driver.RasterDatasetXarrayDriver>`
      - NetCDF and Zarr
+     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
      - required y and x dimensions
 
 
@@ -71,10 +75,10 @@ Raster data (RasterDataset)
 **Single variable GeoTiff raster**
 
 Single raster files are parsed to a **RasterDataset** based on the **raster** driver.
-This driver supports 2D raster for which the dimensions are names "x" and "y".
+This driver supports 2D raster with "x" and "y" dimensions.
 A potential third dimension is called "dim0".
 The variable name is based on the filename, in this case `"GLOBCOVER_200901_200912_300x300m"`.
-The `chunks` key-word argument is passed to :py:meth:`~hydromt.readers.open_mfraster`
+The ``chunks`` key-word argument is passed to the underlying method
 and allows lazy reading of the data.
 
 .. literalinclude:: ../../assets/data_types/single_variable_geotiff_raster.yml
@@ -99,8 +103,8 @@ Multi-variable Virtual Raster Tileset (VRT)
 
 Multiple raster layers from different files are parsed using the **raster** driver.
 Each raster becomes a variable in the resulting RasterDataset based on its filename.
-The path to multiple files can be set using a sting glob or several keys,
-see description of the `uri` argument in the :ref:`yaml file description <data_yaml>`.
+The path to multiple files can be set using a glob string or several keys,
+see description of the ``uri`` argument in the :ref:`yaml file description <data_yaml>`.
 Note that the rasters should have identical grids.
 
 Here multiple .vrt files (dir.vrt, bas.vrt, etc.) are combined based on their variable
@@ -136,9 +140,9 @@ intersecting footprints will be merged together in the CRS of the most central t
 Use `gdaltindex <https://gdal.org/programs/gdaltindex.html>`_ to build an excepted tile index file.
 
 Here a GeoPackage with the tile index referring to individual GeoTiff raster tiles is used.
-The `mosaic_kwargs` are passed to :py:meth:`hydromt.gis.merge` to
-set the resampling `method`. The name of the column in the tile index attribute table
-`tileindex` which contains the raster tile file names is set in the `driver.options``
+The ``mosaic_kwargs`` are passed to :py:meth:`hydromt.gis.merge` to
+set the resampling method. The name of the column in the tile index attribute table
+``tileindex`` which contains the raster tile file names is set in the ``driver.options``
 
 .. literalinclude:: ../../assets/data_types/tiled_raster_dataset.yml
    :language: yaml
@@ -181,12 +185,12 @@ See list of recognized dimensions_ names.
 
 
 To read a raster dataset from a multiple file netcdf archive the following data entry
-is used, where the `options` are passed to :py:func:`xarray.open_mfdataset`
+is used, where the ``options`` are passed to :py:func:`xarray.open_mfdataset`
 (or :py:func:`xarray.open_zarr` for zarr data).
 In case the CRS cannot be inferred from the netcdf metadata it should be defined with
-the `crs` `metadata`` here.
-The path to multiple files can be set using a sting glob or several keys,
-see description of the `uri` argument in the :ref:`yaml file description <data_yaml>`.
+the ``crs`` ``metadata`` here.
+The path to multiple files can be set using a glob string or several keys,
+see description of the ``uri`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.
 
@@ -208,7 +212,17 @@ In :py:func:`xarray.open_mfdataset`, xarray allows for a **preprocess** function
 run before merging several netcdf files together. In hydroMT, some preprocess functions
 are available and can be passed through the options in the same way as any
 xr.open_mfdataset options. These preprocess functions are found at
-:py:obj:`hydromt.data_catalog.preprocessing.py`
+:py:obj:`hydromt.data_catalog.drivers.preprocessing.py`.
+
+They include:
+
+- **round_latlon**: round x and y dimensions to 5 decimals to avoid merging problems in xarray due to small differences
+  in x, y values in the different netcdf files of the same data source.
+- **to_datetimeindex**: Convert the time coordinate to a pandas DateTimeIndex.
+- **remove_duplicates**: Remove duplicate time entries in the time coordinate.
+- **harmonise_dims**: Harmonise the dimensions of all datasets to be the same before merging.
+  This includes converting longitude from 0-360 to -180 to 180, having latitudes in N-S orientation,
+  and convert time to datetimeindex format.
 
 .. _GeoDataFrame:
 
@@ -221,17 +235,20 @@ Vector data (GeoDataFrame)
 .. _vector_formats:
 
 .. list-table::
-   :widths: 17, 25, 30
+   :widths: 17, 25, 28, 30
    :header-rows: 1
 
    * - Driver
      - File formats
+     - Method(s)
      - Comments
    * - :py:class:`pyogrio <geodataframe.pyogrio_driver.PyogrioDriver>`
      - ESRI Shapefile, GeoPackage, GeoJSON, etc.
+     - :py:meth:`~hydromt.readers.open_vector`
      - Point, Line and Polygon geometries. Uses :py:func:`pyogrio.read_dataframe`
    * - :py:class:`geodataframe_table <geodataframe.table_driver.GeoDataFrameTableDriver>`
      - CSV, XY, PARQUET and EXCEL.
+     - :py:meth:`~hydromt.readers.open_vector`
      - Point geometries only.
 
 .. _GPKG_vector:
@@ -242,7 +259,7 @@ GeoPackage spatial vector data
 Spatial vector data is parsed to a **GeoDataFrame** using the **vector** driver.
 For large spatial vector datasets we recommend the GeoPackage format as it includes a
 spatial index for fast filtering of the data based on spatial location. An example is
-shown below. Note that the rename, ``unit_mult``, ``unit_add`` and ``nodata`` options refer to
+shown below. Note that the ``rename``, ``unit_mult``, ``unit_add`` and ``nodata`` options refer to
 columns of the attribute table in case of a GeoDataFrame.
 
 .. literalinclude:: ../../assets/data_types/gpkg_geodataframe.yml
@@ -320,27 +337,32 @@ example pandas can write the same data structure to parquet as it can csv.
 
 .. _GeoDataset:
 
-Geospatial time-series (GeoDataset)
------------------------------------
+Geospatial vector time-series (GeoDataset)
+------------------------------------------
+Geospatial vector time-series include time-series or n-dimensional data associated with a
+vector geometry dimension. Geometry can be of Point, Line or Polygon type.
 
 - :ref:`Netcdf time-series dataset <NC_point>`
-- :ref:`CSV point time-series data <CSV_point>`
+- :ref:`Vector with CSV time-series data <CSV_point>`
 
 .. _geo_formats:
 
 .. list-table::
-   :widths: 17, 25, 30
+   :widths: 17, 25, 28, 30
    :header-rows: 1
 
    * - Driver
      - File formats
+     - Method(s)
      - Comments
    * - :py:class:`geodataset_vector <geodataset.vector_driver.GeoDatasetVectorDriver>`
-     - Combined point location (e.g. CSV or GeoJSON) and text delimited time-series
+     - Combined vector location (e.g. CSV or GeoJSON) and text delimited time-series
        (e.g. CSV) data.
-     -
+     - :py:meth:`~hydromt.readers.open_geodataset`
+     - Uses :py:meth:`~hydromt.readers.open_vector`, :py:meth:`~hydromt.readers.open_timeseries_from_table`
    * - :py:class:`geodataset_xarray <geodataset.xarray_driver.GeoDatasetXarrayDriver>`
      - NetCDF and Zarr
+     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
      - required time and index dimensions_ and x- and y coordinates.
 
 
@@ -349,9 +371,10 @@ Geospatial time-series (GeoDataset)
 Netcdf time-series dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Netcdf and Zarr point time-series data are parsed to **GeoDataset** using the **netcdf** and **zarr** drivers.
-A typical netcdf or zarr point time-series dataset has the following structure with
-two ("time" and "index") dimensions, where the index dimension has x and y coordinates.
+Netcdf and Zarr vector time-series data are parsed to **GeoDataset** using the **netcdf** and **zarr** drivers.
+A typical netcdf or zarr vector time-series dataset has the following structure with
+two ("time" and "index") dimensions, where the index dimension has x and y coordinates for points or geometry
+for polygons or lines.
 The time dimension and spatial coordinates are inferred from the data based
 on a list of recognized dimensions_ names.
 
@@ -366,12 +389,12 @@ on a list of recognized dimensions_ names.
     Data variables:
         waterlevel   (time, stations)
 
-To read a point time-series dataset from a multiple file netcdf archive the following data entry
+To read a vector time-series dataset from a multiple file netcdf archive the following data entry
 is used, where the options are passed to :py:func:`xarray.open_mfdataset`
 (or :py:func:`xarray.open_zarr` for zarr data).
 In case the CRS cannot be inferred from the netcdf data it is defined here.
 The path to multiple files can be set using a sting glob or several keys,
-see description of the `uri` argument in the :ref:`yaml file description <data_yaml>`.
+see description of the ``uri`` argument in the :ref:`yaml file description <data_yaml>`.
 In this example additional renaming and unit conversion preprocessing steps are added to
 unify the data to match the HydroMT naming and unit :ref:`terminology <terminology>`.
 
@@ -392,18 +415,18 @@ unify the data to match the HydroMT naming and unit :ref:`terminology <terminolo
 
 .. _CSV_point:
 
-CSV point time-series data
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Vector with CSV time-series data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Point time-series data where the geospatial point geometries and time-series are saved
+Vector with CSV time-series data where the geospatial vector geometries and time-series are saved
 in separate (text) files are parsed to **GeoDataset** using the **vector** driver. The
 GeoDataset must at least contain a location index with point geometries which is
-referred to by the `uri` argument The path may refer to both GIS vector data such as
+referred to by the ``uri`` argument. The path may refer to both GIS vector data such as
 GeoJSON with only Point geometries or tabulated point vector data such as csv files, see
 earlier examples for GeoDataFrame datasets. Finally, certain binary formats such as
 parquet are also supported. In addition a tabulated time-series text file can be passed
 to be used as a variable of the GeoDataset. This data is added by a second file which is
-referred to using the `data_path` option. The index of the time-series (in the columns
+referred to using the ``data_path`` option. The index of the time-series (in the columns
 header) and point locations must match.
 
 .. literalinclude:: ../../assets/data_types/csv_geodataset.yml
@@ -423,7 +446,7 @@ header) and point locations must match.
 
 *Tabulated time series text file*
 
-To read the time stamps the :py:func:`pandas.to_datetime` method is used.
+To read the time stamps, the :py:func:`pandas.to_datetime` method is used.
 
 .. code-block:: console
 
@@ -441,14 +464,16 @@ NetCDF time-series dataset (Dataset)
 .. _dataset_formats:
 
 .. list-table::
-   :widths: 17, 25, 30
+   :widths: 17, 25, 28, 30
    :header-rows: 1
 
    * - Driver
      - File formats
+     - Method(s)
      - Comments
    * - :py:Class:`dataset_xarray <dataset.xarray_driver.DatasetXarrayDriver>`
      - NetCDF and Zarr
+     - :py:func:`xarray.open_mfdataset`, :py:func:`xarray.open_zarr`
      - required time and index dimensions_.
 
 .. _NC_timeseries:
@@ -484,14 +509,16 @@ dimension.
 .. _dataframe_formats:
 
 .. list-table::
-   :widths: 17, 25, 30
+   :widths: 17, 25, 28, 30
    :header-rows: 1
 
    * - Driver
      - File formats
+     - Method(s)
      - Comments
    * - :py:class:`pandas <dataframe.pandas_driver.PandasDriver>`
      - any file readable by pandas
+     - :py:func:`pandas.read_csv`, :py:func:`pandas.read_excel`, :py:func:`pandas.read_parquet`, :py:func:`pandas.read_fwf`
      - Provide a sheet name or formatting through options
 
 .. note::
@@ -505,10 +532,10 @@ Supported files
 The DataFrameAdapter is quite flexible in supporting different types of tabular data
 formats. The driver allows for flexible reading of files: for example both mapping
 tables and time series data are supported. Please note that for timeseries, the
-`options` need to be used to set the correct column for indexing, and formatting and
+``options`` need to be used to set the correct column for indexing, and formatting and
 parsing of datetime-strings. See the relevant pandas function for which arguments can be
 used. Also note that the driver is not restricted to comma-separated files, as
-the delimiter can be given to the reader through the `options`.
+the delimiter can be given to the reader through the ``options``.
 
 .. literalinclude:: ../../assets/data_types/csv_dataframe.yml
   :language: yaml

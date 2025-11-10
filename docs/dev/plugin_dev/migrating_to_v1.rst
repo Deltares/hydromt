@@ -1,5 +1,5 @@
 
-.. _migration:
+.. _migration_plugin:
 
 ###############
 Migrating to v1

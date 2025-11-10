@@ -7,6 +7,8 @@
 Statistics and Extreme Value Analysis
 =====================================
 
+.. _statistics_skills:
+
 Statistics and performance metrics
 ==================================
 
@@ -29,8 +31,10 @@ Statistics and performance metrics
    skills.rmse
    skills.rsr
 
-Extreme Value Analysis
-=======================
+.. _statistics_extremes:
+
+Extreme Value Analysis and Design Events
+========================================
 .. autosummary::
    :toctree: ../_generated
 
@@ -38,11 +42,4 @@ Extreme Value Analysis
    extremes.fit_extremes
    extremes.get_return_value
    extremes.eva
-
-=============
-Design Events
-=============
-.. autosummary::
-   :toctree: ../_generated
-
    design_events.get_peak_hydrographs
