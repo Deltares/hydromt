@@ -1,7 +1,10 @@
 .. _custom_driver:
 
+Custom Data Driver and Resolver
+===============================
+
 Custom Drivers
-==============
+--------------
 
 Drivers are the second ingredient necessary to read (custom) datasets. Where as
 ``URIResolver`` s (discussed previously) determines _what_ to read, drivers determine _how_ to
@@ -48,7 +51,7 @@ between data types.
 
 
 Custom Resolver
-===============
+---------------
 
 In addition to data which may or may not be in custom file formats, to be able to read
 data, we must also know how it is laid out. For example the AWS Copernicus DEM data

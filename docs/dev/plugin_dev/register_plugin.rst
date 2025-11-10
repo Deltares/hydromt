@@ -1,7 +1,7 @@
 .. _register_plugins:
 
-Implementing Custom behavior
-============================
+Linking your own custom objects to HydroMT core API
+===================================================
 
 Due to the extremely wide range of data formats and conventions out in the world
 HydroMT offers a lot of ways to define custom behaviour, which is where you will

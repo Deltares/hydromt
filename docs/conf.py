@@ -157,10 +157,6 @@ for name in predefined_catalogs:
         continue
     write_nested_dropdown(name, data_cat, categories=categories)
     data_cat._sources = {}  # reset
-#with open("_generated/predefined_catalogs.rst", "w") as f:
-#    f.writelines(
-#        [f".. include:: ../../_generated/{name}.rst\n" for name in predefined_catalogs]
-#    )
 
 # -- General configuration ------------------------------------------------
 
@@ -410,7 +406,7 @@ intersphinx_mapping = {
 # -- NBSPHINX --------------------------------------------------------------
 
 # This is processed by Jinja2 and inserted before each notebook
-nbsphinx_execute = 'never'
+# nbsphinx_execute = 'never'
 
 nbsphinx_prolog = r"""
 {% set docname = env.doc2path(env.docname, base=None).split('\\')[-1].split('/')[-1] %}
