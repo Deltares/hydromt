@@ -1,4 +1,4 @@
-.. _custom_behaviour:
+.. _custom_resolver:
 
 ================
 Custom Resolver
@@ -64,9 +64,9 @@ Handling Missing Data
 HydroMT provides the `handle_nodata` argument to standardize missing data behavior.
 It is strongly recommended to respect this in your resolver.
 
-- **RAISE** – Immediately raise an exception if the requested data does not exist.
-- **WARN** – Emit a warning and return `None`.
-- **IGNORE** – Silently return `None` without logging.
+- **RAISE** - Immediately raise an exception if the requested data does not exist.
+- **WARN** - Emit a warning and return `None`.
+- **IGNORE** - Silently return `None` without logging.
 
 Returning `None` instead of an empty dataset helps distinguish between datasets that do not exist versus datasets with missing values.
 Subsequent functions in the workflow should propagate `None` as needed.

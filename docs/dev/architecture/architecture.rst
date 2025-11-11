@@ -16,10 +16,10 @@ The diagram below summarizes the relationships between these components.
     :width: 800
     :alt: HydroMT main architecture diagram
 
+.. _model_architecture:
+
 Model
 -----
-
-.. _model:
 
 The :class:`Model` represents the complete model setup and workflow.
 It defines the model domain, manages all :class:`ModelComponent`'s, and coordinates data loading and transformations through the :class:`DataCatalog`.
@@ -27,15 +27,16 @@ It defines the model domain, manages all :class:`ModelComponent`'s, and coordina
 Models can be created interactively, through Python scripts, or from workflow definitions for full reproducibility.
 
 See also:
-- :ref:`model_component`
-- :ref:`data_catalog`
+
+- :ref:`model_component_architecture`
+- :ref:`data_catalog_architecture`
 - :ref:`API <model_api>`
 - :ref:`Implement your own <custom_model>`
 
+.. _model_component_architecture:
+
 ModelComponent
 --------------
-
-.. _model_component:
 
 A :class:`ModelComponent` represents a modular building block of a model, such as a specific dataset or process (for example, topography or forcing data).
 Each component defines how its data are read and written, and can interact with other components during setup.
@@ -43,15 +44,16 @@ Each component defines how its data are read and written, and can interact with 
 Components make models composable, flexible, and easy to extend without modifying the HydroMT core.
 
 See also:
-- :ref:`model`
-- :ref:`data_catalog`
+
+- :ref:`model_architecture`
+- :ref:`data_catalog_architecture`
 - :ref:`API <model_components_api>`
-- :ref:`Implement your own <custom_model_component>`
+- :ref:`Implement your own <custom_component>`
+
+.. _data_catalog_architecture:
 
 DataCatalog
 -----------
-
-.. _data_catalog:
 
 The :class:`DataCatalog` is HydroMT's core data access and management layer.
 It provides a structured way to describe where datasets are located, how they can be accessed, and how they should be represented once loaded into memory.
@@ -66,17 +68,18 @@ The :class:`DataCatalog` comes with built-in support for several data catalogs:
 * **Custom YAML catalogs** - defined by users to reference their own data sources and file structures.
 
 See also:
-- :ref:`data_source`
-- :ref:`uri_resolver`
-- :ref:`driver`
-- :ref:`data_adapter`
+
+- :ref:`data_source_architecture`
+- :ref:`uri_resolver_architecture`
+- :ref:`driver_architecture`
+- :ref:`data_adapter_architecture`
 - :ref:`API <data_catalog_api>`
 - :ref:`Create your own <custom_data_catalog>`
 
+.. _data_source_architecture:
+
 DataSource
 ----------
-
-.. _data_source:
 
 Each entry in the :class:`DataCatalog` is represented by a :class:`DataSource`.
 A DataSource encapsulates all the logic required to retrieve and standardize a specific dataset, based on the catalog's metadata.
@@ -94,17 +97,18 @@ From there, the DataSource handles the complete workflow:
 This layered design allows the DataCatalog to stay lightweight and declarative — it only stores metadata (e.g., names, paths, data types, parameters), while the DataSource performs the operational work needed to translate those definitions into usable model inputs.
 
 See also:
-- :ref:`data_catalog`
-- :ref:`uri_resolver`
-- :ref:`driver`
-- :ref:`data_adapter`
+
+- :ref:`data_catalog_architecture`
+- :ref:`uri_resolver_architecture`
+- :ref:`driver_architecture`
+- :ref:`data_adapter_architecture`
 - :ref:`API <data_source_api>`
 - :ref:`Implement your own <custom_data_source>`
 
+.. _uri_resolver_architecture:
+
 URIResolver
 -----------
-
-.. _uri_resolver:
 
 The :class:`URIResolver` locates data by resolving catalog references (URIs) into actual file paths or service endpoints.
 It takes query parameters such as spatial bounds or time ranges and returns one or more resolved URIs that can be read by a :class:`Driver`.
@@ -112,15 +116,16 @@ It takes query parameters such as spatial bounds or time ranges and returns one 
 Custom resolvers can be added to support specific naming conventions, APIs, or cloud storage systems.
 
 See also:
-- :ref:`data_catalog`
-- :ref:`driver`
+
+- :ref:`data_catalog_architecture`
+- :ref:`driver_architecture`
 - :ref:`API <uri_resolver_api>`
-- :ref:`Implement your own <custom_uri_resolver>`
+- :ref:`Implement your own <custom_resolver>`
+
+.. _driver_architecture:
 
 Driver
 ------
-
-.. _driver:
 
 The :class:`Driver` reads resolved data into memory as Python objects such as :class:`xarray.Dataset` or :class:`geopandas.GeoDataFrame`.
 Each HydroMT data type (e.g., raster, vector) has a dedicated driver interface.
@@ -129,15 +134,16 @@ Drivers handle the complexity of I/O operations, including merging multiple file
 New drivers can be added through HydroMT's plugin system to support custom formats.
 
 See also:
-- :ref:`uri_resolver`
-- :ref:`data_adapter`
+
+- :ref:`uri_resolver_architecture`
+- :ref:`data_adapter_architecture`
 - :ref:`API <driver_api>`
 - :ref:`Implement your own <custom_driver>`
 
+.. _data_adapter_architecture:
+
 DataAdapter
 -----------
-
-.. _data_adapter:
 
 The :class:`DataAdapter` standardizes and transforms data after it has been read by a :class:`Driver`.
 It performs operations such as slicing, renaming, regridding, or unit conversion to ensure consistency across datasets and models.
@@ -145,8 +151,9 @@ It performs operations such as slicing, renaming, regridding, or unit conversion
 Each data type (raster, vector, etc.) has its own adapter interface responsible for transforming data into HydroMT's standardized representation.
 
 See also:
-- :ref:`driver`
-- :ref:`data_catalog`
+
+- :ref:`driver_architecture`
+- :ref:`data_catalog_architecture`
 - :ref:`API <data_adapter_api>`
 - :ref:`Implement your own <custom_data_adapter>`
 
@@ -154,10 +161,10 @@ Extensibility
 -------------
 
 HydroMT's architecture is fully extensible.
-Developers can subclass models, components, drivers, adapters, or resolvers and register them through :ref:`the plugin system <plugin_system>`.
+Developers can subclass models, components, drivers, adapters, or resolvers and register them through :ref:`the plugin system <register_plugins>`.
 This is only required if you want to use/support your custom classes through the HydroMT data catalog or model configuration yml files.
 If you are using your custom classes directly in Python code, you can simply instantiate and use them without registering as a plugin.
 This flexibility allows HydroMT to support new model types, data formats, and workflows without changing the core library.
 
 See also:
-- :ref:`plugin_system`
+- :ref:`register_plugins`

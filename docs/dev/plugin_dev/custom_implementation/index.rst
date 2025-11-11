@@ -12,36 +12,39 @@ Each page describes one aspect of customization, from implementing a new model c
 
     .. grid-item-card::
         :text-align: center
-        :link: custom_model_builder
+        :link: custom_model
         :link-type: ref
 
-        :octicon:`puzzle;5em;sd-text-icon blue-icon`
+        :octicon:`book;5em;sd-text-icon blue-icon`
         +++
         Implementing your own HydroMT Model class
-        +++
-        Guidance on building custom models, setup methods, and component integration. # TODO: Add example diagram or schematic
 
     .. grid-item-card::
         :text-align: center
-        :link: custom_components
+        :link: custom_component
         :link-type: ref
 
-        :octicon:`bricks;5em;sd-text-icon blue-icon`
+        :octicon:`pencil;5em;sd-text-icon blue-icon`
         +++
         Creating your own Model Components
-        +++
-        Instructions for implementing `ModelComponent` and `SpatialModelComponent` with initialization, required attributes, and workflow integration. # TODO: Add sample code snippets
 
     .. grid-item-card::
         :text-align: center
-        :link: custom_catalog
+        :link: custom_data_catalog
         :link-type: ref
 
         :octicon:`database;5em;sd-text-icon blue-icon`
         +++
         Pre-defined Data Catalog for your plugin
+
+    .. grid-item-card::
+        :text-align: center
+        :link: custom_data_source
+        :link-type: ref
+
+        :octicon:`server;5em;sd-text-icon blue-icon`
         +++
-        How to define a `PluginDataCatalog` and structure datasets for HydroMT. # TODO: Include YAML example
+        Custom Data Source
 
     .. grid-item-card::
         :text-align: center
@@ -51,8 +54,6 @@ Each page describes one aspect of customization, from implementing a new model c
         :octicon:`server;5em;sd-text-icon blue-icon`
         +++
         Custom Data Driver
-        +++
-        Implement custom drivers to read/write non-standard datasets. # TODO: Add advanced examples for combined usage
 
     .. grid-item-card::
         :text-align: center
@@ -62,10 +63,15 @@ Each page describes one aspect of customization, from implementing a new model c
         :octicon:`server;5em;sd-text-icon blue-icon`
         +++
         Custom Resolver
+
+    .. grid-item-card::
+        :text-align: center
+        :link: custom_data_adapter
+        :link-type: ref
+
+        :octicon:`server;5em;sd-text-icon blue-icon`
         +++
-        Steps to create a custom URIResolver for unique data discovery needs. # TODO: Provide common use cases
-
-
+        Custom Data Adapter
 
 .. toctree::
     :hidden:
@@ -73,5 +79,7 @@ Each page describes one aspect of customization, from implementing a new model c
     model
     component
     catalog
+    data_source
     driver
     resolver
+    data_adapter

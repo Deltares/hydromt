@@ -16,8 +16,6 @@ This guide provides step-by-step instructions on building, registering, and test
         :octicon:`rocket;5em;sd-text-icon blue-icon`
         +++
         Starting your own HydroMT Plugin
-        +++
-        Overview of creating your first plugin, repository structure, and registering with HydroMT.
 
     .. grid-item-card::
         :text-align: center
@@ -27,8 +25,6 @@ This guide provides step-by-step instructions on building, registering, and test
         :octicon:`plug;5em;sd-text-icon blue-icon`
         +++
         Linking your own custom objects to HydroMT core API
-        +++
-        Instructions on registering entry points in `pyproject.toml` for Models, Components, Drivers, Resolvers, and Catalogs. # TODO: Add best practices for naming conventions
 
     .. grid-item-card::
         :text-align: center
@@ -38,14 +34,12 @@ This guide provides step-by-step instructions on building, registering, and test
         :octicon:`check-circle;5em;sd-text-icon blue-icon`
         +++
         Testing your plugin
-        +++
-        Guidance on unit testing model components, models, and complete plugins. # TODO: Include example CI workflow
 
 .. toctree::
    :hidden:
 
    quickstart
    Implement your own <custom_implementation/index>
-   workflows
+   register
    testing
    migrating_to_v1

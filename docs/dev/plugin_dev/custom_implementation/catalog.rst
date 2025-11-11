@@ -1,4 +1,4 @@
-.. _custom_catalog:
+.. _custom_data_catalog:
 
 ===========================
 Custom Data Catalogs

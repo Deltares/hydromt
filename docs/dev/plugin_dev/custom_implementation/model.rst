@@ -1,4 +1,4 @@
-.. _custom_model_builder:
+.. _custom_model:
 
 =================
 Custom Models
@@ -170,7 +170,7 @@ Best practices for defining processes:
 
 
 Workflow Integration
--------------------
+----------------------
 
 Once setup methods and processes are defined, users can include them in YAML workflows:
 

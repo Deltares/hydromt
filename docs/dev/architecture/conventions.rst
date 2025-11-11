@@ -21,7 +21,7 @@ Model Class
 The HydroMT :ref:`Model class <model_api>` defines the structure and behavior of models within the framework.
 To implement HydroMT for a specific model kernel or software, create a subclass named ``<Name>Model`` (e.g., ``SfincsModel`` for SFINCS) with model-specific readers, writers, and setup methods.
 
-- :ref:`Model components </guides/advanced_user/model_components.rst>` are data attributes that together define a model instance.
+- :ref:`Model components <model_components>` are data attributes that together define a model instance.
   Each component represents a specific aspect of the model and is parsed into a Python data object with predefined specifications.
   For example, the ``grid`` component represents static regular grids of a model as an :py:class:`xarray.Dataset`.
 
@@ -39,7 +39,7 @@ To implement HydroMT for a specific model kernel or software, create a subclass 
 - The Model class defines two high-level methods — :py:meth:`~hydromt.Model.build` and :py:meth:`~hydromt.Model.update` — which are available across all model plugins and exposed via the CLI.
   Additional high-level methods may be added in future releases.
 
-- A model subclass can be exposed as a HydroMT plugin by declaring a ``hydromt.models`` `entry point <https://packaging.python.org/en/latest/specifications/entry-points/>`_ in the package’s ``pyproject.toml``.
+- A model subclass can be exposed as a HydroMT plugin by declaring a ``hydromt.models`` `entry point <https://packaging.python.org/en/latest/specifications/entry-points/>`_ in the package's ``pyproject.toml``.
   For detailed instructions, refer to the :ref:`register_plugins` section.
 
 - We strongly recommend writing integration and unit tests for all model classes and components to ensure correctness and maintain stability across releases.
