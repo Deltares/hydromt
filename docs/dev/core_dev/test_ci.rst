@@ -1,5 +1,4 @@
-
-
+.. _test_ci:
 
 Test and CI
 -----------
@@ -34,3 +33,25 @@ A single test:
 .. code-block:: console
 
     $ python -m pytest --verbose test_rio.py::test_object
+
+
+Alternatively, you can also run tests using the pixi install described in the :ref:`developer installation guide <dev_install>`.
+
+
+Run all tests:
+
+.. code-block:: console
+
+    $ pixi run pytest
+
+Run tests in a specific file:
+
+.. code-block:: console
+
+    $ pixi run pytest tests/test_rio.py
+
+Run a specific test function:
+
+.. code-block:: console
+
+    $ pixi run pytest tests/test_rio.py::test_object

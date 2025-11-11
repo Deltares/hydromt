@@ -103,92 +103,19 @@ This workflow will automatically run your test suite in different environments w
 
 Here's a basic outline of how to set up a GitHub Actions workflow for your plugin:
 
-1. Create a new file in your repository at `.github/workflows/test.yml`.
+1. In the pyproject.toml / pixi.toml of your plugin, ensure you have a test command defined that runs your tests.
+Additionally, you should define the features and environments for the various Python versions and dependency versions you want to test.
+A basic example:
 
-```yaml
-name: Test Plugin
+.. literalinclude:: example_pixi.toml
+  :language: toml
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+2. Create a new file in your repository at `.github/workflows/test.yml`, add the following content and update it as needed:
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10]
-        hydromt-version: [latest, main]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          pixi install -e {{ matrix.hydromt-version }}
-
-
-      - name: Run tests
-        run: |
-          pixi run test
-```
-
-2. Commit and push the `test.yml` file to your repository.
-
-This workflow will run your tests in three different Python environments (3.8, 3.9, and 3.10) and against both the latest released version of HydroMT and the latest development version. You can customize the workflow further based on your specific testing requirements.
-
-2. Add the following content to the `test.yml` file:
-
-```yaml
-name: Test Plugin
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10]
-        hydromt-version: [latest, main]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install hydromt==${{ matrix.hydromt-version }}
-
-      - name: Run tests
-        run: |
-          pytest tests/
-```
+.. literalinclude:: example_test.yml
+  :language: yaml
 
 3. Commit and push the `test.yml` file to your repository.
 
-This workflow will run your tests in three different Python environments (3.8, 3.9, and 3.10) and against both the latest released version of HydroMT and the latest development version. You can customize the workflow further based on your specific testing requirements.
+This workflow will run your tests in different operating systems (Ubuntu and Windows), four different Python versions (3.10, 3.11, 3.12, and 3.13), and against both the latest released version of HydroMT and the latest development version.
+You can customize the workflow further based on your specific testing requirements.

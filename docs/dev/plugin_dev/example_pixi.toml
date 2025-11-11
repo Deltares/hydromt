@@ -1,0 +1,47 @@
+[workspace]
+authors = ["example-author <example@example.com>"]
+channels = ["conda-forge"]
+name = "my_plugin"
+platforms = ["win-64"]
+version = "0.1.0"
+
+[tasks]
+test = { cmd = "pytest tests" }
+
+# Install your code in editable mode, dependencies here are installed in all environments
+# Takes the dependencies from pyproject.toml, which will be overridden in the features below.
+[pypi-dependencies]
+my_plugin = { path = ".", editable = true }
+
+# Define features for different Python versions and Hydromt versions
+[feature.py310.dependencies]
+python = "3.10.*"
+
+[feature.py311.dependencies]
+python = "3.11.*"
+
+[feature.py312.dependencies]
+python = "3.12.*"
+
+[feature.py313.dependencies]
+python = "3.13.*"
+
+[feature.hydromt_dev.pypi-dependencies]
+# Get the latest version from main
+hydromt = { git = "https://github.com/Deltares/hydromt.git", branch = "main" }
+
+[feature.hydromt_latest.pypi-dependencies]
+# Replace with the actual stable version range you want to test against
+hydromt = ">=1.0,<2.0"
+
+# Define environments to combine features
+[environments]
+latest_310 = { features = ["py310", "hydromt_latest"], solve-group = "py310" }
+latest_311 = { features = ["py311", "hydromt_latest"], solve-group = "py311" }
+latest_312 = { features = ["py312", "hydromt_latest"], solve-group = "py312" }
+latest_313 = { features = ["py313", "hydromt_latest"], solve-group = "py313" }
+
+dev_310 = { features = ["py310", "hydromt_dev"], solve-group = "py310" }
+dev_311 = { features = ["py311", "hydromt_dev"], solve-group = "py311" }
+dev_312 = { features = ["py312", "hydromt_dev"], solve-group = "py312" }
+dev_313 = { features = ["py313", "hydromt_dev"], solve-group = "py313" }

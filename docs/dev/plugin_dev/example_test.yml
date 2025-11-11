@@ -1,0 +1,36 @@
+name: Test Plugin
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ['310', '311', '312', '313']
+        hydromt-version: ['latest', 'dev']
+
+    name: pytest ${{ matrix.hydromt-version }}-${{ matrix.python-version }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ matrix.os }}-${{ matrix.hydromt-version }}-${{ matrix.python-version }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: prefix-dev/setup-pixi@v0.9.3
+        with:
+          pixi-version: "v0.59.0"
+          environments: ${{ matrix.hydromt-version }}_${{ matrix.python-version }}
+
+      - name: Run tests
+        run: |
+          pixi run --locked -e ${{ matrix.hydromt-version }}_${{ matrix.python-version }}
