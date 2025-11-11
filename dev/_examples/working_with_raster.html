@@ -486,8 +486,8 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:19:50,507 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
-2025-11-10 11:19:50,508 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-11-11 15:19:50,264 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
+2025-11-11 15:19:50,265 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <p>Here, we illustrate some common GIS problems and how the functionality of the DataArray/Dataset <a class="reference internal" href="../api/gis.html#raster-methods"><span class="std std-ref">raster</span></a> accessor can be used. The data is accessed using the HydroMT <a class="reference internal" href="../_generated/hydromt.data_catalog.DataCatalog.html"><span class="doc">DataCatalog</span></a>. For more information see the <a class="reference internal" href="reading_raster_data.html"><span class="doc">Reading raster data</span></a> example.</p>
@@ -511,7 +511,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:19:51,193 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading ghs_pop_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/ghs_pop_2015.tif
+2025-11-11 15:19:50,945 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading ghs_pop_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/ghs_pop_2015.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -520,7 +520,7 @@ GDAL driver. Currently the key difference between both packages, besides the nam
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f5a52f6fb10&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f4a98348450&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -655,7 +655,7 @@ Error: 0.036%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f5a52e65ed0&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f4a98199910&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -696,19 +696,7 @@ Error: 0.036%
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:19:52,591 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
-2025-11-10 11:19:52,593 - hydromt._utils.unused_kwargs - unused_kwargs - WARNING - object: PyogrioDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
-Name: WGS 84
-Axis Info [ellipsoidal]:
-- Lat[north]: Geodetic latitude (degree)
-- Lon[east]: Geodetic longitude (degree)
-Area of Use:
-- name: World.
-- bounds: (-180.0, -90.0, 180.0, 90.0)
-Datum: World Geodetic System 1984 ensemble
-- Ellipsoid: WGS 84
-- Prime Meridian: Greenwich
- unit=None extent={} nodata=None attrs={} category=&#39;geography&#39; notes=&#39;last downloaded 2020-10-19; license required for commercial use&#39; url=&#39;https://gadm.org/download_world.html&#39; author=&#39;gadm&#39; license=&#39;https://gadm.org/license.html&#39;.
+2025-11-11 15:19:52,427 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gadm_level3 GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/gadm_level3.gpkg
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -837,7 +825,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:20:06,975 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading soilgrids RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/soilgrids/{variable}.tif
+2025-11-11 15:20:06,843 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading soilgrids RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/soilgrids/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -846,7 +834,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f5a35f6aa10&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f4a71eecb90&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -871,7 +859,7 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f5a34dbfa10&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f4a70db1910&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -914,11 +902,11 @@ gaps is build using voronoi triangulation. Then, values are calculated for each 
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:20:07,332 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
+2025-11-11 15:20:07,212 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
 resolution MERIT Hydro: 0.00083
-2025-11-10 11:20:07,349 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gebco RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/gebco.tif
+2025-11-11 15:20:07,229 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading gebco RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/gebco.tif
 resolution GEBCO: 0.00417
-2025-11-10 11:20:07,361 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading mdt_cnes_cls18 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/mdt_cnes_cls18.tif
+2025-11-11 15:20:07,241 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading mdt_cnes_cls18 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/mdt_cnes_cls18.tif
 resolution MDT: 0.12500
 </pre></div></div>
 </div>
@@ -928,7 +916,7 @@ resolution MDT: 0.12500
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f5a349a7b10&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f4a73e47050&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -965,7 +953,7 @@ resolution reprojected GEBCO: 0.00083
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.collections.QuadMesh at 0x7f5a34877b10&gt;
+&lt;matplotlib.collections.QuadMesh at 0x7f4a71f19a50&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
