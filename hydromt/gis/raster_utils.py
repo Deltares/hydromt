@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 import dask
 import numpy as np
@@ -38,38 +38,49 @@ _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
 
 
 def full_like(
-    other: xr.DataArray, *, nodata: float = None, lazy: bool = False
+    other: xr.DataArray,
+    *,
+    nodata: float | int | None = None,
+    fill_value: float | int | None = None,
+    dtype: type | None = None,
+    lazy: bool = False,
 ) -> xr.DataArray:
     """Return a full object with the same grid and geospatial attributes as ``other``.
 
     Arguments
     ---------
-    other: DataArray
-        DataArray from which coordinates and attributes are taken
-    nodata: float, int, optional
-        Fill value for new DataArray, defaults to other.nodata or if not set np.nan
-    lazy: bool, optional
-        If True return DataArray with a dask rather than numpy array.
+    other : xr.DataArray
+        DataArray from which coordinates and attributes are taken.
+    nodata : float | int, optional
+        No data value for the new DataArray, defaults to other.nodata or,
+        if not set, to nan. By default None.
+    fill_value : float | int, optional
+        Fill value of the new DataArray. If not provided the same value is used as the
+        determined nodata value. By default None.
+    dtype : type, optional
+        Data type, should be provided as a dtype defined by numpy (e.g. np.float32).
+        By default None.
+    lazy : bool, optional
+        If True return DataArray with a dask rather than numpy array, by default False.
 
     Returns
     -------
-    da: DataArray
-        Filled DataArray
+    da: xr.DataArray
+        Newly created DataArray with the same coordinates and attributes.
     """
     if not isinstance(other, xr.DataArray):
         raise ValueError("other should be xarray.DataArray.")
-    if nodata is None:
-        nodata = other.raster.nodata if other.raster.nodata is not None else np.nan
     da = full(
         coords={d: c for d, c in other.coords.items() if d in other.dims},
-        nodata=nodata,
-        dtype=other.dtype,
+        nodata=(nodata or other.raster.nodata or np.nan),
+        fill_value=fill_value,
+        dtype=(dtype or other.dtype),
+        shape=other.shape,
+        dims=other.dims,
         name=other.name,
         attrs=other.attrs,
         crs=other.raster.crs,
         lazy=lazy,
-        shape=other.shape,
-        dims=other.dims,
     )
     da.raster.set_attrs(**other.raster.attrs)
     da.raster._transform = other.raster.transform
@@ -77,48 +88,57 @@ def full_like(
 
 
 def full(
-    coords,
+    coords: dict[str, np.ndarray],
     *,
-    nodata=np.nan,
-    dtype=np.float32,
-    name=None,
-    attrs=None,
-    crs=None,
-    lazy=False,
-    shape=None,
-    dims=None,
+    nodata: float | int = np.nan,
+    fill_value: float | int | None = None,
+    dtype: type = np.float32,
+    shape: tuple[int] | None = None,
+    dims: tuple[str] | None = None,
+    name: str | None = None,
+    attrs: dict[str, Any] | None = None,
+    crs: dict[str, Any] | int | str | None = None,
+    lazy: bool = False,
 ) -> xr.DataArray:
     """Return a full DataArray based on a geospatial coords dictionary.
 
     Arguments
     ---------
-    coords: sequence or dict of array_like, optional
+    coords : dict[str, np.ndarray]
         Coordinates (tick labels) to use for indexing along each dimension (max 3).
         The coordinate sequence should be (dim0, y, x) of which the first is optional.
-    nodata: float, int, optional
-        Fill value for new DataArray, defaults to other.nodata or if not set np.nan
-    dtype: numpy.dtype, optional
-        Data type
-    name: str, optional
-        DataArray name
-    attrs : dict, optional
-        additional attributes
-    crs: int, dict, or str, optional
-        Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)
-    lazy: bool, optional
-        If True return DataArray with a dask rather than numpy array.
-    shape: tuple, optional
+    nodata : float | int, optional
+        No data value for new DataArray, important for reading with e.g. GDAL/ QGIS.
+        By default nan.
+    fill_value : float | int, optional
+        Fill value of the new DataArray. If not provided, the same value as the nodata
+        value is used. By default None.
+    dtype : type, optional
+        Data type, should be provided as a dtype defined by numpy (e.g. np.float32).
+        By default np.float32.
+    shape : tuple[int], optional
         Length along (dim0, y, x) dimensions, of which the first is optional.
-    dims: tuple, optional
-        Name(s) of the data dimension(s).
+        When provided, it should match the lengths of the provided coordinates.
+        By default None.
+    dims : tuple[str], optional
+        Name(s) of the data dimension(s), by default None.
+    name : str, optional
+        DataArray name, by default None.
+    attrs : dict[str, Any], optional
+        Additional attributes to assign to the DataArray. By default None.
+    crs : dict[str, Any] | int | str, optional
+        Coordinate Reference System. Accepted is EPSG codes (int or str) and
+        proj (str or dict). By default None.
+    lazy : bool, optional
+        If True return DataArray with a dask rather than numpy array, by default False.
 
     Returns
     -------
-    da: DataArray
-        Filled DataArray
+    da: xr.DataArray
+        Newly created DataArray.
     """
     attrs = attrs or {}
-    f = dask.array.empty if lazy else np.full
+    f = dask.array.full if lazy else np.full
     if dims is None:
         dims = tuple([d for d in coords])
     if shape is None:
@@ -129,7 +149,7 @@ def full(
             shape = cs.shape
             if hasattr(cs, "dims"):
                 dims = cs.dims
-    data = f(shape, nodata, dtype=dtype)
+    data = f(shape, (fill_value or nodata), dtype=dtype)
     da = xr.DataArray(data, coords, dims, name, attrs)
     da.raster.set_nodata(nodata)
     da.raster.set_crs(crs)
@@ -137,43 +157,51 @@ def full(
 
 
 def full_from_transform(
-    transform,
-    shape,
+    transform: Affine[float | int] | tuple[float | int],
+    shape: tuple[int],
     *,
-    nodata=np.nan,
-    dtype=np.float32,
-    name=None,
-    attrs=None,
-    crs=None,
-    lazy=False,
-):
+    nodata: float | int = np.nan,
+    fill_value: float | int | None = None,
+    dtype: type = np.float32,
+    name: str | None = None,
+    attrs: dict[str, Any] | None = None,
+    crs: dict[str, Any] | int | str | None = None,
+    lazy: bool = False,
+) -> xr.DataArray:
     """Return a full DataArray based on a geospatial transform and shape.
 
     See :py:meth:`~hydromt.raster_utils.full` for all options.
 
     Parameters
     ----------
-    transform : affine transform
+    transform : Affine[float | int] | tuple[float | int]
         Two dimensional affine transform for 2D linear mapping.
-    shape : tuple of int
+    shape : tuple[int]
         Length along (dim0, y, x) dimensions, of which the first is optional.
-    nodata : optional
-        The nodata value to assign to the DataArray. Defaults to np.nan.
-    dtype : optional
-        The data type to use for the DataArray. Defaults to np.float32.
-    name : optional
-        The name of the DataArray. Defaults to None.
-    attrs : optional
-        Additional attributes to assign to the DataArray. Empty by default.
-    crs : optional
-        The coordinate reference system (CRS) of the DataArray. Defaults to None.
+        By default None.
+    nodata : float | int, optional
+        No data value for new DataArray, important for reading with e.g. GDAL/ QGIS.
+        By default nan.
+    fill_value : float | int, optional
+        Fill value of the new DataArray. If not provided, the same value as the nodata
+        value is used. By default None.
+    dtype : type, optional
+        Data type, should be provided as a dtype defined by numpy (e.g. np.float32).
+        By default np.float32.
+    name : str, optional
+        DataArray name, by default None.
+    attrs : dict[str, Any], optional
+        Additional attributes to assign to the DataArray. By default None.
+    crs : dict[str, Any] | int | str, optional
+        Coordinate Reference System. Accepted is EPSG codes (int or str) and
+        proj (str or dict). By default None.
     lazy : bool, optional
         Whether to create a lazy DataArray. Defaults to False.
 
     Returns
     -------
-    da : DataArray
-        Filled DataArray
+    da : xr.DataArray
+        Newly created DataArray adhering to the provided transform and shape.
     """
     attrs = attrs or {}
     if len(shape) not in [2, 3]:
@@ -188,6 +216,7 @@ def full_from_transform(
     da = full(
         coords=coords,
         nodata=nodata,
+        fill_value=fill_value,
         dtype=dtype,
         name=name,
         attrs=attrs,
