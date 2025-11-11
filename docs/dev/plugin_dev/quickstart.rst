@@ -13,7 +13,7 @@ Before reading this, make sure you're familiar with HydroMT by reviewing at leas
 .. note::
 
   Most of this section focuses on creating *new* functionality.
-  If you already have a plugin and want to migrate it to the new V1 architecture, please refer to the :ref:`migration` guide.
+  If you already have a plugin and want to migrate it to the new V1 architecture, please refer to the :ref:`migration_plugin` guide.
 
 The new V1 architecture of HydroMT provides much greater flexibility to customize behavior —
 for example, by adding your own ``ModelComponents`` without needing a plugin.
@@ -82,4 +82,4 @@ and follows the conventions and API described in the HydroMT documentation.
 This structure helps maintain clarity and organization as your plugin grows in complexity.
 By organizing your repository in this way, contributors and users can quickly understand where to find each part of your plugin.
 
-See also the :ref:`plugin_example` for a concrete example of a HydroMT plugin repository.
+See also the :ref:`plugin_examples` for concrete examples of how to implement a HydroMT plugin.
