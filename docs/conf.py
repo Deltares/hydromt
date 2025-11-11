@@ -17,7 +17,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import re
 import shutil
 
 import numpy as np
@@ -108,10 +107,10 @@ author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 version = hydromt.__version__
 
 # -- Copy notebooks to include in docs -------
-if os.path.isdir("_examples"):
-    remove_dir_content("_examples")
-os.makedirs("_examples")
-shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
+# if os.path.isdir("_examples"):
+#     remove_dir_content("_examples")
+# os.makedirs("_examples")
+# shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
 
 # replace all links of https://deltares.github.io/hydromt/.*/.*.rst.* with ../*.html.*
 # for root, _, files in os.walk("_examples"):
@@ -406,7 +405,7 @@ intersphinx_mapping = {
 # -- NBSPHINX --------------------------------------------------------------
 
 # This is processed by Jinja2 and inserted before each notebook
-# nbsphinx_execute = 'never'
+nbsphinx_execute = 'never'
 
 nbsphinx_prolog = r"""
 {% set docname = env.doc2path(env.docname, base=None).split('\\')[-1].split('/')[-1] %}

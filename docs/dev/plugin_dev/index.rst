@@ -45,6 +45,7 @@ This guide provides step-by-step instructions on building, registering, and test
    :hidden:
 
    quickstart
-   Implement your own <example/index>
+   Implement your own <custom_implementation/index>
    workflows
    testing
+   migrating_to_v1

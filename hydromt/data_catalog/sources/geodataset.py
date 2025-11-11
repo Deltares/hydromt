@@ -223,7 +223,6 @@ class GeoDatasetSource(DataSource):
 
         The collection will contain an asset for each of the associated files.
 
-
         Parameters
         ----------
         - handle_nodata (str, optional): The error handling strategy.

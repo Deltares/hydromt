@@ -70,8 +70,8 @@ Each page describes one aspect of customization, from implementing a new model c
 .. toctree::
     :hidden:
 
-    custom_model
-    custom_component
-    custom_catalog
-    custom_driver
-    custom_resolver
+    model
+    component
+    catalog
+    driver
+    resolver
