@@ -37,56 +37,6 @@ _R = 6371e3  # Radius of earth in m. Use 3956e3 for miles
 # FULL
 
 
-def full_like(
-    other: xr.DataArray,
-    *,
-    nodata: float | int | None = None,
-    fill_value: float | int | None = None,
-    dtype: type | None = None,
-    lazy: bool = False,
-) -> xr.DataArray:
-    """Return a full object with the same grid and geospatial attributes as ``other``.
-
-    Arguments
-    ---------
-    other : xr.DataArray
-        DataArray from which coordinates and attributes are taken.
-    nodata : float | int, optional
-        No data value for the new DataArray, defaults to other.nodata or,
-        if not set, to nan. By default None.
-    fill_value : float | int, optional
-        Fill value of the new DataArray. If not provided the same value is used as the
-        determined nodata value. By default None.
-    dtype : type, optional
-        Data type, should be provided as a dtype defined by numpy (e.g. np.float32).
-        By default None.
-    lazy : bool, optional
-        If True return DataArray with a dask rather than numpy array, by default False.
-
-    Returns
-    -------
-    da: xr.DataArray
-        Newly created DataArray with the same coordinates and attributes.
-    """
-    if not isinstance(other, xr.DataArray):
-        raise ValueError("other should be xarray.DataArray.")
-    da = full(
-        coords={d: c for d, c in other.coords.items() if d in other.dims},
-        nodata=(nodata or other.raster.nodata or np.nan),
-        fill_value=fill_value,
-        dtype=(dtype or other.dtype),
-        shape=other.shape,
-        dims=other.dims,
-        name=other.name,
-        attrs=other.attrs,
-        crs=other.raster.crs,
-        lazy=lazy,
-    )
-    da.raster.set_attrs(**other.raster.attrs)
-    da.raster._transform = other.raster.transform
-    return da
-
-
 def full(
     coords: dict[str, np.ndarray],
     *,
@@ -226,6 +176,56 @@ def full_from_transform(
         dims=dims,
     )
     da.raster._transform = transform
+    return da
+
+
+def full_like(
+    other: xr.DataArray,
+    *,
+    nodata: float | int | None = None,
+    fill_value: float | int | None = None,
+    dtype: type | None = None,
+    lazy: bool = False,
+) -> xr.DataArray:
+    """Return a full object with the same grid and geospatial attributes as ``other``.
+
+    Arguments
+    ---------
+    other : xr.DataArray
+        DataArray from which coordinates and attributes are taken.
+    nodata : float | int, optional
+        No data value for the new DataArray, defaults to other.nodata or,
+        if not set, to nan. By default None.
+    fill_value : float | int, optional
+        Fill value of the new DataArray. If not provided the same value is used as the
+        determined nodata value. By default None.
+    dtype : type, optional
+        Data type, should be provided as a dtype defined by numpy (e.g. np.float32).
+        By default None.
+    lazy : bool, optional
+        If True return DataArray with a dask rather than numpy array, by default False.
+
+    Returns
+    -------
+    da: xr.DataArray
+        Newly created DataArray with the same coordinates and attributes.
+    """
+    if not isinstance(other, xr.DataArray):
+        raise ValueError("other should be xarray.DataArray.")
+    da = full(
+        coords={d: c for d, c in other.coords.items() if d in other.dims},
+        nodata=(nodata or other.raster.nodata or np.nan),
+        fill_value=fill_value,
+        dtype=(dtype or other.dtype),
+        shape=other.shape,
+        dims=other.dims,
+        name=other.name,
+        attrs=other.attrs,
+        crs=other.raster.crs,
+        lazy=lazy,
+    )
+    da.raster.set_attrs(**other.raster.attrs)
+    da.raster._transform = other.raster.transform
     return da
 
 
