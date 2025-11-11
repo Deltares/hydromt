@@ -24,3 +24,4 @@ each plugin documentation website.
    Model workflow file <model_workflow>
    Defining a region <model_region>
    Model components (advanced) <model_components>
+   Model processes (advanced) <model_processes>

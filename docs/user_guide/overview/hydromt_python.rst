@@ -30,8 +30,8 @@ methods are organized around these main objects.
 
 .. dropdown:: **Data catalog functions**
 
-   - :ref:`export data <hydromt_export_python>`
    - :ref:`reading data <hydromt_data_read_python>`
+   - :ref:`export data <hydromt_export_python>`
 
 .. dropdown:: **Methods and processes**
 
@@ -45,9 +45,9 @@ You can use HydroMT to build or update a model in Python instead of the CLI. Add
 with Python, you can also load an existing model to read or analyze its inputs or results.
 
 .. _hydromt_build_python:
+
 Building a model
 ^^^^^^^^^^^^^^^^
-
 The ``build`` function is used to build models from scratch. In Python, you can also
 use the build function in combination with the build workflow file to build a model. Here
 is a small example of how to use the build function in Python:
@@ -55,7 +55,7 @@ is a small example of how to use the build function in Python:
 .. code-block:: python
 
     from hydromt import ExampleModel
-    from hydromt.io import read_workflow_yaml
+    from hydromt.readers import read_workflow_yaml
 
     # Instantiate model
     model = ExampleModel(
@@ -115,7 +115,7 @@ is a small example of how to use the update function in Python:
 .. code-block:: python
 
     from hydromt import ExampleModel
-    from hydromt.io import read_workflow_yaml
+    from hydromt.readers import read_workflow_yaml
 
     # Instantiate model
     model = ExampleModel(
@@ -164,6 +164,7 @@ model steps as methods, instead of using a workflow file. For example:
     model.write()
 
 .. _hydromt_load_python:
+
 Loading and analyzing a model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 You can also use HydroMT and its :class:`~model.Model` and
@@ -172,7 +173,9 @@ inputs or results. HydroMT views a model as a combination of different component
 represent the different type of inputs of a model, like ``config`` for the model run
 configuration file, ``forcing`` for the dynamic forcing data of the model etc. For each
 component, there are methods to ``<component>.set`` (update or add a new data layer),
-``<component>.read`` and ``<component>.write``.
+``<component>.read`` and ``<component>.write``. The underlying data of each component
+is accessible via the ``<component>.data`` attribute (e.g dict, xarray or geopandas objects,
+etc.).
 
 Here is a small example of how to use the :class:`~model.Model` class in python to plot
 or analyze your model:
@@ -189,46 +192,43 @@ or analyze your model:
 
 You can find more detailed examples on using the Model class in Python in:
 
-* `Working with models in python <../_examples/working_with_models.ipynb>`_
+* `Working with models in python <../../_examples/working_with_models.ipynb>`_
 
 And feel free to visit some of the :ref:`plugins <plugins>` documentation to find even more examples!
 
 Data catalog functions
 ----------------------
+The DataCatalog is a core part of HydroMT to find, read, harmonize and transform input data.
+It is usually prepared from a yaml file that defines different data sources and
+their properties. You can find more information on the DataCatalog in the
+:ref:`Data Catalog documentation <get_data>`.
 
 .. currentmodule:: hydromt.data_catalog
 
-Most classes around the finding, reading and transforming input data have
-implementations for the five different data_types in HydroMT.
-The main objects to work with input data are:
+.. _hydromt_data_read_python:
 
-* The :class:`~data_catalog.DataCatalog` is the most high-level class and leverages the
-    next few classes to find, read and transform the data coming from its configuration.
-    The methods used to do this are called  ``get_<data_type>``, for example
-    :func:`~data_catalog.DataCatalog.get_rasterdataset`.
-* The :class:`~uri_resolvers.uri_resolver.URIResolver` is responsible for finding the
-    data based on a single uri. This class is generic for all data_types. An
-    implementation that finds data based on naming conventions is the
-    :class:`~uri_resolvers.convention_resolver.ConventionResolver`.
-* The :class:`Driver <drivers.base_driver.BaseDriver>` has different subclasses based on
-    the data_type, for example
-    :class:`~drivers.raster.raster_dataset_driver.RasterDatasetDriver`, which then has
-    different implementations, for example a driver for reading raster data using
-    rasterio: :class:`~drivers.raster.rasterio_driver.RasterioDriver`. which reads
-    raster data.
-* The :class:`DataAdapter <adapters.data_adapter_base.DataAdapterBase>` has subclasses
-    that transform data, like renaming, reprojecting etc. These subclasses are for
-    example: :class:`~adapters.rasterdataset.RasterDatasetAdapter`.
+Reading data
+^^^^^^^^^^^^
+HydroMT supports reading five different data types:
 
-So let's say you would like to read data in HydroMT, you can do this by creating a
-DataCatalog instance and using the ``get_<data_type>`` methods to read the data.
-This is a short example:
+- **rasterdataset**: raster (regular grid) data (e.g DEM, landuse, soil type, model grid etc.)
+- **geodataframe**: vector data (e.g shapefiles, geojson, etc.)
+- **geodataset**: time varying vector data (e.g point time-series, station data, etc.)
+- **dataframe**: non-spatial tabular data (e.g csv, excel, etc.)
+- **dataset**: non-spatial multi-dimensional data (e.g netcdf, hdf5, etc.)
+
+All input data is accessible and be read through the :class:`~data_catalog.DataCatalog` class
+via its ``get_<data_type>`` methods, for example: ``get_rasterdataset``,
+``get_geodataframe``, ``get_geodataset``, ``get_dataframe``, ``get_dataset``.
+
+Here is a small example of how to use the DataCatalog to read data in Python:
 
 .. code-block:: python
 
-    import hydromt
+    from hydromt import DataCatalog
+
     # create a data catalog from a local data_catalog file
-    cat = hydromt.DataCatalog("data_catalog.yml")
+    cat = DataCatalog("data_catalog.yml")
     # read a raster dataset ("dem" source in the data catalog)
     dem = cat.get_rasterdataset("dem")
     # read a vector dataset ("catchments" source in the data catalog)
@@ -240,81 +240,93 @@ This is a short example:
       bbox = [5.0, 50.0, 6.0, 51.0]
     )
 
-You can find more detailed examples on using the DataCatalog and DataAdapter in Python in:
+You can find more detailed examples on using the DataCatalog in Python in:
 
-* `Reading raster data <../_examples/reading_raster_data.ipynb>`_
-* `Reading vector data <../_examples/reading_vector_data.ipynb>`_
-* `Reading geospatial point time-series data <../_examples/reading_point_data.ipynb>`_
-* `Preparing a data catalog <../_examples/prep_data_catalog.ipynb>`_
-* `Exporting data <../_examples/export_data.ipynb>`_
+* `Reading raster data <../../_examples/reading_raster_data.ipynb>`_
+* `Reading vector data <../../_examples/reading_vector_data.ipynb>`_
+* `Reading geospatial point time-series data <../../_examples/reading_point_data.ipynb>`_
+* `Reading tabular data <../../_examples/reading_tabular_data.ipynb>`_
 
-.. _xarray_accessors:
+In short, what happens in the bachkground of the ``get_<data_type>`` methods is:
 
-Xarray Accessors
-----------------
-Some powerful functionality that HydroMT uses is exposed in the ``gis`` module. In this
-module `xarray accessors
-<https://docs.xarray.dev/en/stable/internals/extending-xarray.html>`_ are located. These
-allow for powerful new methods on top of xarray ``Dataset`` and ``DataArray`` classes.
-There is the :ref:`raster API <raster_api>`, such as functionality to repoject,
-resample, transform, interpolate nodata or zonal statistics. There is also the
-:ref:`GeoDataset API <geodataset_api>` to work with geodataset data (N-dim
-point/line/polygon geometry). For example, reprojecting, transform, update geometry or
-convert to geopandas.GeoDataFrame to access further GIS methods.
+1. The DataCatalog finds the data source in the data catalog that matches the
+   requested name and solves the data source path (e.g local file, remote url, database, etc.)
+2. The DataCatalog uses the appropriate data reader or ``driver`` to read the data from the source
+   depending on its type and file format (e.g. tif, netcdf, shapefile, csv, etc.)
+3. The DataCatalog harmonizes (renaming, unit conversion) and slices (variables, time, space) the
+   data according to the data source properties using the appropriate ``data_adapter``.
 
-.. warning::
-    Remember to close any open datasets when you are finished working with them.
-    Leaving datasets open may cause xarray to lock the files, which can prevent
-    access by other processes until your Python session ends. For example, if you
-    open a NetCDF file used by a model and do not close it before calling
-    ``Model.update()``, HydroMT will raise a ``PermissionError`` when attempting
-    to write to the model.
+HydroMT is flexible enough that you can add your own data types or readers if needed. You
+can find more information on how the DataCatalog works and how to implement your own data
+readers in the :ref:`Developer documentation <intro_developer_guide>`.
 
-.. _flowpy_wrappers:
 
-FlowPy Wrappers:
-----------------
+.. _hydromt_export_python:
 
-`PyFlwDir <https://deltares.github.io/pyflwdir/latest/index.html>` contains a series of
-methods to work with gridded DEM and flow direction datasets. The ``gis.flw`` module
-builds on top of this and provides hydrological methods for raster DEM data. For
-example, calculate flow direction, flow accumulation, stream network, catchments, or
-reproject hydrography.
+Exporting data
+^^^^^^^^^^^^^^
+HydroMT also supports exporting data from a DataCatalog for a specific region or time range.
+This can be useful to extract and export input data for a specific model or region of interest.
+For this, you can use the :py:meth:`~data_catalog.DataCatalog.export_data` method of the
+:class:`~data_catalog.DataCatalog` class. Here is a small example of how to use the export_data method
+in Python:
 
-.. _stats:
+.. code-block:: python
 
-Stats:
-------
+    from hydromt import DataCatalog
 
-The ``stats`` module has statistical methods including ``skills`` to compute skill
-scores of models (e.g. NSE, KGE, bias and many more) and ``extremes`` to analyse extreme
-events (extract peaks or compute return values).
+    # create a data catalog from a local data_catalog file
+    cat = DataCatalog("data_catalog.yml")
+    # export data for a specific region and time range
+    cat.export_data(
+        new_root = "./exported_data",
+        bbox = [5.0, 50.0, 6.0, 51.0],
+        time_range = ("2000-01-01", "2010-12-31"),
+        source_names = ["dem", "landuse", "qobs"]
+    )
 
-.. _processes:
 
-.. currentmodule:: hydromt.model
+Methods and processes
+----------------------
+HydroMT provides a set of methods and (GIS) processes to process input data in order to
+prepare ready to run models. You can find more information on the available methods and
+processes in the :ref:`supporting functionnalities <methods_processes>`, :ref:`model processes <model_processes>` and in
+the :ref:`API reference <api_reference>`.
 
-The ``model`` module has a ``processes`` submodule. This module contains some functions
-to work with different kinds of model in- and ouput.
+These methods and processes are only available via the Python API. You can use them
+directly in your Python scripts or Jupyter notebooks to process data for your models
+or for other purposes.
 
-* :ref:`grid <workflows_grid_api>`: generic workflows to prepare regular gridded data.
-    Used with the :class:`~grid.GridComponent`. For example to prepare regular grid data
-    from constant, from RasterDataset (with or without reclassification) or from GeoDataFrame.
-* :ref:`mesh <workflows_mesh_api>`: generic workflows to prepare unstructured mesh
-    data. Used with :class:`~mesh.MeshComponent`. For example to create a mesh grid or
-    prepare unstructured mesh data from RasterDataset.
-* :ref:`basin_mask <workflows_basin_api>`: workflows to prepare a basin mask based on
-    different region definitions (bounding box, point coordinates, polygon etc.)
-* :ref:`rivers <workflows_rivers_api>`: workflows to prepare river profile data like
-    width and depth.
-* :ref:`temp <workflows_forcing_api>`: workflows to prepare meteorological forcing
-    data. For example to prepare precipitation, temperature, or compute
-    evapotranspiration data. Advanced downscaling methods are also available within
-    these workflows.
+.. _hydromt_methods_python:
 
-You can find a couple of detailed examples of how to use HydroMT methods and workflows in Python:
+Methods
+^^^^^^^
+Methods provide the low-level functionality to do the required processing of common data types
+such as grid and vector data.
 
-* `Working with raster data <../_examples/working_with_raster.ipynb>`_
-* `Working with flow direction data <../_examples/working_with_flow_directions.ipynb>`_
-* `Define hydrological model regions <../_examples/delineate_basin.ipynb>`_
-* `Extreme Value Analysis <../_examples/doing_extreme_value_analysis.ipynb>`_
+HydroMT provides methods in different modules including:
+
+- ``gis.raster``: methods to work with raster (regular grid) data including reprojection,
+  resampling, transforming, interpolating nodata or zonal statistics.
+- ``gis.vector``: methods to work with geodataset data (N-dimensional vector data). For example, reprojecting,
+  transforming, updating geometry or converting to geopandas.GeoDataFrame to access further GIS methods.
+- ``gis.flw``: hydrological methods for raster DEM data. For example, calculate flow direction,
+  flow accumulation, stream network, catchments, or reproject hydrography.
+- ``stats.skills``: statistical methods to compute skill scores of models (e.g. NSE, KGE, bias and many more).
+- ``stats.extremes``: methods to analyse extreme events (extract peaks or compute return values).
+
+.. _hydromt_processes_python:
+
+Processes
+^^^^^^^^^
+Processes combine several methods to go from raw input data to a model component. Examples of
+processes include the delineation of hydrological basins (watersheds), conversion of
+landuse-landcover to model parameter maps, etc.
+
+HydroMT provides processes in the ``model.processes`` module including:
+
+- ``model.processes.basin_mask``: processes to delineate (sub-)basins and create basin masks.
+- ``model.processes.grid``: processes to prepare regular gridded data from different data types.
+- ``model.processes.mesh``: processes to prepare unstructured mesh data from different data types.
+- ``model.processes.rivers``: processes to prepare river network data for hydrological or 1D hydraulic models.
+- ``model.processes.meteo``: processes to prepare gridded meteorological forcing data including downscaling methods.

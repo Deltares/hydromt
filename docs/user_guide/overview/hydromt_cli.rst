@@ -7,7 +7,7 @@ The HydroMT command line interface (CLI) is a command line tool that allows you 
 HydroMT commands from the terminal. It is installed as part of the HydroMT package.
 
 To use the HydroMT CLI, open a terminal, (activate the environment where HydroMT is installed)
-and type ``hydromt`` followed by the command you want to run. you can also run ``hydromt --help``
+and type ``hydromt`` followed by the command you want to run. You can also run ``hydromt --help``
 to get an overview of which commands are available.  The following commands are available:
 
 .. dropdown:: **Information commands**
@@ -36,6 +36,7 @@ The base commands or options are here to get some information about HydroMT like
 help, installed version and available models.
 
 .. _hydromt_help:
+
 help
 ^^^^^
 The ``hydromt --help`` command prints the help message for the HydroMT CLI. It shows the available commands and options
@@ -63,6 +64,7 @@ that can be used with HydroMT. For example:
       update  Update models
 
 .. _hydromt_version:
+
 version
 ^^^^^^^
 The ``hydromt --version`` command prints the installed version of HydroMT. For example:
@@ -74,6 +76,7 @@ The ``hydromt --version`` command prints the installed version of HydroMT. For e
     HydroMT version: 1.0.0
 
 .. _hydromt_models:
+
 models
 ^^^^^^
 The ``hydromt --models`` command prints the available generic models from HydroMT core and
@@ -89,8 +92,10 @@ the installed plugins together with their versions. For example:
         - wflow_sediment (hydromt_wflow 1.0.0)
 
 .. _hydromt_plugins:
+
 plugins
 ^^^^^^^
+
 The ``hydromt --plugins`` command prints the installed HydroMT plugins together with their versions.
 This includes the model plugins (e.g hydromt_wflow), available pre-defined data catalogs (e.g deltares_data),
 available drivers to read different types of data (e.g raster_xarray, geodataset_xarray).
@@ -127,6 +132,7 @@ Model commands
 --------------
 
 .. _hydromt_build:
+
 build
 ^^^^^
 The ``hydromt build`` command is used to build models from scratch. It has two mandatory
@@ -154,8 +160,10 @@ In this section, you will also find how to :ref:`prepare a workflow file <model_
 Finally you can check the :ref:`hydromt build API <build_api>` for all the available options for the build command.
 
 .. _hydromt_update:
+
 update
 ^^^^^^
+
 The ``hydromt update`` command is used to update an existing model. It is quite similar to the
 build command and has two mandatory arguments:
 
@@ -185,8 +193,10 @@ Data catalog commands
 ---------------------
 
 .. _hydromt_export:
+
 export
 ^^^^^^
+
 The ``hydromt export`` command is used to export sample data from a data catalog for
 example to export global data for a specific region and time extent.
 It has one mandatory argument:
@@ -247,6 +257,7 @@ Validation commands
 -------------------
 
 .. _hydromt_check:
+
 check
 ^^^^^
 The ``hydromt check`` command is used to validate the configuration file, and the data catalog.

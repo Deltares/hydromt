@@ -1,7 +1,7 @@
 """Grid Component."""
 
 import logging
-from typing import TYPE_CHECKING, Dict, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
 import geopandas as gpd
 import numpy as np
@@ -10,11 +10,11 @@ from affine import Affine
 from pyproj import CRS
 from shapely.geometry import box
 
-from hydromt.io.readers import open_ncs
-from hydromt.io.writers import write_nc
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.components.spatial import SpatialModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import open_ncs
+from hydromt.writers import write_nc
 
 if TYPE_CHECKING:
     from hydromt.model.model import Model
@@ -146,7 +146,7 @@ class GridComponent(SpatialModelComponent):
         gdal_compliant: bool = False,
         rename_dims: bool = False,
         force_sn: bool = False,
-        **kwargs,
+        to_netcdf_kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Write model grid data to netcdf file at <root>/<fn>.
 
@@ -165,7 +165,7 @@ class GridComponent(SpatialModelComponent):
         force_sn: bool, optional
             If True and gdal_compliant, forces the dataset to have
             South -> North orientation.
-        **kwargs : dict
+        to_netcdf_kwargs : dict, optional
             Additional keyword arguments to be passed to the `write_nc` method.
         """
         self.root._assert_write_mode()
@@ -190,7 +190,7 @@ class GridComponent(SpatialModelComponent):
             rename_dims=rename_dims,
             force_overwrite=self.root.mode.is_override_mode(),
             force_sn=force_sn,
-            **kwargs,
+            to_netcdf_kwargs=to_netcdf_kwargs,
         )
         if close_handle is not None:
             self._deferred_file_close_handles.append(close_handle)

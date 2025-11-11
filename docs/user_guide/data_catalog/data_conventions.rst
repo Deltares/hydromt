@@ -3,8 +3,9 @@
 Data conventions
 ================
 
-Names and units mentioned here are mandatory in order for the input data to be processed correctly and produced the right derived data.
-It is possible to use the ``rename`` option in the :ref:`data catalog yaml file <data_yaml>` so that data variables have hydroMT-compatible names.
+Names and units mentioned here are mandatory in order for the input data to be processed correctly and produce the right derived data.
+It is possible to use the ``rename`` option in the :ref:`data catalog yaml file <data_yaml>` so that data variables have hydroMT-compatible names
+and the ``unit_mult`` and ``unit_add`` options to convert units where necessary.
 This section lists the different variable naming and unit conventions of HydroMT by types.
 A list of recognized :ref:`dimension names <dimensions>` is found here.
 

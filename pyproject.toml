@@ -127,7 +127,7 @@ core = "hydromt.model.components"
 core = "hydromt.data_catalog.drivers"
 
 [project.entry-points."hydromt.models"]
-core = "hydromt.model.model"
+core = "hydromt.model"
 
 [project.entry-points."hydromt.catalogs"]
 core = "hydromt.data_catalog.predefined_catalog"
@@ -141,7 +141,7 @@ description = { file = "hydromt/__init__.py" }
 [tool.ruff]
 line-length = 88
 target-version = "py311"
-exclude = ["docs"]
+exclude = ["docs", "hydromt/model/__init__.py"]
 
 [tool.ruff.lint]
 # enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
@@ -187,6 +187,8 @@ filterwarnings = [
 
 	# zarr v3 experimental warning
 	"ignore:Consolidated metadata is currently not part in the Zarr format 3 specification:UserWarning",
+	# irrelevant radolan engine warning
+	"ignore:Engine 'radolan' loading failed.*:RuntimeWarning",
 ]
 
 [tool.mypy]
@@ -205,7 +207,7 @@ disallow_subclassing_any = true
 disallow_untyped_decorators = true
 disallow_any_generics = true
 
-[tool.pixi.project]
+[tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["linux-64", "win-64"]
 
@@ -225,8 +227,10 @@ hydromt = { path = ".", editable = true }
 pandoc = "*"
 
 [tool.pixi.feature.io.dependencies]
-gdal = ">=3.5.0"
 pyflwdir = ">=0.5.4"
+
+[tool.pixi.feature.vrt.dependencies]
+gdal = ">=3.5.0"
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
@@ -381,6 +385,7 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 default = { features = [
 	"py311",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -391,6 +396,7 @@ default = { features = [
 full-latest = { features = [
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -401,6 +407,7 @@ min-latest = { features = ["py313", "test"], solve-group = "py313" }
 slim-latest = { features = [
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"examples",
 ], solve-group = "py313" }
@@ -408,6 +415,7 @@ slim-latest = { features = [
 full-py313 = { features = [
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -419,6 +427,7 @@ min-py313 = { features = ["py313", "test"], solve-group = "py313" }
 full-py312 = { features = [
 	"py312",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -430,6 +439,7 @@ min-py312 = { features = ["py312", "test"], solve-group = "py312" }
 full-py311 = { features = [
 	"py311",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",

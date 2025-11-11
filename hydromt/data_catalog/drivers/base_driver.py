@@ -57,7 +57,7 @@ class DriverOptions(BaseModel):
         """Return dict of kwargs excluding reserved/internal keys, and including the extra kwargs."""
         return self.model_dump(exclude=exclude, exclude_unset=True)
 
-    def get_kwargs(self) -> dict:
+    def get_kwargs(self) -> dict[str, Any]:
         """Return attributes set that are not explicitly declared fields."""
         return self.model_dump(
             exclude=self.get_excluded_kwarg_names_for_open(), exclude_unset=True
@@ -104,12 +104,8 @@ class BaseDriver(AbstractBaseModel, ABC):
 
     @abstractmethod
     def read(
-        self,
-        uris: list[str],
-        *,
-        handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
-    ):
+        self, uris: list[str], *, handle_nodata: NoDataStrategy = NoDataStrategy.RAISE
+    ) -> Any:
         """Read data using the driver.
 
         Parameters
@@ -118,23 +114,35 @@ class BaseDriver(AbstractBaseModel, ABC):
             List of URIs to read data from.
         handle_nodata : NoDataStrategy, optional
             Strategy to handle no data situations. Default is NoDataStrategy.RAISE.
-        kwargs_for_open : dict[str, Any] | None, optional
-            Additional keyword arguments to pass to the underlying open function. Default is None.
         """
         ...
 
     @abstractmethod
-    def write(self, path: str | Path, *args, **kwargs):
-        """Write data using the driver.
+    def write(
+        self,
+        path: Path | str,
+        data: Any,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
+        """
+        Write data using the driver.
 
         Parameters
         ----------
-        path : str | Path
-            Path to write data to.
-        *args
-            Positional arguments for the write function.
-        **kwargs
-            Keyword arguments for the write function.
+        path : Path | str
+            Destination path where the data will be written. Can be a local or remote URI.
+        data : Any
+            The data object to write. The expected type depends on the specific driver implementation
+            (e.g., pandas DataFrame, xarray Dataset, GeoDataFrame, etc.).
+        write_kwargs : dict[str, Any], optional
+            Additional keyword arguments passed to the underlying writer function (e.g., `to_csv`, `to_zarr`, etc.).
+            Default is None.
+
+        Returns
+        -------
+        Path
+            The path where the data was written.
         """
         ...
 

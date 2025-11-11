@@ -29,7 +29,6 @@ class TestRasterXarrayDriver:
         )
         res: xr.Dataset = driver.read(
             uris,
-            variables=["var1", "var2"],
         )
         call_args = mock_xr_open.call_args
         assert call_args[0][0] == uris  # first arg

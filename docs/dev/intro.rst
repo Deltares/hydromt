@@ -4,47 +4,40 @@ Developer Guide
 ===============
 
 .. grid:: 3
-    :gutter: 1
+    :gutter: 2
 
     .. grid-item-card::
         :text-align: center
-        :link: architecture_index
-        :link-type: ref
+        :link: architecture/architecture
+        :link-type: doc
 
-        :octicon:`circuit-board;5em;sd-text-icon blue-icon`
+        :octicon:`database;5em;sd-text-icon blue-icon`
         +++
         HydroMT Architecture
-        +++
-        Learn about the internal Python architecture and design conventions that form the foundation of HydroMTs modular framework.
 
     .. grid-item-card::
         :text-align: center
-        :link: plugin_developer_guide
-        :link-type: ref
+        :link: plugin_dev/index
+        :link-type: doc
 
-        :octicon:`plug;5em;sd-text-icon blue-icon`
+        :octicon:`book;5em;sd-text-icon blue-icon`
         +++
         Plugin Developer Guide
-        +++
-        Step-by-step guidance on building, registering, and testing your own HydroMT plugin — from models and components to data catalogs and resolvers.
 
     .. grid-item-card::
         :text-align: center
-        :link: core_developer_guide
-        :link-type: ref
+        :link: core_dev/index
+        :link-type: doc
 
-        :octicon:`tools;5em;sd-text-icon blue-icon`
+        :octicon:`book;5em;sd-text-icon blue-icon`
         +++
         Core Developer Guide
-        +++
-        Resources for contributors working on HydroMT itself — including installation, code and git conventions, documentation, testing, and release processes.
-
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Developer Guide
-   :hidden:
+    :maxdepth: 2
+    :hidden:
+    :caption: Developer Guide
 
-   HydroMT Architecture <architecture/index>
-   Plugin Developer Guide <plugin_dev/index>
-   Core Developer Guide <core_dev/index>
+    HydroMT Architecture <architecture/architecture>
+    Plugin Developer Guide <plugin_dev/index>
+    Core Developer Guide <core_dev/index>

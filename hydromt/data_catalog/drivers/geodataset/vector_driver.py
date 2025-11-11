@@ -1,12 +1,12 @@
 """GeoDatasetVectorDriver class for reading vector data from table like files such as csv or parquet."""
 
 import logging
+from pathlib import Path
 from typing import Any, ClassVar
 
 import xarray as xr
 from pydantic import Field
 
-from hydromt._utils.unused_kwargs import _warn_on_unused_kwargs
 from hydromt.data_catalog.drivers.base_driver import (
     DRIVER_OPTIONS_DESCRIPTION,
 )
@@ -15,8 +15,8 @@ from hydromt.data_catalog.drivers.geodataset.geodataset_driver import (
     GeoDatasetOptions,
 )
 from hydromt.error import NoDataStrategy, exec_nodata_strat
-from hydromt.io import open_geodataset
-from hydromt.typing import CRS, Geom, Predicate, SourceMetadata, StrPath, TimeRange
+from hydromt.readers import open_geodataset
+from hydromt.typing import CRS, Geom, Predicate, SourceMetadata
 
 logger = logging.getLogger(__name__)
 
@@ -57,27 +57,31 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
         uris: list[str],
         *,
         handle_nodata: NoDataStrategy = NoDataStrategy.RAISE,
-        kwargs_for_open: dict[str, Any] | None = None,
         mask: Geom | None = None,
         predicate: Predicate = "intersects",
-        variables: list[str] | None = None,
-        time_range: TimeRange | None = None,
         metadata: SourceMetadata | None = None,
     ) -> xr.Dataset:
         """
-        Read tabular datafiles like csv or parquet into to an xarray DataSet.
+        Read tabular or vector dataset files (e.g., CSV, Parquet) into an xarray Dataset.
 
-        Args:
+        Parameters
+        ----------
+        uris : list[str]
+            List of URIs to read data from.
+        handle_nodata : NoDataStrategy, optional
+            Strategy to handle missing data. Default is NoDataStrategy.RAISE.
+        mask : Geom | None, optional
+            Optional spatial mask to clip the dataset.
+        predicate : Predicate, optional
+            Spatial predicate for filtering geometries. Default is "intersects".
+        metadata : SourceMetadata | None, optional
+            Optional metadata object to attach to the loaded dataset.
+
+        Returns
+        -------
+        xr.Dataset
+            The dataset read from the source.
         """
-        _warn_on_unused_kwargs(
-            self.__class__.__name__,
-            {
-                "variables": variables,
-                "time_range": time_range,
-                "metadata": metadata,
-            },
-        )
-        # we want to maintain a list as argument to keep the interface compatible with other drivers.
         if len(uris) > 1:
             raise ValueError(
                 "GeodatasetVectorDriver only supports reading from one URI per source"
@@ -86,24 +90,22 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
             uri = uris[0]
 
         preprocessor = self.options.get_preprocessor()
-        kwargs_for_open = kwargs_for_open or {}
-        kwargs = self.options.get_kwargs() | kwargs_for_open
         crs: CRS | None = metadata.crs if metadata else None
         data = open_geodataset(
-            loc_path=uri, geom=mask, crs=crs, predicate=predicate, **kwargs
+            loc_path=uri,
+            geom=mask,
+            crs=crs,
+            predicate=predicate,
+            **self.options.get_kwargs(),
         )
-
-        if preprocessor is None:
-            out = data
-        else:
-            out = preprocessor(data)
+        out = preprocessor(data)
 
         if isinstance(out, xr.DataArray):
             if out.size == 0:
                 exec_nodata_strat(
                     f"No data from driver {self}'.", strategy=handle_nodata
                 )
-                return out.to_dataset()
+            return out.to_dataset()
         else:
             for variable in out.data_vars:
                 if out[variable].size == 0:
@@ -115,9 +117,31 @@ class GeoDatasetVectorDriver(GeoDatasetDriver):
 
     def write(
         self,
-        path: StrPath,
-        ds: xr.Dataset,
-        **kwargs,
-    ) -> str:
-        """Not implemented."""
+        path: Path | str,
+        data: xr.Dataset,
+        *,
+        write_kwargs: dict[str, Any] | None = None,
+    ) -> Path:
+        """
+        Write a GeoDataset to disk.
+
+        Writing is not supported for this driver, as vector and tabular sources such as
+        CSV or Parquet are read-only in this context. This method exists for interface
+        consistency with GeoDatasetDriver.
+
+        Parameters
+        ----------
+        path : Path | str
+            Destination path where the dataset would be written.
+        data : xr.Dataset
+            The dataset to write.
+        write_kwargs : dict[str, Any] | None, optional
+            Additional keyword arguments that would be passed to the underlying write
+            function. Default is None.
+
+        Raises
+        ------
+        NotImplementedError
+            Always raised, as writing is not supported for this driver.
+        """
         raise NotImplementedError("GeodatasetVectorDriver does not support writing. ")

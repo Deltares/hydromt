@@ -5,9 +5,9 @@ Preparing a Data Catalog
 
 **Steps in brief:**
 
-1) Have your (local) dataset ready in one of the supported :ref:`raster
-   <raster_formats>`, :ref:`vector <vector_formats>` or :ref:`geospatial time-series
-   <geo_formats>`
+1) Have your (local) dataset ready in one of the supported format: :ref:`raster
+   <raster_formats>`, :ref:`vector <vector_formats>`, :ref:`geospatial time-series
+   <geo_formats>`, :ref:`time-series dataset <dataset_formats>` or :ref:`tabular data  <dataframe_formats>`.
 2) Create your own :ref:`yaml file <data_yaml>` with a reference to your prepared
    dataset following the HydroMT :ref:`data conventions <data_convention>`, see examples
    below.
@@ -26,10 +26,9 @@ Each data source, is added to a data catalog yaml file with a user-defined name.
 A blue print for a dataset called **my_dataset** is shown below. The ``uri``,
 ``data_type`` and ``driver`` options are required and the ``metadata`` option with the
 shown keys is highly recommended. The ``rename``, ``nodata``, ``unit_add`` and
-``unit_mult`` options are set per variable (or attribute table column in case of a
-GeoDataFrame).
+``unit_mult`` options are set per variable (or column for tables).
 
-.. literalinclude:: ../../assets/example_catalog.yml
+.. literalinclude:: ../../assets/example_catalog_simple.yml
   :language: yaml
 
 .. testsetup:: *
@@ -40,9 +39,9 @@ GeoDataFrame).
   :hide:
 
   catalog = DataCatalog(fallback_lib=None)  # do not read default catalog
-  catalog.from_yml("docs/assets/example_catalog.yml")
+  catalog.from_yml("docs/assets/example_catalog_simple.yml")
 
-The yaml file has an *optional* global **metadata** data section:
+The catalog file can start with an *optional* global **metadata** data section:
 
 - **roots** (optional): root folders for all the data sources in the yaml file. If not
   provided the folder of where the yaml file is located will be used as root. This is
@@ -61,14 +60,14 @@ The yaml file has an *optional* global **metadata** data section:
   *hydrography*, *meteo*, *landuse*, *ocean*, *socio-economic*, *observed data* but the
   user is free to define its own categories.
 
-The following are **required data source arguments**:
+The following are **required arguments for each data source**:
 
 - **data_type**: type of input data. Either *RasterDataset*, *GeoDataset*, *Dataset*
   *GeoDataFrame* or *DataFrame*.
 - **driver**: data_type specific :Class:`Driver` to read a dataset. If the default
   settings of a driver are sufficient, then a string with the name of the driver is
   enough. Otherwise, a dictionary with the driver class properties can be used. Refer to
-  the :Class:`Driver` documentation to see which options are available.
+  the :Class:`Driver` :ref:`documentation <data_types>` to see which options are available.
 - **uri**: URI pointing to where the data can be queried. Relative paths are combined
   with the global ``root`` option of the yaml file (if available) or the directory of
   the yaml file itself. To read multiple files in a single dataset (if supported by the
@@ -83,10 +82,9 @@ The following are **required data source arguments**:
   digits and is zero-padded for Jan-Sep (e.g. January 2012 is stored as
   ``"path/to/my/files/{variable}_2012_01.nc"``).
 
-A full list of **optional data source arguments** is given below
+A full list of **optional arguments for each data source** is given below
 
 - **version** (recommended): data source version
-- **provider** (recommended): data source provider
 - **metadata** (recommended): additional information on the dataset. In
   :Class:`SourceMetaData` there are many different metadata options available. Some
   metadata properties, like the `crs`, `nodata` or `temporal_extent` and
@@ -97,17 +95,13 @@ A full list of **optional data source arguments** is given below
   *socio-economic*, *observed data* but the user is free to define its own categories.
 - **data_adapter**: the data adapter harmonizes the data so that within HydroMT, there
   are strong conventions on for example variable naming, :ref:`HydroMT variable naming
-  conventions <data_convention>` and variable names. :ref:`recognized dimension names
-  <dimensions>`. There are multiple different parameters available for each
-  :Class:`DataAdapter`.
+  conventions <data_convention>`, dimension names. :ref:`recognized dimension names
+  <dimensions>` and units.
 - **placeholder** (optional): this argument can be used to generate multiple sources
   with a single entry in the data catalog file. If different files follow a logical
   nomenclature, multiple data sources can be defined by iterating through all possible
   combinations of the placeholders. The placeholder names should be given in the source
   name and the path and its values listed under the placeholder argument.
-- **variants** (optional): This argument can be used to generate multiple sources with
-  the same name, but from different providers or versions. Any keys here are essentially
-  used to extend/overwrite the base arguments.
 
 Data variants
 -------------
@@ -142,6 +136,11 @@ to extend and/or overwrite the common arguments, creating new sources.
           name: raster
           filesystem: s3
 
+Here is another example for meteo data (ERA5) in netcdf or zarr format:
+
+.. literalinclude:: ../../assets/example_catalog.yml
+  :language: yaml
+
 To request a specific variant, the variant arguments can be used as keyword arguments to
 the `DataCatalog.get_rasterdataset` method, see code below. By default the newest
 version from the last provider is returned when requesting a data source with specific
@@ -149,17 +148,70 @@ version or provider. Requesting a specific version from a HydroMT configuration 
 also possible.
 
 
-.. code-block:: python
+.. tab-set::
 
-  from hydromt import DataCatalog
-  dc = DataCatalog().from_yml("data_catalog.yml")
-  # get the default version. This will return the latest (2020) version from the last
-  # provider (aws)
-  ds = dc.get_rasterdataset("esa_worldcover")
-  # get a 2020 version. This will return the 2020 version from the last provider (aws)
-  ds = dc.get_rasterdataset("esa_worldcover", version=2020)
-  # get a 2021 version. This will return the 2021 version from the local provider as
-  # this verion is not available from aws .
-  ds = dc.get_rasterdataset("esa_worldcover", version=2021)
-  # get the 2020 version from the local provider
-  ds = dc.get_rasterdataset("esa_worldcover", version=2020, provider="local")
+    .. tab-item:: HydroMT worflow file (CLI)
+
+      Example 1:
+
+      .. code-block:: yaml
+
+        steps:
+          - setup_region:
+              region:
+              bbox: [4.5, 51.5, 6.5, 53.5]
+
+          - setup_maps_from_rasterdataset:
+              raster_fn:
+                source: 'esa_worldcover'
+                version: '2020'
+
+      Example 2:
+
+      .. code-block:: yaml
+
+        steps:
+          - setup_region:
+              region:
+              bbox: [4.5, 51.5, 6.5, 53.5]
+
+          - setup_maps_from_rasterdataset:
+              raster_fn:
+                source: 'era5'
+                provider: 'zarr'
+
+    .. tab-item:: Python API
+
+      Example 1:
+
+      .. code-block:: python
+
+        from hydromt import DataCatalog
+        dc = DataCatalog().from_yml("data_catalog.yml")
+        # get the default version. This will return the latest (2020) version from the last
+        # provider (aws)
+        ds = dc.get_rasterdataset("esa_worldcover")
+        # get a 2020 version. This will return the 2020 version from the last provider (aws)
+        ds = dc.get_rasterdataset("esa_worldcover", version=2020)
+        # get a 2021 version. This will return the 2021 version from the local provider as
+        # this verion is not available from aws .
+        ds = dc.get_rasterdataset("esa_worldcover", version=2021)
+        # get the 2020 version from the local provider
+        ds = dc.get_rasterdataset("esa_worldcover", version=2020, provider="local")
+
+      Example 2:
+
+      .. code-block:: python
+
+        from hydromt import DataCatalog
+        dc = DataCatalog().from_yml("data_catalog.yml")
+        # get the default provider. This will return the zarr provider
+        ds = dc.get_rasterdataset("era5")
+        # get the netcdf provider
+        ds = dc.get_rasterdataset("era5", provider="netcdf")
+        # get the zarr provider
+        ds = dc.get_rasterdataset("era5", provider="zarr")
+
+.. note::
+    The yml-parser does not correctly parses `None` arguments. When this is required, the `null` argument should be used instead.
+    This is parsed to the Python code as a `None`.

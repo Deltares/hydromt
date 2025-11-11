@@ -16,7 +16,8 @@ API reference
    data_source
    drivers
    gis
-   io
+   readers
+   writers
    model
    stats
    plugin

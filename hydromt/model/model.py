@@ -16,7 +16,6 @@ from pyproj import CRS
 
 from hydromt._utils import _rgetattr, _validate_steps, log
 from hydromt.data_catalog import DataCatalog
-from hydromt.io.readers import read_yaml
 from hydromt.model.components import (
     ModelComponent,
     SpatialModelComponent,
@@ -24,13 +23,9 @@ from hydromt.model.components import (
 from hydromt.model.root import ModelRoot
 from hydromt.model.steps import hydromt_step
 from hydromt.plugins import PLUGINS
+from hydromt.readers import read_yaml
 
 __all__ = ["Model"]
-
-# define hydromt model entry points
-# see also hydromt.model group in pyproject.toml
-__hydromt_eps__ = ["Model"]
-
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=ModelComponent)
@@ -214,11 +209,13 @@ class Model(object, metaclass=ABCMeta):
 
         Example
         -------
-        >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
-        ...     model.setup_x()
-        ...     model.setup_y()
-        ...     model.write()
-        # Exiting the with block will call __exit__, ensuring resources are cleaned up.
+        .. code-block:: python
+
+            with Model(root="path/to/model") as model: # This is where __enter__ is called
+                model.setup_x()
+                model.setup_y()
+                model.write()
+            # Exiting the with block will call __exit__, ensuring resources are cleaned up.
 
         Returns
         -------
@@ -236,11 +233,13 @@ class Model(object, metaclass=ABCMeta):
 
         Example
         -------
-        >>> with Model(root="path/to/model") as model: # This is where __enter__ is called
-        ...     model.setup_x()
-        ...     model.setup_y()
-        ...     model.write()
-        # Exiting the with block will call __exit__, ensuring resources are cleaned up.
+        .. code-block:: python
+
+            with Model(root="path/to/model") as model: # This is where __enter__ is called
+                model.setup_x()
+                model.setup_y()
+                model.write()
+            # Exiting the with block will call __exit__, ensuring resources are cleaned up.
 
         Parameters
         ----------
@@ -279,7 +278,7 @@ class Model(object, metaclass=ABCMeta):
             Write complete model after executing all methods in opt, by default True.
         steps: Optional[List[Dict[str, Dict[str, Any]]]]
             Model build steps. The steps can be parsed from a hydromt workflow/
-            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.
+            configuration file using :py:meth:`~hydromt.read_workflow_yaml`.
             This is a list of nested dictionary where the first-level keys are the names
             of the method for a ``Model`` method (e.g. `write`) OR the name of a
             component followed by the name of the method to run separated by a dot for
@@ -299,6 +298,7 @@ class Model(object, metaclass=ABCMeta):
 
         """
         with log.to_file(Path(self.root.path) / "hydromt.log"):
+            log.log_version()
             steps = steps or []
             _validate_steps(self, steps)
 
@@ -357,7 +357,7 @@ class Model(object, metaclass=ABCMeta):
             Write the updated model schematization to disk. By default True.
         steps: Optional[List[Dict[str, Dict[str, Any]]]]
             Model build steps. The steps can be parsed from a hydromt workflow/
-            configuration file using :py:meth:`~hydromt.io.read_workflow_yaml`.
+            configuration file using :py:meth:`~hydromt.read_workflow_yaml`.
             This is a list of nested dictionary where the first-level keys are the names
             of a component followed by the name of the method to run separated by a dot.
             any subsequent pairs will be passed to the method as arguments.
@@ -379,9 +379,9 @@ class Model(object, metaclass=ABCMeta):
         """
         # read current model & optionally clear log file
         with log.to_file(
-            self.root.path / "hydromt.log",
-            append=self.root.is_reading_mode(),
+            self.root.path / "hydromt.log", append=self.root.is_reading_mode()
         ):
+            log.log_version()
             steps = steps or []
             _validate_steps(self, steps)
             if not self.root.is_writing_mode():
@@ -403,6 +403,7 @@ class Model(object, metaclass=ABCMeta):
 
         # No need to clear the log file here since we did that already if needed above
         with log.to_file(self.root.path / "hydromt.log", append=True):
+            log.log_version()
             # check if model has a region
             if self._region_component_name is not None and self.region is None:
                 raise ValueError(

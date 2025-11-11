@@ -1,4 +1,4 @@
-from zipfile import Path
+from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
@@ -18,11 +18,12 @@ from hydromt.model.processes.grid import (
 
 
 @pytest.mark.integration
-def test_create_grid_from_region():
+def test_create_grid_from_region(data_catalog: DataCatalog):
     ds = create_grid_from_region(
         region={"subbasin": [12.319, 46.320], "uparea": 50},
         res=1000,
         crs="utm",
+        data_catalog=data_catalog,
         hydrography_path="merit_hydro",
         basin_index_path="merit_hydro_index",
     )
@@ -107,7 +108,7 @@ def test_grid_from_rasterdataset(demda):
 def test_grid_from_raster_reclass(demda: xr.DataArray, tmp_path: Path, data_dir: Path):
     demda.name = "name"
     reclass_variables = ["roughness_manning"]
-    model = Model(root=tmp_path, mode="w")
+    model = Model(root=tmp_path, data_libs=["artifact_data"], mode="w")
 
     raster_data = "vito_2015"
     reclass_table_data = data_dir / "vito_mapping.csv"

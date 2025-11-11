@@ -107,11 +107,11 @@ author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 # The short version which is displayed
 version = hydromt.__version__
 
-# # -- Copy notebooks to include in docs -------
-# if os.path.isdir("_examples"):
-#     remove_dir_content("_examples")
-# os.makedirs("_examples")
-# shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
+# -- Copy notebooks to include in docs -------
+if os.path.isdir("_examples"):
+    remove_dir_content("_examples")
+os.makedirs("_examples")
+shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
 
 # replace all links of https://deltares.github.io/hydromt/.*/.*.rst.* with ../*.html.*
 # for root, _, files in os.walk("_examples"):
@@ -157,10 +157,6 @@ for name in predefined_catalogs:
         continue
     write_nested_dropdown(name, data_cat, categories=categories)
     data_cat._sources = {}  # reset
-with open("_generated/predefined_catalogs.rst", "w") as f:
-    f.writelines(
-        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
-    )
 
 # -- General configuration ------------------------------------------------
 
@@ -213,7 +209,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_examples/README.rst"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -271,7 +267,7 @@ html_css_files = ["theme-deltares.css"]
 html_theme_options = {
     "show_nav_level": 1,
     "navbar_align": "content",
-    #"use_edit_page_button": True,
+    "use_edit_page_button": False,
     "icon_links": [
         {
             "name": "GitHub",
@@ -410,7 +406,7 @@ intersphinx_mapping = {
 # -- NBSPHINX --------------------------------------------------------------
 
 # This is processed by Jinja2 and inserted before each notebook
-nbsphinx_execute = 'never'
+# nbsphinx_execute = 'never'
 
 nbsphinx_prolog = r"""
 {% set docname = env.doc2path(env.docname, base=None).split('\\')[-1].split('/')[-1] %}

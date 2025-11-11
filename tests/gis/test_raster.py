@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for the hydromt.raster submodule."""
 
+import datetime
 from pathlib import Path
 
 import dask
@@ -14,11 +15,11 @@ from affine import Affine
 from shapely.geometry import LineString, Point, Polygon, box
 
 from hydromt.gis import parse_crs, raster, raster_utils
-from hydromt.io import open_raster
 from hydromt.model.processes.grid import (
     create_grid_from_region,
     create_rotated_grid_from_geom,
 )
+from hydromt.readers import open_raster
 
 # origin, rotation, res, shape, internal_bounds
 # NOTE a rotated grid with a negative dx is not supported
@@ -653,3 +654,49 @@ def test_grid_utm_parsing():
         crs="utm",
         res=100,
     )
+
+
+def test_time_dim_no_time_coord():
+    da = xr.DataArray(np.random.rand(5, 5), dims=("y", "x"), name="test")
+    assert da.raster.time_dim is None
+
+
+def test_time_dim_detects_datetime64():
+    time = pd.date_range("2020-01-01", periods=3)
+    da = xr.DataArray(
+        np.random.rand(3, 5, 5),
+        dims=("time", "y", "x"),
+        coords={"time": time},
+        name="test",
+    )
+    assert da.raster.time_dim == "time"
+    assert da.raster.attrs["time_dim"] == "time"
+
+
+def test_time_dim_detects_object_datetime():
+    da = xr.DataArray(
+        np.random.rand(3, 5, 5),
+        dims=("time", "y", "x"),
+        coords={
+            "time": [
+                datetime.datetime(2020, 1, 1) + datetime.timedelta(days=i)
+                for i in range(3)
+            ]
+        },
+        name="test",
+    )
+    assert da.raster.time_dim == "time"
+
+
+def test_time_dim_multiple_datetime_dims_error():
+    da = xr.DataArray(
+        np.random.rand(3, 3, 5, 5),
+        dims=("time1", "time2", "y", "x"),
+        coords={
+            "time1": pd.date_range("2020-01-01", periods=3),
+            "time2": pd.date_range("2020-02-01", periods=3),
+        },
+        name="test",
+    )
+    with pytest.raises(ValueError, match="Multiple time dimensions found"):
+        _ = da.raster.time_dim

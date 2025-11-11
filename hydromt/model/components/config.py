@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union, cast
 
 from hydromt._utils.path import _make_config_paths_relative
-from hydromt.io.readers import read_toml, read_yaml
-from hydromt.io.writers import write_toml, write_yaml
 from hydromt.model.components.base import ModelComponent
 from hydromt.model.steps import hydromt_step
+from hydromt.readers import read_toml, read_yaml
+from hydromt.writers import write_toml, write_yaml
 
 if TYPE_CHECKING:
     from hydromt.model import Model

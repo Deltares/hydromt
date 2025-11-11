@@ -18,60 +18,67 @@ See the data catalog `changelog <https://github.com/Deltares/hydromt/blob/main/d
 Using a predefined catalog
 --------------------------
 
-From CLI
-~~~~~~~~
+.. tab-set::
 
-To use a predefined catalog, you can specify the catalog name with the ``-d`` or ``--data`` option when running a HydroMT command.
-For example, to use the ``deltares_data`` catalog with the `hydromt build` command, you can run the following:
+    .. tab-item:: Command Line Interface (CLI)
 
-.. code-block:: bash
+        To use a predefined catalog, you can specify the catalog name with the ``-d`` or ``--data`` option when running a HydroMT command.
+        For example, to use the ``deltares_data`` catalog with the `hydromt build` command, you can run the following:
 
-    hydromt build MODEL -d deltares_data ...
+        .. code-block:: bash
 
-Alternatively, deltares_data can also be accessed with the ``--dd`` option:
+            hydromt build MODEL -d deltares_data ...
 
-.. code-block:: bash
+        Alternatively, deltares_data can also be accessed with the ``--dd`` option:
 
-    hydromt build MODEL --dd ...
+        .. code-block:: bash
 
-
-You can specify a version of the catalog by adding the version number after the catalog name, e.g. ``deltares_data=v1.0.0``.
-
-.. code-block:: bash
-
-    hydromt build MODEL -d deltares_data=v1.0.0 ...
-
-Once you have set the data catalog you can specify the data source(s) for each method in the HydroMT
-:ref:`model workflow file <model_workflow>` as shown in the example below with the `setup_precip_forcing` method.
-
-.. code-block:: yaml
-
-    setup_region:
-      region:
-        bbox: [4.5, 51.5, 6.5, 53.5]
-
-    setup_maps_from_rasterdataset:
-      raster_fn:
-        source: 'eobs'
-        version: 'v22.0e'
+            hydromt build MODEL --dd ...
 
 
-From Python
-~~~~~~~~~~~
+        You can specify a version of the catalog by adding the version number after the catalog name, e.g. ``deltares_data=v1.0.0``.
 
-To use a predefined catalog in Python, you can specify the catalog name with the
-``data_libs`` argument when initializing a :py:class:`DataCatalog` class.
-You can specify a data catalog version by adding the version number after the
-catalog name. You can then get data from the catalog using the
-:py:meth:`DataCatalog.get_rasterdataset` or other :ref: `DataCatalog methods`.
+        .. code-block:: bash
 
-.. code-block:: python
+            hydromt build MODEL -d deltares_data=v1.0.0 ...
 
-    from hydromt import DataCatalog
-    data_catalog = DataCatalog(data_libs=["deltares_data"])
-    # specify a data catalog version
-    data_catalog = DataCatalog(data_libs=["deltares_data=v2024.2"])
-    # get data from the catalog
-    ds = data_catalog.get_rasterdataset("eobs") # get the most recently added
-    ds = data_catalog.get_rasterdataset("eobs", version="22.0e") # get a specific
-    version
+        Once you have set the data catalog you can specify the data source(s) for each method in the HydroMT
+        :ref:`model workflow file <model_workflow>` as shown in the example below with the `setup_precip_forcing` method.
+
+        .. code-block:: yaml
+
+            steps:
+              - setup_region:
+                  region:
+                  bbox: [4.5, 51.5, 6.5, 53.5]
+
+              - setup_maps_from_rasterdataset:
+                  raster_fn:
+                    source: 'eobs'
+                    version: 'v22.0e'
+
+    .. tab-item:: Python API
+
+        To use a predefined catalog in Python, you can specify the catalog name with the
+        ``data_libs`` argument when initializing a :py:class:`DataCatalog` class.
+        You can specify a data catalog version by adding the version number after the
+        catalog name. You can then get data from the catalog using the
+        :py:meth:`DataCatalog.get_rasterdataset` or other :ref: `DataCatalog methods`.
+
+        .. code-block:: python
+
+            from hydromt import DataCatalog
+            data_catalog = DataCatalog(data_libs=["deltares_data"])
+            # specify a data catalog version
+            data_catalog = DataCatalog(data_libs=["deltares_data=v1.0.0"])
+            # get data from the catalog
+            ds = data_catalog.get_rasterdataset("eobs") # get the most recently added
+            ds = data_catalog.get_rasterdataset("eobs", version="22.0e") # get a specific version
+
+Available pre-defined data catalogs
+-----------------------------------
+
+.. include:: ../../_generated/deltares_data.rst
+.. include:: ../../_generated/artifact_data.rst
+.. include:: ../../_generated/aws_data.rst
+.. include:: ../../_generated/gcs_cmip6_data.rst

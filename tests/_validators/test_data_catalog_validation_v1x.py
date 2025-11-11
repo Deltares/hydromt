@@ -11,7 +11,7 @@ from hydromt._validators.data_catalog_v1x import (
     DataCatalogV1MetaData,
     DataCatalogV1Validator,
 )
-from hydromt.io.readers import _yml_from_uri_or_path
+from hydromt.readers import _yml_from_uri_or_path
 from tests.conftest import TEST_DATA_DIR
 
 

@@ -61,7 +61,7 @@ jobs:
           verbose: true
           skip-existing: true
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         id: upload-pypi-release-artifacts
         with:
           name: pypi-release-artifacts
@@ -77,14 +77,14 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: prefix-dev/setup-pixi@v0.9.1
+      - uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          pixi-version: "v0.41.1"
+          pixi-version: "v0.59.0"
 
       - name: Generate docs
         run: pixi run --locked doc
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         id: upload-docs-release-artifacts
         with:
           name: docs-release-artifacts

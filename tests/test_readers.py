@@ -15,15 +15,17 @@ from upath import UPath
 import hydromt
 from hydromt import _compat
 from hydromt.gis.raster import GEO_MAP_COORD
-from hydromt.io.readers import (
+from hydromt.readers import (
     open_geodataset,
     open_mfcsv,
     open_nc,
     open_timeseries_from_table,
     open_vector,
     open_vector_from_table,
+    read_workflow_yaml,
 )
-from hydromt.io.writers import write_xy
+from hydromt.writers import write_xy
+from tests.conftest import TEST_DATA_DIR
 
 
 def test_open_vector(tmp_path: Path, df, geodf, world):
@@ -58,13 +60,13 @@ def test_open_vector(tmp_path: Path, df, geodf, world):
     gdf1 = open_vector(xy_path, crs=4326)
     assert np.all(gdf1 == geodf[["geometry"]])
     # read shapefile
-    gdf1 = hydromt.io.open_vector(shp_path, bbox=list(geodf.total_bounds))
+    gdf1 = hydromt.readers.open_vector(shp_path, bbox=list(geodf.total_bounds))
     assert np.all(gdf1 == geodf)
     mask = gpd.GeoDataFrame({"geometry": [box(*geodf.total_bounds)]}, crs=geodf.crs)
-    gdf1 = hydromt.io.open_vector(shp_path, geom=mask)
+    gdf1 = hydromt.readers.open_vector(shp_path, geom=mask)
     assert np.all(gdf1 == geodf)
     # read geopackage
-    gdf1 = hydromt.io.open_vector(gpkg_path)
+    gdf1 = hydromt.readers.open_vector(gpkg_path)
     assert np.all(gdf1 == geodf)
     # read parquet
     gdf1 = open_vector(parquet_path, crs=4326)
@@ -105,7 +107,7 @@ def test_open_vector_s3(geodf: gpd.GeoDataFrame):
     m = MagicMock()
     m.return_value = geodf
     with patch("geopandas.io.file._read_file_pyogrio", m):
-        df = hydromt.io.open_vector(UPath("s3://fake_url/file.geojson"))
+        df = hydromt.readers.open_vector(UPath("s3://fake_url/file.geojson"))
     assert np.all(geodf == df)
 
 
@@ -256,3 +258,33 @@ def test_open_nc_geo_map_coord_sets_close(tmpdir):
     assert len(ds2.data_vars) == 0
     assert GEO_MAP_COORD in ds2.coords
     assert ds2._close is not None
+
+
+def test_read_workflow_yaml():
+    model_type, model_init, steps = read_workflow_yaml(
+        Path(TEST_DATA_DIR, "build_config.yml")
+    )
+
+    assert model_type is None
+    assert "components" in model_init
+    assert len(steps) == 2
+
+    # Check relative path was skipped in global section
+    config_filename = model_init["components"]["config"]["filename"]
+    assert config_filename == "run_config.toml"
+
+
+def test_read_workflow_yaml_extended():
+    model_type, model_init, steps = read_workflow_yaml(
+        Path(TEST_DATA_DIR, "build_config_extended.yml")
+    )
+
+    assert model_type == "model"
+    assert "components" in model_init
+    assert len(steps) == 3
+
+    # Check relative paths
+    config_filename = model_init["components"]["config"]["filename"]
+    assert config_filename == "run_config.toml"
+    config_template = steps[0]["config.create"]["template"]
+    assert config_template == Path(TEST_DATA_DIR, "run_config.toml")

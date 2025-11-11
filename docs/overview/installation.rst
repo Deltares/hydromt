@@ -23,8 +23,8 @@ such that different installations do not conflict.
 
 If you do not yet have such a package manager, we recommend using either:
 
-- `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_: uses the `conda package manager <https://docs.conda.io/en/latest/>`_
 - `Miniforge <https://github.com/conda-forge/miniforge#mambaforge>`_: uses the `mamba package manager <https://github.com/mamba-org/mamba>`_
+- `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_: uses the `conda package manager <https://docs.conda.io/en/latest/>`_
 
 
 .. _installation_hydromt:
@@ -125,7 +125,7 @@ Developer's installation
 ------------------------
 If you want to contribute to the HydroMT codebase, or make some local changes, we advise
 you to install HydroMT in developer mode. We have some different recommendations for this
-available in the :ref:`developer's installation guide <guides/core_dev/dev_install>`_.
+available in the :ref:`developer's installation guide <dev_install>`.
 
 .. _installation_examples:
 

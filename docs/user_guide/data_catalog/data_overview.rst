@@ -22,51 +22,36 @@ You can :ref:`explore and make use of pre-defined data catalogs <existing_catalo
 
     Tiles of tiled rasterdatasets which are described by a .vrt file can be cached locally.
     The requested data tiles will by default be stored to ~/.hydromt_data.
-    To use this option from command line add `--cache` to the `hydromt build` or `hydromt update` commands
+    To use this option from command line add `--cache` to the `hydromt build` or `hydromt update` commands.
     In Python the cache is a property of the DataCatalog and can be set at Initialization.
 
-.. _get_data_cli:
+Using a data catalog
+--------------------
 
-From CLI
---------
+.. tab-set::
 
-When using the HydroMT command line interface (CLI), one can provide a data catalog by specifying the
-path to the yaml file with the ``-d (--data)`` option.
-Alternatively, you can also use names and versions of the :ref:`predefined data catalogs <existing_catalog>`.
-If no version is specified, the latest version available is used.
+    .. tab-item:: Command Line Interface (CLI)
 
-.. code-block:: console
+        When using the HydroMT command line interface (CLI), one can provide a data catalog by specifying the
+        path to the yaml file with the ``-d (--data)`` option.
+        Alternatively, you can also use names and versions of the :ref:`predefined data catalogs <existing_catalog>`.
+        If no version is specified, the latest version available is used.
 
-    hydromt build MODEL -d artifact_data
+        .. code-block:: console
 
-From Python
------------
+            hydromt build MODEL -d /path/to/data-catalog.yml
 
-To read a dataset in Python using the HydroMT requires two steps:
+    .. tab-item:: Python API
 
-1) Initialize a :py:class:`~hydromt.data_catalog.DataCatalog` with references to user- or pre-defined data catalog yaml files
-2) Use :ref: `one of the DataCatalog.get_* methods` to access (a temporal or spatial region of) the data.
+        Initialize a :py:class:`~hydromt.data_catalog.DataCatalog` with references to user- or pre-defined data catalog yaml files
 
-For example to retrieve a raster dataset use :py:func:`~hydromt.DataCatalog.get_rasterdataset`:
+        .. code-block:: python
 
-.. code-block:: python
+            import hydromt
+            data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
 
-    import hydromt
-    data_cat = hydromt.DataCatalog(data_libs=r'/path/to/data-catalog.yml')
-    ds = data_cat.get_rasterdataset('source_name', bbox=[xmin, ymin, xmax, ymax])  # returns xarray.dataset
+        You can find examples of how to read data from a catalog in Python in :ref:`this page <hydromt_data_read_python>`.
 
-More details about reading `raster data  <../_examples/reading_raster_data.ipynb>`_ or
-`vector data  <../_examples/reading_vector_data.ipynb>`_ is provided in the linked examples.
-
-
-Related API references
-----------------------
-
-For related functions see:
-
- - :ref: `DataCatalog API <data_catalog_api>`
- - :ref: `DataCatalog.get_* methods`
- - :ref: `data reading-methods <open_methods>`
 
 .. toctree::
    :hidden:
