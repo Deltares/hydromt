@@ -28,7 +28,7 @@ Docstrings
 - We use the `numpy docstring format <https://numpydoc.readthedocs.io/en/latest/format.html>`_.
   You can easily create these docstring once method arguments have type hints (see above) with
   the VSCode `autoDocstring plugin <https://github.com/NilsJPWerner/autoDocstring>`_.
-- please ensure that all public code you constribute has a valid docstring.
+- please ensure that all public code you contribute has a valid docstring.
 
 .. _code-format:
 

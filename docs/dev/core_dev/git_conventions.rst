@@ -9,7 +9,7 @@ Please search existing issues, open and closed, before creating a new one.
 
 For bugs, please provide tracebacks and relevant log files to clarify the issue.
 `Minimal reproducible examples <https://stackoverflow.com/help/minimal-reproducible-example>`_,
-are especially helpful! If you're submiting a PR for a bug that does not yet have an
+are especially helpful! If you're submitting a PR for a bug that does not yet have an
 associated issue, please create one together with your PR (unless it is something
 trivial). This is important for us to keep track of the changes made to core.
 

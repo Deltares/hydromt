@@ -59,7 +59,7 @@ The :class:`DataCatalog` is HydroMT's core data access and management layer.
 It provides a structured way to describe where datasets are located, how they can be accessed, and how they should be represented once loaded into memory.
 
 Within the HydroMT architecture, the :class:`DataCatalog` connects the :class:`Model` and its components to both internal and external data sources.
-It achieves this by maintaining a registry of :class:`DataSource` objects, each of which encapsulates the specificlogic for accessing that specific dataset.
+It achieves this by maintaining a registry of :class:`DataSource` objects, each of which encapsulates the specific logic for accessing that specific dataset.
 It does not load or process data itself; instead, it delegates those responsibilities to :class:`DataSource` objects.
 
 The :class:`DataCatalog` comes with built-in support for several data catalogs:

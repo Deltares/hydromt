@@ -33,4 +33,4 @@ jobs:
 
       - name: Run tests
         run: |
-          pixi run --locked -e ${{ matrix.hydromt-version }}_${{ matrix.python-version }}
+          pixi run --locked -e ${{ matrix.hydromt-version }}_${{ matrix.python-version }} test
