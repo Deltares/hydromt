@@ -17,6 +17,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import shutil
 
 import numpy as np
@@ -107,27 +108,27 @@ author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 version = hydromt.__version__
 
 # -- Copy notebooks to include in docs -------
-# if os.path.isdir("_examples"):
-#     remove_dir_content("_examples")
-# os.makedirs("_examples")
-# shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
+if os.path.isdir("_examples"):
+    remove_dir_content("_examples")
+os.makedirs("_examples")
+shutil.copytree("../examples", "_examples", dirs_exist_ok=True)
 
 # replace all links of https://deltares.github.io/hydromt/.*/.*.rst.* with ../*.html.*
-# for root, _, files in os.walk("_examples"):
-#     for file in files:
-#         if file.endswith(".ipynb"):
-#             file_path = os.path.join(root, file)
-#             with open(file_path, "r", encoding="utf-8") as f:
-#                 content = f.read()
-#             content = re.sub(
-#                 # This regex checks for anything https://deltares.github.io/hydromt/.../*.html.* and replaces it with ../*.html.*
-#                 # It makes the assumption that links in markdown always end with a closing parenthesis ) or a whitespace \s character
-#                 r"https://deltares\.github\.io/hydromt/[^\s/]+/([^\s]+)\.html([^\s\)]*)",
-#                 r"../\1.rst\2",
-#                 content
-#             )
-#             with open(file_path, "w", encoding="utf-8") as f:
-#                 f.write(content)
+for root, _, files in os.walk("_examples"):
+    for file in files:
+        if file.endswith(".ipynb"):
+            file_path = os.path.join(root, file)
+            with open(file_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            content = re.sub(
+                # This regex checks for anything https://deltares.github.io/hydromt/.../*.html.* and replaces it with ../*.html.*
+                # It makes the assumption that links in markdown always end with a closing parenthesis ) or a whitespace \s character
+                r"https://deltares\.github\.io/hydromt/[^\s/]+/([^\s]+)\.html([^\s\)]*)",
+                r"../\1.rst\2",
+                content
+            )
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(content)
 
 if not os.path.isdir("_generated"):
     os.makedirs("_generated")
@@ -405,7 +406,7 @@ intersphinx_mapping = {
 # -- NBSPHINX --------------------------------------------------------------
 
 # This is processed by Jinja2 and inserted before each notebook
-nbsphinx_execute = 'never'
+# nbsphinx_execute = 'never'
 
 nbsphinx_prolog = r"""
 {% set docname = env.doc2path(env.docname, base=None).split('\\')[-1].split('/')[-1] %}

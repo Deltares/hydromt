@@ -95,7 +95,6 @@ the installed plugins together with their versions. For example:
 
 plugins
 ^^^^^^^
-
 The ``hydromt --plugins`` command prints the installed HydroMT plugins together with their versions.
 This includes the model plugins (e.g hydromt_wflow), available pre-defined data catalogs (e.g deltares_data),
 available drivers to read different types of data (e.g raster_xarray, geodataset_xarray).
@@ -163,7 +162,6 @@ Finally you can check the :ref:`hydromt build API <build_api>` for all the avail
 
 update
 ^^^^^^
-
 The ``hydromt update`` command is used to update an existing model. It is quite similar to the
 build command and has two mandatory arguments:
 
@@ -196,7 +194,6 @@ Data catalog commands
 
 export
 ^^^^^^
-
 The ``hydromt export`` command is used to export sample data from a data catalog for
 example to export global data for a specific region and time extent.
 It has one mandatory argument:

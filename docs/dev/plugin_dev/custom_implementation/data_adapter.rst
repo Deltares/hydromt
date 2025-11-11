@@ -1,8 +1,8 @@
 .. _custom_data_adapter:
 
-================
+===================
 Custom DataAdapter
-================
+===================
 
 `DataAdapterBase` is the base class for all HydroMT data adapters.
 It defines the core structure and transformation utilities used to standardize and convert data after it has been read by a :ref:`driver_architecture`.
@@ -35,6 +35,7 @@ If `unit_add` contains a time offset, it is subtracted from the start and end ti
 Parameters:
 
 - **time_range**: Optional[TimeRange]
+
   Start and end datetime of the requested HydroMT time range.
 
 Returns:
