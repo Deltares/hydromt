@@ -159,8 +159,8 @@ Best practices for defining processes:
 
 - Use standard Python objects (``xarray.Dataset``, ``geopandas.GeoDataFrame``) in processes rather than model components.
 - For GIS operations:
-  - Raster: see :ref:`xarray`
-  - Vector: see :ref:`geopandas`
+  - Raster: see :class:`xarray.Dataset`
+  - Vector: see :class:`geopandas.GeoDataFrame`
   - Mesh/Ugrid: see `xugrid <https://deltares.github.io/xugrid/>`_
 
 - HydroMT includes common workflows for:
