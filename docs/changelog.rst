@@ -8,6 +8,11 @@ All notable changes to this project will be documented in this page.
 The format is based on `Keep a Changelog`_, and this project adheres to
 `Semantic Versioning`_.
 
+v1.3.0-rc5 (2025-11-11)
+=======================
+Fixed
+-----
+- Logging of warnings when unused kwargs are passed.
 
 v1.3.0-rc4 (2025-09-30)
 =======================
