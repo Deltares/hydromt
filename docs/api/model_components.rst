@@ -66,7 +66,7 @@ ConfigComponent
    components.ConfigComponent.test_equal
 
 GeomsComponent
-==============
+--------------
 
 .. autosummary::
    :toctree: ../_generated
@@ -84,7 +84,7 @@ GeomsComponent
    components.GeomsComponent.test_equal
 
 TablesComponent
-===============
+---------------
 
 .. autosummary::
    :toctree: ../_generated
@@ -101,7 +101,7 @@ TablesComponent
    components.TablesComponent.test_equal
 
 DatasetsComponent
-=================
+-----------------
 
 .. autosummary::
    :toctree: ../_generated
@@ -118,7 +118,7 @@ DatasetsComponent
    components.DatasetsComponent.test_equal
 
 SpatialDatasetsComponent
-========================
+------------------------
 
 .. autosummary::
    :toctree: ../_generated
@@ -138,7 +138,7 @@ SpatialDatasetsComponent
    components.SpatialDatasetsComponent.test_equal
 
 GridComponent
-=============
+-------------
 
 .. autosummary::
    :toctree: ../_generated
@@ -160,7 +160,7 @@ GridComponent
    components.GridComponent.test_equal
 
 MeshComponent
-=============
+-------------
 
 .. autosummary::
    :toctree: ../_generated
@@ -183,7 +183,7 @@ MeshComponent
    components.MeshComponent.get_mesh
 
 VectorComponent
-===============
+---------------
 
 .. autosummary::
    :toctree: ../_generated
