@@ -442,6 +442,7 @@
 <ul class="simple">
 <li><p>Added <code class="docutils literal notranslate"><span class="pre">ExampleModel</span></code> class and <code class="docutils literal notranslate"><span class="pre">example_model</span></code> entrypoint for demonstration purposes.</p></li>
 <li><p>Added option for delayed compute in writing netcdf files</p></li>
+<li><p>Added option to specify a ‘fill_value’ in <cite>gis.raster_utils.full</cite>, <cite>full_from_transform</cite> and <cite>full_like</cite>. (#1321)</p></li>
 <li><p>Set compression in <cite>write_nc</cite></p></li>
 <li><p>Allow masking in <cite>GridComponent.set</cite>. (#1229)</p></li>
 <li><p>Default driver is now inferred from file extension for RasterDataset, GeoDataFrame, and GeoDataset sources. (#1267)</p></li>
@@ -471,6 +472,7 @@
 <section id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p>Actually having ‘nan’ values in a lazy DataArray from <cite>gis.raster_utils.full</cite>. (#1321)</p></li>
 <li><p>CLI update command was not working. (#1244)</p></li>
 <li><p>Allow models to not have a spatial component (allows updating if region is None). (#1244)</p></li>
 <li><p>CF compliant dimensions in netcdf files</p></li>
