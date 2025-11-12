@@ -8,7 +8,8 @@ Starting Your Own HydroMT Plugin
 
 You've discovered HydroMT and would like to use it for your own model — but you're wondering how to get started?
 This page provides guidance, best practices, and examples for creating your own HydroMT plugin.
-Before reading this, make sure you're familiar with HydroMT by reviewing at least the :ref:`intro_user_guide` and the :ref:`model_main` sections.
+Before reading this, make sure you're familiar with HydroMT by reviewing at least the :ref:`intro_user_guide` and the
+:ref:`Working with models <model_main>` sections.
 
 .. note::
 
@@ -20,6 +21,7 @@ for example, by adding your own ``ModelComponents`` without needing a plugin.
 However, there are still many cases where creating a plugin is the right approach, including:
 
 * Reading or writing custom data formats
+* Model specific data processing or parameter estimation methods
 * Implementing new components
 * Providing standardized data catalogs for others to use
 
@@ -29,12 +31,11 @@ then creating a plugin is the right choice.
 HydroMT makes it straightforward to create your own plugin.
 A plugin can customize or introduce new implementations of the following objects:
 
-* Model
-* ModelComponent
-* Resolver
-* Driver
-* Catalog
-
+* ``Model``
+* ``ModelComponent``
+* ``Resolver``
+* ``Driver``
+* ``Catalog``
 
 .. _plugin_create:
 
@@ -53,7 +54,7 @@ so if you're unsure, we recommend sticking with pure Python.
 .. _plugin_components:
 
 Typical HydroMT Repository Structure
-------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A typical HydroMT plugin repository follows a clear and consistent structure.
 This layout is **not mandatory**, but is commonly used across HydroMT and its plugins.
@@ -64,7 +65,7 @@ and follows the conventions and API described in the HydroMT documentation.
 .. code-block:: text
 
     hydromt_awesome/
-    ├── docs/                     # Documentation pages and Sphinx source files
+    ├── docs/                     # Documentation pages and source files
     ├── examples/                 # Example models, templates, and notebooks
     ├── tests/                    # Unit and integration tests
     ├── pyproject.toml            # Build-system configuration (for PyPI/Conda)
@@ -82,4 +83,5 @@ and follows the conventions and API described in the HydroMT documentation.
 This structure helps maintain clarity and organization as your plugin grows in complexity.
 By organizing your repository in this way, contributors and users can quickly understand where to find each part of your plugin.
 
-See also the :ref:`plugin_examples` for concrete examples of how to implement a HydroMT plugin.
+See also the :ref:`Implement your own HydroMT objects <plugin_examples>` section for concrete examples and steps of how to implement
+your own objects (Model, ModelComponent, Resolver, Driver, Catalog) in a HydroMT plugin.

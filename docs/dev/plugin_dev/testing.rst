@@ -12,7 +12,7 @@ Testing model components
 ------------------------
 
 When you implement a ``ModelComponent`` we very strongly encourage you to write a
-``test_equals`` method on your component that should test for **deep** equality. This
+``test_equal`` method on your component that should test for **deep** equality. This
 means that it shouldn't just test whether it's literally the same python object, but
 should actually attempt to test whether the attributes and any data held by it are the
 same. This is not only important for your own testing, but also for your users, since
@@ -25,26 +25,25 @@ The function should have the following signature:
     def test_equal(self, other: "ModelComponent") -> tuple[bool, Dict[str, str]]:
         ...
 
-So counter to what we told you about processes this function **should** take the actual
-model as input. The return signature is a boolean indicating whether the equality is
+The return signature is a boolean indicating whether the equality is
 true or not (as usual) and a dictionary. In this dictionary you can add any error
 messages of whatever keys you'd like. If possible, it is good for usability if you can
 report as many issues as possible in one go, so the user doesn't have to run the tests
 over and over again.
 
-As an example, suppose we have a `RainFallComponent` that must have a `time` dimension,
+As an example, suppose we have a ``RainfallComponent`` that must have a ``time`` dimension,
 and ``x`` dimension, and additionally the data inside it must have the correct
-crs. A function for that might look like this:
+``crs``. A function for that might look like this:
 
 
 .. code-block:: python
 
-    class RainFallComponent(ModelComponent):
+    class RainfallComponent(ModelComponent):
 
         def test_equal(self, other: "ModelComponent") -> tuple[bool, Dict[str, str]]:
             errors: Dict[str, str] = {}
             if not isinstance(other, self.__class__):
-                errors['type'] = """Other is not of type RainFallComponent and therfore
+                errors['type'] = """Other is not of type RainfallComponent and therfore
                 cannot be equal"""
                 return (False, errors)
 
@@ -72,12 +71,12 @@ information about what is wrong as possible.
 Testing models
 --------------
 
-If all the components you use have a ``test_equal`` function defined than testing for
+If all the components you use have a ``test_equal`` function defined, then testing for
 model equality should be relatively simple. The core base model also has a
 ``test_equal`` function defined that will test all the components against each other so
 if that is all you require you can simply use that function. If you wish to do
 additional checks you can override this method and simply call
-``super().test_equals(other)`` and do whatever checks you'd like after that.
+``super().test_equal(other)`` and do whatever checks you'd like after that.
 
 
 Testing your plugin as a whole
@@ -98,8 +97,10 @@ the different environments in your CI.
 Setting up a GitHub actions workflow
 -------------------------------------
 
-To ensure your plugin is tested against multiple python versions, and both the latest released version of HydroMT core and the latest development version, you can set up a GitHub Actions workflow.
-This workflow will automatically run your test suite in different environments whenever you push changes to your repository.
+To ensure your plugin is tested against multiple python versions, and both the latest
+released version of HydroMT core and the latest development version, you can set up a
+GitHub Actions workflow. This workflow will automatically run your test suite in different
+environments whenever you push changes to your repository.
 
 Here's a basic outline of how to set up a GitHub Actions workflow for your plugin:
 
@@ -117,5 +118,6 @@ A basic example:
 
 3. Commit and push the `test.yml` file to your repository.
 
-This workflow will run your tests in different operating systems (Ubuntu and Windows), four different Python versions (3.10, 3.11, 3.12, and 3.13), and against both the latest released version of HydroMT and the latest development version.
+This workflow will run your tests in different operating systems (Ubuntu and Windows), four different
+Python versions (3.10, 3.11, 3.12, and 3.13), and against both the latest released version of HydroMT and the latest development version.
 You can customize the workflow further based on your specific testing requirements.

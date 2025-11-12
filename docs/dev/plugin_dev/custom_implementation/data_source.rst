@@ -19,10 +19,11 @@ Overview
 --------
 
 Each subclass of :class:`hydromt.data_catalog.sources.DataSource` represents a specific data type (e.g., `RasterDatasetSource`, `GeoDatasetSource`).
-Subclasses must define the class variable `data_type`, specify a fallback driver, and implement the abstract methods required for reading and exporting data.
+Subclasses must define the class variable ``data_type``, specify a fallback driver, and implement the abstract methods required for reading and exporting data.
 
 When the catalog is parsed, HydroMT validates all DataSource definitions and ensures that:
-1. The declared `data_type` matches the subclass.
+
+1. The declared ``data_type`` matches the subclass.
 2. The appropriate driver is selected (inferred automatically if not provided).
 3. The filesystem configuration is consistent between the driver and resolver.
 
@@ -86,10 +87,10 @@ Core Responsibilities
 
 Each DataSource is responsible for:
 
-- **Validation:** Ensuring that the `data_type`, driver, and resolver match expectations before use.
+- **Validation:** Ensuring that the ``data_type``, driver, and resolver match expectations before use.
 - **Connection:** Maintaining consistency between the resolver's and driver's filesystem definitions.
-- **Resolution:** Combining `root` and `uri` into a fully qualified path or URL (`full_uri` property).
-- **Standardization:** Delegating transformations to the associated `DataAdapterBase`.
+- **Resolution:** Combining ``root`` and ``uri`` into a fully qualified path or URL (``full_uri`` property).
+- **Standardization:** Delegating transformations to the associated ``DataAdapterBase``.
 - **Lifecycle management:** Marking sources as used and logging read operations for traceability.
 
 HydroMT ensures that every source is only used once per workflow unless explicitly reused.
@@ -100,30 +101,30 @@ Abstract Methods
 
 Every subclass must implement the following abstract methods:
 
-- `read_data()` — orchestrates data resolution, reading, and transformation.
-- `to_stac_catalog()` — converts the dataset into a STAC Catalog or returns `None` if not applicable.
-- `to_file()` — writes the dataset to a file and returns a new DataSource pointing to the exported location.
+- ``read_data()`` — orchestrates data resolution, reading, and transformation.
+- ``to_stac_catalog()`` — converts the dataset into a STAC Catalog or returns `None` if not applicable.
+- ``to_file()`` — writes the dataset to a file and returns a new DataSource pointing to the exported location.
 
 Optionally, subclasses may override:
 
-- `_detect_time_range()` — detect time bounds when not defined in metadata.
-- `_detect_bbox()` — detect spatial extent and CRS if available.
+- ``_detect_time_range()`` — detect time bounds when not defined in metadata.
+- ``_detect_bbox()`` — detect spatial extent and CRS if available.
 
 
 Properties and Validation Logic
 -------------------------------
 
-- **`full_uri`**
-  Returns an absolute URI by joining `root` and `uri`. Handles both local and remote sources.
+- **full_uri**:
+  Returns an absolute URI by joining ``root`` and ``uri``. Handles both local and remote sources.
 
-- **`_validate_data_type`**
-  Ensures that catalog-specified `data_type` matches the subclass-defined `data_type`.
+- **_validate_data_type**:
+  Ensures that catalog-specified ``data_type`` matches the subclass-defined ``data_type``.
   Automatically infers a default driver based on file extension if none is specified.
 
-- **`_validate_fs_equal_if_not_set`**
+- **_validate_fs_equal_if_not_set**:
   Ensures the resolver and driver reference the same filesystem unless explicitly overridden.
 
-- **`summary()`**
+- **summary()**:
   Returns a dictionary summarizing key metadata, driver, and data type information.
 
 These built-in validators enforce consistency across catalog definitions and avoid runtime mismatches between components.
@@ -166,16 +167,17 @@ Example Usage
 Best Practices
 --------------
 
-- Keep URI logic isolated to resolvers; do not hardcode path resolution in `read_data`.
+- Keep URI logic isolated to resolvers; do not hardcode path resolution in ``read_data``.
 - Reuse driver and adapter functionality; avoid duplicating I/O logic.
-- Implement `to_stac_catalog()` if your dataset can be described or shared via STAC.
-- Define `_fallback_driver_read` and `_fallback_driver_write` to ensure robust defaults.
-- Use the built-in logging (`_log_start_read_data`) for consistent tracing.
-- Return `None` instead of raising exceptions when appropriate for `NoDataStrategy.IGNORE`.
+- Implement ``to_stac_catalog()`` if your dataset can be described or shared via STAC.
+- Define ``_fallback_driver_read`` and ``_fallback_driver_write`` to ensure robust defaults.
+- Use the built-in logging (``_log_start_read_data``) for consistent tracing.
+- Return ``None`` instead of raising exceptions when appropriate for ``NoDataStrategy.IGNORE``.
 
 
 Summary
 -------
 
 A DataSource is the central integration point between catalog metadata and HydroMT's I/O ecosystem.
-By subclassing it, you gain full control over how new data types are discovered, read, standardized, and exported—while maintaining compatibility with HydroMT's broader workflow and catalog system.
+By sub-classing it, you gain full control over how new data types are discovered, read, standardized,
+and exported—while maintaining compatibility with HydroMT's broader workflow and catalog system.

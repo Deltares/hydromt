@@ -61,8 +61,6 @@ Explore HydroMT's core architecture components and their relationships. Click on
         :octicon:`server;5em;sd-text-icon blue-icon`
         +++
         Driver
-        +++
-        Reads resolved data into Python objects and handles I/O operations.
 
     .. grid-item-card::
         :text-align: center

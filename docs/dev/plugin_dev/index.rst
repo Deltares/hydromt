@@ -39,7 +39,7 @@ This guide provides step-by-step instructions on building, registering, and test
    :hidden:
 
    quickstart
-   Implement your own <custom_implementation/index>
+   Implement your own HydroMT objects <custom_implementation/index>
    register
    testing
    migrating_to_v1

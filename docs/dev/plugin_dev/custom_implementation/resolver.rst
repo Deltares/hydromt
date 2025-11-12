@@ -24,7 +24,7 @@ HydroMT expects that resolvers only generate the URIs. Actual reading of data is
 Implementing a Resolver
 -----------------------
 
-A resolver must implement one public method: `resolve`.
+A resolver must implement one public method: ``resolve``.
 
 .. code-block:: python
 
@@ -61,7 +61,7 @@ Additional arguments can be added after the `*` for backward compatibility.
 Handling Missing Data
 ---------------------
 
-HydroMT provides the `handle_nodata` argument to standardize missing data behavior.
+HydroMT provides the ``handle_nodata`` argument to standardize missing data behavior.
 It is strongly recommended to respect this in your resolver.
 
 - **RAISE** - Immediately raise an exception if the requested data does not exist.

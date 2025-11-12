@@ -29,21 +29,55 @@ Example of adding default components in your model:
 .. code-block:: python
 
     from hydromt.model import Model
+    from hydromt.model.components import ConfigComponent, GridComponent
 
-    class AwesomeModel(Model):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            # Add default component
-            self.add_component("grid", GridComponent)
-            # Any additional custom initialization here
+    class ExampleModel(Model):
+        def __init__(
+            self,
+            root: str | None = None,
+            config_filename: str | None = "settings.toml",
+            mode: str = "w",
+            data_libs: list[str] | str | None = None,
+        ):
+            """Initialize ExampleModel."""
+            components = {
+                "config": ConfigComponent(
+                    self,
+                    filename=str(config_filename),
+                ),
+                "grid": GridComponent(self),
+            }
 
-        def some_other_method(self):
-            self.grid.do_something()
+            super().__init__(
+                root,
+                components=components,
+                region_component="grid",
+                mode=mode,
+                data_libs=data_libs,
+            )
+
+        ## Properties
+        # Components
+        @property
+        def config(self) -> ConfigComponent:
+            """Return the config component."""
+            return self.components["config"]
+
+        @property
+        def grid(self) -> GridComponent:
+            """Return the grid component."""
+            return self.components["grid"]
 
 .. Note::
     You can access a model's components directly as attributes using the name provided at initialization (e.g., ``model.grid``) for convenience.
 
 Always call ``super().__init__`` first to ensure the core functionality is properly initialized.
+
+.. note::
+
+   **region_component**: Specify which component defines the model region.
+   This is optional if you have only one spatial component, but required if multiple components exist
+   (e.g. grid, forcing, states etc.). The region component provides the spatial extent and CRS for data processing.
 
 
 Key Model Properties
@@ -55,7 +89,7 @@ Some important properties available in your model:
 - ``crs`` - reference coordinate system (pyproj.CRS).
 - ``data_catalog`` - access to datasets for populating model components.
 - ``components`` - dictionary of all model components by name.
-- ``<component_name>`` - direct access to a specific component (e.g., ``model.grid`` in the ``AwesomeModel`` class).
+- ``<component_name>`` - direct access to a specific component (e.g., ``model.grid`` in the ``ExampleModel`` class).
 
 For a complete list, see the :ref:`Model API documentation <model_api>`.
 
@@ -64,7 +98,8 @@ Setting Up Model Objects
 ------------------------
 
 When building a model from scratch, inventory the components and their data requirements.
-Most data processing logic resides in the components, but overarching functionality (e.g., perturbations for sensitivity analysis) can be implemented in the model itself.
+Most data processing logic resides in the components, but overarching functionality
+(e.g. methods updating several components) can be implemented in the model itself.
 
 Any method annotated with ``@hydromt_step`` is automatically exposed in the YAML workflow interface.
 
@@ -74,21 +109,18 @@ Any method annotated with ``@hydromt_step`` is automatically exposed in the YAML
    HydroMT does not enforce a strict order, but you can implement checks to ensure dependencies between setup methods are met.
    CLI workflows execute methods in YAML order; Python scripts can call setup functions in any order.
 
+A step or setup method will typically follow this pattern:
 
-Setup Methods
---------------
+1. Read data from the ``DataCatalog`` using appropriate methods (e.g., ``get_rasterdataset``, ``get_geodataframe``).
+2. Process or transform the data as needed (e.g., resampling, reprojection) using HydroMT processes.
+3. Map HydroMT standard variable names to model-specific conventions.
+4. Add the processed data to the relevant model component using component methods (e.g., ``grid.set``, ``config.set``).
 
-HydroMT ``setup_<>`` methods generally perform four steps:
-
-1. Read and parse data from the ``DataCatalog``.
-2. Transform or process data (e.g., resampling, reprojection, filtering).
-3. Rename or map HydroMT standard variable names to model-specific conventions.
-4. Add the processed data to the appropriate model component.
-
-Example: adding a landuse grid from raster data:
+Example: adding a landuse grid from raster data (either in the ``Model`` or ``ModelComponent`` subclass):
 
 .. code-block:: python
 
+    @hydromt_step
     def setup_landuse(
         self,
         landuse: Union[str, Path, xr.DataArray],
@@ -126,18 +158,20 @@ Example: adding a landuse grid from raster data:
         self.set_grid(ds_out)
 
 
-Notes on Input Data Types
--------------------------
+.. note::
 
-Setup methods usually convert external datasets (raster/vector) into standardized HydroMT model components.
-Be explicit about supported input types in your docstrings.
-You may define multiple setup functions to handle different input types (e.g., ``setup_landuse_from_raster`` and ``setup_landuse_from_vector``) to ensure correct processing.
+    **Input data types**
+
+    Setup methods usually convert external datasets (raster/vector) into standardized HydroMT model components.
+    Be explicit about supported input types in your docstrings.
+    You may define multiple setup functions to handle different input types
+    (e.g., ``setup_landuse_from_raster`` and ``setup_landuse_from_vector``) to ensure correct processing.
 
 
 Processes
 ---------
 
-For complex functionality, define reusable functions outside the model class, called **processes**.
+For complex functionality, you can define reusable functions outside the model class, called **processes**.
 Processes allow you to keep models lightweight and testable.
 
 Best practices for defining processes:
@@ -153,20 +187,26 @@ Best practices for defining processes:
 
   .. code-block:: python
 
-      def interpolate_grid(model: AwesomeModel):
+      def interpolate_grid(model: ExampleModel):
           grid = model.grid
           ...
 
 - Use standard Python objects (``xarray.Dataset``, ``geopandas.GeoDataFrame``) in processes rather than model components.
-- For GIS operations:
-  - Raster: see :class:`xarray.Dataset`
-  - Vector: see :class:`geopandas.GeoDataFrame`
-  - Mesh/Ugrid: see `xugrid <https://deltares.github.io/xugrid/>`_
+- For GIS operations or statistics:
 
-- HydroMT includes common workflows for:
-  - Flow direction: `flwdir`
-  - Basin masks: `basin_mask`
-  - Statistical computations: `stats`
+  - Raster: :ref:`raster <raster_api>`
+  - Geodataset: :ref:`vector <geodataset_api>`
+  - Mesh/Ugrid: see `xugrid <https://deltares.github.io/xugrid/>`_
+  - Flow direction: :ref:`flwdir <flw_api>`
+  - Statistical computations: :ref:`stats <statistics>`
+
+- HydroMT includes common processes for:
+
+  - Region handling: :ref:`region <workflows_region_api>`
+  - Basin mask: :ref:`basin_mask <workflows_basin_api>`
+  - Grid creation and data: :ref:`grid <workflows_grid_api>`
+  - Mesh creation and data: :ref:`mesh <workflows_mesh_api>`
+  - Meteorological data processing: :ref:`meteo <workflows_forcing_api>`
 
 
 Workflow Integration
@@ -177,8 +217,8 @@ Once setup methods and processes are defined, users can include them in YAML wor
 .. code-block:: yaml
 
     steps:
-      - landuse_component.setup_landuse:
+      - grid.setup_landuse:
           landuse: "my_landuse.tif"
 
-      - grid_component.compute_flow_directions:
+      - grid.setup_flow_directions:
           method: "d8"

@@ -4,31 +4,33 @@
 Custom Drivers
 ================
 
-Drivers define **how to read and write data** once a URIResolver has determined _what_ to read.
+Drivers define **how to read and write data** once a URIResolver has determined which file(s) to read.
 
 While resolvers locate and list datasets, drivers handle the actual I/O, parsing, and optional slicing.
 For example:
 
-- The same `ConventionResolver` could return file lists for `.nc`, `.zarr`, or `.tif` datasets.
+- The same ``ConventionResolver`` could return file lists for **.nc**, **.zarr**, or **.tif** datasets.
 - The same driver could be used with multiple resolvers to read datasets organized differently.
 
-Custom drivers are often necessary when working with non-standard formats, proprietary files, or datasets that require preprocessing before loading into HydroMT components.
+Custom drivers are often necessary when working with non-standard formats, proprietary files, or datasets
+that require preprocessing before loading into HydroMT components.
 
 Overview
 --------
 
 A **driver** is responsible for:
 
-1. Reading raw data from URIs into Python objects (`xarray.Dataset`, `GeoDataFrame`, `numpy.ndarray`, etc.)
-2. Optionally slicing, subsetting, or transforming the data
+1. Reading raw data from URIs into Python objects (``xarray.Dataset``, ``GeoDataFrame``, ``numpy.ndarray``, etc.)
+2. Optionally slicing, sub-setting, or transforming the data if the underlying python reading (e.g. xarray, pandas) function supports it.
 3. Writing processed datasets back to disk or another storage backend
 
-Drivers should **not** determine which files to read — that is the resolver's job — but may rely on additional arguments such as `time_range` or `mask` to properly slice the dataset.
+Drivers should **not** determine which files to read — that is the resolver's job — but may rely on additional arguments such
+as ``time_range``, ``variables`` or ``mask`` to properly slice the dataset or select specific variables/columns.
 
 Implementing a Driver
 ---------------------
 
-At minimum, a driver must implement the `read` method:
+At minimum, a driver must implement the ``read`` method:
 
 .. code-block:: python
 
@@ -48,7 +50,8 @@ At minimum, a driver must implement the `read` method:
             # read and combine files as needed
             ...
 
-Optionally, you can implement `write` to save data in the same or a different format:
+Optionally, you can implement ``write`` to save data in the same or a different format. This
+is useful for e.g. when using ``DataCatalog.export_data`` functionality.
 
 .. code-block:: python
 
@@ -62,12 +65,12 @@ Optionally, you can implement `write` to save data in the same or a different fo
         # save dataset in desired format
         ...
 
-The `read` method should generally match the arguments used in your resolver to allow smooth integration with HydroMT's workflow system.
+The ``read`` method should generally match the arguments used in your resolver to allow smooth integration with HydroMT's workflow system.
 
 Example
---------------
+-------
 
-A minimal raster driver that reads a single `.tif` file using `rasterio`:
+A minimal raster driver that reads a single **.tif** file using ``rasterio``:
 
 .. code-block:: python
 

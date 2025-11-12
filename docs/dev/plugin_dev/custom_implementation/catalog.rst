@@ -23,7 +23,7 @@ Overview
 A HydroMT data catalog is a YAML file that lists datasets by name.
 Each dataset entry specifies:
 
-- The data type (e.g., `RasterDataset`, `GeoDataset`, or custom type)
+- The data type (e.g., ``RasterDataset``, ``GeoDataset``, or custom type)
 - The driver used to read the data
 - The data location (URI)
 - Optional metadata, adapters, and configuration parameters
