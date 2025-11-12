@@ -20,6 +20,7 @@ New
 ---
 - Added ``ExampleModel`` class and ``example_model`` entrypoint for demonstration purposes.
 - Added option for delayed compute in writing netcdf files
+- Added option to specify a 'fill_value' in `gis.raster_utils.full`, `full_from_transform` and `full_like`. (#1321)
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
 - Default driver is now inferred from file extension for RasterDataset, GeoDataFrame, and GeoDataset sources. (#1267)
@@ -45,6 +46,7 @@ Changed
 
 Fixed
 -----
+- Actually having 'nan' values in a lazy DataArray from `gis.raster_utils.full`. (#1321)
 - CLI update command was not working. (#1244)
 - Allow models to not have a spatial component (allows updating if region is None). (#1244)
 - CF compliant dimensions in netcdf files
