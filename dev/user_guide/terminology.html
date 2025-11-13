@@ -477,7 +477,7 @@
 <tr class="row-even"><td><p>Command Line Interface (CLI)</p></td>
 <td><p>high-level interface to HydroMT <em>build</em>, <em>update</em>, <em>check</em> and <em>export</em> methods.</p></td>
 </tr>
-<tr class="row-odd"><td><p>Configuration (HydroMT)</p></td>
+<tr class="row-odd"><td><p>Workflow file (HydroMT)</p></td>
 <td><p>(.yaml) file describing the complete pipeline with all methods and their arguments to
 <em>build</em> or <em>update</em> a model.</p></td>
 </tr>
@@ -506,9 +506,9 @@ as plugins, see Model plugin.</p></td>
 HydroMT from python.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Model component</p></td>
-<td><p>A model is described by HydroMT with the following components: maps,
-geoms (vector data), forcing, results, states, config, grid (for a grid model), vector
-(for a vector model), mesh (for a mesh model).</p></td>
+<td><p>A building block of a model. Model components are usually linked to a specific model file or input
+data. Examples are config, grid, vector, mesh, forcing, states, parameters, etc. HydroMT provides
+generic model component classes but plugins can define their own.</p></td>
 </tr>
 <tr class="row-even"><td><p>Model plugin</p></td>
 <td><p>(Plugin) Package that links the HydroMT Model class to a specific model software so that HydroMT can build
@@ -520,7 +520,8 @@ Plugins are the most common way of using HydroMT to build and update specific mo
 <td><p>The model software to execute a model simulation. This is <em>not</em> part of any HydroMT plugin.</p></td>
 </tr>
 <tr class="row-even"><td><p>Region</p></td>
-<td><p>Argument of the <em>build</em> CLI methods that specifies the region of interest where                                the model should be prepared / which spatial subregion should be clipped.</p></td>
+<td><p>Argument of the one of the model setup methods that specifies the region of interest where
+the model should be prepared / which spatial subregion should be clipped.</p></td>
 </tr>
 </tbody>
 </table>

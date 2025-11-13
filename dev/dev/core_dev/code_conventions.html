@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Custom Data Driver and Resolver &#8212; HydroMT  documentation</title>
+    <title>Code conventions &#8212; HydroMT  documentation</title>
   
   
   
@@ -46,7 +46,7 @@
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'dev/plugin_dev/custom_driver';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'dev/core_dev/code_conventions';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
@@ -57,8 +57,8 @@
     <link rel="icon" href="../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Linking your own custom objects to HydroMT core API" href="register_plugin.html" />
-    <link rel="prev" title="Custom Catalog" href="custom_catalog.html" />
+    <link rel="next" title="Adding Documentation" href="documentation.html" />
+    <link rel="prev" title="Issue conventions" href="git_conventions.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.2.0.dev0" />
@@ -373,24 +373,38 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../architecture/architecture.html">Architecture</a></li>
-
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Plugin Developer Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plugin_quickstart.html">Starting your own HydroMT Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html">Implementing your own HydroMT Model class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_component.html">Creating your own Model Components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_catalog.html">Pre-defined Data Catalog for your plugin</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Custom Data Driver and Resolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="register_plugin.html">Linking your own custom objects to HydroMT core API</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="testing_your_plugin.html">Testing your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html">Migrating your plugin to v1</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">HydroMT Architecture</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/architecture.html">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/conventions.html">HydroMT Design Conventions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../core_dev/index.html">Core Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/contributing.html">Developer’s guide</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/documentation.html">Adding Documentation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plugin_dev/index.html">Plugin Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/quickstart.html">Starting Your Own HydroMT Plugin</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../plugin_dev/custom_implementation/index.html">Implement your own HydroMT objects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/model.html">Custom Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/component.html">Custom Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/catalog.html">Custom Data Catalogs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_source.html">Custom Data Sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/driver.html">Custom Drivers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/resolver.html">Custom Resolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_adapter.html">Custom DataAdapter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/register.html">Linking your own custom objects to HydroMT core API</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/testing.html">Testing your plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/migrating_to_v1.html">Migrating to v1</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Core Developer Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="git_conventions.html">Issue conventions</a></li>
+
+
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Code conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Adding Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_ci.html">Test and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release.html">Creating a release</a></li>
 </ul>
 </details></li>
 </ul>
@@ -437,9 +451,9 @@
     <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">Developer Guide</a></li>
     
     
-    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Plugin Developer guide</a></li>
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Core Developer’s guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Custom Data Driver and Resolver</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Code conventions</span></li>
   </ul>
 </nav>
 </div>
@@ -456,115 +470,128 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="custom-data-driver-and-resolver">
-<span id="custom-driver"></span><h1>Custom Data Driver and Resolver<a class="headerlink" href="#custom-data-driver-and-resolver" title="Link to this heading">#</a></h1>
-<section id="custom-drivers">
-<h2>Custom Drivers<a class="headerlink" href="#custom-drivers" title="Link to this heading">#</a></h2>
-<p>Drivers are the second ingredient necessary to read (custom) datasets. Where as
-<code class="docutils literal notranslate"><span class="pre">URIResolver</span></code> s (discussed previously) determines _what_ to read, drivers determine _how_ to
-read and slice it. For example, you might use the same <code class="docutils literal notranslate"><span class="pre">ConventionResolver</span></code> to determine
-which files to read, but different drivers to read <cite>.nc</cite>, <cite>.zarr</cite> or <cite>.tiff</cite> files. Vice
-versa you might also use the same driver but different resolvers to read data depending
-on how it was organised. It should therefore be noted that to read a particular dataset
-it might be necessary to implement a custom resolver as well as a custom driver.</p>
-<section id="implementing-a-drivers">
-<h3>Implementing a Drivers<a class="headerlink" href="#implementing-a-drivers" title="Link to this heading">#</a></h3>
-<p>To function drivers MUST at least implement the following function:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">uris</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="o">...</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="o">...</span>
+  <section id="code-conventions">
+<h1>Code conventions<a class="headerlink" href="#code-conventions" title="Link to this heading">#</a></h1>
+<section id="naming">
+<h2>Naming<a class="headerlink" href="#naming" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Please avoid using short abbreviations in function and variable names unless they are
+very well known, they generally make code harder to read and follow.</p></li>
+<li><p>Avoid using names that are too general or too wordy. Strike a good balance between the two.</p></li>
+<li><p>Folder and script names are always lowercase and preferably single words (no underscores)</p></li>
+<li><p>Python classes are written with CamelCase</p></li>
+<li><p>Methods are written with lowercase and might use underscores for readability.
+Specific names are used for methods of the Model class and any child classes, see
+above.</p></li>
+<li><p>Names of (global) constants should be all upper case.</p></li>
+<li><p>Internal (non-public) constants and methods start with an underscore, these should not
+be used outside of your package’s code.</p></li>
+</ul>
+</section>
+<section id="type-hinting">
+<h2>Type hinting<a class="headerlink" href="#type-hinting" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>We use <a class="reference external" href="https://docs.python.org/3/library/typing.html">type hinting</a> for arguments and returns of all methods and classes
+Check this <a class="reference external" href="https://stackoverflow.com/questions/32557920/what-are-type-hints-in-python-3-5">stack overflow post</a> for more
+background about what typing is and how it can be used. In HydroMT we use it specifically to inform external libraries to
+about the type arguments of any HydroMT model method. This is work in progress.</p></li>
+</ul>
+</section>
+<section id="docstrings">
+<h2>Docstrings<a class="headerlink" href="#docstrings" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>We use the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">numpy docstring format</a>.
+You can easily create these docstring once method arguments have type hints (see above) with
+the VSCode <a class="reference external" href="https://github.com/NilsJPWerner/autoDocstring">autoDocstring plugin</a>.</p></li>
+<li><p>please ensure that all public code you contribute has a valid docstring.</p></li>
+</ul>
+</section>
+<section id="code-format">
+<span id="id2"></span><h2>Code format<a class="headerlink" href="#code-format" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>We use the <a class="reference external" href="https://black.readthedocs.io/en/stable/the_black_code_style.html">black code style</a> and <a class="reference external" href="https://pre-commit.com">pre-commit</a> to keep everything formatted. We use the formatter included with <a class="reference external" href="https://docs.astral.sh/ruff/formatter/">ruff</a> which is black compatible, but much faster. Please make sure all hooks pass before commiting. Pre-commit will do this for you if it’s installed correctly.</p></li>
+</ul>
+<p>You can install pre-commit by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>pre-commit
 </pre></div>
 </div>
-<p>You may optionally also implement the following function as is appropriate:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">path</span><span class="p">:</span> <span class="n">StrPath</span><span class="p">,</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-    <span class="o">...</span>
-<span class="p">):</span>
-    <span class="o">...</span>
+<p>It is best to install pre-commit in your existing environment. After that simply install the necessary hooks with</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pre-commit<span class="w"> </span>install
 </pre></div>
 </div>
-<p>As can be seen, <cite>read</cite> takes all of the URIs that the <cite>resolver</cite> has produced and will
-attempt to read data from them in whatever way is appropriate. Since the contents of the
-files themselves might also have to be sliced it is advisable to take the same arguments
-as the resolver is able to take. Note that the signature of the functions may vary
-between data types.</p>
-</section>
-</section>
-<section id="custom-resolver">
-<span id="id1"></span><h2>Custom Resolver<a class="headerlink" href="#custom-resolver" title="Link to this heading">#</a></h2>
-<p>In addition to data which may or may not be in custom file formats, to be able to read
-data, we must also know how it is laid out. For example the AWS Copernicus DEM data
-(<a class="reference external" href="https://registry.opendata.aws/copernicus-dem/">https://registry.opendata.aws/copernicus-dem/</a>) is provided as Cloud Optimised GeoTiff,
-but has no spacial index. Instead the files are divided in tiles covering the globe and
-must be queried using the desired resolution, nothing and easting to find the correct
-files. To be able to query this data set effectively we need a way to translate geospatial
-data into a list of files which we should load to get the data we want. This is
-exactly where <code class="docutils literal notranslate"><span class="pre">URIResolver</span></code> s come in.</p>
-<p>A <cite>URIResolver</cite> is what we use to generate a list of uris to the files we wish to query.
-Not that a uri may be, but does not have to be a local file path. Instead URIs could
-also be URLs, REST API paths, socket based file descriptors or anything else one might
-be able to read data from. Although it may be tempting to think of a URI as a file
-path, we discourage developers from doing so as this may exlucde users from, for
-example, talking to databases to query data.</p>
-<section id="implementing-a-resolver">
-<h3>Implementing a Resolver<a class="headerlink" href="#implementing-a-resolver" title="Link to this heading">#</a></h3>
-<p>Ultimately a resolver has only one public method that it must implement:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">time_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TimeRange</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">zoom_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Zoom</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mask</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">variables</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SourceMetadata</span><span class="p">],</span>
-    <span class="n">handle_nodata</span><span class="p">:</span> <span class="n">NoDataStrategy</span> <span class="o">=</span> <span class="n">NoDataStrategy</span><span class="o">.</span><span class="n">RAISE</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="o">...</span>
+<p>After doing this pre-commit will check all your staged files when committing.</p>
+<p>For example say that you’ve added the following new feature:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;import os\nprint(&quot;This is a new exciting feature&quot;)&#39;</span><span class="w"> </span>&gt;<span class="w"> </span>hydromt/new_feature.py
 </pre></div>
 </div>
-<p>As you can see it takes in a single uri string and will produce from that a list of
-other strings. These strings will then be passed to the appropriate driver to be read
-out. How the driver will use them will be discussed more indepth in that section, but it
-is not the URI resolver’s job to any data, (though it may do that if necessary for the
-resolution, such as reading metadata from potentially interesting files). You may do this in any way you like, such as, but not limited to:</p>
-<ol class="arabic simple">
-<li><p>talking to a API or service</p></li>
-<li><p>reading files from disks</p></li>
-<li><p>produce a-priori defined answers</p></li>
-</ol>
-<p>Your resolver may also take any additional arguments it may need to resolve which data
-to read. You may add any arguments here you like, although it is encouraged for
-backwards compatibility reasons to only add named arguments (i.e. after <cite>*</cite> as above).</p>
-</section>
-<section id="handling-non-existent-data">
-<h3>Handling non-existent data<a class="headerlink" href="#handling-non-existent-data" title="Link to this heading">#</a></h3>
-<p>Note the <cite>handle_nodata</cite> argument. It is highly encouraged to take this argument and
-handle it in a similar way that core does. This argument is an enum that has two
-variants: <cite>RAISE</cite>, <cite>WARN</cite> and <cite>IGNORE</cite>. Your users may (eroniously or not) request data
-that does not exist. Sometimes this is critical, sometimes not. For example, depending
-on the region you are working in, there may or may not be glaciers in your model, but
-this should not prevent you from running the model. Users can tell you what you should
-do if this does not exist by passing you this enum.</p>
-<p>As one might expect, when RAISE is passed and some data does not exist, this will
-immediately raise an exception that the user can catch but will not execute any further
-code until the user does so. <cite>WARN</cite> and <cite>IGNORE</cite> are slightly different though. They are
-identical except for whether a warning will be emitted in the logs or not. Other than
-that, both the options will cause the current code to simply not do any more work.
-Typically this is done by returning <cite>None</cite> from the function in questions, with all
-subsequent functions checking if the input they got from the previous step is <cite>None</cite> and
-also returning <cite>None</cite> as well if they do.</p>
-<p>We have chosen to return <cite>None</cite> instead of an empty dataset because it is easier to tell
-that something has gone wrong, and is easier to check for in Python code. In addition it
-makes a clearer distinction between data that was not found vs data that might be
-missing. For the sake of consistency we ask that you do the same when implementing your
-own resolvers.</p>
-</section>
+<p>(you do not have to do this, it is just for demonstration, but you can copy and execute this code to try for yourself.)</p>
+<p>Then you can add the new feature to the git staging area and try to commit as usual. However pre-commit will tell you that you should add some docstrings for example. You should see an output similar to the one below:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>hydromt/new_feature.py
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;The feature you&#39;ve all been waiting for.&quot;</span>
+<span class="go">  Trim Trailing Whitespace.................................................Passed</span>
+<span class="go">  Fix End of Files.........................................................Failed</span>
+<span class="go">  - hook id: end-of-file-fixer</span>
+<span class="go">  - exit code: 1</span>
+<span class="go">  - files were modified by this hook</span>
+
+<span class="go">  Fixing hydromt/new_feature.py</span>
+
+<span class="go">  Check Yaml...........................................(no files to check)Skipped</span>
+<span class="go">  Check for added large files..............................................Passed</span>
+<span class="go">  Check python ast.........................................................Passed</span>
+<span class="go">  Check JSON...........................................(no files to check)Skipped</span>
+<span class="go">  Debug Statements (Python)................................................Passed</span>
+<span class="go">  Mixed line ending........................................................Passed</span>
+<span class="go">  Format YAML files....................................(no files to check)Skipped</span>
+<span class="go">  ruff.....................................................................Failed</span>
+<span class="go">  - hook id: ruff</span>
+<span class="go">  - exit code: 1</span>
+<span class="go">  - files were modified by this hook</span>
+
+<span class="go">  ruff-format..............................................................Passed</span>
+
+<span class="go">  hydromt/new_feature.py:1:1: D100 Missing docstring in public module</span>
+<span class="go">  Found 2 errors (1 fixed, 1 remaining).</span>
+</pre></div>
+</div>
+<p>This means that pre-commit has found issues in the code you submitted. In the case of the import it was able to fix it automatically. However <cite>ruff</cite> has also detected that you have not added a docstring for the new feature. You can find this out by running:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ruff<span class="w"> </span>.
+</pre></div>
+</div>
+<p>which will show you the same output:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">hydromt/new_feature.py:1:1: D100 Missing docstring in public module</span>
+<span class="go">Found 1 error.</span>
+</pre></div>
+</div>
+<p>After you’ve fixed this problem by for example adding the docstring “””Implement the cool new feature””” at the top of the new file, you just have to add the new version to the staging area again and re-attempt the commit which should now succeed:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git<span class="w"> </span>add<span class="w"> </span>hydromt/new_feature.py
+<span class="gp">$ </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;The feature you&#39;ve all been waiting for.&quot;</span>
+<span class="go">Trim Trailing Whitespace.................................................Passed</span>
+<span class="go">Fix End of Files.........................................................Passed</span>
+<span class="go">Check Yaml...........................................(no files to check)Skipped</span>
+<span class="go">Check for added large files..............................................Passed</span>
+<span class="go">Check python ast.........................................................Passed</span>
+<span class="go">Check JSON...........................................(no files to check)Skipped</span>
+<span class="go">Debug Statements (Python)................................................Passed</span>
+<span class="go">Mixed line ending........................................................Passed</span>
+<span class="go">Format YAML files....................................(no files to check)Skipped</span>
+<span class="go">ruff.....................................................................Passed</span>
+<span class="go">[linting a5e9b683] The feature you&#39;ve all been waiting for.</span>
+<span class="go"> 1 file changed, 4 insertions(+)</span>
+<span class="go"> create mode 100644 hydromt/new_feature.py</span>
+</pre></div>
+</div>
+<p>Now you can push your commit as normal.</p>
+<p>From time to time you might see comments like these:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">rioxarray</span> <span class="c1"># noqa: F401</span>
+</pre></div>
+</div>
+<p>The <cite>noqa</cite> is instructing the linters to ignore the specified rule for the line in question. Whenever possible, we try to avoid using these but it’s not always possible. The full list of rules can be found here: <a class="reference external" href="https://beta.ruff.rs/docs/rules/">Ruff Rules Section</a> Some common ones are:</p>
+<ul class="simple">
+<li><p>E501: Line too long.</p></li>
+<li><p>F401: Unused import.</p></li>
+<li><p>D102: Public methods should have docstrings.</p></li>
+</ul>
 </section>
 </section>
 
@@ -579,20 +606,20 @@ own resolvers.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="custom_catalog.html"
+       href="git_conventions.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Custom Catalog</p>
+        <p class="prev-next-title">Issue conventions</p>
       </div>
     </a>
     <a class="right-next"
-       href="register_plugin.html"
+       href="documentation.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Linking your own custom objects to HydroMT core API</p>
+        <p class="prev-next-title">Adding Documentation</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -635,15 +662,10 @@ own resolvers.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-drivers">Custom Drivers</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-a-drivers">Implementing a Drivers</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#custom-resolver">Custom Resolver</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-a-resolver">Implementing a Resolver</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#handling-non-existent-data">Handling non-existent data</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#naming">Naming</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#type-hinting">Type hinting</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#docstrings">Docstrings</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#code-format">Code format</a></li>
 </ul>
   </nav></div>
 

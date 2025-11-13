@@ -57,8 +57,8 @@
     <link rel="icon" href="../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Plugin Developer guide" href="../plugin_dev/index.html" />
-    <link rel="prev" title="Developer Guide" href="../intro.html" />
+    <link rel="next" title="HydroMT Design Conventions" href="conventions.html" />
+    <link rel="prev" title="HydroMT Architecture" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.2.0.dev0" />
@@ -373,24 +373,38 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Architecture</a></li>
-
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">HydroMT Architecture</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="conventions.html">HydroMT Design Conventions</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../plugin_dev/index.html">Plugin Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/plugin_quickstart.html">Starting your own HydroMT Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_model.html">Implementing your own HydroMT Model class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_component.html">Creating your own Model Components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_catalog.html">Pre-defined Data Catalog for your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/custom_driver.html">Custom Data Driver and Resolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/register_plugin.html">Linking your own custom objects to HydroMT core API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/quickstart.html">Starting Your Own HydroMT Plugin</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../plugin_dev/custom_implementation/index.html">Implement your own HydroMT objects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/model.html">Custom Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/component.html">Custom Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/catalog.html">Custom Data Catalogs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_source.html">Custom Data Sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/driver.html">Custom Drivers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/resolver.html">Custom Resolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_adapter.html">Custom DataAdapter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/register.html">Linking your own custom objects to HydroMT core API</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/testing_your_plugin.html">Testing your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/migrating_to_v1.html">Migrating your plugin to v1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/testing.html">Testing your plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/migrating_to_v1.html">Migrating to v1</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../core_dev/index.html">Core Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/contributing.html">Developer’s guide</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/documentation.html">Adding Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../core_dev/dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/git_conventions.html">Issue conventions</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/code_conventions.html">Code conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/documentation.html">Adding Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/test_ci.html">Test and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/release.html">Creating a release</a></li>
 </ul>
 </details></li>
 </ul>
@@ -436,6 +450,9 @@
     
     <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">Developer Guide</a></li>
     
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">HydroMT Architecture</a></li>
+    
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Architecture</span></li>
   </ul>
 </nav>
@@ -455,98 +472,219 @@
                   
   <section id="architecture">
 <span id="id1"></span><h1>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">#</a></h1>
-<p>HydroMT supports a large variety of models, which all require different types of data.
-It is therefore important that the API that HydroMT exposes is extendable. HydroMT is
-composed of a small set of key classes that support extension. In this section we walk
-through these classes and describe their main responsibilities and where they interact.</p>
+<p>HydroMT provides a modular and extensible framework for building and managing environmental and hydrological models.
+Its architecture is organized around a few core abstractions that define how models, data, and workflows interact.</p>
+<p>At its core, HydroMT connects model components and data sources through a consistent API.
+This allows flexible model construction, reproducibility, and interoperability across a wide range of models and data systems.</p>
+<p>The diagram below summarizes the relationships between these components.</p>
+<a class="reference internal image-reference" href="../../_images/hydromt_architecture.jpeg"><img alt="HydroMT main architecture diagram" src="../../_images/hydromt_architecture.jpeg" style="width: 800px;" />
+</a>
 <section id="model">
-<h2>Model<a class="headerlink" href="#model" title="Link to this heading">#</a></h2>
-<p>The <a class="reference internal" href="../../_generated/hydromt.model.Model.html#hydromt.model.Model" title="hydromt.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> is the main representation of the model that is being built. A
-model is built step by step by adding <a class="reference internal" href="../../_generated/hydromt.model.components.ModelComponent.html#hydromt.model.components.ModelComponent" title="hydromt.model.components.base.ModelComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelComponent</span></code></a> s to the
-Model. <a class="reference internal" href="../../about/plugins.html#plugins"><span class="std std-ref">Plugins</span></a> can define steps which act on these components to implement
-complex interactions between different components. The area of interest for the model
-can be defined by the <a class="reference internal" href="../../_generated/hydromt.model.components.SpatialModelComponent.html#hydromt.model.components.SpatialModelComponent" title="hydromt.model.components.spatial.SpatialModelComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialModelComponent</span></code></a>. The complete
-model building workflow can be encoded in a <a class="reference internal" href="../../user_guide/models/model_workflow.html#model-workflow"><span class="std std-ref">workflow file</span></a> file.</p>
+<span id="model-architecture"></span><h2>Model<a class="headerlink" href="#model" title="Link to this heading">#</a></h2>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> represents the complete model setup and workflow.
+It defines the model domain, manages all <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelComponent</span></code>’s, and coordinates data loading and transformations through the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code>.</p>
+<p>Models can be created interactively, through Python scripts, or from workflow definitions for full reproducibility.</p>
+<p>See also:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#model-component-architecture"><span class="std std-ref">ModelComponent</span></a></p></li>
+<li><p><a class="reference internal" href="../../api/model.html#model-api"><span class="std std-ref">API</span></a></p></li>
+<li><p><a class="reference internal" href="../plugin_dev/custom_implementation/model.html#custom-model"><span class="std std-ref">Implement your own</span></a></p></li>
+</ul>
 </section>
 <section id="modelcomponent">
-<h2>ModelComponent<a class="headerlink" href="#modelcomponent" title="Link to this heading">#</a></h2>
-<p>A <a class="reference internal" href="../../_generated/hydromt.model.Model.html#hydromt.model.Model" title="hydromt.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> can be populated with many different
-<a class="reference internal" href="../../_generated/hydromt.model.components.ModelComponent.html#hydromt.model.components.ModelComponent" title="hydromt.model.components.base.ModelComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelComponent</span></code></a> s. A component can represent any type of data
-you have on your area of interest. This component can have many properties, but always
-has a <code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code> component to read in and write out data. A
-<a class="reference internal" href="../../_generated/hydromt.model.Model.html#hydromt.model.Model" title="hydromt.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a> must have at least one <a class="reference internal" href="../../_generated/hydromt.model.components.ModelComponent.html#hydromt.model.components.ModelComponent" title="hydromt.model.components.base.ModelComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelComponent</span></code></a>.</p>
+<span id="model-component-architecture"></span><h2>ModelComponent<a class="headerlink" href="#modelcomponent" title="Link to this heading">#</a></h2>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">ModelComponent</span></code> represents a modular building block of a model, such as a specific model file or model data (for example, static or forcing data).
+Each component defines how its data are read and written, and can interact with other components during setup.</p>
+<p>Components make models composable, flexible, and easy to extend without modifying the HydroMT core.
+The below components are included in HydroMT by default but you can also create your own custom components.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Model Component</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.model.components.ConfigComponent.html#hydromt.model.components.ConfigComponent" title="hydromt.model.components.ConfigComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConfigComponent</span></code></a></p></td>
+<td><p>Component for managing model configuration</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.model.components.GeomsComponent.html#hydromt.model.components.GeomsComponent" title="hydromt.model.components.GeomsComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeomsComponent</span></code></a></p></td>
+<td><p>Component for managing 1D vector data</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.model.components.TablesComponent.html#hydromt.model.components.TablesComponent" title="hydromt.model.components.TablesComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">TablesComponent</span></code></a></p></td>
+<td><p>Component for managing non-geospatial data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.model.components.DatasetsComponent.html#hydromt.model.components.DatasetsComponent" title="hydromt.model.components.DatasetsComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetsComponent</span></code></a></p></td>
+<td><p>Component for managing non-geospatial data</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.model.components.SpatialDatasetsComponent.html#hydromt.model.components.SpatialDatasetsComponent" title="hydromt.model.components.SpatialDatasetsComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">SpatialDatasetsComponent</span></code></a></p></td>
+<td><p>Component for managing geospatial data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.model.components.GridComponent.html#hydromt.model.components.GridComponent" title="hydromt.model.components.GridComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridComponent</span></code></a></p></td>
+<td><p>Component for managing regular gridded data</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.model.components.MeshComponent.html#hydromt.model.components.MeshComponent" title="hydromt.model.components.MeshComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeshComponent</span></code></a></p></td>
+<td><p>Component for managing unstructured grids</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.model.components.VectorComponent.html#hydromt.model.components.VectorComponent" title="hydromt.model.components.VectorComponent"><code class="xref py py-class docutils literal notranslate"><span class="pre">VectorComponent</span></code></a></p></td>
+<td><p>Component for managing geospatial vector data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>See also:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#model-architecture"><span class="std std-ref">Model</span></a></p></li>
+<li><p><a class="reference internal" href="../../api/model_components.html#model-components-api"><span class="std std-ref">API</span></a></p></li>
+<li><p><a class="reference internal" href="../plugin_dev/custom_implementation/component.html#custom-component"><span class="std std-ref">Implement your own</span></a></p></li>
+</ul>
 </section>
 <section id="datacatalog">
-<h2>DataCatalog<a class="headerlink" href="#datacatalog" title="Link to this heading">#</a></h2>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> s need data. Where the data should be found and how it
-should be loaded is defined in the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code>. Each item in the
-catalog is a <a class="reference internal" href="../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource" title="hydromt.data_catalog.sources.data_source.DataSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></a>. Users can create their own
-catalogs, using a <cite>yaml</cite> format, or they can share their
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.PredefinedCatalog.html#hydromt.data_catalog.PredefinedCatalog" title="hydromt.data_catalog.predefined_catalog.PredefinedCatalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredefinedCatalog</span></code></a> using the <a class="reference internal" href="../../about/plugins.html#plugins"><span class="std std-ref">Plugins</span></a> system.</p>
+<span id="data-catalog-architecture"></span><h2>DataCatalog<a class="headerlink" href="#datacatalog" title="Link to this heading">#</a></h2>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code> is HydroMT’s core data access and management layer.
+It provides a structured way to describe where datasets are located, how they can be accessed, and how they should be represented once loaded into memory.</p>
+<p>Within the HydroMT architecture, the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code> connects the <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> and its components to both internal and external data sources.
+It achieves this by maintaining a registry of <code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code> objects, each of which encapsulates the specific logic for accessing that specific dataset.
+It does not load or process data itself; instead, it delegates those responsibilities to <code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code> objects.</p>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code> comes with built-in support for several data catalogs:</p>
+<ul class="simple">
+<li><p><strong>Predefined catalogs</strong> - distributed with HydroMT or plugins (e.g., <code class="docutils literal notranslate"><span class="pre">deltares_data</span></code>, <code class="docutils literal notranslate"><span class="pre">aws_data</span></code>) that provide standardized and ready-to-use datasets.</p></li>
+<li><p><strong>Custom YAML catalogs</strong> - defined by users to reference their own data sources and file structures.</p></li>
+</ul>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code> can be used through the <code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code> class but also standalone in your own Python scripts for data access and processing outside of a model context.</p>
+<p>See also:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#data-source-architecture"><span class="std std-ref">DataSource</span></a></p></li>
+<li><p><a class="reference internal" href="#uri-resolver-architecture"><span class="std std-ref">URIResolver</span></a></p></li>
+<li><p><a class="reference internal" href="#driver-architecture"><span class="std std-ref">Driver</span></a></p></li>
+<li><p><a class="reference internal" href="#data-adapter-architecture"><span class="std std-ref">DataAdapter</span></a></p></li>
+<li><p><a class="reference internal" href="../../api/data_catalog.html#data-catalog-api"><span class="std std-ref">API</span></a></p></li>
+<li><p><a class="reference internal" href="../../user_guide/data_catalog/data_existing_cat.html#existing-catalog"><span class="std std-ref">Pre-defined catalogs</span></a></p></li>
+<li><p><a class="reference internal" href="../plugin_dev/custom_implementation/catalog.html#custom-data-catalog"><span class="std std-ref">Create your own</span></a></p></li>
+</ul>
 </section>
 <section id="datasource">
-<h2>DataSource<a class="headerlink" href="#datasource" title="Link to this heading">#</a></h2>
-<p>The <a class="reference internal" href="../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource" title="hydromt.data_catalog.sources.data_source.DataSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></a> is the python representation of a parsed
-entry in the <a class="reference internal" href="../../_generated/hydromt.data_catalog.DataCatalog.html#hydromt.data_catalog.DataCatalog" title="hydromt.data_catalog.DataCatalog"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code></a>. The source is responsible for
-validating the catalog entry. It also carries the
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.DataAdapterBase.html#hydromt.data_catalog.adapters.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a>,
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html#hydromt.data_catalog.uri_resolvers.URIResolver" title="hydromt.data_catalog.uri_resolvers.URIResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code></a> and
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.base_driver.BaseDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a> and serves as an entrypoint to the data.
-Per HydroMT data type (e.g. <code class="docutils literal notranslate"><span class="pre">RasterDataset</span></code>, <code class="docutils literal notranslate"><span class="pre">GeoDataFrame</span></code>), HydroMT has one
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource" title="hydromt.data_catalog.sources.data_source.DataSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></a>, e.g.
-<code class="xref py py-class docutils literal notranslate"><span class="pre">RasterDatasetSource</span></code>,
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.sources.GeoDataFrameSource.html#hydromt.data_catalog.sources.GeoDataFrameSource" title="hydromt.data_catalog.sources.geodataframe.GeoDataFrameSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">sources.geodataframe.GeoDataFrameSource</span></code></a>. The
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> method governs the full process of discovery
-with the <a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html#hydromt.data_catalog.uri_resolvers.URIResolver" title="hydromt.data_catalog.uri_resolvers.URIResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code></a>, reading data with the
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.base_driver.BaseDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a>, and transforming the data to a HydroMT
-standard with a <a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.DataAdapterBase.html#hydromt.data_catalog.adapters.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a>.</p>
+<span id="data-source-architecture"></span><h2>DataSource<a class="headerlink" href="#datasource" title="Link to this heading">#</a></h2>
+<p>Each entry in the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code> is represented by a <code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code>.
+A DataSource encapsulates all the logic required to retrieve and standardize a specific dataset, based on the catalog’s attributes and metadata.
+This abstraction separates data definition (in the catalog) from data access and transformation (in the source).</p>
+<p>When a model requests data by one of the DataCatalog’s API functions (e.g. <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_rasterdataset()</span></code>, <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_geodataframe()</span></code> etc.),
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataCatalog</span></code> looks up the matching DataSource and - along with some pre-processing of function parameters - calls its <code class="xref py py-meth docutils literal notranslate"><span class="pre">read_data()</span></code> method.</p>
+<p>From there, the DataSource handles the complete workflow:</p>
+<ol class="arabic simple">
+<li><p><strong>Resolve URIs</strong> - Using a <code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code>, it determines the actual file paths or URLs for the requested data. This supports flexible backends, such as local directories, cloud storage, or web APIs.</p></li>
+<li><p><strong>Load data</strong> - The resolved URIs are passed to a <code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code>, which reads the raw data into a Python object like an <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> or <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a>.</p></li>
+<li><p><strong>Transform and standardize</strong> - The loaded data are passed through a <code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code>, which applies consistent transformations (e.g., variable renaming, temporal/spatial slicing, or unit conversion) to produce a uniform HydroMT representation.</p></li>
+</ol>
+<p>This layered design allows the DataCatalog to stay lightweight and declarative — it only stores attributes and metadata (e.g., names, paths, data types, parameters), while the DataSource performs the operational work needed to translate those definitions into usable model inputs.</p>
+<p>See also:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#data-catalog-architecture"><span class="std std-ref">DataCatalog</span></a></p></li>
+<li><p><a class="reference internal" href="#uri-resolver-architecture"><span class="std std-ref">URIResolver</span></a></p></li>
+<li><p><a class="reference internal" href="#driver-architecture"><span class="std std-ref">Driver</span></a></p></li>
+<li><p><a class="reference internal" href="#data-adapter-architecture"><span class="std std-ref">DataAdapter</span></a></p></li>
+<li><p><a class="reference internal" href="../../api/data_source.html#data-source-api"><span class="std std-ref">API</span></a></p></li>
+<li><p><a class="reference internal" href="../plugin_dev/custom_implementation/data_source.html#custom-data-source"><span class="std std-ref">Implement your own</span></a></p></li>
+</ul>
 </section>
 <section id="uriresolver">
-<h2>URIResolver<a class="headerlink" href="#uriresolver" title="Link to this heading">#</a></h2>
-<p>Finding the right address where the requested data is stored is not always
-straightforward. Searching for data differs between finding data in a web-service,
-database, a catalog or when dealing with a certain naming convention. Exploring where
-the right data can be found is implemented in the <a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html#hydromt.data_catalog.uri_resolvers.URIResolver" title="hydromt.data_catalog.uri_resolvers.URIResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code></a>. The
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html#hydromt.data_catalog.uri_resolvers.URIResolver" title="hydromt.data_catalog.uri_resolvers.URIResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code></a> takes a single <cite>uri</cite> from the data catalog, and the query
-parameters from the model, such as the region, or the time range, and returns multiple
-absolute paths, or <cite>uri</cite> s, that can be read into a single python representation (e.g.
-<cite>xarray.Dataset</cite>). The <a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html#hydromt.data_catalog.uri_resolvers.URIResolver" title="hydromt.data_catalog.uri_resolvers.URIResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code></a> is extendable, so <a class="reference internal" href="../../about/plugins.html#plugins"><span class="std std-ref">Plugins</span></a> or other
-code can subclass the Abstract <a class="reference internal" href="../../_generated/hydromt.data_catalog.uri_resolvers.URIResolver.html#hydromt.data_catalog.uri_resolvers.URIResolver" title="hydromt.data_catalog.uri_resolvers.URIResolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code></a> class to implement their own
-conventions for data discovery.</p>
+<span id="uri-resolver-architecture"></span><h2>URIResolver<a class="headerlink" href="#uriresolver" title="Link to this heading">#</a></h2>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">URIResolver</span></code> locates data by resolving catalog references (URIs) into actual file paths or service endpoints.
+It takes query parameters such as spatial bounds or time ranges and returns one or more resolved URIs that can be read by a <code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code>.</p>
+<p>Custom resolvers can be added to support specific naming conventions, APIs, or cloud storage systems.</p>
+<p>See also:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#data-catalog-architecture"><span class="std std-ref">DataCatalog</span></a></p></li>
+<li><p><a class="reference internal" href="#driver-architecture"><span class="std std-ref">Driver</span></a></p></li>
+<li><p><a class="reference internal" href="../../api/uri_resolvers.html#uri-resolver-api"><span class="std std-ref">API</span></a></p></li>
+<li><p><a class="reference internal" href="../plugin_dev/custom_implementation/resolver.html#custom-resolver"><span class="std std-ref">Implement your own</span></a></p></li>
+</ul>
 </section>
 <section id="driver">
-<h2>Driver<a class="headerlink" href="#driver" title="Link to this heading">#</a></h2>
-<p>The <a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.base_driver.BaseDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a> class is responsible for reading a
-set of geospatial data formats, like a <code class="docutils literal notranslate"><span class="pre">geojson</span></code> file or <code class="docutils literal notranslate"><span class="pre">zarr</span></code> archive, into their
-python in-memory representations: <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a> or
-<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> respectively. This class can also be extended using the
-<a class="reference internal" href="../../about/plugins.html#plugins"><span class="std std-ref">Plugins</span></a>. Because the merging of different files from different
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.sources.DataSource.html#hydromt.data_catalog.sources.DataSource" title="hydromt.data_catalog.sources.data_source.DataSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></a> s can be non-trivial, the driver is responsible
-to merge the different python objects coming from the driver to a single representation.
-This is then returned from the <code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code> method. The query parameters vary per
-HydroMT data type, so there is is a different driver interface per type, e.g.
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.RasterDatasetDriver.html#hydromt.data_catalog.drivers.RasterDatasetDriver" title="hydromt.data_catalog.drivers.raster.raster_dataset_driver.RasterDatasetDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">RasterDatasetDriver</span></code></a>,
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.GeoDataFrameDriver.html#hydromt.data_catalog.drivers.GeoDataFrameDriver" title="hydromt.data_catalog.drivers.geodataframe.geodataframe_driver.GeoDataFrameDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeoDataFrameDriver</span></code></a>. To help with
-different filesystems, the driver class is handed a <code class="xref py py-class docutils literal notranslate"><span class="pre">fsspec.Filesystem</span></code>.</p>
+<span id="driver-architecture"></span><h2>Driver<a class="headerlink" href="#driver" title="Link to this heading">#</a></h2>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code> reads resolved data into memory as Python objects such as <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> or <a class="reference external" href="https://geopandas.org/en/stable/docs/reference/api/geopandas.GeoDataFrame.html#geopandas.GeoDataFrame" title="(in GeoPandas v1.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">geopandas.GeoDataFrame</span></code></a>.
+Each HydroMT data type (e.g., raster, vector) has a dedicated driver interface.</p>
+<p>Drivers handle the complexity of I/O operations, including merging multiple files and managing filesystem access through <cite>fsspec</cite>.
+New drivers can be added through HydroMT’s plugin system to support custom formats.</p>
+<p>Existing drivers in HydroMT core include:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Driver</p></th>
+<th class="head"><p>Data type</p></th>
+<th class="head"><p>File formats</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.RasterioDriver.html#hydromt.data_catalog.drivers.RasterioDriver" title="hydromt.data_catalog.drivers.raster.rasterio_driver.RasterioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">rasterio</span></code></a></p></td>
+<td><p>RasterDataset</p></td>
+<td><p>GeoTIFF, ArcASCII, VRT, tile index, etc.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.RasterDatasetXarrayDriver.html#hydromt.data_catalog.drivers.RasterDatasetXarrayDriver" title="hydromt.data_catalog.drivers.raster.raster_xarray_driver.RasterDatasetXarrayDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">raster_xarray</span></code></a></p></td>
+<td><p>RasterDataset</p></td>
+<td><p>NetCDF and Zarr</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.PyogrioDriver.html#hydromt.data_catalog.drivers.PyogrioDriver" title="hydromt.data_catalog.drivers.geodataframe.pyogrio_driver.PyogrioDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyogrio</span></code></a></p></td>
+<td><p>GeoDataFrame</p></td>
+<td><p>ESRI Shapefile, GeoPackage, GeoJSON, etc.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.GeoDataFrameTableDriver.html#hydromt.data_catalog.drivers.GeoDataFrameTableDriver" title="hydromt.data_catalog.drivers.geodataframe.table_driver.GeoDataFrameTableDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">geodataframe_table</span></code></a></p></td>
+<td><p>GeoDataFrame</p></td>
+<td><p>CSV, XY, PARQUET and EXCEL</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.GeoDatasetVectorDriver.html#hydromt.data_catalog.drivers.GeoDatasetVectorDriver" title="hydromt.data_catalog.drivers.geodataset.vector_driver.GeoDatasetVectorDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">geodataset_vector</span></code></a></p></td>
+<td><p>GeoDataset</p></td>
+<td><p>Vector location (e.g. CSV or GeoJSON) &amp; text delimited time-series (e.g. CSV).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.GeoDatasetXarrayDriver.html#hydromt.data_catalog.drivers.GeoDatasetXarrayDriver" title="hydromt.data_catalog.drivers.geodataset.xarray_driver.GeoDatasetXarrayDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">geodataset_xarray</span></code></a></p></td>
+<td><p>GeoDataset</p></td>
+<td><p>NetCDF and Zarr</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.DatasetXarrayDriver.html#hydromt.data_catalog.drivers.DatasetXarrayDriver" title="hydromt.data_catalog.drivers.dataset.xarray_driver.DatasetXarrayDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">dataset_xarray</span></code></a></p></td>
+<td><p>Dataset</p></td>
+<td><p>NetCDF and Zarr</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.PandasDriver.html#hydromt.data_catalog.drivers.PandasDriver" title="hydromt.data_catalog.drivers.dataframe.pandas_driver.PandasDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas</span></code></a></p></td>
+<td><p>DataFrame</p></td>
+<td><p>Any file readable by pandas (CSV, EXCEL, PARQUET, etc.)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>See also:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#uri-resolver-architecture"><span class="std std-ref">URIResolver</span></a></p></li>
+<li><p><a class="reference internal" href="#data-adapter-architecture"><span class="std std-ref">DataAdapter</span></a></p></li>
+<li><p><a class="reference internal" href="../../api/drivers.html#driver-api"><span class="std std-ref">API</span></a></p></li>
+<li><p><a class="reference internal" href="../plugin_dev/custom_implementation/driver.html#custom-driver"><span class="std std-ref">Implement your own</span></a></p></li>
+</ul>
 </section>
 <section id="dataadapter">
-<h2>DataAdapter<a class="headerlink" href="#dataadapter" title="Link to this heading">#</a></h2>
-<p>The <a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.DataAdapterBase.html#hydromt.data_catalog.adapters.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a> homogenizes the
-data coming from the <a class="reference internal" href="../../_generated/hydromt.data_catalog.drivers.BaseDriver.html#hydromt.data_catalog.drivers.BaseDriver" title="hydromt.data_catalog.drivers.base_driver.BaseDriver"><code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code></a>. This means slicing
-the data to the right region, renaming variables, changing units, regridding and more.
-The adapter has a <code class="xref py py-meth docutils literal notranslate"><span class="pre">transform()</span></code> method that takes a python object and returns the
-same type, e.g. an <cite>xr.Dataset</cite>. This method also accepts query parameters based on the
-data type, so there is a single
-<a class="reference internal" href="../../_generated/hydromt.data_catalog.adapters.DataAdapterBase.html#hydromt.data_catalog.adapters.DataAdapterBase" title="hydromt.data_catalog.adapters.data_adapter_base.DataAdapterBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code></a> per HydroMT data type.</p>
+<span id="data-adapter-architecture"></span><h2>DataAdapter<a class="headerlink" href="#dataadapter" title="Link to this heading">#</a></h2>
+<p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">DataAdapter</span></code> standardizes and transforms data after it has been read by a <code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code>.
+It performs operations such as variable selection, temporal/spatial slicing, renaming, or unit conversion
+to ensure consistency across datasets and models. Note that in some cases, some of these steps may also be
+performed in the <code class="xref py py-class docutils literal notranslate"><span class="pre">Driver</span></code> itself if the underlying xarray, pandas, or geopandas library supports it
+directly in their read function.</p>
+<p>Each data type (raster, vector, etc.) has its own adapter interface responsible for transforming data into HydroMT’s standardized representation.</p>
+<p>See also:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#driver-architecture"><span class="std std-ref">Driver</span></a></p></li>
+<li><p><a class="reference internal" href="#data-catalog-architecture"><span class="std std-ref">DataCatalog</span></a></p></li>
+<li><p><a class="reference internal" href="../../api/data_adapter.html#data-adapter-api"><span class="std std-ref">API</span></a></p></li>
+<li><p><a class="reference internal" href="../plugin_dev/custom_implementation/data_adapter.html#custom-data-adapter"><span class="std std-ref">Implement your own</span></a></p></li>
+</ul>
 </section>
+<section id="extensibility">
+<h2>Extensibility<a class="headerlink" href="#extensibility" title="Link to this heading">#</a></h2>
+<p>HydroMT’s architecture is fully extensible.
+Developers can subclass models, components, drivers, adapters, or resolvers and register them through <a class="reference internal" href="../plugin_dev/register.html#register-plugins"><span class="std std-ref">the plugin system</span></a>.
+This is only required if you want to use/support your custom classes through the HydroMT data catalog or model configuration yml files.
+If you are using your custom classes directly in Python code, you can simply instantiate and use them without registering as a plugin.
+This flexibility allows HydroMT to support new model types, data formats, and workflows without changing the core library.</p>
+<p>See also:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../plugin_dev/register.html#register-plugins"><span class="std std-ref">Linking your own custom objects to HydroMT core API</span></a></p></li>
+</ul>
 </section>
-<section id="architecture-diagram">
-<h1>Architecture Diagram<a class="headerlink" href="#architecture-diagram" title="Link to this heading">#</a></h1>
-<p>The above is summarized in the following architecture diagram. Only the aforementioned
-methods and properties are used.</p>
-<a class="reference internal image-reference" href="../../_images/HydroMT-Architecture-OverArching.drawio.png"><img alt="HydroMT main classes" src="../../_images/HydroMT-Architecture-OverArching.drawio.png" style="width: 800px;" />
-</a>
 </section>
 
 
@@ -560,20 +698,20 @@ methods and properties are used.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../intro.html"
+       href="index.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Developer Guide</p>
+        <p class="prev-next-title">HydroMT Architecture</p>
       </div>
     </a>
     <a class="right-next"
-       href="../plugin_dev/index.html"
+       href="conventions.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Plugin Developer guide</p>
+        <p class="prev-next-title">HydroMT Design Conventions</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -616,7 +754,6 @@ methods and properties are used.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Architecture</a><ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model">Model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modelcomponent">ModelComponent</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#datacatalog">DataCatalog</a></li>
@@ -624,11 +761,8 @@ methods and properties are used.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#uriresolver">URIResolver</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#driver">Driver</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dataadapter">DataAdapter</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#extensibility">Extensibility</a></li>
 </ul>
-</li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#architecture-diagram">Architecture Diagram</a></li>
-</ul>
-
   </nav></div>
 
 </div></div>

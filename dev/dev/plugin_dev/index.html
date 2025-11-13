@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Plugin Developer guide &#8212; HydroMT  documentation</title>
+    <title>Plugin Developer Guide &#8212; HydroMT  documentation</title>
   
   
   
@@ -57,8 +57,8 @@
     <link rel="icon" href="../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Starting your own HydroMT Plugin" href="plugin_quickstart.html" />
-    <link rel="prev" title="Architecture" href="../architecture/architecture.html" />
+    <link rel="next" title="Starting Your Own HydroMT Plugin" href="quickstart.html" />
+    <link rel="prev" title="HydroMT Design Conventions" href="../architecture/conventions.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.2.0.dev0" />
@@ -373,24 +373,38 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../architecture/architecture.html">Architecture</a></li>
-
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">HydroMT Architecture</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/architecture.html">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/conventions.html">HydroMT Design Conventions</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">Plugin Developer Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="plugin_quickstart.html">Starting your own HydroMT Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html">Implementing your own HydroMT Model class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_component.html">Creating your own Model Components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_catalog.html">Pre-defined Data Catalog for your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_driver.html">Custom Data Driver and Resolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="register_plugin.html">Linking your own custom objects to HydroMT core API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html">Starting Your Own HydroMT Plugin</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="custom_implementation/index.html">Implement your own HydroMT objects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="custom_implementation/model.html">Custom Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_implementation/component.html">Custom Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_implementation/catalog.html">Custom Data Catalogs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_implementation/data_source.html">Custom Data Sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_implementation/driver.html">Custom Drivers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_implementation/resolver.html">Custom Resolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="custom_implementation/data_adapter.html">Custom DataAdapter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="register.html">Linking your own custom objects to HydroMT core API</a></li>
 
-<li class="toctree-l2"><a class="reference internal" href="testing_your_plugin.html">Testing your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html">Migrating your plugin to v1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing.html">Testing your plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html">Migrating to v1</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../core_dev/index.html">Core Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/contributing.html">Developer’s guide</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/documentation.html">Adding Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../core_dev/dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/git_conventions.html">Issue conventions</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/code_conventions.html">Code conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/documentation.html">Adding Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/test_ci.html">Test and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/release.html">Creating a release</a></li>
 </ul>
 </details></li>
 </ul>
@@ -436,7 +450,7 @@
     
     <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">Developer Guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Plugin Developer guide</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Plugin Developer Guide</span></li>
   </ul>
 </nav>
 </div>
@@ -454,84 +468,43 @@
                 <article class="bd-article">
                   
   <section id="plugin-developer-guide">
-<span id="intro-plugin-guide"></span><h1>Plugin Developer guide<a class="headerlink" href="#plugin-developer-guide" title="Link to this heading">#</a></h1>
+<span id="intro-plugin-guide"></span><h1>Plugin Developer Guide<a class="headerlink" href="#plugin-developer-guide" title="Link to this heading">#</a></h1>
+<p>This guide provides step-by-step instructions on building, registering, and testing your own HydroMT plugin — from models and components to data catalogs and resolvers.</p>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-3 sd-row-cols-xs-3 sd-row-cols-sm-3 sd-row-cols-md-3 sd-row-cols-lg-3 sd-g-1 sd-g-xs-1 sd-g-sm-1 sd-g-md-1 sd-g-lg-1 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text"><svg version="1.1" width="5.0em" height="5.0em" class="sd-octicon sd-octicon-rocket sd-text-icon blue-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.322.75h1.176a1.75 1.75 0 0 1 1.75 1.749v1.177a10.75 10.75 0 0 1-2.925 7.374l-1.228 1.304a23.699 23.699 0 0 1-1.596 1.542v5.038c0 .615-.323 1.184-.85 1.5l-4.514 2.709a.75.75 0 0 1-1.12-.488l-.963-4.572a1.305 1.305 0 0 1-.14-.129L8.04 15.96l-1.994-1.873a1.305 1.305 0 0 1-.129-.14l-4.571-.963a.75.75 0 0 1-.49-1.12l2.71-4.514c.316-.527.885-.85 1.5-.85h5.037a23.668 23.668 0 0 1 1.542-1.594l1.304-1.23A10.753 10.753 0 0 1 20.321.75Zm-6.344 4.018v-.001l-1.304 1.23a22.275 22.275 0 0 0-3.255 3.851l-2.193 3.29 1.859 1.744a.545.545 0 0 1 .034.034l1.743 1.858 3.288-2.192a22.263 22.263 0 0 0 3.854-3.257l1.228-1.303a9.251 9.251 0 0 0 2.517-6.346V2.5a.25.25 0 0 0-.25-.25h-1.177a9.252 9.252 0 0 0-6.344 2.518ZM6.5 21c-1.209 1.209-3.901 1.445-4.743 1.49a.236.236 0 0 1-.18-.067.236.236 0 0 1-.067-.18c.045-.842.281-3.534 1.49-4.743.9-.9 2.6-.9 3.5 0 .9.9.9 2.6 0 3.5Zm-.592-8.588L8.17 9.017c.23-.346.47-.685.717-1.017H5.066a.25.25 0 0 0-.214.121l-2.167 3.612ZM16 15.112c-.333.248-.672.487-1.018.718l-3.393 2.262.678 3.223 3.612-2.167a.25.25 0 0 0 .121-.214ZM17.5 8a1.5 1.5 0 1 1-3.001-.001A1.5 1.5 0 0 1 17.5 8Z"></path></svg></p>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Starting your own HydroMT Plugin</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="quickstart.html#plugin-quickstart"><span class="std std-ref">Starting Your Own HydroMT Plugin</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text"><svg version="1.1" width="5.0em" height="5.0em" class="sd-octicon sd-octicon-plug sd-text-icon blue-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11.5H2.938c-.794 0-1.438.644-1.438 1.437v8.313a.75.75 0 0 1-1.5 0v-8.312A2.939 2.939 0 0 1 2.937 10H7V6.151c0-.897.678-1.648 1.57-1.74l6.055-.626 1.006-1.174A1.752 1.752 0 0 1 16.96 2h1.29c.966 0 1.75.784 1.75 1.75V6h3.25a.75.75 0 0 1 0 1.5H20V14h3.25a.75.75 0 0 1 0 1.5H20v2.25a1.75 1.75 0 0 1-1.75 1.75h-1.29a1.75 1.75 0 0 1-1.329-.611l-1.006-1.174-6.055-.627A1.749 1.749 0 0 1 7 15.348Zm9.77-7.913v.001l-1.201 1.4a.75.75 0 0 1-.492.258l-6.353.657a.25.25 0 0 0-.224.249v9.196a.25.25 0 0 0 .224.249l6.353.657c.191.02.368.112.493.258l1.2 1.401a.252.252 0 0 0 .19.087h1.29a.25.25 0 0 0 .25-.25v-14a.25.25 0 0 0-.25-.25h-1.29a.252.252 0 0 0-.19.087Z"></path></svg></p>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Linking your own custom objects to HydroMT core API</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="register.html#register-plugins"><span class="std std-ref">Linking your own custom objects to HydroMT core API</span></a></div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover sd-text-center docutils">
+<div class="sd-card-body docutils">
+<p class="sd-card-text"><svg version="1.1" width="5.0em" height="5.0em" class="sd-octicon sd-octicon-check-circle sd-text-icon blue-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.28 9.28a.75.75 0 0 0-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 0 0-1.06 1.06l3 3a.75.75 0 0 0 1.06 0l6.5-6.5Z"></path><path d="M12 1c6.075 0 11 4.925 11 11s-4.925 11-11 11S1 18.075 1 12 5.925 1 12 1ZM2.5 12a9.5 9.5 0 0 0 9.5 9.5 9.5 9.5 0 0 0 9.5-9.5A9.5 9.5 0 0 0 12 2.5 9.5 9.5 0 0 0 2.5 12Z"></path></svg></p>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Testing your plugin</p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference internal" href="testing.html#test-your-plugin"><span class="std std-ref">Testing your plugin</span></a></div>
+</div>
+</div>
+</div>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="plugin_quickstart.html">Starting your own HydroMT Plugin</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="plugin_quickstart.html#create-your-own-plugin-repository">Create your own plugin repository</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="plugin_quickstart.html#typical-hydromt-repository-structure">Typical HydroMT repository structure</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="custom_model.html">Implementing your own HydroMT Model class</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html#initialisation">Initialisation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html#additional-model-properties">Additional Model properties</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html#setup-basic-model-objects">Setup basic model objects</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html#setup-methods">Setup methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html#processes">Processes</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="custom_component.html">Creating your own Model Components</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="custom_component.html#implementing-a-component">Implementing a component</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="custom_component.html#initialisation">Initialisation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="custom_component.html#required-attributes">Required attributes</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="custom_catalog.html">Pre-defined Data Catalog for your plugin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="custom_driver.html">Custom Data Driver and Resolver</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="custom_driver.html#custom-drivers">Custom Drivers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="custom_driver.html#implementing-a-drivers">Implementing a Drivers</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="custom_driver.html#custom-resolver">Custom Resolver</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="custom_driver.html#implementing-a-resolver">Implementing a Resolver</a></li>
-<li class="toctree-l3"><a class="reference internal" href="custom_driver.html#handling-non-existent-data">Handling non-existent data</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="register_plugin.html">Linking your own custom objects to HydroMT core API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="register_plugin.html#entrypoints">EntryPoints</a></li>
-<li class="toctree-l1"><a class="reference internal" href="testing_your_plugin.html">Testing your plugin</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="testing_your_plugin.html#testing-model-components">Testing model components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="testing_your_plugin.html#testing-models">Testing models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="testing_your_plugin.html#testing-your-plugin-as-a-whole">Testing your plugin as a whole</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="migrating_to_v1.html">Migrating your plugin to v1</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html#model-and-modelcomponent">Model and ModelComponent</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="migrating_to_v1.html#new-modelcomponent-class">New <cite>ModelComponent</cite> class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="migrating_to_v1.html#changes-to-the-yaml-hydromt-configuration-file-format">Changes to the <cite>yaml</cite> HydroMT configuration file format</a></li>
-<li class="toctree-l3"><a class="reference internal" href="migrating_to_v1.html#model-region-and-geo-spatial-components">Model region and geo-spatial components</a></li>
-<li class="toctree-l3"><a class="reference internal" href="migrating_to_v1.html#removing-support-for-ini-and-toml-hydromt-configuration-files">Removing support for <cite>ini</cite> and <cite>toml</cite> HydroMT configuration files</a></li>
-<li class="toctree-l3"><a class="reference internal" href="migrating_to_v1.html#implementing-model-components-for-developers">Implementing Model Components (for developers)</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="migrating_to_v1.html#adding-components-to-a-model">Adding Components to a Model</a></li>
-<li class="toctree-l4"><a class="reference internal" href="migrating_to_v1.html#removed-model-attributes">Removed Model attributes</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html#datacatalog">DataCatalog</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="migrating_to_v1.html#changes-to-the-data-catalog-yaml-file-format">Changes to the data catalog <cite>yaml</cite> file format</a></li>
-<li class="toctree-l3"><a class="reference internal" href="migrating_to_v1.html#removing-dictionary-like-features-for-the-datacatalog">Removing dictionary-like features for the DataCatalog</a></li>
-<li class="toctree-l3"><a class="reference internal" href="migrating_to_v1.html#split-the-responsibilities-of-the-dataadapter-into-separate-classes">Split the responsibilities of the <cite>DataAdapter</cite> into separate classes</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="migrating_to_v1.html#datasource">DataSource</a></li>
-<li class="toctree-l4"><a class="reference internal" href="migrating_to_v1.html#uriresolver">URIResolver</a></li>
-<li class="toctree-l4"><a class="reference internal" href="migrating_to_v1.html#driver">Driver</a></li>
-<li class="toctree-l4"><a class="reference internal" href="migrating_to_v1.html#dataadapter">DataAdapter</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html#package-api">Package API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html#logging">Logging</a></li>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html#plugins">Plugins</a></li>
-</ul>
-</li>
-</ul>
 </div>
 </section>
 
@@ -546,20 +519,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../architecture/architecture.html"
+       href="../architecture/conventions.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Architecture</p>
+        <p class="prev-next-title">HydroMT Design Conventions</p>
       </div>
     </a>
     <a class="right-next"
-       href="plugin_quickstart.html"
+       href="quickstart.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Starting your own HydroMT Plugin</p>
+        <p class="prev-next-title">Starting Your Own HydroMT Plugin</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
