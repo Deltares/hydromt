@@ -1,5 +1,7 @@
 .. currentmodule:: hydromt.plugins
 
+.. _hydromt_plugins_api:
+
 =======
 Plugins
 =======

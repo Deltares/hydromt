@@ -5,9 +5,9 @@ Model components (advanced)
 
 .. note::
 
-    This page is only about how to use components, not how to create a custom one. if
+    This page is only about how to use components, not how to create a custom one. If
     you want to create a custom component or add default components to your custom model
-    please refer to :ref:`custom_components` or :ref:`custom_model_builder`
+    please refer to :ref:`custom_component` or :ref:`custom_model`
 
 Model components are how HydroMT specifies a lot of its behaviors. Basically For HydroMT,
 a model is several by several components or files that you can then build and update step by step.

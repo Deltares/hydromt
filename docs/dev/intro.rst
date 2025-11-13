@@ -8,7 +8,7 @@ Developer Guide
 
     .. grid-item-card::
         :text-align: center
-        :link: architecture/architecture
+        :link: architecture/index
         :link-type: doc
 
         :octicon:`database;5em;sd-text-icon blue-icon`
@@ -38,6 +38,6 @@ Developer Guide
     :hidden:
     :caption: Developer Guide
 
-    HydroMT Architecture <architecture/architecture>
+    HydroMT Architecture <architecture/index>
     Plugin Developer Guide <plugin_dev/index>
     Core Developer Guide <core_dev/index>
