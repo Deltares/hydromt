@@ -4,11 +4,11 @@ Linking your own custom objects to HydroMT core API
 ===================================================
 
 Due to the extremely wide range of data formats and conventions out in the world
-HydroMT offers a lot of ways to define custom behaviour, which is where you will
+HydroMT offers a lot of ways to define custom behavior, which is where you will
 probably spend most of your time as a plugin developer. We offer the possibility
-of extending what is in hydromt via the use of entry points. These entry points
-are a way of telling hydromt core about code you would like it to use to do specialised
-such as reading and writing a custom file format. Currently core exposes the following
+of extending what is in hydromt via the use of **entry points**. These entry points
+are a way of telling hydromt core about classes you would like to use to do specialized
+tasks such as reading and writing a custom file format. Currently core exposes the following
 entry points to extend its functionalities:
 
 * Model
@@ -17,20 +17,20 @@ entry points to extend its functionalities:
 * Driver
 * Catalog
 
-We will elaborate on each of these entrypoints in more detail in their own section but
-first we will cover the necessary information that is common to all: how to tell hydromt
-to use your custom behaviour. As an example we will use the hypothetical hydromt plugin
+We elaborate on each of these entrypoints in more detail in the :ref:`custom objects <plugin_examples>`
+section and here we will cover the necessary information that is common to all: how to tell hydromt
+to use your custom behavior. As an example we will use the hypothetical hydromt plugin
 for the (fictional) Advanced Water and Environmental Systems Optimization and Modeling
 Engine or AWESOME for short. The package will be called `hydromt_awesome`.
 
 EntryPoints
 ===========
 
-Entrypoints are how you can tell Python (and by extention HydroMT) about your code that
-you would like it to use. You can find more detailed information about them in the
-`official Python documentation <https://packaging.python.org/en/latest/specifications/entry-points/>`
-You first do this by specifying the entrypoint to tell HydroMT about in your
-`pyproject.toml`. So for example in the `pyproject.toml` of `hydromt_awesome` we might
+Entrypoints are how you can tell Python (and by extension HydroMT) about your custom objects that
+you would like HydroMT to use. You can find more detailed information about them in the
+`official Python documentation <https://packaging.python.org/en/latest/specifications/entry-points/>`_
+You first do this by specifying the HydroMT entrypoints in your
+``pyproject.toml``. So for example in the ``pyproject.toml`` of ``hydromt_awesome`` we might
 write:
 
 .. code-block::toml
@@ -54,18 +54,18 @@ write:
 
 
 The structure of these should be very similar across all entrypoints. The header should
-be of the form `project.entry-points.` followed by the path to the hydromt object you
+be of the form ``project.entry-points.`` followed by the path to the hydromt object you
 want to provide your own implementation for. In most cases this should be accessible
 from the root level of hydromt so one of the examples above should suffice.
 
 The key under the header is just a name for the plugin that will be used to display
-where a plugin is being loaded from (handy if you have multiple plugins loaded)
+where a plugin is being loaded from (handy if you have multiple plugins loaded).
 The value of the pair should be the path from the root necessary to import your object,
 usually this will point to a submodule.
 
-In the submodule you point to should define a global `__hydromt_eps__` list of names of
+Then, the submodule you point to should define a global ``__hydromt_eps__`` list of names of
 objects to import. Note that this should be a list of strings. For example, here is the
-`__hydromt_eps__` list that core devines for it's model components (we use the same
+``__hydromt_eps__`` list that core defines for its model components (we use the same
 mechanism as you will)
 
 .. code-block:: python
@@ -83,7 +83,7 @@ mechanism as you will)
 
 The objects you define in this list should of course be imported before you define them.
 All the classes you define here should become available to access through the HydroMT
-plugin functionality. You can verify that HydroMT can discover your plugins by running
+plugin functionality. You can verify that HydroMT can discover your plugin custom objects by running
 the CLI with the relevant flag. For example if you want to see which model components
 are available in the current installation you can print them by executing:
 
@@ -106,3 +106,19 @@ they were imported from and which version.
 After your plugin classes are properly detected, you can ask HydroMT to access them in
 your scripts and yml workflow files. For more information on the specific entrypoints
 and how they should be implemented, see each of the corresponding sections.
+
+The ``model`` entrypoint is one of the most important ones, as it allows you to define
+custom models that HydroMT can use. The name that you give in the entrypoint definition
+in the ``pyproject.toml`` file can be used in the HydroMT CLI to ``build`` or ``update``
+a model. For example if we had defined the following entrypoint in our plugin and we also
+have installed hydromt_wflow in our environment:
+
+.. code-block:: shell
+
+    $ hydromt --models
+    Model plugins:
+            - model (hydromt 1.0.0)
+            - example_model (hydromt 1.0.0)
+            - wflow_sbm (hydromt_wflow 1.0.0)
+            - wflow_sediment (hydromt_wflow 1.0.0)
+            - awesome (hydromt_awesome 0.1.0)

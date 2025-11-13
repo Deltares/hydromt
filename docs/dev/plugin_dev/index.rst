@@ -1,15 +1,45 @@
 .. _intro_plugin_guide:
 
-Plugin Developer guide
+Plugin Developer Guide
 ======================
 
-.. toctree::
+This guide provides step-by-step instructions on building, registering, and testing your own HydroMT plugin — from models and components to data catalogs and resolvers.
 
-    Starting your own HydroMT Plugin <plugin_quickstart>
-    Implementing your own HydroMT Model class <custom_model>
-    Creating your own Model Components <custom_component>
-    Pre-defined Data Catalog for your plugin <custom_catalog>
-    Custom Data Driver and Resolver <custom_driver>
-    Linking your own custom objects to HydroMT core API <register_plugin>
-    Testing your plugin <testing_your_plugin>
-    Migrating your plugin to v1 <migrating_to_v1>
+.. grid:: 3
+    :gutter: 1
+
+    .. grid-item-card::
+        :text-align: center
+        :link: plugin_quickstart
+        :link-type: ref
+
+        :octicon:`rocket;5em;sd-text-icon blue-icon`
+        +++
+        Starting your own HydroMT Plugin
+
+    .. grid-item-card::
+        :text-align: center
+        :link: register_plugins
+        :link-type: ref
+
+        :octicon:`plug;5em;sd-text-icon blue-icon`
+        +++
+        Linking your own custom objects to HydroMT core API
+
+    .. grid-item-card::
+        :text-align: center
+        :link: test_your_plugin
+        :link-type: ref
+
+        :octicon:`check-circle;5em;sd-text-icon blue-icon`
+        +++
+        Testing your plugin
+
+.. toctree::
+   :hidden:
+
+   quickstart
+   Implement your own HydroMT objects <custom_implementation/index>
+   register
+   testing
+   migrating_to_v1

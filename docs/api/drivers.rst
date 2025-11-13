@@ -1,6 +1,6 @@
 .. currentmodule:: hydromt.data_catalog.drivers
 
-.. _drivers:
+.. _driver_api:
 
 =======
 Drivers
