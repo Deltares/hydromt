@@ -190,6 +190,7 @@ class DataCatalogV0Item(BaseModel):
     meta: DataCatalogV0ItemMetadata | None = None
     unit_add: dict[str, Number] | None = None
     unit_mult: dict[str, Number] | None = None
+    attrs: dict[str, Any] | None = None
     variants: list[SourceVariant] | None = None
     version: str | Number | None = None
 

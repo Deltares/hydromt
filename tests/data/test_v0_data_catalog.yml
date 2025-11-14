@@ -107,6 +107,9 @@ era5:
     kout: 0.000277778
     precip: 1000
     press_msl: 0.01
+  attrs:
+    precip:
+      unit: mm
 era5_hourly:
   crs: 4326
   data_type: RasterDataset
