@@ -56,6 +56,7 @@ Fixed
 - Passing options to ``geodataframe_table`` driver now works. (#1271)
 - Relative path in the workflow yaml were not correctly resolved. (#1304)
 - Fix pydantic for V1 catalog for nodata and fix the catalog upgrade to convert nodata and extra metadata arguments. (#1304)
+- Fix pydantic for V1 catalog for attrs and fix the catalog upgrade to convert attrs arguments.
 - Do not pass metadata "extent" from catalog in xarray objects to avoid issues when writting to netcdf. (#1304)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)
