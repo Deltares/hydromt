@@ -65,6 +65,7 @@ class DatasetAdapter(DataAdapterBase):
             return ds
         except NoDataException:
             exec_nodata_strat("No data to export", strategy=handle_nodata)
+            return None
 
     def _rename_vars(self, ds: Data) -> Data:
         rm = {k: v for k, v in self.rename.items() if k in ds}

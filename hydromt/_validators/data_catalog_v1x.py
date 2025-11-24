@@ -164,6 +164,7 @@ class DataCatalogV1ItemMetadata(BaseModel):
 
     crs: str | int | None = None
     nodata: Number | dict[str, Number] | None = None
+    attrs: Dict[str, Any] | None = None
     category: str | None = None
     paper_doi: str | None = None
     paper_ref: str | None = None
@@ -195,13 +196,20 @@ class DataCatalogV1ItemMetadata(BaseModel):
         v0_metadata: DataCatalogV0ItemMetadata | None,
         crs: str | int | None = None,
         nodata: Number | dict[str, Number] | None = None,
+        attrs: Dict[str, Any] | None = None,
     ):
-        if (v0_metadata is None or v0_metadata.is_empty()) and not crs and not nodata:
+        if (
+            (v0_metadata is None or v0_metadata.is_empty())
+            and not crs
+            and not nodata
+            and not attrs
+        ):
             return None
         elif v0_metadata:
             return DataCatalogV1ItemMetadata(
                 crs=crs,
                 nodata=nodata,
+                attrs=attrs,
                 category=v0_metadata.category,
                 paper_doi=v0_metadata.paper_doi,
                 paper_ref=v0_metadata.paper_ref,
@@ -214,7 +222,7 @@ class DataCatalogV1ItemMetadata(BaseModel):
                 **v0_metadata.model_extra,
             )
         else:
-            return DataCatalogV1ItemMetadata(crs=crs, nodata=nodata)
+            return DataCatalogV1ItemMetadata(crs=crs, nodata=nodata, attrs=attrs)
 
     @staticmethod
     def from_dict(input_dict):
@@ -280,7 +288,10 @@ class DataCatalogV1Item(BaseModel):
             driver = None
 
         metadata = DataCatalogV1ItemMetadata.from_v0(
-            v0_metadata=v0_item.meta, crs=v0_item.crs, nodata=v0_item.nodata
+            v0_metadata=v0_item.meta,
+            crs=v0_item.crs,
+            nodata=v0_item.nodata,
+            attrs=v0_item.attrs,
         )
 
         adapter_dict = {}

@@ -1,5 +1,7 @@
 .. currentmodule:: hydromt.cli
 
+.. _hydromt_cli_api:
+
 ======================
 Command Line Interface
 ======================

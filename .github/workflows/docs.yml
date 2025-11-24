@@ -5,21 +5,19 @@ on:
   push:
     branches: [main]
     paths:
-      - tests/*
-      - hydromt/*
-      - data/*
-      - docs/*
-      - examples/*
+      - hydromt/**
+      - data/**
+      - docs/**
+      - examples/**
       - pyproject.toml
       - .github/workflows/docs.yml
   pull_request:
     branches: [main]
     paths:
-      - tests/*
-      - hydromt/*
-      - data/*
-      - docs/*
-      - examples/*
+      - hydromt/**
+      - data/**
+      - docs/**
+      - examples/**
       - pyproject.toml
       - .github/workflows/docs.yml
 
@@ -32,10 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@v5
-      - uses: prefix-dev/setup-pixi@v0.9.2
+        uses: actions/checkout@v6
+      - uses: prefix-dev/setup-pixi@v0.9.3
         with:
-          pixi-version: "v0.49.0"
+          pixi-version: "v0.59.0"
 
       # if we're not publishing we don't have to write them, so we might as well
       # save ourself a bunch of IO time

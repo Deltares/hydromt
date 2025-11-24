@@ -43,7 +43,7 @@ dependencies = [
 	"xarray",                 # ndim data arrays
 	"xmltodict",              # xml parser also used to read VRT
 	"xugrid>=0.9.0",          # xarray wrapper for mesh processing
-	"zarr>=2.17,<4",          # zarr
+	"zarr>=3.1,<4",           # zarr
 ]
 
 requires-python = ">=3.11"
@@ -64,15 +64,17 @@ dynamic = ['version', 'description']
 [project.optional-dependencies]
 io = [
 	"gcsfs>=2023.12.1", # google cloud file system
-	"gdal>=3.5.0",      # Our favourite geospatial library
 	"fastparquet",      # parquet IO
 	"openpyxl",         # excel IO
 	"pillow",           # image IO
 	"s3fs",             # S3 file system
 ]
+vrt = [
+	"gdal>=3.5.0",      # vrt for caching of mosaic raster
+]
 extra = [
 	"matplotlib", # plotting; required for slippy tiles
-	"pyet",       # calc evapotraspiration, quite well used, used in all wflow models but domain specific
+	"pyet",       # calc evapotranspiration, quite well used, used in all wflow models but domain specific
 ]
 dev = [
 	"flit",            # needed to publish to pypi
@@ -109,6 +111,7 @@ examples = [
 	"jupyterlab", # run examples in jupyter notebook
 	"notebook",   # jupyter integration
 ]
+slim = ["hydromt[io,extra,examples]"]
 
 [project.urls]
 Documentation = "https://deltares.github.io/hydromt"
@@ -124,7 +127,7 @@ core = "hydromt.model.components"
 core = "hydromt.data_catalog.drivers"
 
 [project.entry-points."hydromt.models"]
-core = "hydromt.model.model"
+core = "hydromt.model"
 
 [project.entry-points."hydromt.catalogs"]
 core = "hydromt.data_catalog.predefined_catalog"
@@ -138,7 +141,7 @@ description = { file = "hydromt/__init__.py" }
 [tool.ruff]
 line-length = 88
 target-version = "py311"
-exclude = ["docs"]
+exclude = ["docs", "hydromt/model/__init__.py"]
 
 [tool.ruff.lint]
 # enable pydocstyle (E), pyflake (F) and isort (I), pytest-style (PT), bugbear (B)
@@ -184,6 +187,8 @@ filterwarnings = [
 
 	# zarr v3 experimental warning
 	"ignore:Consolidated metadata is currently not part in the Zarr format 3 specification:UserWarning",
+	# irrelevant radolan engine warning
+	"ignore:Engine 'radolan' loading failed.*:RuntimeWarning",
 ]
 
 [tool.mypy]
@@ -222,8 +227,10 @@ hydromt = { path = ".", editable = true }
 pandoc = "*"
 
 [tool.pixi.feature.io.dependencies]
-gdal = ">=3.5.0"
 pyflwdir = ">=0.5.4"
+
+[tool.pixi.feature.vrt.dependencies]
+gdal = ">=3.5.0"
 
 [tool.pixi.feature.doc.tasks]
 doctest = { cmd = [
@@ -378,6 +385,7 @@ clean-docs-examples = { cmd = ["rm", "-rf", "docs/examples"] }
 default = { features = [
 	"py311",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -388,6 +396,7 @@ default = { features = [
 full-latest = { features = [
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -398,6 +407,7 @@ min-latest = { features = ["py313", "test"], solve-group = "py313" }
 slim-latest = { features = [
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"examples",
 ], solve-group = "py313" }
@@ -405,6 +415,7 @@ slim-latest = { features = [
 full-py313 = { features = [
 	"py313",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -416,6 +427,7 @@ min-py313 = { features = ["py313", "test"], solve-group = "py313" }
 full-py312 = { features = [
 	"py312",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",
@@ -427,6 +439,7 @@ min-py312 = { features = ["py312", "test"], solve-group = "py312" }
 full-py311 = { features = [
 	"py311",
 	"io",
+	"vrt",
 	"extra",
 	"dev",
 	"test",

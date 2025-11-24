@@ -1,3 +1,7 @@
+.. _changelog:
+
+ Changelog
+
 ==========
 What's new
 ==========
@@ -14,7 +18,9 @@ ModelComponent API now contains functions for `ModelComponent.cleanup` and `Mode
 
 New
 ---
+- Added ``ExampleModel`` class and ``example_model`` entrypoint for demonstration purposes.
 - Added option for delayed compute in writing netcdf files
+- Added option to specify a 'fill_value' in `gis.raster_utils.full`, `full_from_transform` and `full_like`. (#1321)
 - Set compression in `write_nc`
 - Allow masking in `GridComponent.set`. (#1229)
 - Default driver is now inferred from file extension for RasterDataset, GeoDataFrame, and GeoDataset sources. (#1267)
@@ -36,10 +42,11 @@ Changed
 - ``hydromt.typing`` and its functions are now public (underscore removed). (#1286)
 - remove ``io`` submodule and move ``readers`` and ``writers`` to the root module (#1308)
 - `write_nc` function no longer accepts kwargs, instead a dict `to_netcdf_kwargs` is used to pass arguments to `xarray.to_netcdf`. The function raises an error when "compute" is one of the arguments.
-
+- Function signatures of `DataCatalog` functions `get_rasterdataset`, `get_geodataframe`, `get_geodataset`, `get_dataset` and `get_dataframe` now have: ``source_kwargs`` (passed to `DataSource.__init__`) instead of just ``kwargs``, and ``time_tuple`` was renamed to ``time_range``. (#1291)
 
 Fixed
 -----
+- Actually having 'nan' values in a lazy DataArray from `gis.raster_utils.full`. (#1321)
 - CLI update command was not working. (#1244)
 - Allow models to not have a spatial component (allows updating if region is None). (#1244)
 - CF compliant dimensions in netcdf files
@@ -49,6 +56,7 @@ Fixed
 - Passing options to ``geodataframe_table`` driver now works. (#1271)
 - Relative path in the workflow yaml were not correctly resolved. (#1304)
 - Fix pydantic for V1 catalog for nodata and fix the catalog upgrade to convert nodata and extra metadata arguments. (#1304)
+- Fix pydantic for V1 catalog for attrs and fix the catalog upgrade to convert attrs arguments.
 - Do not pass metadata "extent" from catalog in xarray objects to avoid issues when writting to netcdf. (#1304)
 - Build and update functions call `ModelComponent.cleanup` and `ModelComponent.finish_write`. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)
 - `hydromt check` has been updated to validate v1 data catalogs (#1265)

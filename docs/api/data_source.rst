@@ -1,6 +1,6 @@
 .. currentmodule:: hydromt.data_catalog.sources
 
-.. _data_source:
+.. _data_source_api:
 
 ============
 Data Sources

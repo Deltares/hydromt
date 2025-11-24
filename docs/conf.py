@@ -107,7 +107,7 @@ author = "Dirk Eilander \\and Hélène Boisgontier \\and Sam Vente"
 # The short version which is displayed
 version = hydromt.__version__
 
-# # -- Copy notebooks to include in docs -------
+# -- Copy notebooks to include in docs -------
 if os.path.isdir("_examples"):
     remove_dir_content("_examples")
 os.makedirs("_examples")
@@ -156,12 +156,7 @@ for name in predefined_catalogs:
         print(e)
         continue
     write_nested_dropdown(name, data_cat, categories=categories)
-    write_nested_dropdown(name, data_cat, categories=categories)
     data_cat._sources = {}  # reset
-with open("_generated/predefined_catalogs.rst", "w") as f:
-    f.writelines(
-        [f".. include:: ../_generated/{name}.rst\n" for name in predefined_catalogs]
-    )
 
 # -- General configuration ------------------------------------------------
 
@@ -214,7 +209,7 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_examples/README.rst"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -251,6 +246,7 @@ autodoc_pydantic_model_member_order = "bysource"
 # a list of builtin themes.
 #
 html_theme = "pydata_sphinx_theme"
+
 html_logo = "_static/hydromt-icon.svg"
 html_favicon = "_static/hydromt-icon.svg"
 autodoc_member_order = "bysource"  # overwrite default alphabetical sort
@@ -271,7 +267,7 @@ html_css_files = ["theme-deltares.css"]
 html_theme_options = {
     "show_nav_level": 1,
     "navbar_align": "content",
-    "use_edit_page_button": True,
+    "use_edit_page_button": False,
     "icon_links": [
         {
             "name": "GitHub",
@@ -286,14 +282,16 @@ html_theme_options = {
             "type": "local",
         },
     ],
-    "logo": {
-        "text": "HydroMT Core",
-    },
-    "navbar_end": ["navbar-icon-links", "version-switcher"],  # remove dark mode switch
+    "logo": {"text": "HydroMT Core"},
+    "navbar_end": ["navbar-icon-links"],  # remove dark mode switch
     "switcher": {
         "json_url": "https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json",
         "version_match": doc_version,
     },
+    "secondary_sidebar_items": [
+        "version-switcher",
+        "page-toc",
+    ],
 }
 
 html_context = {
@@ -408,6 +406,8 @@ intersphinx_mapping = {
 # -- NBSPHINX --------------------------------------------------------------
 
 # This is processed by Jinja2 and inserted before each notebook
+# nbsphinx_execute = 'never'
+
 nbsphinx_prolog = r"""
 {% set docname = env.doc2path(env.docname, base=None).split('\\')[-1].split('/')[-1] %}
 
