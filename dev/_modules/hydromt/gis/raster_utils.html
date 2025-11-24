@@ -429,7 +429,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">dask</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -460,93 +460,60 @@
 <span class="c1"># FULL</span>
 
 
-<div class="viewcode-block" id="full_like">
-<a class="viewcode-back" href="../../../_generated/hydromt.gis.raster_utils.full_like.html#hydromt.gis.raster_utils.full_like">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">full_like</span><span class="p">(</span>
-    <span class="n">other</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">nodata</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a full object with the same grid and geospatial attributes as ``other``.</span>
-
-<span class="sd">    Arguments</span>
-<span class="sd">    ---------</span>
-<span class="sd">    other: DataArray</span>
-<span class="sd">        DataArray from which coordinates and attributes are taken</span>
-<span class="sd">    nodata: float, int, optional</span>
-<span class="sd">        Fill value for new DataArray, defaults to other.nodata or if not set np.nan</span>
-<span class="sd">    lazy: bool, optional</span>
-<span class="sd">        If True return DataArray with a dask rather than numpy array.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    da: DataArray</span>
-<span class="sd">        Filled DataArray</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;other should be xarray.DataArray.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">nodata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">nodata</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-    <span class="n">da</span> <span class="o">=</span> <span class="n">full</span><span class="p">(</span>
-        <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">dims</span><span class="p">},</span>
-        <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-        <span class="n">attrs</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
-        <span class="n">crs</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
-        <span class="n">lazy</span><span class="o">=</span><span class="n">lazy</span><span class="p">,</span>
-        <span class="n">shape</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
-        <span class="n">dims</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
-    <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform</span>
-    <span class="k">return</span> <span class="n">da</span></div>
-
-
-
 <div class="viewcode-block" id="full">
 <a class="viewcode-back" href="../../../_generated/hydromt.gis.raster_utils.full.html#hydromt.gis.raster_utils.full">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">full</span><span class="p">(</span>
-    <span class="n">coords</span><span class="p">,</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">nodata</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">attrs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">lazy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+    <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dims</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">attrs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a full DataArray based on a geospatial coords dictionary.</span>
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    coords: sequence or dict of array_like, optional</span>
+<span class="sd">    coords : dict[str, np.ndarray]</span>
 <span class="sd">        Coordinates (tick labels) to use for indexing along each dimension (max 3).</span>
 <span class="sd">        The coordinate sequence should be (dim0, y, x) of which the first is optional.</span>
-<span class="sd">    nodata: float, int, optional</span>
-<span class="sd">        Fill value for new DataArray, defaults to other.nodata or if not set np.nan</span>
-<span class="sd">    dtype: numpy.dtype, optional</span>
-<span class="sd">        Data type</span>
-<span class="sd">    name: str, optional</span>
-<span class="sd">        DataArray name</span>
-<span class="sd">    attrs : dict, optional</span>
-<span class="sd">        additional attributes</span>
-<span class="sd">    crs: int, dict, or str, optional</span>
-<span class="sd">        Coordinate Reference System. Accepts EPSG codes (int or str); proj (str or dict)</span>
-<span class="sd">    lazy: bool, optional</span>
-<span class="sd">        If True return DataArray with a dask rather than numpy array.</span>
-<span class="sd">    shape: tuple, optional</span>
+<span class="sd">    nodata : float | int, optional</span>
+<span class="sd">        No data value for new DataArray, important for reading with e.g. GDAL/ QGIS.</span>
+<span class="sd">        By default nan.</span>
+<span class="sd">    fill_value : float | int, optional</span>
+<span class="sd">        Fill value of the new DataArray. If not provided, the same value as the nodata</span>
+<span class="sd">        value is used. By default None.</span>
+<span class="sd">    dtype : type, optional</span>
+<span class="sd">        Data type, should be provided as a dtype defined by numpy (e.g. np.float32).</span>
+<span class="sd">        By default np.float32.</span>
+<span class="sd">    shape : tuple[int], optional</span>
 <span class="sd">        Length along (dim0, y, x) dimensions, of which the first is optional.</span>
-<span class="sd">    dims: tuple, optional</span>
-<span class="sd">        Name(s) of the data dimension(s).</span>
+<span class="sd">        When provided, it should match the lengths of the provided coordinates.</span>
+<span class="sd">        By default None.</span>
+<span class="sd">    dims : tuple[str], optional</span>
+<span class="sd">        Name(s) of the data dimension(s), by default None.</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        DataArray name, by default None.</span>
+<span class="sd">    attrs : dict[str, Any], optional</span>
+<span class="sd">        Additional attributes to assign to the DataArray. By default None.</span>
+<span class="sd">    crs : dict[str, Any] | int | str, optional</span>
+<span class="sd">        Coordinate Reference System. Accepted is EPSG codes (int or str) and</span>
+<span class="sd">        proj (str or dict). By default None.</span>
+<span class="sd">    lazy : bool, optional</span>
+<span class="sd">        If True return DataArray with a dask rather than numpy array, by default False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    da: DataArray</span>
-<span class="sd">        Filled DataArray</span>
+<span class="sd">    da: xr.DataArray</span>
+<span class="sd">        Newly created DataArray.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs</span> <span class="ow">or</span> <span class="p">{}</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">empty</span> <span class="k">if</span> <span class="n">lazy</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">array</span><span class="o">.</span><span class="n">full</span> <span class="k">if</span> <span class="n">lazy</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span>
     <span class="k">if</span> <span class="n">dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -557,7 +524,7 @@
             <span class="n">shape</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">shape</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="s2">&quot;dims&quot;</span><span class="p">):</span>
                 <span class="n">dims</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dims</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">nodata</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">fill_value</span> <span class="ow">or</span> <span class="n">nodata</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
     <span class="n">da</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
     <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_nodata</span><span class="p">(</span><span class="n">nodata</span><span class="p">)</span>
     <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_crs</span><span class="p">(</span><span class="n">crs</span><span class="p">)</span>
@@ -568,43 +535,51 @@
 <div class="viewcode-block" id="full_from_transform">
 <a class="viewcode-back" href="../../../_generated/hydromt.gis.raster_utils.full_from_transform.html#hydromt.gis.raster_utils.full_from_transform">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">full_from_transform</span><span class="p">(</span>
-    <span class="n">transform</span><span class="p">,</span>
-    <span class="n">shape</span><span class="p">,</span>
+    <span class="n">transform</span><span class="p">:</span> <span class="n">Affine</span><span class="p">[</span><span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">nodata</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
-    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">attrs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">lazy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+    <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">attrs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">crs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a full DataArray based on a geospatial transform and shape.</span>
 
 <span class="sd">    See :py:meth:`~hydromt.raster_utils.full` for all options.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    transform : affine transform</span>
+<span class="sd">    transform : Affine[float | int] | tuple[float | int]</span>
 <span class="sd">        Two dimensional affine transform for 2D linear mapping.</span>
-<span class="sd">    shape : tuple of int</span>
+<span class="sd">    shape : tuple[int]</span>
 <span class="sd">        Length along (dim0, y, x) dimensions, of which the first is optional.</span>
-<span class="sd">    nodata : optional</span>
-<span class="sd">        The nodata value to assign to the DataArray. Defaults to np.nan.</span>
-<span class="sd">    dtype : optional</span>
-<span class="sd">        The data type to use for the DataArray. Defaults to np.float32.</span>
-<span class="sd">    name : optional</span>
-<span class="sd">        The name of the DataArray. Defaults to None.</span>
-<span class="sd">    attrs : optional</span>
-<span class="sd">        Additional attributes to assign to the DataArray. Empty by default.</span>
-<span class="sd">    crs : optional</span>
-<span class="sd">        The coordinate reference system (CRS) of the DataArray. Defaults to None.</span>
+<span class="sd">        By default None.</span>
+<span class="sd">    nodata : float | int, optional</span>
+<span class="sd">        No data value for new DataArray, important for reading with e.g. GDAL/ QGIS.</span>
+<span class="sd">        By default nan.</span>
+<span class="sd">    fill_value : float | int, optional</span>
+<span class="sd">        Fill value of the new DataArray. If not provided, the same value as the nodata</span>
+<span class="sd">        value is used. By default None.</span>
+<span class="sd">    dtype : type, optional</span>
+<span class="sd">        Data type, should be provided as a dtype defined by numpy (e.g. np.float32).</span>
+<span class="sd">        By default np.float32.</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        DataArray name, by default None.</span>
+<span class="sd">    attrs : dict[str, Any], optional</span>
+<span class="sd">        Additional attributes to assign to the DataArray. By default None.</span>
+<span class="sd">    crs : dict[str, Any] | int | str, optional</span>
+<span class="sd">        Coordinate Reference System. Accepted is EPSG codes (int or str) and</span>
+<span class="sd">        proj (str or dict). By default None.</span>
 <span class="sd">    lazy : bool, optional</span>
 <span class="sd">        Whether to create a lazy DataArray. Defaults to False.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    da : DataArray</span>
-<span class="sd">        Filled DataArray</span>
+<span class="sd">    da : xr.DataArray</span>
+<span class="sd">        Newly created DataArray adhering to the provided transform and shape.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">attrs</span> <span class="o">=</span> <span class="n">attrs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
@@ -619,6 +594,7 @@
     <span class="n">da</span> <span class="o">=</span> <span class="n">full</span><span class="p">(</span>
         <span class="n">coords</span><span class="o">=</span><span class="n">coords</span><span class="p">,</span>
         <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
         <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span>
@@ -628,6 +604,59 @@
         <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">transform</span>
+    <span class="k">return</span> <span class="n">da</span></div>
+
+
+
+<div class="viewcode-block" id="full_like">
+<a class="viewcode-back" href="../../../_generated/hydromt.gis.raster_utils.full_like.html#hydromt.gis.raster_utils.full_like">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">full_like</span><span class="p">(</span>
+    <span class="n">other</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">nodata</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">lazy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a full object with the same grid and geospatial attributes as ``other``.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    other : xr.DataArray</span>
+<span class="sd">        DataArray from which coordinates and attributes are taken.</span>
+<span class="sd">    nodata : float | int, optional</span>
+<span class="sd">        No data value for the new DataArray, defaults to other.nodata or,</span>
+<span class="sd">        if not set, to nan. By default None.</span>
+<span class="sd">    fill_value : float | int, optional</span>
+<span class="sd">        Fill value of the new DataArray. If not provided the same value is used as the</span>
+<span class="sd">        determined nodata value. By default None.</span>
+<span class="sd">    dtype : type, optional</span>
+<span class="sd">        Data type, should be provided as a dtype defined by numpy (e.g. np.float32).</span>
+<span class="sd">        By default None.</span>
+<span class="sd">    lazy : bool, optional</span>
+<span class="sd">        If True return DataArray with a dask rather than numpy array, by default False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    da: xr.DataArray</span>
+<span class="sd">        Newly created DataArray with the same coordinates and attributes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;other should be xarray.DataArray.&quot;</span><span class="p">)</span>
+    <span class="n">da</span> <span class="o">=</span> <span class="n">full</span><span class="p">(</span>
+        <span class="n">coords</span><span class="o">=</span><span class="p">{</span><span class="n">d</span><span class="p">:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">d</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">dims</span><span class="p">},</span>
+        <span class="n">nodata</span><span class="o">=</span><span class="p">(</span><span class="n">nodata</span> <span class="ow">or</span> <span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">nodata</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span>
+        <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="p">(</span><span class="n">dtype</span> <span class="ow">or</span> <span class="n">other</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+        <span class="n">dims</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">attrs</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+        <span class="n">crs</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+        <span class="n">lazy</span><span class="o">=</span><span class="n">lazy</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">set_attrs</span><span class="p">(</span><span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="n">da</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">raster</span><span class="o">.</span><span class="n">transform</span>
     <span class="k">return</span> <span class="n">da</span></div>
 
 

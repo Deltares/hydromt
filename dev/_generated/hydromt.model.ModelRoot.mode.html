@@ -371,17 +371,206 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">General API</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="../api/cli.html">Command Line Interface</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/data_adapter.html">Data Adapters</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.DataAdapterBase.html">hydromt.data_catalog.adapters.DataAdapterBase</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.RasterDatasetAdapter.html">hydromt.data_catalog.adapters.RasterDatasetAdapter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.GeoDatasetAdapter.html">hydromt.data_catalog.adapters.GeoDatasetAdapter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.GeoDataFrameAdapter.html">hydromt.data_catalog.adapters.GeoDataFrameAdapter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.DataFrameAdapter.html">hydromt.data_catalog.adapters.DataFrameAdapter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.DatasetAdapter.html">hydromt.data_catalog.adapters.DatasetAdapter</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/plugin.html">Plugins</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.html">hydromt.plugins.Plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.plugin_summary.html">hydromt.plugins.Plugins.plugin_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.model_plugins.html">hydromt.plugins.Plugins.model_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.model_metadata.html">hydromt.plugins.Plugins.model_metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.model_summary.html">hydromt.plugins.Plugins.model_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.component_plugins.html">hydromt.plugins.Plugins.component_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.component_metadata.html">hydromt.plugins.Plugins.component_metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.component_summary.html">hydromt.plugins.Plugins.component_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.driver_plugins.html">hydromt.plugins.Plugins.driver_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.driver_metadata.html">hydromt.plugins.Plugins.driver_metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.driver_summary.html">hydromt.plugins.Plugins.driver_summary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.catalog_plugins.html">hydromt.plugins.Plugins.catalog_plugins</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.catalog_metadata.html">hydromt.plugins.Plugins.catalog_metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.catalog_summary.html">hydromt.plugins.Plugins.catalog_summary</a></li>
 </ul>
 </details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Model API</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api/model.html">Model</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.html">hydromt.model.Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.read.html">hydromt.model.Model.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.write.html">hydromt.model.Model.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.write_data_catalog.html">hydromt.model.Model.write_data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.build.html">hydromt.model.Model.build</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.update.html">hydromt.model.Model.update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.get_component.html">hydromt.model.Model.get_component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.add_component.html">hydromt.model.Model.add_component</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.test_equal.html">hydromt.model.Model.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.__enter__.html">hydromt.model.Model.__enter__</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.__exit__.html">hydromt.model.Model.__exit__</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.data_catalog.html">hydromt.model.Model.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.crs.html">hydromt.model.Model.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.root.html">hydromt.model.Model.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.region.html">hydromt.model.Model.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.components.html">hydromt.model.Model.components</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.html">hydromt.model.ModelRoot</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">hydromt.model.ModelRoot.mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.is_writing_mode.html">hydromt.model.ModelRoot.is_writing_mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.is_reading_mode.html">hydromt.model.ModelRoot.is_reading_mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.is_override_mode.html">hydromt.model.ModelRoot.is_override_mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.set.html">hydromt.model.ModelRoot.set</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/model_components.html">Model components</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.html">hydromt.model.components.ModelComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.model.html">hydromt.model.components.ModelComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.data_catalog.html">hydromt.model.components.ModelComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.read.html">hydromt.model.components.ModelComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.write.html">hydromt.model.components.ModelComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.root.html">hydromt.model.components.ModelComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.html">hydromt.model.components.SpatialModelComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.model.html">hydromt.model.components.SpatialModelComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.data_catalog.html">hydromt.model.components.SpatialModelComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.root.html">hydromt.model.components.SpatialModelComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.crs.html">hydromt.model.components.SpatialModelComponent.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.bounds.html">hydromt.model.components.SpatialModelComponent.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.region.html">hydromt.model.components.SpatialModelComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent._region_data.html">hydromt.model.components.SpatialModelComponent._region_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.write_region.html">hydromt.model.components.SpatialModelComponent.write_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.test_equal.html">hydromt.model.components.SpatialModelComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.html">hydromt.model.components.ConfigComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.model.html">hydromt.model.components.ConfigComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.data_catalog.html">hydromt.model.components.ConfigComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.root.html">hydromt.model.components.ConfigComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.data.html">hydromt.model.components.ConfigComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.write.html">hydromt.model.components.ConfigComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.read.html">hydromt.model.components.ConfigComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.create.html">hydromt.model.components.ConfigComponent.create</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.update.html">hydromt.model.components.ConfigComponent.update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.set.html">hydromt.model.components.ConfigComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.get_value.html">hydromt.model.components.ConfigComponent.get_value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.test_equal.html">hydromt.model.components.ConfigComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.html">hydromt.model.components.GeomsComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.model.html">hydromt.model.components.GeomsComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.data_catalog.html">hydromt.model.components.GeomsComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.root.html">hydromt.model.components.GeomsComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.data.html">hydromt.model.components.GeomsComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.region.html">hydromt.model.components.GeomsComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.write.html">hydromt.model.components.GeomsComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.read.html">hydromt.model.components.GeomsComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.set.html">hydromt.model.components.GeomsComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.test_equal.html">hydromt.model.components.GeomsComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.html">hydromt.model.components.TablesComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.model.html">hydromt.model.components.TablesComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.data_catalog.html">hydromt.model.components.TablesComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.root.html">hydromt.model.components.TablesComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.data.html">hydromt.model.components.TablesComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.write.html">hydromt.model.components.TablesComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.read.html">hydromt.model.components.TablesComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.set.html">hydromt.model.components.TablesComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.test_equal.html">hydromt.model.components.TablesComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.html">hydromt.model.components.DatasetsComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.model.html">hydromt.model.components.DatasetsComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.data_catalog.html">hydromt.model.components.DatasetsComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.root.html">hydromt.model.components.DatasetsComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.data.html">hydromt.model.components.DatasetsComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.write.html">hydromt.model.components.DatasetsComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.read.html">hydromt.model.components.DatasetsComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.set.html">hydromt.model.components.DatasetsComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.test_equal.html">hydromt.model.components.DatasetsComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.html">hydromt.model.components.SpatialDatasetsComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.model.html">hydromt.model.components.SpatialDatasetsComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.data_catalog.html">hydromt.model.components.SpatialDatasetsComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.root.html">hydromt.model.components.SpatialDatasetsComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.data.html">hydromt.model.components.SpatialDatasetsComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.region.html">hydromt.model.components.SpatialDatasetsComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.write.html">hydromt.model.components.SpatialDatasetsComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.read.html">hydromt.model.components.SpatialDatasetsComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass.html">hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset.html">hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.set.html">hydromt.model.components.SpatialDatasetsComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.test_equal.html">hydromt.model.components.SpatialDatasetsComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.html">hydromt.model.components.GridComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.model.html">hydromt.model.components.GridComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.data_catalog.html">hydromt.model.components.GridComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.root.html">hydromt.model.components.GridComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.res.html">hydromt.model.components.GridComponent.res</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.transform.html">hydromt.model.components.GridComponent.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.crs.html">hydromt.model.components.GridComponent.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.bounds.html">hydromt.model.components.GridComponent.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.region.html">hydromt.model.components.GridComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.data.html">hydromt.model.components.GridComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.write.html">hydromt.model.components.GridComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.read.html">hydromt.model.components.GridComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.set.html">hydromt.model.components.GridComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.test_equal.html">hydromt.model.components.GridComponent.test_equal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.html">hydromt.model.components.MeshComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.model.html">hydromt.model.components.MeshComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.data_catalog.html">hydromt.model.components.MeshComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.root.html">hydromt.model.components.MeshComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.data.html">hydromt.model.components.MeshComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.crs.html">hydromt.model.components.MeshComponent.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.bounds.html">hydromt.model.components.MeshComponent.bounds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.region.html">hydromt.model.components.MeshComponent.region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_names.html">hydromt.model.components.MeshComponent.mesh_names</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_grids.html">hydromt.model.components.MeshComponent.mesh_grids</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_datasets.html">hydromt.model.components.MeshComponent.mesh_datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_gdf.html">hydromt.model.components.MeshComponent.mesh_gdf</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.write.html">hydromt.model.components.MeshComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.read.html">hydromt.model.components.MeshComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.set.html">hydromt.model.components.MeshComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.get_mesh.html">hydromt.model.components.MeshComponent.get_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.html">hydromt.model.components.VectorComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.data.html">hydromt.model.components.VectorComponent.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.geometry.html">hydromt.model.components.VectorComponent.geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.index_dim.html">hydromt.model.components.VectorComponent.index_dim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.crs.html">hydromt.model.components.VectorComponent.crs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.model.html">hydromt.model.components.VectorComponent.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.data_catalog.html">hydromt.model.components.VectorComponent.data_catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.root.html">hydromt.model.components.VectorComponent.root</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.read.html">hydromt.model.components.VectorComponent.read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.write.html">hydromt.model.components.VectorComponent.write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.set.html">hydromt.model.components.VectorComponent.set</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.test_equal.html">hydromt.model.components.VectorComponent.test_equal</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/model_processes.html">Model Processes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.create_grid_from_region.html">hydromt.model.processes.grid.create_grid_from_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.create_rotated_grid_from_geom.html">hydromt.model.processes.grid.create_rotated_grid_from_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.grid_from_constant.html">hydromt.model.processes.grid.grid_from_constant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.grid_from_rasterdataset.html">hydromt.model.processes.grid.grid_from_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.grid_from_raster_reclass.html">hydromt.model.processes.grid.grid_from_raster_reclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.grid_from_geodataframe.html">hydromt.model.processes.grid.grid_from_geodataframe</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.rotated_grid.html">hydromt.model.processes.grid.rotated_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.create_mesh2d_from_region.html">hydromt.model.processes.mesh.create_mesh2d_from_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.create_mesh2d_from_mesh.html">hydromt.model.processes.mesh.create_mesh2d_from_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.create_mesh2d_from_geom.html">hydromt.model.processes.mesh.create_mesh2d_from_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.mesh2d_from_rasterdataset.html">hydromt.model.processes.mesh.mesh2d_from_rasterdataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.mesh2d_from_raster_reclass.html">hydromt.model.processes.mesh.mesh2d_from_raster_reclass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_basin.html">hydromt.model.processes.region.parse_region_basin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_bbox.html">hydromt.model.processes.region.parse_region_bbox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_geom.html">hydromt.model.processes.region.parse_region_geom</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_grid.html">hydromt.model.processes.region.parse_region_grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_other_model.html">hydromt.model.processes.region.parse_region_other_model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_mesh.html">hydromt.model.processes.region.parse_region_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.basin_mask.get_basin_geometry.html">hydromt.model.processes.basin_mask.get_basin_geometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.rivers.river_width.html">hydromt.model.processes.rivers.river_width</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.rivers.river_depth.html">hydromt.model.processes.rivers.river_depth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.precip.html">hydromt.model.processes.meteo.precip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.temp.html">hydromt.model.processes.meteo.temp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.press.html">hydromt.model.processes.meteo.press</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.pet.html">hydromt.model.processes.meteo.pet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.wind.html">hydromt.model.processes.meteo.wind</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.press_correction.html">hydromt.model.processes.meteo.press_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.temp_correction.html">hydromt.model.processes.meteo.temp_correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.resample_time.html">hydromt.model.processes.meteo.resample_time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.delta_freq.html">hydromt.model.processes.meteo.delta_freq</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.pet_debruin.html">hydromt.model.processes.meteo.pet_debruin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.pet_makkink.html">hydromt.model.processes.meteo.pet_makkink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.pm_fao56.html">hydromt.model.processes.meteo.pm_fao56</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data API</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/data_catalog.html">Data catalog</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.html">hydromt.data_catalog.DataCatalog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.DataCatalog.get_source.html">hydromt.data_catalog.DataCatalog.get_source</a></li>
@@ -415,6 +604,12 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.sources.DataFrameSource.html">hydromt.data_catalog.sources.DataFrameSource</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/uri_resolvers.html">URI Resolvers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.uri_resolvers.URIResolver.html">hydromt.data_catalog.uri_resolvers.URIResolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.uri_resolvers.ConventionResolver.html">hydromt.data_catalog.uri_resolvers.ConventionResolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.uri_resolvers.RasterTindexResolver.html">hydromt.data_catalog.uri_resolvers.RasterTindexResolver</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/drivers.html">Drivers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.typing.FSSpecFileSystem.html">hydromt.typing.FSSpecFileSystem</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.BaseDriver.html">hydromt.data_catalog.drivers.BaseDriver</a></li>
@@ -443,6 +638,18 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.drivers.preprocessing.to_datetimeindex.html">hydromt.data_catalog.drivers.preprocessing.to_datetimeindex</a></li>
 </ul>
 </details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/data_adapter.html">Data Adapters</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.DataAdapterBase.html">hydromt.data_catalog.adapters.DataAdapterBase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.RasterDatasetAdapter.html">hydromt.data_catalog.adapters.RasterDatasetAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.GeoDatasetAdapter.html">hydromt.data_catalog.adapters.GeoDatasetAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.GeoDataFrameAdapter.html">hydromt.data_catalog.adapters.GeoDataFrameAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.DataFrameAdapter.html">hydromt.data_catalog.adapters.DataFrameAdapter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.adapters.DatasetAdapter.html">hydromt.data_catalog.adapters.DatasetAdapter</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Supporting functionality</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/gis.html">GIS methods</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.DataArray.raster.from_numpy.html">hydromt.gis.DataArray.raster.from_numpy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.Dataset.raster.from_numpy.html">hydromt.gis.Dataset.raster.from_numpy</a></li>
@@ -581,198 +788,6 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.gis.vector_utils.nearest.html">hydromt.gis.vector_utils.nearest</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/readers.html">Readers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_geodataset.html">hydromt.readers.open_geodataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_mfcsv.html">hydromt.readers.open_mfcsv</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_mfraster.html">hydromt.readers.open_mfraster</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_nc.html">hydromt.readers.open_nc</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_ncs.html">hydromt.readers.open_ncs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_raster.html">hydromt.readers.open_raster</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_raster_from_tindex.html">hydromt.readers.open_raster_from_tindex</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_timeseries_from_table.html">hydromt.readers.open_timeseries_from_table</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_vector.html">hydromt.readers.open_vector</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_vector_from_table.html">hydromt.readers.open_vector_from_table</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.read_toml.html">hydromt.readers.read_toml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.read_workflow_yaml.html">hydromt.readers.read_workflow_yaml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.read_yaml.html">hydromt.readers.read_yaml</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/writers.html">Writers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_nc.html">hydromt.writers.write_nc</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_region.html">hydromt.writers.write_region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_toml.html">hydromt.writers.write_toml</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_xy.html">hydromt.writers.write_xy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_yaml.html">hydromt.writers.write_yaml</a></li>
-</ul>
-</details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="../api/model.html">Model</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.html">hydromt.model.Model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.read.html">hydromt.model.Model.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.write.html">hydromt.model.Model.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.write_data_catalog.html">hydromt.model.Model.write_data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.build.html">hydromt.model.Model.build</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.update.html">hydromt.model.Model.update</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.get_component.html">hydromt.model.Model.get_component</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.add_component.html">hydromt.model.Model.add_component</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.test_equal.html">hydromt.model.Model.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.__enter__.html">hydromt.model.Model.__enter__</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.__exit__.html">hydromt.model.Model.__exit__</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.data_catalog.html">hydromt.model.Model.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.crs.html">hydromt.model.Model.crs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.root.html">hydromt.model.Model.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.region.html">hydromt.model.Model.region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.Model.components.html">hydromt.model.Model.components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.html">hydromt.model.ModelRoot</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">hydromt.model.ModelRoot.mode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.is_writing_mode.html">hydromt.model.ModelRoot.is_writing_mode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.is_reading_mode.html">hydromt.model.ModelRoot.is_reading_mode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.is_override_mode.html">hydromt.model.ModelRoot.is_override_mode</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.ModelRoot.set.html">hydromt.model.ModelRoot.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.html">hydromt.model.components.ModelComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.model.html">hydromt.model.components.ModelComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.data_catalog.html">hydromt.model.components.ModelComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.read.html">hydromt.model.components.ModelComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.write.html">hydromt.model.components.ModelComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ModelComponent.root.html">hydromt.model.components.ModelComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.html">hydromt.model.components.SpatialModelComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.model.html">hydromt.model.components.SpatialModelComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.data_catalog.html">hydromt.model.components.SpatialModelComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.root.html">hydromt.model.components.SpatialModelComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.crs.html">hydromt.model.components.SpatialModelComponent.crs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.bounds.html">hydromt.model.components.SpatialModelComponent.bounds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.region.html">hydromt.model.components.SpatialModelComponent.region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent._region_data.html">hydromt.model.components.SpatialModelComponent._region_data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.write_region.html">hydromt.model.components.SpatialModelComponent.write_region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialModelComponent.test_equal.html">hydromt.model.components.SpatialModelComponent.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.html">hydromt.model.components.ConfigComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.model.html">hydromt.model.components.ConfigComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.data_catalog.html">hydromt.model.components.ConfigComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.root.html">hydromt.model.components.ConfigComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.data.html">hydromt.model.components.ConfigComponent.data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.write.html">hydromt.model.components.ConfigComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.read.html">hydromt.model.components.ConfigComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.create.html">hydromt.model.components.ConfigComponent.create</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.update.html">hydromt.model.components.ConfigComponent.update</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.set.html">hydromt.model.components.ConfigComponent.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.get_value.html">hydromt.model.components.ConfigComponent.get_value</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.ConfigComponent.test_equal.html">hydromt.model.components.ConfigComponent.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.html">hydromt.model.components.GeomsComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.model.html">hydromt.model.components.GeomsComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.data_catalog.html">hydromt.model.components.GeomsComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.root.html">hydromt.model.components.GeomsComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.data.html">hydromt.model.components.GeomsComponent.data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.region.html">hydromt.model.components.GeomsComponent.region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.write.html">hydromt.model.components.GeomsComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.read.html">hydromt.model.components.GeomsComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.set.html">hydromt.model.components.GeomsComponent.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GeomsComponent.test_equal.html">hydromt.model.components.GeomsComponent.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.html">hydromt.model.components.TablesComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.model.html">hydromt.model.components.TablesComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.data_catalog.html">hydromt.model.components.TablesComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.root.html">hydromt.model.components.TablesComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.data.html">hydromt.model.components.TablesComponent.data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.write.html">hydromt.model.components.TablesComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.read.html">hydromt.model.components.TablesComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.set.html">hydromt.model.components.TablesComponent.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.TablesComponent.test_equal.html">hydromt.model.components.TablesComponent.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.html">hydromt.model.components.DatasetsComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.model.html">hydromt.model.components.DatasetsComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.data_catalog.html">hydromt.model.components.DatasetsComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.root.html">hydromt.model.components.DatasetsComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.data.html">hydromt.model.components.DatasetsComponent.data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.write.html">hydromt.model.components.DatasetsComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.read.html">hydromt.model.components.DatasetsComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.set.html">hydromt.model.components.DatasetsComponent.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.DatasetsComponent.test_equal.html">hydromt.model.components.DatasetsComponent.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.html">hydromt.model.components.SpatialDatasetsComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.model.html">hydromt.model.components.SpatialDatasetsComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.data_catalog.html">hydromt.model.components.SpatialDatasetsComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.root.html">hydromt.model.components.SpatialDatasetsComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.data.html">hydromt.model.components.SpatialDatasetsComponent.data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.region.html">hydromt.model.components.SpatialDatasetsComponent.region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.write.html">hydromt.model.components.SpatialDatasetsComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.read.html">hydromt.model.components.SpatialDatasetsComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass.html">hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_raster_reclass</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset.html">hydromt.model.components.SpatialDatasetsComponent.add_raster_data_from_rasterdataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.set.html">hydromt.model.components.SpatialDatasetsComponent.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.SpatialDatasetsComponent.test_equal.html">hydromt.model.components.SpatialDatasetsComponent.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.html">hydromt.model.components.GridComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.model.html">hydromt.model.components.GridComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.data_catalog.html">hydromt.model.components.GridComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.root.html">hydromt.model.components.GridComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.res.html">hydromt.model.components.GridComponent.res</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.transform.html">hydromt.model.components.GridComponent.transform</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.crs.html">hydromt.model.components.GridComponent.crs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.bounds.html">hydromt.model.components.GridComponent.bounds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.region.html">hydromt.model.components.GridComponent.region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.data.html">hydromt.model.components.GridComponent.data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.write.html">hydromt.model.components.GridComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.read.html">hydromt.model.components.GridComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.set.html">hydromt.model.components.GridComponent.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.GridComponent.test_equal.html">hydromt.model.components.GridComponent.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.html">hydromt.model.components.MeshComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.model.html">hydromt.model.components.MeshComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.data_catalog.html">hydromt.model.components.MeshComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.root.html">hydromt.model.components.MeshComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.data.html">hydromt.model.components.MeshComponent.data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.crs.html">hydromt.model.components.MeshComponent.crs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.bounds.html">hydromt.model.components.MeshComponent.bounds</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.region.html">hydromt.model.components.MeshComponent.region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_names.html">hydromt.model.components.MeshComponent.mesh_names</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_grids.html">hydromt.model.components.MeshComponent.mesh_grids</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_datasets.html">hydromt.model.components.MeshComponent.mesh_datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.mesh_gdf.html">hydromt.model.components.MeshComponent.mesh_gdf</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.write.html">hydromt.model.components.MeshComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.read.html">hydromt.model.components.MeshComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.set.html">hydromt.model.components.MeshComponent.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.MeshComponent.get_mesh.html">hydromt.model.components.MeshComponent.get_mesh</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.html">hydromt.model.components.VectorComponent</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.data.html">hydromt.model.components.VectorComponent.data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.geometry.html">hydromt.model.components.VectorComponent.geometry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.index_dim.html">hydromt.model.components.VectorComponent.index_dim</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.crs.html">hydromt.model.components.VectorComponent.crs</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.model.html">hydromt.model.components.VectorComponent.model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.data_catalog.html">hydromt.model.components.VectorComponent.data_catalog</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.root.html">hydromt.model.components.VectorComponent.root</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.read.html">hydromt.model.components.VectorComponent.read</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.write.html">hydromt.model.components.VectorComponent.write</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.set.html">hydromt.model.components.VectorComponent.set</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.components.VectorComponent.test_equal.html">hydromt.model.components.VectorComponent.test_equal</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.create_grid_from_region.html">hydromt.model.processes.grid.create_grid_from_region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.create_rotated_grid_from_geom.html">hydromt.model.processes.grid.create_rotated_grid_from_geom</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.grid_from_constant.html">hydromt.model.processes.grid.grid_from_constant</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.grid_from_rasterdataset.html">hydromt.model.processes.grid.grid_from_rasterdataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.grid_from_raster_reclass.html">hydromt.model.processes.grid.grid_from_raster_reclass</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.grid_from_geodataframe.html">hydromt.model.processes.grid.grid_from_geodataframe</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.grid.rotated_grid.html">hydromt.model.processes.grid.rotated_grid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.create_mesh2d_from_region.html">hydromt.model.processes.mesh.create_mesh2d_from_region</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.create_mesh2d_from_mesh.html">hydromt.model.processes.mesh.create_mesh2d_from_mesh</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.create_mesh2d_from_geom.html">hydromt.model.processes.mesh.create_mesh2d_from_geom</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.mesh2d_from_rasterdataset.html">hydromt.model.processes.mesh.mesh2d_from_rasterdataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.mesh.mesh2d_from_raster_reclass.html">hydromt.model.processes.mesh.mesh2d_from_raster_reclass</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_basin.html">hydromt.model.processes.region.parse_region_basin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_bbox.html">hydromt.model.processes.region.parse_region_bbox</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_geom.html">hydromt.model.processes.region.parse_region_geom</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_grid.html">hydromt.model.processes.region.parse_region_grid</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_other_model.html">hydromt.model.processes.region.parse_region_other_model</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.region.parse_region_mesh.html">hydromt.model.processes.region.parse_region_mesh</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.basin_mask.get_basin_geometry.html">hydromt.model.processes.basin_mask.get_basin_geometry</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.rivers.river_width.html">hydromt.model.processes.rivers.river_width</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.rivers.river_depth.html">hydromt.model.processes.rivers.river_depth</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.precip.html">hydromt.model.processes.meteo.precip</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.temp.html">hydromt.model.processes.meteo.temp</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.press.html">hydromt.model.processes.meteo.press</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.pet.html">hydromt.model.processes.meteo.pet</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.wind.html">hydromt.model.processes.meteo.wind</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.press_correction.html">hydromt.model.processes.meteo.press_correction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.temp_correction.html">hydromt.model.processes.meteo.temp_correction</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.resample_time.html">hydromt.model.processes.meteo.resample_time</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.delta_freq.html">hydromt.model.processes.meteo.delta_freq</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.pet_debruin.html">hydromt.model.processes.meteo.pet_debruin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.pet_makkink.html">hydromt.model.processes.meteo.pet_makkink</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.model.processes.meteo.pm_fao56.html">hydromt.model.processes.meteo.pm_fao56</a></li>
-</ul>
-</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/stats.html">Statistics and Extreme Value Analysis</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.stats.skills.bias.html">hydromt.stats.skills.bias</a></li>
 <li class="toctree-l2"><a class="reference internal" href="hydromt.stats.skills.percentual_bias.html">hydromt.stats.skills.percentual_bias</a></li>
@@ -796,28 +811,31 @@
 <li class="toctree-l2"><a class="reference internal" href="hydromt.stats.design_events.get_peak_hydrographs.html">hydromt.stats.design_events.get_peak_hydrographs</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/plugin.html">Plugins</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.html">hydromt.plugins.Plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.plugin_summary.html">hydromt.plugins.Plugins.plugin_summary</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.model_plugins.html">hydromt.plugins.Plugins.model_plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.model_metadata.html">hydromt.plugins.Plugins.model_metadata</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.model_summary.html">hydromt.plugins.Plugins.model_summary</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.component_plugins.html">hydromt.plugins.Plugins.component_plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.component_metadata.html">hydromt.plugins.Plugins.component_metadata</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.component_summary.html">hydromt.plugins.Plugins.component_summary</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.driver_plugins.html">hydromt.plugins.Plugins.driver_plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.driver_metadata.html">hydromt.plugins.Plugins.driver_metadata</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.driver_summary.html">hydromt.plugins.Plugins.driver_summary</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.catalog_plugins.html">hydromt.plugins.Plugins.catalog_plugins</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.catalog_metadata.html">hydromt.plugins.Plugins.catalog_metadata</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.plugins.Plugins.catalog_summary.html">hydromt.plugins.Plugins.catalog_summary</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">I/O</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/readers.html">Readers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_geodataset.html">hydromt.readers.open_geodataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_mfcsv.html">hydromt.readers.open_mfcsv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_mfraster.html">hydromt.readers.open_mfraster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_nc.html">hydromt.readers.open_nc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_ncs.html">hydromt.readers.open_ncs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_raster.html">hydromt.readers.open_raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_raster_from_tindex.html">hydromt.readers.open_raster_from_tindex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_timeseries_from_table.html">hydromt.readers.open_timeseries_from_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_vector.html">hydromt.readers.open_vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.open_vector_from_table.html">hydromt.readers.open_vector_from_table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.read_toml.html">hydromt.readers.read_toml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.read_workflow_yaml.html">hydromt.readers.read_workflow_yaml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.readers.read_yaml.html">hydromt.readers.read_yaml</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="../api/utils.html">Utility functions</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/uri_resolvers.html">URI Resolvers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.uri_resolvers.URIResolver.html">hydromt.data_catalog.uri_resolvers.URIResolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.uri_resolvers.ConventionResolver.html">hydromt.data_catalog.uri_resolvers.ConventionResolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="hydromt.data_catalog.uri_resolvers.RasterTindexResolver.html">hydromt.data_catalog.uri_resolvers.RasterTindexResolver</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/writers.html">Writers</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_nc.html">hydromt.writers.write_nc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_region.html">hydromt.writers.write_region</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_toml.html">hydromt.writers.write_toml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_xy.html">hydromt.writers.write_xy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydromt.writers.write_yaml.html">hydromt.writers.write_yaml</a></li>
 </ul>
 </details></li>
 </ul>

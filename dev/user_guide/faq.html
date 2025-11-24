@@ -481,19 +481,36 @@ In between the setup and analysis the model software needs to be executed to run
 <div class="line"><strong>Q</strong>: Can I re-use the same method when building / updating a model from the command line interface with an .yaml configuration file.</div>
 </div>
 </div></blockquote>
-<p>Yes, that is possible. You just need to start enumerating the methods by adding a number to the end
-of the method name. For instance, the second time that you use the setup_config method write
-<cite>setup_config2</cite> in your .yaml file, etc. Note that the actual numbers don’t really matter,
-the sequence in which these are in the .yaml file determines the sequence in which these are called.</p>
+<p>Yes, that is possible. In the YAML file, each setup or update method is listed under the steps section.
+So you can easily repeat the same method multiple times with different arguments. For example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">config.update</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">forcing_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">era5_2010.nc</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">setup_precip_forcing</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">precip_data</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;era5&quot;</span>
+<span class="w">      </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2010-01-01</span>
+<span class="w">      </span><span class="nt">end</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2010-12-31</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">forcing.write</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">config.update</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">forcing_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">chirps_2010.nc</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">setup_precip_forcing</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">precip_data</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;chirps&quot;</span>
+<span class="w">      </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2010-01-01</span>
+<span class="w">      </span><span class="nt">end</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2010-12-31</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">forcing.write</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal notranslate"><span class="pre">config.update</span></code>, <code class="docutils literal notranslate"><span class="pre">setup_precip_forcing</span></code> and <code class="docutils literal notranslate"><span class="pre">forcing.write</span></code> are called several times to
+create several forcing files in one go.</p>
 <blockquote>
 <div><div class="line-block">
 <div class="line"><strong>Q</strong>: How can I just write specific model data component
 (i.e.: grid, geoms, forcing, config or states) instead of the all model data when updating?</div>
 </div>
 </div></blockquote>
-<p>Each model plugin implements a combined <cite>write()</cite> method that writes the entire model and is
-called by default at the end of a build or update. If you however add a write method
-(e.g. <cite>write_grid</cite> for a Grid model, <cite>write_forcing</cite>, <cite>write_config</cite>, etc.) to the .yaml file the call to the
+<p>Each model plugin implements a combined <code class="docutils literal notranslate"><span class="pre">write()</span></code> method that writes the entire model and is
+called by default at the end of a <code class="docutils literal notranslate"><span class="pre">build</span></code> or <code class="docutils literal notranslate"><span class="pre">update</span></code>. If you however add a write method
+(e.g. <code class="docutils literal notranslate"><span class="pre">grid.write</span></code> for a Grid model, <code class="docutils literal notranslate"><span class="pre">forcing.write</span></code>, <code class="docutils literal notranslate"><span class="pre">config.write</span></code>, etc.) to the .yaml file the call to the
 general write method is disabled and only the selected model data attributes are written.</p>
 </section>
 <section id="working-with-data-in-hydromt">
@@ -505,7 +522,7 @@ general write method is disabled and only the selected model data attributes are
 </div></blockquote>
 <p>HydroMT does not contain any datasets. A small spatial subset for the Piave basin in northern Italy
 of some data that is often used in combination with HydroMT is made available for testing purposes.
-The data will automatically be downloaded to the “~/.hydromt_data” folder on your machine if no
+The data will automatically be downloaded to the “~/.hydromt” folder on your machine if no
 other data catalogs are provided. See also <a class="reference internal" href="data_catalog/data_overview.html#get-data"><span class="std std-ref">Working with data in HydroMT</span></a> page.
 We are working on creating more data catalogs from (cloud optimized analysis read) open data sources.</p>
 <blockquote>

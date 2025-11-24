@@ -492,8 +492,8 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:18:01,355 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
-2025-11-10 11:18:01,356 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-11-24 10:35:00,252 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
+2025-11-24 10:35:00,253 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">artifact_data</span></code> catalog is one of the pre-defined available DataCatalog of HydroMT. You can find an overview of <a class="reference internal" href="../user_guide/data_catalog/data_existing_cat.html"><span class="doc">pre-defined data catalogs</span></a> in the online user guide. You can also get an overview of the pre-defined catalogs with their version number from HydroMT.</p>
@@ -512,10 +512,10 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;artifact_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.ArtifactDataCatalog object at 0x7f87b3766690&gt;,
- &#39;aws_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.AWSDataCatalog object at 0x7f87afb26bd0&gt;,
- &#39;deltares_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.DeltaresDataCatalog object at 0x7f882ca33d90&gt;,
- &#39;gcs_cmip6_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.GCSCMIP6DataCatalog object at 0x7f87b6e9aa90&gt;}
+{&#39;artifact_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.ArtifactDataCatalog object at 0x7f695ed3cdd0&gt;,
+ &#39;aws_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.AWSDataCatalog object at 0x7f695ed3d1d0&gt;,
+ &#39;deltares_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.DeltaresDataCatalog object at 0x7f69ccd338d0&gt;,
+ &#39;gcs_cmip6_data&#39;: &lt;hydromt.data_catalog.predefined_catalog.GCSCMIP6DataCatalog object at 0x7f695f2742d0&gt;}
 </pre></div></div>
 </div>
 <p>Let’s now check which data sources are available in the catalog:</p>
@@ -557,22 +557,10 @@ dict_keys([&#39;chelsa&#39;, &#39;chirps_global&#39;, &#39;corine&#39;, &#39;dtu
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:18:02,055 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading era5 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/era5.nc
-2025-11-10 11:18:02,058 - hydromt._utils.unused_kwargs - unused_kwargs - WARNING - object: RasterDatasetXarrayDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
-Name: WGS 84
-Axis Info [ellipsoidal]:
-- Lat[north]: Geodetic latitude (degree)
-- Lon[east]: Geodetic longitude (degree)
-Area of Use:
-- name: World.
-- bounds: (-180.0, -90.0, 180.0, 90.0)
-Datum: World Geodetic System 1984 ensemble
-- Ellipsoid: WGS 84
-- Prime Meridian: Greenwich
- unit=None extent={} nodata=None attrs={} category=&#39;meteo&#39; history=&#39;Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency&#39; paper_doi=&#39;10.1002/qj.3803&#39; paper_ref=&#39;Hersbach et al. (2019)&#39; url=&#39;https://doi.org/10.24381/cds.bd0915c6&#39; license=&#39;https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products&#39;.
+2025-11-24 10:35:00,943 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading era5 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/era5.nc
 
 Available extent: (11.625, 45.125, 13.125, 46.875)
-Available dates: 2010-02-02T00:00:00.000000000 to 2010-02-14T00:00:00.000000000
+Available dates: 2010-02-02T00:00:00.000000000 to 2010-02-15T00:00:00.000000000
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1058,21 +1046,21 @@ dl.xr-attrs {
   filter: drop-shadow(1px 1px 5px var(--xr-font-color2));
   stroke-width: 0.8px;
 }
-</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt; Size: 15kB
-Dimensions:      (time: 13, latitude: 7, longitude: 6)
+</style><pre class='xr-text-repr-fallback'>&lt;xarray.Dataset&gt; Size: 17kB
+Dimensions:      (time: 14, latitude: 7, longitude: 6)
 Coordinates:
-  * time         (time) datetime64[ns] 104B 2010-02-02 2010-02-03 ... 2010-02-14
+  * time         (time) datetime64[ns] 112B 2010-02-02 2010-02-03 ... 2010-02-15
   * latitude     (latitude) float32 28B 46.75 46.5 46.25 46.0 45.75 45.5 45.25
   * longitude    (longitude) float32 24B 11.75 12.0 12.25 12.5 12.75 13.0
     spatial_ref  int32 4B ...
 Data variables:
-    precip       (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;
-    temp         (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;
-    press_msl    (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;
-    kin          (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;
-    kout         (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;
-    temp_min     (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;
-    temp_max     (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;
+    precip       (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    temp         (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    press_msl    (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    kin          (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    kout         (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    temp_min     (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
+    temp_max     (time, latitude, longitude) float32 2kB dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;
 Attributes:
     category:        meteo
     history:         Extracted from Copernicus Climate Data Store; resampled ...
@@ -1083,13 +1071,14 @@ Attributes:
     source_version:  ERA5 daily data on pressure levels
     crs:             4326
     url:             https://doi.org/10.24381/cds.bd0915c6
-    license:         https://cds.climate.copernicus.eu/cdsapp/#!/terms/licenc...</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-e62fa0e2-ac6a-45d2-9a88-277f2ae6076b' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-e62fa0e2-ac6a-45d2-9a88-277f2ae6076b' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 13</li><li><span class='xr-has-index'>latitude</span>: 7</li><li><span class='xr-has-index'>longitude</span>: 6</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-e4017bc1-8e9b-4827-aa25-c5720efbffb9' class='xr-section-summary-in' type='checkbox'  checked><label for='section-e4017bc1-8e9b-4827-aa25-c5720efbffb9' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-02 ... 2010-02-14</div><input id='attrs-78dc4485-1e8c-4ba9-a277-b0c137075d9f' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-78dc4485-1e8c-4ba9-a277-b0c137075d9f' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-e0782c41-ae99-41d5-a5e6-ba454fdefee2' class='xr-var-data-in' type='checkbox'><label for='data-e0782c41-ae99-41d5-a5e6-ba454fdefee2' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-02T00:00:00.000000000&#x27;, &#x27;2010-02-03T00:00:00.000000000&#x27;,
+    license:         https://cds.climate.copernicus.eu/cdsapp/#!/terms/licenc...</pre><div class='xr-wrap' style='display:none'><div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div><ul class='xr-sections'><li class='xr-section-item'><input id='section-10c01122-19f7-4c75-aced-fa5ec085a313' class='xr-section-summary-in' type='checkbox' disabled ><label for='section-10c01122-19f7-4c75-aced-fa5ec085a313' class='xr-section-summary'  title='Expand/collapse section'>Dimensions:</label><div class='xr-section-inline-details'><ul class='xr-dim-list'><li><span class='xr-has-index'>time</span>: 14</li><li><span class='xr-has-index'>latitude</span>: 7</li><li><span class='xr-has-index'>longitude</span>: 6</li></ul></div><div class='xr-section-details'></div></li><li class='xr-section-item'><input id='section-737fcc66-91e0-4be2-9a6a-17ac5f88ae1f' class='xr-section-summary-in' type='checkbox'  checked><label for='section-737fcc66-91e0-4be2-9a6a-17ac5f88ae1f' class='xr-section-summary' >Coordinates: <span>(4)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>time</span></div><div class='xr-var-dims'>(time)</div><div class='xr-var-dtype'>datetime64[ns]</div><div class='xr-var-preview xr-preview'>2010-02-02 ... 2010-02-15</div><input id='attrs-b6f6d92e-8101-425b-82b6-b572455dcc45' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-b6f6d92e-8101-425b-82b6-b572455dcc45' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-79e9e994-0c71-42cc-a8ef-a10db8ce4909' class='xr-var-data-in' type='checkbox'><label for='data-79e9e994-0c71-42cc-a8ef-a10db8ce4909' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([&#x27;2010-02-02T00:00:00.000000000&#x27;, &#x27;2010-02-03T00:00:00.000000000&#x27;,
        &#x27;2010-02-04T00:00:00.000000000&#x27;, &#x27;2010-02-05T00:00:00.000000000&#x27;,
        &#x27;2010-02-06T00:00:00.000000000&#x27;, &#x27;2010-02-07T00:00:00.000000000&#x27;,
        &#x27;2010-02-08T00:00:00.000000000&#x27;, &#x27;2010-02-09T00:00:00.000000000&#x27;,
        &#x27;2010-02-10T00:00:00.000000000&#x27;, &#x27;2010-02-11T00:00:00.000000000&#x27;,
        &#x27;2010-02-12T00:00:00.000000000&#x27;, &#x27;2010-02-13T00:00:00.000000000&#x27;,
-       &#x27;2010-02-14T00:00:00.000000000&#x27;], dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>latitude</span></div><div class='xr-var-dims'>(latitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>46.75 46.5 46.25 ... 45.5 45.25</div><input id='attrs-781fd5a1-0908-4f52-8b81-4f42247a611a' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-781fd5a1-0908-4f52-8b81-4f42247a611a' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-fb616fb3-4d89-4c5e-93eb-649762dbf53d' class='xr-var-data-in' type='checkbox'><label for='data-fb616fb3-4d89-4c5e-93eb-649762dbf53d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.75, 46.5 , 46.25, 46.  , 45.75, 45.5 , 45.25], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>longitude</span></div><div class='xr-var-dims'>(longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>11.75 12.0 12.25 12.5 12.75 13.0</div><input id='attrs-5bd47c94-602a-4649-94ef-8600232d14ab' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-5bd47c94-602a-4649-94ef-8600232d14ab' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-cba143c3-3f45-413c-8070-d6f28e94ee7c' class='xr-var-data-in' type='checkbox'><label for='data-cba143c3-3f45-413c-8070-d6f28e94ee7c' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.75, 12.  , 12.25, 12.5 , 12.75, 13.  ], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-f060487e-3f95-46e7-ab50-66bb0554c459' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f060487e-3f95-46e7-ab50-66bb0554c459' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-ecdb321b-6337-4d8c-9614-8ff306599267' class='xr-var-data-in' type='checkbox'><label for='data-ecdb321b-6337-4d8c-9614-8ff306599267' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_dim :</span></dt><dd>longitude</dd><dt><span>y_dim :</span></dt><dd>latitude</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-721cdec4-f26e-4f67-9cba-241c0dcbd1b0' class='xr-section-summary-in' type='checkbox'  checked><label for='section-721cdec4-f26e-4f67-9cba-241c0dcbd1b0' class='xr-section-summary' >Data variables: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>precip</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-b5a8b619-6456-48df-af22-c2ea1a5c745c' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-b5a8b619-6456-48df-af22-c2ea1a5c745c' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-dc2f02af-1985-4022-85d4-a50962412006' class='xr-var-data-in' type='checkbox'><label for='data-dc2f02af-1985-4022-85d4-a50962412006' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+       &#x27;2010-02-14T00:00:00.000000000&#x27;, &#x27;2010-02-15T00:00:00.000000000&#x27;],
+      dtype=&#x27;datetime64[ns]&#x27;)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>latitude</span></div><div class='xr-var-dims'>(latitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>46.75 46.5 46.25 ... 45.5 45.25</div><input id='attrs-38d51ed0-b9ee-4c84-8e24-3a689c90a6a2' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-38d51ed0-b9ee-4c84-8e24-3a689c90a6a2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-311ebacb-5720-4360-8f77-e4f9fd556fc8' class='xr-var-data-in' type='checkbox'><label for='data-311ebacb-5720-4360-8f77-e4f9fd556fc8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([46.75, 46.5 , 46.25, 46.  , 45.75, 45.5 , 45.25], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span class='xr-has-index'>longitude</span></div><div class='xr-var-dims'>(longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>11.75 12.0 12.25 12.5 12.75 13.0</div><input id='attrs-d083a8d3-33ab-4454-b9b3-8b250ced43ee' class='xr-var-attrs-in' type='checkbox' disabled><label for='attrs-d083a8d3-33ab-4454-b9b3-8b250ced43ee' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3f3f1abc-fce4-4214-b4ab-6db94ed3d002' class='xr-var-data-in' type='checkbox'><label for='data-3f3f1abc-fce4-4214-b4ab-6db94ed3d002' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'></dl></div><div class='xr-var-data'><pre>array([11.75, 12.  , 12.25, 12.5 , 12.75, 13.  ], dtype=float32)</pre></div></li><li class='xr-var-item'><div class='xr-var-name'><span>spatial_ref</span></div><div class='xr-var-dims'>()</div><div class='xr-var-dtype'>int32</div><div class='xr-var-preview xr-preview'>...</div><input id='attrs-0851aac2-ae9e-412c-b7b1-e91a760a6b55' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-0851aac2-ae9e-412c-b7b1-e91a760a6b55' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-c6f20de2-08f9-4d6a-a27f-8db34e59a4c0' class='xr-var-data-in' type='checkbox'><label for='data-c6f20de2-08f9-4d6a-a27f-8db34e59a4c0' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>crs_wkt :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd><dt><span>x_dim :</span></dt><dd>longitude</dd><dt><span>y_dim :</span></dt><dd>latitude</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314245179</dd><dt><span>inverse_flattening :</span></dt><dd>298.257223563</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>WGS 84</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>WGS 84</dd><dt><span>horizontal_datum_name :</span></dt><dd>World Geodetic System 1984</dd><dt><span>grid_mapping_name :</span></dt><dd>latitude_longitude</dd><dt><span>spatial_ref :</span></dt><dd>GEOGCRS[&quot;WGS 84&quot;,DATUM[&quot;World Geodetic System 1984&quot;,ELLIPSOID[&quot;WGS 84&quot;,6378137,298.257223563,LENGTHUNIT[&quot;metre&quot;,1]]],PRIMEM[&quot;Greenwich&quot;,0,ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],CS[ellipsoidal,2],AXIS[&quot;geodetic latitude (Lat)&quot;,north,ORDER[1],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],AXIS[&quot;geodetic longitude (Lon)&quot;,east,ORDER[2],ANGLEUNIT[&quot;degree&quot;,0.0174532925199433]],ID[&quot;EPSG&quot;,4326]]</dd></dl></div><div class='xr-var-data'><pre>[1 values with dtype=int32]</pre></div></li></ul></div></li><li class='xr-section-item'><input id='section-8284c47e-67ab-4390-927c-ecb35f49fe2b' class='xr-section-summary-in' type='checkbox'  checked><label for='section-8284c47e-67ab-4390-927c-ecb35f49fe2b' class='xr-section-summary' >Data variables: <span>(7)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><ul class='xr-var-list'><li class='xr-var-item'><div class='xr-var-name'><span>precip</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-5ecaf022-e026-467f-9c9c-8bd60992e4a4' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-5ecaf022-e026-467f-9c9c-8bd60992e4a4' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-859911c1-57f3-42d1-b2e3-149c56c401ef' class='xr-var-data-in' type='checkbox'><label for='data-859911c1-57f3-42d1-b2e3-149c56c401ef' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1104,18 +1093,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 2.13 kiB </td>
-                        <td> 2.13 kiB </td>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (13, 7, 6) </td>
-                        <td> (13, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 8 graph layers </td>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1125,49 +1114,49 @@ Attributes:
             </table>
         </td>
         <td>
-        <svg width="185" height="185" style="stroke:rgb(0,0,0);stroke-width:1" >
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
 
   <!-- Horizontal lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="10" y1="64" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="10" y2="64" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,135.20361990950227 10.0,64.61538461538461" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="65" y2="0" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Vertical lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="65" y1="0" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 65.38461538461539,0.0 135.97285067873304,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
-  <line x1="80" y1="135" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
-  <line x1="135" y1="70" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="80.58823529411765,70.58823529411765 135.97285067873304,70.58823529411765 135.97285067873304,135.20361990950227 80.58823529411765,135.20361990950227" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="108.280543" y="155.203620" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
-  <text x="155.972851" y="102.895928" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,155.972851,102.895928)">7</text>
-  <text x="35.294118" y="119.909502" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,119.909502)">13</text>
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-67a6c5bf-87dc-4448-83e5-2f76f114fc3b' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-67a6c5bf-87dc-4448-83e5-2f76f114fc3b' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-5dd4dd06-e213-445f-984c-182b57a0e9d8' class='xr-var-data-in' type='checkbox'><label for='data-5dd4dd06-e213-445f-984c-182b57a0e9d8' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-3dcaaa69-6757-4820-a50e-640b3fa621d1' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-3dcaaa69-6757-4820-a50e-640b3fa621d1' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-f8bf07c6-6336-47c8-aac7-4014f4185476' class='xr-var-data-in' type='checkbox'><label for='data-f8bf07c6-6336-47c8-aac7-4014f4185476' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1182,18 +1171,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 2.13 kiB </td>
-                        <td> 2.13 kiB </td>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (13, 7, 6) </td>
-                        <td> (13, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 8 graph layers </td>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1203,49 +1192,49 @@ Attributes:
             </table>
         </td>
         <td>
-        <svg width="185" height="185" style="stroke:rgb(0,0,0);stroke-width:1" >
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
 
   <!-- Horizontal lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="10" y1="64" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="10" y2="64" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,135.20361990950227 10.0,64.61538461538461" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="65" y2="0" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Vertical lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="65" y1="0" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 65.38461538461539,0.0 135.97285067873304,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
-  <line x1="80" y1="135" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
-  <line x1="135" y1="70" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="80.58823529411765,70.58823529411765 135.97285067873304,70.58823529411765 135.97285067873304,135.20361990950227 80.58823529411765,135.20361990950227" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="108.280543" y="155.203620" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
-  <text x="155.972851" y="102.895928" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,155.972851,102.895928)">7</text>
-  <text x="35.294118" y="119.909502" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,119.909502)">13</text>
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>press_msl</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-f8c3c6b1-ef21-4bd0-aec0-589bebd74c30' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-f8c3c6b1-ef21-4bd0-aec0-589bebd74c30' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6b12b82b-9fcf-49b6-a842-57068b3dda75' class='xr-var-data-in' type='checkbox'><label for='data-6b12b82b-9fcf-49b6-a842-57068b3dda75' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>press_msl</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-13c5c8a2-3ee1-4394-8262-fbeb577cbf60' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-13c5c8a2-3ee1-4394-8262-fbeb577cbf60' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-bd00aba4-29cf-462a-a05a-507e06a608be' class='xr-var-data-in' type='checkbox'><label for='data-bd00aba4-29cf-462a-a05a-507e06a608be' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1260,18 +1249,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 2.13 kiB </td>
-                        <td> 2.13 kiB </td>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (13, 7, 6) </td>
-                        <td> (13, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 8 graph layers </td>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1281,49 +1270,49 @@ Attributes:
             </table>
         </td>
         <td>
-        <svg width="185" height="185" style="stroke:rgb(0,0,0);stroke-width:1" >
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
 
   <!-- Horizontal lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="10" y1="64" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="10" y2="64" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,135.20361990950227 10.0,64.61538461538461" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="65" y2="0" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Vertical lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="65" y1="0" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 65.38461538461539,0.0 135.97285067873304,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
-  <line x1="80" y1="135" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
-  <line x1="135" y1="70" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="80.58823529411765,70.58823529411765 135.97285067873304,70.58823529411765 135.97285067873304,135.20361990950227 80.58823529411765,135.20361990950227" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="108.280543" y="155.203620" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
-  <text x="155.972851" y="102.895928" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,155.972851,102.895928)">7</text>
-  <text x="35.294118" y="119.909502" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,119.909502)">13</text>
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kin</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-17c16515-65f5-44a8-8de4-4ef3efbb35c8' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-17c16515-65f5-44a8-8de4-4ef3efbb35c8' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-aa8d4f11-540a-43e6-80f8-66841ee9d099' class='xr-var-data-in' type='checkbox'><label for='data-aa8d4f11-540a-43e6-80f8-66841ee9d099' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kin</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-dbb199f2-25d4-41fc-a1bf-812bf2ee6c2e' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-dbb199f2-25d4-41fc-a1bf-812bf2ee6c2e' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-b82ff397-f703-4df0-abcb-197a17ec44ab' class='xr-var-data-in' type='checkbox'><label for='data-b82ff397-f703-4df0-abcb-197a17ec44ab' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1338,18 +1327,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 2.13 kiB </td>
-                        <td> 2.13 kiB </td>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (13, 7, 6) </td>
-                        <td> (13, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 8 graph layers </td>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1359,49 +1348,49 @@ Attributes:
             </table>
         </td>
         <td>
-        <svg width="185" height="185" style="stroke:rgb(0,0,0);stroke-width:1" >
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
 
   <!-- Horizontal lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="10" y1="64" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="10" y2="64" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,135.20361990950227 10.0,64.61538461538461" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="65" y2="0" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Vertical lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="65" y1="0" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 65.38461538461539,0.0 135.97285067873304,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
-  <line x1="80" y1="135" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
-  <line x1="135" y1="70" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="80.58823529411765,70.58823529411765 135.97285067873304,70.58823529411765 135.97285067873304,135.20361990950227 80.58823529411765,135.20361990950227" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="108.280543" y="155.203620" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
-  <text x="155.972851" y="102.895928" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,155.972851,102.895928)">7</text>
-  <text x="35.294118" y="119.909502" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,119.909502)">13</text>
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kout</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-7e160298-5bed-4cd4-956b-4913623444f3' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-7e160298-5bed-4cd4-956b-4913623444f3' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-06f30410-f771-4058-b7c3-270a5cd86f44' class='xr-var-data-in' type='checkbox'><label for='data-06f30410-f771-4058-b7c3-270a5cd86f44' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>kout</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-65d62e91-9a9a-43bc-9add-866b1c1da078' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-65d62e91-9a9a-43bc-9add-866b1c1da078' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-6869a5cf-90b7-4975-927b-e094a1ae75c7' class='xr-var-data-in' type='checkbox'><label for='data-6869a5cf-90b7-4975-927b-e094a1ae75c7' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1416,18 +1405,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 2.13 kiB </td>
-                        <td> 2.13 kiB </td>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (13, 7, 6) </td>
-                        <td> (13, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 8 graph layers </td>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1437,49 +1426,49 @@ Attributes:
             </table>
         </td>
         <td>
-        <svg width="185" height="185" style="stroke:rgb(0,0,0);stroke-width:1" >
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
 
   <!-- Horizontal lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="10" y1="64" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="10" y2="64" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,135.20361990950227 10.0,64.61538461538461" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="65" y2="0" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Vertical lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="65" y1="0" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 65.38461538461539,0.0 135.97285067873304,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
-  <line x1="80" y1="135" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
-  <line x1="135" y1="70" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="80.58823529411765,70.58823529411765 135.97285067873304,70.58823529411765 135.97285067873304,135.20361990950227 80.58823529411765,135.20361990950227" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="108.280543" y="155.203620" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
-  <text x="155.972851" y="102.895928" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,155.972851,102.895928)">7</text>
-  <text x="35.294118" y="119.909502" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,119.909502)">13</text>
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_min</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-9e75c733-fb22-4b33-99bc-d8107d501a72' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-9e75c733-fb22-4b33-99bc-d8107d501a72' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-0a49da32-decf-49c0-8681-6ced3a9f8794' class='xr-var-data-in' type='checkbox'><label for='data-0a49da32-decf-49c0-8681-6ced3a9f8794' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_min</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-9504925a-8cda-454c-9084-23e69a22abb2' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-9504925a-8cda-454c-9084-23e69a22abb2' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-a1c40e93-3dd8-40e0-a928-d19b501496e4' class='xr-var-data-in' type='checkbox'><label for='data-a1c40e93-3dd8-40e0-a928-d19b501496e4' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1494,18 +1483,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 2.13 kiB </td>
-                        <td> 2.13 kiB </td>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (13, 7, 6) </td>
-                        <td> (13, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 8 graph layers </td>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1515,49 +1504,49 @@ Attributes:
             </table>
         </td>
         <td>
-        <svg width="185" height="185" style="stroke:rgb(0,0,0);stroke-width:1" >
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
 
   <!-- Horizontal lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="10" y1="64" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="10" y2="64" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,135.20361990950227 10.0,64.61538461538461" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="65" y2="0" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Vertical lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="65" y1="0" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 65.38461538461539,0.0 135.97285067873304,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
-  <line x1="80" y1="135" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
-  <line x1="135" y1="70" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="80.58823529411765,70.58823529411765 135.97285067873304,70.58823529411765 135.97285067873304,135.20361990950227 80.58823529411765,135.20361990950227" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="108.280543" y="155.203620" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
-  <text x="155.972851" y="102.895928" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,155.972851,102.895928)">7</text>
-  <text x="35.294118" y="119.909502" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,119.909502)">13</text>
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
 </svg>
         </td>
     </tr>
-</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_max</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(13, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-2f058b6b-6b40-40af-be4c-3ef18f3b0c91' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-2f058b6b-6b40-40af-be4c-3ef18f3b0c91' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-07a3eec7-2f3b-41d9-a610-8319c886be7d' class='xr-var-data-in' type='checkbox'><label for='data-07a3eec7-2f3b-41d9-a610-8319c886be7d' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
+</table></div></li><li class='xr-var-item'><div class='xr-var-name'><span>temp_max</span></div><div class='xr-var-dims'>(time, latitude, longitude)</div><div class='xr-var-dtype'>float32</div><div class='xr-var-preview xr-preview'>dask.array&lt;chunksize=(14, 7, 6), meta=np.ndarray&gt;</div><input id='attrs-1f9c454f-d335-4329-911c-a3b2cca0ce48' class='xr-var-attrs-in' type='checkbox' ><label for='attrs-1f9c454f-d335-4329-911c-a3b2cca0ce48' title='Show/Hide attributes'><svg class='icon xr-icon-file-text2'><use xlink:href='#icon-file-text2'></use></svg></label><input id='data-3460dd48-8a2c-4320-ad91-ff5bff34eb55' class='xr-var-data-in' type='checkbox'><label for='data-3460dd48-8a2c-4320-ad91-ff5bff34eb55' title='Show/Hide data repr'><svg class='icon xr-icon-database'><use xlink:href='#icon-database'></use></svg></label><div class='xr-var-attrs'><dl class='xr-attrs'><dt><span>_FillValue :</span></dt><dd>nan</dd></dl></div><div class='xr-var-data'><table>
     <tr>
         <td>
             <table style="border-collapse: collapse;">
@@ -1572,18 +1561,18 @@ Attributes:
 
                     <tr>
                         <th> Bytes </th>
-                        <td> 2.13 kiB </td>
-                        <td> 2.13 kiB </td>
+                        <td> 2.30 kiB </td>
+                        <td> 2.30 kiB </td>
                     </tr>
 
                     <tr>
                         <th> Shape </th>
-                        <td> (13, 7, 6) </td>
-                        <td> (13, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
+                        <td> (14, 7, 6) </td>
                     </tr>
                     <tr>
                         <th> Dask graph </th>
-                        <td colspan="2"> 1 chunks in 8 graph layers </td>
+                        <td colspan="2"> 1 chunks in 7 graph layers </td>
                     </tr>
                     <tr>
                         <th> Data type </th>
@@ -1593,49 +1582,49 @@ Attributes:
             </table>
         </td>
         <td>
-        <svg width="185" height="185" style="stroke:rgb(0,0,0);stroke-width:1" >
+        <svg width="182" height="180" style="stroke:rgb(0,0,0);stroke-width:1" >
 
   <!-- Horizontal lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="10" y1="64" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="60" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="10" y1="0" x2="10" y2="64" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="10" y2="60" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,135.20361990950227 10.0,64.61538461538461" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 80.58823529411765,70.58823529411765 80.58823529411765,130.58823529411765 10.0,60.0" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="10" y1="0" x2="65" y2="0" style="stroke-width:2" />
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="10" y1="0" x2="61" y2="0" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Vertical lines -->
   <line x1="10" y1="0" x2="80" y2="70" style="stroke-width:2" />
-  <line x1="65" y1="0" x2="135" y2="70" style="stroke-width:2" />
+  <line x1="61" y1="0" x2="132" y2="70" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="10.0,0.0 65.38461538461539,0.0 135.97285067873304,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="10.0,0.0 61.42857142857142,0.0 132.01680672268907,70.58823529411765 80.58823529411765,70.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Horizontal lines -->
-  <line x1="80" y1="70" x2="135" y2="70" style="stroke-width:2" />
-  <line x1="80" y1="135" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="132" y2="70" style="stroke-width:2" />
+  <line x1="80" y1="130" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Vertical lines -->
-  <line x1="80" y1="70" x2="80" y2="135" style="stroke-width:2" />
-  <line x1="135" y1="70" x2="135" y2="135" style="stroke-width:2" />
+  <line x1="80" y1="70" x2="80" y2="130" style="stroke-width:2" />
+  <line x1="132" y1="70" x2="132" y2="130" style="stroke-width:2" />
 
   <!-- Colored Rectangle -->
-  <polygon points="80.58823529411765,70.58823529411765 135.97285067873304,70.58823529411765 135.97285067873304,135.20361990950227 80.58823529411765,135.20361990950227" style="fill:#ECB172A0;stroke-width:0"/>
+  <polygon points="80.58823529411765,70.58823529411765 132.01680672268907,70.58823529411765 132.01680672268907,130.58823529411765 80.58823529411765,130.58823529411765" style="fill:#ECB172A0;stroke-width:0"/>
 
   <!-- Text -->
-  <text x="108.280543" y="155.203620" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
-  <text x="155.972851" y="102.895928" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,155.972851,102.895928)">7</text>
-  <text x="35.294118" y="119.909502" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,119.909502)">13</text>
+  <text x="106.302521" y="150.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" >6</text>
+  <text x="152.016807" y="100.588235" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(0,152.016807,100.588235)">7</text>
+  <text x="35.294118" y="115.294118" font-size="1.0rem" font-weight="100" text-anchor="middle" transform="rotate(45,35.294118,115.294118)">14</text>
 </svg>
         </td>
     </tr>
-</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-2131d24f-c885-47da-9e60-45e2b8f9d98a' class='xr-section-summary-in' type='checkbox'  ><label for='section-2131d24f-c885-47da-9e60-45e2b8f9d98a' class='xr-section-summary' >Attributes: <span>(10)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>category :</span></dt><dd>meteo</dd><dt><span>history :</span></dt><dd>Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency</dd><dt><span>paper_doi :</span></dt><dd>10.1002/qj.3803</dd><dt><span>paper_ref :</span></dt><dd>Hersbach et al. (2019)</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://doi.org/10.24381/cds.bd0915c6</dd><dt><span>source_version :</span></dt><dd>ERA5 daily data on pressure levels</dd><dt><span>crs :</span></dt><dd>4326</dd><dt><span>url :</span></dt><dd>https://doi.org/10.24381/cds.bd0915c6</dd><dt><span>license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd></dl></div></li></ul></div></div></div>
+</table></div></li></ul></div></li><li class='xr-section-item'><input id='section-bee59615-1a77-49ca-8789-90016522d30f' class='xr-section-summary-in' type='checkbox'  ><label for='section-bee59615-1a77-49ca-8789-90016522d30f' class='xr-section-summary' >Attributes: <span>(10)</span></label><div class='xr-section-inline-details'></div><div class='xr-section-details'><dl class='xr-attrs'><dt><span>category :</span></dt><dd>meteo</dd><dt><span>history :</span></dt><dd>Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency</dd><dt><span>paper_doi :</span></dt><dd>10.1002/qj.3803</dd><dt><span>paper_ref :</span></dt><dd>Hersbach et al. (2019)</dd><dt><span>source_license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd><dt><span>source_url :</span></dt><dd>https://doi.org/10.24381/cds.bd0915c6</dd><dt><span>source_version :</span></dt><dd>ERA5 daily data on pressure levels</dd><dt><span>crs :</span></dt><dd>4326</dd><dt><span>url :</span></dt><dd>https://doi.org/10.24381/cds.bd0915c6</dd><dt><span>license :</span></dt><dd>https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products</dd></dl></div></li></ul></div></div></div>
 </div>
 </section>
 <section id="Export-an-extract-of-the-data">
@@ -1683,25 +1672,11 @@ Attributes:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:18:02,663 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
-2025-11-10 11:18:02,756 - hydromt.data_catalog.drivers.raster.raster_xarray_driver - raster_xarray_driver - WARNING - Unknown extension for RasterDatasetXarrayDriver: .tif,switching to zarr
-2025-11-10 11:18:03,384 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading era5 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/era5.nc
-2025-11-10 11:18:03,387 - hydromt._utils.unused_kwargs - unused_kwargs - WARNING - object: RasterDatasetXarrayDriver does not use kwarg mask with value                                             geometry
-0  POLYGON ((13 46, 13 46.5, 12 46.5, 12 46, 13 46)).
-2025-11-10 11:18:03,388 - hydromt._utils.unused_kwargs - unused_kwargs - WARNING - object: RasterDatasetXarrayDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
-Name: WGS 84
-Axis Info [ellipsoidal]:
-- Lat[north]: Geodetic latitude (degree)
-- Lon[east]: Geodetic longitude (degree)
-Area of Use:
-- name: World.
-- bounds: (-180.0, -90.0, 180.0, 90.0)
-Datum: World Geodetic System 1984 ensemble
-- Ellipsoid: WGS 84
-- Prime Meridian: Greenwich
- unit=None extent={} nodata=None attrs={} category=&#39;meteo&#39; history=&#39;Extracted from Copernicus Climate Data Store; resampled by Deltares to daily frequency&#39; paper_doi=&#39;10.1002/qj.3803&#39; paper_ref=&#39;Hersbach et al. (2019)&#39; url=&#39;https://doi.org/10.24381/cds.bd0915c6&#39; license=&#39;https://cds.climate.copernicus.eu/cdsapp/#!/terms/licence-to-use-copernicus-products&#39;.
-2025-11-10 11:18:03,474 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/vito.tif
-2025-11-10 11:18:03,488 - hydromt.data_catalog.drivers.raster.raster_xarray_driver - raster_xarray_driver - WARNING - Unknown extension for RasterDatasetXarrayDriver: .tif,switching to zarr
+2025-11-24 10:35:01,444 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
+2025-11-24 10:35:01,716 - hydromt.data_catalog.drivers.raster.raster_xarray_driver - raster_xarray_driver - WARNING - Unknown extension for RasterDatasetXarrayDriver: .tif,switching to zarr
+2025-11-24 10:35:02,341 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading era5 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/era5.nc
+2025-11-24 10:35:02,433 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/vito.tif
+2025-11-24 10:35:02,446 - hydromt.data_catalog.drivers.raster.raster_xarray_driver - raster_xarray_driver - WARNING - Unknown extension for RasterDatasetXarrayDriver: .tif,switching to zarr
 </pre></div></div>
 </div>
 </section>
@@ -1746,62 +1721,62 @@ tmp_data_export/vito.zarr/x
  - zarr.json
 tmp_data_export/vito.zarr/x/c
  - 0
-tmp_data_export/basins.zarr
+tmp_data_export/lndslp.zarr
  - zarr.json
-tmp_data_export/basins.zarr/hnd
+tmp_data_export/lndslp.zarr/hnd
  - zarr.json
-tmp_data_export/basins.zarr/hnd/c
-tmp_data_export/basins.zarr/hnd/c/0
+tmp_data_export/lndslp.zarr/hnd/c
+tmp_data_export/lndslp.zarr/hnd/c/0
  - 0
-tmp_data_export/basins.zarr/lndslp
+tmp_data_export/lndslp.zarr/lndslp
  - zarr.json
-tmp_data_export/basins.zarr/lndslp/c
-tmp_data_export/basins.zarr/lndslp/c/0
+tmp_data_export/lndslp.zarr/lndslp/c
+tmp_data_export/lndslp.zarr/lndslp/c/0
  - 0
-tmp_data_export/basins.zarr/rivwth
+tmp_data_export/lndslp.zarr/rivwth
  - zarr.json
-tmp_data_export/basins.zarr/rivwth/c
-tmp_data_export/basins.zarr/rivwth/c/0
+tmp_data_export/lndslp.zarr/rivwth/c
+tmp_data_export/lndslp.zarr/rivwth/c/0
  - 0
-tmp_data_export/basins.zarr/upgrid
+tmp_data_export/lndslp.zarr/upgrid
  - zarr.json
-tmp_data_export/basins.zarr/upgrid/c
-tmp_data_export/basins.zarr/upgrid/c/0
+tmp_data_export/lndslp.zarr/upgrid/c
+tmp_data_export/lndslp.zarr/upgrid/c/0
  - 0
-tmp_data_export/basins.zarr/elevtn
+tmp_data_export/lndslp.zarr/elevtn
  - zarr.json
-tmp_data_export/basins.zarr/elevtn/c
-tmp_data_export/basins.zarr/elevtn/c/0
+tmp_data_export/lndslp.zarr/elevtn/c
+tmp_data_export/lndslp.zarr/elevtn/c/0
  - 0
-tmp_data_export/basins.zarr/uparea
+tmp_data_export/lndslp.zarr/uparea
  - zarr.json
-tmp_data_export/basins.zarr/uparea/c
-tmp_data_export/basins.zarr/uparea/c/0
+tmp_data_export/lndslp.zarr/uparea/c
+tmp_data_export/lndslp.zarr/uparea/c/0
  - 0
-tmp_data_export/basins.zarr/basins
+tmp_data_export/lndslp.zarr/basins
  - zarr.json
-tmp_data_export/basins.zarr/basins/c
-tmp_data_export/basins.zarr/basins/c/0
+tmp_data_export/lndslp.zarr/basins/c
+tmp_data_export/lndslp.zarr/basins/c/0
  - 0
-tmp_data_export/basins.zarr/spatial_ref
+tmp_data_export/lndslp.zarr/spatial_ref
  - zarr.json
-tmp_data_export/basins.zarr/y
+tmp_data_export/lndslp.zarr/y
  - zarr.json
-tmp_data_export/basins.zarr/y/c
+tmp_data_export/lndslp.zarr/y/c
  - 0
-tmp_data_export/basins.zarr/flwdir
+tmp_data_export/lndslp.zarr/flwdir
  - zarr.json
-tmp_data_export/basins.zarr/flwdir/c
-tmp_data_export/basins.zarr/flwdir/c/0
+tmp_data_export/lndslp.zarr/flwdir/c
+tmp_data_export/lndslp.zarr/flwdir/c/0
  - 0
-tmp_data_export/basins.zarr/x
+tmp_data_export/lndslp.zarr/x
  - zarr.json
-tmp_data_export/basins.zarr/x/c
+tmp_data_export/lndslp.zarr/x/c
  - 0
-tmp_data_export/basins.zarr/strord
+tmp_data_export/lndslp.zarr/strord
  - zarr.json
-tmp_data_export/basins.zarr/strord/c
-tmp_data_export/basins.zarr/strord/c/0
+tmp_data_export/lndslp.zarr/strord/c
+tmp_data_export/lndslp.zarr/strord/c/0
  - 0
 </pre></div></div>
 </div>
@@ -1853,7 +1828,7 @@ era5:
   data_type: RasterDataset
   root: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export
 merit_hydro:
-  uri: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export/basins.zarr
+  uri: /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export/lndslp.zarr
   driver:
     options: {}
     name: raster_xarray
@@ -1901,7 +1876,7 @@ vito_2015:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:18:03,535 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmp_data_export/data_catalog.yml
+2025-11-24 10:35:02,492 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from tmp_data_export/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -1933,21 +1908,8 @@ dict_keys([&#39;era5&#39;, &#39;merit_hydro&#39;, &#39;vito_2015&#39;])
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:18:03,545 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
-2025-11-10 11:18:03,559 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export/basins.zarr
-2025-11-10 11:18:03,560 - hydromt._utils.unused_kwargs - unused_kwargs - WARNING - object: RasterDatasetXarrayDriver does not use kwarg variables with value [&#39;elevtn&#39;].
-2025-11-10 11:18:03,561 - hydromt._utils.unused_kwargs - unused_kwargs - WARNING - object: RasterDatasetXarrayDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
-Name: WGS 84
-Axis Info [ellipsoidal]:
-- Lat[north]: Geodetic latitude (degree)
-- Lon[east]: Geodetic longitude (degree)
-Area of Use:
-- name: World.
-- bounds: (-180.0, -90.0, 180.0, 90.0)
-Datum: World Geodetic System 1984 ensemble
-- Ellipsoid: WGS 84
-- Prime Meridian: Greenwich
- unit=None extent={} nodata=None attrs={} category=&#39;topography&#39; paper_doi=&#39;10.1029/2019WR024873&#39; paper_ref=&#39;Yamazaki et al. (2019)&#39; url=&#39;http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro&#39; license=&#39;CC-BY-NC 4.0 or ODbL 1.0&#39;.
+2025-11-24 10:35:02,503 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
+2025-11-24 10:35:02,518 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_data_export/lndslp.zarr
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">

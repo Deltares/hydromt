@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Custom components &#8212; HydroMT  documentation</title>
+    <title>HydroMT Design Conventions &#8212; HydroMT  documentation</title>
   
   
   
@@ -46,7 +46,7 @@
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'dev/plugin_dev/custom_component';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'dev/architecture/conventions';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
@@ -57,8 +57,8 @@
     <link rel="icon" href="../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Custom Catalog" href="custom_catalog.html" />
-    <link rel="prev" title="Custom Models" href="custom_model.html" />
+    <link rel="next" title="Plugin Developer Guide" href="../plugin_dev/index.html" />
+    <link rel="prev" title="Architecture" href="architecture.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.2.0.dev0" />
@@ -373,24 +373,38 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../architecture/architecture.html">Architecture</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">HydroMT Architecture</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">HydroMT Design Conventions</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plugin_dev/index.html">Plugin Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/quickstart.html">Starting Your Own HydroMT Plugin</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../plugin_dev/custom_implementation/index.html">Implement your own HydroMT objects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/model.html">Custom Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/component.html">Custom Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/catalog.html">Custom Data Catalogs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_source.html">Custom Data Sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/driver.html">Custom Drivers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/resolver.html">Custom Resolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_adapter.html">Custom DataAdapter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/register.html">Linking your own custom objects to HydroMT core API</a></li>
 
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Plugin Developer Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plugin_quickstart.html">Starting your own HydroMT Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html">Implementing your own HydroMT Model class</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Creating your own Model Components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_catalog.html">Pre-defined Data Catalog for your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_driver.html">Custom Data Driver and Resolver</a></li>
-<li class="toctree-l2"><a class="reference internal" href="register_plugin.html">Linking your own custom objects to HydroMT core API</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="testing_your_plugin.html">Testing your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html">Migrating your plugin to v1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/testing.html">Testing your plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/migrating_to_v1.html">Migrating to v1</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../core_dev/index.html">Core Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/contributing.html">Developer’s guide</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/documentation.html">Adding Documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../core_dev/dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/git_conventions.html">Issue conventions</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/code_conventions.html">Code conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/documentation.html">Adding Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/test_ci.html">Test and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../core_dev/release.html">Creating a release</a></li>
 </ul>
 </details></li>
 </ul>
@@ -437,9 +451,9 @@
     <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">Developer Guide</a></li>
     
     
-    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Plugin Developer guide</a></li>
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">HydroMT Architecture</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Custom components</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">HydroMT Design Conventions</span></li>
   </ul>
 </nav>
 </div>
@@ -456,73 +470,53 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="custom-components">
-<span id="id1"></span><h1>Custom components<a class="headerlink" href="#custom-components" title="Link to this heading">#</a></h1>
-<p>Components are a large part of how HydroMT defines its behavior.
-A component is a part of the model architecture that is responsible
-for handling a specific part of the data, such as the Grid, Config, or Mesh
-but also potentially something like rivers, catchments, pipes or other custom behavior
-your plugin might need.</p>
-<section id="implementing-a-component">
-<h2>Implementing a component<a class="headerlink" href="#implementing-a-component" title="Link to this heading">#</a></h2>
-<section id="initialisation">
-<h3>Initialisation<a class="headerlink" href="#initialisation" title="Link to this heading">#</a></h3>
-<p>There are generally two types of components you might want to implement:
-<cite>ModelComponent</cite> and <cite>SpatialModelComponent</cite>. They are similar but the
-<cite>SpatialModelComponent</cite> is meant to hold spacial data. A model MUST have at least one
-<cite>SpatialModelComponent</cite> for it’s region functionality to function properly.</p>
-<p>Components of any kind, should take a reference to the model they are a part of at
-initialization so that components can access other components through the model as is
-necessary. Typically this is done like so:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="go">class AwesomeRiverComponent(ModelComponent):</span>
-<span class="go">    def __init__(</span>
-<span class="go">        self,</span>
-<span class="go">        model: Model,</span>
-<span class="go">        filename: str = &quot;component/{name}.csv&quot;,</span>
-<span class="go">    ):</span>
-<span class="go">        self._data: Optional[Dict[str, Union[pd.DataFrame, pd.Series]]] = None</span>
-<span class="go">        self._filename: str = filename</span>
-<span class="go">        super().__init__(model=model)</span>
-</pre></div>
-</div>
-<p>It is also important that the component has a <code class="docutils literal notranslate"><span class="pre">self._filename</span></code> property defined
-because the data in components they are lazy loaded by default, meaning that
-the data associated with them only get’s loaded if necessary. Therefore it is important
-to set a property on the component so that it can read from/write to the correct default
-file location, without additional input.</p>
-<p><code class="docutils literal notranslate"><span class="pre">SpatialModelComponent</span></code> s should take some additional information in their
-initialisation:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">region_component</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;spatial_component/</span><span class="si">{name}</span><span class="s2">.nc&quot;</span><span class="p">,</span>
-    <span class="n">region_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;spatial_component/region.geojson&quot;</span><span class="p">,</span>
-<span class="p">):</span>
-    <span class="o">...</span>
-</pre></div>
-</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">region_filename</span></code> is a similar file location within the model root where region data
-should be written if necessary. Note also that spatial components do not necessarily
-have their own region. Sometimes they can derive their region from other spacial
-components, such as a subgrid deriving its region from the main grid. If this is the
-case then set the <code class="docutils literal notranslate"><span class="pre">region_component</span></code> to the name of the component from which you wish to
-derive the region.</p>
+  <section id="hydromt-design-conventions">
+<span id="architecture-conventions"></span><h1>HydroMT Design Conventions<a class="headerlink" href="#hydromt-design-conventions" title="Link to this heading">#</a></h1>
+<section id="general">
+<h2>General<a class="headerlink" href="#general" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>HydroMT follows consistent <a class="reference internal" href="../../user_guide/data_catalog/data_conventions.html#data-convention"><span class="std std-ref">naming and unit conventions</span></a> for frequently used variables to ensure clarity and interoperability.</p></li>
+<li><p>Code and documentation should adhere to Pythonic naming standards (PEP8), and public API elements should have clear docstrings following the NumPy style.</p></li>
+</ul>
 </section>
-<section id="required-attributes">
-<h3>Required attributes<a class="headerlink" href="#required-attributes" title="Link to this heading">#</a></h3>
-<p>Aside form initialisation the components are expected to have some other properties
-(<cite>data</cite>, <cite>model</cite>, <cite>data_catalog</cite> and <cite>root</cite>) and functions (<cite>read</cite> and <cite>write</cite>).
-Functions annotated with the <code class="docutils literal notranslate"><span class="pre">&#64;hydromt_step</span></code> decorator will be available to users of a
-workflow yaml. Depending on the context your component may also want to implement the
-functions <cite>set</cite> (which is typically not annotaed with the <code class="docutils literal notranslate"><span class="pre">&#64;hydromt_step</span></code> decorator
-since it cannot be sued in a yaml workflow)`, and <cite>test_equal</cite>. <cite>set</cite> is typically used
-by python users to overwrite data in the component after they have done something with
-it outside of your component. <cite>test_equal</cite> is purely for testing purposes and should test
-whether the component provided (including potential data) is equal to the component it
-is being run on. This is very useful for testing that includes data.</p>
+<section id="data">
+<h2>Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>HydroMT supports a range of <a class="reference internal" href="../../user_guide/data_catalog/data_types.html#data-types"><span class="std std-ref">data types</span></a>, which can be extended as needed.</p></li>
+<li><p>Input data is defined in a <a class="reference internal" href="../../user_guide/data_catalog/data_prepare_cat.html#data-yaml"><span class="std std-ref">data catalog</span></a> and parsed by HydroMT to its associated Python type through the <code class="docutils literal notranslate"><span class="pre">DataSource</span></code> class.</p></li>
+<li><p>The goal of the <code class="docutils literal notranslate"><span class="pre">DataAdapter</span></code> is to standardize internal data representation — including variable names, units, and structure — with minimal preprocessing.</p></li>
+<li><p>When accessing data from the catalog via any <code class="docutils literal notranslate"><span class="pre">DataCatalog.get_&lt;data_type&gt;</span></code> method, the adapter ensures a consistent and unified format.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">get_*</span></code> methods also support arguments to define spatial or temporal subsets of datasets, ensuring efficient and targeted data access.</p></li>
+</ul>
 </section>
+<section id="model-class">
+<h2>Model Class<a class="headerlink" href="#model-class" title="Link to this heading">#</a></h2>
+<p>The HydroMT <a class="reference internal" href="../../api/model.html#model-api"><span class="std std-ref">Model class</span></a> defines the structure and behavior of models within the framework.
+To implement HydroMT for a specific model kernel or software, create a subclass named <code class="docutils literal notranslate"><span class="pre">&lt;Name&gt;Model</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">SfincsModel</span></code> for SFINCS) with model-specific
+readers, writers, and setup methods.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../user_guide/models/model_components.html#model-components"><span class="std std-ref">Model components</span></a> are data attributes that together define a model instance.
+Each component represents a specific aspect (file/data) of the model and is parsed into a Python class and data object with predefined specifications.
+For example, the <code class="docutils literal notranslate"><span class="pre">GridComponent</span></code> data represents static regular grids of a model as an <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a>.</p></li>
+<li><p>Most model components include both <code class="docutils literal notranslate"><span class="pre">read</span></code> and <code class="docutils literal notranslate"><span class="pre">write</span></code> methods for handling model-specific formats.
+These methods may include optional keyword arguments but <strong>must not</strong> require positional arguments.
+Model outputs can also be handled through components but should not implement a <code class="docutils literal notranslate"><span class="pre">write</span></code> method.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">Model</span></code> should contain high level methods that go from raw data into model inputs and parameters.
+These methods are decorated with <code class="docutils literal notranslate"><span class="pre">&#64;hydromt_step</span></code> to indicate they are part of the model workflow.
+Each method should have a clear purpose, and documented inputs and outputs.</p></li>
+<li><p>All public model methods, defined with <code class="docutils literal notranslate"><span class="pre">hydromt_step</span></code> may only accept arguments of basic Python types: <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">int</span></code>,
+<code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">list</span></code>, or <code class="docutils literal notranslate"><span class="pre">dict</span></code>.
+This restriction ensures methods can be fully defined in a <a class="reference internal" href="../../user_guide/models/model_workflow.html#model-workflow"><span class="std std-ref">workflow YAML file</span></a>.</p></li>
+<li><p>Model methods access data through the <code class="docutils literal notranslate"><span class="pre">Model.data_catalog</span></code> attribute — an instance of <code class="xref py py-class docutils literal notranslate"><span class="pre">hydromt.DataCatalog</span></code>.
+Any argument ending with <code class="docutils literal notranslate"><span class="pre">_fn</span></code> (short for <em>filename</em>) refers either to a source in the data catalog or to a file path.
+Inside the method, data can be read with any <code class="docutils literal notranslate"><span class="pre">DataCatalog.get_&lt;data_type&gt;</span></code> method, which handles both catalog entries and local file paths transparently.</p></li>
+<li><p>The Model class defines two high-level methods — <code class="xref py py-meth docutils literal notranslate"><span class="pre">build()</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">update()</span></code> — which
+are available across all model plugins and exposed via the CLI. Additional high-level methods may be added in future releases.</p></li>
+<li><p>A model subclass can be exposed as a HydroMT plugin by declaring a <code class="docutils literal notranslate"><span class="pre">hydromt.models</span></code>
+<a class="reference external" href="https://packaging.python.org/en/latest/specifications/entry-points/">entry point</a> in the package’s <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>.
+For detailed instructions, refer to the <a class="reference internal" href="../plugin_dev/register.html#register-plugins"><span class="std std-ref">Linking your own custom objects to HydroMT core API</span></a> section.</p></li>
+<li><p>We strongly recommend writing integration and unit tests for all model classes and components to ensure correctness and maintain stability across releases.</p></li>
+</ul>
 </section>
 </section>
 
@@ -537,20 +531,20 @@ is being run on. This is very useful for testing that includes data.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="custom_model.html"
+       href="architecture.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Custom Models</p>
+        <p class="prev-next-title">Architecture</p>
       </div>
     </a>
     <a class="right-next"
-       href="custom_catalog.html"
+       href="../plugin_dev/index.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Custom Catalog</p>
+        <p class="prev-next-title">Plugin Developer Guide</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -593,11 +587,9 @@ is being run on. This is very useful for testing that includes data.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementing-a-component">Implementing a component</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#initialisation">Initialisation</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#required-attributes">Required attributes</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#general">General</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data">Data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-class">Model Class</a></li>
 </ul>
   </nav></div>
 

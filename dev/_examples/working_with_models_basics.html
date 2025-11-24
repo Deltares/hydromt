@@ -476,41 +476,10 @@
 <li><p><strong>building</strong> a model: building a model from scratch.</p></li>
 <li><p><strong>updating</strong> a model: adding or changing model components of an existing model.</p></li>
 </ul>
-<p>Here we show how to build and update a hypothetical distributed model from the command line interface (CLI) based on the generic HydroMT <strong>Model</strong>.</p>
+<p>Here we show how to build and update a hypothetical gridded model that contains a <code class="docutils literal notranslate"><span class="pre">grid</span></code> and a <code class="docutils literal notranslate"><span class="pre">config</span></code> from the command line interface (CLI) based on the generic HydroMT <strong>example_model</strong>.</p>
 <p>Lets first check which models are available in our environment:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>--help
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Usage: hydromt [OPTIONS] COMMAND [ARGS]...
-
-  Command line interface for hydromt models.
-
-Options:
-  --version     Show the version and exit.
-  --models      Print available model plugins and exit.
-  --components  Print available component plugins and exit.
-  --plugins     Print available component plugins and exit.
-  --help        Show this message and exit.
-
-Commands:
-  build   Build models
-  check   Validate config / data catalog / region
-  export  Export data
-  update  Update models
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>--models
@@ -527,11 +496,25 @@ Model plugins:
         - example_model (hydromt 1.2.0.dev0)
 </pre></div></div>
 </div>
+<section id="Build-a-model-from-CLI">
+<h2>Build a model from CLI<a class="headerlink" href="#Build-a-model-from-CLI" title="Link to this heading">#</a></h2>
+<p>To build a model you always follow the next four steps.</p>
+<ol class="arabic simple">
+<li><p>Prepare or use a pre-defined data catalog with all the required data sources</p></li>
+<li><p>Define your model region, see the overview of <a class="reference internal" href="../user_guide/models/model_region.html"><span class="doc">model region options</span></a>.</p></li>
+<li><p>Prepare a <a class="reference internal" href="../user_guide/models/model_workflow.html"><span class="doc">model workflow file</span></a> which describes the complete pipeline to build your model.</p></li>
+<li><p>Build you model using the CLI or Python interface</p></li>
+</ol>
+<p>Here we focus on steps 2-4 and use data from the <a class="reference internal" href="../user_guide/data_catalog/data_existing_cat.html#available-pre-defined-data-catalogs"><span class="std std-ref">predefined artifact_data catalog</span></a>.</p>
+<p>Using the <strong>hydromt build</strong> method we can setup a complete model from scratch. Let’s get an overview of the method and its arguments.</p>
+<blockquote>
+<div><p>Note the required MODEL (i.e. name of the model) and MODEL_ROOT (i.e. folder where to save the model) arguments.</p>
+</div></blockquote>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>--components
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>build<span class="w"> </span>--help
 </pre></div>
 </div>
 </div>
@@ -540,20 +523,515 @@ Model plugins:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Component plugins:
-        - ConfigComponent (hydromt 1.2.0.dev0)
-        - DatasetsComponent (hydromt 1.2.0.dev0)
-        - GeomsComponent (hydromt 1.2.0.dev0)
-        - GridComponent (hydromt 1.2.0.dev0)
-        - MeshComponent (hydromt 1.2.0.dev0)
-        - SpatialDatasetsComponent (hydromt 1.2.0.dev0)
-        - TablesComponent (hydromt 1.2.0.dev0)
-        - VectorComponent (hydromt 1.2.0.dev0)
+Usage: hydromt build [OPTIONS] MODEL MODEL_ROOT
+
+  Build models from scratch.
+
+  Example usage: --------------
+
+  To build a wflow model: hydromt build wflow_sbm /path/to/model_root -i
+  /path/to/wflow_config.yml -d deltares_data -d /path/to/data_catalog.yml -v
+
+  To build a sfincs model: hydromt build sfincs /path/to/model_root  -i
+  /path/to/sfincs_config.yml -d /path/to/data_catalog.yml -v
+
+Options:
+  -i, --config PATH        Path to hydroMT configuration file, for the model
+                           specific implementation.  [required]
+  -d, --data TEXT          Path to local yaml data catalog file OR name of
+                           predefined data catalog.
+  --dd, --deltares-data    Flag: Shortcut to add the &#34;deltares_data&#34; catalog
+  --fo, --force-overwrite  Flag: If provided overwrite existing model files
+  --cache                  Flag: If provided cache tiled rasterdatasets
+  -v, --verbose            Increase verbosity.
+  -q, --quiet              Decrease verbosity.
+  --help                   Show this message and exit.
 </pre></div></div>
 </div>
-<section id="Build-a-model-from-CLI">
-<h2>Build a model from CLI<a class="headerlink" href="#Build-a-model-from-CLI" title="Link to this heading">#</a></h2>
-<p>TBC</p>
+<p>As a first step, we want to create a grid for our example model. We will do this by calling the <code class="docutils literal notranslate"><span class="pre">example_model.grid.create_from_region</span></code> method. We will based our grid from a bounding box with a resolution of 0.05 degree in EPSG 4326.</p>
+<p>For this we will create the following workflow file below, where we define the region for our grid.</p>
+<blockquote>
+<div><p>The %%writefile magic saves the content below to a file. The content of the .yaml file start from the second line.</p>
+</div></blockquote>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> tmp_build_example_model_min.yml
+
+<span class="n">steps</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">create_from_region</span><span class="p">:</span>
+      <span class="n">region</span><span class="p">:</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="p">[</span><span class="mf">11.70</span><span class="p">,</span> <span class="mf">45.35</span><span class="p">,</span> <span class="mf">12.95</span><span class="p">,</span> <span class="mf">46.70</span><span class="p">]</span>
+      <span class="n">res</span><span class="p">:</span> <span class="mf">0.05</span>
+      <span class="n">crs</span><span class="p">:</span> <span class="mi">4326</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Writing tmp_build_example_model_min.yml
+</pre></div></div>
+</div>
+<p>Now let’s call the HydroMT <code class="docutils literal notranslate"><span class="pre">build</span></code> command with our newly created <strong>build_example_model.yml</strong> workflow file and using the <strong>artifact_data</strong> catalog:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>build<span class="w"> </span>example_model<span class="w"> </span>./tmp_example_model_min<span class="w"> </span>-i<span class="w"> </span>tmp_build_example_model_min.yml<span class="w"> </span>-d<span class="w"> </span>artifact_data<span class="w"> </span>--fo<span class="w"> </span>-v
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-24 10:36:59,697 - hydromt - log - INFO - HydroMT version: 1.2.0.dev0
+2025-11-24 10:36:59,724 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2025-11-24 10:36:59,724 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-11-24 10:37:00,406 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.2.0.dev0).
+2025-11-24 10:37:00,407 - hydromt - log - INFO - HydroMT version: 1.2.0.dev0
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - build: grid.create_from_region
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.res=0.05
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.crs=4326
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.region_crs=4326
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.rotated=False
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.hydrography_path=None
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.basin_index_path=None
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.add_mask=True
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.align=True
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.dec_origin=0
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.dec_rotation=3
+2025-11-24 10:37:00,407 - hydromt.model.model - model - INFO - grid.create_from_region.region={&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2025-11-24 10:37:00,407 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing 2D grid.
+2025-11-24 10:37:00,420 - hydromt.model.components.config - config - INFO - example_model.config: No config data found, skip writing.
+2025-11-24 10:37:00,420 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model_min/grid.nc.
+</pre></div></div>
+</div>
+<p>The example above means the following: run <strong>hydromt build</strong> with:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">example_model</span></code>: i.e. build a generic GridModel instance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./tmp_example_model_min</span></code>: output model folder</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">tmp_build</span> <span class="pre">example_model_min.yml</span></code>: path to the model build workflow file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">artifact_data</span></code>: data catalog to use</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-vv</span></code> : give some extra verbosity (1 * v) to display feedback on screen. Now INFO messages are provided.</p></li>
+</ul>
+<p>Let’s see which files where created for our model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># print MODEL_ROOT folder</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">print_dir</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.xml&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; - </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="n">print_dir</span><span class="p">(</span><span class="s2">&quot;tmp_example_model_min&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_example_model_min
+ - hydromt.log
+ - grid.nc
+</pre></div></div>
+</div>
+<p>We can see that in this case, not many files were created, only the grid and the hydromt log file.</p>
+<p>So now let’s add more steps to our workflow file to also add a configuration file with some settings, re-create our grid and populate it with some data (e.g. elevation and landuse). We will use the following workflow file:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> tmp_build_example_model.yml
+
+<span class="n">steps</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">:</span>
+      <span class="n">data</span><span class="p">:</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span> <span class="n">value</span>
+        <span class="n">timers</span><span class="o">.</span><span class="n">end</span><span class="p">:</span> <span class="s2">&quot;2010-02-15&quot;</span>
+        <span class="n">timers</span><span class="o">.</span><span class="n">start</span><span class="p">:</span> <span class="s2">&quot;2010-02-05&quot;</span>
+  <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">create_from_region</span><span class="p">:</span>
+      <span class="n">region</span><span class="p">:</span>
+        <span class="n">bbox</span><span class="p">:</span> <span class="p">[</span><span class="mf">11.70</span><span class="p">,</span> <span class="mf">45.35</span><span class="p">,</span> <span class="mf">12.95</span><span class="p">,</span> <span class="mf">46.70</span><span class="p">]</span>
+      <span class="n">res</span><span class="p">:</span> <span class="mf">0.05</span>
+      <span class="n">crs</span><span class="p">:</span> <span class="mi">4326</span>
+  <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">add_data_from_rasterdataset</span><span class="p">:</span>
+      <span class="n">raster_data</span><span class="p">:</span> <span class="n">merit_hydro_ihu</span>
+      <span class="n">variables</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">elevtn</span>
+        <span class="o">-</span> <span class="n">basins</span>
+      <span class="n">reproject_method</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">average</span>
+        <span class="o">-</span> <span class="n">mode</span>
+  <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">add_data_from_rasterdataset</span><span class="p">:</span>
+      <span class="n">raster_data</span><span class="p">:</span> <span class="n">vito_2015</span>
+      <span class="n">fill_method</span><span class="p">:</span> <span class="n">nearest</span>
+      <span class="n">reproject_method</span><span class="p">:</span> <span class="n">mode</span>
+      <span class="n">rename</span><span class="p">:</span>
+        <span class="n">vito</span><span class="p">:</span> <span class="n">landuse</span>
+  <span class="o">-</span> <span class="n">write</span><span class="p">:</span>
+      <span class="n">components</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">grid</span>
+        <span class="o">-</span> <span class="n">config</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Writing tmp_build_example_model.yml
+</pre></div></div>
+</div>
+<p>In this configuration, you see that we will prepare quite a lot of data for our grid model using some of the generic model methods for grid. We will prepare:</p>
+<ul class="simple">
+<li><p>Update some config options using <a class="reference internal" href="../_generated/hydromt.model.components.ConfigComponent.update.html#hydromt.model.components.ConfigComponent.update"><span class="std std-ref">config.update</span></a></p></li>
+<li><p>Create a regular grid from a bounding box region using <a class="reference external" href="https://github.com/Deltares/hydromt/blob/fbb17de5046e657a6257959c5ee48634eab5adab/hydromt/model/example/example_grid_component.py#L58">grid.create_from_region</a></p></li>
+<li><p>A couple of grid based on reprojection of MERIT Hydro IHU (elevation, basins) and VITO (landuse) using <a class="reference external" href="https://github.com/Deltares/hydromt/blob/fbb17de5046e657a6257959c5ee48634eab5adab/hydromt/model/example/example_grid_component.py#L156">grid.add_data_from_rasterdataset</a>. Note that you can use the same several times in the same workflow file.</p></li>
+</ul>
+<p>Let’s now build this model:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>build<span class="w"> </span>example_model<span class="w"> </span>./tmp_example_model<span class="w"> </span>-i<span class="w"> </span>tmp_build_example_model.yml<span class="w"> </span>-d<span class="w"> </span>artifact_data<span class="w"> </span>--fo<span class="w"> </span>-v
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-24 10:37:04,933 - hydromt - log - INFO - HydroMT version: 1.2.0.dev0
+2025-11-24 10:37:04,961 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2025-11-24 10:37:04,961 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-11-24 10:37:05,640 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.2.0.dev0).
+2025-11-24 10:37:05,641 - hydromt - log - INFO - HydroMT version: 1.2.0.dev0
+2025-11-24 10:37:05,641 - hydromt.model.model - model - INFO - build: config.update
+2025-11-24 10:37:05,641 - hydromt.model.model - model - INFO - config.update.data={&#39;header.settings&#39;: &#39;value&#39;, &#39;timers.end&#39;: &#39;2010-02-15&#39;, &#39;timers.start&#39;: &#39;2010-02-05&#39;}
+2025-11-24 10:37:05,641 - hydromt.model.model - model - INFO - build: grid.create_from_region
+2025-11-24 10:37:05,641 - hydromt.model.model - model - INFO - grid.create_from_region.res=0.05
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.crs=4326
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.region_crs=4326
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.rotated=False
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.hydrography_path=None
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.basin_index_path=None
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.add_mask=True
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.align=True
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.dec_origin=0
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.dec_rotation=3
+2025-11-24 10:37:05,642 - hydromt.model.model - model - INFO - grid.create_from_region.region={&#39;bbox&#39;: [11.7, 45.35, 12.95, 46.7]}
+2025-11-24 10:37:05,642 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing 2D grid.
+2025-11-24 10:37:05,656 - hydromt.model.model - model - INFO - build: grid.add_data_from_rasterdataset
+2025-11-24 10:37:05,656 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=[&#39;elevtn&#39;, &#39;basins&#39;]
+2025-11-24 10:37:05,656 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=None
+2025-11-24 10:37:05,656 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=[&#39;average&#39;, &#39;mode&#39;]
+2025-11-24 10:37:05,656 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
+2025-11-24 10:37:05,656 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename=None
+2025-11-24 10:37:05,656 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=merit_hydro_ihu
+2025-11-24 10:37:05,657 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source merit_hydro_ihu
+2025-11-24 10:37:05,659 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_ihu RasterDataset data from /home/runner/.hydromt/artifact_data/latest/merit_hydro_1k/{variable}.tif
+2025-11-24 10:37:05,788 - hydromt.model.model - model - INFO - build: grid.add_data_from_rasterdataset
+2025-11-24 10:37:05,788 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=None
+2025-11-24 10:37:05,788 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=nearest
+2025-11-24 10:37:05,788 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=mode
+2025-11-24 10:37:05,788 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
+2025-11-24 10:37:05,788 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename={&#39;vito&#39;: &#39;landuse&#39;}
+2025-11-24 10:37:05,788 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=vito_2015
+2025-11-24 10:37:05,788 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source vito_2015
+2025-11-24 10:37:05,790 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading vito_2015 RasterDataset data from /home/runner/.hydromt/artifact_data/latest/vito.tif
+2025-11-24 10:37:05,845 - hydromt.model.model - model - INFO - build: write
+2025-11-24 10:37:05,845 - hydromt.model.model - model - INFO - write.components=[&#39;grid&#39;, &#39;config&#39;]
+2025-11-24 10:37:05,845 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/grid.nc.
+2025-11-24 10:37:05,900 - hydromt.model.components.config - config - INFO - example_model.config: Writing model config to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/settings.toml.
+</pre></div></div>
+</div>
+<p>The example above means the following: run <strong>hydromt build</strong> with:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">example_model</span></code>: i.e. build a generic GridModel instance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./tmp_example_model</span></code>: output model folder</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">tmp_build_example_model.yaml</span></code>: use this .yaml file to configure the model build</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">artifact_data</span></code>: parse the pre-defined artifact_data</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-vv</span></code>: give some extra verbosity (1 * v) to display feedback on screen. Now INFO messages are provided.</p></li>
+</ul>
+<p>Let’s check some of the outputs that were produced:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Files created</span>
+<span class="n">print_dir</span><span class="p">(</span><span class="s2">&quot;tmp_example_model&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_example_model
+ - settings.toml
+ - hydromt.log
+ - grid.nc
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># checkout the content of the hypothetical model simulation configuration</span>
+<span class="n">fn_yaml</span> <span class="o">=</span> <span class="s2">&quot;tmp_example_model/settings.toml&quot;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn_yaml</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[header]
+settings = &#34;value&#34;
+
+[timers]
+end = &#34;2010-02-15&#34;
+start = &#34;2010-02-05&#34;
+
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># List of variables in grid.nc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;./tmp_example_model&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">data</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available in grid.nc: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-24 10:37:10,091 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.2.0.dev0).
+Variables available in grid.nc: [&#39;mask&#39;, &#39;elevtn&#39;, &#39;basins&#39;, &#39;landuse&#39;]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Plot one of the variable (change the name below to plot a different variable)</span>
+<span class="n">var</span> <span class="o">=</span> <span class="s2">&quot;elevtn&quot;</span>
+<span class="n">ds</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.collections.QuadMesh at 0x7f32a2beced0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/_examples_working_with_models_basics_21_1.png" src="../_images/_examples_working_with_models_basics_21_1.png" />
+</div>
+</div>
+</section>
+<section id="Update-a-model-from-CLI">
+<h2>Update a model from CLI<a class="headerlink" href="#Update-a-model-from-CLI" title="Link to this heading">#</a></h2>
+<p>Using the <strong>hydromt update</strong> method we can update an existing model with new components or modify existing components. Let’s get an overview of the method and its arguments.</p>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">MODEL</span></code> (i.e. name of the model), and <code class="docutils literal notranslate"><span class="pre">MODEL_ROOT</span></code> (i.e. folder of existing model) are still required. There is an optional <code class="docutils literal notranslate"><span class="pre">-o</span></code> <code class="docutils literal notranslate"><span class="pre">--model-out</span></code> option to save the updated model in a different directory.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>update<span class="w"> </span>--help
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Usage: hydromt update [OPTIONS] MODEL MODEL_ROOT
+
+  Update a specific component of a model.
+
+  Set an output directory to copy the edited model to a new folder, otherwise
+  maps are overwritten.
+
+  Example usage: --------------
+
+  Update Wflow model components outlined in an .yml configuration file and
+  write the model to a directory: hydromt update wflow_sbm /path/to/model_root
+  -o /path/to/model_out  -i /path/to/wflow_config.yml  -d
+  /path/to/data_catalog.yml -v
+
+Options:
+  -o, --model-out DIRECTORY  Output model folder. Maps in MODEL_ROOT are
+                             overwritten if left empty.
+  -i, --config PATH          Path to hydroMT configuration file, for the model
+                             specific implementation.  [required]
+  -d, --data TEXT            Path to local yaml data catalog file OR name of
+                             predefined data catalog.
+  --dd, --deltares-data      Flag: Shortcut to add the &#34;deltares_data&#34; catalog
+  --fo, --force-overwrite    Flag: If provided overwrite existing model files
+  --cache                    Flag: If provided cache tiled rasterdatasets
+  -q, --quiet                Decrease verbosity.
+  -v, --verbose              Increase verbosity.
+  --help                     Show this message and exit.
+</pre></div></div>
+</div>
+<p>In this basic example we use the <strong>hydromt update</strong> method to update the ExampleModel instance with an upstream area raster map. Then we write only the updated model map component to file.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%writefile</span> tmp_update_example_model.yml
+
+<span class="n">steps</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">add_data_from_rasterdataset</span><span class="p">:</span>
+      <span class="n">raster_data</span><span class="p">:</span> <span class="n">merit_hydro_ihu</span>
+      <span class="n">variables</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">uparea</span>
+      <span class="n">reproject_method</span><span class="p">:</span>
+        <span class="o">-</span> <span class="nb">max</span>
+  <span class="o">-</span> <span class="n">grid</span><span class="o">.</span><span class="n">write</span><span class="p">:</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Writing tmp_update_example_model.yml
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>hydromt<span class="w"> </span>update<span class="w"> </span>example_model<span class="w"> </span>./tmp_example_model<span class="w"> </span>-o<span class="w"> </span>./tmp_example_model_update<span class="w"> </span>-i<span class="w"> </span>tmp_update_example_model.yml<span class="w"> </span>-d<span class="w"> </span>artifact_data<span class="w"> </span>--fo<span class="w"> </span>-v
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-24 10:37:18,625 - hydromt - log - INFO - HydroMT version: 1.2.0.dev0
+2025-11-24 10:37:18,652 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data latest
+2025-11-24 10:37:18,652 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-11-24 10:37:19,328 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.2.0.dev0).
+2025-11-24 10:37:19,328 - hydromt - log - INFO - HydroMT version: 1.2.0.dev0
+2025-11-24 10:37:19,328 - hydromt.model.model - model - INFO - Reading model data from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model
+2025-11-24 10:37:19,328 - hydromt.model.components.config - config - INFO - Reading model config file from /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model/settings.toml.
+2025-11-24 10:37:19,353 - hydromt - log - INFO - HydroMT version: 1.2.0.dev0
+2025-11-24 10:37:19,356 - hydromt.model.model - model - INFO - update: grid.add_data_from_rasterdataset
+2025-11-24 10:37:19,356 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.variables=[&#39;uparea&#39;]
+2025-11-24 10:37:19,357 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.fill_method=None
+2025-11-24 10:37:19,357 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.reproject_method=[&#39;max&#39;]
+2025-11-24 10:37:19,357 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.mask_name=mask
+2025-11-24 10:37:19,357 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.rename=None
+2025-11-24 10:37:19,357 - hydromt.model.model - model - INFO - grid.add_data_from_rasterdataset.raster_data=merit_hydro_ihu
+2025-11-24 10:37:19,357 - hydromt.hydromt.model.example.example_grid_component - example_grid_component - INFO - Preparing grid data from raster source merit_hydro_ihu
+2025-11-24 10:37:19,358 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_ihu RasterDataset data from /home/runner/.hydromt/artifact_data/latest/merit_hydro_1k/{variable}.tif
+2025-11-24 10:37:19,437 - hydromt.model.model - model - INFO - update: grid.write
+2025-11-24 10:37:19,437 - hydromt.model.model - model - INFO - grid.write.filename=None
+2025-11-24 10:37:19,437 - hydromt.model.model - model - INFO - grid.write.gdal_compliant=False
+2025-11-24 10:37:19,437 - hydromt.model.model - model - INFO - grid.write.rename_dims=False
+2025-11-24 10:37:19,437 - hydromt.model.model - model - INFO - grid.write.force_sn=False
+2025-11-24 10:37:19,437 - hydromt.model.model - model - INFO - grid.write.to_netcdf_kwargs=None
+2025-11-24 10:37:19,437 - hydromt.model.components.grid - grid - INFO - example_model.grid: Writing grid data to /home/runner/work/hydromt/hydromt/docs/_examples/tmp_example_model_update/grid.nc.
+</pre></div></div>
+</div>
+<p>The example above means the following: run <strong>hydromt update</strong> with:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">example_model</span></code>: i.e. update a ExampleModel instance</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./tmp_example_model</span></code>: the folder of the to-be updated model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">./tmp_example_model_update</span></code>: the folder of the updated model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-i</span> <span class="pre">tmp_update_example_model.yml</span></code>: the hydromt workflow file listing the methods to be executed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">artifact_data</span></code>: use the pre-defined artifact_data catalog</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-v</span></code>: give some extra verbosity (2 * v) to display feedback on screen. Now debug messages are provided.</p></li>
+</ul>
+<p>Let’s check the content of the updated model and that we should now have an uparea variable available in the updated model grid:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># note the difference with the original model</span>
+<span class="n">print_dir</span><span class="p">(</span><span class="s2">&quot;tmp_example_model_update&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+tmp_example_model_update
+ - hydromt.log
+ - grid.nc
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># List of variables in grid.nc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">hydromt.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleModel</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">ExampleModel</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s2">&quot;./tmp_example_model_update&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">)</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">data</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variables available in grid.nc: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+2025-11-24 10:37:20,152 - hydromt.model.model - model - INFO - Initializing example_model model from hydromt (v1.2.0.dev0).
+Variables available in grid.nc: [&#39;mask&#39;, &#39;elevtn&#39;, &#39;basins&#39;, &#39;landuse&#39;, &#39;uparea&#39;]
+</pre></div></div>
+</div>
 </section>
 </section>
 
@@ -625,6 +1103,7 @@ Component plugins:
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Build-a-model-from-CLI">Build a model from CLI</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Update-a-model-from-CLI">Update a model from CLI</a></li>
 </ul>
   </nav></div>
 

@@ -57,7 +57,7 @@
     <link rel="icon" href="_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="hydromt.data_catalog.uri_resolvers.RasterTindexResolver" href="_generated/hydromt.data_catalog.uri_resolvers.RasterTindexResolver.html" />
+    <link rel="prev" title="hydromt.writers.write_yaml" href="_generated/hydromt.writers.write_yaml.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.2.0.dev0" />
@@ -442,6 +442,7 @@
 <ul class="simple">
 <li><p>Added <code class="docutils literal notranslate"><span class="pre">ExampleModel</span></code> class and <code class="docutils literal notranslate"><span class="pre">example_model</span></code> entrypoint for demonstration purposes.</p></li>
 <li><p>Added option for delayed compute in writing netcdf files</p></li>
+<li><p>Added option to specify a ‘fill_value’ in <cite>gis.raster_utils.full</cite>, <cite>full_from_transform</cite> and <cite>full_like</cite>. (#1321)</p></li>
 <li><p>Set compression in <cite>write_nc</cite></p></li>
 <li><p>Allow masking in <cite>GridComponent.set</cite>. (#1229)</p></li>
 <li><p>Default driver is now inferred from file extension for RasterDataset, GeoDataFrame, and GeoDataset sources. (#1267)</p></li>
@@ -471,6 +472,7 @@
 <section id="fixed">
 <h3>Fixed<a class="headerlink" href="#fixed" title="Link to this heading">#</a></h3>
 <ul class="simple">
+<li><p>Actually having ‘nan’ values in a lazy DataArray from <cite>gis.raster_utils.full</cite>. (#1321)</p></li>
 <li><p>CLI update command was not working. (#1244)</p></li>
 <li><p>Allow models to not have a spatial component (allows updating if region is None). (#1244)</p></li>
 <li><p>CF compliant dimensions in netcdf files</p></li>
@@ -480,6 +482,7 @@
 <li><p>Passing options to <code class="docutils literal notranslate"><span class="pre">geodataframe_table</span></code> driver now works. (#1271)</p></li>
 <li><p>Relative path in the workflow yaml were not correctly resolved. (#1304)</p></li>
 <li><p>Fix pydantic for V1 catalog for nodata and fix the catalog upgrade to convert nodata and extra metadata arguments. (#1304)</p></li>
+<li><p>Fix pydantic for V1 catalog for attrs and fix the catalog upgrade to convert attrs arguments.</p></li>
 <li><p>Do not pass metadata “extent” from catalog in xarray objects to avoid issues when writting to netcdf. (#1304)</p></li>
 <li><p>Build and update functions call <cite>ModelComponent.cleanup</cite> and <cite>ModelComponent.finish_write</cite>. Stabilizing the write functionality and making sure that netCDF files can be overwritten when the source and destination are the same. (#778)</p></li>
 <li><p><cite>hydromt check</cite> has been updated to validate v1 data catalogs (#1265)</p></li>
@@ -1356,12 +1359,12 @@ in the documentation and in Binder.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="_generated/hydromt.data_catalog.uri_resolvers.RasterTindexResolver.html"
+       href="_generated/hydromt.writers.write_yaml.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">hydromt.data_catalog.uri_resolvers.RasterTindexResolver</p>
+        <p class="prev-next-title">hydromt.writers.write_yaml</p>
       </div>
     </a>
 </div>

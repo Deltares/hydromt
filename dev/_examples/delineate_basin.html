@@ -526,8 +526,8 @@ been extended with a basin mask layer, which together with the basin index vecto
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:17:37,311 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
-2025-11-10 11:17:37,312 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
+2025-11-24 10:34:34,649 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Reading data catalog artifact_data v1.0.0
+2025-11-24 10:34:34,650 - hydromt.data_catalog.data_catalog - data_catalog - INFO - Parsing data catalog from /home/runner/.hydromt/artifact_data/v1.0.0/data_catalog.yml
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -557,7 +557,7 @@ Datum: World Geodetic System 1984 ensemble
 - Ellipsoid: WGS 84
 - Prime Meridian: Greenwich
 , unit=None, extent={}, nodata=None, attrs={}, category=&#39;topography&#39;, paper_doi=&#39;10.1029/2019WR024873&#39;, paper_ref=&#39;Yamazaki et al. (2019)&#39;, url=&#39;http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_Hydro&#39;, license=&#39;CC-BY-NC 4.0 or ODbL 1.0&#39;)
-2025-11-10 11:17:37,999 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
+2025-11-24 10:34:35,330 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro RasterDataset data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro/{variable}.tif
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -640,20 +640,8 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:17:40,335 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_index GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro_index.gpkg
-2025-11-10 11:17:40,338 - hydromt._utils.unused_kwargs - unused_kwargs - WARNING - object: PyogrioDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
-Name: WGS 84
-Axis Info [ellipsoidal]:
-- Lat[north]: Geodetic latitude (degree)
-- Lon[east]: Geodetic longitude (degree)
-Area of Use:
-- name: World.
-- bounds: (-180.0, -90.0, 180.0, 90.0)
-Datum: World Geodetic System 1984 ensemble
-- Ellipsoid: WGS 84
-- Prime Meridian: Greenwich
- unit=None extent={} nodata=None attrs={} category=&#39;topography&#39; paper_doi=&#39;10.5194/hess-2020-582&#39; paper_ref=&#39;Eilander et al. (in review)&#39; license=&#39;CC-BY-NC 4.0&#39;.
-2025-11-10 11:17:40,448 - hydromt.model.processes.basin_mask - basin_mask - INFO - basin bbox: [12.1958, 45.5850, 12.8983, 46.4167]
+2025-11-24 10:34:37,854 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_index GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro_index.gpkg
+2025-11-24 10:34:37,960 - hydromt.model.processes.basin_mask - basin_mask - INFO - basin bbox: [12.1958, 45.5850, 12.8983, 46.4167]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -713,7 +701,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:17:43,717 - hydromt.model.processes.basin_mask - basin_mask - INFO - subbasin bbox: [12.2350, 45.7950, 12.8783, 46.4167]
+2025-11-24 10:34:41,572 - hydromt.model.processes.basin_mask - basin_mask - INFO - subbasin bbox: [12.2350, 45.7950, 12.8783, 46.4167]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -769,20 +757,8 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:17:44,749 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_index GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro_index.gpkg
-2025-11-10 11:17:44,751 - hydromt._utils.unused_kwargs - unused_kwargs - WARNING - object: PyogrioDriver does not use kwarg metadata with value crs=&lt;Geographic 2D CRS: EPSG:4326&gt;
-Name: WGS 84
-Axis Info [ellipsoidal]:
-- Lat[north]: Geodetic latitude (degree)
-- Lon[east]: Geodetic longitude (degree)
-Area of Use:
-- name: World.
-- bounds: (-180.0, -90.0, 180.0, 90.0)
-Datum: World Geodetic System 1984 ensemble
-- Ellipsoid: WGS 84
-- Prime Meridian: Greenwich
- unit=None extent={} nodata=None attrs={} category=&#39;topography&#39; paper_doi=&#39;10.5194/hess-2020-582&#39; paper_ref=&#39;Eilander et al. (in review)&#39; license=&#39;CC-BY-NC 4.0&#39;.
-2025-11-10 11:17:45,082 - hydromt.model.processes.basin_mask - basin_mask - INFO - subbasin bbox: [12.1958, 45.7192, 12.8783, 46.4167]
+2025-11-24 10:34:42,734 - hydromt.data_catalog.sources.data_source - data_source - INFO - Reading merit_hydro_index GeoDataFrame data from /home/runner/.hydromt/artifact_data/v1.0.0/merit_hydro_index.gpkg
+2025-11-24 10:34:43,049 - hydromt.model.processes.basin_mask - basin_mask - INFO - subbasin bbox: [12.1958, 45.7192, 12.8783, 46.4167]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -841,7 +817,7 @@ Datum: World Geodetic System 1984 ensemble
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2025-11-10 11:17:47,670 - hydromt.model.processes.basin_mask - basin_mask - INFO - interbasin bbox: [12.5000, 45.7200, 12.7000, 46.0000]
+2025-11-24 10:34:45,689 - hydromt.model.processes.basin_mask - basin_mask - INFO - interbasin bbox: [12.5000, 45.7200, 12.7000, 46.0000]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">

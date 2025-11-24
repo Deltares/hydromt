@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Linking your own custom objects to HydroMT core API &#8212; HydroMT  documentation</title>
+    <title>Test and CI &#8212; HydroMT  documentation</title>
   
   
   
@@ -46,7 +46,7 @@
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'dev/plugin_dev/register_plugin';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'dev/core_dev/test_ci';</script>
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://raw.githubusercontent.com/Deltares/hydromt/gh-pages/switcher.json';
@@ -57,8 +57,8 @@
     <link rel="icon" href="../../_static/hydromt-icon.svg"/>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Testing your plugin" href="testing_your_plugin.html" />
-    <link rel="prev" title="Custom Data Driver and Resolver" href="custom_driver.html" />
+    <link rel="next" title="Creating a release" href="release.html" />
+    <link rel="prev" title="Adding Documentation" href="documentation.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="1.2.0.dev0" />
@@ -373,24 +373,38 @@
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="../architecture/architecture.html">Architecture</a></li>
-
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Plugin Developer Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="plugin_quickstart.html">Starting your own HydroMT Plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_model.html">Implementing your own HydroMT Model class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_component.html">Creating your own Model Components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_catalog.html">Pre-defined Data Catalog for your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="custom_driver.html">Custom Data Driver and Resolver</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">Linking your own custom objects to HydroMT core API</a></li>
-
-<li class="toctree-l2"><a class="reference internal" href="testing_your_plugin.html">Testing your plugin</a></li>
-<li class="toctree-l2"><a class="reference internal" href="migrating_to_v1.html">Migrating your plugin to v1</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">HydroMT Architecture</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/architecture.html">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/conventions.html">HydroMT Design Conventions</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../core_dev/index.html">Core Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/contributing.html">Developer’s guide</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/documentation.html">Adding Documentation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../core_dev/dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../plugin_dev/index.html">Plugin Developer Guide</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/quickstart.html">Starting Your Own HydroMT Plugin</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../plugin_dev/custom_implementation/index.html">Implement your own HydroMT objects</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/model.html">Custom Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/component.html">Custom Components</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/catalog.html">Custom Data Catalogs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_source.html">Custom Data Sources</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/driver.html">Custom Drivers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/resolver.html">Custom Resolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plugin_dev/custom_implementation/data_adapter.html">Custom DataAdapter</a></li>
+</ul>
+</details></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/register.html">Linking your own custom objects to HydroMT core API</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/testing.html">Testing your plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../plugin_dev/migrating_to_v1.html">Migrating to v1</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Core Developer Guide</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="dev_install.html">Developer installation guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="git_conventions.html">Issue conventions</a></li>
+
+
+<li class="toctree-l2"><a class="reference internal" href="code_conventions.html">Code conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="documentation.html">Adding Documentation</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Test and CI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release.html">Creating a release</a></li>
 </ul>
 </details></li>
 </ul>
@@ -437,9 +451,9 @@
     <li class="breadcrumb-item"><a href="../intro.html" class="nav-link">Developer Guide</a></li>
     
     
-    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Plugin Developer guide</a></li>
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Core Developer’s guide</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Linking your own custom objects to HydroMT core API</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Test and CI</span></li>
   </ul>
 </nav>
 </div>
@@ -456,82 +470,44 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="linking-your-own-custom-objects-to-hydromt-core-api">
-<span id="register-plugins"></span><h1>Linking your own custom objects to HydroMT core API<a class="headerlink" href="#linking-your-own-custom-objects-to-hydromt-core-api" title="Link to this heading">#</a></h1>
-<p>Due to the extremely wide range of data formats and conventions out in the world
-HydroMT offers a lot of ways to define custom behaviour, which is where you will
-probably spend most of your time as a plugin developer. We offer the possibility
-of extending what is in hydromt via the use of entry points. These entry points
-are a way of telling hydromt core about code you would like it to use to do specialised
-such as reading and writing a custom file format. Currently core exposes the following
-entry points to extend its functionalities:</p>
-<ul class="simple">
-<li><p>Model</p></li>
-<li><p>ModelComponent</p></li>
-<li><p>Resolvers</p></li>
-<li><p>Driver</p></li>
-<li><p>Catalog</p></li>
-</ul>
-<p>We will elaborate on each of these entrypoints in more detail in their own section but
-first we will cover the necessary information that is common to all: how to tell hydromt
-to use your custom behaviour. As an example we will use the hypothetical hydromt plugin
-for the (fictional) Advanced Water and Environmental Systems Optimization and Modeling
-Engine or AWESOME for short. The package will be called <cite>hydromt_awesome</cite>.</p>
+  <section id="test-and-ci">
+<span id="test-ci"></span><h1>Test and CI<a class="headerlink" href="#test-and-ci" title="Link to this heading">#</a></h1>
+<p>We use <a class="reference external" href="https://pytest.org">pytest</a> for testing and <a class="reference external" href="https://docs.github.com/en/actions">github actions</a> for CI.
+- Unit tests are mandatory for new methods and workflows and integration tests are highly recommended for various
+- All tests should be contained in the tests directory in functions named <cite>test_*</cite>.
+- We use <a class="reference external" href="https://sonarcloud.io/project/overview?id=Deltares_hydromt">SonarQube</a> to monitor the coverage of the tests and aim for high (&gt;90%) coverage. This is work in progress.
+- Checkout this <a class="reference external" href="https://levelup.gitconnected.com/a-comprehensive-guide-to-pytest-3676f05df5a0">comprehensive guide to pytest</a> for more info and tips.</p>
+<section id="running-the-tests">
+<h2>Running the tests<a class="headerlink" href="#running-the-tests" title="Link to this heading">#</a></h2>
+<p>HydroMT’s tests live in the tests folder and generally match the main package layout.
+Test should be run from the tests folder.</p>
+<p>To run the entire suite and the code coverage report:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>tests
+<span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>--verbose<span class="w"> </span>--cov<span class="o">=</span>hydromt<span class="w"> </span>--cov-report<span class="w"> </span>term-missing
+</pre></div>
+</div>
+<p>A single test file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>--verbose<span class="w"> </span>test_rio.py
+</pre></div>
+</div>
+<p>A single test:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>--verbose<span class="w"> </span>test_rio.py::test_object
+</pre></div>
+</div>
+<p>Alternatively, you can also run tests using the pixi install described in the <a class="reference internal" href="dev_install.html#dev-install"><span class="std std-ref">developer installation guide</span></a>.</p>
+<p>Run all tests:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pixi<span class="w"> </span>run<span class="w"> </span>pytest
+</pre></div>
+</div>
+<p>Run tests in a specific file:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pixi<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_rio.py
+</pre></div>
+</div>
+<p>Run a specific test function:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pixi<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests/test_rio.py::test_object
+</pre></div>
+</div>
 </section>
-<section id="entrypoints">
-<h1>EntryPoints<a class="headerlink" href="#entrypoints" title="Link to this heading">#</a></h1>
-<p>Entrypoints are how you can tell Python (and by extention HydroMT) about your code that
-you would like it to use. You can find more detailed information about them in the
-<cite>official Python documentation &lt;https://packaging.python.org/en/latest/specifications/entry-points/&gt;</cite>
-You first do this by specifying the entrypoint to tell HydroMT about in your
-<cite>pyproject.toml</cite>. So for example in the <cite>pyproject.toml</cite> of <cite>hydromt_awesome</cite> we might
-write:</p>
-<p>The structure of these should be very similar across all entrypoints. The header should
-be of the form <cite>project.entry-points.</cite> followed by the path to the hydromt object you
-want to provide your own implementation for. In most cases this should be accessible
-from the root level of hydromt so one of the examples above should suffice.</p>
-<p>The key under the header is just a name for the plugin that will be used to display
-where a plugin is being loaded from (handy if you have multiple plugins loaded)
-The value of the pair should be the path from the root necessary to import your object,
-usually this will point to a submodule.</p>
-<p>In the submodule you point to should define a global <cite>__hydromt_eps__</cite> list of names of
-objects to import. Note that this should be a list of strings. For example, here is the
-<cite>__hydromt_eps__</cite> list that core devines for it’s model components (we use the same
-mechanism as you will)</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">__hydromt_eps__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;ConfigComponent&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;DatasetsComponent&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;GeomsComponent&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;GridComponent&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MeshComponent&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;SpatialDatasetsComponent&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;TablesComponent&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;VectorComponent&quot;</span><span class="p">,</span>
-<span class="p">]</span>
-</pre></div>
-</div>
-<p>The objects you define in this list should of course be imported before you define them.
-All the classes you define here should become available to access through the HydroMT
-plugin functionality. You can verify that HydroMT can discover your plugins by running
-the CLI with the relevant flag. For example if you want to see which model components
-are available in the current installation you can print them by executing:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>hydromt<span class="w"> </span>--components
-Component<span class="w"> </span>plugins:
-<span class="w">        </span>-<span class="w"> </span>ConfigComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0a0<span class="o">)</span>
-<span class="w">        </span>-<span class="w"> </span>DatasetsComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0a0<span class="o">)</span>
-<span class="w">        </span>-<span class="w"> </span>GeomsComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0a0<span class="o">)</span>
-<span class="w">        </span>-<span class="w"> </span>GridComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0a0<span class="o">)</span>
-<span class="w">        </span>-<span class="w"> </span>MeshComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0a0<span class="o">)</span>
-<span class="w">        </span>-<span class="w"> </span>SpatialDatasetsComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0a0<span class="o">)</span>
-<span class="w">        </span>-<span class="w"> </span>TablesComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0a0<span class="o">)</span>
-<span class="w">        </span>-<span class="w"> </span>VectorComponent<span class="w"> </span><span class="o">(</span>hydromt<span class="w"> </span><span class="m">1</span>.0.0a0<span class="o">)</span>
-</pre></div>
-</div>
-<p>This will show you all the components that HydroMT currently knows about, what package
-they were imported from and which version.</p>
-<p>After your plugin classes are properly detected, you can ask HydroMT to access them in
-your scripts and yml workflow files. For more information on the specific entrypoints
-and how they should be implemented, see each of the corresponding sections.</p>
 </section>
 
 
@@ -545,20 +521,20 @@ and how they should be implemented, see each of the corresponding sections.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="custom_driver.html"
+       href="documentation.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Custom Data Driver and Resolver</p>
+        <p class="prev-next-title">Adding Documentation</p>
       </div>
     </a>
     <a class="right-next"
-       href="testing_your_plugin.html"
+       href="release.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Testing your plugin</p>
+        <p class="prev-next-title">Creating a release</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -601,10 +577,8 @@ and how they should be implemented, see each of the corresponding sections.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Linking your own custom objects to HydroMT core API</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#entrypoints">EntryPoints</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-the-tests">Running the tests</a></li>
 </ul>
-
   </nav></div>
 
 </div></div>
